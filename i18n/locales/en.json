@@ -1,0 +1,514 @@
+{
+  "welcome": {
+    "title": "Welcome",
+    "message": "Welcome to your Vue.js application"
+  },
+  "nav": {
+    "home": "Home",
+    "news": "News",
+    "projects": "Projects",
+    "network": "Our Network",
+    "training": "Training",
+    "about": "About",
+    "apply": "Apply Now",
+    "viewAll": "View all",
+    "exploreAll": "Explore all",
+    "more": "More",
+    "searchPlaceholder": "Search programs, news, campus...",
+    "quickLinks": "Quick links",
+    "toClose": "to close",
+    "badges": {
+      "new": "New",
+      "popular": "Popular",
+      "flagship": "Flagship"
+    },
+    "dropdowns": {
+      "news": {
+        "featured": "Featured",
+        "featuredDesc": "Stay updated with the latest news from Senghor University: calls for applications, job offers and upcoming events.",
+        "callsForApplications": "Calls for Applications",
+        "callsForApplicationsDesc": "Apply to available training programs and scholarships",
+        "jobOffers": "Job Offers",
+        "jobOffersDesc": "Professional opportunities within our network",
+        "events": "Events",
+        "eventsDesc": "Upcoming conferences, seminars and meetings"
+      },
+      "training": {
+        "featured": "Programs",
+        "featuredDesc": "Internationally recognized excellence programs to train tomorrow's African leaders.",
+        "masters": "Masters",
+        "mastersDesc": "2-year Master programs on the Alexandria campus",
+        "universityDiplomas": "University Diplomas",
+        "universityDiplomasDesc": "Specialized one-year academic programs",
+        "certifications": "Certifications",
+        "certificationsDesc": "Short and intensive professional certifications",
+        "doctorate": "Doctorate",
+        "doctorateDesc": "Doctoral program in partnership with the Doctoral School",
+        "online": "Online",
+        "onlineDesc": "Distance learning via our FAD department",
+        "externalCampus": "External Campuses",
+        "externalCampusDesc": "Programs delivered at our partner campuses"
+      },
+      "projects": {
+        "transformAction": "TransformAction",
+        "kreAfrika": "KreAfrika",
+        "projet70": "70s Project",
+        "projetUSenghor": "USenghor Project"
+      },
+      "network": {
+        "featured": "Network",
+        "featuredDesc": "Join a community of over 5,000 graduates and partners committed to African development.",
+        "strategicPartners": "Strategic Partners",
+        "strategicPartnersDesc": "OIF, AFD, Francophonie and international institutions",
+        "campusPartners": "Campus Partners",
+        "campusPartnersDesc": "Partner universities and academic institutions",
+        "teachersNetwork": "Teachers Network",
+        "teachersNetworkDesc": "Community of international experts and professors",
+        "alumni": "Alumni",
+        "alumniDesc": "Network of graduates across 54 African countries",
+        "alumniProgram": "Alumni Program",
+        "alumniProgramDesc": "Activities and services for former students"
+      },
+      "about": {
+        "mission": "Mission & Values",
+        "history": "History",
+        "governance": "Governance",
+        "campus": "Alexandria Campus"
+      }
+    }
+  },
+  "hero": {
+    "badge": "International French-speaking University",
+    "slides": {
+      "slide1": {
+        "title": "Training Tomorrow's Leaders for African Development",
+        "subtitle": "Senghor University has been training high-level African executives in sustainable development for over 30 years."
+      },
+      "slide2": {
+        "title": "Academic Excellence in Service of Africa",
+        "subtitle": "Internationally recognized Master's programs taught by world-renowned experts."
+      },
+      "slide3": {
+        "title": "A Network of 5000+ Graduates Worldwide",
+        "subtitle": "Join a dynamic community of professionals committed to the development of the African continent."
+      },
+      "slide4": {
+        "title": "Alexandria, Crossroads of Cultures and Knowledge",
+        "subtitle": "Study in a unique setting, in the heart of one of the most iconic cities of the Mediterranean."
+      }
+    },
+    "cta": {
+      "discover": "Discover Our Programs",
+      "contact": "Contact Us"
+    },
+    "stats": {
+      "countries": "African countries represented",
+      "years": "Years of excellence",
+      "graduates": "Graduates trained",
+      "francophone": "French-speaking"
+    }
+  },
+  "history": {
+    "badge": "Our History",
+    "title": "History",
+    "subtitle": "Discover the origins and evolution of Senghor University, born from an ambitious vision for the development of Francophone Africa.",
+    "genesis": {
+      "date": "May 1989 - Dakar",
+      "title": "The 70s-80s Project",
+      "description": "The project to create a French-speaking university dedicated to African development was born at the Summit of Heads of State and Government of French-speaking countries, held in May 1989 in Dakar. This ambitious initiative aimed to provide Africa with a higher education institution capable of training highly qualified African executives.",
+      "point1": "Initiative born at the Francophonie Summit in Dakar",
+      "point2": "Vision of excellence to train tomorrow's African leaders"
+    },
+    "founders": {
+      "title": "The Founding Fathers",
+      "subtitle": "Visionary figures who shaped the institution",
+      "senghor": {
+        "role": "Poet, thinker and former President of Senegal"
+      },
+      "druon": {
+        "role": "French writer and academician"
+      },
+      "boutros": {
+        "role": "Former UN Secretary-General"
+      },
+      "dupuy": {
+        "role": "Jurist and international law expert"
+      }
+    },
+    "usenghor": {
+      "since": "Since October 1990",
+      "title": "USenghor Project",
+      "description": "Senghor University officially opens its doors in Alexandria, Egypt. It bears the name of Léopold Sédar Senghor, a major figure in the Francophonie, who played a central role in promoting French-speaking identity around the world.",
+      "milestone1": {
+        "title": "Opening in Alexandria",
+        "desc": "October 1990 - The university welcomes its first students"
+      },
+      "milestone2": {
+        "title": "Reference in training",
+        "desc": "Over 30 years of excellence in development professions"
+      }
+    },
+    "leadership": {
+      "title": "Current Leadership",
+      "rector": {
+        "name": "Pr. Thierry Verdel",
+        "title": "Rector",
+        "since": "Since June 21, 2016"
+      },
+      "president": {
+        "name": "Pr. Hany Helal",
+        "title": "President"
+      }
+    },
+    "legacy": {
+      "badge": "Our Legacy",
+      "title": "An Enduring Mission",
+      "description": "For over 30 years, Senghor University has pursued its ambitious mission: training future African and Francophone executives capable of meeting major development challenges, while strengthening ties between Africa and the international Francophonie.",
+      "tag1": "African Development",
+      "tag2": "Academic Excellence",
+      "tag3": "Francophone Cooperation"
+    }
+  },
+  "mission": {
+    "badge": "Our Identity",
+    "title": "Mission & Values",
+    "subtitle": "For over 30 years, we have been training tomorrow's African leaders",
+    "mission": {
+      "title": "Our Mission",
+      "description": "Train, in French, creative executives capable of meeting the challenges of sustainable development in Africa.",
+      "tagline": "In excellence and innovation"
+    },
+    "vision": {
+      "title": "Our Vision",
+      "description": "Become a major player in the training and capacity building of executives in Africa and for Africa.",
+      "keywords": {
+        "innovation": "Innovation",
+        "excellence": "Excellence",
+        "impact": "Impact"
+      }
+    },
+    "experience": {
+      "badge": "Discover",
+      "title": "The Senghor Experience",
+      "description": "A unique educational experience with professional immersion, creativity projects and much more.",
+      "cta": "Learn more",
+      "features": {
+        "immersion": "Professional immersion",
+        "creativity": "Creative projects",
+        "network": "International network"
+      },
+      "stats": {
+        "countries": "African countries",
+        "graduates": "Graduates",
+        "years": "Years of excellence"
+      }
+    }
+  },
+  "navigation": {
+    "home": "Home",
+    "about": "About"
+  },
+  "theme": {
+    "darkMode": "Dark mode enabled",
+    "lightMode": "Light mode enabled"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "confirm": "Confirm"
+  },
+  "header": {
+    "searchPlaceholder": "Search for anything",
+    "categories": "Categories",
+    "teachOnUdemy": "Teach on Tombooktou",
+    "myLearning": "My learning",
+    "login": "Log in",
+    "signup": "Sign up",
+    "search": "Search"
+  },
+  "search": {
+    "placeholder": "Search programs, news, campus...",
+    "searching": "Searching...",
+    "suggestions": "Popular searches",
+    "resultsFor": "Results for \"{query}\"",
+    "noResults": "No results found",
+    "noResultsDescription": "Try different keywords or browse our categories.",
+    "noResultsTitle": "No results found",
+    "noResultsDesc": "Try different keywords or browse our suggestions.",
+    "students": "students",
+    "popularSearches": "Popular suggestions",
+    "recentSearches": "Recent searches",
+    "clearHistory": "Clear",
+    "resultsCount": "{count} results for \"{query}\"",
+    "sortBy": "Sort by",
+    "navigate": "to navigate",
+    "select": "to select",
+    "close": "to close",
+    "applyNowDesc": "Join our programs",
+    "openCalls": "Open calls",
+    "openCallsDesc": "Active applications",
+    "emptyState": {
+      "title": "What do you want to learn?",
+      "subtitle": "Start typing to search for courses, instructors, and topics."
+    },
+    "sort": {
+      "relevance": "Relevance",
+      "newest": "Newest",
+      "rating": "Highest rated",
+      "price": "Price"
+    },
+    "filters": {
+      "all": "All",
+      "development": "Development",
+      "business": "Business",
+      "design": "Design",
+      "marketing": "Marketing"
+    },
+    "badges": {
+      "bestseller": "Bestseller",
+      "hot": "Hot",
+      "new": "New"
+    }
+  },
+  "featuredCourses": {
+    "title": "A broad selection of courses",
+    "subtitle": "Choose from over 250,000 online video courses with new additions published every month",
+    "viewMore": "View more",
+    "badges": {
+      "bestseller": "Bestseller",
+      "new": "New"
+    }
+  },
+  "popularCategories": {
+    "title": "Top categories",
+    "categories": {
+      "webDevelopment": "Web Development",
+      "dataScience": "Data Science",
+      "design": "Design",
+      "marketing": "Marketing",
+      "business": "Business",
+      "photography": "Photography",
+      "music": "Music",
+      "healthFitness": "Health & Fitness"
+    }
+  },
+  "trendingCourses": {
+    "title": "Students are viewing",
+    "filters": {
+      "all": "All",
+      "popular": "Most popular",
+      "topRated": "Highest rated",
+      "new": "Newest"
+    },
+    "badges": {
+      "bestseller": "Bestseller",
+      "new": "New"
+    }
+  },
+  "featuredInstructors": {
+    "title": "Featured instructors",
+    "students": "students",
+    "courses": "courses",
+    "instructorRating": "Instructor rating",
+    "viewProfile": "View profile",
+    "badges": {
+      "topInstructor": "Top instructor"
+    }
+  },
+  "testimonials": {
+    "title": "See what our learners are saying",
+    "trustedBy": "Trusted by companies of all sizes"
+  },
+  "udemyBusiness": {
+    "title": "Tombooktou Business",
+    "subtitle": "Upskill your team with on-demand courses",
+    "description": "Keep your team's skills current with a Tombooktou Business subscription. Give up to 20 team members access to our top-rated course collection.",
+    "features": {
+      "teamTraining": {
+        "title": "Team training",
+        "description": "Train your entire team with professional-quality courses"
+      },
+      "analytics": {
+        "title": "Analytics",
+        "description": "Track your team's progress with detailed analytics"
+      },
+      "dedicatedSupport": {
+        "title": "Dedicated support",
+        "description": "Get dedicated customer support for your organization"
+      }
+    },
+    "cta": {
+      "tryFree": "Try Tombooktou Business",
+      "learnMore": "Learn more"
+    },
+    "stats": {
+      "companies": "companies",
+      "learners": "learners",
+      "languages": "languages"
+    }
+  },
+  "campus": {
+    "badge": "Our Global Presence",
+    "title": "Campus & Network",
+    "subtitle": "From Egypt to Sub-Saharan Africa, discover our network of campuses and academic partners across the continent.",
+    "stats": {
+      "campuses": "Active campuses",
+      "countries": "Countries represented",
+      "students": "Active students"
+    },
+    "legend": {
+      "headquarters": "Main headquarters",
+      "campus": "External campus",
+      "partner": "Academic partner",
+      "alumni": "Alumni presence"
+    },
+    "filters": {
+      "all": "All",
+      "headquarters": "Headquarters",
+      "campus": "Campuses",
+      "partner": "Partners"
+    },
+    "students": "students",
+    "tooltip": {
+      "alumni": "Alumni presence"
+    },
+    "modal": {
+      "programs": "Available programs",
+      "activeStudents": "Active students",
+      "close": "Close",
+      "visitWebsite": "Visit website"
+    }
+  },
+  "governance": {
+    "badge": "Governance",
+    "title": "Governance",
+    "subtitle": "A solid and transparent governance structure in service of academic excellence",
+    "foundingTexts": {
+      "badge": "Founding texts",
+      "title": "Founding Texts",
+      "description": "Senghor University was created by the Conference of Heads of State and Government of French-speaking countries at the Dakar Summit in May 1989. Its statutes and operations are governed by founding texts that guarantee its academic independence and mission in service of African development.",
+      "point1": "Constitutive Charter adopted at the Dakar Summit (1989)",
+      "point2": "University Statutes approved by the OIF",
+      "point3": "Headquarters Agreement with the Arab Republic of Egypt"
+    },
+    "donorCountries": {
+      "title": "Donor Countries",
+      "description": "Senghor University benefits from the financial support of many member countries of the Francophonie"
+    },
+    "board": {
+      "title": "Board of Directors",
+      "description": "The Board of Directors defines the general policy of the University and ensures its good governance",
+      "president": {
+        "name": "Pr. Hany Helal",
+        "role": "Board President"
+      },
+      "secretary": {
+        "name": "Marie Konaté",
+        "role": "Secretary General"
+      },
+      "treasurer": {
+        "name": "Amadou Bâ",
+        "role": "Treasurer"
+      },
+      "programs": {
+        "name": "Fatou Ndiaye",
+        "role": "Programs Director"
+      },
+      "vicePresident1": {
+        "name": "Vice-President Africa",
+        "title": "Vice-President"
+      },
+      "vicePresident2": {
+        "name": "Vice-President Europe",
+        "title": "Vice-President"
+      },
+      "rector": {
+        "name": "Pr. Thierry Verdel",
+        "title": "Rector",
+        "since": "Since June 21, 2016"
+      },
+      "directors": {
+        "academic": "Academic Affairs",
+        "finance": "Finance",
+        "partnerships": "Partnerships",
+        "hr": "Human Resources"
+      }
+    }
+  },
+  "footer": {
+    "description": "Senghor University has been training high-level African executives committed to sustainable development of the continent for over 30 years.",
+    "newsletter": {
+      "title": "Stay informed",
+      "description": "Receive our news, calls for applications and events directly in your inbox.",
+      "placeholder": "Your email address",
+      "subscribe": "Subscribe",
+      "subscribing": "Subscribing...",
+      "success": "Thank you for subscribing!",
+      "error": "An error occurred. Please try again.",
+      "privacy": "By subscribing, you agree to our privacy policy."
+    },
+    "programs": {
+      "title": "Programs",
+      "masters": "Masters",
+      "diplomas": "University Diplomas",
+      "certifications": "Certifications",
+      "doctorate": "Doctorate",
+      "online": "Distance Learning"
+    },
+    "university": {
+      "title": "The University",
+      "about": "About",
+      "mission": "Mission & Values",
+      "governance": "Governance",
+      "campus": "Alexandria Campus",
+      "history": "Our History"
+    },
+    "resources": {
+      "title": "Resources",
+      "news": "News",
+      "events": "Events",
+      "jobs": "Job Offers",
+      "library": "Library",
+      "faq": "FAQ"
+    },
+    "network": {
+      "title": "Our Network",
+      "alumni": "Alumni",
+      "partners": "Partners",
+      "externalCampuses": "External Campuses",
+      "contact": "Contact Us"
+    },
+    "social": {
+      "title": "Follow us",
+      "facebook": "Facebook",
+      "twitter": "Twitter",
+      "linkedin": "LinkedIn",
+      "youtube": "YouTube",
+      "instagram": "Instagram"
+    },
+    "legal": {
+      "title": "Legal Information",
+      "terms": "Legal Notice",
+      "privacy": "Privacy Policy",
+      "cookies": "Cookie Settings",
+      "accessibility": "Accessibility"
+    },
+    "contact": {
+      "title": "Contact",
+      "address": "1, Place Ahmed Orabi, El Mancheya, Alexandria, Egypt",
+      "phone": "+20 3 484 3504",
+      "email": "info{'@'}usenghor.org"
+    },
+    "bottom": {
+      "copyright": "{year} Senghor University. All rights reserved.",
+      "oif": "Direct operator of the Francophonie"
+    }
+  }
+}
