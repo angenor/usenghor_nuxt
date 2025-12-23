@@ -2,6 +2,22 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+  ssr: true,
+  nitro: {
+    preset: 'static',
+    prerender: {
+      failOnError: false,
+      crawlLinks: true
+    }
+  },
+  vite: {
+    optimizeDeps: {
+      include: ['vue', 'vue-router', 'pinia']
+    },
+    ssr: {
+      noExternal: ['vue', 'vue-router', '@fortawesome/vue-fontawesome', '@fortawesome/fontawesome-svg-core']
+    }
+  },
   modules: [
     '@nuxt/content',
     '@nuxt/eslint',
