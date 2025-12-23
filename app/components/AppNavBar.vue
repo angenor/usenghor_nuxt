@@ -21,6 +21,7 @@ const activeDropdown = ref<string | null>(null)
 const expandedMobileMenus = ref<string[]>([])
 
 // Primary nav items (displayed first with accent styling)
+// Based on carte_mentale_senghor.md structure
 const primaryNavItems = [
   {
     key: 'training',
@@ -35,12 +36,13 @@ const primaryNavItems = [
       descKey: 'featuredDesc'
     },
     children: [
-      { key: 'masters', route: '/formations/masters', icon: 'fa-solid fa-graduation-cap', badge: 'popular' },
-      { key: 'universityDiplomas', route: '/formations/diplomes-universite', icon: 'fa-solid fa-award' },
-      { key: 'certifications', route: '/formations/certifiantes', icon: 'fa-solid fa-certificate' },
       { key: 'doctorate', route: '/formations/doctorat', icon: 'fa-solid fa-book-open' },
-      { key: 'online', route: '/formations/en-ligne', icon: 'fa-solid fa-laptop', badge: 'new' },
-      { key: 'externalCampus', route: '/formations/campus-externalises', icon: 'fa-solid fa-building' }
+      { key: 'masters', route: '/formations/masters', icon: 'fa-solid fa-graduation-cap', badge: 'popular' },
+      { key: 'mastersAlexandria', route: '/formations/masters/alexandrie', icon: 'fa-solid fa-building-columns' },
+      { key: 'mastersExternal', route: '/formations/masters/campus-externalises', icon: 'fa-solid fa-globe' },
+      { key: 'mastersOnline', route: '/formations/masters/en-ligne', icon: 'fa-solid fa-laptop', badge: 'new' },
+      { key: 'universityDiplomas', route: '/formations/diplomes-universite', icon: 'fa-solid fa-award' },
+      { key: 'certifications', route: '/formations/certifiantes', icon: 'fa-solid fa-certificate' }
     ]
   },
   {
@@ -57,14 +59,32 @@ const primaryNavItems = [
     },
     children: [
       { key: 'callsForApplications', route: '/actualites/appels', icon: 'fa-solid fa-bullhorn' },
-      { key: 'jobOffers', route: '/actualites/emplois', icon: 'fa-solid fa-briefcase' },
+      { key: 'callsOpen', route: '/actualites/appels/en-cours', icon: 'fa-solid fa-clock', badge: 'new' },
+      { key: 'callsClosed', route: '/actualites/appels/clos', icon: 'fa-solid fa-check-circle' },
+      { key: 'recruitment', route: '/actualites/recrutements', icon: 'fa-solid fa-briefcase' },
       { key: 'events', route: '/actualites/evenements', icon: 'fa-solid fa-calendar-days' }
     ]
   }
 ]
 
 // Secondary nav items (grouped in "More" dropdown)
+// Based on carte_mentale_senghor.md structure
 const secondaryNavItems = [
+  {
+    key: 'about',
+    route: '/nous-connaitre',
+    icon: 'fa-solid fa-info-circle',
+    children: [
+      { key: 'mission', route: '/nous-connaitre/mission', icon: 'fa-solid fa-bullseye' },
+      { key: 'history', route: '/nous-connaitre/mission/histoire', icon: 'fa-solid fa-landmark' },
+      { key: 'governance', route: '/nous-connaitre/mission/gouvernance', icon: 'fa-solid fa-sitemap' },
+      { key: 'strategy', route: '/nous-connaitre/strategie', icon: 'fa-solid fa-chess' },
+      { key: 'commitments', route: '/nous-connaitre/engagements', icon: 'fa-solid fa-heart' },
+      { key: 'organization', route: '/nous-connaitre/organisation', icon: 'fa-solid fa-building' },
+      { key: 'partners', route: '/nous-connaitre/partenaires', icon: 'fa-solid fa-handshake' },
+      { key: 'joinUs', route: '/nous-connaitre/nous-rejoindre', icon: 'fa-solid fa-user-plus' }
+    ]
+  },
   {
     key: 'projects',
     route: '/projets',
@@ -72,31 +92,29 @@ const secondaryNavItems = [
     children: [
       { key: 'transformAction', route: '/projets/transformaction', icon: 'fa-solid fa-rocket', badge: 'flagship' },
       { key: 'kreAfrika', route: '/projets/kreafrika', icon: 'fa-solid fa-lightbulb' },
-      { key: 'projet70', route: '/projets/annees-70', icon: 'fa-solid fa-clock-rotate-left' },
-      { key: 'projetUSenghor', route: '/projets/usenghor', icon: 'fa-solid fa-university' }
+      { key: 'fundraising', route: '/projets/levee-de-fonds', icon: 'fa-solid fa-hand-holding-dollar' }
     ]
   },
   {
-    key: 'network',
-    route: '/reseau',
-    icon: 'fa-solid fa-users',
+    key: 'alumni',
+    route: '/alumni',
+    icon: 'fa-solid fa-user-graduate',
     children: [
-      { key: 'strategicPartners', route: '/reseau/partenaires-strategiques', icon: 'fa-solid fa-handshake' },
-      { key: 'campusPartners', route: '/reseau/partenaires-campus', icon: 'fa-solid fa-building-columns' },
-      { key: 'teachersNetwork', route: '/reseau/enseignants', icon: 'fa-solid fa-chalkboard-user' },
-      { key: 'alumni', route: '/reseau/alumni', icon: 'fa-solid fa-user-graduate', badge: '5000+' },
-      { key: 'alumniProgram', route: '/reseau/programme-alumni', icon: 'fa-solid fa-users' }
+      { key: 'alumniNetwork', route: '/alumni/reseau', icon: 'fa-solid fa-users', badge: '5000+' },
+      { key: 'alumniProgram', route: '/alumni/programme', icon: 'fa-solid fa-star' }
     ]
   },
   {
-    key: 'about',
-    route: '/a-propos',
-    icon: 'fa-solid fa-info-circle',
+    key: 'campus',
+    route: '/campus',
+    icon: 'fa-solid fa-building-columns',
     children: [
-      { key: 'mission', route: '/a-propos/mission', icon: 'fa-solid fa-bullseye' },
-      { key: 'history', route: '/a-propos/historique', icon: 'fa-solid fa-landmark' },
-      { key: 'governance', route: '/a-propos/gouvernance', icon: 'fa-solid fa-sitemap' },
-      { key: 'campus', route: '/a-propos/campus', icon: 'fa-solid fa-map-location-dot' }
+      { key: 'housing', route: '/campus/logements', icon: 'fa-solid fa-house' },
+      { key: 'library', route: '/campus/bibliotheque', icon: 'fa-solid fa-book' },
+      { key: 'conferenceHall', route: '/campus/conferences', icon: 'fa-solid fa-microphone' },
+      { key: 'academicSpaces', route: '/campus/espaces-academiques', icon: 'fa-solid fa-chalkboard' },
+      { key: 'sports', route: '/campus/sports', icon: 'fa-solid fa-futbol' },
+      { key: 'hotel', route: '/campus/hotel', icon: 'fa-solid fa-hotel' }
     ]
   }
 ]

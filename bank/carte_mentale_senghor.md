@@ -1,5 +1,4 @@
-# Structure du site internet - Université Senghor
-
+# MENU
 ---
 
 ## 1. Nous connaître
