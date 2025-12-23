@@ -1,0 +1,58 @@
+{
+  "governance": {
+    "badge": "Gouvernance",
+    "title": "Gouvernance",
+    "subtitle": "Une structure de gouvernance solide et transparente au service de l'excellence académique",
+    "foundingTexts": {
+      "badge": "Textes fondateurs",
+      "title": "Textes Fondateurs",
+      "description": "L'Université Senghor a été créée par la Conférence des chefs d'État et de gouvernement des pays ayant le français en partage lors du Sommet de Dakar en mai 1989. Ses statuts et son fonctionnement sont régis par des textes fondateurs qui garantissent son indépendance académique et sa mission au service du développement africain.",
+      "point1": "Charte constitutive adoptée au Sommet de Dakar (1989)",
+      "point2": "Statuts de l'Université approuvés par l'OIF",
+      "point3": "Convention de siège avec la République arabe d'Égypte"
+    },
+    "donorCountries": {
+      "title": "Pays Bailleurs",
+      "description": "L'Université Senghor bénéficie du soutien financier de nombreux pays membres de la Francophonie"
+    },
+    "board": {
+      "title": "Conseil d'Administration",
+      "description": "Le Conseil d'administration définit la politique générale de l'Université et veille à sa bonne gouvernance",
+      "president": {
+        "name": "Pr. Hany Helal",
+        "role": "Président du Conseil"
+      },
+      "secretary": {
+        "name": "Marie Konaté",
+        "role": "Secrétaire Général"
+      },
+      "treasurer": {
+        "name": "Amadou Bâ",
+        "role": "Trésorier"
+      },
+      "programs": {
+        "name": "Fatou Ndiaye",
+        "role": "Dir. des Programmes"
+      },
+      "vicePresident1": {
+        "name": "Vice-Président Afrique",
+        "title": "Vice-Président"
+      },
+      "vicePresident2": {
+        "name": "Vice-Président Europe",
+        "title": "Vice-Président"
+      },
+      "rector": {
+        "name": "Pr. Thierry Verdel",
+        "title": "Recteur",
+        "since": "Depuis le 21 juin 2016"
+      },
+      "directors": {
+        "academic": "Direction Académique",
+        "finance": "Direction Financière",
+        "partnerships": "Direction Partenariats",
+        "hr": "Direction RH"
+      }
+    }
+  }
+}

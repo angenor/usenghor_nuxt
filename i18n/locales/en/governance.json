@@ -1,0 +1,58 @@
+{
+  "governance": {
+    "badge": "Governance",
+    "title": "Governance",
+    "subtitle": "A solid and transparent governance structure in service of academic excellence",
+    "foundingTexts": {
+      "badge": "Founding texts",
+      "title": "Founding Texts",
+      "description": "Senghor University was created by the Conference of Heads of State and Government of French-speaking countries at the Dakar Summit in May 1989. Its statutes and operations are governed by founding texts that guarantee its academic independence and mission in service of African development.",
+      "point1": "Constitutive Charter adopted at the Dakar Summit (1989)",
+      "point2": "University Statutes approved by the OIF",
+      "point3": "Headquarters Agreement with the Arab Republic of Egypt"
+    },
+    "donorCountries": {
+      "title": "Donor Countries",
+      "description": "Senghor University benefits from the financial support of many member countries of the Francophonie"
+    },
+    "board": {
+      "title": "Board of Directors",
+      "description": "The Board of Directors defines the general policy of the University and ensures its good governance",
+      "president": {
+        "name": "Pr. Hany Helal",
+        "role": "Board President"
+      },
+      "secretary": {
+        "name": "Marie Konaté",
+        "role": "Secretary General"
+      },
+      "treasurer": {
+        "name": "Amadou Bâ",
+        "role": "Treasurer"
+      },
+      "programs": {
+        "name": "Fatou Ndiaye",
+        "role": "Programs Director"
+      },
+      "vicePresident1": {
+        "name": "Vice-President Africa",
+        "title": "Vice-President"
+      },
+      "vicePresident2": {
+        "name": "Vice-President Europe",
+        "title": "Vice-President"
+      },
+      "rector": {
+        "name": "Pr. Thierry Verdel",
+        "title": "Rector",
+        "since": "Since June 21, 2016"
+      },
+      "directors": {
+        "academic": "Academic Affairs",
+        "finance": "Finance",
+        "partnerships": "Partnerships",
+        "hr": "Human Resources"
+      }
+    }
+  }
+}

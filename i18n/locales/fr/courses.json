@@ -1,0 +1,79 @@
+{
+  "featuredCourses": {
+    "title": "Un large choix de cours",
+    "subtitle": "Choisissez parmi plus de 250 000 cours vidéo en ligne avec de nouveaux ajouts publiés chaque mois",
+    "viewMore": "Voir plus",
+    "badges": {
+      "bestseller": "Bestseller",
+      "new": "Nouveau"
+    }
+  },
+  "popularCategories": {
+    "title": "Catégories les plus populaires",
+    "categories": {
+      "webDevelopment": "Développement web",
+      "dataScience": "Data Science",
+      "design": "Design",
+      "marketing": "Marketing",
+      "business": "Business",
+      "photography": "Photographie",
+      "music": "Musique",
+      "healthFitness": "Santé et fitness"
+    }
+  },
+  "trendingCourses": {
+    "title": "Les étudiants consultent ces cours",
+    "filters": {
+      "all": "Tout",
+      "popular": "Les plus populaires",
+      "topRated": "Les mieux notés",
+      "new": "Nouveaux"
+    },
+    "badges": {
+      "bestseller": "Bestseller",
+      "new": "Nouveau"
+    }
+  },
+  "featuredInstructors": {
+    "title": "Instructeurs vedettes",
+    "students": "étudiants",
+    "courses": "cours",
+    "instructorRating": "Note instructeur",
+    "viewProfile": "Voir le profil",
+    "badges": {
+      "topInstructor": "Top instructeur"
+    }
+  },
+  "testimonials": {
+    "title": "Voyez ce que disent nos apprenants",
+    "trustedBy": "Faites confiance aux entreprises du monde entier"
+  },
+  "udemyBusiness": {
+    "title": "Tombooktou Business",
+    "subtitle": "Formez vos équipes avec des cours de qualité professionnelle",
+    "description": "Donnez à vos équipes les compétences dont elles ont besoin pour rester compétitives dans un monde en constante évolution grâce à notre collection de cours créés par des experts du secteur.",
+    "features": {
+      "teamTraining": {
+        "title": "Formation d'équipe",
+        "description": "Formez vos équipes entières avec des cours de qualité professionnelle"
+      },
+      "analytics": {
+        "title": "Analytics",
+        "description": "Suivez les progrès de votre équipe avec des analyses détaillées"
+      },
+      "dedicatedSupport": {
+        "title": "Support dédié",
+        "description": "Bénéficiez d'un support client dédié pour votre organisation"
+      }
+    },
+    "cta": {
+      "tryFree": "Essayez Tombooktou Business",
+      "learnMore": "En savoir plus"
+    },
+    "stats": {
+      "companies": "entreprises",
+      "learners": "apprenants",
+      "languages": "langues"
+    }
+  }
+}

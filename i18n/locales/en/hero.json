@@ -1,0 +1,33 @@
+{
+  "hero": {
+    "badge": "International French-speaking University",
+    "slides": {
+      "slide1": {
+        "title": "Training Tomorrow's Leaders for African Development",
+        "subtitle": "Senghor University has been training high-level African executives in sustainable development for over 30 years."
+      },
+      "slide2": {
+        "title": "Academic Excellence in Service of Africa",
+        "subtitle": "Internationally recognized Master's programs taught by world-renowned experts."
+      },
+      "slide3": {
+        "title": "A Network of 5000+ Graduates Worldwide",
+        "subtitle": "Join a dynamic community of professionals committed to the development of the African continent."
+      },
+      "slide4": {
+        "title": "Alexandria, Crossroads of Cultures and Knowledge",
+        "subtitle": "Study in a unique setting, in the heart of one of the most iconic cities of the Mediterranean."
+      }
+    },
+    "cta": {
+      "discover": "Discover Our Programs",
+      "contact": "Contact Us"
+    },
+    "stats": {
+      "countries": "African countries represented",
+      "years": "Years of excellence",
+      "graduates": "Graduates trained",
+      "francophone": "French-speaking"
+    }
+  }
+}

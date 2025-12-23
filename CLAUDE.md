@@ -25,7 +25,7 @@ pnpm generate     # Generate static site
   - `plugins/` - Nuxt plugins: Font Awesome setup
   - `stores/` - Pinia stores
   - `assets/css/` - Tailwind CSS: `main.css` imports `base.css`
-- `i18n/locales/` - Translation files: `fr.json`, `en.json`, `ar.json`
+- `i18n/locales/` - Translation files organized by language folder (`fr/`, `en/`, `ar/`), each containing thematic JSON files (`common.json`, `nav.json`, `hero.json`, `history.json`, `mission.json`, `campus.json`, `governance.json`, `footer.json`, `search.json`, `courses.json`) merged via `index.ts`
 - `public/images/` - Static images (bg, gallery, logos)
 - `bank/` - Project documentation/specs
 

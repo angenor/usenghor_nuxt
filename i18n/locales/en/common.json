@@ -1,0 +1,26 @@
+{
+  "welcome": {
+    "title": "Welcome",
+    "message": "Welcome to your Vue.js application"
+  },
+  "navigation": {
+    "home": "Home",
+    "about": "About"
+  },
+  "theme": {
+    "darkMode": "Dark mode enabled",
+    "lightMode": "Light mode enabled"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "confirm": "Confirm"
+  }
+}

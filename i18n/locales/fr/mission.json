@@ -1,0 +1,37 @@
+{
+  "mission": {
+    "badge": "Notre identité",
+    "title": "Mission et Valeurs",
+    "subtitle": "Depuis plus de 30 ans, nous formons les leaders africains de demain",
+    "mission": {
+      "title": "Notre Mission",
+      "description": "Former, en français, des cadres créatifs capables de relever les défis du développement durable de l'Afrique.",
+      "tagline": "En excellence et en innovation"
+    },
+    "vision": {
+      "title": "Notre Vision",
+      "description": "Devenir un acteur majeur de la formation et du renforcement de capacités des cadres en Afrique et pour l'Afrique.",
+      "keywords": {
+        "innovation": "Innovation",
+        "excellence": "Excellence",
+        "impact": "Impact"
+      }
+    },
+    "experience": {
+      "badge": "Découvrir",
+      "title": "L'expérience Senghor",
+      "description": "Une expérience éducative unique en immersion professionnelle, projets de créativité et bien d'autres.",
+      "cta": "En savoir plus",
+      "features": {
+        "immersion": "Immersion professionnelle",
+        "creativity": "Projets créatifs",
+        "network": "Réseau international"
+      },
+      "stats": {
+        "countries": "Pays africains",
+        "graduates": "Diplômés",
+        "years": "Années d'excellence"
+      }
+    }
+  }
+}

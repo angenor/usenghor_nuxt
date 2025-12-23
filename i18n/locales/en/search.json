@@ -1,0 +1,55 @@
+{
+  "header": {
+    "searchPlaceholder": "Search for anything",
+    "categories": "Categories",
+    "teachOnUdemy": "Teach on Tombooktou",
+    "myLearning": "My learning",
+    "login": "Log in",
+    "signup": "Sign up",
+    "search": "Search"
+  },
+  "search": {
+    "placeholder": "Search programs, news, campus...",
+    "searching": "Searching...",
+    "suggestions": "Popular searches",
+    "resultsFor": "Results for \"{query}\"",
+    "noResults": "No results found",
+    "noResultsDescription": "Try different keywords or browse our categories.",
+    "noResultsTitle": "No results found",
+    "noResultsDesc": "Try different keywords or browse our suggestions.",
+    "students": "students",
+    "popularSearches": "Popular suggestions",
+    "recentSearches": "Recent searches",
+    "clearHistory": "Clear",
+    "resultsCount": "{count} results for \"{query}\"",
+    "sortBy": "Sort by",
+    "navigate": "to navigate",
+    "select": "to select",
+    "close": "to close",
+    "applyNowDesc": "Join our programs",
+    "openCalls": "Open calls",
+    "openCallsDesc": "Active applications",
+    "emptyState": {
+      "title": "What do you want to learn?",
+      "subtitle": "Start typing to search for courses, instructors, and topics."
+    },
+    "sort": {
+      "relevance": "Relevance",
+      "newest": "Newest",
+      "rating": "Highest rated",
+      "price": "Price"
+    },
+    "filters": {
+      "all": "All",
+      "development": "Development",
+      "business": "Business",
+      "design": "Design",
+      "marketing": "Marketing"
+    },
+    "badges": {
+      "bestseller": "Bestseller",
+      "hot": "Hot",
+      "new": "New"
+    }
+  }
+}

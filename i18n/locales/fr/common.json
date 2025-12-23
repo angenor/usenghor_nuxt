@@ -1,0 +1,26 @@
+{
+  "welcome": {
+    "title": "Bienvenue",
+    "message": "Bienvenue dans votre application Vue.js"
+  },
+  "navigation": {
+    "home": "Accueil",
+    "about": "À propos"
+  },
+  "theme": {
+    "darkMode": "Mode sombre activé",
+    "lightMode": "Mode clair activé"
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "search": "Rechercher",
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "success": "Succès",
+    "confirm": "Confirmer"
+  }
+}

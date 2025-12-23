@@ -1,0 +1,119 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "news": "Actualités",
+    "projects": "Nos projets",
+    "network": "Notre réseau",
+    "training": "Se former",
+    "about": "Nous connaître",
+    "alumni": "Nos alumni",
+    "campus": "Campus",
+    "apply": "Candidater",
+    "viewAll": "Voir tout",
+    "exploreAll": "Tout explorer",
+    "more": "Plus",
+    "searchPlaceholder": "Rechercher formations, actualités, campus...",
+    "quickLinks": "Liens rapides",
+    "toClose": "pour fermer",
+    "badges": {
+      "new": "Nouveau",
+      "popular": "Populaire",
+      "flagship": "Phare"
+    },
+    "dropdowns": {
+      "news": {
+        "featured": "À la une",
+        "featuredDesc": "Retrouvez toutes les actualités de l'Université Senghor : appels à candidatures, recrutements et événements à ne pas manquer.",
+        "callsForApplications": "Appels à candidatures",
+        "callsForApplicationsDesc": "Postulez aux programmes de formation et bourses disponibles",
+        "callsOpen": "Appels en cours",
+        "callsOpenDesc": "Candidatures actuellement ouvertes",
+        "callsClosed": "Appels clos",
+        "callsClosedDesc": "Archives des appels terminés",
+        "recruitment": "Recrutements",
+        "recruitmentDesc": "Opportunités professionnelles au sein de notre réseau",
+        "events": "Événements",
+        "eventsDesc": "Conférences, séminaires et rencontres à venir"
+      },
+      "training": {
+        "featured": "Formations",
+        "featuredDesc": "Des programmes d'excellence reconnus internationalement pour former les leaders africains de demain.",
+        "doctorate": "Doctorat",
+        "doctorateDesc": "Programme doctoral en partenariat avec l'École doctorale",
+        "masters": "Masters",
+        "mastersDesc": "Programmes de Master en 2 ans",
+        "mastersAlexandria": "Campus d'Alexandrie",
+        "mastersAlexandriaDesc": "Masters sur notre campus principal en Égypte",
+        "mastersExternal": "Campus externalisés",
+        "mastersExternalDesc": "Formations délocalisées dans nos campus partenaires",
+        "mastersOnline": "En ligne",
+        "mastersOnlineDesc": "Masters à distance via notre département FAD",
+        "universityDiplomas": "Diplômes d'université",
+        "universityDiplomasDesc": "Formations spécialisées d'une année académique",
+        "certifications": "Formations certifiantes",
+        "certificationsDesc": "Certifications professionnelles courtes et intensives"
+      },
+      "projects": {
+        "transformAction": "Transform'Action Africa",
+        "transformActionDesc": "Programme phare de transformation africaine",
+        "kreAfrika": "KreAfrika",
+        "kreAfrikaDesc": "Initiative pour l'innovation et la créativité",
+        "fundraising": "Levée de fonds",
+        "fundraisingDesc": "Soutenez nos projets de développement"
+      },
+      "network": {
+        "featured": "Réseau",
+        "featuredDesc": "Rejoignez une communauté de plus de 5000 diplômés et partenaires engagés pour le développement africain.",
+        "strategicPartners": "Partenaires stratégiques",
+        "strategicPartnersDesc": "OIF, AFD, Francophonie et institutions internationales",
+        "campusPartners": "Partenaires campus",
+        "campusPartnersDesc": "Universités et institutions académiques partenaires",
+        "teachersNetwork": "Réseau des enseignants",
+        "teachersNetworkDesc": "Communauté d'experts et professeurs internationaux",
+        "alumni": "Alumni",
+        "alumniDesc": "Réseau des anciens diplômés dans 54 pays africains",
+        "alumniProgram": "Programme Alumni",
+        "alumniProgramDesc": "Activités et services dédiés aux anciens"
+      },
+      "about": {
+        "mission": "Notre mission",
+        "missionDesc": "Découvrez notre vision et nos valeurs fondatrices",
+        "history": "Notre histoire",
+        "historyDesc": "Le projet Senghor depuis ses origines",
+        "governance": "Gouvernance",
+        "governanceDesc": "Textes fondateurs, pays bailleurs et conseil d'administration",
+        "strategy": "Notre stratégie",
+        "strategyDesc": "Plan stratégique et levée de fonds",
+        "commitments": "Nos engagements",
+        "commitmentsDesc": "Nos valeurs et notre charte éthique",
+        "organization": "Notre organisation",
+        "organizationDesc": "Organigramme, départements et services",
+        "partners": "Nos partenaires",
+        "partnersDesc": "Campus externalisés et partenaires stratégiques",
+        "joinUs": "Nous rejoindre",
+        "joinUsDesc": "Carrières, enseignants, étudiants et partenaires"
+      },
+      "alumni": {
+        "alumniNetwork": "Réseau alumni",
+        "alumniNetworkDesc": "Plus de 5000 diplômés dans 54 pays africains",
+        "alumniProgram": "Programme alumni",
+        "alumniProgramDesc": "Activités et services dédiés aux anciens"
+      },
+      "campus": {
+        "housing": "Logements",
+        "housingDesc": "Hébergement sur le campus de Borg el Arab",
+        "library": "Bibliothèque",
+        "libraryDesc": "Ressources documentaires et espaces d'étude",
+        "conferenceHall": "Salle de conférences",
+        "conferenceHallDesc": "Espaces pour événements et séminaires",
+        "academicSpaces": "Espaces académiques",
+        "academicSpacesDesc": "Salles de cours et laboratoires",
+        "sports": "Sports",
+        "sportsDesc": "Piscine et installations sportives",
+        "hotel": "Hôtel",
+        "hotelDesc": "Hébergement pour visiteurs et invités"
+      }
+    },
+    "language": "Langue"
+  }
+}

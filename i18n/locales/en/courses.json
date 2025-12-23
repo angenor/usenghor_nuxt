@@ -1,0 +1,79 @@
+{
+  "featuredCourses": {
+    "title": "A broad selection of courses",
+    "subtitle": "Choose from over 250,000 online video courses with new additions published every month",
+    "viewMore": "View more",
+    "badges": {
+      "bestseller": "Bestseller",
+      "new": "New"
+    }
+  },
+  "popularCategories": {
+    "title": "Top categories",
+    "categories": {
+      "webDevelopment": "Web Development",
+      "dataScience": "Data Science",
+      "design": "Design",
+      "marketing": "Marketing",
+      "business": "Business",
+      "photography": "Photography",
+      "music": "Music",
+      "healthFitness": "Health & Fitness"
+    }
+  },
+  "trendingCourses": {
+    "title": "Students are viewing",
+    "filters": {
+      "all": "All",
+      "popular": "Most popular",
+      "topRated": "Highest rated",
+      "new": "Newest"
+    },
+    "badges": {
+      "bestseller": "Bestseller",
+      "new": "New"
+    }
+  },
+  "featuredInstructors": {
+    "title": "Featured instructors",
+    "students": "students",
+    "courses": "courses",
+    "instructorRating": "Instructor rating",
+    "viewProfile": "View profile",
+    "badges": {
+      "topInstructor": "Top instructor"
+    }
+  },
+  "testimonials": {
+    "title": "See what our learners are saying",
+    "trustedBy": "Trusted by companies of all sizes"
+  },
+  "udemyBusiness": {
+    "title": "Tombooktou Business",
+    "subtitle": "Upskill your team with on-demand courses",
+    "description": "Keep your team's skills current with a Tombooktou Business subscription. Give up to 20 team members access to our top-rated course collection.",
+    "features": {
+      "teamTraining": {
+        "title": "Team training",
+        "description": "Train your entire team with professional-quality courses"
+      },
+      "analytics": {
+        "title": "Analytics",
+        "description": "Track your team's progress with detailed analytics"
+      },
+      "dedicatedSupport": {
+        "title": "Dedicated support",
+        "description": "Get dedicated customer support for your organization"
+      }
+    },
+    "cta": {
+      "tryFree": "Try Tombooktou Business",
+      "learnMore": "Learn more"
+    },
+    "stats": {
+      "companies": "companies",
+      "learners": "learners",
+      "languages": "languages"
+    }
+  }
+}

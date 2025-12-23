@@ -1,0 +1,76 @@
+{
+  "nav": {
+    "home": "الرئيسية",
+    "news": "الأخبار",
+    "projects": "المشاريع",
+    "network": "شبكتنا",
+    "training": "التكوين",
+    "about": "من نحن",
+    "apply": "تقديم طلب",
+    "viewAll": "عرض الكل",
+    "exploreAll": "استكشاف الكل",
+    "more": "المزيد",
+    "searchPlaceholder": "البحث عن برامج، أخبار، حرم جامعي...",
+    "quickLinks": "روابط سريعة",
+    "toClose": "للإغلاق",
+    "badges": {
+      "new": "جديد",
+      "popular": "شائع",
+      "flagship": "رائد"
+    },
+    "dropdowns": {
+      "news": {
+        "featured": "أبرز الأخبار",
+        "featuredDesc": "تابعوا آخر أخبار جامعة سنغور: دعوات للترشح، عروض عمل وفعاليات قادمة.",
+        "callsForApplications": "دعوات للترشح",
+        "callsForApplicationsDesc": "تقدم للبرامج التدريبية والمنح المتاحة",
+        "jobOffers": "عروض العمل",
+        "jobOffersDesc": "فرص مهنية ضمن شبكتنا",
+        "events": "الفعاليات",
+        "eventsDesc": "مؤتمرات وندوات ولقاءات قادمة"
+      },
+      "training": {
+        "featured": "البرامج",
+        "featuredDesc": "برامج تميز معترف بها دولياً لتكوين قادة أفريقيا المستقبليين.",
+        "masters": "الماجستير",
+        "mastersDesc": "برامج ماجستير لمدة سنتين في حرم الإسكندرية",
+        "universityDiplomas": "الدبلومات الجامعية",
+        "universityDiplomasDesc": "تكوينات متخصصة لمدة سنة أكاديمية",
+        "certifications": "الشهادات المهنية",
+        "certificationsDesc": "شهادات مهنية قصيرة ومكثفة",
+        "doctorate": "الدكتوراه",
+        "doctorateDesc": "برنامج دكتوراه بالشراكة مع مدرسة الدكتوراه",
+        "online": "عبر الإنترنت",
+        "onlineDesc": "تكوين عن بعد عبر قسم التعليم عن بعد",
+        "externalCampus": "الحرم الجامعية الخارجية",
+        "externalCampusDesc": "تكوينات في حرمنا الجامعية الشريكة"
+      },
+      "projects": {
+        "transformAction": "TransformAction",
+        "kreAfrika": "KreAfrika",
+        "projet70": "مشروع السبعينات",
+        "projetUSenghor": "مشروع جامعة سنغور"
+      },
+      "network": {
+        "featured": "الشبكة",
+        "featuredDesc": "انضم إلى مجتمع يضم أكثر من 5000 خريج وشريك ملتزمين بالتنمية الأفريقية.",
+        "strategicPartners": "الشركاء الاستراتيجيون",
+        "strategicPartnersDesc": "المنظمة الدولية للفرنكوفونية والوكالة الفرنسية للتنمية والمؤسسات الدولية",
+        "campusPartners": "شركاء الحرم الجامعي",
+        "campusPartnersDesc": "الجامعات والمؤسسات الأكاديمية الشريكة",
+        "teachersNetwork": "شبكة المعلمين",
+        "teachersNetworkDesc": "مجتمع من الخبراء والأساتذة الدوليين",
+        "alumni": "الخريجون",
+        "alumniDesc": "شبكة الخريجين في 54 دولة أفريقية",
+        "alumniProgram": "برنامج الخريجين",
+        "alumniProgramDesc": "أنشطة وخدمات مخصصة للخريجين"
+      },
+      "about": {
+        "mission": "الرسالة والقيم",
+        "history": "التاريخ",
+        "governance": "الحوكمة",
+        "campus": "حرم الإسكندرية"
+      }
+    }
+  }
+}

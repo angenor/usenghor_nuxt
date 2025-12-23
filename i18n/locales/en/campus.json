@@ -1,0 +1,34 @@
+{
+  "campus": {
+    "badge": "Our Global Presence",
+    "title": "Campus & Network",
+    "subtitle": "From Egypt to Sub-Saharan Africa, discover our network of campuses and academic partners across the continent.",
+    "stats": {
+      "campuses": "Active campuses",
+      "countries": "Countries represented",
+      "students": "Active students"
+    },
+    "legend": {
+      "headquarters": "Main headquarters",
+      "campus": "External campus",
+      "partner": "Academic partner",
+      "alumni": "Alumni presence"
+    },
+    "filters": {
+      "all": "All",
+      "headquarters": "Headquarters",
+      "campus": "Campuses",
+      "partner": "Partners"
+    },
+    "students": "students",
+    "tooltip": {
+      "alumni": "Alumni presence"
+    },
+    "modal": {
+      "programs": "Available programs",
+      "activeStudents": "Active students",
+      "close": "Close",
+      "visitWebsite": "Visit website"
+    }
+  }
+}

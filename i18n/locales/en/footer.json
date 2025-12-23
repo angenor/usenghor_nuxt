@@ -1,0 +1,71 @@
+{
+  "footer": {
+    "description": "Senghor University has been training high-level African executives committed to sustainable development of the continent for over 30 years.",
+    "newsletter": {
+      "title": "Stay informed",
+      "description": "Receive our news, calls for applications and events directly in your inbox.",
+      "placeholder": "Your email address",
+      "subscribe": "Subscribe",
+      "subscribing": "Subscribing...",
+      "success": "Thank you for subscribing!",
+      "error": "An error occurred. Please try again.",
+      "privacy": "By subscribing, you agree to our privacy policy."
+    },
+    "programs": {
+      "title": "Programs",
+      "masters": "Masters",
+      "diplomas": "University Diplomas",
+      "certifications": "Certifications",
+      "doctorate": "Doctorate",
+      "online": "Distance Learning"
+    },
+    "university": {
+      "title": "The University",
+      "about": "About",
+      "mission": "Mission & Values",
+      "governance": "Governance",
+      "campus": "Alexandria Campus",
+      "history": "Our History"
+    },
+    "resources": {
+      "title": "Resources",
+      "news": "News",
+      "events": "Events",
+      "jobs": "Job Offers",
+      "library": "Library",
+      "faq": "FAQ"
+    },
+    "network": {
+      "title": "Our Network",
+      "alumni": "Alumni",
+      "partners": "Partners",
+      "externalCampuses": "External Campuses",
+      "contact": "Contact Us"
+    },
+    "social": {
+      "title": "Follow us",
+      "facebook": "Facebook",
+      "twitter": "Twitter",
+      "linkedin": "LinkedIn",
+      "youtube": "YouTube",
+      "instagram": "Instagram"
+    },
+    "legal": {
+      "title": "Legal Information",
+      "terms": "Legal Notice",
+      "privacy": "Privacy Policy",
+      "cookies": "Cookie Settings",
+      "accessibility": "Accessibility"
+    },
+    "contact": {
+      "title": "Contact",
+      "address": "1, Place Ahmed Orabi, El Mancheya, Alexandria, Egypt",
+      "phone": "+20 3 484 3504",
+      "email": "info{'@'}usenghor.org"
+    },
+    "bottom": {
+      "copyright": "{year} Senghor University. All rights reserved.",
+      "oif": "Direct operator of the Francophonie"
+    }
+  }
+}

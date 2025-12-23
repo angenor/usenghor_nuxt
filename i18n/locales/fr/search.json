@@ -1,0 +1,55 @@
+{
+  "header": {
+    "searchPlaceholder": "Rechercher un cours",
+    "categories": "Catégories",
+    "teachOnUdemy": "Enseigner",
+    "myLearning": "Mes cours",
+    "login": "Connexion",
+    "signup": "S'inscrire",
+    "search": "Recherche"
+  },
+  "search": {
+    "placeholder": "Rechercher formations, actualités, campus...",
+    "searching": "Recherche en cours...",
+    "suggestions": "Recherches populaires",
+    "resultsFor": "Résultats pour \"{query}\"",
+    "noResults": "Aucun résultat trouvé",
+    "noResultsDescription": "Essayez d'autres mots-clés ou parcourez nos catégories.",
+    "noResultsTitle": "Aucun résultat trouvé",
+    "noResultsDesc": "Essayez d'autres mots-clés ou parcourez nos suggestions.",
+    "students": "étudiants",
+    "popularSearches": "Suggestions populaires",
+    "recentSearches": "Recherches récentes",
+    "clearHistory": "Effacer",
+    "resultsCount": "{count} résultats pour \"{query}\"",
+    "sortBy": "Trier par",
+    "navigate": "pour naviguer",
+    "select": "pour sélectionner",
+    "close": "pour fermer",
+    "applyNowDesc": "Rejoignez nos formations",
+    "openCalls": "Appels ouverts",
+    "openCallsDesc": "Candidatures en cours",
+    "emptyState": {
+      "title": "Que voulez-vous apprendre ?",
+      "subtitle": "Commencez à taper pour rechercher des cours, instructeurs et sujets."
+    },
+    "sort": {
+      "relevance": "Pertinence",
+      "newest": "Plus récents",
+      "rating": "Mieux notés",
+      "price": "Prix"
+    },
+    "filters": {
+      "all": "Tous",
+      "development": "Développement",
+      "business": "Business",
+      "design": "Design",
+      "marketing": "Marketing"
+    },
+    "badges": {
+      "bestseller": "Bestseller",
+      "hot": "Tendance",
+      "new": "Nouveau"
+    }
+  }
+}

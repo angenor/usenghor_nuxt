@@ -1,0 +1,26 @@
+{
+  "welcome": {
+    "title": "مرحباً",
+    "message": "مرحباً بكم في تطبيق Vue.js الخاص بكم"
+  },
+  "navigation": {
+    "home": "الرئيسية",
+    "about": "من نحن"
+  },
+  "theme": {
+    "darkMode": "تم تفعيل الوضع الداكن",
+    "lightMode": "تم تفعيل الوضع الفاتح"
+  },
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "add": "إضافة",
+    "search": "بحث",
+    "loading": "جارٍ التحميل...",
+    "error": "حدث خطأ",
+    "success": "نجاح",
+    "confirm": "تأكيد"
+  }
+}

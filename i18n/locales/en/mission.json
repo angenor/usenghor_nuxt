@@ -1,0 +1,37 @@
+{
+  "mission": {
+    "badge": "Our Identity",
+    "title": "Mission & Values",
+    "subtitle": "For over 30 years, we have been training tomorrow's African leaders",
+    "mission": {
+      "title": "Our Mission",
+      "description": "Train, in French, creative executives capable of meeting the challenges of sustainable development in Africa.",
+      "tagline": "In excellence and innovation"
+    },
+    "vision": {
+      "title": "Our Vision",
+      "description": "Become a major player in the training and capacity building of executives in Africa and for Africa.",
+      "keywords": {
+        "innovation": "Innovation",
+        "excellence": "Excellence",
+        "impact": "Impact"
+      }
+    },
+    "experience": {
+      "badge": "Discover",
+      "title": "The Senghor Experience",
+      "description": "A unique educational experience with professional immersion, creativity projects and much more.",
+      "cta": "Learn more",
+      "features": {
+        "immersion": "Professional immersion",
+        "creativity": "Creative projects",
+        "network": "International network"
+      },
+      "stats": {
+        "countries": "African countries",
+        "graduates": "Graduates",
+        "years": "Years of excellence"
+      }
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "history": {
+    "badge": "Notre Histoire",
+    "title": "Historique",
+    "subtitle": "Découvrez les origines et l'évolution de l'Université Senghor, née d'une vision ambitieuse pour le développement de l'Afrique francophone.",
+    "genesis": {
+      "date": "Mai 1989 - Dakar",
+      "title": "Projet des années 70-80",
+      "description": "Le projet de création d'une université francophone dédiée au développement de l'Afrique a vu le jour lors du Sommet des chefs d'État et de gouvernement des pays francophones, tenu en mai 1989 à Dakar. Cette initiative ambitieuse visait à doter l'Afrique d'un établissement d'enseignement supérieur capable de former des cadres africains hautement qualifiés.",
+      "point1": "Initiative née au Sommet de la Francophonie de Dakar",
+      "point2": "Vision d'excellence pour former les leaders africains de demain"
+    },
+    "founders": {
+      "title": "Les Pères Fondateurs",
+      "subtitle": "Des personnalités visionnaires qui ont façonné l'institution",
+      "senghor": {
+        "role": "Poète, penseur et ancien Président du Sénégal"
+      },
+      "druon": {
+        "role": "Écrivain et académicien français"
+      },
+      "boutros": {
+        "role": "Ancien Secrétaire général de l'ONU"
+      },
+      "dupuy": {
+        "role": "Juriste et expert en droit international"
+      }
+    },
+    "usenghor": {
+      "since": "Depuis octobre 1990",
+      "title": "Projet USenghor",
+      "description": "L'Université Senghor ouvre officiellement ses portes à Alexandrie, en Égypte. Elle porte le nom de Léopold Sédar Senghor, figure majeure de la francophonie, qui a joué un rôle central dans la promotion de l'identité francophone à travers le monde.",
+      "milestone1": {
+        "title": "Ouverture à Alexandrie",
+        "desc": "Octobre 1990 - L'université accueille ses premiers étudiants"
+      },
+      "milestone2": {
+        "title": "Référence en formation",
+        "desc": "Plus de 30 ans d'excellence dans les métiers du développement"
+      }
+    },
+    "leadership": {
+      "title": "Direction actuelle",
+      "rector": {
+        "name": "Pr. Thierry Verdel",
+        "title": "Recteur",
+        "since": "Depuis le 21 juin 2016"
+      },
+      "president": {
+        "name": "Pr. Hany Helal",
+        "title": "Président"
+      }
+    },
+    "legacy": {
+      "badge": "Notre héritage",
+      "title": "Une mission qui perdure",
+      "description": "Depuis plus de 30 ans, l'Université Senghor poursuit sa mission ambitieuse : former les futurs cadres africains et francophones, capables de relever les défis majeurs du développement, tout en renforçant les liens entre l'Afrique et la francophonie internationale.",
+      "tag1": "Développement africain",
+      "tag2": "Excellence académique",
+      "tag3": "Coopération francophone"
+    }
+  }
+}

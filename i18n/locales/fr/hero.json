@@ -1,0 +1,33 @@
+{
+  "hero": {
+    "badge": "Université internationale de la Francophonie",
+    "slides": {
+      "slide1": {
+        "title": "Former les leaders de demain pour le développement africain",
+        "subtitle": "L'Université Senghor forme depuis plus de 30 ans les cadres africains de haut niveau dans les domaines du développement durable."
+      },
+      "slide2": {
+        "title": "Une excellence académique au service de l'Afrique",
+        "subtitle": "Des programmes de Master reconnus internationalement, dispensés par des experts de renommée mondiale."
+      },
+      "slide3": {
+        "title": "Un réseau de 5000+ diplômés à travers le monde",
+        "subtitle": "Rejoignez une communauté dynamique de professionnels engagés pour le développement du continent africain."
+      },
+      "slide4": {
+        "title": "Alexandrie, carrefour des cultures et des savoirs",
+        "subtitle": "Étudiez dans un cadre unique, au cœur de l'une des villes les plus emblématiques de la Méditerranée."
+      }
+    },
+    "cta": {
+      "discover": "Découvrir nos formations",
+      "contact": "Nous contacter"
+    },
+    "stats": {
+      "countries": "Pays africains représentés",
+      "years": "Années d'excellence",
+      "graduates": "Diplômés formés",
+      "francophone": "Francophone"
+    }
+  }
+}

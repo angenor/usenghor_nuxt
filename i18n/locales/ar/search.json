@@ -1,0 +1,55 @@
+{
+  "header": {
+    "searchPlaceholder": "البحث عن دورة",
+    "categories": "الفئات",
+    "teachOnUdemy": "التدريس",
+    "myLearning": "دوراتي",
+    "login": "تسجيل الدخول",
+    "signup": "إنشاء حساب",
+    "search": "بحث"
+  },
+  "search": {
+    "placeholder": "البحث عن برامج، أخبار، حرم جامعي...",
+    "searching": "جارٍ البحث...",
+    "suggestions": "عمليات البحث الشائعة",
+    "resultsFor": "نتائج البحث عن \"{query}\"",
+    "noResults": "لم يتم العثور على نتائج",
+    "noResultsDescription": "جرب كلمات مفتاحية أخرى أو تصفح فئاتنا.",
+    "noResultsTitle": "لم يتم العثور على نتائج",
+    "noResultsDesc": "جرب كلمات مفتاحية أخرى أو تصفح اقتراحاتنا.",
+    "students": "طالب",
+    "popularSearches": "اقتراحات شائعة",
+    "recentSearches": "عمليات البحث الأخيرة",
+    "clearHistory": "مسح",
+    "resultsCount": "{count} نتيجة لـ \"{query}\"",
+    "sortBy": "ترتيب حسب",
+    "navigate": "للتنقل",
+    "select": "للاختيار",
+    "close": "للإغلاق",
+    "applyNowDesc": "انضم إلى برامجنا",
+    "openCalls": "دعوات مفتوحة",
+    "openCallsDesc": "طلبات جارية",
+    "emptyState": {
+      "title": "ماذا تريد أن تتعلم؟",
+      "subtitle": "ابدأ بالكتابة للبحث عن دورات ومدربين ومواضيع."
+    },
+    "sort": {
+      "relevance": "الصلة",
+      "newest": "الأحدث",
+      "rating": "الأعلى تقييماً",
+      "price": "السعر"
+    },
+    "filters": {
+      "all": "الكل",
+      "development": "التطوير",
+      "business": "الأعمال",
+      "design": "التصميم",
+      "marketing": "التسويق"
+    },
+    "badges": {
+      "bestseller": "الأكثر مبيعاً",
+      "hot": "رائج",
+      "new": "جديد"
+    }
+  }
+}

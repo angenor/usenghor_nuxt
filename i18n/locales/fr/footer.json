@@ -1,0 +1,71 @@
+{
+  "footer": {
+    "description": "L'Université Senghor forme depuis plus de 30 ans les cadres africains de haut niveau, engagés pour le développement durable du continent.",
+    "newsletter": {
+      "title": "Restez informé",
+      "description": "Recevez nos actualités, appels à candidatures et événements directement dans votre boîte mail.",
+      "placeholder": "Votre adresse email",
+      "subscribe": "S'abonner",
+      "subscribing": "Inscription...",
+      "success": "Merci pour votre inscription !",
+      "error": "Une erreur est survenue. Veuillez réessayer.",
+      "privacy": "En vous inscrivant, vous acceptez notre politique de confidentialité."
+    },
+    "programs": {
+      "title": "Formations",
+      "masters": "Masters",
+      "diplomas": "Diplômes d'université",
+      "certifications": "Formations certifiantes",
+      "doctorate": "Doctorat",
+      "online": "Formation à distance"
+    },
+    "university": {
+      "title": "L'Université",
+      "about": "À propos",
+      "mission": "Mission et valeurs",
+      "governance": "Gouvernance",
+      "campus": "Campus d'Alexandrie",
+      "history": "Notre histoire"
+    },
+    "resources": {
+      "title": "Ressources",
+      "news": "Actualités",
+      "events": "Événements",
+      "jobs": "Offres d'emploi",
+      "library": "Bibliothèque",
+      "faq": "FAQ"
+    },
+    "network": {
+      "title": "Notre réseau",
+      "alumni": "Alumni",
+      "partners": "Partenaires",
+      "externalCampuses": "Campus externalisés",
+      "contact": "Nous contacter"
+    },
+    "social": {
+      "title": "Suivez-nous",
+      "facebook": "Facebook",
+      "twitter": "Twitter",
+      "linkedin": "LinkedIn",
+      "youtube": "YouTube",
+      "instagram": "Instagram"
+    },
+    "legal": {
+      "title": "Informations légales",
+      "terms": "Mentions légales",
+      "privacy": "Politique de confidentialité",
+      "cookies": "Gestion des cookies",
+      "accessibility": "Accessibilité"
+    },
+    "contact": {
+      "title": "Contact",
+      "address": "1, Place Ahmed Orabi, El Mancheya, Alexandrie, Égypte",
+      "phone": "+20 3 484 3504",
+      "email": "info{'@'}usenghor.org"
+    },
+    "bottom": {
+      "copyright": "{year} Université Senghor. Tous droits réservés.",
+      "oif": "Opérateur direct de la Francophonie"
+    }
+  }
+}

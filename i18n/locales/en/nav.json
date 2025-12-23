@@ -1,0 +1,76 @@
+{
+  "nav": {
+    "home": "Home",
+    "news": "News",
+    "projects": "Projects",
+    "network": "Our Network",
+    "training": "Training",
+    "about": "About",
+    "apply": "Apply Now",
+    "viewAll": "View all",
+    "exploreAll": "Explore all",
+    "more": "More",
+    "searchPlaceholder": "Search programs, news, campus...",
+    "quickLinks": "Quick links",
+    "toClose": "to close",
+    "badges": {
+      "new": "New",
+      "popular": "Popular",
+      "flagship": "Flagship"
+    },
+    "dropdowns": {
+      "news": {
+        "featured": "Featured",
+        "featuredDesc": "Stay updated with the latest news from Senghor University: calls for applications, job offers and upcoming events.",
+        "callsForApplications": "Calls for Applications",
+        "callsForApplicationsDesc": "Apply to available training programs and scholarships",
+        "jobOffers": "Job Offers",
+        "jobOffersDesc": "Professional opportunities within our network",
+        "events": "Events",
+        "eventsDesc": "Upcoming conferences, seminars and meetings"
+      },
+      "training": {
+        "featured": "Programs",
+        "featuredDesc": "Internationally recognized excellence programs to train tomorrow's African leaders.",
+        "masters": "Masters",
+        "mastersDesc": "2-year Master programs on the Alexandria campus",
+        "universityDiplomas": "University Diplomas",
+        "universityDiplomasDesc": "Specialized one-year academic programs",
+        "certifications": "Certifications",
+        "certificationsDesc": "Short and intensive professional certifications",
+        "doctorate": "Doctorate",
+        "doctorateDesc": "Doctoral program in partnership with the Doctoral School",
+        "online": "Online",
+        "onlineDesc": "Distance learning via our FAD department",
+        "externalCampus": "External Campuses",
+        "externalCampusDesc": "Programs delivered at our partner campuses"
+      },
+      "projects": {
+        "transformAction": "TransformAction",
+        "kreAfrika": "KreAfrika",
+        "projet70": "70s Project",
+        "projetUSenghor": "USenghor Project"
+      },
+      "network": {
+        "featured": "Network",
+        "featuredDesc": "Join a community of over 5,000 graduates and partners committed to African development.",
+        "strategicPartners": "Strategic Partners",
+        "strategicPartnersDesc": "OIF, AFD, Francophonie and international institutions",
+        "campusPartners": "Campus Partners",
+        "campusPartnersDesc": "Partner universities and academic institutions",
+        "teachersNetwork": "Teachers Network",
+        "teachersNetworkDesc": "Community of international experts and professors",
+        "alumni": "Alumni",
+        "alumniDesc": "Network of graduates across 54 African countries",
+        "alumniProgram": "Alumni Program",
+        "alumniProgramDesc": "Activities and services for former students"
+      },
+      "about": {
+        "mission": "Mission & Values",
+        "history": "History",
+        "governance": "Governance",
+        "campus": "Alexandria Campus"
+      }
+    }
+  }
+}

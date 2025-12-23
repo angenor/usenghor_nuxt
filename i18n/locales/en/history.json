@@ -1,0 +1,63 @@
+{
+  "history": {
+    "badge": "Our History",
+    "title": "History",
+    "subtitle": "Discover the origins and evolution of Senghor University, born from an ambitious vision for the development of Francophone Africa.",
+    "genesis": {
+      "date": "May 1989 - Dakar",
+      "title": "The 70s-80s Project",
+      "description": "The project to create a French-speaking university dedicated to African development was born at the Summit of Heads of State and Government of French-speaking countries, held in May 1989 in Dakar. This ambitious initiative aimed to provide Africa with a higher education institution capable of training highly qualified African executives.",
+      "point1": "Initiative born at the Francophonie Summit in Dakar",
+      "point2": "Vision of excellence to train tomorrow's African leaders"
+    },
+    "founders": {
+      "title": "The Founding Fathers",
+      "subtitle": "Visionary figures who shaped the institution",
+      "senghor": {
+        "role": "Poet, thinker and former President of Senegal"
+      },
+      "druon": {
+        "role": "French writer and academician"
+      },
+      "boutros": {
+        "role": "Former UN Secretary-General"
+      },
+      "dupuy": {
+        "role": "Jurist and international law expert"
+      }
+    },
+    "usenghor": {
+      "since": "Since October 1990",
+      "title": "USenghor Project",
+      "description": "Senghor University officially opens its doors in Alexandria, Egypt. It bears the name of Léopold Sédar Senghor, a major figure in the Francophonie, who played a central role in promoting French-speaking identity around the world.",
+      "milestone1": {
+        "title": "Opening in Alexandria",
+        "desc": "October 1990 - The university welcomes its first students"
+      },
+      "milestone2": {
+        "title": "Reference in training",
+        "desc": "Over 30 years of excellence in development professions"
+      }
+    },
+    "leadership": {
+      "title": "Current Leadership",
+      "rector": {
+        "name": "Pr. Thierry Verdel",
+        "title": "Rector",
+        "since": "Since June 21, 2016"
+      },
+      "president": {
+        "name": "Pr. Hany Helal",
+        "title": "President"
+      }
+    },
+    "legacy": {
+      "badge": "Our Legacy",
+      "title": "An Enduring Mission",
+      "description": "For over 30 years, Senghor University has pursued its ambitious mission: training future African and Francophone executives capable of meeting major development challenges, while strengthening ties between Africa and the international Francophonie.",
+      "tag1": "African Development",
+      "tag2": "Academic Excellence",
+      "tag3": "Francophone Cooperation"
+    }
+  }
+}

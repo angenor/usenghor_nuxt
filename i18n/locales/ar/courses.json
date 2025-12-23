@@ -1,0 +1,79 @@
+{
+  "featuredCourses": {
+    "title": "مجموعة واسعة من الدورات",
+    "subtitle": "اختر من بين أكثر من 250,000 دورة فيديو عبر الإنترنت مع إضافات جديدة تُنشر كل شهر",
+    "viewMore": "عرض المزيد",
+    "badges": {
+      "bestseller": "الأكثر مبيعاً",
+      "new": "جديد"
+    }
+  },
+  "popularCategories": {
+    "title": "الفئات الأكثر شعبية",
+    "categories": {
+      "webDevelopment": "تطوير الويب",
+      "dataScience": "علوم البيانات",
+      "design": "التصميم",
+      "marketing": "التسويق",
+      "business": "الأعمال",
+      "photography": "التصوير",
+      "music": "الموسيقى",
+      "healthFitness": "الصحة واللياقة"
+    }
+  },
+  "trendingCourses": {
+    "title": "الطلاب يشاهدون هذه الدورات",
+    "filters": {
+      "all": "الكل",
+      "popular": "الأكثر شعبية",
+      "topRated": "الأعلى تقييماً",
+      "new": "الأحدث"
+    },
+    "badges": {
+      "bestseller": "الأكثر مبيعاً",
+      "new": "جديد"
+    }
+  },
+  "featuredInstructors": {
+    "title": "المدربون المميزون",
+    "students": "طالب",
+    "courses": "دورة",
+    "instructorRating": "تقييم المدرب",
+    "viewProfile": "عرض الملف",
+    "badges": {
+      "topInstructor": "مدرب متميز"
+    }
+  },
+  "testimonials": {
+    "title": "شاهد ما يقوله متعلمونا",
+    "trustedBy": "موثوق به من قبل الشركات حول العالم"
+  },
+  "udemyBusiness": {
+    "title": "Tombooktou Business",
+    "subtitle": "طوّر مهارات فريقك من خلال دورات احترافية",
+    "description": "امنح فرقك المهارات التي يحتاجونها للبقاء في المنافسة في عالم متغير باستمرار من خلال مجموعة دوراتنا التي أنشأها خبراء الصناعة.",
+    "features": {
+      "teamTraining": {
+        "title": "تدريب الفريق",
+        "description": "درّب فرقك بأكملها من خلال دورات ذات جودة احترافية"
+      },
+      "analytics": {
+        "title": "التحليلات",
+        "description": "تابع تقدم فريقك من خلال تحليلات مفصلة"
+      },
+      "dedicatedSupport": {
+        "title": "دعم مخصص",
+        "description": "احصل على دعم عملاء مخصص لمؤسستك"
+      }
+    },
+    "cta": {
+      "tryFree": "جرب Tombooktou Business",
+      "learnMore": "اعرف المزيد"
+    },
+    "stats": {
+      "companies": "شركة",
+      "learners": "متعلم",
+      "languages": "لغة"
+    }
+  }
+}
