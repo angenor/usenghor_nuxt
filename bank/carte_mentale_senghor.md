@@ -25,7 +25,7 @@
 - Plan stratégique — SECTION + Document téléchargeable
 - Levée de fonds — SECTION
 
-### 1.3. Nos engagements — SECTION `#engagements`
+### 1.3. Nos engagements — SOUS-PAGE `#engagements`
 - Nos valeurs — SECTION
 - Notre charte éthique — SECTION + Document PDF
 
@@ -102,7 +102,7 @@
 
 - Transform'Action Africa — SOUS-PAGE `/projets/transform-action-africa`
 - Kreafrika — SOUS-PAGE `/projets/kreafrika`
-- Levée de fonds — SECTION ou SOUS-PAGE `/projets/levee-de-fonds`
+- Levée de fonds — SOUS-PAGE `/projets/levee-de-fonds`
 
 ---
 
