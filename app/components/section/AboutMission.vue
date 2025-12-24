@@ -8,7 +8,9 @@ interface Props {
   title: string
   content: string
   image?: string
+  transformText?: string
   cta?: Cta
+  ctaSecondary?: Cta
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -55,21 +57,43 @@ const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', t
             {{ props.title }}
           </h2>
 
-          <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-8">
+          <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
             {{ props.content }}
           </p>
 
-          <NuxtLink
-            v-if="props.cta"
-            :to="localePath(props.cta.to)"
-            class="group inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-white font-semibold rounded-full transition-all duration-300 hover:bg-amber-600 hover:shadow-lg hover:shadow-amber-500/30 hover:-translate-y-0.5"
-          >
-            <span>{{ props.cta.label }}</span>
-            <font-awesome-icon
-              icon="fa-solid fa-arrow-right"
-              class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
-            />
-          </NuxtLink>
+          <!-- Accompagner la transformation de l'Afrique -->
+          <div v-if="props.transformText" class="mb-8 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border-l-4 border-amber-500">
+            <p class="text-gray-700 dark:text-gray-200 font-medium italic">
+              {{ props.transformText }}
+            </p>
+          </div>
+
+          <!-- CTAs -->
+          <div class="flex flex-wrap gap-4">
+            <NuxtLink
+              v-if="props.cta"
+              :to="localePath(props.cta.to)"
+              class="group inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-white font-semibold rounded-full transition-all duration-300 hover:bg-amber-600 hover:shadow-lg hover:shadow-amber-500/30 hover:-translate-y-0.5"
+            >
+              <span>{{ props.cta.label }}</span>
+              <font-awesome-icon
+                icon="fa-solid fa-arrow-right"
+                class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+              />
+            </NuxtLink>
+
+            <NuxtLink
+              v-if="props.ctaSecondary"
+              :to="localePath(props.ctaSecondary.to)"
+              class="group inline-flex items-center gap-2 px-6 py-3 border-2 border-amber-500 text-amber-600 dark:text-amber-400 font-semibold rounded-full transition-all duration-300 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+            >
+              <span>{{ props.ctaSecondary.label }}</span>
+              <font-awesome-icon
+                icon="fa-solid fa-arrow-right"
+                class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+              />
+            </NuxtLink>
+          </div>
         </div>
       </div>
     </div>
