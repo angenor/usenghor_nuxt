@@ -21,6 +21,8 @@
     "loading": "Chargement...",
     "error": "Une erreur est survenue",
     "success": "Succès",
-    "confirm": "Confirmer"
+    "confirm": "Confirmer",
+    "discover": "Découvrir",
+    "learnMore": "En savoir plus"
   }
 }

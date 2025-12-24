@@ -31,8 +31,8 @@ La section "Nous connaître" est le coeur institutionnel du site. Elle présente
 - Hero section avec image du campus
 - Section Mission `#mission`
 - Section Engagements `#engagements`
-- Navigation vers les sous-pages
 - Chiffres clés (stats section)
+- **Section Aperçu** - Cartes aperçu vers les sous-pages (image + titre + résumé + lien)
 
 ### 2. SOUS-PAGE HISTOIRE `/a-propos/histoire`
 > Détails: [02-histoire.md](./plan-apropos/02-histoire.md)
@@ -89,6 +89,8 @@ La section "Nous connaître" est le coeur institutionnel du site. Elle présente
 | `PageHero` | Hero réutilisable toutes pages | P0 |
 | `SectionMission` | Section mission page principale | P0 |
 | `SectionEngagements` | Valeurs + Charte éthique | P1 |
+| `SectionPreviewCards` | Cartes aperçu avec image + résumé | P0 |
+| `CardPreview` | Carte aperçu individuelle | P0 |
 | `TimelineHistory` | Chronologie interactive | P1 |
 | `CardCountry` | Card pays bailleur avec drapeau | P1 |
 | `CardCAMember` | Card membre Conseil Admin | P1 |

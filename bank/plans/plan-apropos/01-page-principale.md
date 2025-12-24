@@ -2,208 +2,80 @@
 
 > Route: `/a-propos`
 > Fichier: `app/pages/a-propos/index.vue`
+> Statut: **Implémenté**
 
 ---
 
 ## Objectif
 
-Page d'entrée de la section institutionnelle. Présente une vue d'ensemble de l'université avec navigation vers les sous-pages détaillées.
+Page d'entrée de la section institutionnelle. Présente la mission, les valeurs et des sections aperçu indépendantes vers chaque sous-page.
 
 ---
 
-## Structure de la page
+## Sections de la page
 
-```
-┌─────────────────────────────────────────────────────┐
-│                    HERO SECTION                      │
-│  - Image de fond (campus Alexandrie)                │
-│  - Titre: "Nous connaître"                          │
-│  - Sous-titre: "Université internationale..."       │
-│  - Breadcrumb: Accueil > Nous connaître            │
-└─────────────────────────────────────────────────────┘
-                         │
-┌─────────────────────────────────────────────────────┐
-│              SECTION MISSION #mission               │
-│  ┌─────────────────┐  ┌─────────────────────────┐  │
-│  │     Image       │  │  Titre: Notre mission   │  │
-│  │   ou Vidéo      │  │  Texte éditorial        │  │
-│  │                 │  │  CTA: "Notre histoire"  │  │
-│  └─────────────────┘  └─────────────────────────┘  │
-└─────────────────────────────────────────────────────┘
-                         │
-┌─────────────────────────────────────────────────────┐
-│                 SECTION STATS                        │
-│   ┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐   │
-│   │  30+   │  │  15    │  │ 5000+  │  │  50+   │   │
-│   │ années │  │ pays   │  │ alumni │  │ forma- │   │
-│   │        │  │bailleurs│ │        │  │ tions  │   │
-│   └────────┘  └────────┘  └────────┘  └────────┘   │
-└─────────────────────────────────────────────────────┘
-                         │
-┌─────────────────────────────────────────────────────┐
-│          SECTION ENGAGEMENTS #engagements           │
-│                                                     │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐   │
-│  │ Nos valeurs │ │ Excellence  │ │  Diversité  │   │
-│  │    icon     │ │    icon     │ │    icon     │   │
-│  │   texte     │ │   texte     │ │   texte     │   │
-│  └─────────────┘ └─────────────┘ └─────────────┘   │
-│                                                     │
-│  [Télécharger notre charte éthique] (PDF)          │
-└─────────────────────────────────────────────────────┘
-                         │
-┌─────────────────────────────────────────────────────┐
-│              NAVIGATION CARDS                        │
-│                                                     │
-│  ┌──────────────┐  ┌──────────────┐                │
-│  │  Histoire    │  │ Gouvernance  │                │
-│  │    →         │  │     →        │                │
-│  └──────────────┘  └──────────────┘                │
-│  ┌──────────────┐  ┌──────────────┐                │
-│  │ Organisation │  │  Partenaires │                │
-│  │    →         │  │     →        │                │
-│  └──────────────┘  └──────────────┘                │
-└─────────────────────────────────────────────────────┘
-```
+1. **Hero** - Image de fond, titre, sous-titre, breadcrumb
+2. **Mission** `#mission` - Présentation avec image et CTA
+3. **Stats** - Chiffres clés animés (30+ années, 15 pays, 5000+ alumni, 50+ formations)
+4. **Engagements** `#engagements` - Valeurs (Excellence, Diversité, Ouverture) + charte éthique PDF
+5. **Titre section** - "Découvrir l'Université"
+6. **7 Sections indépendantes** - Chaque sous-page a son propre composant customisable
 
 ---
 
-## Composants nécessaires
+## Sections Aperçu (composants indépendants)
 
-### 1. PageHero
-```vue
-<PageHero
-  :title="$t('about.hero.title')"
-  :subtitle="$t('about.hero.subtitle')"
-  image="/images/campus/hero-apropos.jpg"
-  :breadcrumb="[
-    { label: $t('nav.home'), to: '/' },
-    { label: $t('nav.about') }
-  ]"
-/>
-```
+Chaque sous-page a son propre composant dans `components/section/about/` :
 
-### 2. SectionMission
-```vue
-<SectionMission
-  :title="$t('about.mission.title')"
-  :content="$t('about.mission.content')"
-  image="/images/about/mission.jpg"
-  :cta="{ label: $t('about.mission.cta'), to: '/a-propos/histoire' }"
-/>
-```
-
-### 3. SectionStats
-```vue
-<SectionStats
-  :stats="[
-    { value: '30+', label: $t('about.stats.years') },
-    { value: '15', label: $t('about.stats.countries') },
-    { value: '5000+', label: $t('about.stats.alumni') },
-    { value: '50+', label: $t('about.stats.programs') }
-  ]"
-/>
-```
-
-### 4. SectionEngagements
-```vue
-<SectionEngagements
-  :values="[
-    { icon: 'star', title: $t('about.values.excellence'), text: '...' },
-    { icon: 'users', title: $t('about.values.diversity'), text: '...' },
-    { icon: 'globe', title: $t('about.values.openness'), text: '...' }
-  ]"
-  :charter="{ label: $t('about.charter.download'), url: '/documents/charte-ethique.pdf' }"
-/>
-```
-
-### 5. NavigationCards
-```vue
-<NavigationCards
-  :cards="[
-    { title: $t('nav.history'), to: '/a-propos/histoire', icon: 'clock' },
-    { title: $t('nav.governance'), to: '/a-propos/gouvernance', icon: 'building' },
-    { title: $t('nav.organization'), to: '/a-propos/organisation', icon: 'sitemap' },
-    { title: $t('nav.partners'), to: '/a-propos/partenaires', icon: 'handshake' }
-  ]"
-/>
-```
+| Section | Composant | Couleur | Route |
+|---------|-----------|---------|-------|
+| Notre histoire | `SectionAboutHistory` | amber | `/a-propos/histoire` |
+| Gouvernance | `SectionAboutGovernance` | blue | `/a-propos/gouvernance` |
+| Notre stratégie | `SectionAboutStrategy` | emerald | `/a-propos/strategie` |
+| Notre organisation | `SectionAboutOrganization` | purple | `/a-propos/organisation` |
+| Le personnel | `SectionAboutTeam` | rose | `/a-propos/equipe` |
+| Nos partenaires | `SectionAboutPartners` | cyan | `/a-propos/partenaires` |
+| Nous rejoindre | `SectionAboutCareers` | lime | `/carrieres` |
 
 ---
 
-## Fichier i18n: `about.json`
+## Composants
 
-```json
-{
-  "hero": {
-    "title": "Nous connaître",
-    "subtitle": "Université internationale de langue française au service du développement africain"
-  },
-  "mission": {
-    "title": "Notre mission",
-    "content": "Accompagner la transformation de l'Afrique en formant ses futurs décideurs...",
-    "cta": "Découvrir notre histoire"
-  },
-  "stats": {
-    "years": "années d'existence",
-    "countries": "pays bailleurs",
-    "alumni": "diplômés",
-    "programs": "formations"
-  },
-  "values": {
-    "excellence": "Excellence",
-    "diversity": "Diversité",
-    "openness": "Ouverture"
-  },
-  "charter": {
-    "title": "Notre charte éthique",
-    "download": "Télécharger la charte"
-  }
-}
-```
+| Composant | Fichier | Statut |
+|-----------|---------|--------|
+| `PageHero` | `components/page/Hero.vue` | ✅ |
+| `SectionAboutMission` | `components/section/AboutMission.vue` | ✅ |
+| `SectionStats` | `components/section/Stats.vue` | ✅ |
+| `SectionEngagements` | `components/section/Engagements.vue` | ✅ |
+| `SectionAboutHistory` | `components/section/about/History.vue` | ✅ |
+| `SectionAboutGovernance` | `components/section/about/Governance.vue` | ✅ |
+| `SectionAboutStrategy` | `components/section/about/Strategy.vue` | ✅ |
+| `SectionAboutOrganization` | `components/section/about/Organization.vue` | ✅ |
+| `SectionAboutTeam` | `components/section/about/Team.vue` | ✅ |
+| `SectionAboutPartners` | `components/section/about/Partners.vue` | ✅ |
+| `SectionAboutCareers` | `components/section/about/Careers.vue` | ✅ |
 
 ---
 
-## SEO
+## i18n
 
-```vue
-<script setup>
-useSeoMeta({
-  title: () => $t('about.seo.title'),
-  description: () => $t('about.seo.description'),
-  ogImage: '/images/og/about.jpg'
-})
-</script>
-```
+Fichiers: `i18n/locales/{fr,en,ar}/about.json`
+
+Clés :
+- `about.hero.{title,subtitle}`
+- `about.mission.{title,content,cta}`
+- `about.stats.{years,countries,alumni,programs}`
+- `about.engagements.title` / `about.engagements.values.{excellence,diversity,openness}`
+- `about.charter.download`
+- `about.preview.title`
+- `about.preview.{history,governance,strategy,organization,team,partners,careers}.{title,summary}`
+- `about.seo.{title,description}`
+- `common.discover`
 
 ---
 
 ## Données
 
-Cette page est principalement **statique** (i18n + images).
-Les chiffres clés peuvent être:
-- Codés en dur dans i18n
-- Ou récupérés depuis `settings.stats` (JSONB)
+Page **statique** (i18n + images placeholders Picsum).
 
----
-
-## Fichiers à créer
-
-```
-app/
-├── pages/
-│   └── a-propos/
-│       └── index.vue
-├── components/
-│   ├── page/
-│   │   └── PageHero.vue
-│   └── section/
-│       ├── SectionMission.vue
-│       ├── SectionStats.vue
-│       ├── SectionEngagements.vue
-│       └── NavigationCards.vue
-i18n/locales/
-├── fr/about.json
-├── en/about.json
-└── ar/about.json
-```
+SEO via `useSeoMeta`.

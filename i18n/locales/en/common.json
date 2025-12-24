@@ -21,6 +21,8 @@
     "loading": "Loading...",
     "error": "An error occurred",
     "success": "Success",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "discover": "Discover",
+    "learnMore": "Learn more"
   }
 }

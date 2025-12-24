@@ -1,0 +1,75 @@
+{
+  "about": {
+    "seo": {
+      "title": "Nous connaître | Université Senghor",
+      "description": "Découvrez l'Université Senghor d'Alexandrie, université internationale de langue française au service du développement africain depuis plus de 30 ans."
+    },
+    "hero": {
+      "title": "Nous connaître",
+      "subtitle": "Université internationale de langue française au service du développement africain"
+    },
+    "mission": {
+      "title": "Notre mission",
+      "content": "L'Université Senghor accompagne la transformation de l'Afrique en formant ses futurs décideurs. Depuis 1990, nous formons des cadres africains de haut niveau dans les domaines du développement durable, de la santé, de la culture et du management. Notre approche unique combine excellence académique, immersion professionnelle et réseau panafricain.",
+      "cta": "Découvrir notre histoire"
+    },
+    "stats": {
+      "years": "années d'existence",
+      "countries": "pays bailleurs",
+      "alumni": "diplômés",
+      "programs": "formations"
+    },
+    "engagements": {
+      "title": "Nos valeurs",
+      "values": {
+        "excellence": {
+          "title": "Excellence",
+          "text": "Nous visons l'excellence dans toutes nos formations, avec des programmes accrédités et reconnus internationalement."
+        },
+        "diversity": {
+          "title": "Diversité",
+          "text": "Notre communauté réunit des étudiants et enseignants de tout le continent africain et au-delà."
+        },
+        "openness": {
+          "title": "Ouverture",
+          "text": "Nous cultivons l'ouverture sur le monde, favorisant les échanges interculturels et les partenariats internationaux."
+        }
+      }
+    },
+    "charter": {
+      "title": "Notre charte éthique",
+      "download": "Télécharger la charte éthique"
+    },
+    "preview": {
+      "title": "Découvrir l'Université",
+      "history": {
+        "title": "Notre histoire",
+        "summary": "Depuis 1989, le projet Senghor incarne la vision d'une université africaine d'excellence. Découvrez les grandes étapes de notre développement."
+      },
+      "governance": {
+        "title": "Gouvernance",
+        "summary": "15 pays africains soutiennent notre mission. Découvrez nos textes fondateurs et les membres du Conseil d'Administration."
+      },
+      "strategy": {
+        "title": "Notre stratégie",
+        "summary": "Le plan stratégique 2024-2030 définit nos ambitions pour former les leaders de demain et accompagner la transformation de l'Afrique."
+      },
+      "organization": {
+        "title": "Notre organisation",
+        "summary": "5 départements académiques, des services dédiés et une équipe engagée au service de la réussite de nos étudiants."
+      },
+      "team": {
+        "title": "Le personnel",
+        "summary": "Enseignants, chercheurs et personnel administratif : découvrez les visages de ceux qui font vivre l'Université au quotidien."
+      },
+      "partners": {
+        "title": "Nos partenaires",
+        "summary": "Campus externalisés en Afrique et partenariats stratégiques avec des universités et organisations du monde entier."
+      },
+      "careers": {
+        "title": "Nous rejoindre",
+        "summary": "Rejoignez une université internationale au cœur de l'Afrique. Opportunités pour enseignants, chercheurs et personnel administratif."
+      }
+    }
+  }
+}

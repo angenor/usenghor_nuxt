@@ -8,6 +8,7 @@ import governance from './governance.json'
 import footer from './footer.json'
 import search from './search.json'
 import courses from './courses.json'
+import about from './about.json'
 
 export default {
   ...common,
@@ -19,5 +20,6 @@ export default {
   ...governance,
   ...footer,
   ...search,
-  ...courses
+  ...courses,
+  ...about
 }

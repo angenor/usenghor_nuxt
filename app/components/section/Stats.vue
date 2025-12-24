@@ -1,0 +1,107 @@
+<script setup lang="ts">
+interface Stat {
+  value: string
+  label: string
+}
+
+interface Props {
+  stats: Stat[]
+}
+
+const props = defineProps<Props>()
+
+const statsRef = ref<HTMLElement | null>(null)
+const hasAnimated = ref(false)
+const animatedValues = ref<number[]>([])
+
+// Parse numeric values from stats
+const targetValues = computed(() => {
+  return props.stats.map(stat => {
+    const num = parseInt(stat.value.replace(/[^0-9]/g, ''))
+    return isNaN(num) ? 0 : num
+  })
+})
+
+// Initialize animated values
+onMounted(() => {
+  animatedValues.value = props.stats.map(() => 0)
+})
+
+const animateValue = (index: number, target: number, duration = 2000) => {
+  const startTime = performance.now()
+  const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4)
+
+  const updateValue = (currentTime: number) => {
+    const elapsed = currentTime - startTime
+    const progress = Math.min(elapsed / duration, 1)
+    const easedProgress = easeOutQuart(progress)
+    animatedValues.value[index] = Math.round(target * easedProgress)
+    if (progress < 1) requestAnimationFrame(updateValue)
+  }
+  requestAnimationFrame(updateValue)
+}
+
+const startAnimation = () => {
+  if (hasAnimated.value) return
+  hasAnimated.value = true
+  targetValues.value.forEach((target, index) => {
+    setTimeout(() => animateValue(index, target, 1500), index * 150)
+  })
+}
+
+// Get suffix from original value (e.g., "+" from "30+")
+const getSuffix = (value: string): string => {
+  const match = value.match(/[^0-9]+$/)
+  return match ? match[0] : ''
+}
+
+let observer: IntersectionObserver | null = null
+
+onMounted(() => {
+  observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) startAnimation()
+      })
+    },
+    { threshold: 0.3 }
+  )
+  if (statsRef.value) observer.observe(statsRef.value)
+})
+
+onUnmounted(() => {
+  if (observer) observer.disconnect()
+})
+</script>
+
+<template>
+  <section
+    ref="statsRef"
+    class="py-12 lg:py-16 bg-gradient-to-r from-amber-500 to-amber-600 dark:from-amber-600 dark:to-amber-700"
+  >
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+        <div
+          v-for="(stat, index) in props.stats"
+          :key="index"
+          class="text-center transform transition-all duration-500"
+          :class="{ 'translate-y-0 opacity-100': hasAnimated, 'translate-y-4 opacity-0': !hasAnimated }"
+          :style="{ transitionDelay: `${index * 100}ms` }"
+        >
+          <div class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-2 tabular-nums">
+            {{ animatedValues[index] || 0 }}{{ getSuffix(stat.value) }}
+          </div>
+          <div class="text-white/80 text-sm sm:text-base font-medium">
+            {{ stat.label }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<style scoped>
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+</style>

@@ -21,6 +21,8 @@
     "loading": "جارٍ التحميل...",
     "error": "حدث خطأ",
     "success": "نجاح",
-    "confirm": "تأكيد"
+    "confirm": "تأكيد",
+    "discover": "اكتشف",
+    "learnMore": "اقرأ المزيد"
   }
 }
