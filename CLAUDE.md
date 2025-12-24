@@ -52,3 +52,37 @@ pnpm generate     # Generate static site
 - Dark mode via `dark:` variants (toggled by `useDarkMode` composable)
 - Custom amber color palette defined in `tailwind.config.ts`
 - Animate.css for animations
+
+## Mock Data
+
+For development without a database, use the `useMockData` composable:
+
+```ts
+const { departments, staff, formations, getFlagEmoji } = useMockData()
+```
+
+Mock data files are in `bank/mock-data/` and mirror the PostgreSQL schema in `bank/modele_de_donnee/schema.sql`.
+
+## Placeholder Images & Avatars
+
+For development and mockups, use these placeholder services:
+
+### Random Images (Picsum Photos)
+```
+https://picsum.photos/{width}/{height}
+```
+**Examples:**
+- `https://picsum.photos/400/300` - 400x300 image
+- `https://picsum.photos/800/600` - 800x600 image
+- `https://picsum.photos/1920/1080` - Full HD image
+- `https://picsum.photos/seed/{unique-id}/400/300` - Seeded (consistent) image
+
+### Random Avatars (Pravatar)
+```
+https://i.pravatar.cc/{size}
+```
+**Examples:**
+- `https://i.pravatar.cc/150` - 150x150 avatar
+- `https://i.pravatar.cc/64` - 64x64 avatar (small)
+- `https://i.pravatar.cc/300` - 300x300 avatar (large)
+- `https://i.pravatar.cc/150?u={unique-id}` - Consistent avatar for same ID
