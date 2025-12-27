@@ -76,15 +76,10 @@ const cardColors = [
 
           <!-- Icon -->
           <div class="relative mb-6">
-            <div
-              class="w-14 h-14 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110"
-              :class="`${cardColors[index % cardColors.length].bg} shadow-${cardColors[index % cardColors.length].shadow}/30`"
-            >
-              <font-awesome-icon
-                :icon="getIcon(value.icon)"
-                class="w-6 h-6 text-white"
-              />
-            </div>
+            <font-awesome-icon
+              :icon="getIcon(value.icon)"
+              class="w-8 h-8 text-gray-700 dark:text-gray-300 transition-transform duration-300 group-hover:scale-110"
+            />
           </div>
 
           <!-- Content -->
