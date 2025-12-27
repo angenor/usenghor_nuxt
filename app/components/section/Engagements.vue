@@ -35,12 +35,12 @@ const getIcon = (iconName: string): string => {
   return iconMap[iconName] || 'fa-solid fa-check'
 }
 
-// Colors for each card
-const cardColors = [
-  { bg: 'from-amber-400 to-orange-500', light: 'amber', shadow: 'amber-500' },
-  { bg: 'from-blue-400 to-indigo-500', light: 'blue', shadow: 'blue-500' },
-  { bg: 'from-emerald-400 to-teal-500', light: 'emerald', shadow: 'emerald-500' },
-  { bg: 'from-purple-400 to-pink-500', light: 'purple', shadow: 'purple-500' }
+// Accent colors for each card
+const accentColors = [
+  'bg-amber-400',
+  'bg-blue-400',
+  'bg-emerald-400',
+  'bg-purple-400'
 ]
 </script>
 
@@ -62,33 +62,42 @@ const cardColors = [
       </div>
 
       <!-- Values Grid -->
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-12">
         <div
           v-for="(value, index) in props.values"
           :key="index"
-          class="group relative bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+          class="group relative"
         >
-          <!-- Background Gradient on Hover -->
+          <!-- Colored background offset -->
           <div
-            class="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-300 bg-gradient-to-br"
-            :class="`${cardColors[index % cardColors.length].bg}`"
+            class="absolute -right-3 -bottom-3 h-full w-full rounded-xl transition-transform duration-300 group-hover:translate-x-1 group-hover:translate-y-1"
+            :class="accentColors[index % accentColors.length]"
           ></div>
 
-          <!-- Icon -->
-          <div class="relative mb-6">
+          <!-- Main card -->
+          <div class="relative bg-white dark:bg-gray-800 rounded-xl p-8 space-y-5">
+            <!-- Accent line -->
+            <div
+              class="h-1.5 w-16 rounded-full"
+              :class="accentColors[index % accentColors.length]"
+            ></div>
+
+            <!-- Icon -->
             <font-awesome-icon
               :icon="getIcon(value.icon)"
-              class="w-8 h-8 text-gray-700 dark:text-gray-300 transition-transform duration-300 group-hover:scale-110"
+              class="w-8 h-8 text-gray-700 dark:text-gray-300"
             />
-          </div>
 
-          <!-- Content -->
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">
-            {{ value.title }}
-          </h3>
-          <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
-            {{ value.text }}
-          </p>
+            <!-- Title -->
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+              {{ value.title }}
+            </h3>
+
+            <!-- Description -->
+            <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+              {{ value.text }}
+            </p>
+          </div>
         </div>
       </div>
 
