@@ -75,7 +75,7 @@ const accentColors = [
           ></div>
 
           <!-- Main card -->
-          <div class="relative bg-white dark:bg-gray-800 rounded-xl p-8 space-y-5">
+          <div class="relative h-full bg-white dark:bg-gray-800 rounded-xl p-8 space-y-5">
             <!-- Accent line -->
             <div
               class="h-1.5 w-16 rounded-full"
