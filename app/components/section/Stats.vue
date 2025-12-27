@@ -6,9 +6,12 @@ interface Stat {
 
 interface Props {
   stats: Stat[]
+  backgroundImage?: string
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  backgroundImage: '/images/bg/backgroud_senghor3.jpg'
+})
 
 const statsRef = ref<HTMLElement | null>(null)
 const hasAnimated = ref(false)
@@ -77,10 +80,20 @@ onUnmounted(() => {
 <template>
   <section
     ref="statsRef"
-    class="py-12 lg:py-16 bg-gradient-to-r from-amber-500 to-amber-600 dark:from-amber-600 dark:to-amber-700"
+    class="relative py-16 lg:py-24 overflow-hidden"
   >
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+    <!-- Background Image with Fixed Attachment (Parallax) -->
+    <div
+      class="absolute inset-0 bg-cover bg-center bg-fixed"
+      :style="{ backgroundImage: `url(${props.backgroundImage})` }"
+    ></div>
+
+    <!-- Dark Overlay with Gradient -->
+    <div class="absolute inset-0 bg-gradient-to-r from-amber-900/85 via-amber-800/80 to-amber-900/85"></div>
+
+    <!-- Content -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
         <div
           v-for="(stat, index) in props.stats"
           :key="index"
@@ -88,10 +101,10 @@ onUnmounted(() => {
           :class="{ 'translate-y-0 opacity-100': hasAnimated, 'translate-y-4 opacity-0': !hasAnimated }"
           :style="{ transitionDelay: `${index * 100}ms` }"
         >
-          <div class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-2 tabular-nums">
+          <div class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-2 tabular-nums drop-shadow-lg">
             {{ animatedValues[index] || 0 }}{{ getSuffix(stat.value) }}
           </div>
-          <div class="text-white/80 text-sm sm:text-base font-medium">
+          <div class="text-white/90 text-sm sm:text-base font-medium">
             {{ stat.label }}
           </div>
         </div>

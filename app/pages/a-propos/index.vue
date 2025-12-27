@@ -54,6 +54,9 @@ const breadcrumb = computed(() => [
       :breadcrumb="breadcrumb"
     />
 
+    <!-- Sticky Tabs Navigation -->
+    <SectionAboutTabsNav />
+
     <!-- Mission Section -->
     <SectionAboutMission
       :title="t('about.mission.title')"
@@ -69,31 +72,8 @@ const breadcrumb = computed(() => [
     />
 
     <!-- Stats Section -->
-    <!-- <SectionStats :stats="stats" /> -->
+    <SectionStats :stats="stats" />
 
-    <!-- Engagements Section -->
-    <SectionEngagements
-      :title="t('about.engagements.title')"
-      :values="values"
-      :charter="{ label: t('about.charter.download'), url: '/documents/charte-ethique.pdf' }"
-    />
-
-    <!-- Section Titre "Découvrir l'Université" -->
-    <div class="py-12 bg-gray-50 dark:bg-gray-800">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
-          {{ t('about.preview.title') }}
-        </h2>
-      </div>
-    </div>
-
-    <!-- Sections indépendantes pour chaque sous-page -->
-    <SectionAboutHistory />
-    <SectionAboutGovernance />
-    <SectionAboutStrategy />
-    <SectionAboutOrganization />
-    <SectionAboutTeam />
-    <SectionAboutPartners />
-    <SectionAboutCareers />
+    
   </div>
 </template>

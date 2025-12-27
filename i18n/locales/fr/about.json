@@ -46,6 +46,13 @@
       "title": "Notre charte éthique",
       "download": "Télécharger la charte éthique"
     },
+    "tabs": {
+      "about": "Nous connaître",
+      "strategy": "Notre stratégie",
+      "engagements": "Nos engagements",
+      "organization": "Notre organisation",
+      "careers": "Nous rejoindre"
+    },
     "preview": {
       "title": "Découvrir l'Université",
       "history": {

@@ -46,6 +46,13 @@
       "title": "ميثاقنا الأخلاقي",
       "download": "تحميل الميثاق الأخلاقي"
     },
+    "tabs": {
+      "about": "من نحن",
+      "strategy": "استراتيجيتنا",
+      "engagements": "التزاماتنا",
+      "organization": "منظمتنا",
+      "careers": "انضم إلينا"
+    },
     "preview": {
       "title": "اكتشف الجامعة",
       "history": {

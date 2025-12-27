@@ -46,6 +46,13 @@
       "title": "Our Ethical Charter",
       "download": "Download the ethical charter"
     },
+    "tabs": {
+      "about": "About Us",
+      "strategy": "Our Strategy",
+      "engagements": "Our Commitments",
+      "organization": "Our Organization",
+      "careers": "Join Us"
+    },
     "preview": {
       "title": "Discover the University",
       "history": {
