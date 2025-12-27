@@ -74,6 +74,14 @@ const breadcrumb = computed(() => [
     <!-- Stats Section -->
     <SectionStats :stats="stats" />
 
-    
+    <!-- Links to other sections -->
+    <SectionAboutLinks />
+
+    <!-- Engagements Section -->
+    <SectionEngagements
+      :title="t('about.engagements.title')"
+      :values="values"
+      :charter="{ label: t('about.charter.download'), url: '/documents/charte-ethique.pdf' }"
+    />
   </div>
 </template>
