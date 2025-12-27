@@ -59,7 +59,6 @@ const breadcrumb = computed(() => [
       :title="t('about.mission.title')"
       :content="t('about.mission.content')"
       :transform-text="t('about.mission.transform')"
-      image="https://picsum.photos/seed/about-mission/800/600"
       :cta="{ label: t('about.mission.cta'), to: '/a-propos/histoire' }"
       :cta-secondary="{ label: t('about.mission.ctaGovernance'), to: '/a-propos/gouvernance' }"
     />

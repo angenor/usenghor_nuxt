@@ -7,14 +7,14 @@ interface Cta {
 interface Props {
   title: string
   content: string
-  image?: string
+  illustration?: string
   transformText?: string
   cta?: Cta
   ctaSecondary?: Cta
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  image: 'https://picsum.photos/seed/about-mission/800/600'
+  illustration: '/images/bg/Asset-1.webp'
 })
 
 const localePath = useLocalePath()
@@ -30,20 +30,13 @@ const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', t
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-        <!-- Image -->
-        <div class="relative order-2 lg:order-1">
-          <div class="relative rounded-2xl overflow-hidden shadow-2xl">
-            <img
-              :src="props.image"
-              :alt="props.title"
-              class="w-full h-auto object-cover aspect-[4/3]"
-            />
-            <!-- Decorative overlay -->
-            <div class="absolute inset-0 bg-gradient-to-tr from-amber-500/20 to-transparent"></div>
-          </div>
-          <!-- Decorative element -->
-          <div class="absolute -bottom-4 -left-4 w-24 h-24 bg-amber-500/10 rounded-2xl -z-10"></div>
-          <div class="absolute -top-4 -right-4 w-32 h-32 bg-amber-500/10 rounded-full -z-10"></div>
+        <!-- Illustration -->
+        <div class="relative order-2 lg:order-1 flex items-center justify-center">
+          <img
+            :src="props.illustration"
+            :alt="props.title"
+            class="w-full max-w-md lg:max-w-lg h-auto object-contain drop-shadow-lg"
+          />
         </div>
 
         <!-- Content -->
