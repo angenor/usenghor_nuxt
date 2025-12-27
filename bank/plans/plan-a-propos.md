@@ -28,11 +28,23 @@ La section "Nous connaître" est le coeur institutionnel du site. Elle présente
 ### 1. PAGE PRINCIPALE `/a-propos`
 > Détails: [01-page-principale.md](./plan-apropos/01-page-principale.md)
 
-- Hero section avec image du campus
-- Section Mission `#mission`
-- Section Engagements `#engagements`
-- Chiffres clés (stats section)
-- **Section Aperçu** - Cartes aperçu vers les sous-pages (image + titre + résumé + lien)
+- **Hero section** avec image du campus
+- **Section Mission** `#mission` - Notre mission et valeurs
+- **Section Engagements** `#engagements` - Valeurs + Charte éthique
+- **Chiffres clés** (stats section)
+
+#### Sections résumé vers les sous-pages
+
+Chaque section résumé contient: image/illustration + titre + court texte + bouton "En savoir plus"
+
+| Section | Lien vers | Contenu résumé |
+|---------|-----------|----------------|
+| **Notre Histoire** | `/a-propos/histoire` | Image historique + dates clés + accroche sur la création |
+| **Gouvernance** | `/a-propos/gouvernance` | Photo CA + intro textes fondateurs + mention pays bailleurs |
+| **Plan Stratégique** | `/a-propos/strategie` | Visuel objectifs + axes principaux |
+| **Organisation** | `/a-propos/organisation` | Mini-organigramme simplifié + nombre de services |
+| **Notre Équipe** | `/a-propos/equipe` | Galerie photos personnel + chiffre effectif |
+| **Partenaires** | `/a-propos/partenaires` | Logos partenaires principaux + carte campus |
 
 ### 2. SOUS-PAGE HISTOIRE `/a-propos/histoire`
 > Détails: [02-histoire.md](./plan-apropos/02-histoire.md)
@@ -89,8 +101,13 @@ La section "Nous connaître" est le coeur institutionnel du site. Elle présente
 | `PageHero` | Hero réutilisable toutes pages | P0 |
 | `SectionMission` | Section mission page principale | P0 |
 | `SectionEngagements` | Valeurs + Charte éthique | P1 |
-| `SectionPreviewCards` | Cartes aperçu avec image + résumé | P0 |
-| `CardPreview` | Carte aperçu individuelle | P0 |
+| `SectionSummary` | Section résumé réutilisable (image + texte + bouton) | P0 |
+| `SectionSummaryHistory` | Résumé histoire (timeline mini + accroche) | P0 |
+| `SectionSummaryGovernance` | Résumé gouvernance (drapeaux + intro) | P0 |
+| `SectionSummaryStrategy` | Résumé plan stratégique | P1 |
+| `SectionSummaryOrganization` | Résumé organisation (mini-organigramme) | P1 |
+| `SectionSummaryTeam` | Résumé équipe (galerie visages) | P1 |
+| `SectionSummaryPartners` | Résumé partenaires (logos grid) | P1 |
 | `TimelineHistory` | Chronologie interactive | P1 |
 | `CardCountry` | Card pays bailleur avec drapeau | P1 |
 | `CardCAMember` | Card membre Conseil Admin | P1 |

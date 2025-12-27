@@ -1,7 +1,6 @@
 <script setup lang="ts">
-interface Cta {
+interface DiscoverItem {
   label: string
-  to: string
 }
 
 interface Props {
@@ -9,17 +8,25 @@ interface Props {
   content: string
   illustration?: string
   transformText?: string
-  cta?: Cta
-  ctaSecondary?: Cta
+  discoverItems?: DiscoverItem[]
+  ctaLabel?: string
+  ctaAnchor?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  illustration: '/images/bg/Asset-1.webp'
+  illustration: '/images/bg/Asset-1.webp',
+  ctaLabel: 'Découvrir',
+  ctaAnchor: '#history'
 })
 
-const localePath = useLocalePath()
-
 const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.2 })
+
+const scrollToSection = () => {
+  const element = document.querySelector(props.ctaAnchor)
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' })
+  }
+}
 </script>
 
 <template>
@@ -41,13 +48,12 @@ const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', t
 
         <!-- Content -->
         <div class="order-1 lg:order-2">
-          <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 mb-6">
-            <font-awesome-icon icon="fa-solid fa-bullseye" class="w-3.5 h-3.5 mr-2" />
-            Mission
-          </span>
 
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-            {{ props.title }}
+            <span class="relative inline-block">
+              {{ props.title }}
+              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+            </span>
           </h2>
 
           <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
@@ -61,31 +67,31 @@ const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', t
             </p>
           </div>
 
-          <!-- CTAs -->
-          <div class="flex flex-wrap gap-4">
-            <NuxtLink
-              v-if="props.cta"
-              :to="localePath(props.cta.to)"
-              class="group inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-white font-semibold rounded-full transition-all duration-300 hover:bg-amber-600 hover:shadow-lg hover:shadow-amber-500/30 hover:-translate-y-0.5"
-            >
-              <span>{{ props.cta.label }}</span>
-              <font-awesome-icon
-                icon="fa-solid fa-arrow-right"
-                class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
-              />
-            </NuxtLink>
+          <!-- Discover Box -->
+          <div v-if="props.discoverItems?.length" class="border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6">
+            <ul class="mb-5 flex flex-wrap gap-x-6 gap-y-2">
+              <li
+                v-for="(item, index) in props.discoverItems"
+                :key="index"
+                class="inline-flex items-center gap-2 text-gray-700 dark:text-gray-300"
+              >
+                <span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>
+                <span class="font-medium">{{ item.label }}</span>
+              </li>
+            </ul>
 
-            <NuxtLink
-              v-if="props.ctaSecondary"
-              :to="localePath(props.ctaSecondary.to)"
-              class="group inline-flex items-center gap-2 px-6 py-3 border-2 border-amber-500 text-amber-600 dark:text-amber-400 font-semibold rounded-full transition-all duration-300 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+            <!-- CTA Button -->
+            <button
+              type="button"
+              class="group inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-white font-semibold rounded-full transition-all duration-300 hover:bg-amber-600 hover:shadow-lg hover:shadow-amber-500/30 hover:-translate-y-0.5"
+              @click="scrollToSection"
             >
-              <span>{{ props.ctaSecondary.label }}</span>
+              <span>{{ props.ctaLabel }}</span>
               <font-awesome-icon
                 icon="fa-solid fa-arrow-right"
                 class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
               />
-            </NuxtLink>
+            </button>
           </div>
         </div>
       </div>

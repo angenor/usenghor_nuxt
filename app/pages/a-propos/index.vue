@@ -59,12 +59,17 @@ const breadcrumb = computed(() => [
       :title="t('about.mission.title')"
       :content="t('about.mission.content')"
       :transform-text="t('about.mission.transform')"
-      :cta="{ label: t('about.mission.cta'), to: '/a-propos/histoire' }"
-      :cta-secondary="{ label: t('about.mission.ctaGovernance'), to: '/a-propos/gouvernance' }"
+      :discover-items="[
+        { label: t('about.mission.discover.history') },
+        { label: t('about.mission.discover.governance') },
+        { label: t('about.mission.discover.strategy') }
+      ]"
+      :cta-label="t('about.mission.ctaLabel')"
+      cta-anchor="#history"
     />
 
     <!-- Stats Section -->
-    <SectionStats :stats="stats" />
+    <!-- <SectionStats :stats="stats" /> -->
 
     <!-- Engagements Section -->
     <SectionEngagements

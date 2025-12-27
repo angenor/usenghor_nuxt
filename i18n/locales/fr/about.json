@@ -12,8 +12,12 @@
       "title": "Notre mission",
       "content": "L'Université Senghor accompagne la transformation de l'Afrique en formant ses futurs décideurs. Depuis 1990, nous formons des cadres africains de haut niveau dans les domaines du développement durable, de la santé, de la culture et du management. Notre approche unique combine excellence académique, immersion professionnelle et réseau panafricain.",
       "transform": "Accompagner la transformation de l'Afrique par la formation de leaders engagés et compétents, porteurs du changement pour un développement durable et inclusif du continent.",
-      "cta": "Découvrir notre histoire",
-      "ctaGovernance": "Notre gouvernance"
+      "discover": {
+        "history": "Notre histoire",
+        "governance": "Notre gouvernance",
+        "strategy": "Accompagner la transformation de l'Afrique"
+      },
+      "ctaLabel": "Découvrir"
     },
     "stats": {
       "years": "années d'existence",

@@ -12,8 +12,12 @@
       "title": "Our Mission",
       "content": "Senghor University supports Africa's transformation by training its future leaders. Since 1990, we have been training high-level African executives in sustainable development, health, culture, and management. Our unique approach combines academic excellence, professional immersion, and a pan-African network.",
       "transform": "Supporting Africa's transformation by training committed and competent leaders, agents of change for sustainable and inclusive development of the continent.",
-      "cta": "Discover our history",
-      "ctaGovernance": "Our governance"
+      "discover": {
+        "history": "Our history",
+        "governance": "Our governance",
+        "strategy": "Supporting Africa's transformation"
+      },
+      "ctaLabel": "Discover"
     },
     "stats": {
       "years": "years of existence",
