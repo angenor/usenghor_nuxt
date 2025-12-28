@@ -403,7 +403,7 @@ onUnmounted(() => {
   align-items: center;
   padding: 2rem 0;
   font-family: var(--font-pixel, 'JetBrains Mono', monospace);
-  font-size: clamp(4rem, 12vw, 10rem);
+  font-size: clamp(2rem, 6vw, 5rem);
   font-weight: 300;
   line-height: 1;
   color: rgba(0, 0, 0, 0.5);
