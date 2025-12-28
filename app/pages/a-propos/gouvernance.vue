@@ -93,6 +93,7 @@ onMounted(() => {
 const mapRef = ref<HTMLElement | null>(null)
 const mapInstance = shallowRef<LeafletMap | null>(null)
 const activeStep = ref(0)
+const polylineRef = shallowRef<L.Polyline | null>(null)
 
 // Initialiser la carte Leaflet et scrollama
 onMounted(async () => {
@@ -111,7 +112,7 @@ onMounted(async () => {
   // Créer la carte
   if (mapRef.value) {
     const map = L.map(mapRef.value, { zoomControl: false })
-      .setView([15, 10], 4) // Vue centrée sur l'Afrique
+      .setView([15, 10], 5) // Zoom plus proche pour mieux voir les transitions
 
     mapInstance.value = map
 
@@ -120,12 +121,8 @@ onMounted(async () => {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map)
 
-    // Polyline reliant les pays
-    const latlngs = laterMembers.value
-      .filter(p => p.location)
-      .map(p => [p.location!.lat, p.location!.lng] as [number, number])
-
-    L.polyline(latlngs, {
+    // Polyline VIDE au départ (sera mise à jour progressivement au scroll)
+    polylineRef.value = L.polyline([], {
       color: '#f59e0b', // amber-500
       dashArray: '12 12',
       weight: 3
@@ -157,10 +154,20 @@ onMounted(async () => {
         const stepIndex = parseInt(response.element.getAttribute('data-step') || '1') - 1
         activeStep.value = stepIndex
 
-        // Pan vers le pays
+        // Mettre à jour la polyline progressivement
+        const latlngs = laterMembers.value
+          .slice(0, stepIndex + 1) // Seulement les points jusqu'au step actuel
+          .filter(p => p.location)
+          .map(p => [p.location!.lat, p.location!.lng] as [number, number])
+
+        if (polylineRef.value) {
+          polylineRef.value.setLatLngs(latlngs)
+        }
+
+        // FlyTo vers le pays actuel avec zoom
         const pays = laterMembers.value[stepIndex]
         if (pays?.location && mapInstance.value) {
-          mapInstance.value.panTo([pays.location.lat, pays.location.lng], {
+          mapInstance.value.flyTo([pays.location.lat, pays.location.lng], 6, {
             animate: true,
             duration: 1.5
           })
@@ -399,8 +406,19 @@ const formatFileSize = (bytes: number) => {
 
     <!-- Chronologie des adhésions - Scrollytelling avec carte -->
     <section class="relative">
+      <!-- Header HORS de la carte -->
+      <div class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+          <span class="w-1.5 h-6 bg-blue-500 rounded-full"></span>
+          Chronologie des adhésions
+        </h3>
+        <p class="text-gray-600 dark:text-gray-300 max-w-2xl">
+          Découvrez les pays qui ont rejoint l'Université Senghor après sa fondation.
+        </p>
+      </div>
+
       <ClientOnly>
-        <!-- Carte Leaflet (fixed background) -->
+        <!-- Carte Leaflet (sticky background) -->
         <div class="scroll__graphic sticky top-0 w-full h-screen z-0">
           <div class="absolute inset-0 bg-white/20 dark:bg-gray-900/40 z-10"></div>
           <div id="map-chronologie" ref="mapRef" class="w-full h-full"></div>
@@ -408,21 +426,8 @@ const formatFileSize = (bytes: number) => {
 
         <!-- Step Cards (scrolling content) -->
         <div class="scroll__text relative z-20 -mt-[100vh] pb-[50vh]">
-          <!-- Header -->
-          <div class="pt-[30vh] pb-16 px-4 sm:px-6 lg:px-8">
-            <div class="max-w-lg ml-auto">
-              <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                <span class="w-1.5 h-6 bg-blue-500 rounded-full"></span>
-                Chronologie des adhésions
-              </h3>
-              <p class="text-gray-600 dark:text-gray-300">
-                Découvrez les pays qui ont rejoint l'Université Senghor après sa fondation.
-              </p>
-            </div>
-          </div>
-
           <!-- Step cards pour chaque pays -->
-          <div class="flex flex-col items-end px-4 sm:px-6 lg:px-8 space-y-[30vh]">
+          <div class="flex flex-col items-end px-4 sm:px-6 lg:px-8 pt-[20vh] space-y-[30vh]">
             <div
               v-for="(pays, index) in laterMembers"
               :key="pays.id"
