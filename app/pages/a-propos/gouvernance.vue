@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import type { PaysBailleur } from '@bank/mock-data/pays-bailleurs'
+import type { Map as LeafletMap } from 'leaflet'
+
 const { t } = useI18n()
 const {
   paysBailleurs,
@@ -35,6 +38,136 @@ const vicePresidents = computed(() =>
 const observers = computed(() =>
   conseilAdministration.value.filter(m => m.ca_role === 'observateur')
 )
+
+// === PAYS BAILLEURS ===
+// Égypte (pays hôte - hero card)
+const egypte = computed(() =>
+  paysBailleurs.value.find(p => p.code === 'EG')
+)
+
+// Autres fondateurs 1989 (France, Sénégal, Cameroun, CI, Gabon)
+const otherFounders = computed(() =>
+  paysBailleurs.value.filter(p => p.member_since === 1989 && p.code !== 'EG')
+)
+
+// Pays non-fondateurs (1990-1996) pour la timeline
+const laterMembers = computed(() =>
+  paysBailleurs.value.filter(p => p.member_since > 1989)
+)
+
+// Années uniques pour timeline (excluant 1989)
+const timelineYears = computed(() =>
+  [...new Set(laterMembers.value.map(p => p.member_since))].sort()
+)
+
+const getPaysByYear = (year: number) =>
+  paysBailleurs.value.filter(p => p.member_since === year)
+
+// === DRAWER ===
+const selectedPays = ref<PaysBailleur | null>(null)
+
+const openDrawer = (pays: PaysBailleur) => {
+  selectedPays.value = pays
+  if (import.meta.client) {
+    document.body.style.overflow = 'hidden'
+  }
+}
+
+const closeDrawer = () => {
+  selectedPays.value = null
+  if (import.meta.client) {
+    document.body.style.overflow = ''
+  }
+}
+
+// Fermer avec Escape
+onMounted(() => {
+  const handleEsc = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') closeDrawer()
+  }
+  window.addEventListener('keydown', handleEsc)
+  onUnmounted(() => window.removeEventListener('keydown', handleEsc))
+})
+
+// === SCROLLYTELLING MAP ===
+const mapRef = ref<HTMLElement | null>(null)
+const mapInstance = shallowRef<LeafletMap | null>(null)
+const activeStep = ref(0)
+
+// Initialiser la carte Leaflet et scrollama
+onMounted(async () => {
+  if (!import.meta.client) return
+
+  // Attendre que le DOM soit prêt
+  await nextTick()
+
+  // Import dynamique de Leaflet (client-side only)
+  const L = await import('leaflet')
+  await import('leaflet/dist/leaflet.css')
+
+  // Import scrollama
+  const scrollama = (await import('scrollama')).default
+
+  // Créer la carte
+  if (mapRef.value) {
+    const map = L.map(mapRef.value, { zoomControl: false })
+      .setView([15, 10], 4) // Vue centrée sur l'Afrique
+
+    mapInstance.value = map
+
+    // Tiles OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map)
+
+    // Polyline reliant les pays
+    const latlngs = laterMembers.value
+      .filter(p => p.location)
+      .map(p => [p.location!.lat, p.location!.lng] as [number, number])
+
+    L.polyline(latlngs, {
+      color: '#f59e0b', // amber-500
+      dashArray: '12 12',
+      weight: 3
+    }).addTo(map)
+
+    // Marqueurs numérotés
+    laterMembers.value.forEach((pays, index) => {
+      if (!pays.location) return
+
+      const numberIcon = L.divIcon({
+        className: 'number-icon',
+        html: `<div>${index + 1}</div>`,
+        iconSize: [28, 28]
+      })
+
+      L.marker([pays.location.lat, pays.location.lng], { icon: numberIcon })
+        .bindPopup(`<strong>${getFlagEmoji(pays.code)} ${pays.name_fr}</strong><br>${pays.capital}`)
+        .addTo(map)
+    })
+
+    // Initialiser scrollama
+    const scroller = scrollama()
+    scroller
+      .setup({
+        step: '.step-card',
+        offset: 0.5
+      })
+      .onStepEnter((response: { element: Element }) => {
+        const stepIndex = parseInt(response.element.getAttribute('data-step') || '1') - 1
+        activeStep.value = stepIndex
+
+        // Pan vers le pays
+        const pays = laterMembers.value[stepIndex]
+        if (pays?.location && mapInstance.value) {
+          mapInstance.value.panTo([pays.location.lat, pays.location.lng], {
+            animate: true,
+            duration: 1.5
+          })
+        }
+      })
+  }
+})
 
 // Scroll animations
 const { elementRef: textsRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.2 })
@@ -155,7 +288,7 @@ const formatFileSize = (bytes: number) => {
     <!-- Section 2: Pays Bailleurs -->
     <section
       ref="countriesRef"
-      class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-800 relative overflow-hidden"
+      class="py-16 lg:py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 relative overflow-hidden"
     >
       <!-- Background pattern -->
       <div class="absolute inset-0 opacity-5 dark:opacity-[0.02]">
@@ -168,8 +301,8 @@ const formatFileSize = (bytes: number) => {
       </div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <!-- Header -->
-        <div class="text-center mb-12">
+        <!-- Header avec stats -->
+        <div class="text-center mb-16">
           <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
             {{ t('governance.donorCountries.title') }}
           </h2>
@@ -177,61 +310,248 @@ const formatFileSize = (bytes: number) => {
             {{ t('governance.donorCountries.description') }}
           </p>
 
-          <!-- Stats -->
-          <div class="flex justify-center gap-12 mt-8">
+          <!-- Stats animées -->
+          <div class="flex flex-wrap justify-center gap-8 sm:gap-12 mt-8">
             <div class="text-center">
-              <span class="text-5xl font-bold text-amber-500">{{ paysBailleurs.length }}</span>
+              <span class="text-4xl sm:text-5xl font-bold text-amber-500">{{ paysBailleurs.length }}</span>
               <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Pays membres</p>
             </div>
             <div class="text-center">
-              <span class="text-5xl font-bold text-amber-500">1989</span>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Année de création</p>
+              <span class="text-4xl sm:text-5xl font-bold text-amber-500">35+</span>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Années de partenariat</p>
+            </div>
+            <div class="text-center">
+              <span class="text-4xl sm:text-5xl font-bold text-amber-500">3</span>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Continents</p>
             </div>
           </div>
         </div>
 
-        <!-- Grille pays -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        <!-- Pays fondateurs 1989 -->
+        <div class="mb-16">
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+            <span class="w-1.5 h-6 bg-amber-500 rounded-full"></span>
+            Pays fondateurs
+          </h3>
+
+          <!-- Égypte : Hero card -->
           <div
-            v-for="(pays, index) in paysBailleurs"
-            :key="pays.id"
-            class="group relative bg-white dark:bg-gray-700 rounded-2xl p-6
-                   text-center shadow-sm hover:shadow-xl transition-all duration-300
-                   hover:-translate-y-2 cursor-default"
-            :style="{ animationDelay: `${index * 50}ms` }"
+            v-if="egypte"
+            class="bg-gradient-to-br from-amber-500 via-amber-500 to-amber-600
+                   rounded-3xl p-6 sm:p-8 text-white mb-6 relative overflow-hidden cursor-pointer
+                   hover:shadow-2xl hover:shadow-amber-500/20 transition-all duration-300"
+            @click="openDrawer(egypte)"
           >
-            <!-- Drapeau -->
-            <span class="text-5xl block mb-3 group-hover:scale-110 transition-transform duration-300">
-              {{ getFlagEmoji(pays.code) }}
-            </span>
+            <!-- Decorative elements -->
+            <div class="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+            <div class="absolute bottom-0 left-0 w-32 h-32 bg-black/10 rounded-full translate-y-1/2 -translate-x-1/2"></div>
 
-            <!-- Nom du pays -->
-            <h3 class="font-medium text-sm text-gray-900 dark:text-white">
-              {{ pays.name_fr }}
-            </h3>
-
-            <!-- Badge fondateur -->
-            <span
-              v-if="pays.contribution_type_fr"
-              class="inline-block mt-2 text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full"
-            >
-              {{ pays.contribution_type_fr }}
-            </span>
-
-            <!-- Tooltip -->
-            <div
-              class="absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 pointer-events-none
-                     group-hover:opacity-100 transition-opacity duration-300
-                     bg-gray-900 dark:bg-gray-600 text-white text-xs px-3 py-1.5 rounded-lg
-                     whitespace-nowrap shadow-lg z-10"
-            >
-              Membre depuis {{ pays.member_since }}
-              <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-600"></div>
+            <div class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+              <span class="text-6xl sm:text-7xl">{{ getFlagEmoji(egypte.code) }}</span>
+              <div class="flex-1">
+                <div class="flex flex-wrap items-center gap-3 mb-2">
+                  <h4 class="text-2xl sm:text-3xl font-bold">{{ egypte.name_fr }}</h4>
+                  <span class="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
+                    Pays hôte
+                  </span>
+                </div>
+                <p class="text-white/90 text-sm sm:text-base max-w-2xl">
+                  {{ egypte.description_fr }}
+                </p>
+                <div class="flex flex-wrap gap-4 mt-4 text-sm text-white/75">
+                  <span class="flex items-center gap-1">
+                    <font-awesome-icon icon="fa-solid fa-location-dot" class="text-xs" />
+                    Capitale : {{ egypte.capital }}
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <font-awesome-icon icon="fa-solid fa-calendar" class="text-xs" />
+                    Membre depuis {{ egypte.member_since }}
+                  </span>
+                </div>
+              </div>
+              <font-awesome-icon icon="fa-solid fa-chevron-right" class="text-white/50 text-xl hidden sm:block" />
             </div>
           </div>
+
+          <!-- 5 autres fondateurs en grille -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            <button
+              v-for="pays in otherFounders"
+              :key="pays.id"
+              class="founder-card group"
+              @click="openDrawer(pays)"
+            >
+              <span class="text-4xl sm:text-5xl block mb-3 group-hover:scale-110 transition-transform duration-300">
+                {{ getFlagEmoji(pays.code) }}
+              </span>
+              <h4 class="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">
+                {{ pays.name_fr }}
+              </h4>
+              <span class="text-xs text-amber-600 dark:text-amber-400 mt-1 block">
+                Membre fondateur
+              </span>
+            </button>
+          </div>
         </div>
+
       </div>
     </section>
+
+    <!-- Chronologie des adhésions - Scrollytelling avec carte -->
+    <section class="relative">
+      <ClientOnly>
+        <!-- Carte Leaflet (fixed background) -->
+        <div class="scroll__graphic sticky top-0 w-full h-screen z-0">
+          <div class="absolute inset-0 bg-white/20 dark:bg-gray-900/40 z-10"></div>
+          <div id="map-chronologie" ref="mapRef" class="w-full h-full"></div>
+        </div>
+
+        <!-- Step Cards (scrolling content) -->
+        <div class="scroll__text relative z-20 -mt-[100vh] pb-[50vh]">
+          <!-- Header -->
+          <div class="pt-[30vh] pb-16 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-lg ml-auto">
+              <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                <span class="w-1.5 h-6 bg-blue-500 rounded-full"></span>
+                Chronologie des adhésions
+              </h3>
+              <p class="text-gray-600 dark:text-gray-300">
+                Découvrez les pays qui ont rejoint l'Université Senghor après sa fondation.
+              </p>
+            </div>
+          </div>
+
+          <!-- Step cards pour chaque pays -->
+          <div class="flex flex-col items-end px-4 sm:px-6 lg:px-8 space-y-[30vh]">
+            <div
+              v-for="(pays, index) in laterMembers"
+              :key="pays.id"
+              :data-step="index + 1"
+              class="step-card"
+              :class="{ 'step-active': activeStep === index }"
+              @click="openDrawer(pays)"
+            >
+              <h3 class="text-lg font-bold text-amber-600 dark:text-amber-400">
+                {{ pays.member_since }}
+              </h3>
+              <h4 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2 mt-1">
+                <span class="text-3xl">{{ getFlagEmoji(pays.code) }}</span>
+                {{ pays.name_fr }}
+              </h4>
+              <p class="text-gray-700 dark:text-gray-300 mt-3 leading-relaxed text-sm">
+                {{ pays.description_fr }}
+              </p>
+              <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-3">
+                <font-awesome-icon icon="fa-solid fa-location-dot" class="text-xs" />
+                <span>{{ pays.capital }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <template #fallback>
+          <!-- Fallback pour SSR : timeline simple -->
+          <div class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+              <span class="w-1.5 h-6 bg-blue-500 rounded-full"></span>
+              Chronologie des adhésions
+            </h3>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div
+                v-for="pays in laterMembers"
+                :key="pays.id"
+                class="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700"
+              >
+                <span class="text-3xl">{{ getFlagEmoji(pays.code) }}</span>
+                <h4 class="font-semibold mt-2">{{ pays.name_fr }}</h4>
+                <p class="text-sm text-gray-500">Membre depuis {{ pays.member_since }}</p>
+              </div>
+            </div>
+          </div>
+        </template>
+      </ClientOnly>
+    </section>
+
+    <!-- Drawer latéral pour détails pays -->
+    <Teleport to="body">
+      <Transition name="drawer">
+        <div v-if="selectedPays" class="fixed inset-0 z-50">
+          <!-- Backdrop -->
+          <div
+            class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            @click="closeDrawer"
+          ></div>
+
+          <!-- Drawer panel -->
+          <div class="drawer-panel absolute top-0 right-0 h-full w-full max-w-md bg-white dark:bg-gray-900 shadow-2xl">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center gap-4">
+                <span class="text-5xl">{{ getFlagEmoji(selectedPays.code) }}</span>
+                <div>
+                  <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+                    {{ selectedPays.name_fr }}
+                  </h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Membre depuis {{ selectedPays.member_since }}
+                  </p>
+                </div>
+              </div>
+              <button
+                class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center
+                       hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                @click="closeDrawer"
+              >
+                <font-awesome-icon icon="fa-solid fa-xmark" class="text-gray-500" />
+              </button>
+            </div>
+
+            <!-- Content -->
+            <div class="p-6 space-y-6 overflow-y-auto h-[calc(100%-88px)]">
+              <!-- Badge contribution -->
+              <div v-if="selectedPays.contribution_type_fr">
+                <span class="inline-block px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-sm font-medium">
+                  {{ selectedPays.contribution_type_fr }}
+                </span>
+              </div>
+
+              <!-- Description -->
+              <div>
+                <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                  Contribution
+                </h4>
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                  {{ selectedPays.description_fr || 'Ce pays contribue au développement et au rayonnement de l\'Université Senghor.' }}
+                </p>
+              </div>
+
+              <!-- Infos -->
+              <div class="space-y-4">
+                <div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                  <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
+                    <font-awesome-icon icon="fa-solid fa-location-dot" class="text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Capitale</p>
+                    <p class="font-semibold text-gray-900 dark:text-white">{{ selectedPays.capital || 'Non renseignée' }}</p>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                  <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                    <font-awesome-icon icon="fa-solid fa-calendar" class="text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Membre depuis</p>
+                    <p class="font-semibold text-gray-900 dark:text-white">{{ selectedPays.member_since }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
 
     <!-- Section 3: Conseil d'Administration -->
     <section
@@ -477,5 +797,182 @@ const formatFileSize = (bytes: number) => {
     width: 200px;
     height: 280px;
   }
+}
+
+/* === PAYS BAILLEURS === */
+
+/* Cards fondateurs */
+.founder-card {
+  @apply bg-white dark:bg-gray-800 rounded-2xl p-6 text-center
+         border border-gray-100 dark:border-gray-700
+         hover:border-amber-300 dark:hover:border-amber-600
+         hover:shadow-lg hover:-translate-y-1
+         transition-all duration-300 cursor-pointer;
+}
+
+/* Timeline chips */
+.country-chip {
+  @apply flex flex-col items-center gap-1 px-3 py-2
+         bg-white dark:bg-gray-800 rounded-xl
+         border border-gray-200 dark:border-gray-700
+         hover:border-amber-400 dark:hover:border-amber-500
+         hover:shadow-md hover:-translate-y-0.5
+         transition-all duration-200 cursor-pointer;
+}
+
+/* === DRAWER === */
+.drawer-enter-active,
+.drawer-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.drawer-enter-active .drawer-panel,
+.drawer-leave-active .drawer-panel {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drawer-enter-from,
+.drawer-leave-to {
+  opacity: 0;
+}
+
+.drawer-enter-from .drawer-panel,
+.drawer-leave-to .drawer-panel {
+  transform: translateX(100%);
+}
+
+/* Scrollbar pour timeline */
+.timeline-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.timeline-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.timeline-container::-webkit-scrollbar-thumb {
+  background: theme('colors.gray.300');
+  border-radius: 3px;
+}
+
+.timeline-container::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.gray.400');
+}
+
+:is(.dark) .timeline-container::-webkit-scrollbar-thumb {
+  background: theme('colors.gray.600');
+}
+
+:is(.dark) .timeline-container::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.gray.500');
+}
+
+/* === SCROLLYTELLING MAP === */
+
+/* Step Cards */
+.step-card {
+  background-color: #fdf3d7;
+  background-image: url("https://assets.codepen.io/252820/soft-wallpaper.png");
+  background-size: cover;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.2);
+  border: 1px solid #d1a878;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  max-width: 100%;
+  width: 380px;
+  position: relative;
+}
+
+.step-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 4px 8px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* Numéro en badge */
+.step-card::before {
+  content: attr(data-step);
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 1.1em;
+  font-weight: 700;
+  width: 36px;
+  height: 36px;
+  background-color: #f59e0b;
+  color: white;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* État actif */
+.step-card.step-active {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px #f59e0b, 2px 4px 15px rgba(245, 158, 11, 0.35);
+}
+
+/* Dark mode */
+:is(.dark) .step-card {
+  background-color: #1f2937;
+  background-image: none;
+  border-color: #374151;
+}
+
+:is(.dark) .step-card:hover {
+  border-color: #4b5563;
+}
+
+:is(.dark) .step-card.step-active {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px #f59e0b, 2px 4px 15px rgba(245, 158, 11, 0.3);
+}
+</style>
+
+<!-- Styles globaux pour Leaflet (non scoped car DOM généré dynamiquement) -->
+<style>
+/* Map markers numérotés */
+.number-icon {
+  background: #f59e0b;
+  color: white;
+  border-radius: 50%;
+  width: 28px !important;
+  height: 28px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.number-icon div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Popup Leaflet */
+.leaflet-popup-content-wrapper {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-content {
+  margin: 12px 16px;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Attribution discrète */
+.leaflet-control-attribution {
+  font-size: 10px;
+  opacity: 0.6;
 }
 </style>
