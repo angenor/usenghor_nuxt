@@ -3,6 +3,12 @@ interface DiscoverItem {
   label: string
 }
 
+interface CtaLink {
+  label: string
+  to: string
+  icon?: string
+}
+
 interface Props {
   title: string
   content: string
@@ -11,6 +17,7 @@ interface Props {
   discoverItems?: DiscoverItem[]
   ctaLabel?: string
   ctaAnchor?: string
+  ctaLinks?: CtaLink[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -92,6 +99,32 @@ const scrollToSection = () => {
                 class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
               />
             </button>
+          </div>
+
+          <!-- CTA Links -->
+          <div v-if="props.ctaLinks?.length" class="flex flex-wrap gap-4 mt-8">
+            <NuxtLink
+              v-for="(link, index) in props.ctaLinks"
+              :key="index"
+              :to="link.to"
+              :class="[
+                'group inline-flex items-center gap-3 px-6 py-3 font-semibold rounded-full transition-all duration-300 hover:-translate-y-0.5',
+                index === 0
+                  ? 'bg-amber-500 text-white hover:bg-amber-600 hover:shadow-lg hover:shadow-amber-500/30'
+                  : 'border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-amber-500 hover:text-amber-600 dark:hover:border-amber-500 dark:hover:text-amber-400'
+              ]"
+            >
+              <font-awesome-icon
+                v-if="link.icon"
+                :icon="link.icon"
+                class="w-5 h-5"
+              />
+              <span>{{ link.label }}</span>
+              <font-awesome-icon
+                icon="fa-solid fa-arrow-right"
+                class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+              />
+            </NuxtLink>
           </div>
         </div>
       </div>

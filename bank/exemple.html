@@ -1,0 +1,549 @@
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300&display=swap" rel="stylesheet">
+
+<!-- <div class="about h-[100vh] bg-white flex items-center justify-center">
+  <p class="text-2xl font-bold">about</p>
+</div>
+ -->
+<!-- Grid Layout -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-[var(--grid-gutter)] px-[var(--site-margin)] pt-[var(--space-xl)] ">
+
+  <div class="md:col-span-12">
+    <h1 class="text-[length:var(--fs-8)] font-black leading-[0.9] tracking-tight">
+      THE ONLY WAY IS ALL-IN.
+    </h1>
+  </div>
+
+  <div class="md:col-span-12 rounded-[var(--panel-radius)] overflow-hidden">
+    <video class="hero__portrait" playsinline autoplay muted loop draggable="true" poster="https://i.ibb.co/zVkrHmBX/pr-temp-1.png">
+      <source src="https://peterriezebos.netlify.app/assets/pr-teaser-opener-clean-D9lxxvRT.mp4" type="video/mp4" />
+    </video>
+  </div>
+  <!-- Intro + Leading (2 kolommen) -->
+  <div class="md:col-span-12 flex flex-col md:flex-row items-baseline gap-[var(--grid-gutter)]">
+  <div class="md:w-1/2">
+    
+  </div>
+  
+</div>
+  <!-- Sticky tekst + image (2 kolommen) -->
+  <div class="md:col-span-6 md:sticky top-[var(--space-xs-m)] self-start space-y-[var(--space-xs-s)]">
+    <h2 class="text-[length:var(--fs-4)] font-bold tracking-tight max-w-[20ch] leading-[100%]">
+      That’s the process of artist Peter Riezebos.
+    </h2>
+     <p class="text-[length:var(--fs-0)] md:text-[length:var(--fs-1)] leading-[112.5%] max-w-[40ch]">
+      Curiosity consumes him as he excavates and recreates worlds to understand them—friendship, wine, gaming, love, wrestling. Everything between human nature and the everyday. Everywhere between Amsterdam and Shanghai.
+    </p>
+    <p class=" text-(length:--fs-0) md:text-(length:--fs-1) leading-[112.5%] max-w-[40ch]">
+      His collective work includes creative processes, different art styles and interests, photo archives, and pages upon pages of observations and anecdotes. Each artwork is a deep dive into a subject that fascinates him, from 266 bottles of Mouton-Rothschild to 100 vintage video games to his life partner.
+    </p>
+    <p class="text-(length:--fs-0) md:text-(length:--fs-1) leading-[112.5%] mt-[var(--space-s)] max-w-[40ch]">
+      Peter transforms every subject into an immersive experience. He lets the process drive him as he observes, chronicles, creates, and tells it like it really, truly is. Not to please but to understand. Not because he must, but because he has no choice.And he wouldn’t have it any other way.
+    </p>
+  </div>
+  <div class="md:col-span-6">
+    <img src="https://i.ibb.co/zVkrHmBX/pr-temp-1.png" alt="Peter Riezebos" class="w-full h-auto rounded-[var(--panel-radius)]" />
+  </div>
+
+</section>
+
+<div class="timeline pt-[20vw]">
+  <div id="year-display" class="year-number sticky top-[2vh] z-10 flex justify-center items-center text-[8vw] ">
+    <span class="digit">1</span>
+    <span class="digit">9</span>
+    <span class="digit">8</span>
+    <span class="digit">0</span>
+  </div>
+
+  <section class="year-section h-screen flex px-8 py-12 md:py-4" data-year="1994" data-color="#FDF6E3">
+    <div class="grid grid-rows-[1fr_auto] md:grid-rows-1 md:grid-cols-2 gap-8 w-full h-full">
+
+      <!-- Media stack met padding -->
+      <div class="media-stack relative w-full h-full flex items-center justify-center p-4 md:p-12 order-1 md:order-2">
+        <img class="media-item absolute max-h-[80%] max-w-[80%]object-contain" src="https://cdn.cosmos.so/e95e4039-99d3-4505-89ff-d010cfa13fef?format=webp&w=554" />
+        <img class="media-item absolute max-h-[80%] max-w-[80%] object-contain" src="https://cdn.cosmos.so/41554083-7e5f-4f22-866b-eda0844a2b52?format=webp&w=554" />
+        <video class="media-item absolute max-h-[80%] max-w-[80%] object-contain" src="https://avtshare01.rz.tu-ilmenau.de/avt-vqdb-uhd-1/test_3/segments/water_netflix_8s_871kbps_1080p_59.94fps_h264.mp4" autoplay muted loop playsinline preload="auto"></video>
+        <img class="media-item absolute max-h-[80%] max-w-[80%] object-contain" src="https://cdn.cosmos.so/77f4dc1e-c1b6-4ba0-b189-d765f0b33dc6?format=webp&w=554" />
+      </div>
+
+      <!-- Tekstblok met positionering linksonder op desktop -->
+      <div class="order-2 md:order-1 flex flex-col justify-end md:justify-end md:items-start md:self-center">
+        <div class="text-left">
+          <h2 class="text-(length:--fs-5) font-bold mb-2 leading-[100%]">Academic Path</h2>
+          <p class="intro text-lg text-(length:--fs-0) md:text-(length:--fs-1) max-w-[40ch] leading-[112.5%]">
+            Peter left high school without a diploma, then earned four propedeuses, three bachelors, and three masters. Collected over 800 credits. Took part in honors programs and student committees. Conducted research at Harvard. Completed a PhD at ECNU in Shanghai. Captured in his first book, From MAVO to Harvard.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="year-section h-screen flex px-8 py-12 md:py-4" data-year="2001" data-color="#E0F7FA">
+    <div class="grid grid-rows-[1fr_auto] md:grid-rows-1 md:grid-cols-2 gap-8 w-full h-full">
+
+      <!-- Media stack met padding -->
+      <div class="media-stack relative w-full h-full flex items-center justify-center p-4 md:p-12 order-1 md:order-2">
+        <img class="media-item absolute max-h-[80%] max-w-[80%] object-contain" src="https://cdn.cosmos.so/e95e4039-99d3-4505-89ff-d010cfa13fef?format=webp&w=554" />
+        <img class="media-item absolute max-h-[80%] max-w-[80%] object-contain" src="https://cdn.cosmos.so/41554083-7e5f-4f22-866b-eda0844a2b52?format=webp&w=554" />
+        <img class="media-item absolute max-h-[80%] max-w-[80%] object-contain" src="https://cdn.cosmos.so/77f4dc1e-c1b6-4ba0-b189-d765f0b33dc6?format=webp&w=554" />
+        <video class="media-item absolute max-h-[80%] max-w-[80%]  object-contain" src="https://avtshare01.rz.tu-ilmenau.de/avt-vqdb-uhd-1/test_3/segments/cutting_orange_tuil_8s_871kbps_1080p_59.94fps_h264.mp4" autoplay muted loop playsinline preload="auto"></video>
+      </div>
+
+      <!-- Tekstblok met positionering linksonder op desktop -->
+      <div class="order-2 md:order-1 flex flex-col justify-end md:justify-end md:items-start md:self-center">
+        <div class="text-left">
+          <h2 class="text-(length:--fs-5) font-bold mb-2 leading-[100%]">Title</h2>
+          <p class="intro text-lg text-(length:--fs-0) md:text-(length:--fs-1) max-w-[40ch] leading-[112.5%]">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer quis lorem porttitor, facilisis elit ac, vulputate leo. Sed sagittis efficitur lorem sed finibus. Duis quam massa, tincidunt sed volutpat vitae, blandit ac mi. Ut faucibus id nibh et hendrerit. Donec gravida auctor mauris bibendum efficitur.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="year-section h-screen flex px-8 py-12 md:py-4" data-year="2017" data-color="#EDE7F6">
+    <div class="grid grid-rows-[1fr_auto] md:grid-rows-1 md:grid-cols-2 gap-8 w-full h-full">
+
+      <!-- Media stack met padding -->
+      <div class="media-stack relative w-full h-full flex items-center justify-center p-4 md:p-12 order-1 md:order-2">
+        <video class="media-item absolute max-h-[80%] max-w-[80%] object-contain" src="https://avtshare01.rz.tu-ilmenau.de/avt-vqdb-uhd-1/test_1/segments/vegetables_tuil_750kbps_720p_59.94fps_h264.mp4" autoplay muted loop playsinline preload="auto"></video>
+        <img class="media-item absolute max-h-[80%] max-w-[80%] object-contain" src="https://cdn.cosmos.so/e95e4039-99d3-4505-89ff-d010cfa13fef?format=webp&w=554" />
+        <img class="media-item absolute max-h-[80%] max-w-[80%] object-contain" src="https://cdn.cosmos.so/41554083-7e5f-4f22-866b-eda0844a2b52?format=webp&w=554" />
+        <img class="media-item absolute max-h-[80%] max-w-[80%] object-contain" src="https://cdn.cosmos.so/77f4dc1e-c1b6-4ba0-b189-d765f0b33dc6?format=webp&w=554" />
+      </div>
+
+      <!-- Tekstblok met positionering linksonder op desktop -->
+      <div class="order-2 md:order-1 flex flex-col justify-end md:justify-end md:items-start md:self-center">
+        <div class="text-left">
+          <h2 class="text-(length:--fs-3) font-bold mb-2 leading-[100%]">Title</h2>
+          <p class="intro text-lg text-(length:--fs-0) md:text-(length:--fs-1) max-w-[40ch] leading-[112.5%]">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer quis lorem porttitor, facilisis elit ac, vulputate leo. Sed sagittis efficitur lorem sed finibus. Duis quam massa, tincidunt sed volutpat vitae, blandit ac mi. Ut faucibus id nibh et hendrerit. Donec gravida auctor mauris bibendum efficitur. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer quis lorem porttitor, facilisis elit ac, vulputate leo.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="year-section h-screen flex px-8 py-12 md:py-4" data-year="2021" data-color="#FFF3E0">
+    <div class="grid grid-rows-[1fr_auto] md:grid-rows-1 md:grid-cols-2 gap-8 w-full h-full">
+
+      <!-- Media stack met padding -->
+      <div class="media-stack relative w-full h-full flex items-center justify-center p-4 md:p-12 order-1 md:order-2">
+        <video class="media-item absolute max-h-[80%] max-w-[80%] object-contain" src="https://avtshare01.rz.tu-ilmenau.de/avt-vqdb-uhd-1/test_3/segments/cutting_orange_tuil_8s_871kbps_1080p_59.94fps_h264.mp4" autoplay muted loop playsinline preload="auto"></video>
+        <img class="media-item absolute max-h-[80%] max-w-[80%] object-contain" src="https://cdn.cosmos.so/e95e4039-99d3-4505-89ff-d010cfa13fef?format=webp&w=554" />
+        <img class="media-item absolute max-h-[80%] max-w-[80%] object-contain" src="https://cdn.cosmos.so/41554083-7e5f-4f22-866b-eda0844a2b52?format=webp&w=554" />
+        <img class="media-item absolute max-h-[80%] max-w-[80%] object-contain" src="https://cdn.cosmos.so/77f4dc1e-c1b6-4ba0-b189-d765f0b33dc6?format=webp&w=554" />
+      </div>
+
+      <!-- Tekstblok met positionering linksonder op desktop -->
+      <div class="order-2 md:order-1 flex flex-col justify-end md:justify-end md:items-start md:self-center">
+        <div class="text-left">
+          <h2 class="text-(length:--fs-5) font-bold mb-2 leading-[100%]">New York</h2>
+          <p class="intro text-lg text-(length:--fs-0) md:text-(length:--fs-1) max-w-[40ch] leading-[112.5%]">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer quis lorem porttitor, facilisis elit ac, vulputate leo. Sed sagittis efficitur lorem sed finibus. Duis quam massa, tincidunt sed volutpat vitae, blandit ac mi. Ut faucibus id nibh et hendrerit. Donec gravida auctor mauris bibendum efficitur.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<div class="footer h-[100vh] bg-black text-white flex items-center justify-center">
+  <p class="text-2xl font-bold">footer</p>
+</div>
+
+<button id="mute-toggle" aria-label="Toggle sound" class="mute-button">🔇</button>
+
+<audio id="tick-up" src="https://ia903106.us.archive.org/22/items/43-enginestall/55_step4.mp3" preload="auto"></audio>
+<audio id="tick-down" src="https://ia903106.us.archive.org/22/items/43-enginestall/54_step3.mp3" preload="auto"></audio>
+
+<!-- 
+
+https://electronicenergysource.com/entirelibofsounds/Salvaged%20Files/SFX/Zoemtonen%20%20hisses%20%20pingen%20woesjes%20%20tikjes/TING4.WAV
+
+
+https://electronicenergysource.com/entirelibofsounds/Salvaged%20Files/SFX/Zoemtonen%20%20hisses%20%20pingen%20woesjes%20%20tikjes/ -->
+
+<!-- https://festival.mmilens.fr/ -->
+
+:root {
+  --fs--3: clamp(0.512rem, 0.6338rem + -0.497vw, 0.6333rem);
+  --fs--2: clamp(0.64rem, 0.845rem + -0.8366vw, 0.8442rem);
+  --fs--1: clamp(0.8rem, 1.1266rem + -1.3329vw, 1.1253rem);
+  --fs-0: clamp(1rem, 1.502rem + -2.0488vw, 1.5rem);
+  --fs-1: clamp(1.25rem, 2.0024rem + -3.0712vw, 1.9995rem);
+  --fs-2: clamp(1.5625rem, 2.6697rem + -4.5191vw, 2.6653rem);
+  --fs-3: clamp(1.9531rem, 3.5592rem + -6.5553vw, 3.5529rem);
+  --fs-4: clamp(2.4414rem, 4.745rem + -9.4025vw, 4.736rem);
+  --fs-5: clamp(3.0518rem, 6.3259rem + -13.3639vw, 6.3131rem);
+  --fs-6: clamp(3.8147rem, 8.4334rem + -18.852vw, 8.4153rem);
+  --fs-7: clamp(4.7684rem, 11.243rem + -26.4272vw, 11.2177rem);
+  --fs-8: clamp(5.9605rem, 14.9885rem + -36.8492vw, 14.9531rem);
+  --fs-9: clamp(7.4506rem, 19.9816rem + -51.1472vw, 19.9325rem);
+  --fs-10: clamp(9.3132rem, 26.638rem + -70.7132vw, 26.5701rem);
+
+  
+  /* Space */
+  --space-3xs: clamp(0.25rem, 0.3755rem + -0.5122vw, 0.375rem);
+  --space-2xs: clamp(0.5rem, 0.751rem + -1.0244vw, 0.75rem);
+  --space-xs: clamp(0.75rem, 1.1265rem + -1.5366vw, 1.125rem);
+  --space-s: clamp(1rem, 1.502rem + -2.0488vw, 1.5rem);
+  --space-m: clamp(1.5rem, 2.253rem + -3.0733vw, 2.25rem);
+  --space-l: clamp(2rem, 3.0039rem + -4.0977vw, 3rem);
+  --space-xl: clamp(3rem, 4.5059rem + -6.1465vw, 4.5rem);
+  --space-2xl: clamp(4rem, 6.0079rem + -8.1954vw, 6rem);
+  --space-3xl: clamp(6rem, 9.0118rem + -12.2931vw, 9rem);
+
+  /* One-up pairs */
+  --space-3xs-2xs: clamp(0.25rem, 0.752rem + -2.0488vw, 0.75rem);
+  --space-2xs-xs: clamp(0.5rem, 1.1275rem + -2.5611vw, 1.125rem);
+  --space-xs-s: clamp(0.75rem, 1.503rem + -3.0733vw, 1.5rem);
+  --space-s-m: clamp(1rem, 2.2549rem + -5.1221vw, 2.25rem);
+  --space-m-l: clamp(1.5rem, 3.0059rem + -6.1465vw, 3rem);
+  --space-l-xl: clamp(2rem, 4.5098rem + -10.2442vw, 4.5rem);
+  --space-xl-2xl: clamp(3rem, 6.0118rem + -12.2931vw, 6rem);
+  --space-2xl-3xl: clamp(4rem, 9.0197rem + -20.4884vw, 9rem);
+
+  /* Custom pairs */
+  --space-2xs-s: clamp(0.5rem, 1.5039rem + -4.0977vw, 1.5rem);
+  --space-xs-s: clamp(0.75rem, 1.503rem + -3.0733vw, 1.5rem);
+  --space-xs-m: clamp(0.75rem, 2.2559rem + -6.1465vw, 2.25rem);
+  --space-s-l: clamp(1rem, 3.0079rem + -8.1954vw, 3rem);
+  --space-m-xl: clamp(1.5rem, 4.5118rem + -12.2931vw, 4.5rem);
+
+  /* Grid */
+  // --grid-max-width: 93rem;
+  --grid-max-width: 100%;
+  --grid-gutter: var(--space-s-l, clamp(1rem, 0.2847rem + 2.9197vw, 3rem));
+  --grid-columns: 12;
+   --site-margin: var(--grid-gutter);
+  --panel-radius: var(--space-s-l);
+  
+  --font-system: Inter, Roboto, "Helvetica Neue", "Arial Nova", "Nimbus Sans",
+    Arial, sans-serif;
+   --font-heading: "neue-haas-grotesk-display", Inter, Roboto, "Helvetica Neue",
+    "Arial Nova", "Nimbus Sans", Arial, sans-serif;
+  
+  --font-body: "neue-haas-grotesk-display", var(--font-system);
+  --font-pixel: "JetBrains Mono", monospace, var(--font-system);
+}
+
+/* * {
+  border:1px solid red;
+} */
+
+.font-pixel {
+  font-family: var(--font-pixel);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: #fff;
+}
+
+.timeline {
+  position: relative;
+}
+
+/* * {
+  border: 1px solid red;
+} */
+
+.year-number {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-pixel);
+  line-height: 1;
+  text-box-trim: trim-both;
+}
+
+.digit {
+  display: inline-block;
+  overflow: hidden;
+  /*   text-box-edge: cap alphabetic; */
+ 
+
+  line-height: 90%;
+  width: 0.875ch;
+  position: relative;
+  /*     backdrop-filter: blur(1rem); */
+}
+
+.year-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /*   border-top: 1px solid #eee; */
+}
+
+.content {
+  max-width: 400px;
+  padding: 1rem;
+  font-size: 1.5rem;
+  transform: scale(0.95);
+  opacity: 0;
+}
+
+.mute-button {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: black;
+  color: white;
+  border: none;
+  font-size: 1.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(1rem);
+}
+.mute-button:hover {
+  background: #fff;
+  transform: scale(1.05);
+}
+
+/* .mute-button::before {
+  content: "🔇"; 
+}
+.mute-button:not(.muted)::before {
+  content: "🔈";
+} */
+
+
+
+// ─────────────────────────────────────────────────────────────
+// 1. CONFIG: Lenis Smooth Scroll + GSAP ScrollTrigger Setup
+// ─────────────────────────────────────────────────────────────
+const lenis = new Lenis({
+  duration: 1.2,
+  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
+});
+
+function raf(time) {
+  lenis.raf(time);
+  ScrollTrigger.update();
+  requestAnimationFrame(raf);
+}
+requestAnimationFrame(raf);
+
+gsap.registerPlugin(ScrollTrigger, SplitText);
+
+// ─────────────────────────────────────────────────────────────
+// 2. ELEMENTEN SELECTEREN
+// ─────────────────────────────────────────────────────────────
+const yearDisplay = document.getElementById("year-display");
+const digits = yearDisplay.querySelectorAll(".digit");
+const yearSections = document.querySelectorAll(".year-section");
+
+
+const muteButton = document.getElementById("mute-toggle");
+const tickUp = document.getElementById("tick-up");
+const tickDown = document.getElementById("tick-down");
+
+let isMuted = true; // Altijd starten als gemute
+let currentYear = "1980";
+
+const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+if (isTouchDevice) {
+  document.getElementById("mute-toggle").style.display = "none";
+}
+
+let userInteracted = !isTouchDevice; // true op desktop, false op touch
+
+// ─────────────────────────────────────────────────────────────
+// 2. INIT BUTTON STATE
+// ─────────────────────────────────────────────────────────────
+function updateMuteIcon() {
+  muteButton.textContent = isMuted ? "🔇" : "🔈";
+}
+
+updateMuteIcon();
+
+// ─────────────────────────────────────────────────────────────
+// 3. MUTE BUTTON INTERACTIE
+// ─────────────────────────────────────────────────────────────
+muteButton.addEventListener("click", () => {
+  // Eerste klik op mobiel = activeer geluid
+  if (!userInteracted && isTouchDevice) {
+    userInteracted = true;
+    isMuted = false;
+    updateMuteIcon();
+    return;
+  }
+
+  // Toggle mute state
+  isMuted = !isMuted;
+  updateMuteIcon();
+});
+
+
+// ─────────────────────────────────────────────────────────────
+// 5. JAAR ANIMATIE LOGICA
+// ─────────────────────────────────────────────────────────────
+function animateYearRoll(from, to, direction = "up") {
+  const fromStr = from.toString().padStart(4, "0");
+  const toStr = to.toString().padStart(4, "0");
+
+  digits.forEach((el, i) => {
+    const oldDigit = fromStr[i];
+    const newDigit = toStr[i];
+
+    if (oldDigit !== newDigit) {
+      const delay = (3 - i) * 0.1;
+
+      gsap.to(el, {
+        yPercent: -100,
+        opacity: 0,
+        duration: 0.2,
+        delay,
+        ease: "power2.in",
+        onComplete: () => {
+          el.textContent = newDigit;
+          gsap.set(el, { yPercent: 100, opacity: 0 });
+
+           if (!isMuted) {
+            const sound = direction === "down" ? tickDown : tickUp;
+            if (sound) {
+              sound.currentTime = 0;
+              sound.play().catch((e) => {
+                console.warn("Audio play error:", e);
+              });
+            }
+          }
+
+
+          gsap.to(el, {
+            yPercent: 0,
+            opacity: 1,
+            duration: 0.3,
+            delay: 0.05,
+            ease: "power2.out"
+          });
+        }
+      });
+    }
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// 6. SCROLL ANIMATIE PER JAAR-SECTIE
+// ─────────────────────────────────────────────────────────────
+yearSections.forEach((section, index) => {
+  const newYear = section.dataset.year;
+  const bgColor = section.dataset.color || "#ffffff";
+  const intro = section.querySelector(".intro");
+  const stack = section.querySelector(".media-stack");
+  const items = stack?.querySelectorAll(".media-item") || [];
+
+  const split = new SplitText(intro, { type: "words" });
+  gsap.set(split.words, { opacity: 0.1 });
+
+  // TL met ScrollTrigger die beide elementen aanstuurt
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: section,
+      start: "top top",
+      end: "+=100%",
+      pin: true,
+      scrub: true,
+      onEnter: () => {
+        animateYearRoll(currentYear, newYear, "up");
+        currentYear = newYear;
+
+        gsap.to("body", {
+          backgroundColor: bgColor,
+          duration: 0.6,
+          ease: "power2.out",
+        });
+      },
+      onLeaveBack: () => {
+        const prev = yearSections[index - 1];
+        const prevYear = prev?.dataset.year || "1980";
+        const prevColor = prev?.dataset.color || "#ffffff";
+
+        animateYearRoll(currentYear, prevYear, "down");
+        currentYear = prevYear;
+
+        gsap.to("body", {
+          backgroundColor: prevColor,
+          duration: 0.6,
+          ease: "power2.out",
+        });
+      },
+    },
+  });
+
+  // Voeg tekst animatie toe
+  tl.to(split.words, {
+    opacity: 1,
+    stagger: 0.05,
+    duration: 0.6,
+    ease: "power2.out",
+  });
+
+  // Voeg scrub-animatie voor media toe
+  items.forEach((item, i) => {
+    gsap.set(item, {
+      opacity: 0,
+      zIndex: i,
+      rotate: gsap.utils.random(-4, 4),
+      scale: 0.95,
+    });
+
+    tl.to(
+      item,
+      {
+        opacity: 1,
+        scale: 1,
+        zIndex: items.length + i,
+        duration: 0.1,
+        ease: "power2.out",
+      },
+      i * 0.6 // timing offset per item
+    );
+  });
+});
+
+
+// const mediaStacks = document.querySelectorAll(".media-stack");
+
+// mediaStacks.forEach((stack) => {
+//   const items = stack.querySelectorAll(".media-item");
+
+//   items.forEach((item, i) => {
+//     // optioneel: kleine random rotatie
+//     gsap.set(item, {
+//       opacity: 0,
+//       zIndex: i,
+//       rotate: gsap.utils.random(-3, 3),
+//       scale: 0.95,
+//     });
+
+//     gsap.to(item, {
+//       scrollTrigger: {
+//         trigger: stack,
+//         start: `top+=${i * 10}% center`, // elke X% activeren
+//         end: `+=20%`,
+//         scrub: true,
+//       },
+//       opacity: 1,
+//       scale: 1,
+//       zIndex: items.length + i, // komt bovenop
+//       duration: 0.4,
+//       ease: "power2.out",
+//     });
+//   });
+// });

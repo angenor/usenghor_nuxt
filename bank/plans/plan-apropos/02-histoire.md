@@ -19,7 +19,7 @@ Raconter l'histoire de l'Université Senghor depuis sa création jusqu'à aujour
 3. **Projet Senghor** - Portrait de Léopold Sédar Senghor, biographie, citation
 4. **Timeline** - Chronologie interactive (1989 → aujourd'hui) avec images
 5. **Galerie** - Photos historiques avec lightbox
-6. **Vidéo** - Vidéo institutionnelle (YouTube embed)
+6. **Vidéo** - Vidéo institutionnelle (YouTube embed: https://www.youtube.com/watch?v=P_ywpXb3trk)
 
 ---
 
