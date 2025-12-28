@@ -72,17 +72,13 @@ const primaryNavItems = [
 const secondaryNavItems = [
   {
     key: 'about',
-    route: '/nous-connaitre',
+    route: '/a-propos',
     icon: 'fa-solid fa-info-circle',
+    singleLink: true, // Tout le bloc est un seul lien cliquable
     children: [
-      { key: 'mission', route: '/nous-connaitre/mission', icon: 'fa-solid fa-bullseye' },
-      { key: 'history', route: '/nous-connaitre/mission/histoire', icon: 'fa-solid fa-landmark' },
-      { key: 'governance', route: '/nous-connaitre/mission/gouvernance', icon: 'fa-solid fa-sitemap' },
-      { key: 'strategy', route: '/nous-connaitre/strategie', icon: 'fa-solid fa-chess' },
-      { key: 'commitments', route: '/nous-connaitre/engagements', icon: 'fa-solid fa-heart' },
-      { key: 'organization', route: '/nous-connaitre/organisation', icon: 'fa-solid fa-building' },
-      { key: 'partners', route: '/nous-connaitre/partenaires', icon: 'fa-solid fa-handshake' },
-      { key: 'joinUs', route: '/nous-connaitre/nous-rejoindre', icon: 'fa-solid fa-user-plus' }
+      { key: 'mission', icon: 'fa-solid fa-bullseye' },
+      { key: 'history', icon: 'fa-solid fa-landmark' },
+      { key: 'governance', icon: 'fa-solid fa-sitemap' }
     ]
   },
   {
@@ -121,7 +117,6 @@ const secondaryNavItems = [
 
 // For mobile menu compatibility
 const navItems = [
-  { key: 'home', route: '/', hasDropdown: false },
   ...primaryNavItems,
   ...secondaryNavItems.map(item => ({ ...item, hasDropdown: true, megaMenu: false }))
 ]
@@ -232,19 +227,6 @@ onUnmounted(() => {
 
         <!-- Desktop Navigation -->
         <div class="hidden lg:flex items-center gap-2">
-          <!-- Home Link -->
-          <NuxtLink
-            :to="localePath('/')"
-            class="flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300 mr-2"
-            :class="[
-              isScrolled
-                ? 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                : 'text-white/90 hover:bg-white/10'
-            ]"
-          >
-            <font-awesome-icon icon="fa-solid fa-house" class="w-4 h-4" />
-          </NuxtLink>
-
           <!-- Primary Nav Items (Accented) -->
           <div
             v-for="item in primaryNavItems"
@@ -400,37 +382,62 @@ onUnmounted(() => {
                 <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl shadow-black/15 dark:shadow-black/40 border border-gray-100 dark:border-gray-800 overflow-hidden w-[420px] p-3">
                   <!-- Categories Grid -->
                   <div class="grid grid-cols-1 gap-2">
-                    <div
-                      v-for="section in secondaryNavItems"
-                      :key="section.key"
-                      class="p-3 rounded-xl bg-gray-50/50 dark:bg-gray-800/50"
-                    >
+                    <!-- Single Link Block (like "Nous connaître") -->
+                    <template v-for="section in secondaryNavItems" :key="section.key">
                       <NuxtLink
+                        v-if="section.singleLink"
                         :to="localePath(section.route)"
-                        class="flex items-center gap-2 mb-3 text-sm font-semibold text-gray-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                        class="group block p-3 rounded-xl bg-gray-50/50 dark:bg-gray-800/50 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all duration-200 cursor-pointer"
                       >
-                        <font-awesome-icon :icon="section.icon" class="w-4 h-4 text-amber-500" />
-                        {{ t(`nav.${section.key}`) }}
-                        <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3 ml-auto opacity-0 group-hover:opacity-100" />
-                      </NuxtLink>
-                      <div class="grid grid-cols-2 gap-1">
-                        <NuxtLink
-                          v-for="child in section.children"
-                          :key="child.key"
-                          :to="localePath(child.route)"
-                          class="group flex items-center gap-2 px-2 py-1.5 text-xs text-gray-600 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg hover:bg-white dark:hover:bg-gray-700 transition-all duration-200"
-                        >
-                          <font-awesome-icon :icon="child.icon" class="w-3 h-3 opacity-50 group-hover:opacity-100" />
-                          <span>{{ t(`nav.dropdowns.${section.key}.${child.key}`) }}</span>
-                          <span
-                            v-if="child.badge"
-                            class="ml-auto px-1 py-0.5 text-[8px] font-semibold uppercase rounded bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-300"
+                        <div class="flex items-center gap-2 mb-3 text-sm font-semibold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                          <font-awesome-icon :icon="section.icon" class="w-4 h-4 text-amber-500" />
+                          {{ t(`nav.${section.key}`) }}
+                          <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                        <div class="grid grid-cols-2 gap-1">
+                          <div
+                            v-for="child in section.children"
+                            :key="child.key"
+                            class="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-600 dark:text-gray-400 group-hover:text-amber-600/80 dark:group-hover:text-amber-400/80 transition-colors"
                           >
-                            {{ child.badge === 'flagship' ? t('nav.badges.flagship') : child.badge }}
-                          </span>
+                            <font-awesome-icon :icon="child.icon" class="w-3 h-3 opacity-50 group-hover:opacity-100" />
+                            <span>{{ t(`nav.dropdowns.${section.key}.${child.key}`) }}</span>
+                          </div>
+                        </div>
+                      </NuxtLink>
+
+                      <!-- Regular Block with individual links -->
+                      <div
+                        v-else
+                        class="p-3 rounded-xl bg-gray-50/50 dark:bg-gray-800/50"
+                      >
+                        <NuxtLink
+                          :to="localePath(section.route)"
+                          class="flex items-center gap-2 mb-3 text-sm font-semibold text-gray-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                        >
+                          <font-awesome-icon :icon="section.icon" class="w-4 h-4 text-amber-500" />
+                          {{ t(`nav.${section.key}`) }}
+                          <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3 ml-auto opacity-0 group-hover:opacity-100" />
                         </NuxtLink>
+                        <div class="grid grid-cols-2 gap-1">
+                          <NuxtLink
+                            v-for="child in section.children"
+                            :key="child.key"
+                            :to="localePath(child.route)"
+                            class="group flex items-center gap-2 px-2 py-1.5 text-xs text-gray-600 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg hover:bg-white dark:hover:bg-gray-700 transition-all duration-200"
+                          >
+                            <font-awesome-icon :icon="child.icon" class="w-3 h-3 opacity-50 group-hover:opacity-100" />
+                            <span>{{ t(`nav.dropdowns.${section.key}.${child.key}`) }}</span>
+                            <span
+                              v-if="child.badge"
+                              class="ml-auto px-1 py-0.5 text-[8px] font-semibold uppercase rounded bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-300"
+                            >
+                              {{ child.badge === 'flagship' ? t('nav.badges.flagship') : child.badge }}
+                            </span>
+                          </NuxtLink>
+                        </div>
                       </div>
-                    </div>
+                    </template>
                   </div>
                 </div>
               </div>
@@ -593,6 +600,29 @@ onUnmounted(() => {
               @click="isMobileMenuOpen = false"
             >
               {{ t(`nav.${item.key}`) }}
+            </NuxtLink>
+
+            <!-- Single Link Item (like "Nous connaître") -->
+            <NuxtLink
+              v-else-if="item.singleLink"
+              :to="localePath(item.route)"
+              class="group block px-4 py-3.5 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all duration-200"
+              @click="isMobileMenuOpen = false"
+            >
+              <div class="flex items-center justify-between text-gray-700 dark:text-gray-200 font-medium group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                <span>{{ t(`nav.${item.key}`) }}</span>
+                <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+              <div class="mt-2 flex flex-wrap gap-2">
+                <span
+                  v-for="child in item.children"
+                  :key="child.key"
+                  class="inline-flex items-center gap-1.5 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-md group-hover:bg-amber-100 dark:group-hover:bg-amber-900/30 group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors"
+                >
+                  <font-awesome-icon :icon="child.icon" class="w-3 h-3" />
+                  {{ t(`nav.dropdowns.${item.key}.${child.key}`) }}
+                </span>
+              </div>
             </NuxtLink>
 
             <!-- Menu Item with Dropdown -->

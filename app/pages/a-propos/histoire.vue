@@ -139,8 +139,14 @@ const splitIntoWords = (text: string): string[] => {
 onMounted(() => {
   if (import.meta.server) return
 
+  // Scroll to top on page load with smooth animation
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+
   // Register GSAP plugins
   gsap.registerPlugin(ScrollTrigger)
+
+  // Reset body background color on page entry
+  gsap.set('body', { backgroundColor: '#FDF6E3' })
 
   // L'année est visible dès le départ grâce à position: sticky
   // Pas besoin de toggle autoAlpha !
