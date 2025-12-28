@@ -20,6 +20,7 @@ export interface Document {
   year?: number
   is_public: boolean
   sort_order: number
+  cover_image?: string // URL image de couverture
 }
 
 export const mockDocuments: Document[] = [
@@ -36,7 +37,8 @@ export const mockDocuments: Document[] = [
     language: 'fr',
     year: 1989,
     is_public: true,
-    sort_order: 1
+    sort_order: 1,
+    cover_image: 'https://picsum.photos/seed/doc-convention/400/500'
   },
   {
     id: 'doc-statuts',
@@ -50,7 +52,8 @@ export const mockDocuments: Document[] = [
     language: 'fr',
     year: 2020,
     is_public: true,
-    sort_order: 2
+    sort_order: 2,
+    cover_image: 'https://picsum.photos/seed/doc-statuts/400/500'
   },
   {
     id: 'doc-reglement',
@@ -64,7 +67,8 @@ export const mockDocuments: Document[] = [
     language: 'fr',
     year: 2022,
     is_public: true,
-    sort_order: 3
+    sort_order: 3,
+    cover_image: 'https://picsum.photos/seed/doc-reglement/400/500'
   },
 
   // === CHARTES ===
