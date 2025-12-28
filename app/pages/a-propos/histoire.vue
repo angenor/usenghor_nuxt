@@ -88,9 +88,6 @@ const yearDisplayRef = ref<HTMLElement | null>(null)
 const timelineRef = ref<HTMLElement | null>(null)
 const sectionRefs = ref<HTMLElement[]>([])
 
-// Year display visibility
-const isYearVisible = ref(false)
-
 // Set section ref
 const setSectionRef = (el: any, index: number) => {
   if (el) sectionRefs.value[index] = el
@@ -145,32 +142,28 @@ onMounted(() => {
   // Register GSAP plugins
   gsap.registerPlugin(ScrollTrigger)
 
-  // Initially hide year display
-  if (yearDisplayRef.value) {
-    gsap.set(yearDisplayRef.value, { autoAlpha: 0 })
-  }
+  // L'année est visible dès le départ grâce à position: sticky
+  // Pas besoin de toggle autoAlpha !
 
-  // Show/hide year display based on timeline visibility
+  // ScrollTrigger pour gérer la fin de timeline (scroll avec footer)
+  // On utilise la dernière section comme trigger, avec un offset pour les sections pinnées
   if (timelineRef.value) {
     ScrollTrigger.create({
       trigger: timelineRef.value,
-      start: 'top 60%',
-      end: 'bottom+=500% bottom', // Compte les 5 sections pinnees (chaque +100%)
+      // Start après toutes les sections pinnées (5 sections x 100% = 500%)
+      start: 'bottom+=500% bottom',
+      end: 'bottom+=500% top',
       onEnter: () => {
-        isYearVisible.value = true
-        gsap.to(yearDisplayRef.value, { autoAlpha: 1, duration: 0.3 })
-      },
-      onLeave: () => {
-        isYearVisible.value = false
-        gsap.to(yearDisplayRef.value, { autoAlpha: 0, duration: 0.3 })
-      },
-      onEnterBack: () => {
-        isYearVisible.value = true
-        gsap.to(yearDisplayRef.value, { autoAlpha: 1, duration: 0.3 })
+        // Quand on quitte la timeline, transformer sticky en relative pour scroller avec footer
+        if (yearDisplayRef.value) {
+          gsap.set(yearDisplayRef.value, { position: 'relative' })
+        }
       },
       onLeaveBack: () => {
-        isYearVisible.value = false
-        gsap.to(yearDisplayRef.value, { autoAlpha: 0, duration: 0.3 })
+        // Retour au sticky quand on revient
+        if (yearDisplayRef.value) {
+          gsap.set(yearDisplayRef.value, { position: 'sticky' })
+        }
       }
     })
   }
@@ -284,64 +277,66 @@ onUnmounted(() => {
       :breadcrumb="breadcrumb"
     />
 
-    <!-- Sticky Intro Section -->
-    <section class="py-16 lg:py-24 bg-white dark:bg-gray-900">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          <!-- Text Content -->
-          <div class="space-y-6">
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
-              <span class="relative inline-block">
-                {{ t('history.title') }}
-                <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
-              </span>
-            </h2>
-            <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-              {{ t('history.subtitle') }}
-            </p>
-            <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-              {{ t('history.genesis.point1') }}
-            </p>
-          </div>
-          <!-- SVG Image -->
-          <div class="flex items-center justify-center">
-            <svg class="w-full max-w-md h-auto" viewBox="0 0 100 100">
-              <defs>
-                <mask id="hashMask">
-                  <rect width="100" height="100" fill="black"/>
-                  <rect x="20" y="30" width="60" height="12" rx="2" fill="white"/>
-                  <rect x="20" y="58" width="60" height="12" rx="2" fill="white"/>
-                  <rect x="30" y="20" width="12" height="60" rx="2" fill="white"/>
-                  <rect x="58" y="20" width="12" height="60" rx="2" fill="white"/>
-                  <rect x="42" y="42" width="16" height="16" fill="white"/>
-                </mask>
-              </defs>
-              <image
-                href="https://picsum.photos/seed/senghor-portrait/800/800"
-                width="100"
-                height="100"
-                preserveAspectRatio="xMidYMid slice"
-                mask="url(#hashMask)"
-              />
-            </svg>
+    <!-- Histoire Content Wrapper (pour le sticky behavior) -->
+    <div class="histoire-content">
+      <!-- Intro Section -->
+      <section class="py-16 lg:py-24 bg-white dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <!-- Text Content -->
+            <div class="space-y-6 flex flex-col justify-center">
+              <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
+                <span class="relative inline-block">
+                  {{ t('history.title') }}
+                  <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+                </span>
+              </h2>
+              <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+                {{ t('history.subtitle') }}
+              </p>
+              <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+                {{ t('history.genesis.point1') }}
+              </p>
+            </div>
+            <!-- SVG Image -->
+            <div class="flex items-center justify-center">
+              <svg class="w-full max-w-md h-auto" viewBox="0 0 100 100">
+                <defs>
+                  <mask id="hashMask">
+                    <rect width="100" height="100" fill="black"/>
+                    <rect x="20" y="30" width="60" height="12" rx="2" fill="white"/>
+                    <rect x="20" y="58" width="60" height="12" rx="2" fill="white"/>
+                    <rect x="30" y="20" width="12" height="60" rx="2" fill="white"/>
+                    <rect x="58" y="20" width="12" height="60" rx="2" fill="white"/>
+                    <rect x="42" y="42" width="16" height="16" fill="white"/>
+                  </mask>
+                </defs>
+                <image
+                  href="/images/logos/Conours-20e-promotion-usenghor.jpg"
+                  width="100"
+                  height="100"
+                  preserveAspectRatio="xMidYMid slice"
+                  mask="url(#hashMask)"
+                />
+              </svg>
+            </div>
           </div>
         </div>
+      </section>
+
+      <!-- Year Display - APRÈS l'intro, devient sticky en haut -->
+      <div
+        ref="yearDisplayRef"
+        class="year-display"
+      >
+        <span class="digit">1</span>
+        <span class="digit">9</span>
+        <span class="digit">8</span>
+        <span class="digit">9</span>
       </div>
-    </section>
 
-    <!-- Fixed Year Display (visible only during timeline scroll) -->
-    <div
-      ref="yearDisplayRef"
-      class="year-display-fixed"
-    >
-      <span class="digit">1</span>
-      <span class="digit">9</span>
-      <span class="digit">8</span>
-      <span class="digit">9</span>
-    </div>
-
-    <!-- Timeline Section -->
-    <div ref="timelineRef" class="timeline pt-[20vw]">
+      <!-- Timeline Section -->
+      <div ref="timelineRef" class="timeline pt-[10vw]">
       <!-- Year Sections -->
       <section
         v-for="(event, index) in timelineEvents"
@@ -386,40 +381,42 @@ onUnmounted(() => {
           </div>
         </div>
       </section>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.histoire-page {
-  overflow-x: hidden;
+/* Wrapper for sticky behavior - doit contenir tout le contenu scrollable */
+.histoire-content {
+  position: relative;
 }
 
-/* Fixed year display - stays at top below navbar */
-.year-display-fixed {
-  position: fixed;
-  top: 5rem; /* Below navbar (~80px) */
-  left: 0;
-  right: 0;
-  z-index: 50;
+/* Sticky year display - visible from start, becomes sticky below navbar */
+.year-display {
+  position: -webkit-sticky; /* Safari */
+  position: sticky;
+  top: 80px; /* Hauteur exacte du navbar */
+  z-index: 40;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 2rem 0;
   font-family: var(--font-pixel, 'JetBrains Mono', monospace);
   font-size: clamp(4rem, 12vw, 10rem);
   font-weight: 300;
   line-height: 1;
-  color: rgba(0, 0, 0, 0.4); /* Beaucoup plus fonce */
+  color: rgba(0, 0, 0, 0.5);
   pointer-events: none;
   user-select: none;
-  visibility: hidden; /* Initially hidden, controlled by GSAP autoAlpha */
+  /* Pas de background - transparent */
 }
 
-.dark .year-display-fixed {
-  color: rgba(255, 255, 255, 0.4); /* Beaucoup plus fonce */
+.dark .year-display {
+  color: rgba(255, 255, 255, 0.5);
 }
 
-.year-display-fixed .digit {
+.year-display .digit {
   display: inline-block;
   width: 0.7em;
   text-align: center;
