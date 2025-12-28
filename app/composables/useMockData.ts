@@ -8,15 +8,15 @@
  * Pour basculer vers l'API réelle, remplacer les imports par des appels API
  */
 
-import { mockDepartments, type Department } from '~/bank/mock-data/departments'
-import { mockServices, type Service } from '~/bank/mock-data/services'
-import { mockStaff, type Staff } from '~/bank/mock-data/staff'
-import { mockPaysBailleurs, getFlagEmoji, type PaysBailleur } from '~/bank/mock-data/pays-bailleurs'
-import { mockConseilAdministration, type CAMember } from '~/bank/mock-data/conseil-administration'
-import { mockCampusExternalises, campusPrincipal, type CampusExternalise } from '~/bank/mock-data/campus-externalises'
-import { mockPartenaires, type Partenaire } from '~/bank/mock-data/partenaires'
-import { mockFormations, type Formation } from '~/bank/mock-data/formations'
-import { mockDocuments, type Document } from '~/bank/mock-data/documents'
+import { mockDepartments, type Department } from '@bank/mock-data/departments'
+import { mockServices, type Service } from '@bank/mock-data/services'
+import { mockStaff, type Staff } from '@bank/mock-data/staff'
+import { mockPaysBailleurs, getFlagEmoji, type PaysBailleur } from '@bank/mock-data/pays-bailleurs'
+import { mockConseilAdministration, type CAMember } from '@bank/mock-data/conseil-administration'
+import { mockCampusExternalises, campusPrincipal, type CampusExternalise } from '@bank/mock-data/campus-externalises'
+import { mockPartenaires, type Partenaire } from '@bank/mock-data/partenaires'
+import { mockFormations, type Formation } from '@bank/mock-data/formations'
+import { mockDocuments, type Document } from '@bank/mock-data/documents'
 
 export function useMockData() {
   // === DÉPARTEMENTS ===
