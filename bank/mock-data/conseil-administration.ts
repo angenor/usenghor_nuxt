@@ -117,30 +117,6 @@ export const mockConseilAdministration: CAMember[] = [
     is_active: true
   },
   {
-    id: 'ca-008',
-    civility: 'Mme',
-    first_name: 'Leila',
-    last_name: 'Ben Salem',
-    title_fr: 'Représentante de la Tunisie',
-    ca_role: 'membre',
-    representing_fr: 'République Tunisienne',
-    country_code: 'TN',
-    sort_order: 8,
-    is_active: true
-  },
-  {
-    id: 'ca-009',
-    civility: 'M.',
-    first_name: 'François',
-    last_name: 'Amoussou',
-    title_fr: 'Représentant du Bénin',
-    ca_role: 'membre',
-    representing_fr: 'République du Bénin',
-    country_code: 'BJ',
-    sort_order: 9,
-    is_active: true
-  },
-  {
     id: 'ca-010',
     civility: 'Dr',
     first_name: 'Louise',

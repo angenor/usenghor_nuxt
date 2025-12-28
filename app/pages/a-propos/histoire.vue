@@ -283,6 +283,9 @@ onUnmounted(() => {
       :breadcrumb="breadcrumb"
     />
 
+    <!-- Sticky Tabs Navigation -->
+    <SectionAboutTabsNav />
+
     <!-- Histoire Content Wrapper (pour le sticky behavior) -->
     <div class="histoire-content">
       <!-- Intro Section -->

@@ -43,6 +43,9 @@ const observers = computed(() =>
       :breadcrumb="breadcrumb"
     />
 
+    <!-- Sticky Tabs Navigation -->
+    <SectionAboutTabsNav />
+
     <!-- Section 1: Textes Fondateurs -->
     <GovernanceFoundingTextsSection :documents="foundingTexts" />
 

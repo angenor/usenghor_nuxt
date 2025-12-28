@@ -15,12 +15,6 @@ const { getFlagEmoji } = useMockData()
 const { elementRef: headerRef } = useScrollAnimation({ animation: 'fadeInDown' })
 const { elementRef: orgChartRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.1 })
 
-// Refs pour leader-line
-const presidentRef = ref<HTMLElement | null>(null)
-const vpRefs = ref<HTMLElement[]>([])
-const memberRefs = ref<HTMLElement[]>([])
-const lines = ref<any[]>([])
-
 // Color classes for gradient avatars
 const getColorClasses = (color: string) => {
   const colors: Record<string, { bg: string; badge: string; ring: string }> = {
@@ -32,16 +26,20 @@ const getColorClasses = (color: string) => {
   return colors[color] || colors.emerald
 }
 
-// Assign colors to VP positions
+// Assign colors to VP and member positions
 const vpColors = ['cyan', 'amber', 'purple', 'emerald']
 const memberColors = ['cyan', 'amber', 'purple', 'emerald', 'cyan', 'amber', 'purple', 'emerald']
 
-// Set VP ref
+// Refs for leader-line
+const presidentRef = ref<HTMLElement | null>(null)
+const vpRefs = ref<HTMLElement[]>([])
+const memberRefs = ref<HTMLElement[]>([])
+const lines = ref<any[]>([])
+
 const setVpRef = (el: any, index: number) => {
   if (el) vpRefs.value[index] = el
 }
 
-// Set Member ref
 const setMemberRef = (el: any, index: number) => {
   if (el) memberRefs.value[index] = el
 }
@@ -60,37 +58,40 @@ const drawLines = async () => {
   // Dynamic import for SSR compatibility
   const LeaderLine = (await import('leader-line-new')).default
 
-  const lineOptions = {
-    color: 'rgba(16, 185, 129, 0.6)',
-    size: 2,
-    path: 'grid',
-    startSocket: 'bottom',
-    endSocket: 'top',
-    startPlug: 'behind',
-    endPlug: 'behind'
-  }
-
-  // President → VPs
+  // President → VPs (straight lines)
   if (presidentRef.value && vpRefs.value.length > 0) {
     vpRefs.value.forEach(vpEl => {
       if (vpEl && presidentRef.value) {
-        const line = new LeaderLine(presidentRef.value, vpEl, lineOptions)
+        const line = new LeaderLine(presidentRef.value, vpEl, {
+          color: 'rgba(16, 185, 129, 0.5)',
+          size: 2,
+          path: 'straight',
+          startSocket: 'bottom',
+          endSocket: 'top',
+          startPlug: 'behind',
+          endPlug: 'behind'
+        })
         lines.value.push(line)
       }
     })
   }
 
-  // VPs → Members (connect from center VP or first VP to all members)
+  // VP (center) → Members (straight lines from center VP only)
   if (vpRefs.value.length > 0 && memberRefs.value.length > 0) {
     const centerVpIndex = Math.floor(vpRefs.value.length / 2)
-    const sourceVp = vpRefs.value[centerVpIndex] || vpRefs.value[0]
+    const centerVp = vpRefs.value[centerVpIndex]
 
-    if (sourceVp) {
+    if (centerVp) {
       memberRefs.value.forEach(memberEl => {
         if (memberEl) {
-          const line = new LeaderLine(sourceVp, memberEl, {
-            ...lineOptions,
-            color: 'rgba(99, 102, 241, 0.5)'
+          const line = new LeaderLine(centerVp, memberEl, {
+            color: 'rgba(99, 102, 241, 0.4)',
+            size: 2,
+            path: 'straight',
+            startSocket: 'bottom',
+            endSocket: 'top',
+            startPlug: 'behind',
+            endPlug: 'behind'
           })
           lines.value.push(line)
         }
@@ -107,11 +108,7 @@ const handleResize = () => {
 }
 
 onMounted(() => {
-  // Wait for DOM to be ready then draw lines
-  setTimeout(() => {
-    drawLines()
-  }, 500)
-
+  setTimeout(() => drawLines(), 500)
   window.addEventListener('resize', handleResize)
 })
 
@@ -122,11 +119,8 @@ onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
 })
 
-// Redraw when data changes
 watch([() => props.vicePresidents, () => props.members], () => {
-  nextTick(() => {
-    setTimeout(() => drawLines(), 300)
-  })
+  nextTick(() => setTimeout(() => drawLines(), 300))
 }, { deep: true })
 </script>
 
@@ -157,9 +151,9 @@ watch([() => props.vicePresidents, () => props.members], () => {
       </div>
 
       <!-- Conseil d'Administration - Organigramme -->
-      <div ref="orgChartRef" class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-3xl p-8 lg:p-12">
+      <div ref="orgChartRef" class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-3xl p-8 lg:p-12 overflow-x-auto">
         <!-- Hierarchical Org Chart -->
-        <div class="org-chart">
+        <div class="org-chart min-w-[900px]">
           <!-- Niveau 1 : Président -->
           <div v-if="props.president" class="flex justify-center mb-16">
             <div
@@ -327,7 +321,6 @@ watch([() => props.vicePresidents, () => props.members], () => {
 /* Org Chart Layout */
 .org-chart {
   padding: 1rem 0;
-  position: relative;
 }
 
 .org-card {

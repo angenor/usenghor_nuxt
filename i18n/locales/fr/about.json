@@ -48,8 +48,9 @@
     },
     "tabs": {
       "about": "Nous connaître",
+      "history": "Notre histoire",
+      "governance": "Gouvernance",
       "strategy": "Notre stratégie",
-      "engagements": "Nos engagements",
       "organization": "Notre organisation",
       "careers": "Nous rejoindre"
     },
