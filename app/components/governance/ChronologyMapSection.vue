@@ -35,8 +35,7 @@ const { mapRef, activeStep } = useScrollytellingMap({
     <ClientOnly>
       <!-- Carte Leaflet (sticky background) -->
       <div class="scroll__graphic sticky top-0 w-full h-screen z-0">
-        <div class="absolute inset-0 bg-white/20 dark:bg-gray-900/40 z-10"></div>
-        <div id="map-chronologie" ref="mapRef" class="w-full h-full"></div>
+        <div id="map-chronologie" ref="mapRef" class="w-full h-full map-container"></div>
       </div>
 
       <!-- Step Cards (scrolling content) -->
@@ -196,5 +195,10 @@ const { mapRef, activeStep } = useScrollytellingMap({
 .leaflet-control-attribution {
   font-size: 10px;
   opacity: 0.6;
+}
+
+/* Dark mode : filtre sur la carte */
+:is(.dark) .map-container {
+  filter: brightness(0.7) contrast(1.1);
 }
 </style>
