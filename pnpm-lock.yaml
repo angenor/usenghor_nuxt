@@ -95,6 +95,9 @@ importers:
       gsap:
         specifier: ^3.14.2
         version: 3.14.2
+      leader-line-new:
+        specifier: ^1.1.9
+        version: 1.1.9
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
@@ -4345,6 +4348,9 @@ packages:
   lazystream@1.0.1:
     resolution: {integrity: sha512-b94GiNHQNy6JNTrt5w6zNyffMrNkXZb3KTkCZJb2V1xaEGCk093vkZ2jk3tpaeP33/OiXC+WvK9AxUebnf5nbw==}
     engines: {node: '>= 0.6.3'}
+
+  leader-line-new@1.1.9:
+    resolution: {integrity: sha512-x56aRYaqJTA4aAS2fgbSpvWKY3IxRXDSFeGkNBmCQ3LX44B3F1HEjcBTkCiK5I3W0nPWeUTWe7dTt59VtdfFWw==}
 
   leaflet@1.9.4:
     resolution: {integrity: sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==}
@@ -11159,6 +11165,8 @@ snapshots:
   lazystream@1.0.1:
     dependencies:
       readable-stream: 2.3.8
+
+  leader-line-new@1.1.9: {}
 
   leaflet@1.9.4: {}
 
