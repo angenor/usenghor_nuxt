@@ -300,7 +300,7 @@ onUnmounted(() => {
             </div>
             <!-- SVG Image -->
             <div class="flex items-center justify-center">
-              <svg class="w-full max-w-md h-auto" viewBox="0 0 100 100">
+              <svg class="w-full max-w-md lg:max-w-4xl h-auto" viewBox="0 0 100 100">
                 <defs>
                   <mask id="hashMask">
                     <rect width="100" height="100" fill="black"/>
@@ -401,7 +401,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 2rem 0;
+  padding: 2rem 0 4rem; /* Plus d'espace en bas sur mobile */
   font-family: var(--font-pixel, 'JetBrains Mono', monospace);
   font-size: clamp(2rem, 6vw, 5rem);
   font-weight: 300;
@@ -410,6 +410,12 @@ onUnmounted(() => {
   pointer-events: none;
   user-select: none;
   /* Pas de background - transparent */
+}
+
+@media (min-width: 768px) {
+  .year-display {
+    padding: 2rem 0; /* Padding normal sur desktop */
+  }
 }
 
 .dark .year-display {

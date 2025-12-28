@@ -17,7 +17,7 @@ Présenter la gouvernance institutionnelle: textes fondateurs, pays bailleurs et
 1. **Hero** - Titre, sous-titre, breadcrumb
 2. **Textes fondateurs** - Liste de documents PDF téléchargeables (Convention, Statuts, Règlement, Charte)
 3. **Pays bailleurs** - Grille de cards avec drapeaux (15 pays)
-4. **Conseil d'Administration** - Président en vedette + grille des membres
+4. **Conseil d'Administration** - Président en vedette + grille des membres)
 
 ---
 
