@@ -24,5 +24,10 @@
     "confirm": "Confirm",
     "discover": "Discover",
     "learnMore": "Learn more"
+  },
+  "wip": {
+    "title": "Page under development",
+    "message": "This page is currently under construction. Come back soon to discover its content.",
+    "backHome": "Back to home"
   }
 }

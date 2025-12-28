@@ -16,21 +16,19 @@ const { elementRef: headerRef } = useScrollAnimation({ animation: 'fadeInDown' }
 const { elementRef: orgChartRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.1 })
 
 // Color classes for gradient avatars
-const getColorClasses = (index: number) => {
-  const colors = [
-    { bg: 'bg-gradient-to-br from-emerald-500 to-teal-600', ring: 'ring-emerald-500/30' },
-    { bg: 'bg-gradient-to-br from-cyan-500 to-blue-600', ring: 'ring-cyan-500/30' },
-    { bg: 'bg-gradient-to-br from-amber-500 to-orange-600', ring: 'ring-amber-500/30' },
-    { bg: 'bg-gradient-to-br from-purple-500 to-indigo-600', ring: 'ring-purple-500/30' },
-    { bg: 'bg-gradient-to-br from-rose-500 to-pink-600', ring: 'ring-rose-500/30' }
-  ]
-  return colors[index % colors.length]
+const getColorClasses = (color: string) => {
+  const colors: Record<string, { bg: string; badge: string; ring: string }> = {
+    emerald: { bg: 'bg-gradient-to-br from-emerald-500 to-teal-600', badge: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300', ring: 'ring-emerald-500/30' },
+    cyan: { bg: 'bg-gradient-to-br from-cyan-500 to-blue-600', badge: 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300', ring: 'ring-cyan-500/30' },
+    amber: { bg: 'bg-gradient-to-br from-amber-500 to-orange-600', badge: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300', ring: 'ring-amber-500/30' },
+    purple: { bg: 'bg-gradient-to-br from-purple-500 to-indigo-600', badge: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300', ring: 'ring-purple-500/30' }
+  }
+  return colors[color] || colors.emerald
 }
 
-// Get initials from name
-const getInitials = (member: CAMember) => {
-  return `${member.first_name.charAt(0)}${member.last_name.charAt(0)}`
-}
+// Assign colors to VP positions
+const vpColors = ['cyan', 'amber', 'purple', 'emerald']
+const memberColors = ['cyan', 'amber', 'purple', 'emerald', 'cyan', 'amber', 'purple', 'emerald']
 </script>
 
 <template>
@@ -59,26 +57,33 @@ const getInitials = (member: CAMember) => {
         </p>
       </div>
 
-      <!-- Org Chart Container -->
+      <!-- Conseil d'Administration - Organigramme -->
       <div ref="orgChartRef" class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-3xl p-8 lg:p-12 overflow-x-auto">
-        <div class="org-chart min-w-[600px]">
+        <!-- Hierarchical Org Chart -->
+        <div class="org-chart min-w-[800px]">
           <!-- Niveau 1 : Président -->
           <div v-if="props.president" class="flex justify-center mb-8">
             <div class="org-node connector-down">
               <div class="org-card bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 w-72">
                 <div class="flex flex-col items-center">
                   <div class="president-avatar-ring p-1 rounded-full mb-4">
-                    <img
-                      :src="props.president.photo || 'https://i.pravatar.cc/200?u=president'"
-                      :alt="`${props.president.first_name} ${props.president.last_name}`"
-                      class="w-20 h-20 rounded-full object-cover"
-                    />
+                    <div class="bg-gradient-to-br from-emerald-500 to-teal-600 w-20 h-20 rounded-full flex items-center justify-center overflow-hidden">
+                      <img
+                        v-if="props.president.photo"
+                        :src="props.president.photo"
+                        :alt="`${props.president.first_name} ${props.president.last_name}`"
+                        class="w-full h-full object-cover"
+                      />
+                      <span v-else class="text-2xl font-bold text-white">
+                        {{ props.president.first_name.charAt(0) }}{{ props.president.last_name.charAt(0) }}
+                      </span>
+                    </div>
                   </div>
                   <span class="text-2xl mb-2">{{ getFlagEmoji(props.president.country_code) }}</span>
                   <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-1 text-center">
                     {{ props.president.civility }} {{ props.president.first_name }} {{ props.president.last_name }}
                   </h4>
-                  <span class="px-4 py-1.5 rounded-full text-sm font-medium bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                  <span class="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 px-4 py-1.5 rounded-full text-sm font-medium border border-emerald-200 dark:border-emerald-800">
                     Président du Conseil
                   </span>
                   <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">{{ props.president.representing_fr }}</p>
@@ -88,30 +93,36 @@ const getInitials = (member: CAMember) => {
           </div>
 
           <!-- Niveau 2 : Vice-Présidents -->
-          <div v-if="props.vicePresidents.length > 0" class="vp-level horizontal-line pt-8 mb-8">
-            <div class="flex justify-center gap-6 flex-wrap">
-              <div
-                v-for="(vp, index) in props.vicePresidents"
-                :key="vp.id"
-                class="org-node connector-up"
-              >
-                <div class="org-card bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 w-56">
-                  <div class="flex flex-col items-center">
-                    <div :class="[getColorClasses(index).bg, 'w-16 h-16 rounded-full flex items-center justify-center mb-3 ring-4 ring-opacity-30', getColorClasses(index).ring]">
-                      <img
-                        :src="vp.photo || 'https://i.pravatar.cc/150?u=' + vp.id"
-                        :alt="`${vp.first_name} ${vp.last_name}`"
-                        class="w-14 h-14 rounded-full object-cover border-2 border-white"
-                      />
+          <div v-if="props.vicePresidents.length > 0" class="horizontal-line pt-8 mb-8">
+            <div class="flex justify-center">
+              <div class="org-node connector-up connector-down">
+                <div class="flex justify-center gap-6 flex-wrap">
+                  <div
+                    v-for="(vp, index) in props.vicePresidents"
+                    :key="vp.id"
+                    class="org-card bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 w-56"
+                  >
+                    <div class="flex flex-col items-center">
+                      <div :class="[getColorClasses(vpColors[index % vpColors.length]).bg, 'w-16 h-16 rounded-full flex items-center justify-center mb-3 ring-4 ring-opacity-30 overflow-hidden', getColorClasses(vpColors[index % vpColors.length]).ring]">
+                        <img
+                          v-if="vp.photo"
+                          :src="vp.photo"
+                          :alt="`${vp.first_name} ${vp.last_name}`"
+                          class="w-full h-full object-cover"
+                        />
+                        <span v-else class="text-lg font-bold text-white">
+                          {{ vp.first_name.charAt(0) }}{{ vp.last_name.charAt(0) }}
+                        </span>
+                      </div>
+                      <span class="text-xl mb-1">{{ getFlagEmoji(vp.country_code) }}</span>
+                      <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-1 text-center">
+                        {{ vp.civility }} {{ vp.first_name }} {{ vp.last_name }}
+                      </h4>
+                      <span :class="[getColorClasses(vpColors[index % vpColors.length]).badge, 'px-3 py-1 rounded-full text-xs font-medium border text-center']">
+                        Vice-Président
+                      </span>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">{{ vp.representing_fr }}</p>
                     </div>
-                    <span class="text-xl mb-1">{{ getFlagEmoji(vp.country_code) }}</span>
-                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-1 text-center">
-                      {{ vp.civility }} {{ vp.first_name }} {{ vp.last_name }}
-                    </h4>
-                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800 text-center">
-                      Vice-Président
-                    </span>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">{{ vp.representing_fr }}</p>
                   </div>
                 </div>
               </div>
@@ -119,30 +130,32 @@ const getInitials = (member: CAMember) => {
           </div>
 
           <!-- Niveau 3 : Membres du Conseil -->
-          <div v-if="props.members.length > 0" class="members-level horizontal-line-members pt-8">
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center justify-center gap-2">
-              <span class="w-1.5 h-6 bg-blue-500 rounded-full"></span>
-              Membres du Conseil
-            </h3>
-            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div v-if="props.members.length > 0" class="horizontal-line pt-8">
+            <div class="flex justify-center gap-4 flex-wrap">
               <div
                 v-for="(member, index) in props.members"
                 :key="member.id"
-                class="member-card group bg-white dark:bg-gray-800/50 rounded-xl p-5 border border-gray-200/50 dark:border-gray-700/50 hover:border-emerald-300 dark:hover:border-emerald-600 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                class="org-node connector-up"
               >
-                <div class="flex flex-col items-center text-center">
-                  <div :class="[getColorClasses(index + 2).bg, 'w-14 h-14 rounded-full flex items-center justify-center mb-3 ring-4 ring-opacity-30 group-hover:scale-110 transition-transform duration-300', getColorClasses(index + 2).ring]">
-                    <img
-                      :src="member.photo || 'https://i.pravatar.cc/150?u=' + member.id"
-                      :alt="`${member.first_name} ${member.last_name}`"
-                      class="w-12 h-12 rounded-full object-cover border-2 border-white"
-                    />
+                <div class="org-card bg-white dark:bg-gray-800/50 rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 hover:border-emerald-300 dark:hover:border-emerald-600 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 w-44">
+                  <div class="flex flex-col items-center text-center">
+                    <div :class="[getColorClasses(memberColors[index % memberColors.length]).bg, 'w-12 h-12 rounded-full flex items-center justify-center mb-2 ring-4 ring-opacity-30 overflow-hidden', getColorClasses(memberColors[index % memberColors.length]).ring]">
+                      <img
+                        v-if="member.photo"
+                        :src="member.photo"
+                        :alt="`${member.first_name} ${member.last_name}`"
+                        class="w-full h-full object-cover"
+                      />
+                      <span v-else class="text-sm font-bold text-white">
+                        {{ member.first_name.charAt(0) }}{{ member.last_name.charAt(0) }}
+                      </span>
+                    </div>
+                    <span class="text-lg">{{ getFlagEmoji(member.country_code) }}</span>
+                    <h4 class="font-semibold text-gray-900 dark:text-white mt-1 text-xs">
+                      {{ member.civility }} {{ member.first_name }} {{ member.last_name }}
+                    </h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ member.representing_fr }}</p>
                   </div>
-                  <span class="text-xl">{{ getFlagEmoji(member.country_code) }}</span>
-                  <h4 class="font-semibold text-gray-900 dark:text-white mt-1 text-sm">
-                    {{ member.civility }} {{ member.first_name }} {{ member.last_name }}
-                  </h4>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ member.representing_fr }}</p>
                 </div>
               </div>
             </div>
@@ -150,7 +163,7 @@ const getInitials = (member: CAMember) => {
         </div>
 
         <!-- Observateurs -->
-        <div v-if="props.observers.length > 0" class="mt-12">
+        <div v-if="props.observers.length > 0" class="mt-12 pt-8 border-t border-dashed border-gray-300 dark:border-gray-600">
           <h3 class="text-lg font-semibold text-gray-500 dark:text-gray-400 mb-6 flex items-center justify-center gap-2">
             <span class="w-1.5 h-6 bg-gray-400 rounded-full"></span>
             Observateurs
@@ -161,11 +174,17 @@ const getInitials = (member: CAMember) => {
               :key="obs.id"
               class="flex items-center gap-3 px-4 py-3 bg-white/50 dark:bg-gray-800/30 rounded-xl border border-dashed border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
             >
-              <img
-                :src="obs.photo || 'https://i.pravatar.cc/150?u=' + obs.id"
-                :alt="`${obs.first_name} ${obs.last_name}`"
-                class="w-10 h-10 rounded-full object-cover opacity-80"
-              />
+              <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
+                <img
+                  v-if="obs.photo"
+                  :src="obs.photo"
+                  :alt="`${obs.first_name} ${obs.last_name}`"
+                  class="w-full h-full object-cover opacity-80"
+                />
+                <span v-else class="text-xs font-medium text-gray-500 dark:text-gray-400">
+                  {{ obs.first_name.charAt(0) }}{{ obs.last_name.charAt(0) }}
+                </span>
+              </div>
               <div>
                 <h4 class="font-medium text-gray-700 dark:text-gray-300 text-sm">
                   {{ obs.civility }} {{ obs.first_name }} {{ obs.last_name }}
@@ -220,7 +239,6 @@ const getInitials = (member: CAMember) => {
 
 .org-card {
   position: relative;
-  animation: fadeInUp 0.6s ease-out forwards;
 }
 
 /* Connector down - vertical line going down from element */
@@ -262,69 +280,16 @@ const getInitials = (member: CAMember) => {
   background: linear-gradient(to right, transparent, #10b981, #6366f1, #10b981, transparent);
 }
 
-/* VP level with connector going down to Members */
-.vp-level {
-  position: relative;
-}
-
-.vp-level::after {
-  content: '';
-  position: absolute;
-  bottom: -32px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  height: 32px;
-  background: linear-gradient(to bottom, #10b981, #3b82f6);
-}
-
-/* Horizontal line before Members section */
-.horizontal-line-members {
-  position: relative;
-}
-
-.horizontal-line-members::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 10%;
-  right: 10%;
-  height: 2px;
-  background: linear-gradient(to right, transparent, #3b82f6, #8b5cf6, #3b82f6, transparent);
-}
-
-/* Vertical connector from horizontal line to Members title */
-.horizontal-line-members::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  height: 32px;
-  background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
-}
-
-/* President avatar ring - gradient border */
+/* President avatar ring - static gradient border */
 .president-avatar-ring {
   background: linear-gradient(135deg, #10b981, #6366f1, #8b5cf6);
-  padding: 4px;
+  padding: 3px;
 }
 
-/* Member card animation */
-.member-card {
+/* Card entrance animation */
+.org-card {
   animation: fadeInUp 0.6s ease-out forwards;
-  opacity: 0;
 }
-
-.member-card:nth-child(1) { animation-delay: 0.1s; }
-.member-card:nth-child(2) { animation-delay: 0.15s; }
-.member-card:nth-child(3) { animation-delay: 0.2s; }
-.member-card:nth-child(4) { animation-delay: 0.25s; }
-.member-card:nth-child(5) { animation-delay: 0.3s; }
-.member-card:nth-child(6) { animation-delay: 0.35s; }
-.member-card:nth-child(7) { animation-delay: 0.4s; }
-.member-card:nth-child(8) { animation-delay: 0.45s; }
 
 @keyframes fadeInUp {
   from {

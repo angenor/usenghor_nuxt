@@ -2,12 +2,13 @@
 const { t } = useI18n()
 const localePath = useLocalePath()
 const route = useRoute()
+const router = useRouter()
 
 // Tabs configuration
 const tabs = computed(() => [
   { key: 'about', label: t('about.tabs.about'), to: '/a-propos', icon: 'fa-solid fa-info-circle', exact: true },
   { key: 'strategy', label: t('about.tabs.strategy'), to: '/a-propos/strategie', icon: 'fa-solid fa-chess' },
-  { key: 'engagements', label: t('about.tabs.engagements'), to: '#engagements', icon: 'fa-solid fa-heart', isAnchor: true },
+  { key: 'engagements', label: t('about.tabs.engagements'), to: '#engagements', icon: 'fa-solid fa-heart', isAnchor: true, anchorPage: '/a-propos' },
   { key: 'organization', label: t('about.tabs.organization'), to: '/a-propos/organisation', icon: 'fa-solid fa-sitemap' },
   { key: 'careers', label: t('about.tabs.careers'), to: '/carrieres', icon: 'fa-solid fa-briefcase' }
 ])
@@ -23,11 +24,32 @@ const isActive = (tabTo: string, exact = false) => {
   return currentPath === localizedPath || currentPath.startsWith(localizedPath + '/')
 }
 
-// Scroll to anchor
-const scrollToAnchor = (anchor: string) => {
-  const element = document.querySelector(anchor)
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth' })
+// Check if we're on the anchor's target page
+const isOnAnchorPage = (anchorPage: string) => {
+  const currentPath = route.path
+  const localizedPath = localePath(anchorPage)
+  return currentPath === localizedPath
+}
+
+// Scroll to anchor (or navigate then scroll)
+const scrollToAnchor = async (anchor: string, anchorPage?: string) => {
+  // If we're not on the target page, navigate first
+  if (anchorPage && !isOnAnchorPage(anchorPage)) {
+    await router.push(localePath(anchorPage) + anchor)
+    // Wait for navigation and DOM update
+    await nextTick()
+    setTimeout(() => {
+      const element = document.querySelector(anchor)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+      }
+    }, 100)
+  } else {
+    // Already on the page, just scroll
+    const element = document.querySelector(anchor)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' })
+    }
   }
 }
 </script>
@@ -44,7 +66,7 @@ const scrollToAnchor = (anchor: string) => {
             v-if="tab.isAnchor"
             type="button"
             class="group flex items-center gap-2 px-3 sm:px-4 py-4 text-sm font-medium whitespace-nowrap border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200"
-            @click="scrollToAnchor(tab.to)"
+            @click="scrollToAnchor(tab.to, tab.anchorPage)"
           >
             <font-awesome-icon
               :icon="tab.icon"
