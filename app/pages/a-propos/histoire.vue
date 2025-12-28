@@ -285,24 +285,47 @@ onUnmounted(() => {
     />
 
     <!-- Sticky Intro Section -->
-    <section class="grid grid-cols-1 md:grid-cols-12 gap-[var(--grid-gutter)] px-[var(--site-margin)] py-[var(--space-xl)]">
-      <div class="md:col-span-6 md:sticky top-[var(--space-xs)] self-start space-y-[var(--space-xs)]">
-        <h2 class="text-[length:var(--fs-4)] font-bold tracking-tight max-w-[20ch] leading-[100%] text-gray-900 dark:text-white">
-          {{ t('history.title') }}
-        </h2>
-        <p class="text-[length:var(--fs-0)] md:text-[length:var(--fs-1)] leading-[112.5%] max-w-[40ch] text-gray-600 dark:text-gray-300">
-          {{ t('history.subtitle') }}
-        </p>
-        <p class="text-[length:var(--fs-0)] md:text-[length:var(--fs-1)] leading-[112.5%] max-w-[40ch] text-gray-600 dark:text-gray-300">
-          {{ t('history.genesis.point1') }}
-        </p>
-      </div>
-      <div class="md:col-span-6">
-        <img
-          src="https://picsum.photos/seed/senghor-portrait/800/1000"
-          alt="Leopold Sedar Senghor"
-          class="w-full h-auto rounded-[var(--panel-radius)]"
-        />
+    <section class="py-16 lg:py-24 bg-white dark:bg-gray-900">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <!-- Text Content -->
+          <div class="space-y-6">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
+              <span class="relative inline-block">
+                {{ t('history.title') }}
+                <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+              </span>
+            </h2>
+            <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+              {{ t('history.subtitle') }}
+            </p>
+            <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+              {{ t('history.genesis.point1') }}
+            </p>
+          </div>
+          <!-- SVG Image -->
+          <div class="flex items-center justify-center">
+            <svg class="w-full max-w-md h-auto" viewBox="0 0 100 100">
+              <defs>
+                <mask id="hashMask">
+                  <rect width="100" height="100" fill="black"/>
+                  <rect x="20" y="30" width="60" height="12" rx="2" fill="white"/>
+                  <rect x="20" y="58" width="60" height="12" rx="2" fill="white"/>
+                  <rect x="30" y="20" width="12" height="60" rx="2" fill="white"/>
+                  <rect x="58" y="20" width="12" height="60" rx="2" fill="white"/>
+                  <rect x="42" y="42" width="16" height="16" fill="white"/>
+                </mask>
+              </defs>
+              <image
+                href="https://picsum.photos/seed/senghor-portrait/800/800"
+                width="100"
+                height="100"
+                preserveAspectRatio="xMidYMid slice"
+                mask="url(#hashMask)"
+              />
+            </svg>
+          </div>
+        </div>
       </div>
     </section>
 
