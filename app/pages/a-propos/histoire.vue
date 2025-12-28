@@ -387,11 +387,6 @@ onUnmounted(() => {
         </div>
       </section>
     </div>
-
-    <!-- Footer Space -->
-    <div class="h-[50vh] bg-white dark:bg-gray-900 flex items-center justify-center">
-      <p class="text-2xl font-bold text-gray-400">{{ t('history.legacy.badge') }}</p>
-    </div>
   </div>
 </template>
 
