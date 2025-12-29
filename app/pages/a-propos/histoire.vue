@@ -338,10 +338,12 @@ onUnmounted(() => {
         ref="yearDisplayRef"
         class="year-display"
       >
-        <span class="digit">1</span>
-        <span class="digit">9</span>
-        <span class="digit">8</span>
-        <span class="digit">9</span>
+        <span class="year-bg">
+          <span class="digit">1</span>
+          <span class="digit">9</span>
+          <span class="digit">8</span>
+          <span class="digit">9</span>
+        </span>
       </div>
 
       <!-- Timeline Section -->
@@ -415,10 +417,9 @@ onUnmounted(() => {
   font-size: clamp(2rem, 6vw, 5rem);
   font-weight: 300;
   line-height: 1;
-  color: rgba(0, 0, 0, 0.5);
+  color: rgba(0, 0, 0, 0.7);
   pointer-events: none;
   user-select: none;
-  /* Pas de background - transparent */
 }
 
 @media (min-width: 768px) {
@@ -428,7 +429,19 @@ onUnmounted(() => {
 }
 
 .dark .year-display {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Background uniquement autour des chiffres */
+.year-bg {
+  display: inline-flex;
+  padding: 0.1em 0.1em;
+  border-radius: 0.25em;
+  background: rgba(253, 246, 227, 0.9);
+}
+
+.dark .year-bg {
+  background: rgba(17, 24, 39, 0.9);
 }
 
 .year-display .digit {
