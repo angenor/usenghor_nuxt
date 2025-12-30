@@ -117,7 +117,7 @@ const scrollToAnchor = async (anchor: string, anchorPage?: string) => {
     <!-- Sub Navigation (shown on histoire/gouvernance pages) -->
     <nav
       v-if="isOnSubPage"
-      class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700"
+      class="bg-white/30 dark:bg-gray-800/30 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-center gap-1 py-2">
