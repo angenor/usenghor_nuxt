@@ -1,0 +1,99 @@
+{
+  "strategy": {
+    "seo": {
+      "title": "Notre Strategie | Universite Senghor",
+      "description": "Decouvrez le Plan strategique de l'Universite Senghor : nos axes prioritaires, objectifs et projets pour accompagner la transformation de l'Afrique."
+    },
+    "hero": {
+      "title": "Notre Strategie",
+      "subtitle": "Plan strategique : Former les leaders de demain pour transformer l'Afrique"
+    },
+    "plan": {
+      "title": "Plan strategique",
+      "summary": "Le Plan strategique de l'Universite Senghor definit notre vision et nos ambitions pour les six prochaines annees. Il s'articule autour de cinq axes strategiques majeurs qui guideront nos actions et nos investissements pour former les leaders africains de demain.",
+      "download": "Telecharger le plan strategique (PDF)"
+    },
+    "axes": {
+      "title": "Nos axes strategiques",
+      "subtitle": "Cinq piliers pour accompagner la transformation de l'Afrique",
+      "items": {
+        "excellence": {
+          "title": "Excellence academique",
+          "description": "Renforcer la qualite de nos formations et de notre recherche pour former des leaders competents.",
+          "objective1": "Accreditation internationale de tous les programmes",
+          "objective2": "Developpement de nouveaux masters specialises",
+          "objective3": "Renforcement du corps professoral permanent"
+        },
+        "innovation": {
+          "title": "Innovation pedagogique",
+          "description": "Innover dans nos methodes d'enseignement et integrer les outils numeriques.",
+          "objective1": "Deploiement de la plateforme e-learning",
+          "objective2": "Formation hybride et a distance",
+          "objective3": "Partenariats avec les EdTech africaines"
+        },
+        "rayonnement": {
+          "title": "Rayonnement international",
+          "description": "Etendre notre presence en Afrique et renforcer nos partenariats mondiaux.",
+          "objective1": "Ouverture de 3 nouveaux campus delocalises",
+          "objective2": "Accords avec 20 universites partenaires",
+          "objective3": "Programmes d'echange etudiant"
+        },
+        "durabilite": {
+          "title": "Developpement durable",
+          "description": "Integrer les enjeux environnementaux et sociaux dans toutes nos activites.",
+          "objective1": "Campus neutre en carbone d'ici 2028",
+          "objective2": "Formations dediees au developpement durable",
+          "objective3": "Recherche sur les defis climatiques africains"
+        },
+        "gouvernance": {
+          "title": "Gouvernance renforcee",
+          "description": "Moderniser notre gouvernance et diversifier nos sources de financement.",
+          "objective1": "Reforme des instances de gouvernance",
+          "objective2": "Augmentation des ressources propres",
+          "objective3": "Systeme d'evaluation et de suivi"
+        }
+      }
+    },
+    "indicators": {
+      "title": "Objectifs 2030",
+      "subtitle": "Nos indicateurs cles de performance",
+      "items": {
+        "students": "etudiants formes par an",
+        "programs": "programmes de formation",
+        "women": "de femmes dans les promotions",
+        "insertion": "taux d'insertion professionnelle"
+      }
+    },
+    "fundraising": {
+      "title": "Levee de fonds",
+      "subtitle": "Nos projets prioritaires pour accompagner notre developpement",
+      "projects": {
+        "scholarships": {
+          "title": "Bourses d'excellence",
+          "description": "Financer des bourses pour les etudiants meritants issus de milieux defavorises.",
+          "amount": "500 000 EUR/an"
+        },
+        "campus": {
+          "title": "Extension du campus",
+          "description": "Construire de nouveaux batiments pour accueillir plus d'etudiants.",
+          "amount": "2 000 000 EUR"
+        },
+        "research": {
+          "title": "Centre de recherche",
+          "description": "Creer un centre de recherche dedie aux defis du developpement africain.",
+          "amount": "1 500 000 EUR"
+        },
+        "library": {
+          "title": "Bibliotheque numerique",
+          "description": "Developper une bibliotheque numerique accessible a tous nos campus.",
+          "amount": "300 000 EUR"
+        }
+      },
+      "cta": {
+        "title": "Devenez partenaire",
+        "text": "Rejoignez-nous dans notre mission de former les leaders africains de demain. Votre soutien fait la difference.",
+        "button": "Nous contacter"
+      }
+    }
+  }
+}

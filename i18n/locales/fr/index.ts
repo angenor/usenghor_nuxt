@@ -9,6 +9,7 @@ import footer from './footer.json'
 import search from './search.json'
 import courses from './courses.json'
 import about from './about.json'
+import strategy from './strategy.json'
 
 export default {
   ...common,
@@ -21,5 +22,6 @@ export default {
   ...footer,
   ...search,
   ...courses,
-  ...about
+  ...about,
+  ...strategy
 }

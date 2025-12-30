@@ -1,0 +1,99 @@
+{
+  "strategy": {
+    "seo": {
+      "title": "Our Strategy | Senghor University",
+      "description": "Discover Senghor University's Strategic Plan: our priority areas, objectives, and projects to support Africa's transformation."
+    },
+    "hero": {
+      "title": "Our Strategy",
+      "subtitle": "Strategic Plan: Training tomorrow's leaders to transform Africa"
+    },
+    "plan": {
+      "title": "Strategic Plan",
+      "summary": "Senghor University's Strategic Plan defines our vision and ambitions for the next six years. It is structured around five major strategic axes that will guide our actions and investments to train Africa's leaders of tomorrow.",
+      "download": "Download the strategic plan (PDF)"
+    },
+    "axes": {
+      "title": "Our Strategic Axes",
+      "subtitle": "Five pillars to support Africa's transformation",
+      "items": {
+        "excellence": {
+          "title": "Academic Excellence",
+          "description": "Strengthen the quality of our programs and research to train competent leaders.",
+          "objective1": "International accreditation of all programs",
+          "objective2": "Development of new specialized masters",
+          "objective3": "Strengthening of permanent faculty"
+        },
+        "innovation": {
+          "title": "Pedagogical Innovation",
+          "description": "Innovate in our teaching methods and integrate digital tools.",
+          "objective1": "Deployment of e-learning platform",
+          "objective2": "Hybrid and distance learning",
+          "objective3": "Partnerships with African EdTech"
+        },
+        "rayonnement": {
+          "title": "International Outreach",
+          "description": "Extend our presence in Africa and strengthen our global partnerships.",
+          "objective1": "Opening of 3 new satellite campuses",
+          "objective2": "Agreements with 20 partner universities",
+          "objective3": "Student exchange programs"
+        },
+        "durabilite": {
+          "title": "Sustainable Development",
+          "description": "Integrate environmental and social issues into all our activities.",
+          "objective1": "Carbon-neutral campus by 2028",
+          "objective2": "Dedicated sustainable development programs",
+          "objective3": "Research on African climate challenges"
+        },
+        "gouvernance": {
+          "title": "Enhanced Governance",
+          "description": "Modernize our governance and diversify our funding sources.",
+          "objective1": "Reform of governance bodies",
+          "objective2": "Increase in own resources",
+          "objective3": "Evaluation and monitoring system"
+        }
+      }
+    },
+    "indicators": {
+      "title": "2030 Objectives",
+      "subtitle": "Our key performance indicators",
+      "items": {
+        "students": "students trained per year",
+        "programs": "training programs",
+        "women": "women in cohorts",
+        "insertion": "professional insertion rate"
+      }
+    },
+    "fundraising": {
+      "title": "Fundraising",
+      "subtitle": "Our priority projects to support our development",
+      "projects": {
+        "scholarships": {
+          "title": "Excellence Scholarships",
+          "description": "Fund scholarships for deserving students from disadvantaged backgrounds.",
+          "amount": "EUR 500,000/year"
+        },
+        "campus": {
+          "title": "Campus Extension",
+          "description": "Build new buildings to accommodate more students.",
+          "amount": "EUR 2,000,000"
+        },
+        "research": {
+          "title": "Research Center",
+          "description": "Create a research center dedicated to African development challenges.",
+          "amount": "EUR 1,500,000"
+        },
+        "library": {
+          "title": "Digital Library",
+          "description": "Develop a digital library accessible to all our campuses.",
+          "amount": "EUR 300,000"
+        }
+      },
+      "cta": {
+        "title": "Become a Partner",
+        "text": "Join us in our mission to train Africa's leaders of tomorrow. Your support makes a difference.",
+        "button": "Contact Us"
+      }
+    }
+  }
+}
