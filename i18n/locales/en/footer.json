@@ -59,7 +59,9 @@
     },
     "contact": {
       "title": "Contact",
+      "addressTitle": "Address",
       "address": "1, Place Ahmed Orabi, El Mancheya, Alexandria, Egypt",
+      "phoneTitle": "Phone",
       "phone": "+20 3 484 3504",
       "email": "info{'@'}usenghor.org"
     },
