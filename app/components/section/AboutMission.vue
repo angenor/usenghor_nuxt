@@ -21,7 +21,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  illustration: '/images/bg/Asset-1.webp',
+  illustration: '/images/bg/bg_mission_section.jpeg',
   ctaLabel: 'Découvrir',
   ctaAnchor: '#history'
 })
