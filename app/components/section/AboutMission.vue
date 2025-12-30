@@ -49,7 +49,7 @@ const scrollToSection = () => {
           <img
             :src="props.illustration"
             :alt="props.title"
-            class="w-full max-w-md lg:max-w-lg h-auto object-contain drop-shadow-lg"
+            class="illustration-bordered w-full max-w-md lg:max-w-lg h-auto object-contain"
           />
         </div>
 
@@ -131,3 +131,25 @@ const scrollToSection = () => {
     </div>
   </section>
 </template>
+
+<style scoped>
+.illustration-bordered {
+  --c: #f59e0b; /* amber-500 */
+  --b: 6px; /* thickness of the border */
+  --o: 20px; /* control the offset */
+
+  --_p: calc(2 * var(--o) + var(--b));
+  padding: var(--_p) var(--_p) 0 0;
+  outline: var(--b) solid var(--c);
+  outline-offset: calc(var(--o) - var(--_p));
+  transition: 0.4s;
+}
+
+.illustration-bordered:hover {
+  padding: calc(var(--_p) / 2);
+}
+
+:root.dark .illustration-bordered {
+  --c: #fbbf24; /* amber-400 for dark mode */
+}
+</style>

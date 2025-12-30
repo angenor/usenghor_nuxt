@@ -10,7 +10,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  backgroundImage: '/images/bg/backgroud_senghor3.jpg'
+  backgroundImage: '/images/bg/bg_stats_section.jpeg'
 })
 
 const statsRef = ref<HTMLElement | null>(null)
