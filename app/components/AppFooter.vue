@@ -131,32 +131,30 @@ const socialLinks = [
       <!-- Main Footer Content -->
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-6">
-          <!-- Logo & Description -->
-          <div class="col-span-2 md:col-span-3 lg:col-span-2">
-            <div class="flex items-center gap-3 mb-4">
+          <!-- Logo vertical -->
+          <div class="col-span-2 md:col-span-3 lg:col-span-2 flex flex-col">
+            <div class="flex-1 flex flex-col items-start justify-between">
+              <!-- Logo blanc pour le footer sombre -->
               <img
-                src="/images/logos/logo-web-noir-petit.png"
+                src="/images/logos/senghor_logo_vertical_blanc.png"
                 alt="Université Senghor"
-                class="h-12 w-auto brightness-0 invert"
+                class="h-48 lg:h-56 w-auto object-contain"
               />
-            </div>
-            <p class="text-gray-400 mb-6 leading-relaxed">
-              {{ t('footer.description') }}
-            </p>
 
-            <!-- Social Links -->
-            <div class="flex gap-3">
-              <a
-                v-for="social in socialLinks"
-                :key="social.name"
-                :href="social.url"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-gray-400 hover:bg-amber-500 hover:text-white transition-all duration-300 hover:scale-110"
-                :aria-label="social.name"
-              >
-                <font-awesome-icon :icon="social.icon" class="w-4 h-4" />
-              </a>
+              <!-- Social Links -->
+              <div class="flex gap-3 mt-6">
+                <a
+                  v-for="social in socialLinks"
+                  :key="social.name"
+                  :href="social.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-gray-400 hover:bg-amber-500 hover:text-white transition-all duration-300 hover:scale-110"
+                  :aria-label="social.name"
+                >
+                  <font-awesome-icon :icon="social.icon" class="w-4 h-4" />
+                </a>
+              </div>
             </div>
           </div>
 
