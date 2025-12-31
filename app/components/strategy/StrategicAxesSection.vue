@@ -16,7 +16,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.1 })
+const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.1 })
 
 // Map icon names to Font Awesome icons
 const getIcon = (iconName: string): string => {
@@ -70,9 +70,10 @@ const getColors = (color: string) => colorClasses[color] || colorClasses.amber
 <template>
   <section
     ref="sectionRef"
-    class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-800 transition-colors duration-300 heropattern-jigsaw-gray-100 dark:heropattern-jigsaw-gray-700 bg-fixed"
+    class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-800 transition-colors duration-300 heropattern-jigsaw-gray-100 dark:heropattern-jigsaw-gray-700"
+    style="background-attachment: fixed;"
   >
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl mx-auto  px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="text-center mb-12 lg:mb-16">
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
