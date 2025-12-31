@@ -41,6 +41,7 @@ pnpm generate     # Generate static site
 - English URLs: `/en`, `/en/about`
 - Arabic URLs: `/ar`, `/ar/about` (RTL direction applied automatically)
 - Browser language detection with cookie persistence
+- **French: toujours utiliser les accents** (é, è, ê, à, ç, etc.)
 
 **Component Structure:**
 - `app.vue` handles global layout, RTL switching, and includes `AppNavBar` + `AppFooter`
