@@ -70,7 +70,7 @@ const getColors = (color: string) => colorClasses[color] || colorClasses.amber
 <template>
   <section
     ref="sectionRef"
-    class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-800 transition-colors duration-300"
+    class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-800 transition-colors duration-300 heropattern-jigsaw-gray-100 dark:heropattern-jigsaw-gray-700 bg-fixed"
   >
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->

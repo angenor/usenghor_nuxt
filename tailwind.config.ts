@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss'
+import heroPatterns from 'tailwindcss-hero-patterns'
 
 export default {
   darkMode: 'class',
@@ -32,5 +33,5 @@ export default {
       }
     }
   },
-  plugins: []
+  plugins: [heroPatterns]
 } satisfies Config

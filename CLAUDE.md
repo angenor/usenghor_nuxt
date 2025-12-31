@@ -53,6 +53,7 @@ pnpm generate     # Generate static site
 - Dark mode via `dark:` variants (toggled by `useDarkMode` composable)
 - Custom amber color palette defined in `tailwind.config.ts`
 - Animate.css for animations
+- [`tailwindcss-hero-patterns`](https://github.com/svengau/tailwindcss-hero-patterns) for section backgrounds: `heropattern-{pattern}-{color}-{shade}` (ex: `heropattern-jigsaw-gray-100`)
 
 ## Mock Data
 

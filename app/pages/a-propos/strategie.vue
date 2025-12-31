@@ -138,12 +138,12 @@ const fundraisingProjects = computed(() => [
     />
 
     <!-- Target Indicators Section -->
-    <StrategyTargetIndicatorsSection
+    <!-- <StrategyTargetIndicatorsSection
       :title="t('strategy.indicators.title')"
       :subtitle="t('strategy.indicators.subtitle')"
       :indicators="targetIndicators"
       background-image="/images/bg/bg_stats_section.jpeg"
-    />
+    /> -->
 
     <!-- Fundraising Section -->
     <StrategyFundraisingSection
