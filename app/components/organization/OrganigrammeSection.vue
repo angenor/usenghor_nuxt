@@ -114,6 +114,14 @@ const getDeptName = (dept: any) => {
   if (locale.value === 'en') return dept.name_en
   return dept.name_fr
 }
+
+// Scroll vers la section département
+const scrollToDept = (slug: string) => {
+  const element = document.getElementById(slug)
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
 </script>
 
 <template>
@@ -200,13 +208,14 @@ const getDeptName = (dept: any) => {
 
           <!-- Departments Grid -->
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <a
+            <button
               v-for="dept in departments"
               :key="dept.id"
-              :href="`#${dept.slug}`"
+              type="button"
               data-card
-              class="group bg-white dark:bg-gray-800 rounded-xl p-5 border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer"
+              class="group bg-white dark:bg-gray-800 rounded-xl p-5 border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer text-left"
               :class="groupColors.departements.border"
+              @click="scrollToDept(dept.slug)"
             >
               <div class="flex items-start gap-4">
                 <div
@@ -229,7 +238,7 @@ const getDeptName = (dept: any) => {
                   </span>
                 </div>
               </div>
-            </a>
+            </button>
           </div>
         </div>
 
