@@ -33,73 +33,178 @@ const programs = [
     colors: ['#10b981', '#6ee7b7'] // emerald
   }
 ]
+
+// Gallery images
+const galleryImages = [
+  { src: 'https://picsum.photos/seed/student-1/400/500', alt: 'Étudiant Senghor' },
+  { src: 'https://picsum.photos/seed/campus-1/600/400', alt: 'Campus Alexandrie' },
+  { src: 'https://picsum.photos/seed/student-2/400/400', alt: 'Étudiants en cours' },
+  { src: 'https://picsum.photos/seed/campus-2/400/300', alt: 'Bibliothèque' },
+  { src: 'https://picsum.photos/seed/student-3/400/500', alt: 'Remise de diplômes' }
+]
 </script>
 
 <template>
   <section
     id="etudiants"
     ref="sectionRef"
-    class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-900 transition-colors duration-300 scroll-mt-20"
+    class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-900 transition-colors duration-300 scroll-mt-20 overflow-hidden"
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Header -->
-      <div class="max-w-3xl mx-auto text-center mb-12">
-        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium mb-6 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
-          <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-3.5 h-3.5 mr-2" />
-          {{ t('careers.opportunities.students.title') }}
-        </span>
-        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-          {{ t('careers.students.title') }}
-        </h2>
-        <p class="text-lg text-gray-600 dark:text-gray-300">
-          {{ t('careers.students.text') }}
-        </p>
+      <!-- Header with Image Bento Grid -->
+      <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mb-16">
+        <!-- Text Content -->
+        <div class="order-2 lg:order-1">
+          <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium mb-6 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+            <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-3.5 h-3.5 mr-2" />
+            {{ t('careers.opportunities.students.title') }}
+          </span>
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+            {{ t('careers.students.title') }}
+          </h2>
+          <p class="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+            {{ t('careers.students.text') }}
+          </p>
+
+          <!-- Stats Row -->
+          <div class="flex flex-wrap gap-6 mb-8">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center">
+                <font-awesome-icon icon="fa-solid fa-users" class="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">3500+</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Alumni</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-purple-500 flex items-center justify-center">
+                <font-awesome-icon icon="fa-solid fa-globe-africa" class="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">40+</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Pays</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center">
+                <font-awesome-icon icon="fa-solid fa-award" class="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">30+</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Ans</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bento Image Grid -->
+        <div class="order-1 lg:order-2 relative">
+          <div class="bento-grid">
+            <!-- Main large image -->
+            <div class="bento-item bento-item--large">
+              <img
+                :src="galleryImages[0].src"
+                :alt="galleryImages[0].alt"
+                class="w-full h-full object-cover"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-blue-600/40 to-transparent"></div>
+            </div>
+
+            <!-- Top right -->
+            <div class="bento-item bento-item--medium">
+              <img
+                :src="galleryImages[1].src"
+                :alt="galleryImages[1].alt"
+                class="w-full h-full object-cover"
+              />
+              <div class="absolute inset-0 bg-gradient-to-br from-purple-600/30 to-transparent"></div>
+            </div>
+
+            <!-- Bottom left small -->
+            <div class="bento-item bento-item--small">
+              <img
+                :src="galleryImages[2].src"
+                :alt="galleryImages[2].alt"
+                class="w-full h-full object-cover"
+              />
+            </div>
+
+            <!-- Bottom right -->
+            <div class="bento-item bento-item--accent">
+              <div class="w-full h-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center p-4">
+                <div class="text-center text-white">
+                  <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-8 h-8 mb-2" />
+                  <p class="text-sm font-medium">Alexandrie, Égypte</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Decorative elements -->
+          <div class="absolute -top-4 -right-4 w-24 h-24 bg-blue-200 dark:bg-blue-800/30 rounded-full blur-2xl opacity-60"></div>
+          <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-purple-200 dark:bg-purple-800/30 rounded-full blur-2xl opacity-60"></div>
+        </div>
       </div>
 
-      <!-- Two column layout -->
+      <!-- Two column layout: Why + Programs -->
       <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-        <!-- Left: Content -->
-        <div class="order-2 lg:order-1">
+        <!-- Left: Why study with us + CTA -->
+        <div>
           <!-- Why study with us -->
           <div class="mb-10">
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+              <span class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                <font-awesome-icon icon="fa-solid fa-star" class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              </span>
               {{ t('careers.students.why.title') }}
             </h3>
             <div class="space-y-3">
               <div
                 v-for="(item, index) in whyItems"
                 :key="index"
-                class="flex items-start gap-3 p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                class="group flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 hover:shadow-md"
               >
-                <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
-                  <font-awesome-icon icon="fa-solid fa-check" class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                  <font-awesome-icon icon="fa-solid fa-check" class="w-4 h-4 text-white" />
                 </div>
-                <span class="text-gray-700 dark:text-gray-300 pt-1">{{ item }}</span>
+                <span class="text-gray-700 dark:text-gray-300 pt-0.5">{{ item }}</span>
               </div>
             </div>
           </div>
 
-          <!-- CTA -->
-          <div class="p-6 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-            <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              {{ t('careers.students.cta.title') }}
-            </h4>
-            <p class="text-gray-600 dark:text-gray-300 mb-4">
-              {{ t('careers.students.cta.text') }}
-            </p>
-            <NuxtLink
-              :to="localePath('/inscription')"
-              class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
-            >
-              <font-awesome-icon icon="fa-solid fa-file-pen" class="w-4 h-4" />
-              {{ t('careers.students.cta.button') }}
-            </NuxtLink>
+          <!-- CTA Card with Image Background -->
+          <div class="relative overflow-hidden rounded-2xl">
+            <img
+              :src="galleryImages[4].src"
+              alt="Campus"
+              class="absolute inset-0 w-full h-full object-cover"
+            />
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-600/95 to-blue-500/90"></div>
+            <div class="relative p-8 text-white">
+              <h4 class="text-xl font-bold mb-2">
+                {{ t('careers.students.cta.title') }}
+              </h4>
+              <p class="text-blue-100 mb-6">
+                {{ t('careers.students.cta.text') }}
+              </p>
+              <NuxtLink
+                :to="localePath('/inscription')"
+                class="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+              >
+                <font-awesome-icon icon="fa-solid fa-file-pen" class="w-4 h-4" />
+                {{ t('careers.students.cta.button') }}
+              </NuxtLink>
+            </div>
           </div>
         </div>
 
         <!-- Right: Programs Infographic -->
-        <div class="order-1 lg:order-2">
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 text-center lg:text-left">
+        <div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+            <span class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+              <font-awesome-icon icon="fa-solid fa-book-open" class="w-4 h-4 text-purple-600 dark:text-purple-400" />
+            </span>
             {{ t('careers.students.programs.title') }}
           </h3>
 
@@ -138,6 +243,22 @@ const programs = [
               </div>
             </NuxtLink>
           </div>
+
+          <!-- Bottom image accent -->
+          <div class="mt-8 relative rounded-2xl overflow-hidden shadow-lg">
+            <img
+              :src="galleryImages[3].src"
+              alt="Bibliothèque"
+              class="w-full h-40 object-cover"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent"></div>
+            <div class="absolute bottom-4 left-4 right-4 text-white">
+              <p class="text-sm font-medium flex items-center gap-2">
+                <font-awesome-icon icon="fa-solid fa-location-dot" class="w-3 h-3" />
+                Campus moderne à Alexandrie
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -145,12 +266,62 @@ const programs = [
 </template>
 
 <style scoped>
+/* Bento Grid */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 100px);
+  gap: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 640px) {
+  .bento-grid {
+    grid-template-rows: repeat(3, 120px);
+  }
+}
+
+.bento-item {
+  position: relative;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.bento-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.bento-item--large {
+  grid-column: 1 / 2;
+  grid-row: 1 / 4;
+}
+
+.bento-item--medium {
+  grid-column: 2 / 4;
+  grid-row: 1 / 3;
+}
+
+.bento-item--small {
+  grid-column: 2 / 3;
+  grid-row: 3 / 4;
+}
+
+.bento-item--accent {
+  grid-column: 3 / 4;
+  grid-row: 3 / 4;
+}
+
+/* Infographic */
 .infographic-container {
   display: flex;
   flex-direction: column;
   filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.15));
-  padding-left: 1.5rem; /* Space for left arrow */
-  padding-right: 1.5rem; /* Space for right arrow */
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
 
 .dark .infographic-container {
@@ -308,6 +479,30 @@ const programs = [
 
 /* Responsive - Mobile */
 @media (max-width: 640px) {
+  .bento-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 120px);
+  }
+
+  .bento-item--large {
+    grid-column: 1 / 2;
+    grid-row: 1 / 3;
+  }
+
+  .bento-item--medium {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+  }
+
+  .bento-item--small {
+    display: none;
+  }
+
+  .bento-item--accent {
+    grid-column: 2 / 3;
+    grid-row: 2 / 3;
+  }
+
   .infographic-container {
     padding-left: 1rem;
     padding-right: 1rem;
