@@ -116,6 +116,17 @@ const getFormationName = (formation: any) => {
   if (locale.value === 'en') return formation.title_en || formation.title_fr
   return formation.title_fr
 }
+
+// Images illustratives par département (utilisant picsum avec seed pour consistance)
+const deptImages: Record<string, string> = {
+  'dept-culture': 'https://picsum.photos/seed/culture-art/600/400',
+  'dept-environnement': 'https://picsum.photos/seed/environment-nature/600/400',
+  'dept-management': 'https://picsum.photos/seed/business-management/600/400',
+  'dept-sante': 'https://picsum.photos/seed/health-medical/600/400',
+  'dept-doctoral': 'https://picsum.photos/seed/research-doctoral/600/400'
+}
+
+const getDeptImage = (deptId: string) => deptImages[deptId] || 'https://picsum.photos/seed/university/600/400'
 </script>
 
 <template>
@@ -142,62 +153,113 @@ const getFormationName = (formation: any) => {
       class="section-bubble transition-colors duration-300"
       :class="[getColors(dept.color).bgLight, getColors(dept.color).bgDark]"
     >
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-        <!-- Icône + Titre -->
-        <div class="flex items-center gap-4 mb-6">
-          <div
-            class="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
-            :class="getColors(dept.color).iconBg"
-          >
-            <font-awesome-icon
-              :icon="getIcon(dept.icon)"
-              class="w-7 h-7 text-white"
-            />
-          </div>
-          <h3
-            class="text-2xl lg:text-3xl font-bold text-gray-900"
-            :class="getColors(dept.color).textDark"
-          >
-            {{ getDeptName(dept) }}
-          </h3>
-        </div>
-
-        <!-- Description -->
-        <p
-          class="text-gray-700 leading-relaxed mb-8 max-w-3xl"
-          :class="getColors(dept.color).textDark"
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
+        <!-- Layout flex avec alternance image gauche/droite -->
+        <div
+          class="flex flex-col gap-8 lg:gap-12 items-center"
+          :class="index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'"
         >
-          {{ getDeptDescription(dept) }}
-        </p>
+          <!-- Image illustrative -->
+          <div class="w-full lg:w-5/12 flex-shrink-0">
+            <div class="relative group">
+              <!-- Forme décorative derrière l'image -->
+              <div
+                class="absolute -inset-4 rounded-3xl opacity-30 blur-xl transition-all duration-500 group-hover:opacity-50"
+                :class="getColors(dept.color).iconBg"
+              ></div>
+              <!-- Container image avec forme organique -->
+              <div class="relative overflow-hidden rounded-3xl shadow-2xl">
+                <!-- Masque SVG pour forme organique -->
+                <div
+                  class="aspect-[4/3] overflow-hidden"
+                  :style="{
+                    clipPath: index % 2 === 0
+                      ? 'polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%)'
+                      : 'polygon(0 0, 100% 0, 100% 100%, 15% 100%, 0 85%)'
+                  }"
+                >
+                  <img
+                    :src="getDeptImage(dept.id)"
+                    :alt="getDeptName(dept)"
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                </div>
+                <!-- Overlay gradient -->
+                <div
+                  class="absolute inset-0 opacity-20"
+                  :class="getColors(dept.color).iconBg"
+                ></div>
+                <!-- Badge flottant avec icône -->
+                <div
+                  class="absolute bottom-4 shadow-lg flex items-center justify-center w-16 h-16 rounded-2xl"
+                  :class="[
+                    getColors(dept.color).iconBg,
+                    index % 2 === 0 ? 'right-4' : 'left-4'
+                  ]"
+                >
+                  <font-awesome-icon
+                    :icon="getIcon(dept.icon)"
+                    class="w-8 h-8 text-white"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
 
-        <!-- Formations badges -->
-        <div v-if="getFormationsByDepartment(dept.id).length > 0">
-          <h4
-            class="text-sm font-semibold uppercase tracking-wider mb-4 text-gray-600"
-            :class="getColors(dept.color).textDark"
-          >
-            {{ t('organization.departments.view_programs') }}
-          </h4>
-          <div class="flex flex-wrap gap-3">
-            <NuxtLink
-              v-for="formation in getFormationsByDepartment(dept.id)"
-              :key="formation.id"
-              :to="localePath(`/formations/${formation.slug}`)"
-              class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm transition-all duration-200 hover:shadow-md hover:scale-105"
-              :class="[getColors(dept.color).badgeBg, getColors(dept.color).badgeText]"
+          <!-- Contenu texte -->
+          <div class="w-full lg:w-7/12">
+            <!-- Titre -->
+            <h3
+              class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4"
+              :class="getColors(dept.color).textDark"
             >
-              <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-3.5 h-3.5" />
-              {{ getFormationName(formation) }}
-            </NuxtLink>
+              {{ getDeptName(dept) }}
+            </h3>
+
+            <!-- Ligne décorative -->
+            <div
+              class="w-20 h-1 rounded-full mb-6"
+              :class="getColors(dept.color).iconBg"
+            ></div>
+
+            <!-- Description -->
+            <p
+              class="text-gray-700 leading-relaxed text-lg mb-8"
+              :class="getColors(dept.color).textDark"
+            >
+              {{ getDeptDescription(dept) }}
+            </p>
+
+            <!-- Formations badges -->
+            <div v-if="getFormationsByDepartment(dept.id).length > 0">
+              <h4
+                class="text-sm font-semibold uppercase tracking-wider mb-4 text-gray-600"
+                :class="getColors(dept.color).textDark"
+              >
+                {{ t('organization.departments.view_programs') }}
+              </h4>
+              <div class="flex flex-wrap gap-3">
+                <NuxtLink
+                  v-for="formation in getFormationsByDepartment(dept.id)"
+                  :key="formation.id"
+                  :to="localePath(`/formations/${formation.slug}`)"
+                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:scale-105 hover:-translate-y-0.5"
+                  :class="[getColors(dept.color).badgeBg, getColors(dept.color).badgeText]"
+                >
+                  <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-3.5 h-3.5" />
+                  {{ getFormationName(formation) }}
+                </NuxtLink>
+              </div>
+            </div>
+            <p
+              v-else
+              class="text-sm italic text-gray-500"
+              :class="getColors(dept.color).textDark"
+            >
+              {{ t('organization.departments.no_programs') }}
+            </p>
           </div>
         </div>
-        <p
-          v-else
-          class="text-sm italic text-gray-500"
-          :class="getColors(dept.color).textDark"
-        >
-          {{ t('organization.departments.no_programs') }}
-        </p>
       </div>
 
       <!-- Wave separator (sauf dernier) -->
