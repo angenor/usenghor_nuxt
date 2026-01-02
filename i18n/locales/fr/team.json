@@ -1,0 +1,36 @@
+{
+  "team": {
+    "seo": {
+      "title": "Notre équipe | Université Senghor",
+      "description": "Découvrez l'équipe de l'Université Senghor : direction, enseignants-chercheurs et personnel administratif."
+    },
+    "hero": {
+      "title": "Notre équipe",
+      "subtitle": "Les visages de ceux qui font vivre l'Université au quotidien"
+    },
+    "filters": {
+      "all": "Tous",
+      "direction": "Direction",
+      "enseignant": "Enseignants",
+      "administratif": "Administratifs",
+      "search": "Rechercher un membre...",
+      "no_results": "Aucun résultat pour votre recherche",
+      "clear_filters": "Effacer les filtres"
+    },
+    "card": {
+      "email": "Envoyer un email",
+      "linkedin": "Voir le profil LinkedIn",
+      "department": "Département",
+      "service": "Service"
+    },
+    "stats": {
+      "total": "membre | membres",
+      "showing": "Affichage de {count} sur {total}"
+    },
+    "cta": {
+      "title": "Rejoignez notre équipe",
+      "text": "Vous souhaitez contribuer à la formation des cadres africains de demain ?",
+      "button": "Voir les opportunités"
+    }
+  }
+}

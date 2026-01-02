@@ -1,0 +1,36 @@
+{
+  "team": {
+    "seo": {
+      "title": "Our Team | Senghor University",
+      "description": "Discover the Senghor University team: leadership, faculty and administrative staff."
+    },
+    "hero": {
+      "title": "Our Team",
+      "subtitle": "The faces of those who bring the University to life every day"
+    },
+    "filters": {
+      "all": "All",
+      "direction": "Leadership",
+      "enseignant": "Faculty",
+      "administratif": "Administrative Staff",
+      "search": "Search for a member...",
+      "no_results": "No results for your search",
+      "clear_filters": "Clear filters"
+    },
+    "card": {
+      "email": "Send an email",
+      "linkedin": "View LinkedIn profile",
+      "department": "Department",
+      "service": "Service"
+    },
+    "stats": {
+      "total": "member | members",
+      "showing": "Showing {count} of {total}"
+    },
+    "cta": {
+      "title": "Join our team",
+      "text": "Do you want to contribute to training tomorrow's African leaders?",
+      "button": "View opportunities"
+    }
+  }
+}

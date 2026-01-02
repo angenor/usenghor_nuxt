@@ -9,6 +9,7 @@ const tabs = computed(() => [
   { key: 'about', label: t('about.tabs.about'), to: '/a-propos', icon: 'fa-solid fa-info-circle', exact: true },
   { key: 'strategy', label: t('about.tabs.strategy'), to: '/a-propos/strategie', icon: 'fa-solid fa-chess' },
   { key: 'organization', label: t('about.tabs.organization'), to: '/a-propos/organisation', icon: 'fa-solid fa-sitemap' },
+  { key: 'team', label: t('about.tabs.team'), to: '/a-propos/equipe', icon: 'fa-solid fa-users' },
   { key: 'careers', label: t('about.tabs.careers'), to: '/carrieres', icon: 'fa-solid fa-briefcase' }
 ])
 

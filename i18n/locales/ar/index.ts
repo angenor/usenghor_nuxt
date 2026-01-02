@@ -11,6 +11,7 @@ import courses from './courses.json'
 import about from './about.json'
 import strategy from './strategy.json'
 import organization from './organization.json'
+import team from './team.json'
 
 export default {
   ...common,
@@ -25,5 +26,6 @@ export default {
   ...courses,
   ...about,
   ...strategy,
-  ...organization
+  ...organization,
+  ...team
 }
