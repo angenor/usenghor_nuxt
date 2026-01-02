@@ -37,8 +37,8 @@ onMounted(() => {
   })
 })
 
-// Service categories
-const categories = ['rectorat', 'academique', 'administratif'] as const
+// Service categories (rectorat est dans IntroSection)
+const categories = ['academique', 'administratif'] as const
 
 // Category colors
 const categoryColors: Record<string, { bg: string; text: string; border: string }> = {
