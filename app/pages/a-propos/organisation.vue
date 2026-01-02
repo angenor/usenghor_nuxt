@@ -18,6 +18,9 @@ const breadcrumb = computed(() => [
   { label: t('nav.about'), to: '/a-propos' },
   { label: t('about.tabs.organization') }
 ])
+
+// Animation pour la section CTA
+const { elementRef: ctaRef } = useScrollAnimation({ animation: 'zoomIn', threshold: 0.2 })
 </script>
 
 <template>
@@ -44,8 +47,8 @@ const breadcrumb = computed(() => [
 
     <!-- CTA Section -->
     <section class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div class="bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-8 lg:p-12">
+      <div ref="ctaRef" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-8 lg:p-12 hover:shadow-xl transition-shadow duration-300">
           <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-4">
             {{ t('organization.cta.title') }}
           </h3>

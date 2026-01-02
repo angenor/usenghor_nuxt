@@ -1,7 +1,41 @@
 <script setup lang="ts">
 const { t, locale } = useI18n()
 const { getServicesByCategory } = useMockData()
-const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.1 })
+const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.1 })
+
+// Animations staggerées pour chaque catégorie
+const categoryRefs = ref<HTMLElement[]>([])
+
+onMounted(() => {
+  categoryRefs.value.forEach((el, catIndex) => {
+    if (!el) return
+    const cards = el.querySelectorAll<HTMLElement>('[data-service]')
+
+    cards.forEach((card, cardIndex) => {
+      card.style.opacity = '0'
+      card.style.transform = 'translateY(20px)'
+    })
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            cards.forEach((card, cardIndex) => {
+              setTimeout(() => {
+                card.classList.add('animate__animated', 'animate__fadeInUp')
+                card.style.opacity = '1'
+                card.style.transform = 'translateY(0)'
+              }, cardIndex * 100)
+            })
+            observer.disconnect()
+          }
+        })
+      },
+      { threshold: 0.1 }
+    )
+    observer.observe(el)
+  })
+})
 
 // Service categories
 const categories = ['rectorat', 'academique', 'administratif'] as const
@@ -76,7 +110,11 @@ const getServiceName = (service: any) => {
 
       <!-- Services by Category -->
       <div class="space-y-12">
-        <div v-for="category in categories" :key="category">
+        <div
+          v-for="(category, catIndex) in categories"
+          :key="category"
+          :ref="(el) => { if (el) categoryRefs[catIndex] = el as HTMLElement }"
+        >
           <!-- Category Title -->
           <div class="flex items-center justify-center gap-3 mb-6">
             <div class="h-px flex-1 bg-gray-200 dark:bg-gray-700"></div>
@@ -91,6 +129,7 @@ const getServiceName = (service: any) => {
             <div
               v-for="service in getServicesByCategory(category)"
               :key="service.id"
+              data-service
               class="group bg-white dark:bg-gray-800 rounded-xl p-5 border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
               :class="categoryColors[category].border"
             >

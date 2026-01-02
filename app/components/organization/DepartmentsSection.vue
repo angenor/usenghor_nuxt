@@ -2,7 +2,7 @@
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { departments, getFormationsByDepartment } = useMockData()
-const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.1 })
+const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.05 })
 
 // Map department icons to Font Awesome icons
 const iconMap: Record<string, string> = {
@@ -151,7 +151,7 @@ const getDeptImage = (deptId: string) => deptImages[deptId] || 'https://picsum.p
       v-for="(dept, index) in departments"
       :key="dept.id"
       class="section-bubble transition-colors duration-300"
-      :class="[getColors(dept.color).bgLight, getColors(dept.color).bgDark]"
+      :class="[getColors(dept.color)?.bgLight, getColors(dept.color)?.bgDark]"
     >
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
         <!-- Layout flex avec alternance image gauche/droite -->
