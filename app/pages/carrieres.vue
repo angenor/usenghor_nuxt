@@ -3,8 +3,10 @@ const { t } = useI18n()
 
 // SEO
 useSeoMeta({
-  title: () => t('about.tabs.careers'),
-  description: () => t('wip.message')
+  title: () => t('careers.seo.title'),
+  description: () => t('careers.seo.description'),
+  ogTitle: () => t('careers.seo.title'),
+  ogDescription: () => t('careers.seo.description')
 })
 
 // Breadcrumb
@@ -18,8 +20,8 @@ const breadcrumb = computed(() => [
   <div>
     <!-- Hero -->
     <PageHero
-      :title="t('about.tabs.careers')"
-      :subtitle="t('wip.message')"
+      :title="t('careers.hero.title')"
+      :subtitle="t('careers.hero.subtitle')"
       image="/images/bg/backgroud_senghor3.jpg"
       :breadcrumb="breadcrumb"
     />
@@ -27,10 +29,19 @@ const breadcrumb = computed(() => [
     <!-- Sticky Tabs Navigation -->
     <SectionAboutTabsNav />
 
-    <!-- Work in Progress -->
-    <PageWorkInProgress
-      :title="t('about.tabs.careers')"
-      icon="fa-solid fa-briefcase"
-    />
+    <!-- Introduction -->
+    <CareersIntroSection />
+
+    <!-- Opportunities Cards -->
+    <CareersOpportunitiesSection />
+
+    <!-- Teachers Section -->
+    <CareersTeachersSection />
+
+    <!-- Students Section -->
+    <CareersStudentsSection />
+
+    <!-- Partners Section -->
+    <CareersPartnersSection />
   </div>
 </template>

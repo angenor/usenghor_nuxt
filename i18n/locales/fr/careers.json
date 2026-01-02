@@ -1,0 +1,173 @@
+{
+  "careers": {
+    "seo": {
+      "title": "Nous rejoindre | Université Senghor",
+      "description": "Rejoignez l'Université Senghor : opportunités pour enseignants, étudiants et partenaires stratégiques."
+    },
+    "hero": {
+      "title": "Nous rejoindre",
+      "subtitle": "Contribuez à former les leaders africains de demain"
+    },
+    "intro": {
+      "title": "Faire carrière chez nous",
+      "text": "L'Université Senghor offre un environnement de travail unique au cœur de l'Afrique francophone. Que vous soyez enseignant-chercheur, étudiant ou partenaire institutionnel, vous trouverez chez nous des opportunités exceptionnelles de développement et de collaboration.",
+      "stats": {
+        "positions": "postes ouverts",
+        "nationalities": "nationalités",
+        "years": "ans d'excellence"
+      }
+    },
+    "opportunities": {
+      "title": "Rejoignez-nous",
+      "subtitle": "Plusieurs façons de contribuer à notre mission",
+      "teachers": {
+        "title": "En tant qu'enseignant",
+        "description": "Rejoignez une équipe pédagogique internationale et formez les cadres africains de demain."
+      },
+      "students": {
+        "title": "En tant qu'étudiant",
+        "description": "Développez vos compétences avec nos formations de haut niveau reconnues internationalement."
+      },
+      "partners": {
+        "title": "En tant que partenaire",
+        "description": "Collaborez avec nous pour renforcer l'impact de notre mission en Afrique."
+      },
+      "discover": "Découvrir"
+    },
+    "teachers": {
+      "title": "Enseignants & Chercheurs",
+      "subtitle": "Rejoignez une communauté académique d'excellence",
+      "text": "L'Université Senghor recrute des enseignants-chercheurs de haut niveau pour ses différents programmes. Vous évoluerez dans un environnement multiculturel unique, au service du développement africain.",
+      "benefits": {
+        "title": "Pourquoi nous rejoindre ?",
+        "items": [
+          {
+            "icon": "fa-solid fa-globe-africa",
+            "title": "Environnement international",
+            "text": "Travaillez avec des collègues et étudiants de plus de 40 pays africains."
+          },
+          {
+            "icon": "fa-solid fa-network-wired",
+            "title": "Réseau panafricain",
+            "text": "Accédez à un réseau de plus de 3 500 alumni occupant des postes clés en Afrique."
+          },
+          {
+            "icon": "fa-solid fa-lightbulb",
+            "title": "Impact concret",
+            "text": "Contribuez directement au développement du continent africain."
+          },
+          {
+            "icon": "fa-solid fa-sun",
+            "title": "Cadre de vie exceptionnel",
+            "text": "Vivez à Alexandrie, ville historique au bord de la Méditerranée."
+          }
+        ]
+      },
+      "positions": {
+        "title": "Types de postes",
+        "items": [
+          {
+            "title": "Professeurs titulaires",
+            "text": "Postes permanents avec responsabilités pédagogiques et de recherche."
+          },
+          {
+            "title": "Enseignants vacataires",
+            "text": "Interventions ponctuelles dans nos programmes de formation."
+          },
+          {
+            "title": "Chercheurs associés",
+            "text": "Collaborations de recherche sur des projets spécifiques."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Intéressé(e) ?",
+        "text": "Envoyez votre candidature avec CV et lettre de motivation.",
+        "button": "Postuler",
+        "email": "recrutement{'@'}usenghor.org"
+      }
+    },
+    "students": {
+      "title": "Futurs étudiants",
+      "subtitle": "Développez vos compétences pour transformer l'Afrique",
+      "text": "L'Université Senghor propose des formations de haut niveau dans les domaines clés du développement africain. Nos diplômes sont reconnus internationalement et nos alumni occupent des postes de responsabilité dans toute l'Afrique.",
+      "why": {
+        "title": "Pourquoi étudier chez nous ?",
+        "items": [
+          "Formation d'excellence en langue française",
+          "Diplômes reconnus internationalement",
+          "Réseau alumni de plus de 3 500 cadres africains",
+          "Campus moderne à Alexandrie",
+          "Bourses disponibles pour les étudiants méritants"
+        ]
+      },
+      "programs": {
+        "title": "Nos formations",
+        "masters": {
+          "title": "Masters",
+          "description": "Formations professionnalisantes en 2 ans dans 5 départements."
+        },
+        "doctoral": {
+          "title": "Doctorat",
+          "description": "École doctorale pour la recherche de haut niveau."
+        },
+        "diplomes": {
+          "title": "Diplômes universitaires",
+          "description": "Formations courtes certifiantes pour professionnels."
+        },
+        "certifications": {
+          "title": "Certifications",
+          "description": "Programmes de formation continue et développement professionnel."
+        }
+      },
+      "cta": {
+        "title": "Prêt(e) à nous rejoindre ?",
+        "text": "Consultez nos appels à candidatures et inscrivez-vous.",
+        "button": "Candidater"
+      }
+    },
+    "partners": {
+      "title": "Devenir partenaire",
+      "subtitle": "Collaborons pour l'avenir de l'Afrique",
+      "text": "L'Université Senghor développe des partenariats stratégiques avec des universités, institutions et entreprises du monde entier. Ensemble, nous pouvons renforcer notre impact sur le développement africain.",
+      "types": {
+        "title": "Types de partenariats",
+        "items": [
+          {
+            "icon": "fa-solid fa-building-columns",
+            "title": "Partenariats académiques",
+            "text": "Échanges d'étudiants et d'enseignants, co-diplomation, projets de recherche conjoints."
+          },
+          {
+            "icon": "fa-solid fa-landmark",
+            "title": "Partenariats institutionnels",
+            "text": "Collaboration avec gouvernements et organisations internationales."
+          },
+          {
+            "icon": "fa-solid fa-briefcase",
+            "title": "Partenariats entreprises",
+            "text": "Stages, mécénat, chaires d'enseignement, formation continue."
+          }
+        ]
+      },
+      "form": {
+        "title": "Contactez-nous",
+        "text": "Vous souhaitez explorer les possibilités de partenariat ? Remplissez ce formulaire.",
+        "name": "Nom complet",
+        "email": "Email professionnel",
+        "organization": "Organisation",
+        "type": "Type de partenariat",
+        "type_options": {
+          "academic": "Académique",
+          "institutional": "Institutionnel",
+          "business": "Entreprise",
+          "other": "Autre"
+        },
+        "message": "Votre message",
+        "submit": "Envoyer",
+        "success": "Merci ! Votre message a été envoyé.",
+        "error": "Une erreur est survenue. Veuillez réessayer."
+      }
+    }
+  }
+}

@@ -1,0 +1,173 @@
+{
+  "careers": {
+    "seo": {
+      "title": "Join Us | Senghor University",
+      "description": "Join Senghor University: opportunities for teachers, students and strategic partners."
+    },
+    "hero": {
+      "title": "Join Us",
+      "subtitle": "Contribute to training tomorrow's African leaders"
+    },
+    "intro": {
+      "title": "Build your career with us",
+      "text": "Senghor University offers a unique work environment at the heart of French-speaking Africa. Whether you are a teacher-researcher, student or institutional partner, you will find exceptional opportunities for development and collaboration.",
+      "stats": {
+        "positions": "open positions",
+        "nationalities": "nationalities",
+        "years": "years of excellence"
+      }
+    },
+    "opportunities": {
+      "title": "Join us",
+      "subtitle": "Several ways to contribute to our mission",
+      "teachers": {
+        "title": "As a teacher",
+        "description": "Join an international teaching team and train tomorrow's African executives."
+      },
+      "students": {
+        "title": "As a student",
+        "description": "Develop your skills with our internationally recognized high-level programs."
+      },
+      "partners": {
+        "title": "As a partner",
+        "description": "Collaborate with us to strengthen the impact of our mission in Africa."
+      },
+      "discover": "Discover"
+    },
+    "teachers": {
+      "title": "Teachers & Researchers",
+      "subtitle": "Join an academic community of excellence",
+      "text": "Senghor University recruits high-level teacher-researchers for its various programs. You will work in a unique multicultural environment, serving African development.",
+      "benefits": {
+        "title": "Why join us?",
+        "items": [
+          {
+            "icon": "fa-solid fa-globe-africa",
+            "title": "International environment",
+            "text": "Work with colleagues and students from over 40 African countries."
+          },
+          {
+            "icon": "fa-solid fa-network-wired",
+            "title": "Pan-African network",
+            "text": "Access a network of over 3,500 alumni in key positions across Africa."
+          },
+          {
+            "icon": "fa-solid fa-lightbulb",
+            "title": "Concrete impact",
+            "text": "Contribute directly to the development of the African continent."
+          },
+          {
+            "icon": "fa-solid fa-sun",
+            "title": "Exceptional living environment",
+            "text": "Live in Alexandria, a historic city on the Mediterranean coast."
+          }
+        ]
+      },
+      "positions": {
+        "title": "Position types",
+        "items": [
+          {
+            "title": "Full-time professors",
+            "text": "Permanent positions with teaching and research responsibilities."
+          },
+          {
+            "title": "Adjunct lecturers",
+            "text": "Occasional interventions in our training programs."
+          },
+          {
+            "title": "Associate researchers",
+            "text": "Research collaborations on specific projects."
+          }
+        ]
+      },
+      "cta": {
+        "title": "Interested?",
+        "text": "Send your application with CV and cover letter.",
+        "button": "Apply",
+        "email": "recrutement{'@'}usenghor.org"
+      }
+    },
+    "students": {
+      "title": "Future students",
+      "subtitle": "Develop your skills to transform Africa",
+      "text": "Senghor University offers high-level training in key areas of African development. Our degrees are internationally recognized and our alumni hold leadership positions across Africa.",
+      "why": {
+        "title": "Why study with us?",
+        "items": [
+          "Excellence in French-language education",
+          "Internationally recognized degrees",
+          "Alumni network of over 3,500 African executives",
+          "Modern campus in Alexandria",
+          "Scholarships available for deserving students"
+        ]
+      },
+      "programs": {
+        "title": "Our programs",
+        "masters": {
+          "title": "Master's degrees",
+          "description": "Professional 2-year programs in 5 departments."
+        },
+        "doctoral": {
+          "title": "Doctoral programs",
+          "description": "Doctoral school for high-level research."
+        },
+        "diplomes": {
+          "title": "University diplomas",
+          "description": "Short certifying programs for professionals."
+        },
+        "certifications": {
+          "title": "Certifications",
+          "description": "Continuing education and professional development programs."
+        }
+      },
+      "cta": {
+        "title": "Ready to join us?",
+        "text": "Check our calls for applications and register.",
+        "button": "Apply"
+      }
+    },
+    "partners": {
+      "title": "Become a partner",
+      "subtitle": "Let's collaborate for Africa's future",
+      "text": "Senghor University develops strategic partnerships with universities, institutions and companies worldwide. Together, we can strengthen our impact on African development.",
+      "types": {
+        "title": "Partnership types",
+        "items": [
+          {
+            "icon": "fa-solid fa-building-columns",
+            "title": "Academic partnerships",
+            "text": "Student and faculty exchanges, joint degrees, collaborative research projects."
+          },
+          {
+            "icon": "fa-solid fa-landmark",
+            "title": "Institutional partnerships",
+            "text": "Collaboration with governments and international organizations."
+          },
+          {
+            "icon": "fa-solid fa-briefcase",
+            "title": "Corporate partnerships",
+            "text": "Internships, sponsorship, teaching chairs, continuing education."
+          }
+        ]
+      },
+      "form": {
+        "title": "Contact us",
+        "text": "Would you like to explore partnership opportunities? Fill out this form.",
+        "name": "Full name",
+        "email": "Professional email",
+        "organization": "Organization",
+        "type": "Partnership type",
+        "type_options": {
+          "academic": "Academic",
+          "institutional": "Institutional",
+          "business": "Corporate",
+          "other": "Other"
+        },
+        "message": "Your message",
+        "submit": "Send",
+        "success": "Thank you! Your message has been sent.",
+        "error": "An error occurred. Please try again."
+      }
+    }
+  }
+}
