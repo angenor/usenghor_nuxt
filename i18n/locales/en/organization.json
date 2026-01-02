@@ -1,0 +1,62 @@
+{
+  "organization": {
+    "seo": {
+      "title": "Our Organization | Senghor University",
+      "description": "Discover the organization of Senghor University: organizational chart, academic departments and services."
+    },
+    "hero": {
+      "title": "Our Organization",
+      "subtitle": "Organizational structure and University services"
+    },
+    "intro": {
+      "text": "Senghor University is organized around 5 academic departments and services dedicated to supporting students and the functioning of the institution.",
+      "nav": {
+        "orgchart": "Org Chart",
+        "departments": "Departments",
+        "services": "Services"
+      }
+    },
+    "orgchart": {
+      "title": "Organizational Chart",
+      "subtitle": "University hierarchical structure",
+      "recteur": "Rector",
+      "recteur_desc": "University leadership and institutional representation",
+      "cabinet": "Rector's Office",
+      "cabinet_desc": "Coordination of strategic activities and institutional communication",
+      "sg": "Secretary General",
+      "sg_desc": "Administrative management and service coordination",
+      "departments_level": "Academic Departments",
+      "dept_culture": "Culture",
+      "dept_environment": "Environment",
+      "dept_management": "Administration & Management",
+      "dept_health": "Health",
+      "dept_doctoral": "Doctoral School"
+    },
+    "departments": {
+      "title": "Academic Departments",
+      "subtitle": "5 departments dedicated to training African executives",
+      "head": "Head",
+      "view_programs": "View programs",
+      "no_programs": "Programs coming soon",
+      "programs_count": "{count} program | {count} programs"
+    },
+    "services": {
+      "title": "Services",
+      "subtitle": "Dedicated teams for support",
+      "categories": {
+        "rectorat": "Rectorate",
+        "academique": "Academic Services",
+        "administratif": "Administrative Services"
+      },
+      "contact": "Contact",
+      "location": "Location",
+      "email": "Email",
+      "phone": "Phone"
+    },
+    "cta": {
+      "title": "Meet our team",
+      "text": "Discover the faces of those who bring the University to life every day.",
+      "button": "View team"
+    }
+  }
+}

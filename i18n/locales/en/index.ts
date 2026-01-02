@@ -10,6 +10,7 @@ import search from './search.json'
 import courses from './courses.json'
 import about from './about.json'
 import strategy from './strategy.json'
+import organization from './organization.json'
 
 export default {
   ...common,
@@ -23,5 +24,6 @@ export default {
   ...search,
   ...courses,
   ...about,
-  ...strategy
+  ...strategy,
+  ...organization
 }

@@ -1,0 +1,62 @@
+{
+  "organization": {
+    "seo": {
+      "title": "Notre organisation | Université Senghor",
+      "description": "Découvrez l'organisation de l'Université Senghor : organigramme, départements académiques et services."
+    },
+    "hero": {
+      "title": "Notre organisation",
+      "subtitle": "Structure organisationnelle et services de l'Université"
+    },
+    "intro": {
+      "text": "L'Université Senghor est organisée autour de 5 départements académiques et de services dédiés à l'accompagnement des étudiants et au fonctionnement de l'institution.",
+      "nav": {
+        "orgchart": "Organigramme",
+        "departments": "Départements",
+        "services": "Services"
+      }
+    },
+    "orgchart": {
+      "title": "Organigramme",
+      "subtitle": "Structure hiérarchique de l'Université",
+      "recteur": "Recteur",
+      "recteur_desc": "Direction générale de l'Université et représentation institutionnelle",
+      "cabinet": "Cabinet du Recteur",
+      "cabinet_desc": "Coordination des activités stratégiques et communication institutionnelle",
+      "sg": "Secrétaire Général",
+      "sg_desc": "Gestion administrative et coordination des services",
+      "departments_level": "Départements académiques",
+      "dept_culture": "Culture",
+      "dept_environment": "Environnement",
+      "dept_management": "Administration et Gestion",
+      "dept_health": "Santé",
+      "dept_doctoral": "École doctorale"
+    },
+    "departments": {
+      "title": "Départements académiques",
+      "subtitle": "5 départements au service de la formation des cadres africains",
+      "head": "Responsable",
+      "view_programs": "Voir les formations",
+      "no_programs": "Formations à venir",
+      "programs_count": "{count} formation | {count} formations"
+    },
+    "services": {
+      "title": "Services",
+      "subtitle": "Des équipes dédiées à l'accompagnement",
+      "categories": {
+        "rectorat": "Rectorat",
+        "academique": "Services académiques",
+        "administratif": "Services administratifs"
+      },
+      "contact": "Contact",
+      "location": "Localisation",
+      "email": "Email",
+      "phone": "Téléphone"
+    },
+    "cta": {
+      "title": "Rencontrez notre équipe",
+      "text": "Découvrez les visages de ceux qui font vivre l'Université au quotidien.",
+      "button": "Voir l'équipe"
+    }
+  }
+}
