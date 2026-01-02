@@ -150,7 +150,8 @@ const getDeptImage = (deptId: string) => deptImages[deptId] || 'https://picsum.p
     <div
       v-for="(dept, index) in departments"
       :key="dept.id"
-      class="section-bubble transition-colors duration-300"
+      :id="dept.slug"
+      class="section-bubble transition-colors duration-300 scroll-mt-20"
       :class="[getColors(dept.color)?.bgLight, getColors(dept.color)?.bgDark]"
     >
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
