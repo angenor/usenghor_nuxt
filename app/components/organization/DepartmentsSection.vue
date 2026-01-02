@@ -343,8 +343,5 @@ const getDeptImage = (deptId: string) => deptImages[deptId] || 'https://picsum.p
         </div>
       </div>
     </div>
-
-    <!-- Transition vers section suivante -->
-    <div class="h-16 bg-gray-100 dark:bg-gray-900"></div>
   </section>
 </template>
