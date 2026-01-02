@@ -36,14 +36,11 @@ const { elementRef: ctaRef } = useScrollAnimation({ animation: 'zoomIn', thresho
     <!-- Sticky Tabs Navigation -->
     <SectionAboutTabsNav />
 
-    <!-- Intro + Organigramme simplifié -->
-    <OrganizationIntroSection />
+    <!-- Organigramme complet -->
+    <OrganizationOrganigrammeSection />
 
-    <!-- Départements Timeline -->
+    <!-- Départements académiques détaillés -->
     <OrganizationDepartmentsSection />
-
-    <!-- Services par catégorie -->
-    <OrganizationServicesSection />
 
     <!-- CTA Section -->
     <section class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
