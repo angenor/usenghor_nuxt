@@ -907,7 +907,7 @@ const formatDate = (dateStr: string) => {
   letter-spacing: 2px;
   margin: 0;
   padding-bottom: 6px;
-  line-height: 1rem;
+  line-height: 1.2;
 }
 
 .demo-card .head h2 .small {
@@ -957,7 +957,7 @@ const formatDate = (dateStr: string) => {
   }
   .demo-card .head h2 {
     font-size: 165%;
-    line-height: 1.2rem;
+    line-height: 1.2;
   }
   .demo-card .head h2 .small {
     font-size: 0.8rem;
