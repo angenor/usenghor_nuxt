@@ -175,6 +175,26 @@ const tabs = [
   { key: 'media', icon: 'fa-solid fa-photo-film' }
 ]
 
+// Navigate to next tab
+const goToNextTab = () => {
+  const currentIndex = tabs.findIndex(tab => tab.key === activeTab.value)
+  const nextTabItem = tabs[currentIndex + 1]
+  if (currentIndex < tabs.length - 1 && nextTabItem) {
+    activeTab.value = nextTabItem.key
+    // Scroll to top of tab content
+    window.scrollTo({ top: 400, behavior: 'smooth' })
+  }
+}
+
+// Get next tab info
+const nextTab = computed(() => {
+  const currentIndex = tabs.findIndex(tab => tab.key === activeTab.value)
+  if (currentIndex < tabs.length - 1) {
+    return tabs[currentIndex + 1] ?? null
+  }
+  return null
+})
+
 // Icon map
 const iconMap: Record<string, string> = {
   'building-columns': 'fa-solid fa-building-columns',
@@ -576,6 +596,19 @@ const formatDate = (dateStr: string) => {
               </div>
             </div>
           </div>
+
+          <!-- Next Tab Button -->
+          <div v-if="nextTab" class="mt-12 flex justify-end">
+            <button
+              type="button"
+              class="group inline-flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+              :class="`${colorClasses.bgLight} ${colorClasses.text}`"
+              @click="goToNextTab"
+            >
+              <span>{{ t(`organizationDetail.tabs.${nextTab.key}`) }}</span>
+              <font-awesome-icon :icon="nextTab.icon" class="w-5 h-5 transition-transform group-hover:translate-x-1" />
+            </button>
+          </div>
         </div>
 
         <!-- Team Tab -->
@@ -625,6 +658,19 @@ const formatDate = (dateStr: string) => {
             <font-awesome-icon icon="fa-solid fa-users" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
             <p class="text-gray-500 dark:text-gray-400 text-lg">{{ t('organizationDetail.team.empty') }}</p>
           </div>
+
+          <!-- Next Tab Button -->
+          <div v-if="nextTab" class="mt-12 flex justify-end">
+            <button
+              type="button"
+              class="group inline-flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+              :class="`${colorClasses.bgLight} ${colorClasses.text}`"
+              @click="goToNextTab"
+            >
+              <span>{{ t(`organizationDetail.tabs.${nextTab.key}`) }}</span>
+              <font-awesome-icon :icon="nextTab.icon" class="w-5 h-5 transition-transform group-hover:translate-x-1" />
+            </button>
+          </div>
         </div>
 
         <!-- Achievements Tab - Flexbox Timeline -->
@@ -661,6 +707,19 @@ const formatDate = (dateStr: string) => {
                 <img :src="achievement.image" :alt="achievement.title" />
               </div>
             </div>
+          </div>
+
+          <!-- Next Tab Button -->
+          <div v-if="nextTab" class="mt-12 flex justify-end">
+            <button
+              type="button"
+              class="group inline-flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+              :class="`${colorClasses.bgLight} ${colorClasses.text}`"
+              @click="goToNextTab"
+            >
+              <span>{{ t(`organizationDetail.tabs.${nextTab.key}`) }}</span>
+              <font-awesome-icon :icon="nextTab.icon" class="w-5 h-5 transition-transform group-hover:translate-x-1" />
+            </button>
           </div>
         </div>
 
@@ -719,6 +778,19 @@ const formatDate = (dateStr: string) => {
               </div>
             </div>
           </div>
+
+          <!-- Next Tab Button -->
+          <div v-if="nextTab" class="mt-12 flex justify-end">
+            <button
+              type="button"
+              class="group inline-flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+              :class="`${colorClasses.bgLight} ${colorClasses.text}`"
+              @click="goToNextTab"
+            >
+              <span>{{ t(`organizationDetail.tabs.${nextTab.key}`) }}</span>
+              <font-awesome-icon :icon="nextTab.icon" class="w-5 h-5 transition-transform group-hover:translate-x-1" />
+            </button>
+          </div>
         </div>
 
         <!-- News Tab -->
@@ -762,6 +834,19 @@ const formatDate = (dateStr: string) => {
                 </button>
               </div>
             </article>
+          </div>
+
+          <!-- Next Tab Button -->
+          <div v-if="nextTab" class="mt-12 flex justify-end">
+            <button
+              type="button"
+              class="group inline-flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+              :class="`${colorClasses.bgLight} ${colorClasses.text}`"
+              @click="goToNextTab"
+            >
+              <span>{{ t(`organizationDetail.tabs.${nextTab.key}`) }}</span>
+              <font-awesome-icon :icon="nextTab.icon" class="w-5 h-5 transition-transform group-hover:translate-x-1" />
+            </button>
           </div>
         </div>
 
