@@ -4,6 +4,31 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getDepartmentBySlug, services, getStaffByDepartment, getStaffByService } = useMockData()
 
+// Scroll detection for sticky title
+const heroRef = ref<HTMLElement | null>(null)
+const showTitleInNav = ref(false)
+
+onMounted(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0]
+      if (entry) {
+        // Show title in nav when hero is less than 20% visible
+        showTitleInNav.value = entry.intersectionRatio < 0.2
+      }
+    },
+    { threshold: [0, 0.2, 0.5, 1] }
+  )
+
+  if (heroRef.value) {
+    observer.observe(heroRef.value)
+  }
+
+  onUnmounted(() => {
+    observer.disconnect()
+  })
+})
+
 // Get route params directly (not computed for SSG compatibility)
 const entityType = route.params.type as string
 const entitySlug = route.params.slug as string
@@ -348,44 +373,65 @@ const formatDate = (dateStr: string) => {
 <template>
   <div v-if="entity">
     <!-- Hero Section with Image -->
-    <PageHero
-      :title="entityName"
-      :subtitle="entityDescription"
-      image="/images/bg/backgroud_senghor3.jpg"
-      :breadcrumb="breadcrumb"
-    >
-      <template #badge>
-        <span
-          class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/20 backdrop-blur-sm text-white"
-        >
-          <font-awesome-icon :icon="entityIcon" class="w-4 h-4" />
-          {{ t(`organizationDetail.breadcrumb.${entityType === 'departement' ? 'department' : 'service'}`) }}
-        </span>
-      </template>
-    </PageHero>
+    <div ref="heroRef">
+      <PageHero
+        :title="entityName"
+        :subtitle="entityDescription"
+        image="/images/bg/backgroud_senghor3.jpg"
+        :breadcrumb="breadcrumb"
+      >
+        <template #badge>
+          <span
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/20 backdrop-blur-sm text-white"
+          >
+            <font-awesome-icon :icon="entityIcon" class="w-4 h-4" />
+            {{ t(`organizationDetail.breadcrumb.${entityType === 'departement' ? 'department' : 'service'}`) }}
+          </span>
+        </template>
+      </PageHero>
+    </div>
 
     <!-- Tabs Navigation (similar to TabsNav.vue) -->
     <div class="sticky top-20 z-40">
       <nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex items-center justify-center overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
-            <button
-              v-for="tab in tabs"
-              :key="tab.key"
-              type="button"
-              class="group flex items-center gap-2 px-3 sm:px-4 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200"
-              :class="activeTab === tab.key
-                ? `${colorClasses.border} ${colorClasses.text}`
-                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-              @click="activeTab = tab.key"
+          <div class="flex items-center gap-4">
+            <!-- Title (appears on scroll) -->
+            <div
+              class="flex items-center gap-3 py-3 transition-all duration-300 overflow-hidden"
+              :class="showTitleInNav ? 'opacity-100 max-w-xs lg:max-w-md' : 'opacity-0 max-w-0'"
             >
-              <font-awesome-icon
-                :icon="tab.icon"
-                class="w-4 h-4 transition-colors duration-200"
-                :class="activeTab === tab.key ? colorClasses.text : 'text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300'"
-              />
-              <span class="hidden sm:inline">{{ t(`organizationDetail.tabs.${tab.key}`) }}</span>
-            </button>
+              <div
+                class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                :class="colorClasses.bgLight"
+              >
+                <font-awesome-icon :icon="entityIcon" class="w-4 h-4" :class="colorClasses.text" />
+              </div>
+              <span class="font-semibold text-gray-900 dark:text-white truncate text-sm lg:text-base">
+                {{ entityName }}
+              </span>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex-1 flex items-center justify-center overflow-x-auto scrollbar-hide">
+              <button
+                v-for="tab in tabs"
+                :key="tab.key"
+                type="button"
+                class="group flex items-center gap-2 px-3 sm:px-4 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200"
+                :class="activeTab === tab.key
+                  ? `${colorClasses.border} ${colorClasses.text}`
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                @click="activeTab = tab.key"
+              >
+                <font-awesome-icon
+                  :icon="tab.icon"
+                  class="w-4 h-4 transition-colors duration-200"
+                  :class="activeTab === tab.key ? colorClasses.text : 'text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300'"
+                />
+                <span class="hidden sm:inline">{{ t(`organizationDetail.tabs.${tab.key}`) }}</span>
+              </button>
+            </div>
           </div>
         </div>
       </nav>
