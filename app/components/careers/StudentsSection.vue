@@ -36,11 +36,11 @@ const programs = [
 
 // Gallery images
 const galleryImages = [
-  { src: 'https://picsum.photos/seed/student-1/400/500', alt: 'Étudiant Senghor' },
-  { src: 'https://picsum.photos/seed/campus-1/600/400', alt: 'Campus Alexandrie' },
-  { src: 'https://picsum.photos/seed/student-2/400/400', alt: 'Étudiants en cours' },
-  { src: 'https://picsum.photos/seed/campus-2/400/300', alt: 'Bibliothèque' },
-  { src: 'https://picsum.photos/seed/student-3/400/500', alt: 'Remise de diplômes' }
+  { src: '/images/bg/backgroud_senghor1.jpg', alt: 'Remise de diplômes Senghor' },
+  { src: '/images/bg/backgroud_senghor2.jpg', alt: 'Campus Alexandrie' },
+  { src: '/images/bg/backgroud_senghor3.jpg', alt: 'Étudiants Senghor' },
+  { src: '/images/bg/bg_mission_section.jpeg', alt: 'Université Senghor' },
+  { src: '/images/bg/bg_stats_section.jpeg', alt: 'Vie universitaire' }
 ]
 </script>
 
