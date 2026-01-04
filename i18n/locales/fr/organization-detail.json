@@ -1,0 +1,82 @@
+{
+  "organizationDetail": {
+    "seo": {
+      "titleDepartment": "{name} | Département | Université Senghor",
+      "titleService": "{name} | Service | Université Senghor",
+      "description": "Découvrez les missions, l'équipe et les projets du {type} {name} de l'Université Senghor."
+    },
+    "breadcrumb": {
+      "department": "Département",
+      "service": "Service"
+    },
+    "tabs": {
+      "missions": "Missions",
+      "team": "Équipe",
+      "achievements": "Réalisations",
+      "projects": "Projets",
+      "news": "Actualités",
+      "media": "Médiathèque"
+    },
+    "missions": {
+      "title": "Nos missions",
+      "subtitle": "Objectifs et engagements",
+      "objectives": "Objectifs principaux",
+      "values": "Nos valeurs",
+      "empty": "Les missions seront bientôt détaillées."
+    },
+    "team": {
+      "title": "Notre équipe",
+      "subtitle": "Les personnes qui font vivre ce {type}",
+      "head": "Responsable",
+      "members": "Membres de l'équipe",
+      "contact": "Contacter",
+      "empty": "Aucun membre affiché pour le moment.",
+      "viewProfile": "Voir le profil"
+    },
+    "achievements": {
+      "title": "Nos réalisations",
+      "subtitle": "Ce que nous avons accompli",
+      "timeline": "Chronologie",
+      "highlights": "Points forts",
+      "empty": "Les réalisations seront bientôt documentées."
+    },
+    "projects": {
+      "title": "Nos projets",
+      "subtitle": "Initiatives en cours et à venir",
+      "status": {
+        "ongoing": "En cours",
+        "completed": "Terminé",
+        "planned": "Planifié"
+      },
+      "viewMore": "En savoir plus",
+      "empty": "Aucun projet affiché pour le moment."
+    },
+    "news": {
+      "title": "Actualités",
+      "subtitle": "Les dernières nouvelles",
+      "readMore": "Lire la suite",
+      "publishedOn": "Publié le",
+      "empty": "Aucune actualité pour le moment."
+    },
+    "media": {
+      "title": "Médiathèque",
+      "subtitle": "Photos, vidéos et documents",
+      "categories": {
+        "photos": "Photos",
+        "videos": "Vidéos",
+        "documents": "Documents"
+      },
+      "download": "Télécharger",
+      "viewGallery": "Voir la galerie",
+      "empty": "Aucun média disponible pour le moment."
+    },
+    "cta": {
+      "contact": "Nous contacter",
+      "backToOrg": "Retour à l'organisation"
+    },
+    "types": {
+      "department": "département",
+      "service": "service"
+    }
+  }
+}

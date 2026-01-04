@@ -13,6 +13,7 @@ import strategy from './strategy.json'
 import organization from './organization.json'
 import team from './team.json'
 import careers from './careers.json'
+import organizationDetail from './organization-detail.json'
 
 export default {
   ...common,
@@ -29,5 +30,6 @@ export default {
   ...strategy,
   ...organization,
   ...team,
-  ...careers
+  ...careers,
+  ...organizationDetail
 }

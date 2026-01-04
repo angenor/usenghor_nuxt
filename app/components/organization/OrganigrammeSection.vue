@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { t, locale } = useI18n()
+const localePath = useLocalePath()
 const { departments, getServicesByCategory } = useMockData()
 const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.1 })
 
@@ -115,13 +116,6 @@ const getDeptName = (dept: any) => {
   return dept.name_fr
 }
 
-// Scroll vers la section département
-const scrollToDept = (slug: string) => {
-  const element = document.getElementById(slug)
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-}
 </script>
 
 <template>
@@ -159,9 +153,10 @@ const scrollToDept = (slug: string) => {
 
           <!-- Services Grid -->
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div
+            <NuxtLink
               v-for="service in rectoratServices"
               :key="service.id"
+              :to="localePath(`/a-propos/organisation/service/${service.slug}`)"
               data-card
               class="group bg-white dark:bg-gray-800 rounded-xl p-5 border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
               :class="groupColors.rectorat.border"
@@ -181,17 +176,13 @@ const scrollToDept = (slug: string) => {
                   <h4 class="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
                     {{ getServiceName(service) }}
                   </h4>
-                  <a
-                    v-if="service.email"
-                    :href="`mailto:${service.email}`"
-                    class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-envelope" class="w-3 h-3" />
-                    <span class="truncate">{{ service.email }}</span>
-                  </a>
+                  <span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                    <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
+                    <span>{{ t('organization.departments.view_programs') }}</span>
+                  </span>
                 </div>
               </div>
-            </div>
+            </NuxtLink>
           </div>
         </div>
 
@@ -208,14 +199,13 @@ const scrollToDept = (slug: string) => {
 
           <!-- Departments Grid -->
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <button
+            <NuxtLink
               v-for="dept in departments"
               :key="dept.id"
-              type="button"
+              :to="localePath(`/a-propos/organisation/departement/${dept.slug}`)"
               data-card
-              class="group bg-white dark:bg-gray-800 rounded-xl p-5 border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer text-left"
+              class="group bg-white dark:bg-gray-800 rounded-xl p-5 border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
               :class="groupColors.departements.border"
-              @click="scrollToDept(dept.slug)"
             >
               <div class="flex items-start gap-4">
                 <div
@@ -233,12 +223,12 @@ const scrollToDept = (slug: string) => {
                     {{ getDeptName(dept) }}
                   </h4>
                   <span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                    <font-awesome-icon icon="fa-solid fa-arrow-down" class="w-3 h-3" />
+                    <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
                     <span>{{ t('organization.departments.view_programs') }}</span>
                   </span>
                 </div>
               </div>
-            </button>
+            </NuxtLink>
           </div>
         </div>
 
@@ -255,9 +245,10 @@ const scrollToDept = (slug: string) => {
 
           <!-- Services Grid -->
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div
+            <NuxtLink
               v-for="service in academiqueServices"
               :key="service.id"
+              :to="localePath(`/a-propos/organisation/service/${service.slug}`)"
               data-card
               class="group bg-white dark:bg-gray-800 rounded-xl p-5 border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
               :class="groupColors.academique.border"
@@ -277,17 +268,13 @@ const scrollToDept = (slug: string) => {
                   <h4 class="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
                     {{ getServiceName(service) }}
                   </h4>
-                  <a
-                    v-if="service.email"
-                    :href="`mailto:${service.email}`"
-                    class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-envelope" class="w-3 h-3" />
-                    <span class="truncate">{{ service.email }}</span>
-                  </a>
+                  <span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
+                    <span>{{ t('organization.departments.view_programs') }}</span>
+                  </span>
                 </div>
               </div>
-            </div>
+            </NuxtLink>
           </div>
         </div>
 
@@ -304,9 +291,10 @@ const scrollToDept = (slug: string) => {
 
           <!-- Services Grid -->
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div
+            <NuxtLink
               v-for="service in administratifServices"
               :key="service.id"
+              :to="localePath(`/a-propos/organisation/service/${service.slug}`)"
               data-card
               class="group bg-white dark:bg-gray-800 rounded-xl p-5 border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
               :class="groupColors.administratif.border"
@@ -326,17 +314,13 @@ const scrollToDept = (slug: string) => {
                   <h4 class="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
                     {{ getServiceName(service) }}
                   </h4>
-                  <a
-                    v-if="service.email"
-                    :href="`mailto:${service.email}`"
-                    class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-envelope" class="w-3 h-3" />
-                    <span class="truncate">{{ service.email }}</span>
-                  </a>
+                  <span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                    <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
+                    <span>{{ t('organization.departments.view_programs') }}</span>
+                  </span>
                 </div>
               </div>
-            </div>
+            </NuxtLink>
           </div>
         </div>
 

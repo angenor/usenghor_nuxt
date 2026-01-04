@@ -1,0 +1,82 @@
+{
+  "organizationDetail": {
+    "seo": {
+      "titleDepartment": "{name} | قسم | جامعة سنغور",
+      "titleService": "{name} | خدمة | جامعة سنغور",
+      "description": "اكتشف مهام وفريق ومشاريع {type} {name} في جامعة سنغور."
+    },
+    "breadcrumb": {
+      "department": "قسم",
+      "service": "خدمة"
+    },
+    "tabs": {
+      "missions": "المهام",
+      "team": "الفريق",
+      "achievements": "الإنجازات",
+      "projects": "المشاريع",
+      "news": "الأخبار",
+      "media": "الوسائط"
+    },
+    "missions": {
+      "title": "مهامنا",
+      "subtitle": "الأهداف والالتزامات",
+      "objectives": "الأهداف الرئيسية",
+      "values": "قيمنا",
+      "empty": "سيتم تفصيل المهام قريباً."
+    },
+    "team": {
+      "title": "فريقنا",
+      "subtitle": "الأشخاص الذين يديرون هذا {type}",
+      "head": "المسؤول",
+      "members": "أعضاء الفريق",
+      "contact": "اتصل",
+      "empty": "لا يوجد أعضاء معروضون حالياً.",
+      "viewProfile": "عرض الملف الشخصي"
+    },
+    "achievements": {
+      "title": "إنجازاتنا",
+      "subtitle": "ما حققناه",
+      "timeline": "الجدول الزمني",
+      "highlights": "أبرز النقاط",
+      "empty": "سيتم توثيق الإنجازات قريباً."
+    },
+    "projects": {
+      "title": "مشاريعنا",
+      "subtitle": "المبادرات الحالية والمستقبلية",
+      "status": {
+        "ongoing": "جارٍ",
+        "completed": "مكتمل",
+        "planned": "مخطط"
+      },
+      "viewMore": "اعرف المزيد",
+      "empty": "لا توجد مشاريع معروضة حالياً."
+    },
+    "news": {
+      "title": "الأخبار",
+      "subtitle": "آخر التحديثات",
+      "readMore": "اقرأ المزيد",
+      "publishedOn": "نُشر في",
+      "empty": "لا توجد أخبار حالياً."
+    },
+    "media": {
+      "title": "الوسائط",
+      "subtitle": "الصور والفيديوهات والوثائق",
+      "categories": {
+        "photos": "صور",
+        "videos": "فيديوهات",
+        "documents": "وثائق"
+      },
+      "download": "تحميل",
+      "viewGallery": "عرض المعرض",
+      "empty": "لا توجد وسائط متاحة حالياً."
+    },
+    "cta": {
+      "contact": "اتصل بنا",
+      "backToOrg": "العودة للتنظيم"
+    },
+    "types": {
+      "department": "قسم",
+      "service": "خدمة"
+    }
+  }
+}

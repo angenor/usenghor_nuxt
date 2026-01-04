@@ -1,0 +1,82 @@
+{
+  "organizationDetail": {
+    "seo": {
+      "titleDepartment": "{name} | Department | Senghor University",
+      "titleService": "{name} | Service | Senghor University",
+      "description": "Discover the missions, team and projects of the {type} {name} at Senghor University."
+    },
+    "breadcrumb": {
+      "department": "Department",
+      "service": "Service"
+    },
+    "tabs": {
+      "missions": "Missions",
+      "team": "Team",
+      "achievements": "Achievements",
+      "projects": "Projects",
+      "news": "News",
+      "media": "Media"
+    },
+    "missions": {
+      "title": "Our missions",
+      "subtitle": "Objectives and commitments",
+      "objectives": "Main objectives",
+      "values": "Our values",
+      "empty": "Missions will be detailed soon."
+    },
+    "team": {
+      "title": "Our team",
+      "subtitle": "The people behind this {type}",
+      "head": "Head",
+      "members": "Team members",
+      "contact": "Contact",
+      "empty": "No members displayed at the moment.",
+      "viewProfile": "View profile"
+    },
+    "achievements": {
+      "title": "Our achievements",
+      "subtitle": "What we have accomplished",
+      "timeline": "Timeline",
+      "highlights": "Highlights",
+      "empty": "Achievements will be documented soon."
+    },
+    "projects": {
+      "title": "Our projects",
+      "subtitle": "Current and upcoming initiatives",
+      "status": {
+        "ongoing": "Ongoing",
+        "completed": "Completed",
+        "planned": "Planned"
+      },
+      "viewMore": "Learn more",
+      "empty": "No projects displayed at the moment."
+    },
+    "news": {
+      "title": "News",
+      "subtitle": "Latest updates",
+      "readMore": "Read more",
+      "publishedOn": "Published on",
+      "empty": "No news at the moment."
+    },
+    "media": {
+      "title": "Media",
+      "subtitle": "Photos, videos and documents",
+      "categories": {
+        "photos": "Photos",
+        "videos": "Videos",
+        "documents": "Documents"
+      },
+      "download": "Download",
+      "viewGallery": "View gallery",
+      "empty": "No media available at the moment."
+    },
+    "cta": {
+      "contact": "Contact us",
+      "backToOrg": "Back to organization"
+    },
+    "types": {
+      "department": "department",
+      "service": "service"
+    }
+  }
+}
