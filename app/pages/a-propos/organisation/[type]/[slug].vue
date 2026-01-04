@@ -260,30 +260,58 @@ const mockObjectives = computed(() => [
 const mockAchievements = computed(() => [
   {
     year: '2024',
+    subtitle: locale.value === 'fr' ? 'Qualité' : locale.value === 'ar' ? 'الجودة' : 'Quality',
     title: locale.value === 'fr' ? 'Certification internationale' : locale.value === 'ar' ? 'شهادة دولية' : 'International certification',
     description: locale.value === 'fr'
-      ? 'Obtention de la certification qualité pour nos programmes de formation'
+      ? 'Obtention de la certification qualité pour nos programmes de formation. Cette reconnaissance internationale atteste de l\'excellence de notre approche pédagogique.'
       : locale.value === 'ar'
-        ? 'الحصول على شهادة الجودة لبرامجنا التدريبية'
-        : 'Quality certification obtained for our training programs'
+        ? 'الحصول على شهادة الجودة لبرامجنا التدريبية. هذا الاعتراف الدولي يشهد على تميز نهجنا التربوي.'
+        : 'Quality certification obtained for our training programs. This international recognition attests to the excellence of our pedagogical approach.',
+    image: '/images/bg/backgroud_senghor1.jpg'
   },
   {
     year: '2023',
+    subtitle: locale.value === 'fr' ? 'Coopération' : locale.value === 'ar' ? 'التعاون' : 'Cooperation',
     title: locale.value === 'fr' ? 'Nouveau partenariat' : locale.value === 'ar' ? 'شراكة جديدة' : 'New partnership',
     description: locale.value === 'fr'
-      ? 'Signature d\'un accord de coopération avec 5 universités africaines'
+      ? 'Signature d\'un accord de coopération avec 5 universités africaines majeures, renforçant notre réseau d\'échanges académiques sur le continent.'
       : locale.value === 'ar'
-        ? 'توقيع اتفاقية تعاون مع 5 جامعات أفريقية'
-        : 'Cooperation agreement signed with 5 African universities'
+        ? 'توقيع اتفاقية تعاون مع 5 جامعات أفريقية كبرى، مما يعزز شبكة التبادل الأكاديمي في القارة.'
+        : 'Cooperation agreement signed with 5 major African universities, strengthening our academic exchange network across the continent.',
+    image: '/images/bg/backgroud_senghor2.jpg'
   },
   {
     year: '2022',
-    title: locale.value === 'fr' ? 'Digitalisation' : locale.value === 'ar' ? 'الرقمنة' : 'Digitalization',
+    subtitle: locale.value === 'fr' ? 'Innovation' : locale.value === 'ar' ? 'الابتكار' : 'Innovation',
+    title: locale.value === 'fr' ? 'Digitalisation complète' : locale.value === 'ar' ? 'الرقمنة الكاملة' : 'Full digitalization',
     description: locale.value === 'fr'
-      ? 'Mise en place de la plateforme d\'enseignement à distance'
+      ? 'Mise en place de la plateforme d\'enseignement à distance permettant à nos étudiants de suivre leurs cours depuis n\'importe où dans le monde.'
       : locale.value === 'ar'
-        ? 'إنشاء منصة التعليم عن بُعد'
-        : 'Implementation of the distance learning platform'
+        ? 'إنشاء منصة التعليم عن بُعد التي تتيح لطلابنا متابعة دروسهم من أي مكان في العالم.'
+        : 'Implementation of the distance learning platform allowing our students to attend classes from anywhere in the world.',
+    image: '/images/bg/backgroud_senghor3.jpg'
+  },
+  {
+    year: '2021',
+    subtitle: locale.value === 'fr' ? 'Recherche' : locale.value === 'ar' ? 'البحث' : 'Research',
+    title: locale.value === 'fr' ? 'Centre de recherche' : locale.value === 'ar' ? 'مركز البحث' : 'Research center',
+    description: locale.value === 'fr'
+      ? 'Création du centre de recherche sur le développement durable en Afrique, avec 15 chercheurs permanents et 30 doctorants.'
+      : locale.value === 'ar'
+        ? 'إنشاء مركز البحث حول التنمية المستدامة في أفريقيا، مع 15 باحثًا دائمًا و30 طالب دكتوراه.'
+        : 'Creation of the research center on sustainable development in Africa, with 15 permanent researchers and 30 doctoral students.',
+    image: '/images/bg/bg_mission_section.jpeg'
+  },
+  {
+    year: '2020',
+    subtitle: locale.value === 'fr' ? 'Expansion' : locale.value === 'ar' ? 'التوسع' : 'Expansion',
+    title: locale.value === 'fr' ? 'Nouveaux programmes' : locale.value === 'ar' ? 'برامج جديدة' : 'New programs',
+    description: locale.value === 'fr'
+      ? 'Lancement de 3 nouveaux masters professionnels en environnement, santé publique et gouvernance numérique pour répondre aux défis contemporains.'
+      : locale.value === 'ar'
+        ? 'إطلاق 3 ماسترات مهنية جديدة في البيئة والصحة العامة والحوكمة الرقمية لمواجهة التحديات المعاصرة.'
+        : 'Launch of 3 new professional masters in environment, public health and digital governance to address contemporary challenges.',
+    image: '/images/bg/bg_stats_section.jpeg'
   }
 ])
 
@@ -358,6 +386,73 @@ const mockMedia = {
 }
 
 const activeMediaTab = ref('photos')
+
+// Timeline colors for achievements
+type TimelineColor = {
+  solid: string
+  gradient: string
+  bgLight: string
+  text: string
+  arrowLeft: string
+  arrowRight: string
+}
+
+const defaultTimelineColor: TimelineColor = {
+  solid: '#46b8e9',
+  gradient: 'from-cyan-500 to-blue-500',
+  bgLight: 'bg-cyan-100 dark:bg-cyan-900/30',
+  text: 'text-cyan-600 dark:text-cyan-400',
+  arrowLeft: 'border-l-cyan-500',
+  arrowRight: 'border-r-cyan-500'
+}
+
+const timelineColors: TimelineColor[] = [
+  defaultTimelineColor,
+  {
+    solid: '#3ee9d1',
+    gradient: 'from-teal-400 to-emerald-500',
+    bgLight: 'bg-teal-100 dark:bg-teal-900/30',
+    text: 'text-teal-600 dark:text-teal-400',
+    arrowLeft: 'border-l-teal-400',
+    arrowRight: 'border-r-teal-400'
+  },
+  {
+    solid: '#ce43eb',
+    gradient: 'from-purple-500 to-pink-500',
+    bgLight: 'bg-purple-100 dark:bg-purple-900/30',
+    text: 'text-purple-600 dark:text-purple-400',
+    arrowLeft: 'border-l-purple-500',
+    arrowRight: 'border-r-purple-500'
+  },
+  {
+    solid: '#4d92eb',
+    gradient: 'from-blue-500 to-indigo-500',
+    bgLight: 'bg-blue-100 dark:bg-blue-900/30',
+    text: 'text-blue-600 dark:text-blue-400',
+    arrowLeft: 'border-l-blue-500',
+    arrowRight: 'border-r-blue-500'
+  },
+  {
+    solid: '#f59e0b',
+    gradient: 'from-amber-500 to-orange-500',
+    bgLight: 'bg-amber-100 dark:bg-amber-900/30',
+    text: 'text-amber-600 dark:text-amber-400',
+    arrowLeft: 'border-l-amber-500',
+    arrowRight: 'border-r-amber-500'
+  }
+]
+
+const getTimelineColor = (index: number): TimelineColor => {
+  return timelineColors[index % timelineColors.length] ?? defaultTimelineColor
+}
+
+// Card order for flexbox column wrap layout (zigzag pattern)
+// With 5 items and 3 rows: cards 1,3,5 go left column; cards 2,4 go right column
+const getCardStyle = (index: number) => {
+  // Order calculation for zigzag: odd cards get lower order, even cards get higher
+  const order = index % 2 === 0 ? Math.floor(index / 2) + 1 : Math.ceil(mockAchievements.value.length / 2) + Math.floor(index / 2) + 1
+  return { order }
+}
 
 // Format date
 const formatDate = (dateStr: string) => {
@@ -532,46 +627,38 @@ const formatDate = (dateStr: string) => {
           </div>
         </div>
 
-        <!-- Achievements Tab -->
+        <!-- Achievements Tab - Flexbox Timeline -->
         <div v-if="activeTab === 'achievements'" class="animate__animated animate__fadeIn">
-          <div class="mb-8">
-            <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <div class="text-center mb-12">
+            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-3">
               {{ t('organizationDetail.achievements.title') }}
             </h2>
-            <p class="text-gray-600 dark:text-gray-400">{{ t('organizationDetail.achievements.subtitle') }}</p>
+            <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">{{ t('organizationDetail.achievements.subtitle') }}</p>
           </div>
 
-          <!-- Timeline -->
-          <div class="relative">
-            <div class="absolute left-4 lg:left-1/2 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700 transform lg:-translate-x-1/2"></div>
-
-            <div class="space-y-8">
-              <div
-                v-for="(achievement, index) in mockAchievements"
-                :key="index"
-                class="relative"
-                :class="index % 2 === 0 ? 'lg:pr-1/2' : 'lg:pl-1/2 lg:ml-auto'"
-              >
-                <!-- Timeline dot -->
-                <div
-                  class="absolute left-4 lg:left-1/2 w-4 h-4 rounded-full transform -translate-x-1/2 z-10"
-                  :class="colorClasses.bg"
-                ></div>
-
-                <!-- Card -->
-                <div
-                  class="ml-12 lg:ml-0 bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
-                  :class="index % 2 === 0 ? 'lg:mr-8' : 'lg:ml-8'"
-                >
-                  <span
-                    class="inline-block px-3 py-1 rounded-full text-sm font-semibold mb-3"
-                    :class="`${colorClasses.bgLight} ${colorClasses.text}`"
-                  >
-                    {{ achievement.year }}
-                  </span>
-                  <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">{{ achievement.title }}</h3>
-                  <p class="text-gray-600 dark:text-gray-400">{{ achievement.description }}</p>
+          <!-- Flexbox Timeline -->
+          <div class="demo-card-wrapper">
+            <div
+              v-for="(achievement, index) in mockAchievements"
+              :key="index"
+              class="demo-card"
+              :class="`demo-card--step${index + 1}`"
+              :style="getCardStyle(index)"
+            >
+              <!-- Head -->
+              <div class="head" :style="{ backgroundColor: getTimelineColor(index).solid }">
+                <div class="number-box">
+                  <span>{{ String(index + 1).padStart(2, '0') }}</span>
                 </div>
+                <h2>
+                  <span class="small">{{ achievement.subtitle }}</span>
+                  {{ achievement.title }}
+                </h2>
+              </div>
+              <!-- Body -->
+              <div class="body">
+                <p>{{ achievement.description }}</p>
+                <img :src="achievement.image" :alt="achievement.title" />
               </div>
             </div>
           </div>
@@ -766,4 +853,246 @@ const formatDate = (dateStr: string) => {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Timeline Styles */
+.demo-card-wrapper {
+  position: relative;
+  margin: auto;
+  max-width: 94%;
+}
+
+/* Timeline vertical line */
+.demo-card-wrapper::after {
+  z-index: 1;
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  border-left: 1px solid rgba(191, 191, 191, 0.4);
+}
+
+.demo-card {
+  position: relative;
+  display: block;
+  margin: 10px auto 80px;
+  max-width: 94%;
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+.demo-card .head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  color: #fff;
+  font-weight: 400;
+}
+
+.demo-card .head .number-box {
+  display: inline;
+  float: left;
+  margin: 15px;
+  padding: 10px;
+  font-size: 35px;
+  line-height: 35px;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.17);
+}
+
+.demo-card .head h2 {
+  text-transform: uppercase;
+  font-size: 1.3rem;
+  font-weight: inherit;
+  letter-spacing: 2px;
+  margin: 0;
+  padding-bottom: 6px;
+  line-height: 1rem;
+}
+
+.demo-card .head h2 .small {
+  display: block;
+  font-size: 0.6rem;
+  margin: 0;
+}
+
+.demo-card .body {
+  background: #fff;
+  border: 1px solid rgba(191, 191, 191, 0.4);
+  border-top: 0;
+  padding: 15px;
+}
+
+.demo-card .body p {
+  font-size: 14px;
+  line-height: 18px;
+  margin-bottom: 15px;
+  color: #555;
+}
+
+.demo-card .body img {
+  display: block;
+  width: 100%;
+}
+
+/* Dark mode */
+:global(.dark) .demo-card .body {
+  background: rgb(17 24 39);
+  border-color: rgb(55 65 81);
+}
+
+:global(.dark) .demo-card .body p {
+  color: rgb(156 163 175);
+}
+
+:global(.dark) .demo-card-wrapper::after {
+  border-left-color: rgb(75 85 99);
+}
+
+/* Responsive: sm (480px) */
+@media (min-width: 480px) {
+  .demo-card {
+    max-width: 60%;
+    box-shadow: 0px 1px 22px 4px rgba(0, 0, 0, 0.07);
+  }
+  .demo-card .head h2 {
+    font-size: 165%;
+    line-height: 1.2rem;
+  }
+  .demo-card .head h2 .small {
+    font-size: 0.8rem;
+  }
+}
+
+/* Responsive: md (720px) */
+@media (min-width: 720px) {
+  .demo-card {
+    max-width: 40%;
+  }
+}
+
+/* Responsive: lg (1000px) - Full timeline layout */
+@media (min-width: 1000px) {
+  .demo-card-wrapper {
+    display: flex;
+    flex-flow: column wrap;
+    width: 1170px; /* 450*2 + 90*3 */
+    height: 1650px; /* 3 * (400 + 90) + 180 */
+    margin: 0 auto;
+    max-width: 100%;
+  }
+
+  .demo-card-wrapper::after {
+    border-left: 1px solid #bdbdbd;
+  }
+
+  :global(.dark) .demo-card-wrapper::after {
+    border-left-color: rgb(75 85 99);
+  }
+
+  .demo-card {
+    max-width: 450px;
+    height: 400px;
+    margin: 90px;
+    margin-top: 45px;
+    margin-bottom: 45px;
+  }
+
+  .demo-card .body {
+    height: 315px; /* 400 - (35 + 50) */
+    overflow: hidden;
+  }
+
+  /* Odd cards - left side */
+  .demo-card:nth-child(odd) {
+    margin-right: 45px;
+  }
+
+  .demo-card:nth-child(odd) .head::after {
+    position: absolute;
+    content: "";
+    width: 0;
+    height: 0;
+    border-top: 15px solid transparent;
+    border-bottom: 15px solid transparent;
+    border-left-width: 15px;
+    border-left-style: solid;
+    left: 100%;
+  }
+
+  .demo-card:nth-child(odd) .head::before {
+    position: absolute;
+    content: "";
+    width: 9px;
+    height: 9px;
+    background-color: #bdbdbd;
+    border-radius: 9px;
+    box-shadow: 0px 0px 2px 8px #f7f7f7;
+    left: 490px; /* 450 + 45 - 4.5 */
+  }
+
+  :global(.dark) .demo-card:nth-child(odd) .head::before {
+    box-shadow: 0px 0px 2px 8px rgb(31 41 55);
+  }
+
+  /* Even cards - right side */
+  .demo-card:nth-child(even) {
+    margin-left: 45px;
+  }
+
+  .demo-card:nth-child(even) .head::after {
+    position: absolute;
+    content: "";
+    width: 0;
+    height: 0;
+    border-top: 15px solid transparent;
+    border-bottom: 15px solid transparent;
+    border-right-width: 15px;
+    border-right-style: solid;
+    right: 100%;
+  }
+
+  .demo-card:nth-child(even) .head::before {
+    position: absolute;
+    content: "";
+    width: 9px;
+    height: 9px;
+    background-color: #bdbdbd;
+    border-radius: 9px;
+    box-shadow: 0px 0px 2px 8px #f7f7f7;
+    right: 489px; /* 450 + 45 - 4.5 - 1 */
+  }
+
+  :global(.dark) .demo-card:nth-child(even) .head::before {
+    box-shadow: 0px 0px 2px 8px rgb(31 41 55);
+  }
+
+  /* Stagger for second card */
+  .demo-card:nth-child(2) {
+    margin-top: 180px;
+  }
+
+  /* Card ordering for column wrap zigzag */
+  .demo-card:nth-child(1) { order: 1; }
+  .demo-card:nth-child(2) { order: 4; }
+  .demo-card:nth-child(3) { order: 2; }
+  .demo-card:nth-child(4) { order: 5; }
+  .demo-card:nth-child(5) { order: 3; }
+}
+
+/* Card colors and arrow colors */
+.demo-card--step1 { background-color: #46b8e9; }
+.demo-card--step1 .head::after { border-color: #46b8e9; }
+
+.demo-card--step2 { background-color: #3ee9d1; }
+.demo-card--step2 .head::after { border-color: #3ee9d1; }
+
+.demo-card--step3 { background-color: #ce43eb; }
+.demo-card--step3 .head::after { border-color: #ce43eb; }
+
+.demo-card--step4 { background-color: #4d92eb; }
+.demo-card--step4 .head::after { border-color: #4d92eb; }
+
+.demo-card--step5 { background-color: #f59e0b; }
+.demo-card--step5 .head::after { border-color: #f59e0b; }
 </style>
