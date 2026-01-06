@@ -36,7 +36,7 @@
       "title": "Départements académiques",
       "subtitle": "5 départements au service de la formation des cadres africains",
       "head": "Responsable",
-      "view_programs": "Voir les formations",
+      "view_programs": "Voir les détails",
       "no_programs": "Formations à venir",
       "programs_count": "{count} formation | {count} formations"
     },
