@@ -1,0 +1,87 @@
+{
+  "partners": {
+    "seo": {
+      "title": "Our Partners | Senghor University",
+      "description": "Discover our external campuses across Africa and our strategic academic, institutional and private partners."
+    },
+    "hero": {
+      "badge": "Global Network",
+      "title": "Our Partners",
+      "subtitle": "An international network serving francophone excellence"
+    },
+    "campus": {
+      "title": "External Campuses",
+      "subtitle": "Our presence across the francophone world",
+      "viewDetails": "View campus",
+      "visitWebsite": "Visit website",
+      "headquarters": "Headquarters",
+      "externalCampus": "External campus",
+      "selected": "Selected",
+      "noPartners": "No partners associated with this campus",
+      "noTeam": "No team members registered",
+      "noCalls": "No current calls",
+      "noEvents": "No upcoming events",
+      "noNews": "No recent news",
+      "noMedia": "No media available",
+      "tabs": {
+        "partners": "Partners",
+        "team": "Team",
+        "calls": "Current Calls",
+        "events": "Events",
+        "news": "News",
+        "media": "Media Library"
+      },
+      "team": {
+        "title": "Campus Team",
+        "contact": "Contact"
+      },
+      "calls": {
+        "title": "Current Calls",
+        "deadline": "Deadline",
+        "apply": "Apply",
+        "types": {
+          "candidature": "Application",
+          "projet": "Call for Projects",
+          "bourse": "Scholarship"
+        }
+      },
+      "events": {
+        "title": "Events",
+        "upcoming": "Upcoming",
+        "past": "Past",
+        "types": {
+          "conference": "Conference",
+          "atelier": "Workshop",
+          "ceremonie": "Ceremony",
+          "autre": "Other"
+        }
+      },
+      "news": {
+        "title": "News",
+        "readMore": "Read more"
+      },
+      "media": {
+        "title": "Media Library",
+        "videos": "Videos",
+        "photos": "Photos",
+        "viewGallery": "View gallery"
+      }
+    },
+    "strategic": {
+      "title": "Strategic Partners",
+      "subtitle": "Institutions and organizations supporting our mission"
+    },
+    "filters": {
+      "all": "All",
+      "academic": "Academic",
+      "institutional": "Institutional",
+      "corporate": "Corporate",
+      "ngo": "NGO"
+    },
+    "card": {
+      "visitWebsite": "Visit website",
+      "strategic": "Strategic partner"
+    },
+    "back": "Back to partners"
+  }
+}

@@ -17,6 +17,11 @@ import { mockCampusExternalises, campusPrincipal, type CampusExternalise } from 
 import { mockPartenaires, type Partenaire } from '@bank/mock-data/partenaires'
 import { mockFormations, type Formation } from '@bank/mock-data/formations'
 import { mockDocuments, type Document } from '@bank/mock-data/documents'
+import { mockCampusTeam, type CampusTeamMember } from '@bank/mock-data/campus-team'
+import { mockCampusCalls, type CampusCall } from '@bank/mock-data/campus-calls'
+import { mockCampusEvents, type CampusEvent } from '@bank/mock-data/campus-events'
+import { mockCampusNews, type CampusNews } from '@bank/mock-data/campus-news'
+import { mockCampusMedia, type CampusMedia } from '@bank/mock-data/campus-media'
 
 export function useMockData() {
   // === DÉPARTEMENTS ===
@@ -86,6 +91,25 @@ export function useMockData() {
   const getPartenairesByType = (type: Partenaire['partner_type']) =>
     mockPartenaires.filter(p => p.is_active && p.partner_type === type)
 
+  // === DONNÉES CAMPUS (équipes, appels, événements, actualités, médias) ===
+  const getCampusTeam = (campusId: string) =>
+    mockCampusTeam.filter(m => m.campus_id === campusId)
+
+  const getCampusCalls = (campusId: string) =>
+    mockCampusCalls.filter(c => c.campus_id === campusId && c.is_active)
+
+  const getCampusEvents = (campusId: string) =>
+    mockCampusEvents.filter(e => e.campus_id === campusId)
+
+  const getCampusNews = (campusId: string) =>
+    mockCampusNews.filter(n => n.campus_id === campusId)
+
+  const getCampusMedia = (campusId: string) =>
+    mockCampusMedia.filter(m => m.campus_id === campusId)
+
+  const getCampusMediaByType = (campusId: string, type: CampusMedia['type']) =>
+    mockCampusMedia.filter(m => m.campus_id === campusId && m.type === type)
+
   // === FORMATIONS ===
   const formations = computed(() => mockFormations.filter(f => f.is_published))
 
@@ -152,6 +176,14 @@ export function useMockData() {
     getPartenairesStrategiques,
     getPartenairesByType,
 
+    // Getters données campus
+    getCampusTeam,
+    getCampusCalls,
+    getCampusEvents,
+    getCampusNews,
+    getCampusMedia,
+    getCampusMediaByType,
+
     // Getters formations
     getFormationsFeatured,
     getFormationsByType,
@@ -178,5 +210,10 @@ export type {
   CampusExternalise,
   Partenaire,
   Formation,
-  Document
+  Document,
+  CampusTeamMember,
+  CampusCall,
+  CampusEvent,
+  CampusNews,
+  CampusMedia
 }

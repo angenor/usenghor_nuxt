@@ -1,0 +1,87 @@
+{
+  "partners": {
+    "seo": {
+      "title": "Nos partenaires | Université Senghor",
+      "description": "Découvrez nos campus externalisés à travers l'Afrique et nos partenaires stratégiques académiques, institutionnels et privés."
+    },
+    "hero": {
+      "badge": "Réseau mondial",
+      "title": "Nos partenaires",
+      "subtitle": "Un réseau international au service de l'excellence francophone"
+    },
+    "campus": {
+      "title": "Campus externalisés",
+      "subtitle": "Notre présence à travers le monde francophone",
+      "viewDetails": "Voir le campus",
+      "visitWebsite": "Visiter le site",
+      "headquarters": "Siège",
+      "externalCampus": "Campus externalisé",
+      "selected": "Sélectionné",
+      "noPartners": "Aucun partenaire associé à ce campus",
+      "noTeam": "Aucun membre d'équipe enregistré",
+      "noCalls": "Aucun appel en cours",
+      "noEvents": "Aucun événement à venir",
+      "noNews": "Aucune actualité récente",
+      "noMedia": "Aucun média disponible",
+      "tabs": {
+        "partners": "Partenaires",
+        "team": "Équipe",
+        "calls": "Appels en cours",
+        "events": "Événements",
+        "news": "Actualités",
+        "media": "Médiathèque"
+      },
+      "team": {
+        "title": "Équipe du campus",
+        "contact": "Contacter"
+      },
+      "calls": {
+        "title": "Appels en cours",
+        "deadline": "Date limite",
+        "apply": "Postuler",
+        "types": {
+          "candidature": "Candidature",
+          "projet": "Appel à projets",
+          "bourse": "Bourse"
+        }
+      },
+      "events": {
+        "title": "Événements",
+        "upcoming": "À venir",
+        "past": "Passés",
+        "types": {
+          "conference": "Conférence",
+          "atelier": "Atelier",
+          "ceremonie": "Cérémonie",
+          "autre": "Autre"
+        }
+      },
+      "news": {
+        "title": "Actualités",
+        "readMore": "Lire la suite"
+      },
+      "media": {
+        "title": "Médiathèque",
+        "videos": "Vidéos",
+        "photos": "Photos",
+        "viewGallery": "Voir la galerie"
+      }
+    },
+    "strategic": {
+      "title": "Partenaires stratégiques",
+      "subtitle": "Institutions et organisations qui soutiennent notre mission"
+    },
+    "filters": {
+      "all": "Tous",
+      "academic": "Académiques",
+      "institutional": "Institutionnels",
+      "corporate": "Entreprises",
+      "ngo": "ONG"
+    },
+    "card": {
+      "visitWebsite": "Visiter le site",
+      "strategic": "Partenaire stratégique"
+    },
+    "back": "Retour aux partenaires"
+  }
+}
