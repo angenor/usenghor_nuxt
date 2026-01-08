@@ -47,7 +47,7 @@ const filteredPartners = computed(() => {
           tag="div"
           class="contents"
         >
-          <CardPartner
+          <CardsCardPartner
             v-for="partner in filteredPartners"
             :key="partner.id"
             :partner="partner"

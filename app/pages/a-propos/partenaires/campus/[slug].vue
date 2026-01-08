@@ -48,7 +48,7 @@ const activeTab = ref('partners')
 <template>
   <div v-if="campus">
     <!-- Hero -->
-    <CampusCampusHero :campus="campus" />
+    <CampusHero :campus="campus" />
 
     <!-- Back Link -->
     <div class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
@@ -64,43 +64,43 @@ const activeTab = ref('partners')
     </div>
 
     <!-- Tabs Navigation -->
-    <CampusCampusTabs v-model="activeTab" />
+    <CampusTabs v-model="activeTab" />
 
     <!-- Tab Content -->
     <div class="bg-gray-50 dark:bg-gray-950 min-h-[400px]">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Partners Tab -->
-        <CampusCampusPartners
+        <CampusPartners
           v-if="activeTab === 'partners'"
           :campus-id="campus.id"
         />
 
         <!-- Team Tab -->
-        <CampusCampusTeam
+        <CampusTeam
           v-else-if="activeTab === 'team'"
           :campus-id="campus.id"
         />
 
         <!-- Calls Tab -->
-        <CampusCampusCalls
+        <CampusCalls
           v-else-if="activeTab === 'calls'"
           :campus-id="campus.id"
         />
 
         <!-- Events Tab -->
-        <CampusCampusEvents
+        <CampusEvents
           v-else-if="activeTab === 'events'"
           :campus-id="campus.id"
         />
 
         <!-- News Tab -->
-        <CampusCampusNews
+        <CampusNews
           v-else-if="activeTab === 'news'"
           :campus-id="campus.id"
         />
 
         <!-- Media Tab -->
-        <CampusCampusMedia
+        <CampusMedia
           v-else-if="activeTab === 'media'"
           :campus-id="campus.id"
         />

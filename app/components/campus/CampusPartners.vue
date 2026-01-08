@@ -22,7 +22,7 @@ const campusPartners = computed(() => {
     </h3>
 
     <div v-if="campusPartners.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <CardPartner
+      <CardsCardPartner
         v-for="partner in campusPartners"
         :key="partner.id"
         :partner="partner"
