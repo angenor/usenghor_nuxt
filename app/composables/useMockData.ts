@@ -14,7 +14,7 @@ import { mockStaff, type Staff } from '@bank/mock-data/staff'
 import { mockPaysBailleurs, getFlagEmoji, type PaysBailleur } from '@bank/mock-data/pays-bailleurs'
 import { mockConseilAdministration, type CAMember } from '@bank/mock-data/conseil-administration'
 import { mockCampusExternalises, campusPrincipal, type CampusExternalise } from '@bank/mock-data/campus-externalises'
-import { mockPartenaires, type Partenaire } from '@bank/mock-data/partenaires'
+import { mockPartenaires, mockCharterOperators, mockCampusPartners, type Partenaire, type PartnerCategory, type PartnerType } from '@bank/mock-data/partenaires'
 import { mockFormations, type Formation } from '@bank/mock-data/formations'
 import { mockDocuments, type Document } from '@bank/mock-data/documents'
 import { mockCampusTeam, type CampusTeamMember } from '@bank/mock-data/campus-team'
@@ -85,11 +85,20 @@ export function useMockData() {
   // === PARTENAIRES ===
   const partenaires = computed(() => mockPartenaires.filter(p => p.is_active))
 
-  const getPartenairesStrategiques = () =>
-    mockPartenaires.filter(p => p.is_active && p.is_strategic)
+  // Opérateurs et acteurs de la charte (OIF, APF, AUF, AIMF)
+  const charterOperators = computed(() => mockCharterOperators.filter(p => p.is_active))
 
-  const getPartenairesByType = (type: Partenaire['partner_type']) =>
+  // Partenaires Campus (institutions partenaires)
+  const campusPartners = computed(() => mockCampusPartners.filter(p => p.is_active))
+
+  const getPartenairesByCategory = (category: PartnerCategory) =>
+    mockPartenaires.filter(p => p.is_active && p.category === category)
+
+  const getPartenairesByType = (type: PartnerType) =>
     mockPartenaires.filter(p => p.is_active && p.partner_type === type)
+
+  const getCampusPartnersByType = (type: PartnerType) =>
+    mockCampusPartners.filter(p => p.is_active && p.partner_type === type)
 
   // === DONNÉES CAMPUS (équipes, appels, événements, actualités, médias) ===
   const getCampusTeam = (campusId: string) =>
@@ -147,6 +156,8 @@ export function useMockData() {
     campusExternalises,
     campusPrincipal,
     partenaires,
+    charterOperators,
+    campusPartners,
     formations,
     documents,
 
@@ -173,8 +184,9 @@ export function useMockData() {
     getCampusBySlug,
 
     // Getters partenaires
-    getPartenairesStrategiques,
+    getPartenairesByCategory,
     getPartenairesByType,
+    getCampusPartnersByType,
 
     // Getters données campus
     getCampusTeam,
@@ -209,6 +221,8 @@ export type {
   CAMember,
   CampusExternalise,
   Partenaire,
+  PartnerCategory,
+  PartnerType,
   Formation,
   Document,
   CampusTeamMember,

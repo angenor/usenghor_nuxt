@@ -2,21 +2,38 @@
   "partners": {
     "seo": {
       "title": "Our Partners | Senghor University",
-      "description": "Discover our external campuses across Africa and our strategic academic, institutional and private partners."
+      "description": "Discover our partners: Francophonie operators, partner institutions and external campuses across Africa."
     },
     "hero": {
       "badge": "Global Network",
       "title": "Our Partners",
       "subtitle": "An international network serving francophone excellence"
     },
+    "charter": {
+      "badge": "Francophonie",
+      "title": "Charter Operators and Actors",
+      "subtitle": "Senghor University is a direct operator of the Francophonie, alongside OIF, AUF, APF and AIMF.",
+      "info": "These four operators constitute the institutional foundation of the Francophonie."
+    },
     "campus": {
-      "title": "External Campuses",
-      "subtitle": "Our presence across the francophone world",
-      "viewDetails": "View campus",
-      "visitWebsite": "Visit website",
-      "headquarters": "Headquarters",
-      "externalCampus": "External campus",
-      "selected": "Selected",
+      "badge": "50+ partners",
+      "title": "Campus Partners",
+      "subtitle": "Academic, research and cultural institutions partnering with Senghor University",
+      "noResults": "No partners in this category",
+      "stats": {
+        "institutions": "Partner institutions",
+        "countries": "Countries represented",
+        "continents": "Continents"
+      },
+      "externalCampus": {
+        "title": "External Campuses",
+        "subtitle": "Our presence across the francophone world",
+        "viewDetails": "View campus",
+        "visitWebsite": "Visit website",
+        "headquarters": "Headquarters",
+        "externalCampus": "External campus",
+        "selected": "Selected"
+      },
       "noPartners": "No partners associated with this campus",
       "noTeam": "No team members registered",
       "noCalls": "No current calls",
@@ -67,16 +84,24 @@
         "viewGallery": "View gallery"
       }
     },
-    "strategic": {
-      "title": "Strategic Partners",
-      "subtitle": "Institutions and organizations supporting our mission"
+    "externalCampus": {
+      "title": "External Campuses",
+      "subtitle": "Our presence across the francophone world",
+      "viewDetails": "View campus",
+      "visitWebsite": "Visit website",
+      "headquarters": "Headquarters",
+      "externalCampus": "External campus",
+      "selected": "Selected"
     },
     "filters": {
       "all": "All",
+      "charter": "Charter Operators",
+      "campus": "Campus Partners",
       "academic": "Academic",
-      "institutional": "Institutional",
-      "corporate": "Corporate",
-      "ngo": "NGO"
+      "research": "Research",
+      "culture": "Culture",
+      "environment": "Environment",
+      "institutional": "Institutional"
     },
     "card": {
       "visitWebsite": "Visit website",

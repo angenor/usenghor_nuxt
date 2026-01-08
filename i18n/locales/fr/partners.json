@@ -2,21 +2,38 @@
   "partners": {
     "seo": {
       "title": "Nos partenaires | Université Senghor",
-      "description": "Découvrez nos campus externalisés à travers l'Afrique et nos partenaires stratégiques académiques, institutionnels et privés."
+      "description": "Découvrez nos partenaires : opérateurs de la Francophonie, institutions partenaires et campus externalisés à travers l'Afrique."
     },
     "hero": {
       "badge": "Réseau mondial",
       "title": "Nos partenaires",
       "subtitle": "Un réseau international au service de l'excellence francophone"
     },
+    "charter": {
+      "badge": "Francophonie",
+      "title": "Opérateurs et acteurs de la charte",
+      "subtitle": "L'Université Senghor est un opérateur direct de la Francophonie, aux côtés de l'OIF, de l'AUF, de l'APF et de l'AIMF.",
+      "info": "Ces quatre opérateurs constituent le socle institutionnel de la Francophonie."
+    },
     "campus": {
-      "title": "Campus externalisés",
-      "subtitle": "Notre présence à travers le monde francophone",
-      "viewDetails": "Voir le campus",
-      "visitWebsite": "Visiter le site",
-      "headquarters": "Siège",
-      "externalCampus": "Campus externalisé",
-      "selected": "Sélectionné",
+      "badge": "50+ partenaires",
+      "title": "Partenaires Campus",
+      "subtitle": "Institutions académiques, de recherche et culturelles partenaires de l'Université Senghor",
+      "noResults": "Aucun partenaire dans cette catégorie",
+      "stats": {
+        "institutions": "Institutions partenaires",
+        "countries": "Pays représentés",
+        "continents": "Continents"
+      },
+      "externalCampus": {
+        "title": "Campus externalisés",
+        "subtitle": "Notre présence à travers le monde francophone",
+        "viewDetails": "Voir le campus",
+        "visitWebsite": "Visiter le site",
+        "headquarters": "Siège",
+        "externalCampus": "Campus externalisé",
+        "selected": "Sélectionné"
+      },
       "noPartners": "Aucun partenaire associé à ce campus",
       "noTeam": "Aucun membre d'équipe enregistré",
       "noCalls": "Aucun appel en cours",
@@ -67,16 +84,24 @@
         "viewGallery": "Voir la galerie"
       }
     },
-    "strategic": {
-      "title": "Partenaires stratégiques",
-      "subtitle": "Institutions et organisations qui soutiennent notre mission"
+    "externalCampus": {
+      "title": "Campus externalisés",
+      "subtitle": "Notre présence à travers le monde francophone",
+      "viewDetails": "Voir le campus",
+      "visitWebsite": "Visiter le site",
+      "headquarters": "Siège",
+      "externalCampus": "Campus externalisé",
+      "selected": "Sélectionné"
     },
     "filters": {
       "all": "Tous",
+      "charter": "Opérateurs de la charte",
+      "campus": "Partenaires Campus",
       "academic": "Académiques",
-      "institutional": "Institutionnels",
-      "corporate": "Entreprises",
-      "ngo": "ONG"
+      "research": "Recherche",
+      "culture": "Culture",
+      "environment": "Environnement",
+      "institutional": "Institutionnels"
     },
     "card": {
       "visitWebsite": "Visiter le site",
