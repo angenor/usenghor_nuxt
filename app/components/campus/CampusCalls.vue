@@ -7,7 +7,11 @@ const props = defineProps<Props>()
 const { t } = useI18n()
 const { getCampusCalls } = useMockData()
 
-const calls = computed(() => getCampusCalls(props.campusId))
+const calls = computed(() => {
+  const result = getCampusCalls(props.campusId)
+  console.log('CampusCalls - campusId:', props.campusId, '- found:', result.length, 'calls')
+  return result
+})
 </script>
 
 <template>
@@ -16,8 +20,8 @@ const calls = computed(() => getCampusCalls(props.campusId))
       {{ t('partners.campus.calls.title') }}
     </h3>
 
-    <div v-if="calls.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <CardCall
+    <div v-if="calls.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <CardsCardCall
         v-for="call in calls"
         :key="call.id"
         :call="call"
