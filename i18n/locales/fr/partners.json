@@ -17,22 +17,18 @@
     },
     "campus": {
       "badge": "50+ partenaires",
-      "title": "Partenaires Campus",
-      "subtitle": "Institutions académiques, de recherche et culturelles partenaires de l'Université Senghor",
+      "title": "Campus externalisés",
+      "subtitle": "Notre présence à travers le monde francophone",
       "noResults": "Aucun partenaire dans cette catégorie",
+      "headquarters": "Siège",
+      "externalCampus": "Campus externalisé",
+      "selected": "Sélectionné",
+      "viewDetails": "Voir le campus",
+      "visitWebsite": "Visiter le site",
       "stats": {
         "institutions": "Institutions partenaires",
         "countries": "Pays représentés",
         "continents": "Continents"
-      },
-      "externalCampus": {
-        "title": "Campus externalisés",
-        "subtitle": "Notre présence à travers le monde francophone",
-        "viewDetails": "Voir le campus",
-        "visitWebsite": "Visiter le site",
-        "headquarters": "Siège",
-        "externalCampus": "Campus externalisé",
-        "selected": "Sélectionné"
       },
       "noPartners": "Aucun partenaire associé à ce campus",
       "noTeam": "Aucun membre d'équipe enregistré",

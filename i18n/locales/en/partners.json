@@ -17,22 +17,18 @@
     },
     "campus": {
       "badge": "50+ partners",
-      "title": "Campus Partners",
-      "subtitle": "Academic, research and cultural institutions partnering with Senghor University",
+      "title": "External Campuses",
+      "subtitle": "Our presence across the francophone world",
       "noResults": "No partners in this category",
+      "headquarters": "Headquarters",
+      "externalCampus": "External campus",
+      "selected": "Selected",
+      "viewDetails": "View campus",
+      "visitWebsite": "Visit website",
       "stats": {
         "institutions": "Partner institutions",
         "countries": "Countries represented",
         "continents": "Continents"
-      },
-      "externalCampus": {
-        "title": "External Campuses",
-        "subtitle": "Our presence across the francophone world",
-        "viewDetails": "View campus",
-        "visitWebsite": "Visit website",
-        "headquarters": "Headquarters",
-        "externalCampus": "External campus",
-        "selected": "Selected"
       },
       "noPartners": "No partners associated with this campus",
       "noTeam": "No team members registered",
