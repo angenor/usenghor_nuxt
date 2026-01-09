@@ -125,7 +125,7 @@ const getCountryFlag = (country?: string) => {
             <!-- Charter badge -->
             <div
               v-if="isCharterOperator(partner)"
-              class="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-full uppercase tracking-wide"
+              class="absolute -top-5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-full uppercase tracking-wide text-center"
             >
               {{ t('partners.filters.charter') }}
             </div>
