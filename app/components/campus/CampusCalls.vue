@@ -20,7 +20,7 @@ const calls = computed(() => {
       {{ t('partners.campus.calls.title') }}
     </h3>
 
-    <div v-if="calls.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div v-if="calls.length > 0" class="flex flex-col gap-6">
       <CardsCardCall
         v-for="call in calls"
         :key="call.id"

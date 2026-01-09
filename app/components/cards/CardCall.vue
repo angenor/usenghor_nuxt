@@ -73,98 +73,101 @@ const typeIcons: Record<string, string> = {
 </script>
 
 <template>
-  <div
-    class="group relative flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
-  >
-    <!-- Image -->
-    <div class="relative h-48 overflow-hidden">
-      <img
-        :src="call.image"
-        :alt="getLocalizedTitle"
-        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        loading="lazy"
-        @error="($event.target as HTMLImageElement).src = `https://picsum.photos/seed/${call.id}/800/400`"
-      >
-      <!-- Overlay gradient -->
-      <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-
-      <!-- Type badge on image -->
-      <div class="absolute top-4 left-4">
-        <span
-          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full backdrop-blur-sm"
-          :class="typeColors[call.type]"
+  <div class="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 dark:border-gray-700">
+    <div class="flex flex-col lg:flex-row">
+      <!-- Image -->
+      <div class="relative lg:w-80 h-48 lg:h-auto flex-shrink-0 overflow-hidden">
+        <img
+          :src="call.image"
+          :alt="getLocalizedTitle"
+          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+          @error="($event.target as HTMLImageElement).src = `https://picsum.photos/seed/${call.id}/800/400`"
         >
-          <font-awesome-icon :icon="typeIcons[call.type]" class="w-3 h-3" />
-          {{ t(`partners.campus.calls.types.${call.type}`) }}
-        </span>
-      </div>
+        <!-- Overlay gradient -->
+        <div class="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent lg:bg-gradient-to-t" />
 
-      <!-- Urgent badge -->
-      <div v-if="isDeadlineSoon" class="absolute top-4 right-4">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 text-white text-xs font-semibold rounded-full shadow-lg">
-          <font-awesome-icon icon="fa-solid fa-clock" class="w-3 h-3" />
-          {{ daysRemaining }} jours
-        </span>
-      </div>
-
-      <!-- Deadline on image -->
-      <div class="absolute bottom-4 left-4 right-4">
-        <div class="flex items-center gap-2 text-white text-sm">
-          <font-awesome-icon icon="fa-solid fa-calendar-check" class="w-4 h-4 text-amber-400" />
-          <span class="opacity-90">{{ t('partners.campus.calls.deadline') }} :</span>
-          <span class="font-semibold">{{ formattedDeadline }}</span>
+        <!-- Type badge on image -->
+        <div class="absolute top-4 left-4">
+          <span
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full backdrop-blur-sm"
+            :class="typeColors[call.type]"
+          >
+            <font-awesome-icon :icon="typeIcons[call.type]" class="w-3 h-3" />
+            {{ t(`partners.campus.calls.types.${call.type}`) }}
+          </span>
         </div>
-      </div>
-    </div>
 
-    <!-- Content -->
-    <div class="flex-1 p-5 flex flex-col">
-      <!-- Title -->
-      <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-        {{ getLocalizedTitle }}
-      </h3>
-
-      <!-- Description -->
-      <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-4 flex-1">
-        {{ getLocalizedDescription }}
-      </p>
-
-      <!-- Partner logos -->
-      <div v-if="call.partner_logos && call.partner_logos.length > 0" class="flex items-center gap-2 mb-4 pb-4 border-b border-gray-100 dark:border-gray-700">
-        <span class="text-xs text-gray-500 dark:text-gray-400 mr-1">Partenaires :</span>
-        <div class="flex items-center -space-x-2">
-          <div
-            v-for="(logo, index) in call.partner_logos.slice(0, 4)"
-            :key="index"
-            class="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border-2 border-white dark:border-gray-800 overflow-hidden shadow-sm"
-          >
-            <img
-              :src="logo"
-              alt="Partenaire"
-              class="w-full h-full object-contain p-1"
-              loading="lazy"
-            >
-          </div>
-          <div
-            v-if="call.partner_logos.length > 4"
-            class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 border-2 border-white dark:border-gray-800 flex items-center justify-center"
-          >
-            <span class="text-xs font-medium text-gray-600 dark:text-gray-300">+{{ call.partner_logos.length - 4 }}</span>
-          </div>
+        <!-- Urgent badge -->
+        <div v-if="isDeadlineSoon" class="absolute top-4 right-4">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 text-white text-xs font-semibold rounded-full shadow-lg animate-pulse">
+            <font-awesome-icon icon="fa-solid fa-clock" class="w-3 h-3" />
+            {{ daysRemaining }} jours
+          </span>
         </div>
       </div>
 
-      <!-- Apply button -->
-      <a
-        v-if="call.url"
-        :href="call.url"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="inline-flex items-center justify-center gap-2 px-5 py-3 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-amber-500/25"
-      >
-        <span>{{ t('partners.campus.calls.apply') }}</span>
-        <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
-      </a>
+      <!-- Content -->
+      <div class="flex-1 p-6 flex flex-col justify-between">
+        <div>
+          <!-- Title -->
+          <h3 class="font-bold text-xl text-gray-900 dark:text-white mb-3 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+            {{ getLocalizedTitle }}
+          </h3>
+
+          <!-- Description -->
+          <p class="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2 lg:line-clamp-3">
+            {{ getLocalizedDescription }}
+          </p>
+
+          <!-- Deadline -->
+          <div class="flex items-center gap-2 text-sm mb-4">
+            <font-awesome-icon icon="fa-solid fa-calendar-check" class="w-4 h-4 text-amber-500" />
+            <span class="text-gray-500 dark:text-gray-400">{{ t('partners.campus.calls.deadline') }} :</span>
+            <span class="font-semibold text-gray-900 dark:text-white">{{ formattedDeadline }}</span>
+          </div>
+        </div>
+
+        <!-- Footer: Partners + Button -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+          <!-- Partner logos -->
+          <div v-if="call.partner_logos && call.partner_logos.length > 0" class="flex items-center gap-3">
+            <span class="text-xs text-gray-500 dark:text-gray-400">Partenaires :</span>
+            <div class="flex items-center -space-x-2">
+              <div
+                v-for="(logo, index) in call.partner_logos.slice(0, 4)"
+                :key="index"
+                class="w-10 h-10 rounded-full bg-white dark:bg-gray-700 border-2 border-white dark:border-gray-800 overflow-hidden shadow-sm"
+              >
+                <img
+                  :src="logo"
+                  alt="Partenaire"
+                  class="w-full h-full object-contain p-1"
+                  loading="lazy"
+                >
+              </div>
+              <div
+                v-if="call.partner_logos.length > 4"
+                class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 border-2 border-white dark:border-gray-800 flex items-center justify-center"
+              >
+                <span class="text-xs font-medium text-gray-600 dark:text-gray-300">+{{ call.partner_logos.length - 4 }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Apply button -->
+          <a
+            v-if="call.url"
+            :href="call.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-amber-500/25 sm:ml-auto"
+          >
+            <span>{{ t('partners.campus.calls.apply') }}</span>
+            <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 </template>
