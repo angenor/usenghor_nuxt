@@ -88,9 +88,10 @@ export const mockCampusCalls: CampusCall[] = [
     description_en: 'Senghor University, in partnership with ENA of Côte d\'Ivoire and Félix Houphouët-Boigny University, opens applications for the Master 2 in Public Policy Management and Evaluation. This program of excellence aims to train senior executives capable of designing, managing and evaluating public policies in the francophone African space.',
     image: 'https://picsum.photos/seed/call-abidjan-pp/800/400',
     partner_logos: [
-      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.jpg',
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.png',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg',
-      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.jpg'
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png',
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/03.png'
     ],
     url: 'https://usenghor.org/candidatures/abidjan-politiques-publiques',
     is_active: true
@@ -107,8 +108,9 @@ export const mockCampusCalls: CampusCall[] = [
     description_en: 'The Abidjan campus launches its call for applications for the Master 2 in Culture and Creative Industries, in partnership with the Ministry of Culture and Francophonie. Training focused on cultural management, creative economy and the enhancement of African heritage.',
     image: 'https://picsum.photos/seed/call-abidjan-culture/800/400',
     partner_logos: [
-      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.jpg',
-      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/03.jpg'
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.png',
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/03.png',
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/20.png'
     ],
     url: 'https://usenghor.org/candidatures/abidjan-culture',
     is_active: true
@@ -126,8 +128,9 @@ export const mockCampusCalls: CampusCall[] = [
     image: 'https://picsum.photos/seed/call-abidjan-bourse/800/400',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg',
-      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.jpg',
-      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.jpg'
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png',
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.png',
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/04.jpg'
     ],
     url: 'https://usenghor.org/bourses/abidjan-excellence',
     is_active: true
@@ -144,8 +147,9 @@ export const mockCampusCalls: CampusCall[] = [
     description_en: 'The Abidjan campus, with the support of the Agence Universitaire de la Francophonie (AUF), launches a call for projects for researchers and doctoral students working on innovative solutions for sustainable development in West Africa.',
     image: 'https://picsum.photos/seed/call-abidjan-innovation/800/400',
     partner_logos: [
-      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.jpg',
-      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.jpg'
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png',
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.png',
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/1.png'
     ],
     url: 'https://usenghor.org/projets/abidjan-innovation',
     is_active: true

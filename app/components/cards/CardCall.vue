@@ -66,7 +66,7 @@ const typeBgColors: Record<string, string> = {
 
 <template>
   <div
-    class="blog-card group relative block w-full max-w-4xl h-[380px] bg-cover bg-center bg-no-repeat overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 mx-auto"
+    class="blog-card group relative block w-full h-[380px] bg-cover bg-center bg-no-repeat overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
     :style="{ backgroundImage: `url(${call.image})` }"
   >
     <!-- Content mask (white area on left) - inline-block -->
@@ -99,15 +99,15 @@ const typeBgColors: Record<string, string> = {
       </div>
 
       <!-- Partner logos -->
-      <div v-if="call.partner_logos && call.partner_logos.length > 0" class="absolute bottom-4 left-8 flex items-center gap-1">
+      <div v-if="call.partner_logos && call.partner_logos.length > 0" class="absolute bottom-4 left-8 flex items-center gap-2">
         <div
-          v-for="(logo, index) in call.partner_logos.slice(0, 3)"
+          v-for="(logo, index) in call.partner_logos.slice(0, 4)"
           :key="index"
-          class="w-8 h-8 rounded-full bg-white border border-gray-200 overflow-hidden shadow-sm -ml-2 first:ml-0"
+          class="w-12 h-12 rounded-lg bg-white border border-gray-200 overflow-hidden shadow-md -ml-1 first:ml-0"
         >
-          <img :src="logo" alt="Partenaire" class="w-full h-full object-contain p-1" loading="lazy">
+          <img :src="logo" alt="Partenaire" class="w-full h-full object-contain p-1.5" loading="lazy">
         </div>
-        <span v-if="call.partner_logos.length > 3" class="text-xs text-gray-500 ml-1">+{{ call.partner_logos.length - 3 }}</span>
+        <span v-if="call.partner_logos.length > 4" class="text-xs text-gray-500 ml-1 font-medium">+{{ call.partner_logos.length - 4 }}</span>
       </div>
     </div>
 
