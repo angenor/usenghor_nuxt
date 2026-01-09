@@ -49,18 +49,6 @@ const getLocalizedName = (partner: Partenaire) => {
 
 // Check if charter operator (for styling)
 const isCharterOperator = (partner: Partenaire) => partner.category === 'charter_operator'
-
-// Country to flag emoji mapping
-const getCountryFlag = (country?: string) => {
-  if (!country) return ''
-  const flags: Record<string, string> = {
-    'FR': '🇫🇷', 'CA': '🇨🇦', 'EG': '🇪🇬', 'SN': '🇸🇳', 'BF': '🇧🇫',
-    'BJ': '🇧🇯', 'GN': '🇬🇳', 'LU': '🇱🇺', 'PT': '🇵🇹', 'HU': '🇭🇺',
-    'MA': '🇲🇦', 'CM': '🇨🇲', 'CD': '🇨🇩', 'BE': '🇧🇪', 'VN': '🇻🇳',
-    'TG': '🇹🇬', 'MG': '🇲🇬', 'CI': '🇨🇮'
-  }
-  return flags[country] || '🌍'
-}
 </script>
 
 <template>
@@ -155,11 +143,6 @@ const getCountryFlag = (country?: string) => {
             >
               {{ getLocalizedName(partner) }}
             </h3>
-
-            <!-- Country flag if available -->
-            <span v-if="partner.country" class="mt-2 text-lg" :title="partner.country">
-              {{ getCountryFlag(partner.country) }}
-            </span>
 
             <!-- External link indicator -->
             <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
