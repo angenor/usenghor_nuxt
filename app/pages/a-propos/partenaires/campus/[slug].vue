@@ -4,6 +4,9 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getCampusBySlug, getFlagEmoji } = useMockData()
 
+// Valid tabs
+const validTabs = ['partners', 'team', 'calls', 'events', 'news', 'media']
+
 // Get campus from slug
 const slug = computed(() => route.params.slug as string)
 const campus = computed(() => getCampusBySlug(slug.value))
@@ -41,8 +44,11 @@ const breadcrumb = computed(() => [
   { label: getLocalizedName.value }
 ])
 
-// Active tab
-const activeTab = ref('partners')
+// Active tab based on URL hash (default: calls)
+const activeTab = computed(() => {
+  const hash = route.hash?.replace('#', '') || 'calls'
+  return validTabs.includes(hash) ? hash : 'calls'
+})
 </script>
 
 <template>
@@ -64,7 +70,7 @@ const activeTab = ref('partners')
     </div>
 
     <!-- Tabs Navigation -->
-    <CampusTabs v-model="activeTab" />
+    <CampusTabs :active-tab="activeTab" />
 
     <!-- Tab Content -->
     <div class="bg-gray-50 dark:bg-gray-950 min-h-[400px]">
