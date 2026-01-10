@@ -77,7 +77,9 @@
           "projet": "دعوة لتقديم المشاريع",
           "bourse": "منحة",
           "recrutement": "توظيف"
-        }
+        },
+        "showMore": "عرض المزيد",
+        "showLess": "عرض أقل"
       },
       "events": {
         "title": "الفعاليات",

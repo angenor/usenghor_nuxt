@@ -77,7 +77,9 @@
           "projet": "Call for Projects",
           "bourse": "Scholarship",
           "recrutement": "Recruitment"
-        }
+        },
+        "showMore": "Show more",
+        "showLess": "Show less"
       },
       "events": {
         "title": "Events",

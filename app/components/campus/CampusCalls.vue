@@ -11,6 +11,19 @@ const { getCampusCalls, getCampusFormationsRealisees, getCampusClosedCalls, getC
 type FilterType = 'all' | 'calls' | 'formations' | 'closed' | 'recruitments'
 const activeFilter = ref<FilterType>('all')
 
+// Expanded sections state (default: collapsed, showing only 3 items)
+const ITEMS_LIMIT = 3
+const expandedSections = ref<Record<string, boolean>>({
+  calls: false,
+  formations: false,
+  closed: false,
+  recruitments: false
+})
+
+const toggleSection = (section: string) => {
+  expandedSections.value[section] = !expandedSections.value[section]
+}
+
 // Filter options with counts (only show filters with data)
 const allFilters = [
   { id: 'all' as FilterType, label: () => t('partners.campus.calls.filters.all'), icon: 'fa-solid fa-layer-group' },
@@ -25,21 +38,24 @@ const filters = computed(() => {
   return allFilters.filter(f => f.id === 'all' || (f.count && f.count() > 0))
 })
 
-const calls = computed(() => {
-  return getCampusCalls(props.campusId)
-})
+const calls = computed(() => getCampusCalls(props.campusId))
+const formationsRealisees = computed(() => getCampusFormationsRealisees(props.campusId))
+const closedCalls = computed(() => getCampusClosedCalls(props.campusId))
+const recruitments = computed(() => getCampusRecruitments(props.campusId))
 
-const formationsRealisees = computed(() => {
-  return getCampusFormationsRealisees(props.campusId)
-})
-
-const closedCalls = computed(() => {
-  return getCampusClosedCalls(props.campusId)
-})
-
-const recruitments = computed(() => {
-  return getCampusRecruitments(props.campusId)
-})
+// Displayed items (limited or full based on expanded state)
+const displayedCalls = computed(() =>
+  expandedSections.value.calls ? calls.value : calls.value.slice(0, ITEMS_LIMIT)
+)
+const displayedFormations = computed(() =>
+  expandedSections.value.formations ? formationsRealisees.value : formationsRealisees.value.slice(0, ITEMS_LIMIT)
+)
+const displayedClosedCalls = computed(() =>
+  expandedSections.value.closed ? closedCalls.value : closedCalls.value.slice(0, ITEMS_LIMIT)
+)
+const displayedRecruitments = computed(() =>
+  expandedSections.value.recruitments ? recruitments.value : recruitments.value.slice(0, ITEMS_LIMIT)
+)
 
 // === SIDEBAR DATA ===
 const allEvents = computed(() => getCampusEvents(props.campusId))
@@ -177,12 +193,28 @@ const formatDate = (dateStr: string) => {
             </span>
           </h2>
 
-          <div v-if="calls.length > 0" class="flex flex-col gap-6">
-            <CardsCardCall
-              v-for="call in calls"
-              :key="call.id"
-              :call="call"
-            />
+          <div v-if="calls.length > 0">
+            <div class="flex flex-col gap-6">
+              <CardsCardCall
+                v-for="call in displayedCalls"
+                :key="call.id"
+                :call="call"
+              />
+            </div>
+
+            <!-- Show more/less button -->
+            <button
+              v-if="calls.length > ITEMS_LIMIT"
+              class="mt-6 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+              @click="toggleSection('calls')"
+            >
+              <font-awesome-icon
+                :icon="expandedSections.calls ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down'"
+                class="w-4 h-4"
+              />
+              {{ expandedSections.calls ? t('partners.campus.calls.showLess') : t('partners.campus.calls.showMore') }}
+              <span class="text-gray-500 dark:text-gray-400">({{ calls.length - ITEMS_LIMIT }})</span>
+            </button>
           </div>
 
           <div v-else class="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
@@ -200,12 +232,28 @@ const formatDate = (dateStr: string) => {
             </span>
           </h2>
 
-          <div v-if="formationsRealisees.length > 0" class="flex flex-col gap-6">
-            <CardsCardFormationRealisee
-              v-for="formation in formationsRealisees"
-              :key="formation.id"
-              :formation="formation"
-            />
+          <div v-if="formationsRealisees.length > 0">
+            <div class="flex flex-col gap-6">
+              <CardsCardFormationRealisee
+                v-for="formation in displayedFormations"
+                :key="formation.id"
+                :formation="formation"
+              />
+            </div>
+
+            <!-- Show more/less button -->
+            <button
+              v-if="formationsRealisees.length > ITEMS_LIMIT"
+              class="mt-6 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+              @click="toggleSection('formations')"
+            >
+              <font-awesome-icon
+                :icon="expandedSections.formations ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down'"
+                class="w-4 h-4"
+              />
+              {{ expandedSections.formations ? t('partners.campus.calls.showLess') : t('partners.campus.calls.showMore') }}
+              <span class="text-gray-500 dark:text-gray-400">({{ formationsRealisees.length - ITEMS_LIMIT }})</span>
+            </button>
           </div>
 
           <div v-else class="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
@@ -223,12 +271,28 @@ const formatDate = (dateStr: string) => {
             </span>
           </h2>
 
-          <div v-if="closedCalls.length > 0" class="flex flex-col gap-6">
-            <CardsCardCall
-              v-for="call in closedCalls"
-              :key="call.id"
-              :call="call"
-            />
+          <div v-if="closedCalls.length > 0">
+            <div class="flex flex-col gap-6">
+              <CardsCardCall
+                v-for="call in displayedClosedCalls"
+                :key="call.id"
+                :call="call"
+              />
+            </div>
+
+            <!-- Show more/less button -->
+            <button
+              v-if="closedCalls.length > ITEMS_LIMIT"
+              class="mt-6 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+              @click="toggleSection('closed')"
+            >
+              <font-awesome-icon
+                :icon="expandedSections.closed ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down'"
+                class="w-4 h-4"
+              />
+              {{ expandedSections.closed ? t('partners.campus.calls.showLess') : t('partners.campus.calls.showMore') }}
+              <span class="text-gray-500 dark:text-gray-400">({{ closedCalls.length - ITEMS_LIMIT }})</span>
+            </button>
           </div>
 
           <div v-else class="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
@@ -246,12 +310,28 @@ const formatDate = (dateStr: string) => {
             </span>
           </h2>
 
-          <div v-if="recruitments.length > 0" class="flex flex-col gap-6">
-            <CardsCardCall
-              v-for="recruitment in recruitments"
-              :key="recruitment.id"
-              :call="recruitment"
-            />
+          <div v-if="recruitments.length > 0">
+            <div class="flex flex-col gap-6">
+              <CardsCardCall
+                v-for="recruitment in displayedRecruitments"
+                :key="recruitment.id"
+                :call="recruitment"
+              />
+            </div>
+
+            <!-- Show more/less button -->
+            <button
+              v-if="recruitments.length > ITEMS_LIMIT"
+              class="mt-6 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+              @click="toggleSection('recruitments')"
+            >
+              <font-awesome-icon
+                :icon="expandedSections.recruitments ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down'"
+                class="w-4 h-4"
+              />
+              {{ expandedSections.recruitments ? t('partners.campus.calls.showLess') : t('partners.campus.calls.showMore') }}
+              <span class="text-gray-500 dark:text-gray-400">({{ recruitments.length - ITEMS_LIMIT }})</span>
+            </button>
           </div>
 
           <div v-else class="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-xl">

@@ -77,7 +77,9 @@
           "projet": "Appel à projets",
           "bourse": "Bourse",
           "recrutement": "Recrutement"
-        }
+        },
+        "showMore": "Voir plus",
+        "showLess": "Voir moins"
       },
       "events": {
         "title": "Événements",
