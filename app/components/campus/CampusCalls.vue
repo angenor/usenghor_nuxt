@@ -11,14 +11,19 @@ const { getCampusCalls, getCampusFormationsRealisees, getCampusClosedCalls, getC
 type FilterType = 'all' | 'calls' | 'formations' | 'closed' | 'recruitments'
 const activeFilter = ref<FilterType>('all')
 
-// Filter options with counts
-const filters = computed(() => [
-  { id: 'all' as FilterType, label: t('partners.campus.calls.filters.all'), icon: 'fa-solid fa-layer-group' },
-  { id: 'calls' as FilterType, label: t('partners.campus.calls.filters.calls'), icon: 'fa-solid fa-bullhorn', count: calls.value.length },
-  { id: 'formations' as FilterType, label: t('partners.campus.calls.filters.formations'), icon: 'fa-solid fa-graduation-cap', count: formationsRealisees.value.length },
-  { id: 'closed' as FilterType, label: t('partners.campus.calls.filters.closed'), icon: 'fa-solid fa-folder-closed', count: closedCalls.value.length },
-  { id: 'recruitments' as FilterType, label: t('partners.campus.calls.filters.recruitments'), icon: 'fa-solid fa-user-plus', count: recruitments.value.length }
-])
+// Filter options with counts (only show filters with data)
+const allFilters = [
+  { id: 'all' as FilterType, label: () => t('partners.campus.calls.filters.all'), icon: 'fa-solid fa-layer-group' },
+  { id: 'calls' as FilterType, label: () => t('partners.campus.calls.filters.calls'), icon: 'fa-solid fa-bullhorn', count: () => calls.value.length },
+  { id: 'formations' as FilterType, label: () => t('partners.campus.calls.filters.formations'), icon: 'fa-solid fa-graduation-cap', count: () => formationsRealisees.value.length },
+  { id: 'closed' as FilterType, label: () => t('partners.campus.calls.filters.closed'), icon: 'fa-solid fa-folder-closed', count: () => closedCalls.value.length },
+  { id: 'recruitments' as FilterType, label: () => t('partners.campus.calls.filters.recruitments'), icon: 'fa-solid fa-user-plus', count: () => recruitments.value.length }
+]
+
+// Only show filters that have data (except 'all' which is always shown)
+const filters = computed(() => {
+  return allFilters.filter(f => f.id === 'all' || (f.count && f.count() > 0))
+})
 
 const calls = computed(() => {
   return getCampusCalls(props.campusId)
@@ -79,10 +84,17 @@ const sidebarTeam = computed(() => {
   return getCampusTeam(props.campusId).slice(0, 4)
 })
 
-// Check if section should be visible
-const showSection = (section: FilterType) => {
-  return activeFilter.value === 'all' || activeFilter.value === section
+// Check if section should be visible (hide empty sections in 'all' mode)
+const showSection = (section: FilterType, hasData: boolean) => {
+  if (activeFilter.value === section) return true
+  if (activeFilter.value === 'all' && hasData) return true
+  return false
 }
+
+// Check if there's any data at all
+const hasAnyData = computed(() => {
+  return calls.value.length > 0 || formationsRealisees.value.length > 0 || closedCalls.value.length > 0 || recruitments.value.length > 0
+})
 
 // Localized getters
 const getLocalizedEventTitle = (event: CampusEvent) => {
@@ -115,41 +127,49 @@ const formatDate = (dateStr: string) => {
 
 <template>
   <div class="py-8">
-    <!-- Filters -->
-    <div class="flex flex-wrap gap-2 pb-4 border-b border-gray-200 dark:border-gray-700 mb-8">
-      <button
-        v-for="filter in filters"
-        :key="filter.id"
-        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200"
-        :class="[
-          activeFilter === filter.id
-            ? 'bg-amber-500 text-white shadow-md'
-            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-        ]"
-        @click="activeFilter = filter.id"
-      >
-        <font-awesome-icon :icon="filter.icon" class="w-4 h-4" />
-        <span>{{ filter.label }}</span>
-        <span
-          v-if="filter.count !== undefined"
-          class="px-2 py-0.5 text-xs rounded-full"
-          :class="[
-            activeFilter === filter.id
-              ? 'bg-white/20 text-white'
-              : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-          ]"
-        >
-          {{ filter.count }}
-        </span>
-      </button>
+    <!-- Empty state when no data at all -->
+    <div v-if="!hasAnyData" class="text-center py-16">
+      <font-awesome-icon icon="fa-solid fa-bullhorn" class="w-16 h-16 text-gray-300 dark:text-gray-600 mb-6" />
+      <p class="text-xl text-gray-500 dark:text-gray-400">{{ t('partners.campus.noCalls') }}</p>
     </div>
 
-    <!-- Two-column layout -->
-    <div class="flex flex-col lg:flex-row gap-8">
+    <!-- Content when data exists -->
+    <template v-else>
+      <!-- Filters -->
+      <div class="flex flex-wrap gap-2 pb-4 border-b border-gray-200 dark:border-gray-700 mb-8">
+        <button
+          v-for="filter in filters"
+          :key="filter.id"
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200"
+          :class="[
+            activeFilter === filter.id
+              ? 'bg-amber-500 text-white shadow-md'
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+          ]"
+          @click="activeFilter = filter.id"
+        >
+          <font-awesome-icon :icon="filter.icon" class="w-4 h-4" />
+          <span>{{ filter.label() }}</span>
+          <span
+            v-if="filter.count"
+            class="px-2 py-0.5 text-xs rounded-full"
+            :class="[
+              activeFilter === filter.id
+                ? 'bg-white/20 text-white'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+            ]"
+          >
+            {{ filter.count() }}
+          </span>
+        </button>
+      </div>
+
+      <!-- Two-column layout -->
+      <div class="flex flex-col lg:flex-row gap-8">
       <!-- Main content -->
       <div class="flex-1 space-y-16">
         <!-- Section 1: Appels en cours -->
-        <section v-if="showSection('calls')">
+        <section v-if="showSection('calls', calls.length > 0)">
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-8">
             <span class="relative inline-block">
               {{ t('partners.campus.calls.title') }}
@@ -172,7 +192,7 @@ const formatDate = (dateStr: string) => {
         </section>
 
         <!-- Section 2: Formations réalisées -->
-        <section v-if="showSection('formations')">
+        <section v-if="showSection('formations', formationsRealisees.length > 0)">
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-8">
             <span class="relative inline-block">
               {{ t('partners.campus.formations.title') }}
@@ -195,7 +215,7 @@ const formatDate = (dateStr: string) => {
         </section>
 
         <!-- Section 3: Appels clos -->
-        <section v-if="showSection('closed')">
+        <section v-if="showSection('closed', closedCalls.length > 0)">
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-8">
             <span class="relative inline-block">
               {{ t('partners.campus.calls.closedTitle') }}
@@ -218,7 +238,7 @@ const formatDate = (dateStr: string) => {
         </section>
 
         <!-- Section 4: Recrutements -->
-        <section v-if="showSection('recruitments')">
+        <section v-if="showSection('recruitments', recruitments.length > 0)">
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-8">
             <span class="relative inline-block">
               {{ t('partners.campus.calls.recruitmentsTitle') }}
@@ -442,6 +462,7 @@ const formatDate = (dateStr: string) => {
           </p>
         </div>
       </aside>
-    </div>
+      </div>
+    </template>
   </div>
 </template>
