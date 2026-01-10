@@ -81,7 +81,16 @@ const typeBgColors: Record<string, string> = {
 
       <!-- Title -->
       <h3 class="text-xl lg:text-2xl font-extrabold text-gray-900 dark:text-gray-900 leading-tight mb-2 pb-1 border-b-2 border-gray-300">
-        {{ getLocalizedTitle }}
+        <a
+          v-if="call.url"
+          :href="call.url"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hover:text-amber-600 transition-colors duration-200"
+        >
+          {{ getLocalizedTitle }}
+        </a>
+        <span v-else>{{ getLocalizedTitle }}</span>
       </h3>
 
       <!-- Description -->
