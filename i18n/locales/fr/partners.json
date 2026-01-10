@@ -78,6 +78,11 @@
         "videos": "Vidéos",
         "photos": "Photos",
         "viewGallery": "Voir la galerie"
+      },
+      "formations": {
+        "title": "Formations réalisées",
+        "graduates": "diplômés",
+        "noFormations": "Aucune formation réalisée"
       }
     },
     "externalCampus": {

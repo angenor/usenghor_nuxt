@@ -23,9 +23,12 @@ const pastEvents = computed(() => {
 
 <template>
   <div class="py-8">
-    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">
-      {{ t('partners.campus.events.title') }}
-    </h3>
+    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+      <span class="relative inline-block">
+        {{ t('partners.campus.events.title') }}
+        <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+      </span>
+    </h2>
 
     <!-- Upcoming Events -->
     <div v-if="upcomingEvents.length > 0" class="mb-10">

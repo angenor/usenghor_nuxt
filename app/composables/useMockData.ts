@@ -22,6 +22,7 @@ import { mockCampusCalls, type CampusCall } from '@bank/mock-data/campus-calls'
 import { mockCampusEvents, type CampusEvent } from '@bank/mock-data/campus-events'
 import { mockCampusNews, type CampusNews } from '@bank/mock-data/campus-news'
 import { mockCampusMedia, type CampusMedia } from '@bank/mock-data/campus-media'
+import { mockCampusFormationsRealisees, type CampusFormationRealisee } from '@bank/mock-data/campus-formations-realisees'
 
 export function useMockData() {
   // === DÉPARTEMENTS ===
@@ -119,6 +120,10 @@ export function useMockData() {
   const getCampusMediaByType = (campusId: string, type: CampusMedia['type']) =>
     mockCampusMedia.filter(m => m.campus_id === campusId && m.type === type)
 
+  // === FORMATIONS RÉALISÉES PAR CAMPUS ===
+  const getCampusFormationsRealisees = (campusId: string) =>
+    mockCampusFormationsRealisees.filter(f => f.campus_id === campusId).sort((a, b) => b.year - a.year)
+
   // === FORMATIONS ===
   const formations = computed(() => mockFormations.filter(f => f.is_published))
 
@@ -195,6 +200,7 @@ export function useMockData() {
     getCampusNews,
     getCampusMedia,
     getCampusMediaByType,
+    getCampusFormationsRealisees,
 
     // Getters formations
     getFormationsFeatured,
@@ -229,5 +235,6 @@ export type {
   CampusCall,
   CampusEvent,
   CampusNews,
-  CampusMedia
+  CampusMedia,
+  CampusFormationRealisee
 }

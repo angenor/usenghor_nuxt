@@ -60,8 +60,11 @@ const isCharterOperator = (partner: Partenaire) => partner.category === 'charter
           <font-awesome-icon icon="fa-solid fa-handshake" class="w-3.5 h-3.5 mr-2" />
           {{ t('partners.campus.badge') }}
         </span>
-        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-          {{ t('partners.hero.title') }}
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          <span class="relative inline-block">
+            {{ t('partners.hero.title') }}
+            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+          </span>
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
           {{ t('partners.hero.subtitle') }}

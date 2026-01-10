@@ -78,6 +78,11 @@
         "videos": "Videos",
         "photos": "Photos",
         "viewGallery": "View gallery"
+      },
+      "formations": {
+        "title": "Completed Programs",
+        "graduates": "graduates",
+        "noFormations": "No completed programs"
       }
     },
     "externalCampus": {

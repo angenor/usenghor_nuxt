@@ -78,6 +78,11 @@
         "videos": "فيديوهات",
         "photos": "صور",
         "viewGallery": "عرض المعرض"
+      },
+      "formations": {
+        "title": "البرامج المنجزة",
+        "graduates": "خريجين",
+        "noFormations": "لا توجد برامج منجزة"
       }
     },
     "externalCampus": {
