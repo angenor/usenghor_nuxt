@@ -65,8 +65,10 @@ export const mockCampusNews: CampusNews[] = [
     title_fr: 'Le campus d\'Abidjan accueille le MASA 2025',
     title_en: 'Abidjan Campus Hosts MASA 2025',
     date: '2025-01-05',
-    excerpt_fr: 'Le campus sera partenaire officiel du Marché des Arts du Spectacle Africain en mars 2025.',
-    image: 'https://picsum.photos/seed/news-abidjan-1/600/400'
+    excerpt_fr: 'Le campus sera partenaire officiel du Marché des Arts du Spectacle Africain en mars 2025. Cette collaboration permettra aux étudiants de participer activement à l\'organisation de cet événement majeur de la scène culturelle africaine.',
+    excerpt_en: 'The campus will be an official partner of the African Performing Arts Market in March 2025. This collaboration will allow students to actively participate in organizing this major event on the African cultural scene.',
+    image: 'https://picsum.photos/seed/news-abidjan-1/800/500',
+    url: '/actualites/masa-2025'
   },
   {
     id: 'news-abidjan-2',
@@ -74,8 +76,39 @@ export const mockCampusNews: CampusNews[] = [
     title_fr: 'Exposition des travaux d\'étudiants au Musée des Civilisations',
     title_en: 'Student Works Exhibition at Museum of Civilizations',
     date: '2024-12-15',
-    excerpt_fr: 'Les étudiants du Master Culture présentent leurs projets de fin d\'études au musée.',
-    image: 'https://picsum.photos/seed/news-abidjan-2/600/400'
+    excerpt_fr: 'Les étudiants du Master Culture présentent leurs projets de fin d\'études au musée. Une occasion unique de découvrir les talents émergents de la scène culturelle ivoirienne.',
+    excerpt_en: 'Master Culture students present their final projects at the museum. A unique opportunity to discover emerging talents from the Ivorian cultural scene.',
+    image: 'https://picsum.photos/seed/news-abidjan-2/800/500'
+  },
+  {
+    id: 'news-abidjan-3',
+    campus_id: 'campus-abidjan',
+    title_fr: 'Signature d\'un accord avec l\'ENA de Côte d\'Ivoire',
+    title_en: 'Agreement Signed with ENA of Ivory Coast',
+    date: '2024-11-28',
+    excerpt_fr: 'Le campus renforce son partenariat stratégique avec l\'École Nationale d\'Administration pour la formation des cadres de la fonction publique ivoirienne.',
+    excerpt_en: 'The campus strengthens its strategic partnership with the National School of Administration for training Ivorian civil service executives.',
+    image: 'https://picsum.photos/seed/news-abidjan-3/800/500'
+  },
+  {
+    id: 'news-abidjan-4',
+    campus_id: 'campus-abidjan',
+    title_fr: 'Remise des diplômes de la promotion 2024',
+    title_en: '2024 Graduation Ceremony',
+    date: '2024-10-20',
+    excerpt_fr: 'Cérémonie officielle de remise des diplômes en présence du Ministre de l\'Enseignement Supérieur. 85 diplômés ont été célébrés cette année.',
+    excerpt_en: 'Official graduation ceremony in the presence of the Minister of Higher Education. 85 graduates were celebrated this year.',
+    image: 'https://picsum.photos/seed/news-abidjan-4/800/500'
+  },
+  {
+    id: 'news-abidjan-5',
+    campus_id: 'campus-abidjan',
+    title_fr: 'Lancement du programme de mentorat avec les alumni',
+    title_en: 'Launch of Alumni Mentorship Program',
+    date: '2024-09-15',
+    excerpt_fr: 'Un nouveau programme de mentorat connecte les étudiants actuels avec les anciens diplômés occupant des postes stratégiques en Afrique de l\'Ouest.',
+    excerpt_en: 'A new mentorship program connects current students with alumni holding strategic positions in West Africa.',
+    image: 'https://picsum.photos/seed/news-abidjan-5/800/500'
   },
 
   // Campus Tunis
