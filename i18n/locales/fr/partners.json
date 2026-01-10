@@ -63,6 +63,13 @@
           "closed": "Appels clos",
           "recruitments": "Recrutements"
         },
+        "sidebar": {
+          "upcomingEvents": "Événements à venir",
+          "recentEvents": "Événements récents",
+          "recentNews": "Actualités récentes",
+          "viewAllEvents": "Voir tous les événements",
+          "viewAllNews": "Voir toutes les actualités"
+        },
         "types": {
           "candidature": "Candidature",
           "projet": "Appel à projets",

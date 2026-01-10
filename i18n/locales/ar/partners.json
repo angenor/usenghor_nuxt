@@ -63,6 +63,13 @@
           "closed": "الدعوات المغلقة",
           "recruitments": "التوظيف"
         },
+        "sidebar": {
+          "upcomingEvents": "الفعاليات القادمة",
+          "recentEvents": "الفعاليات الأخيرة",
+          "recentNews": "آخر الأخبار",
+          "viewAllEvents": "عرض جميع الفعاليات",
+          "viewAllNews": "عرض جميع الأخبار"
+        },
         "types": {
           "candidature": "ترشح",
           "projet": "دعوة لتقديم المشاريع",
