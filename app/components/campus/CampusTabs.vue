@@ -1,9 +1,16 @@
 <script setup lang="ts">
 interface Props {
   activeTab: string
+  campusName?: string
+  countryFlag?: string
+  showCampusName?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  campusName: '',
+  countryFlag: '',
+  showCampusName: false
+})
 
 const { t } = useI18n()
 const route = useRoute()
@@ -26,6 +33,23 @@ const getTabUrl = (tabId: string) => {
 <template>
   <div class="sticky top-20 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Campus Name (appears when hero title is out of view) -->
+      <Transition
+        enter-active-class="transition-all duration-300 ease-out"
+        enter-from-class="opacity-0 -translate-y-2 max-h-0"
+        enter-to-class="opacity-100 translate-y-0 max-h-16"
+        leave-active-class="transition-all duration-200 ease-in"
+        leave-from-class="opacity-100 translate-y-0 max-h-16"
+        leave-to-class="opacity-0 -translate-y-2 max-h-0"
+      >
+        <div v-show="showCampusName" class="flex items-center gap-3 pt-3 pb-2 overflow-hidden">
+          <span class="text-xl">{{ countryFlag }}</span>
+          <h2 class="text-lg font-bold text-gray-900 dark:text-white truncate">
+            {{ campusName }}
+          </h2>
+        </div>
+      </Transition>
+
       <nav class="flex overflow-x-auto scrollbar-hide -mb-px">
         <NuxtLink
           v-for="tab in tabs"

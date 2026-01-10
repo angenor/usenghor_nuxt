@@ -49,28 +49,52 @@ const activeTab = computed(() => {
   const hash = route.hash?.replace('#', '') || 'calls'
   return validTabs.includes(hash) ? hash : 'calls'
 })
+
+// Sticky header visibility
+const heroRef = ref<{ titleRef: HTMLElement | null } | null>(null)
+const showStickyHeader = ref(false)
+
+onMounted(() => {
+  // Wait for component to be mounted and get the title ref
+  nextTick(() => {
+    const titleElement = heroRef.value?.titleRef
+    if (!titleElement) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0]
+        if (entry) {
+          // Show sticky header when title is NOT intersecting (out of view)
+          showStickyHeader.value = !entry.isIntersecting
+        }
+      },
+      {
+        threshold: 0,
+        rootMargin: '-80px 0px 0px 0px' // Account for navbar height
+      }
+    )
+
+    observer.observe(titleElement)
+
+    onUnmounted(() => {
+      observer.disconnect()
+    })
+  })
+})
 </script>
 
 <template>
   <div v-if="campus">
     <!-- Hero -->
-    <CampusHero :campus="campus" />
+    <CampusHero ref="heroRef" :campus="campus" />
 
-    <!-- Back Link -->
-    <div class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <NuxtLink
-          :to="localePath('/a-propos/partenaires')"
-          class="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
-        >
-          <font-awesome-icon icon="fa-solid fa-arrow-left" class="w-4 h-4" />
-          {{ t('partners.back') }}
-        </NuxtLink>
-      </div>
-    </div>
-
-    <!-- Tabs Navigation -->
-    <CampusTabs :active-tab="activeTab" />
+    <!-- Tabs Navigation (with integrated sticky campus name) -->
+    <CampusTabs
+      :active-tab="activeTab"
+      :campus-name="getLocalizedName"
+      :country-flag="getFlagEmoji(campus.country)"
+      :show-campus-name="showStickyHeader"
+    />
 
     <!-- Tab Content -->
     <div class="bg-gray-50 dark:bg-gray-950 min-h-[400px]">

@@ -28,6 +28,10 @@ const getLocalizedDescription = computed(() => {
   if (locale.value === 'en' && props.campus.description_en) return props.campus.description_en
   return props.campus.description_fr
 })
+
+// Expose title ref for intersection observer
+const titleRef = ref<HTMLElement | null>(null)
+defineExpose({ titleRef })
 </script>
 
 <template>
@@ -61,7 +65,7 @@ const getLocalizedDescription = computed(() => {
           </span>
 
           <!-- Title -->
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4">
+          <h1 ref="titleRef" class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4">
             {{ getLocalizedName }}
           </h1>
 
