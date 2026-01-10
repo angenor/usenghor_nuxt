@@ -71,6 +71,11 @@ const formatDate = (dateStr: string) => {
 
             <!-- Content -->
             <div class="mt-5">
+              <!-- Featured Badge -->
+              <span class="inline-block px-3 py-1 text-xs font-semibold text-white bg-amber-600 rounded uppercase tracking-wide mb-3">
+                {{ t('partners.campus.news.featured') }}
+              </span>
+
               <!-- Title -->
               <h3 class="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 dark:text-white leading-tight">
                 <a

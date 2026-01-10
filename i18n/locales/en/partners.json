@@ -74,6 +74,7 @@
       },
       "news": {
         "title": "News",
+        "featured": "Featured",
         "readMore": "Read more"
       },
       "media": {
