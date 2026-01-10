@@ -60,7 +60,8 @@ const daysRemaining = computed(() => {
 const typeBgColors: Record<string, string> = {
   candidature: 'bg-blue-500',
   projet: 'bg-emerald-500',
-  bourse: 'bg-purple-500'
+  bourse: 'bg-purple-500',
+  recrutement: 'bg-indigo-500'
 }
 </script>
 
