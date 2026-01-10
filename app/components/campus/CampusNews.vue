@@ -12,11 +12,14 @@ const news = computed(() => getCampusNews(props.campusId))
 // Featured article (first one)
 const featuredNews = computed(() => news.value[0] || null)
 
-// Other articles
-const otherNews = computed(() => news.value.slice(1))
+// Side articles (2nd to 4th)
+const sideNews = computed(() => news.value.slice(1, 4))
+
+// Remaining articles (5th and onwards) - displayed in two-column format
+const remainingNews = computed(() => news.value.slice(4))
 
 // Get localized title
-const getLocalizedTitle = (item: typeof featuredNews.value) => {
+const getLocalizedTitle = (item: (typeof news.value)[0]) => {
   if (!item) return ''
   if (locale.value === 'en' && item.title_en) return item.title_en
   if (locale.value === 'ar' && item.title_ar) return item.title_ar
@@ -24,7 +27,7 @@ const getLocalizedTitle = (item: typeof featuredNews.value) => {
 }
 
 // Get localized excerpt
-const getLocalizedExcerpt = (item: typeof featuredNews.value) => {
+const getLocalizedExcerpt = (item: (typeof news.value)[0]) => {
   if (!item) return ''
   if (locale.value === 'en' && item.excerpt_en) return item.excerpt_en
   return item.excerpt_fr
@@ -51,7 +54,7 @@ const formatDate = (dateStr: string) => {
     </h2>
 
     <div v-if="news.length > 0">
-      <!-- Blog layout -->
+      <!-- Section 1: Featured + Side articles -->
       <div class="flex flex-col lg:flex-row lg:space-x-8">
         <!-- Left: Featured article -->
         <div class="lg:w-1/2 xl:w-3/5">
@@ -89,18 +92,17 @@ const formatDate = (dateStr: string) => {
 
               <!-- Date -->
               <div class="flex items-center gap-3 mt-4">
-                <font-awesome-icon icon="fa-regular fa-calendar" class="w-4 h-4 text-amber-500" />
                 <span class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(featuredNews.date) }}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Right: Other articles -->
+        <!-- Right: Side articles -->
         <div class="lg:w-1/2 xl:w-2/5 mt-8 lg:mt-0">
           <div class="space-y-0">
             <article
-              v-for="(item, index) in otherNews"
+              v-for="(item, index) in sideNews"
               :key="item.id"
               class="group flex flex-col md:flex-row gap-4 py-5"
               :class="{ 'border-t border-gray-200 dark:border-gray-700': index > 0 }"
@@ -140,13 +142,55 @@ const formatDate = (dateStr: string) => {
 
                 <!-- Date -->
                 <div class="flex items-center gap-2 mt-3">
-                  <font-awesome-icon icon="fa-regular fa-calendar" class="w-3 h-3 text-amber-500" />
                   <span class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(item.date) }}</span>
                 </div>
               </div>
             </article>
           </div>
         </div>
+      </div>
+
+      <!-- Section 2: Remaining articles in two-column format (Policy & Company style) -->
+      <div v-if="remainingNews.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
+        <article
+          v-for="item in remainingNews"
+          :key="item.id"
+          class="group border-t border-gray-300 dark:border-gray-700 pt-6"
+        >
+          <!-- Image -->
+          <div class="overflow-hidden rounded-xl">
+            <img
+              :src="item.image || 'https://picsum.photos/seed/default/600/400'"
+              :alt="getLocalizedTitle(item)"
+              class="w-full h-48 md:h-56 object-cover transition-transform duration-500 group-hover:scale-105"
+              loading="lazy"
+            >
+          </div>
+
+          <!-- Title -->
+          <h4 class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white leading-tight mt-4">
+            <a
+              v-if="item.url"
+              :href="item.url"
+              class="hover:text-amber-600 dark:hover:text-amber-400 hover:underline transition-colors duration-200"
+            >
+              {{ getLocalizedTitle(item) }}
+            </a>
+            <span v-else class="cursor-pointer hover:text-amber-600 dark:hover:text-amber-400 hover:underline transition-colors duration-200">
+              {{ getLocalizedTitle(item) }}
+            </span>
+          </h4>
+
+          <!-- Excerpt -->
+          <p class="mt-3 text-gray-600 dark:text-gray-400 text-base leading-relaxed line-clamp-3">
+            {{ getLocalizedExcerpt(item) }}
+          </p>
+
+          <!-- Date -->
+          <div class="flex items-center gap-3 mt-4">
+            <span class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(item.date) }}</span>
+          </div>
+        </article>
       </div>
     </div>
 

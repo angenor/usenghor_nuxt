@@ -110,6 +110,56 @@ export const mockCampusNews: CampusNews[] = [
     excerpt_en: 'A new mentorship program connects current students with alumni holding strategic positions in West Africa.',
     image: 'https://picsum.photos/seed/news-abidjan-5/800/500'
   },
+  {
+    id: 'news-abidjan-6',
+    campus_id: 'campus-abidjan',
+    title_fr: 'Conférence internationale sur le développement durable en Afrique',
+    title_en: 'International Conference on Sustainable Development in Africa',
+    date: '2024-08-22',
+    excerpt_fr: 'Le campus a organisé une conférence réunissant des experts internationaux sur les enjeux du développement durable en Afrique subsaharienne.',
+    excerpt_en: 'The campus organized a conference bringing together international experts on sustainable development challenges in sub-Saharan Africa.',
+    image: 'https://picsum.photos/seed/news-abidjan-6/800/500'
+  },
+  {
+    id: 'news-abidjan-7',
+    campus_id: 'campus-abidjan',
+    title_fr: 'Ouverture des inscriptions pour la rentrée 2025',
+    title_en: 'Registration Open for 2025 Academic Year',
+    date: '2024-07-10',
+    excerpt_fr: 'Les candidatures sont ouvertes pour les Masters en Management, Culture et Politiques Publiques. Date limite : 30 septembre 2024.',
+    excerpt_en: 'Applications are open for Masters in Management, Culture and Public Policy. Deadline: September 30, 2024.',
+    image: 'https://picsum.photos/seed/news-abidjan-7/800/500'
+  },
+  {
+    id: 'news-abidjan-8',
+    campus_id: 'campus-abidjan',
+    title_fr: 'Visite de la Secrétaire Générale de l\'OIF',
+    title_en: 'Visit from OIF Secretary General',
+    date: '2024-06-05',
+    excerpt_fr: 'La Secrétaire Générale de l\'Organisation Internationale de la Francophonie a visité le campus et rencontré les étudiants.',
+    excerpt_en: 'The Secretary General of the International Organization of the Francophonie visited the campus and met with students.',
+    image: 'https://picsum.photos/seed/news-abidjan-8/800/500'
+  },
+  {
+    id: 'news-abidjan-9',
+    campus_id: 'campus-abidjan',
+    title_fr: 'Hackathon Innovation Sociale : 48h pour changer le monde',
+    title_en: 'Social Innovation Hackathon: 48 Hours to Change the World',
+    date: '2024-05-18',
+    excerpt_fr: 'Plus de 100 étudiants ont participé au hackathon pour développer des solutions innovantes aux défis sociaux de la Côte d\'Ivoire.',
+    excerpt_en: 'Over 100 students participated in the hackathon to develop innovative solutions to Ivory Coast\'s social challenges.',
+    image: 'https://picsum.photos/seed/news-abidjan-9/800/500'
+  },
+  {
+    id: 'news-abidjan-10',
+    campus_id: 'campus-abidjan',
+    title_fr: 'Nouveau laboratoire numérique inauguré',
+    title_en: 'New Digital Lab Inaugurated',
+    date: '2024-04-12',
+    excerpt_fr: 'Un laboratoire équipé des dernières technologies a été inauguré pour accompagner la transformation digitale de nos formations.',
+    excerpt_en: 'A laboratory equipped with the latest technologies was inaugurated to support the digital transformation of our programs.',
+    image: 'https://picsum.photos/seed/news-abidjan-10/800/500'
+  },
 
   // Campus Tunis
   {
