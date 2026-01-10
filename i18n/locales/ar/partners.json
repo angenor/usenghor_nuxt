@@ -68,7 +68,9 @@
           "recentEvents": "الفعاليات الأخيرة",
           "recentNews": "آخر الأخبار",
           "viewAllEvents": "عرض جميع الفعاليات",
-          "viewAllNews": "عرض جميع الأخبار"
+          "viewAllNews": "عرض جميع الأخبار",
+          "viewAllPartners": "عرض جميع الشركاء",
+          "viewAllTeam": "عرض جميع الأعضاء"
         },
         "types": {
           "candidature": "ترشح",

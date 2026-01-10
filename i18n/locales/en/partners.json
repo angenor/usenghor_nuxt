@@ -68,7 +68,9 @@
           "recentEvents": "Recent Events",
           "recentNews": "Recent News",
           "viewAllEvents": "View all events",
-          "viewAllNews": "View all news"
+          "viewAllNews": "View all news",
+          "viewAllPartners": "View all partners",
+          "viewAllTeam": "View all team"
         },
         "types": {
           "candidature": "Application",

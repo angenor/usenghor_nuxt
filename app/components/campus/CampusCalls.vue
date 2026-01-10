@@ -5,7 +5,7 @@ interface Props {
 
 const props = defineProps<Props>()
 const { t, locale } = useI18n()
-const { getCampusCalls, getCampusFormationsRealisees, getCampusClosedCalls, getCampusRecruitments, getCampusEvents, getCampusNews } = useMockData()
+const { getCampusCalls, getCampusFormationsRealisees, getCampusClosedCalls, getCampusRecruitments, getCampusEvents, getCampusNews, getCampusTeam, partenaires } = useMockData()
 
 // Active filter
 type FilterType = 'all' | 'calls' | 'formations' | 'closed' | 'recruitments'
@@ -69,6 +69,16 @@ const sidebarNews = computed(() => {
     .slice(0, 4)
 })
 
+// Get campus partners (limit to 6 for sidebar)
+const sidebarPartners = computed(() => {
+  return partenaires.value.slice(0, 6)
+})
+
+// Get campus team (limit to 4 for sidebar)
+const sidebarTeam = computed(() => {
+  return getCampusTeam(props.campusId).slice(0, 4)
+})
+
 // Check if section should be visible
 const showSection = (section: FilterType) => {
   return activeFilter.value === 'all' || activeFilter.value === section
@@ -85,6 +95,12 @@ const getLocalizedNewsTitle = (news: CampusNews) => {
   if (locale.value === 'en' && news.title_en) return news.title_en
   if (locale.value === 'ar' && news.title_ar) return news.title_ar
   return news.title_fr
+}
+
+const getLocalizedPartnerName = (partner: Partenaire) => {
+  if (locale.value === 'en' && partner.name_en) return partner.name_en
+  if (locale.value === 'ar' && partner.name_ar) return partner.name_ar
+  return partner.name_fr
 }
 
 // Format date
@@ -333,6 +349,96 @@ const formatDate = (dateStr: string) => {
 
           <p v-else class="text-sm text-gray-500 dark:text-gray-400">
             {{ t('partners.campus.noNews') }}
+          </p>
+        </div>
+
+        <!-- Separator -->
+        <hr class="border-gray-200 dark:border-gray-700 my-6">
+
+        <!-- Partners Section -->
+        <div>
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <font-awesome-icon icon="fa-solid fa-handshake" class="w-5 h-5 text-amber-500" />
+            {{ t('partners.campus.tabs.partners') }}
+          </h3>
+
+          <div v-if="sidebarPartners.length > 0" class="grid grid-cols-3 gap-3">
+            <a
+              v-for="partner in sidebarPartners"
+              :key="partner.id"
+              :href="partner.website || '#'"
+              :title="getLocalizedPartnerName(partner)"
+              class="group flex items-center justify-center p-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500 transition-colors"
+            >
+              <img
+                :src="partner.logo"
+                :alt="getLocalizedPartnerName(partner)"
+                class="w-full h-12 object-contain opacity-70 group-hover:opacity-100 transition-opacity"
+                loading="lazy"
+              >
+            </a>
+          </div>
+
+          <!-- View all partners link -->
+          <a
+            v-if="sidebarPartners.length > 0"
+            href="#partners"
+            class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+          >
+            {{ t('partners.campus.calls.sidebar.viewAllPartners') }}
+            <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
+          </a>
+
+          <p v-else class="text-sm text-gray-500 dark:text-gray-400">
+            {{ t('partners.campus.noPartners') }}
+          </p>
+        </div>
+
+        <!-- Separator -->
+        <hr class="border-gray-200 dark:border-gray-700 my-6">
+
+        <!-- Team Section -->
+        <div>
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <font-awesome-icon icon="fa-solid fa-users" class="w-5 h-5 text-amber-500" />
+            {{ t('partners.campus.tabs.team') }}
+          </h3>
+
+          <div v-if="sidebarTeam.length > 0" class="space-y-3">
+            <div
+              v-for="member in sidebarTeam"
+              :key="member.id"
+              class="flex items-center gap-3"
+            >
+              <img
+                :src="member.photo"
+                :alt="member.name"
+                class="w-10 h-10 rounded-full object-cover"
+                loading="lazy"
+              >
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                  {{ member.name }}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                  {{ member.role_fr }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- View all team link -->
+          <a
+            v-if="sidebarTeam.length > 0"
+            href="#team"
+            class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+          >
+            {{ t('partners.campus.calls.sidebar.viewAllTeam') }}
+            <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
+          </a>
+
+          <p v-else class="text-sm text-gray-500 dark:text-gray-400">
+            {{ t('partners.campus.noTeam') }}
           </p>
         </div>
       </aside>
