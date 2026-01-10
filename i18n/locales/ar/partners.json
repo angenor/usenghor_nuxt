@@ -56,6 +56,13 @@
         "apply": "تقدم بطلب",
         "noClosedCalls": "لا توجد دعوات مغلقة",
         "noRecruitments": "لا يوجد توظيف حالياً",
+        "filters": {
+          "all": "الكل",
+          "calls": "الدعوات الجارية",
+          "formations": "البرامج",
+          "closed": "الدعوات المغلقة",
+          "recruitments": "التوظيف"
+        },
         "types": {
           "candidature": "ترشح",
           "projet": "دعوة لتقديم المشاريع",

@@ -56,6 +56,13 @@
         "apply": "Apply",
         "noClosedCalls": "No closed calls",
         "noRecruitments": "No current recruitments",
+        "filters": {
+          "all": "All",
+          "calls": "Current Calls",
+          "formations": "Programs",
+          "closed": "Closed Calls",
+          "recruitments": "Recruitments"
+        },
         "types": {
           "candidature": "Application",
           "projet": "Call for Projects",
