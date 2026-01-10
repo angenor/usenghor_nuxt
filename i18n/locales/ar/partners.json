@@ -60,8 +60,11 @@
       },
       "events": {
         "title": "الفعاليات",
+        "featured": "الأبرز",
         "upcoming": "القادمة",
+        "highlighted": "مميز",
         "past": "الماضية",
+        "noMore": "لا توجد فعاليات أخرى حالياً",
         "types": {
           "conference": "مؤتمر",
           "atelier": "ورشة عمل",

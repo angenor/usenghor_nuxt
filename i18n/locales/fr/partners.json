@@ -60,8 +60,11 @@
       },
       "events": {
         "title": "Événements",
+        "featured": "À la une",
         "upcoming": "À venir",
+        "highlighted": "En vedette",
         "past": "Passés",
+        "noMore": "Pas d'autres événements pour le moment",
         "types": {
           "conference": "Conférence",
           "atelier": "Atelier",

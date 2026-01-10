@@ -60,8 +60,11 @@
       },
       "events": {
         "title": "Events",
+        "featured": "Trending",
         "upcoming": "Upcoming",
+        "highlighted": "Featured",
         "past": "Past",
+        "noMore": "No more events at this time",
         "types": {
           "conference": "Conference",
           "atelier": "Workshop",

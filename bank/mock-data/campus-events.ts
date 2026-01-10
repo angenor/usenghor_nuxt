@@ -85,7 +85,7 @@ export const mockCampusEvents: CampusEvent[] = [
     title_en: 'Francophone Cultures Festival',
     date: '2025-03-20',
     location_fr: 'Palais de la Culture, Abidjan',
-    description_fr: 'Festival célébrant la diversité culturelle de la francophonie africaine.',
+    description_fr: 'Festival célébrant la diversité culturelle de la francophonie africaine avec des performances artistiques, expositions et rencontres.',
     image: 'https://picsum.photos/seed/event-abidjan-1/600/400',
     type: 'autre'
   },
@@ -96,9 +96,87 @@ export const mockCampusEvents: CampusEvent[] = [
     title_en: 'Creative Industries Masterclass',
     date: '2025-04-10',
     location_fr: 'Campus d\'Abidjan',
-    description_fr: 'Masterclass animée par des professionnels des industries créatives africaines.',
+    description_fr: 'Masterclass animée par des professionnels des industries créatives africaines sur les tendances et opportunités du secteur.',
     image: 'https://picsum.photos/seed/event-abidjan-2/600/400',
     type: 'atelier'
+  },
+  {
+    id: 'event-abidjan-3',
+    campus_id: 'campus-abidjan',
+    title_fr: 'Conférence internationale sur l\'économie culturelle africaine',
+    title_en: 'International Conference on African Cultural Economy',
+    date: '2025-05-15',
+    location_fr: 'Hôtel Ivoire, Abidjan',
+    location_en: 'Hotel Ivoire, Abidjan',
+    description_fr: 'Grande conférence réunissant chercheurs, entrepreneurs et décideurs pour explorer les opportunités économiques du secteur culturel en Afrique.',
+    image: 'https://picsum.photos/seed/event-abidjan-3/600/400',
+    type: 'conference'
+  },
+  {
+    id: 'event-abidjan-4',
+    campus_id: 'campus-abidjan',
+    title_fr: 'Cérémonie d\'ouverture de l\'année académique 2025-2026',
+    title_en: 'Opening Ceremony Academic Year 2025-2026',
+    date: '2025-09-15',
+    location_fr: 'Campus d\'Abidjan',
+    description_fr: 'Cérémonie officielle marquant le début de la nouvelle année académique avec la présentation des nouveaux programmes et la bienvenue aux étudiants.',
+    image: 'https://picsum.photos/seed/event-abidjan-4/600/400',
+    type: 'ceremonie'
+  },
+  {
+    id: 'event-abidjan-5',
+    campus_id: 'campus-abidjan',
+    title_fr: 'Atelier de design thinking pour l\'innovation sociale',
+    title_en: 'Design Thinking Workshop for Social Innovation',
+    date: '2025-06-08',
+    location_fr: 'Espace Innovation, Campus d\'Abidjan',
+    description_fr: 'Atelier pratique de deux jours sur les méthodologies de design thinking appliquées aux défis sociaux africains.',
+    image: 'https://picsum.photos/seed/event-abidjan-5/600/400',
+    type: 'atelier'
+  },
+  {
+    id: 'event-abidjan-6',
+    campus_id: 'campus-abidjan',
+    title_fr: 'Table ronde : Femmes leaders dans la culture africaine',
+    title_en: 'Panel: Women Leaders in African Culture',
+    date: '2025-03-08',
+    location_fr: 'Auditorium du Campus, Abidjan',
+    description_fr: 'À l\'occasion de la Journée internationale des droits des femmes, rencontre avec des femmes qui façonnent le paysage culturel africain.',
+    image: 'https://picsum.photos/seed/event-abidjan-6/600/400',
+    type: 'conference'
+  },
+  {
+    id: 'event-abidjan-7',
+    campus_id: 'campus-abidjan',
+    title_fr: 'Hackathon : Solutions numériques pour le patrimoine africain',
+    title_en: 'Hackathon: Digital Solutions for African Heritage',
+    date: '2025-07-20',
+    location_fr: 'Campus d\'Abidjan',
+    description_fr: '48 heures pour développer des solutions innovantes de préservation et valorisation du patrimoine culturel africain grâce au numérique.',
+    image: 'https://picsum.photos/seed/event-abidjan-7/600/400',
+    type: 'atelier'
+  },
+  {
+    id: 'event-abidjan-8',
+    campus_id: 'campus-abidjan',
+    title_fr: 'Colloque : Politiques culturelles et développement durable',
+    title_en: 'Symposium: Cultural Policies and Sustainable Development',
+    date: '2025-10-12',
+    location_fr: 'Fondation Félix Houphouët-Boigny, Yamoussoukro',
+    description_fr: 'Colloque interdisciplinaire explorant le rôle des politiques culturelles dans l\'atteinte des objectifs de développement durable.',
+    image: 'https://picsum.photos/seed/event-abidjan-8/600/400',
+    type: 'conference'
+  },
+  {
+    id: 'event-abidjan-9',
+    campus_id: 'campus-abidjan',
+    title_fr: 'Cérémonie de remise des diplômes - Promotion 2025',
+    title_en: 'Graduation Ceremony - Class of 2025',
+    date: '2025-12-15',
+    location_fr: 'Palais de la Culture, Abidjan',
+    description_fr: 'Célébration officielle de la promotion 2025 en présence des autorités académiques, des familles et des partenaires institutionnels.',
+    image: 'https://picsum.photos/seed/event-abidjan-9/600/400',
+    type: 'ceremonie'
   },
 
   // Campus Tunis
