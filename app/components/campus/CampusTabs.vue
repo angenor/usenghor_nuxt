@@ -10,10 +10,10 @@ const route = useRoute()
 
 const tabs = [
   { id: 'calls', label: () => t('partners.campus.tabs.calls'), icon: 'fa-solid fa-bullhorn' },
-  { id: 'partners', label: () => t('partners.campus.tabs.partners'), icon: 'fa-solid fa-handshake' },
-  { id: 'team', label: () => t('partners.campus.tabs.team'), icon: 'fa-solid fa-users' },
   { id: 'events', label: () => t('partners.campus.tabs.events'), icon: 'fa-solid fa-calendar-alt' },
   { id: 'news', label: () => t('partners.campus.tabs.news'), icon: 'fa-solid fa-newspaper' },
+  { id: 'partners', label: () => t('partners.campus.tabs.partners'), icon: 'fa-solid fa-handshake' },
+  { id: 'team', label: () => t('partners.campus.tabs.team'), icon: 'fa-solid fa-users' },
   { id: 'media', label: () => t('partners.campus.tabs.media'), icon: 'fa-solid fa-photo-film' }
 ]
 

@@ -4,8 +4,8 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getCampusBySlug, getFlagEmoji } = useMockData()
 
-// Valid tabs
-const validTabs = ['partners', 'team', 'calls', 'events', 'news', 'media']
+// Valid tabs (in display order)
+const validTabs = ['calls', 'events', 'news', 'partners', 'team', 'media']
 
 // Get campus from slug
 const slug = computed(() => route.params.slug as string)
