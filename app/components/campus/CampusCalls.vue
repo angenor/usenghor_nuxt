@@ -257,7 +257,8 @@ const formatDate = (dateStr: string) => {
                 <h4 class="text-sm font-semibold text-gray-900 dark:text-white leading-tight line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                   {{ getLocalizedEventTitle(event) }}
                 </h4>
-                <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <span class="text-xs text-gray-500 dark:text-gray-400 mt-1 inline-flex items-center gap-1">
+                  <font-awesome-icon icon="fa-regular fa-calendar" class="w-3 h-3" />
                   {{ formatDate(event.date) }}
                 </span>
               </div>
