@@ -50,12 +50,17 @@
       },
       "calls": {
         "title": "Appels en cours",
+        "closedTitle": "Appels clos",
+        "recruitmentsTitle": "Recrutements",
         "deadline": "Date limite",
         "apply": "Postuler",
+        "noClosedCalls": "Aucun appel clos",
+        "noRecruitments": "Aucun recrutement en cours",
         "types": {
           "candidature": "Candidature",
           "projet": "Appel à projets",
-          "bourse": "Bourse"
+          "bourse": "Bourse",
+          "recrutement": "Recrutement"
         }
       },
       "events": {

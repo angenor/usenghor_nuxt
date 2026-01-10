@@ -106,7 +106,13 @@ export function useMockData() {
     mockCampusTeam.filter(m => m.campus_id === campusId)
 
   const getCampusCalls = (campusId: string) =>
-    mockCampusCalls.filter(c => c.campus_id === campusId && c.is_active)
+    mockCampusCalls.filter(c => c.campus_id === campusId && c.is_active && c.status === 'open' && c.type !== 'recrutement')
+
+  const getCampusClosedCalls = (campusId: string) =>
+    mockCampusCalls.filter(c => c.campus_id === campusId && c.is_active && c.status === 'closed')
+
+  const getCampusRecruitments = (campusId: string) =>
+    mockCampusCalls.filter(c => c.campus_id === campusId && c.is_active && c.type === 'recrutement')
 
   const getCampusEvents = (campusId: string) =>
     mockCampusEvents.filter(e => e.campus_id === campusId)
@@ -196,6 +202,8 @@ export function useMockData() {
     // Getters données campus
     getCampusTeam,
     getCampusCalls,
+    getCampusClosedCalls,
+    getCampusRecruitments,
     getCampusEvents,
     getCampusNews,
     getCampusMedia,

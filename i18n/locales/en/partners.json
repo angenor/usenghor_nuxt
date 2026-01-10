@@ -50,12 +50,17 @@
       },
       "calls": {
         "title": "Current Calls",
+        "closedTitle": "Closed Calls",
+        "recruitmentsTitle": "Recruitments",
         "deadline": "Deadline",
         "apply": "Apply",
+        "noClosedCalls": "No closed calls",
+        "noRecruitments": "No current recruitments",
         "types": {
           "candidature": "Application",
           "projet": "Call for Projects",
-          "bourse": "Scholarship"
+          "bourse": "Scholarship",
+          "recrutement": "Recruitment"
         }
       },
       "events": {

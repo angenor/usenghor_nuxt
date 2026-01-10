@@ -50,12 +50,17 @@
       },
       "calls": {
         "title": "الدعوات الجارية",
+        "closedTitle": "الدعوات المغلقة",
+        "recruitmentsTitle": "التوظيف",
         "deadline": "الموعد النهائي",
         "apply": "تقدم بطلب",
+        "noClosedCalls": "لا توجد دعوات مغلقة",
+        "noRecruitments": "لا يوجد توظيف حالياً",
         "types": {
           "candidature": "ترشح",
           "projet": "دعوة لتقديم المشاريع",
-          "bourse": "منحة"
+          "bourse": "منحة",
+          "recrutement": "توظيف"
         }
       },
       "events": {
