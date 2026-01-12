@@ -40,7 +40,8 @@ const accentColors = [
   'bg-amber-400',
   'bg-blue-400',
   'bg-emerald-400',
-  'bg-purple-400'
+  'bg-purple-400',
+  'bg-rose-400'
 ]
 </script>
 

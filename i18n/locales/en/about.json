@@ -10,8 +10,11 @@
     },
     "mission": {
       "title": "Our Mission",
-      "content": "Senghor University supports Africa's transformation by training its future leaders. Since 1990, we have been training high-level African executives in sustainable development, health, culture, and management. Our unique approach combines academic excellence, professional immersion, and a pan-African network.",
-      "transform": "Supporting Africa's transformation by training committed and competent leaders, agents of change for sustainable and inclusive development of the continent.",
+      "content": "To train, in French, creative leaders capable of meeting the challenges of sustainable development in Africa.",
+      "vision": {
+        "title": "Our Vision",
+        "content": "To become a major player in training and capacity building for executives in Africa and for Africa."
+      },
       "discover": {
         "history": "Our history",
         "governance": "Our governance",
@@ -25,20 +28,29 @@
       "alumni": "graduates",
       "programs": "programs"
     },
+    "slogan": "Where Africa's tomorrow is prepared, built, and invented",
     "engagements": {
       "title": "Our Values",
       "values": {
         "excellence": {
           "title": "Excellence",
-          "text": "We strive for excellence in all our programs, with internationally accredited and recognized curricula."
+          "text": "Academic standards and intellectual rigor in service of quality."
         },
-        "diversity": {
-          "title": "Diversity",
-          "text": "Our community brings together students and teachers from across the African continent and beyond."
+        "ethics": {
+          "title": "Ethics",
+          "text": "Responsibility, integrity, commitment, respect for individuals and the common good."
         },
-        "openness": {
-          "title": "Openness",
-          "text": "We cultivate openness to the world, fostering intercultural exchanges and international partnerships."
+        "inclusion": {
+          "title": "Inclusion",
+          "text": "Valuing diverse backgrounds, languages and cultures, promoting gender equality."
+        },
+        "innovation": {
+          "title": "Innovation",
+          "text": "Creativity, action research, collective intelligence, and openness to digital and AI."
+        },
+        "solidarity": {
+          "title": "Solidarity",
+          "text": "Partnership, mutual support, scientific dialogue, and university diplomacy."
         }
       }
     },

@@ -10,8 +10,11 @@
     },
     "mission": {
       "title": "Notre mission",
-      "content": "L'Université Senghor accompagne la transformation de l'Afrique en formant ses futurs décideurs. Depuis 1990, nous formons des cadres africains de haut niveau dans les domaines du développement durable, de la santé, de la culture et du management. Notre approche unique combine excellence académique, immersion professionnelle et réseau panafricain.",
-      "transform": "Accompagner la transformation de l'Afrique par la formation de leaders engagés et compétents, porteurs du changement pour un développement durable et inclusif du continent.",
+      "content": "Former, en français, des cadres créatifs capables de relever les défis du développement durable de l'Afrique.",
+      "vision": {
+        "title": "Notre vision",
+        "content": "Devenir un acteur majeur de la formation et du renforcement de capacités des cadres en Afrique et pour l'Afrique."
+      },
       "discover": {
         "history": "Notre histoire",
         "governance": "Notre gouvernance",
@@ -25,20 +28,29 @@
       "alumni": "diplômés",
       "programs": "formations"
     },
+    "slogan": "L'endroit où se prépare, se construit et s'invente l'Afrique de demain",
     "engagements": {
       "title": "Nos valeurs",
       "values": {
         "excellence": {
           "title": "Excellence",
-          "text": "Nous visons l'excellence dans toutes nos formations, avec des programmes accrédités et reconnus internationalement."
+          "text": "Exigence académique et rigueur intellectuelle au service de la qualité."
         },
-        "diversity": {
-          "title": "Diversité",
-          "text": "Notre communauté réunit des étudiants et enseignants de tout le continent africain et au-delà."
+        "ethics": {
+          "title": "Éthique",
+          "text": "Responsabilité, intégrité, engagement, respect des personnes et du bien commun."
         },
-        "openness": {
-          "title": "Ouverture",
-          "text": "Nous cultivons l'ouverture sur le monde, favorisant les échanges interculturels et les partenariats internationaux."
+        "inclusion": {
+          "title": "Inclusion",
+          "text": "Valorisation des parcours, langues et cultures, promotion de l'égalité hommes-femmes."
+        },
+        "innovation": {
+          "title": "Innovation",
+          "text": "Créativité, recherche-action, intelligence collective et ouverture au numérique et à l'IA."
+        },
+        "solidarity": {
+          "title": "Solidarité",
+          "text": "Partenariat, entraide, dialogue scientifique et diplomatie universitaire."
         }
       }
     },

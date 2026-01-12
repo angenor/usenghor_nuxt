@@ -26,14 +26,24 @@ const values = computed(() => [
     text: t('about.engagements.values.excellence.text')
   },
   {
-    icon: 'users',
-    title: t('about.engagements.values.diversity.title'),
-    text: t('about.engagements.values.diversity.text')
+    icon: 'shield',
+    title: t('about.engagements.values.ethics.title'),
+    text: t('about.engagements.values.ethics.text')
   },
   {
-    icon: 'globe',
-    title: t('about.engagements.values.openness.title'),
-    text: t('about.engagements.values.openness.text')
+    icon: 'users',
+    title: t('about.engagements.values.inclusion.title'),
+    text: t('about.engagements.values.inclusion.text')
+  },
+  {
+    icon: 'lightbulb',
+    title: t('about.engagements.values.innovation.title'),
+    text: t('about.engagements.values.innovation.text')
+  },
+  {
+    icon: 'handshake',
+    title: t('about.engagements.values.solidarity.title'),
+    text: t('about.engagements.values.solidarity.text')
   }
 ])
 
