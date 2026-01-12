@@ -15,42 +15,31 @@
     },
     "axes": {
       "title": "Our Strategic Axes",
-      "subtitle": "Five pillars to support Africa's transformation",
+      "subtitle": "Three pillars to support Africa's transformation",
       "items": {
-        "excellence": {
-          "title": "Academic Excellence",
-          "description": "Strengthen the quality of our programs and research to train competent leaders.",
-          "objective1": "International accreditation of all programs",
-          "objective2": "Development of new specialized masters",
-          "objective3": "Strengthening of permanent faculty"
+        "a1": {
+          "code": "A1",
+          "title": "Train, Innovate and Research",
+          "description": "Strengthen academic excellence, develop research and innovate in our teaching methods.",
+          "objective1": "Academic excellence and international accreditation",
+          "objective2": "Pedagogical innovation and digital integration",
+          "objective3": "Development of applied research"
         },
-        "innovation": {
-          "title": "Pedagogical Innovation",
-          "description": "Innovate in our teaching methods and integrate digital tools.",
-          "objective1": "Deployment of e-learning platform",
-          "objective2": "Hybrid and distance learning",
-          "objective3": "Partnerships with African EdTech"
+        "a2": {
+          "code": "A2",
+          "title": "Govern, Cooperate and Digitize",
+          "description": "Modernize governance, strengthen partnerships and accelerate digital transformation.",
+          "objective1": "Modern and efficient governance",
+          "objective2": "Enhanced institutional cooperation",
+          "objective3": "Digital transformation of services"
         },
-        "rayonnement": {
-          "title": "International Outreach",
-          "description": "Extend our presence in Africa and strengthen our global partnerships.",
-          "objective1": "Opening of 3 new satellite campuses",
-          "objective2": "Agreements with 20 partner universities",
-          "objective3": "Student exchange programs"
-        },
-        "durabilite": {
-          "title": "Sustainable Development",
-          "description": "Integrate environmental and social issues into all our activities.",
-          "objective1": "Carbon-neutral campus by 2028",
-          "objective2": "Dedicated sustainable development programs",
-          "objective3": "Research on African climate challenges"
-        },
-        "gouvernance": {
-          "title": "Enhanced Governance",
-          "description": "Modernize our governance and diversify our funding sources.",
-          "objective1": "Reform of governance bodies",
-          "objective2": "Increase in own resources",
-          "objective3": "Evaluation and monitoring system"
+        "a3": {
+          "code": "A3",
+          "title": "Radiate, Undertake and Impact",
+          "description": "Extend our international reach, support entrepreneurship and maximize our societal impact.",
+          "objective1": "International reach and visibility",
+          "objective2": "Support for entrepreneurship and professional integration",
+          "objective3": "Measurable impact on African development"
         }
       }
     },

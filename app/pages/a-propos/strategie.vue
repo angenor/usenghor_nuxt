@@ -26,44 +26,31 @@ const getObjectives = (axisKey: string) => [
 // Strategic Axes Data
 const strategicAxes = computed(() => [
   {
-    id: 'excellence',
-    icon: 'star',
+    id: 'a1',
+    code: t('strategy.axes.items.a1.code'),
+    icon: 'graduation-cap',
     color: 'amber' as const,
-    title: t('strategy.axes.items.excellence.title'),
-    description: t('strategy.axes.items.excellence.description'),
-    objectives: getObjectives('excellence')
+    title: t('strategy.axes.items.a1.title'),
+    description: t('strategy.axes.items.a1.description'),
+    objectives: getObjectives('a1')
   },
   {
-    id: 'innovation',
-    icon: 'lightbulb',
+    id: 'a2',
+    code: t('strategy.axes.items.a2.code'),
+    icon: 'building',
     color: 'blue' as const,
-    title: t('strategy.axes.items.innovation.title'),
-    description: t('strategy.axes.items.innovation.description'),
-    objectives: getObjectives('innovation')
+    title: t('strategy.axes.items.a2.title'),
+    description: t('strategy.axes.items.a2.description'),
+    objectives: getObjectives('a2')
   },
   {
-    id: 'rayonnement',
+    id: 'a3',
+    code: t('strategy.axes.items.a3.code'),
     icon: 'globe',
     color: 'emerald' as const,
-    title: t('strategy.axes.items.rayonnement.title'),
-    description: t('strategy.axes.items.rayonnement.description'),
-    objectives: getObjectives('rayonnement')
-  },
-  {
-    id: 'durabilite',
-    icon: 'leaf',
-    color: 'green' as const,
-    title: t('strategy.axes.items.durabilite.title'),
-    description: t('strategy.axes.items.durabilite.description'),
-    objectives: getObjectives('durabilite')
-  },
-  {
-    id: 'gouvernance',
-    icon: 'building',
-    color: 'purple' as const,
-    title: t('strategy.axes.items.gouvernance.title'),
-    description: t('strategy.axes.items.gouvernance.description'),
-    objectives: getObjectives('gouvernance')
+    title: t('strategy.axes.items.a3.title'),
+    description: t('strategy.axes.items.a3.description'),
+    objectives: getObjectives('a3')
   }
 ])
 

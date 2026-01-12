@@ -1,6 +1,7 @@
 <script setup lang="ts">
 interface StrategicAxis {
   id: string
+  code?: string
   icon: string
   color: 'amber' | 'blue' | 'emerald' | 'green' | 'purple'
   title: string
@@ -25,7 +26,8 @@ const getIcon = (iconName: string): string => {
     lightbulb: 'fa-solid fa-lightbulb',
     globe: 'fa-solid fa-globe',
     leaf: 'fa-solid fa-leaf',
-    building: 'fa-solid fa-building-columns'
+    building: 'fa-solid fa-building-columns',
+    'graduation-cap': 'fa-solid fa-graduation-cap'
   }
   return iconMap[iconName] || 'fa-solid fa-check'
 }
@@ -99,9 +101,9 @@ const getColors = (color: string) => colorClasses[color] || colorClasses.amber
                 :class="getColors(axis.color).border"
               >
                 <div class="text-3xl font-black" :class="getColors(axis.color).text">
-                  {{ String(index + 1).padStart(2, '0') }}
+                  {{ axis.code || String(index + 1).padStart(2, '0') }}
                 </div>
-                <div class="text-gray-500 dark:text-gray-400 text-sm">Axe {{ index + 1 }}</div>
+                <div class="text-gray-500 dark:text-gray-400 text-sm">Axe</div>
               </div>
               <div v-if="index < props.axes.length - 1" class="h-full border-l-4 border-transparent">
                 <div class="border-l-4 mr-4 h-full border-gray-300 dark:border-gray-600 border-dashed"></div>
@@ -114,7 +116,7 @@ const getColors = (color: string) => colorClasses[color] || colorClasses.amber
                 <div class="flex-auto p-6">
                   <!-- Mobile step indicator -->
                   <div class="md:hidden text-sm font-normal uppercase mb-2" :class="getColors(axis.color).text">
-                    <span class="font-black">Axe {{ index + 1 }}</span>
+                    <span class="font-black">Axe {{ axis.code || index + 1 }}</span>
                   </div>
                   <!-- Title -->
                   <div class="flex items-center gap-3 mb-3">
@@ -189,9 +191,9 @@ const getColors = (color: string) => colorClasses[color] || colorClasses.amber
                 :class="getColors(axis.color).border"
               >
                 <div class="text-3xl font-black" :class="getColors(axis.color).text">
-                  {{ String(index + 1).padStart(2, '0') }}
+                  {{ axis.code || String(index + 1).padStart(2, '0') }}
                 </div>
-                <div class="text-gray-500 dark:text-gray-400 text-sm">Axe {{ index + 1 }}</div>
+                <div class="text-gray-500 dark:text-gray-400 text-sm">Axe</div>
               </div>
               <div v-if="index < props.axes.length - 1" class="h-full border-r-4 border-transparent">
                 <div class="border-l-4 ml-4 h-full border-gray-300 dark:border-gray-600 border-dashed"></div>
@@ -204,7 +206,7 @@ const getColors = (color: string) => colorClasses[color] || colorClasses.amber
                 <div class="flex-auto p-6">
                   <!-- Mobile step indicator -->
                   <div class="md:hidden text-sm font-normal uppercase mb-2" :class="getColors(axis.color).text">
-                    <span class="font-black">Axe {{ index + 1 }}</span>
+                    <span class="font-black">Axe {{ axis.code || index + 1 }}</span>
                   </div>
                   <!-- Title -->
                   <div class="flex items-center gap-3 mb-3">

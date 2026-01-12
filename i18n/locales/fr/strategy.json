@@ -15,42 +15,31 @@
     },
     "axes": {
       "title": "Nos axes stratégiques",
-      "subtitle": "Cinq piliers pour accompagner la transformation de l'Afrique",
+      "subtitle": "Trois piliers pour accompagner la transformation de l'Afrique",
       "items": {
-        "excellence": {
-          "title": "Excellence académique",
-          "description": "Renforcer la qualité de nos formations et de notre recherche pour former des leaders compétents.",
-          "objective1": "Accréditation internationale de tous les programmes",
-          "objective2": "Développement de nouveaux masters spécialisés",
-          "objective3": "Renforcement du corps professoral permanent"
+        "a1": {
+          "code": "A1",
+          "title": "Former, innover et rechercher",
+          "description": "Renforcer l'excellence académique, développer la recherche et innover dans nos méthodes pédagogiques.",
+          "objective1": "Excellence académique et accréditation internationale",
+          "objective2": "Innovation pédagogique et intégration du numérique",
+          "objective3": "Développement de la recherche appliquée"
         },
-        "innovation": {
-          "title": "Innovation pédagogique",
-          "description": "Innover dans nos méthodes d'enseignement et intégrer les outils numériques.",
-          "objective1": "Déploiement de la plateforme e-learning",
-          "objective2": "Formation hybride et à distance",
-          "objective3": "Partenariats avec les EdTech africaines"
+        "a2": {
+          "code": "A2",
+          "title": "Gouverner, coopérer et numériser",
+          "description": "Moderniser la gouvernance, renforcer les partenariats et accélérer la transformation numérique.",
+          "objective1": "Gouvernance moderne et efficiente",
+          "objective2": "Coopération institutionnelle renforcée",
+          "objective3": "Transformation numérique des services"
         },
-        "rayonnement": {
-          "title": "Rayonnement international",
-          "description": "Étendre notre présence en Afrique et renforcer nos partenariats mondiaux.",
-          "objective1": "Ouverture de 3 nouveaux campus délocalisés",
-          "objective2": "Accords avec 20 universités partenaires",
-          "objective3": "Programmes d'échange étudiant"
-        },
-        "durabilite": {
-          "title": "Développement durable",
-          "description": "Intégrer les enjeux environnementaux et sociaux dans toutes nos activités.",
-          "objective1": "Campus neutre en carbone d'ici 2028",
-          "objective2": "Formations dédiées au développement durable",
-          "objective3": "Recherche sur les défis climatiques africains"
-        },
-        "gouvernance": {
-          "title": "Gouvernance renforcée",
-          "description": "Moderniser notre gouvernance et diversifier nos sources de financement.",
-          "objective1": "Réforme des instances de gouvernance",
-          "objective2": "Augmentation des ressources propres",
-          "objective3": "Système d'évaluation et de suivi"
+        "a3": {
+          "code": "A3",
+          "title": "Rayonner, entreprendre et impacter",
+          "description": "Étendre notre rayonnement international, soutenir l'entrepreneuriat et maximiser notre impact sociétal.",
+          "objective1": "Rayonnement international et visibilité",
+          "objective2": "Soutien à l'entrepreneuriat et à l'insertion",
+          "objective3": "Impact mesurable sur le développement africain"
         }
       }
     },
