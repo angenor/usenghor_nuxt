@@ -49,52 +49,21 @@ const activeTab = computed(() => {
   const hash = route.hash?.replace('#', '') || 'calls'
   return validTabs.includes(hash) ? hash : 'calls'
 })
-
-// Sticky header visibility
-const heroRef = ref<{ titleRef: HTMLElement | null } | null>(null)
-const showStickyHeader = ref(false)
-
-onMounted(() => {
-  // Wait for component to be mounted and get the title ref
-  nextTick(() => {
-    const titleElement = heroRef.value?.titleRef
-    if (!titleElement) return
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0]
-        if (entry) {
-          // Show sticky header when title is NOT intersecting (out of view)
-          showStickyHeader.value = !entry.isIntersecting
-        }
-      },
-      {
-        threshold: 0,
-        rootMargin: '-80px 0px 0px 0px' // Account for navbar height
-      }
-    )
-
-    observer.observe(titleElement)
-
-    onUnmounted(() => {
-      observer.disconnect()
-    })
-  })
-})
 </script>
 
 <template>
   <div v-if="campus">
-    <!-- Hero -->
-    <CampusHero ref="heroRef" :campus="campus" />
-
-    <!-- Tabs Navigation (with integrated sticky campus name) -->
-    <CampusTabs
-      :active-tab="activeTab"
+    <!-- Campus NavBar -->
+    <CampusNavBar
       :campus-name="getLocalizedName"
       :country-flag="getFlagEmoji(campus.country)"
-      :show-campus-name="showStickyHeader"
     />
+
+    <!-- Hero -->
+    <CampusHero :campus="campus" />
+
+    <!-- Tabs Navigation -->
+    <CampusTabs :active-tab="activeTab" />
 
     <!-- Tab Content -->
     <div class="bg-gray-50 dark:bg-gray-950 min-h-[400px]">

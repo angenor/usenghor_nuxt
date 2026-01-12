@@ -71,6 +71,9 @@
         "governance": "Governance",
         "campus": "Alexandria Campus"
       }
-    }
+    },
+    "language": "Language",
+    "search": "Search",
+    "backToMainSite": "Back to main site"
   }
 }

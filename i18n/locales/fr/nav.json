@@ -114,6 +114,8 @@
         "hotelDesc": "Hébergement pour visiteurs et invités"
       }
     },
-    "language": "Langue"
+    "language": "Langue",
+    "search": "Rechercher",
+    "backToMainSite": "Retour au site principal"
   }
 }
