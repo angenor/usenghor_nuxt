@@ -21,64 +21,113 @@ const breadcrumb = computed(() => [
   { label: t('history.title') }
 ])
 
-// Timeline events data
-const timelineEvents = [
+// Phase colors mapping
+const phaseColors: Record<string, string> = {
+  'Fondation': '#FDF6E3',     // Jaune/crème - Phase 1
+  'Foundation': '#FDF6E3',
+  'التأسيس': '#FDF6E3',
+  'Développement': '#E8F5E9', // Vert clair - Phase 2
+  'Development': '#E8F5E9',
+  'التطوير': '#E8F5E9',
+  'Rayonnement': '#E3F2FD',   // Bleu clair - Phase 3
+  'Outreach': '#E3F2FD',
+  'الإشعاع': '#E3F2FD',
+  'Actuel': '#FCE4EC',        // Rose - Phase actuelle
+  'Current': '#FCE4EC',
+  'الحالي': '#FCE4EC'
+}
+
+// Timeline events data from i18n
+const timelineEvents = computed(() => [
   {
     year: '1989',
-    title: t('history.genesis.title'),
-    description: t('history.genesis.description'),
-    bgColor: '#FDF6E3',
+    title: t('history.timeline.1989.title'),
+    description: t('history.timeline.1989.description'),
+    bgColor: phaseColors[t('history.timeline.1989.phase')] || '#FDF6E3',
     media: [
       { type: 'image', src: 'https://picsum.photos/seed/dakar89/800/600', alt: 'Sommet de Dakar 1989' },
       { type: 'image', src: 'https://picsum.photos/seed/francophonie/800/600', alt: 'Francophonie' },
-      { type: 'image', src: 'https://picsum.photos/seed/africa89/800/600', alt: 'Afrique 1989' }
+      { type: 'image', src: 'https://picsum.photos/seed/tabatoni/800/600', alt: 'Pierre Tabatoni' }
     ]
   },
   {
-    year: '1990',
-    title: t('history.usenghor.title'),
-    description: t('history.usenghor.description'),
-    bgColor: '#E0F7FA',
+    year: '1991',
+    title: t('history.timeline.1991.title'),
+    description: t('history.timeline.1991.description'),
+    bgColor: phaseColors[t('history.timeline.1991.phase')] || '#FDF6E3',
     media: [
-      { type: 'image', src: 'https://picsum.photos/seed/alexandria/800/600', alt: 'Alexandrie' },
-      { type: 'image', src: 'https://picsum.photos/seed/inauguration/800/600', alt: 'Inauguration' },
-      { type: 'image', src: 'https://picsum.photos/seed/campus90/800/600', alt: 'Campus 1990' }
+      { type: 'image', src: 'https://picsum.photos/seed/redonnet/800/600', alt: 'Jean-Claude Redonnet' },
+      { type: 'image', src: 'https://picsum.photos/seed/campus91/800/600', alt: 'Campus 1991' },
+      { type: 'image', src: 'https://picsum.photos/seed/students91/800/600', alt: 'Étudiants 1991' }
     ]
   },
   {
-    year: '2000',
-    title: 'Une decennie d\'excellence',
-    description: 'Apres 10 ans de formation, l\'Universite Senghor a forme des centaines de cadres africains dans les domaines du developpement durable.',
-    bgColor: '#EDE7F6',
+    year: '1993',
+    title: t('history.timeline.1993.title'),
+    description: t('history.timeline.1993.description'),
+    bgColor: phaseColors[t('history.timeline.1993.phase')] || '#E8F5E9',
     media: [
-      { type: 'image', src: 'https://picsum.photos/seed/diploma/800/600', alt: 'Diplomes' },
-      { type: 'image', src: 'https://picsum.photos/seed/ceremony/800/600', alt: 'Ceremonie' },
-      { type: 'image', src: 'https://picsum.photos/seed/decade/800/600', alt: '10 ans' }
+      { type: 'image', src: 'https://picsum.photos/seed/seck/800/600', alt: 'Souleymane Seck' },
+      { type: 'image', src: 'https://picsum.photos/seed/expansion/800/600', alt: 'Expansion' },
+      { type: 'image', src: 'https://picsum.photos/seed/programs/800/600', alt: 'Programmes' }
+    ]
+  },
+  {
+    year: '2002',
+    title: t('history.timeline.2002.title'),
+    description: t('history.timeline.2002.description'),
+    bgColor: phaseColors[t('history.timeline.2002.phase')] || '#E8F5E9',
+    media: [
+      { type: 'image', src: 'https://picsum.photos/seed/constant/800/600', alt: 'Fred Constant' },
+      { type: 'image', src: 'https://picsum.photos/seed/elkosheri/800/600', alt: 'Ahmed El Kosheri' },
+      { type: 'image', src: 'https://picsum.photos/seed/decade2000/800/600', alt: 'Décennie 2000' }
+    ]
+  },
+  {
+    year: '2004',
+    title: t('history.timeline.2004.title'),
+    description: t('history.timeline.2004.description'),
+    bgColor: phaseColors[t('history.timeline.2004.phase')] || '#E3F2FD',
+    media: [
+      { type: 'image', src: 'https://picsum.photos/seed/texier/800/600', alt: 'Fernand Texier' },
+      { type: 'image', src: 'https://picsum.photos/seed/helal/800/600', alt: 'Hany Helal' },
+      { type: 'image', src: 'https://picsum.photos/seed/international/800/600', alt: 'Rayonnement international' }
+    ]
+  },
+  {
+    year: '2009',
+    title: t('history.timeline.2009.title'),
+    description: t('history.timeline.2009.description'),
+    bgColor: phaseColors[t('history.timeline.2009.phase')] || '#E3F2FD',
+    media: [
+      { type: 'image', src: 'https://picsum.photos/seed/lourde/800/600', alt: 'Albert Lourde' },
+      { type: 'image', src: 'https://picsum.photos/seed/modern/800/600', alt: 'Modernisation' },
+      { type: 'image', src: 'https://picsum.photos/seed/campus2009/800/600', alt: 'Campus 2009' }
     ]
   },
   {
     year: '2016',
-    title: t('history.leadership.rector.name'),
-    description: t('history.leadership.rector.since'),
-    bgColor: '#E8F5E9',
+    title: t('history.timeline.2016.title'),
+    description: t('history.timeline.2016.description'),
+    bgColor: phaseColors[t('history.timeline.2016.phase')] || '#FCE4EC',
     media: [
-      { type: 'image', src: 'https://picsum.photos/seed/verdel/800/600', alt: 'Pr. Verdel' },
-      { type: 'image', src: 'https://picsum.photos/seed/strategy/800/600', alt: 'Strategie' },
-      { type: 'image', src: 'https://picsum.photos/seed/new-era/800/600', alt: 'Nouvelle ere' }
+      { type: 'image', src: 'https://picsum.photos/seed/verdel/800/600', alt: 'Pr. Thierry Verdel' },
+      { type: 'image', src: 'https://picsum.photos/seed/strategy2016/800/600', alt: 'Stratégie' },
+      { type: 'image', src: 'https://picsum.photos/seed/new-era/800/600', alt: 'Nouvelle ère' }
     ]
   },
   {
     year: '2020',
-    title: t('history.legacy.title'),
-    description: t('history.legacy.description'),
-    bgColor: '#FCE4EC',
+    title: t('history.timeline.2020.title'),
+    description: t('history.timeline.2020.description'),
+    bgColor: phaseColors[t('history.timeline.2020.phase')] || '#FCE4EC',
     media: [
       { type: 'image', src: 'https://picsum.photos/seed/30years/800/600', alt: '30 ans' },
       { type: 'image', src: 'https://picsum.photos/seed/alumni/800/600', alt: 'Alumni' },
       { type: 'image', src: 'https://picsum.photos/seed/impact/800/600', alt: 'Impact' }
     ]
   }
-]
+])
 
 // Current year for display
 let currentYear = '1989'
@@ -156,9 +205,9 @@ onMounted(() => {
   if (timelineRef.value) {
     ScrollTrigger.create({
       trigger: timelineRef.value,
-      // Start après toutes les sections pinnées (5 sections x 100% = 500%)
-      start: 'bottom+=500% bottom',
-      end: 'bottom+=500% top',
+      // Start après toutes les sections pinnées (8 sections x 100% = 800%)
+      start: 'bottom+=800% bottom',
+      end: 'bottom+=800% top',
       onEnter: () => {
         // Quand on quitte la timeline, transformer sticky en relative pour scroller avec footer
         if (yearDisplayRef.value) {
@@ -178,7 +227,7 @@ onMounted(() => {
   sectionRefs.value.forEach((section, index) => {
     if (!section) return
 
-    const event = timelineEvents[index]
+    const event = timelineEvents.value[index]
     const newYear = event.year
     const bgColor = event.bgColor
 
@@ -225,7 +274,7 @@ onMounted(() => {
           })
         },
         onLeaveBack: () => {
-          const prev = timelineEvents[index - 1]
+          const prev = timelineEvents.value[index - 1]
           const prevYear = prev?.year || '1989'
           const prevColor = prev?.bgColor || '#ffffff'
 

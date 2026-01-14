@@ -39,6 +39,62 @@
         "desc": "Plus de 30 ans d'excellence dans les métiers du développement"
       }
     },
+    "timeline": {
+      "1989": {
+        "title": "Création de l'Université",
+        "description": "Le Sommet de la Francophonie à Dakar lance le projet. Pierre Tabatoni devient le premier recteur, René-Jean Dupuy le premier président.",
+        "rector": "Pierre Tabatoni",
+        "president": "René-Jean Dupuy",
+        "phase": "Fondation"
+      },
+      "1991": {
+        "title": "Nouveau recteur",
+        "description": "Jean-Claude Redonnet prend la direction académique de l'institution naissante.",
+        "rector": "Jean-Claude Redonnet",
+        "president": "René-Jean Dupuy",
+        "phase": "Fondation"
+      },
+      "1993": {
+        "title": "Phase de développement",
+        "description": "Souleymane Seck devient recteur, inaugurant une période d'expansion et de consolidation académique.",
+        "rector": "Souleymane Seck",
+        "president": "René-Jean Dupuy",
+        "phase": "Développement"
+      },
+      "2002": {
+        "title": "Nouvelle direction",
+        "description": "Fred Constant prend les rênes du rectorat sous la présidence d'Ahmed El Kosheri.",
+        "rector": "Fred Constant",
+        "president": "Ahmed El Kosheri",
+        "phase": "Développement"
+      },
+      "2004": {
+        "title": "Phase de rayonnement",
+        "description": "Fernand Texier et Hany Helal dirigent l'université vers son affirmation internationale.",
+        "rector": "Fernand Texier",
+        "president": "Hany Helal",
+        "phase": "Rayonnement"
+      },
+      "2009": {
+        "title": "Continuité et modernisation",
+        "description": "Albert Lourde devient recteur, poursuivant la modernisation de l'institution.",
+        "rector": "Albert Lourde",
+        "president": "Hany Helal",
+        "phase": "Rayonnement"
+      },
+      "2016": {
+        "title": "Direction actuelle",
+        "description": "Le Pr. Thierry Verdel prend ses fonctions de recteur le 21 juin 2016.",
+        "rector": "Thierry Verdel",
+        "president": "Hany Helal",
+        "phase": "Actuel"
+      },
+      "2020": {
+        "title": "30 ans d'excellence",
+        "description": "L'Université Senghor célèbre trois décennies de formation de cadres africains.",
+        "phase": "Actuel"
+      }
+    },
     "leadership": {
       "title": "Direction actuelle",
       "rector": {

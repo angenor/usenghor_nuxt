@@ -39,6 +39,62 @@
         "desc": "Over 30 years of excellence in development professions"
       }
     },
+    "timeline": {
+      "1989": {
+        "title": "University Creation",
+        "description": "The Francophonie Summit in Dakar launches the project. Pierre Tabatoni becomes the first rector, René-Jean Dupuy the first president.",
+        "rector": "Pierre Tabatoni",
+        "president": "René-Jean Dupuy",
+        "phase": "Foundation"
+      },
+      "1991": {
+        "title": "New Rector",
+        "description": "Jean-Claude Redonnet takes over the academic leadership of the nascent institution.",
+        "rector": "Jean-Claude Redonnet",
+        "president": "René-Jean Dupuy",
+        "phase": "Foundation"
+      },
+      "1993": {
+        "title": "Development Phase",
+        "description": "Souleymane Seck becomes rector, inaugurating a period of expansion and academic consolidation.",
+        "rector": "Souleymane Seck",
+        "president": "René-Jean Dupuy",
+        "phase": "Development"
+      },
+      "2002": {
+        "title": "New Leadership",
+        "description": "Fred Constant takes the reins of the rectorate under the presidency of Ahmed El Kosheri.",
+        "rector": "Fred Constant",
+        "president": "Ahmed El Kosheri",
+        "phase": "Development"
+      },
+      "2004": {
+        "title": "Outreach Phase",
+        "description": "Fernand Texier and Hany Helal lead the university toward international recognition.",
+        "rector": "Fernand Texier",
+        "president": "Hany Helal",
+        "phase": "Outreach"
+      },
+      "2009": {
+        "title": "Continuity and Modernization",
+        "description": "Albert Lourde becomes rector, continuing the institution's modernization.",
+        "rector": "Albert Lourde",
+        "president": "Hany Helal",
+        "phase": "Outreach"
+      },
+      "2016": {
+        "title": "Current Leadership",
+        "description": "Pr. Thierry Verdel takes office as rector on June 21, 2016.",
+        "rector": "Thierry Verdel",
+        "president": "Hany Helal",
+        "phase": "Current"
+      },
+      "2020": {
+        "title": "30 Years of Excellence",
+        "description": "Senghor University celebrates three decades of training African executives.",
+        "phase": "Current"
+      }
+    },
     "leadership": {
       "title": "Current Leadership",
       "rector": {
