@@ -77,6 +77,81 @@ const stats = computed(() => [
   { label: t('site.presentation.stats.capacity'), value: t('site.presentation.stats.capacityValue') },
   { label: t('site.presentation.stats.founded'), value: t('site.presentation.stats.foundedValue') }
 ])
+
+// Color configuration per facility (rotating colors)
+const facilityColors = [
+  {
+    bgLight: 'bg-amber-100',
+    bgDark: 'dark:bg-amber-900',
+    bgLightHex: '#fef3c7',
+    bgDarkHex: '#78350f',
+    textDark: 'dark:text-amber-100',
+    iconBg: 'bg-amber-500'
+  },
+  {
+    bgLight: 'bg-emerald-100',
+    bgDark: 'dark:bg-emerald-900',
+    bgLightHex: '#d1fae5',
+    bgDarkHex: '#064e3b',
+    textDark: 'dark:text-emerald-100',
+    iconBg: 'bg-emerald-500'
+  },
+  {
+    bgLight: 'bg-purple-100',
+    bgDark: 'dark:bg-purple-900',
+    bgLightHex: '#f3e8ff',
+    bgDarkHex: '#581c87',
+    textDark: 'dark:text-purple-100',
+    iconBg: 'bg-purple-500'
+  },
+  {
+    bgLight: 'bg-sky-100',
+    bgDark: 'dark:bg-sky-900',
+    bgLightHex: '#e0f2fe',
+    bgDarkHex: '#0c4a6e',
+    textDark: 'dark:text-sky-100',
+    iconBg: 'bg-sky-500'
+  },
+  {
+    bgLight: 'bg-rose-100',
+    bgDark: 'dark:bg-rose-900',
+    bgLightHex: '#ffe4e6',
+    bgDarkHex: '#881337',
+    textDark: 'dark:text-rose-100',
+    iconBg: 'bg-rose-500'
+  },
+  {
+    bgLight: 'bg-indigo-100',
+    bgDark: 'dark:bg-indigo-900',
+    bgLightHex: '#e0e7ff',
+    bgDarkHex: '#312e81',
+    textDark: 'dark:text-indigo-100',
+    iconBg: 'bg-indigo-500'
+  },
+  {
+    bgLight: 'bg-teal-100',
+    bgDark: 'dark:bg-teal-900',
+    bgLightHex: '#ccfbf1',
+    bgDarkHex: '#134e4a',
+    textDark: 'dark:text-teal-100',
+    iconBg: 'bg-teal-500'
+  }
+]
+
+const getFacilityColors = (index: number) => facilityColors[index % facilityColors.length]!
+
+// Get current section SVG color (for wave bubbles)
+const getCurrentSvgColor = (index: number, isDark: boolean) => {
+  const config = getFacilityColors(index)
+  return isDark ? config.bgDarkHex : config.bgLightHex
+}
+
+// Get next section background color (for wave separator background)
+const getNextBgColor = (index: number, isDark: boolean) => {
+  if (index >= facilities.value.length - 1) return isDark ? '#111827' : '#f9fafb'
+  const config = getFacilityColors(index + 1)
+  return isDark ? config.bgDarkHex : config.bgLightHex
+}
 </script>
 
 <template>
@@ -142,65 +217,216 @@ const stats = computed(() => [
     </section>
 
     <!-- Facilities Section -->
-    <section class="py-16 bg-gray-50 dark:bg-gray-900">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-          <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            {{ t('site.facilities.title') }}
+    <section>
+      <!-- Header -->
+      <div class="py-16 lg:py-20 bg-white dark:bg-gray-900 text-center">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
+            <span class="relative inline-block">
+              {{ t('site.facilities.title') }}
+              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+            </span>
           </h2>
-          <p class="text-lg text-gray-600 dark:text-gray-400">
+          <p class="mt-6 text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             {{ t('site.facilities.subtitle') }}
           </p>
         </div>
+      </div>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <article
-            v-for="facility in facilities"
-            :key="facility.id"
-            class="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden"
+      <!-- Facilities avec bubble waves -->
+      <div
+        v-for="(facility, index) in facilities"
+        :key="facility.id"
+        :id="facility.slug"
+        class="section-bubble transition-colors duration-300 scroll-mt-20"
+        :class="[getFacilityColors(index).bgLight, getFacilityColors(index).bgDark]"
+      >
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
+          <!-- Layout flex avec alternance image gauche/droite -->
+          <div
+            class="flex flex-col gap-8 lg:gap-12 items-center"
+            :class="index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'"
           >
-            <!-- Image -->
-            <div class="relative h-48 overflow-hidden">
-              <img
-                :src="facility.image"
-                :alt="getLocalizedFacilityName(facility)"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                loading="lazy"
-              >
-              <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-              <div class="absolute bottom-4 left-4">
-                <div class="flex items-center gap-2 text-white">
-                  <font-awesome-icon :icon="facility.icon" class="w-6 h-6" />
-                  <span class="text-lg font-bold">{{ getLocalizedFacilityName(facility) }}</span>
+            <!-- Image illustrative -->
+            <div class="w-full lg:w-5/12 flex-shrink-0">
+              <div class="relative group">
+                <!-- Forme décorative derrière l'image -->
+                <div
+                  class="absolute -inset-4 rounded-3xl opacity-30 blur-xl transition-all duration-500 group-hover:opacity-50"
+                  :class="getFacilityColors(index).iconBg"
+                ></div>
+                <!-- Container image avec forme organique -->
+                <div class="relative overflow-hidden rounded-3xl shadow-2xl">
+                  <!-- Masque SVG pour forme organique -->
+                  <div
+                    class="aspect-[4/3] overflow-hidden"
+                    :style="{
+                      clipPath: index % 2 === 0
+                        ? 'polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%)'
+                        : 'polygon(0 0, 100% 0, 100% 100%, 15% 100%, 0 85%)'
+                    }"
+                  >
+                    <img
+                      :src="facility.image"
+                      :alt="getLocalizedFacilityName(facility)"
+                      class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      loading="lazy"
+                    />
+                  </div>
+                  <!-- Overlay gradient -->
+                  <div
+                    class="absolute inset-0 opacity-20"
+                    :class="getFacilityColors(index).iconBg"
+                  ></div>
+                  <!-- Badge flottant avec icône -->
+                  <div
+                    class="absolute bottom-4 shadow-lg flex items-center justify-center w-16 h-16 rounded-2xl"
+                    :class="[
+                      getFacilityColors(index).iconBg,
+                      index % 2 === 0 ? 'right-4' : 'left-4'
+                    ]"
+                  >
+                    <font-awesome-icon
+                      :icon="facility.icon"
+                      class="w-8 h-8 text-white"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Content -->
-            <div class="p-6">
-              <p class="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
+            <!-- Contenu texte -->
+            <div class="w-full lg:w-7/12">
+              <!-- Titre -->
+              <h3
+                class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4"
+                :class="getFacilityColors(index).textDark"
+              >
+                {{ getLocalizedFacilityName(facility) }}
+              </h3>
+
+              <!-- Ligne décorative -->
+              <div
+                class="w-20 h-1 rounded-full mb-6"
+                :class="getFacilityColors(index).iconBg"
+              ></div>
+
+              <!-- Description -->
+              <p
+                class="text-gray-700 leading-relaxed text-lg mb-8"
+                :class="getFacilityColors(index).textDark"
+              >
                 {{ getLocalizedFacilityDescription(facility) }}
               </p>
 
               <!-- Features list -->
-              <ul class="space-y-2 mb-4">
+              <ul class="space-y-3 mb-6">
                 <li
-                  v-for="(feature, index) in getLocalizedFacilityFeatures(facility).slice(0, 3)"
-                  :key="index"
-                  class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
+                  v-for="(feature, featureIndex) in getLocalizedFacilityFeatures(facility)"
+                  :key="featureIndex"
+                  class="flex items-center gap-3 text-gray-700"
+                  :class="getFacilityColors(index).textDark"
                 >
-                  <font-awesome-icon icon="fa-solid fa-check" class="w-4 h-4 text-amber-500" />
+                  <div
+                    class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+                    :class="getFacilityColors(index).iconBg"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-check" class="w-3 h-3 text-white" />
+                  </div>
                   {{ feature }}
                 </li>
               </ul>
 
               <!-- Capacity if available -->
-              <div v-if="facility.capacity" class="flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-400">
+              <div
+                v-if="facility.capacity"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/60 dark:bg-gray-800/60"
+              >
                 <font-awesome-icon icon="fa-solid fa-users" class="w-4 h-4" />
                 {{ t('site.facilities.capacity') }}: {{ facility.capacity }}
               </div>
             </div>
-          </article>
+          </div>
+        </div>
+
+        <!-- Wave separator (sauf dernier) -->
+        <div
+          v-if="index < facilities.length - 1"
+          class="wave-separator"
+        >
+          <!-- Light mode -->
+          <div
+            class="absolute inset-0 dark:hidden"
+            :style="{ backgroundColor: getNextBgColor(index, false) }"
+          >
+            <!-- Wave type A (index pair) -->
+            <svg
+              v-if="index % 2 === 0"
+              viewBox="0 0 1185 248"
+              preserveAspectRatio="none"
+              class="w-full h-full"
+            >
+              <circle cx="76" cy="121.1" r="20" :fill="getCurrentSvgColor(index, false)" />
+              <circle cx="870" cy="201.1" r="11" :fill="getCurrentSvgColor(index, false)" />
+              <circle cx="814.5" cy="165.6" r="24.5" :fill="getCurrentSvgColor(index, false)" />
+              <path
+                :fill="getCurrentSvgColor(index, false)"
+                d="M0 0v17.7c22.7 14.8 53 31.9 90.7 51.5 150.8 78 322 116.6 424.8 69.3 102.9-47.4 138-69.3 210.8-69.3s118.3 48.6 219.5 38.3 76.3-59.3 188.7-59.3c18.9 0 35.5 2.6 50.5 6.8V0H0z"
+              />
+            </svg>
+            <!-- Wave type B (index impair) -->
+            <svg
+              v-if="index % 2 === 1"
+              viewBox="0 0 1185 248"
+              preserveAspectRatio="none"
+              class="w-full h-full"
+            >
+              <circle cx="1109" cy="126.9" r="20" :fill="getCurrentSvgColor(index, false)" />
+              <circle cx="370.5" cy="82.4" r="24.5" :fill="getCurrentSvgColor(index, false)" />
+              <circle cx="315" cy="46.9" r="11" :fill="getCurrentSvgColor(index, false)" />
+              <path
+                :fill="getCurrentSvgColor(index, false)"
+                d="M50.5 199.8c112.4 0 87.5-49 188.7-59.3s146.7 38.3 219.5 38.3 107.9-21.9 210.8-69.3c102.8-47.3 274-8.7 424.8 69.3 37.7 19.5 68 36.7 90.7 51.5V0H0v193c15 4.2 31.6 6.8 50.5 6.8z"
+              />
+            </svg>
+          </div>
+
+          <!-- Dark mode -->
+          <div
+            class="absolute inset-0 hidden dark:block"
+            :style="{ backgroundColor: getNextBgColor(index, true) }"
+          >
+            <!-- Wave type A (index pair) -->
+            <svg
+              v-if="index % 2 === 0"
+              viewBox="0 0 1185 248"
+              preserveAspectRatio="none"
+              class="w-full h-full"
+            >
+              <circle cx="76" cy="121.1" r="20" :fill="getCurrentSvgColor(index, true)" />
+              <circle cx="870" cy="201.1" r="11" :fill="getCurrentSvgColor(index, true)" />
+              <circle cx="814.5" cy="165.6" r="24.5" :fill="getCurrentSvgColor(index, true)" />
+              <path
+                :fill="getCurrentSvgColor(index, true)"
+                d="M0 0v17.7c22.7 14.8 53 31.9 90.7 51.5 150.8 78 322 116.6 424.8 69.3 102.9-47.4 138-69.3 210.8-69.3s118.3 48.6 219.5 38.3 76.3-59.3 188.7-59.3c18.9 0 35.5 2.6 50.5 6.8V0H0z"
+              />
+            </svg>
+            <!-- Wave type B (index impair) -->
+            <svg
+              v-if="index % 2 === 1"
+              viewBox="0 0 1185 248"
+              preserveAspectRatio="none"
+              class="w-full h-full"
+            >
+              <circle cx="1109" cy="126.9" r="20" :fill="getCurrentSvgColor(index, true)" />
+              <circle cx="370.5" cy="82.4" r="24.5" :fill="getCurrentSvgColor(index, true)" />
+              <circle cx="315" cy="46.9" r="11" :fill="getCurrentSvgColor(index, true)" />
+              <path
+                :fill="getCurrentSvgColor(index, true)"
+                d="M50.5 199.8c112.4 0 87.5-49 188.7-59.3s146.7 38.3 219.5 38.3 107.9-21.9 210.8-69.3c102.8-47.3 274-8.7 424.8 69.3 37.7 19.5 68 36.7 90.7 51.5V0H0v193c15 4.2 31.6 6.8 50.5 6.8z"
+              />
+            </svg>
+          </div>
         </div>
       </div>
     </section>
@@ -446,5 +672,29 @@ const stats = computed(() => [
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Wave separator styles */
+.wave-separator {
+  position: relative;
+  height: 120px;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .wave-separator {
+    height: 160px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .wave-separator {
+    height: 200px;
+  }
+}
+
+/* Section bubble container */
+.section-bubble {
+  position: relative;
 }
 </style>

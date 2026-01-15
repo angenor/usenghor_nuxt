@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Project } from '~/composables/useMockData'
+import { getFlagEmoji } from '@bank/mock-data/projets'
 
 const route = useRoute()
 const { t, locale } = useI18n()
@@ -100,12 +101,30 @@ const getLocalizedTitleFor = (p: Project) => {
 
 // Render markdown content
 const renderedContent = computed(() => {
-  const content = getLocalizedContent.value
-  // Simple markdown rendering for headers and paragraphs
-  return content
+  let content = getLocalizedContent.value
+
+  // Process markdown in correct order
+  content = content
+    // Headers (order matters: h3 before h2)
+    .replace(/^### (.+)$/gm, '<h3 class="text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-3">$1</h3>')
     .replace(/^## (.+)$/gm, '<h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">$1</h2>')
-    .replace(/^- (.+)$/gm, '<li class="ml-4 text-gray-700 dark:text-gray-300">$1</li>')
-    .replace(/\n\n/g, '</p><p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">')
+    // Bold text
+    .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-gray-900 dark:text-white">$1</strong>')
+    // List items
+    .replace(/^- (.+)$/gm, '<li class="ml-4 text-gray-700 dark:text-gray-300 mb-1">$1</li>')
+    // Wrap consecutive list items in ul
+    .replace(/(<li[^>]*>.*<\/li>\n?)+/g, '<ul class="list-disc list-inside mb-4 space-y-1">$&</ul>')
+    // Paragraphs (double newlines)
+    .replace(/\n\n(?!<)/g, '</p><p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">')
+    // Single newlines within paragraphs
+    .replace(/\n(?!<)/g, '<br>')
+
+  // Wrap in paragraph if doesn't start with a tag
+  if (!content.startsWith('<')) {
+    content = '<p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">' + content + '</p>'
+  }
+
+  return content
 })
 </script>
 
@@ -208,7 +227,14 @@ const renderedContent = computed(() => {
                 {{ t('projets.detail.countries') }}
               </div>
               <div class="font-bold text-gray-900 dark:text-white text-sm">
-                {{ project.countries.length > 2 ? `${project.countries.length} pays` : project.countries.join(', ') }}
+                <template v-if="project.countries.length > 3">
+                  {{ project.countries.length }} pays
+                </template>
+                <template v-else>
+                  <span v-for="(country, idx) in project.countries" :key="country.code">
+                    <span v-if="country.code !== 'UN'">{{ getFlagEmoji(country.code) }}</span> {{ country.name }}<span v-if="idx < project.countries.length - 1">, </span>
+                  </span>
+                </template>
               </div>
             </div>
 
@@ -264,19 +290,42 @@ const renderedContent = computed(() => {
               <font-awesome-icon icon="fa-solid fa-handshake" class="text-amber-500" />
               {{ t('projets.detail.partners') }}
             </h3>
-            <div class="flex flex-wrap gap-3">
-              <span
-                v-for="partner in project.partners"
-                :key="partner"
-                class="inline-block px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium"
-              >
-                {{ partner }}
-              </span>
+            <div class="flex flex-wrap items-center gap-6">
+              <template v-for="partner in project.partners" :key="partner.name">
+                <a
+                  v-if="partner.website"
+                  :href="partner.website"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="group flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-200 dark:border-gray-700"
+                  :title="partner.name"
+                >
+                  <img
+                    v-if="partner.logo"
+                    :src="partner.logo"
+                    :alt="partner.name"
+                    class="h-10 w-auto max-w-[120px] object-contain"
+                  >
+                  <span v-else class="text-gray-700 dark:text-gray-300 font-medium">{{ partner.name }}</span>
+                </a>
+                <div
+                  v-else
+                  class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+                >
+                  <img
+                    v-if="partner.logo"
+                    :src="partner.logo"
+                    :alt="partner.name"
+                    class="h-10 w-auto max-w-[120px] object-contain"
+                  >
+                  <span v-else class="text-gray-700 dark:text-gray-300 font-medium">{{ partner.name }}</span>
+                </div>
+              </template>
             </div>
           </div>
 
           <!-- Countries list -->
-          <div v-if="project.countries.length > 2" class="mb-8">
+          <div v-if="project.countries.length > 0" class="mb-8">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <font-awesome-icon icon="fa-solid fa-globe-africa" class="text-amber-500" />
               {{ t('projets.detail.countries') }}
@@ -284,10 +333,12 @@ const renderedContent = computed(() => {
             <div class="flex flex-wrap gap-2">
               <span
                 v-for="country in project.countries"
-                :key="country"
-                class="inline-block px-3 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-full text-sm"
+                :key="country.code"
+                class="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-full text-sm"
               >
-                {{ country }}
+                <span v-if="country.code !== 'UN'" class="text-lg">{{ getFlagEmoji(country.code) }}</span>
+                <font-awesome-icon v-else icon="fa-solid fa-globe" class="w-4 h-4" />
+                {{ country.name }}
               </span>
             </div>
           </div>

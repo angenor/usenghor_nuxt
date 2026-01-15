@@ -23,7 +23,7 @@ import { mockCampusEvents, type CampusEvent } from '@bank/mock-data/campus-event
 import { mockCampusNews, type CampusNews } from '@bank/mock-data/campus-news'
 import { mockCampusMedia, type CampusMedia } from '@bank/mock-data/campus-media'
 import { mockCampusFormationsRealisees, type CampusFormationRealisee } from '@bank/mock-data/campus-formations-realisees'
-import { mockProjects, type Project } from '@bank/mock-data/projets'
+import { mockProjects, type Project, type ProjectPartner, type ProjectCountry, getFlagEmoji as getProjectFlagEmoji } from '@bank/mock-data/projets'
 import { mockAlumni, type Alumnus, type Industry } from '@bank/mock-data/alumni'
 import { mockSiteFacilities, type SiteFacility } from '@bank/mock-data/site-facilities'
 import { mockSiteGallery, type SiteGalleryItem, type MediaType } from '@bank/mock-data/site-gallery'
@@ -468,9 +468,14 @@ export type {
   CampusMedia,
   CampusFormationRealisee,
   Project,
+  ProjectPartner,
+  ProjectCountry,
   Alumnus,
   Industry,
   SiteFacility,
   SiteGalleryItem,
   MediaType
 }
+
+// Re-export utility function
+export { getProjectFlagEmoji }

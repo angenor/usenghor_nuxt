@@ -2,6 +2,17 @@
  * Mock Data: Projets de l'Université Senghor
  */
 
+export interface ProjectPartner {
+  name: string
+  logo?: string
+  website?: string
+}
+
+export interface ProjectCountry {
+  name: string
+  code: string // ISO 3166-1 alpha-2
+}
+
 export interface Project {
   id: string
   slug: string
@@ -21,11 +32,20 @@ export interface Project {
   featured: boolean
   start_date: string
   end_date?: string
-  partners: string[]
-  countries: string[]
+  partners: ProjectPartner[]
+  countries: ProjectCountry[]
   website?: string
   budget?: string
   beneficiaries?: string
+}
+
+// Helper function to get flag emoji from country code
+export function getFlagEmoji(countryCode: string): string {
+  const codePoints = countryCode
+    .toUpperCase()
+    .split('')
+    .map(char => 127397 + char.charCodeAt(0))
+  return String.fromCodePoint(...codePoints)
 }
 
 export const mockProjects: Project[] = [
@@ -42,7 +62,13 @@ export const mockProjects: Project[] = [
 
 ## Notre mission
 
-Accompagner les leaders africains dans la conduite de transformations structurelles au sein de leurs organisations, pour répondre aux défis de la transition sociale et écologique du continent.
+Former les cadres publics qui transforment l'Afrique en renforçant les compétences managériales et de leadership des cadres du secteur public en Afrique francophone, pour améliorer leurs pratiques professionnelles et la performance de leurs organisations.
+
+## Format du programme
+
+- **Durée** : 30 jours répartis sur 6 mois
+- **Modalités** : 3 semaines de sessions résidentielles en présentiel combinées à des modules de formation à distance
+- **Adaptation** : Programme personnalisé pour refléter les spécificités culturelles et contextuelles des organisations africaines
 
 ## Approche pédagogique
 
@@ -51,24 +77,26 @@ Transform'Action Africa propose une pédagogie innovante qui combine :
 - **Apprentissage par l'action** : Les participants travaillent sur des projets concrets de transformation de leurs organisations
 - **Intelligence collective** : Échanges entre pairs et co-construction de solutions
 - **Créativité** : Méthodes de design thinking et d'innovation sociale
-- **Accompagnement personnalisé** : Coaching individuel et mentorat par des experts
+- **Résolution collective de problèmes** : Méthodologies créatives adaptées au contexte africain
 
-## Domaines d'intervention
+## Bénéficiaires
 
-- Gouvernance et management public
-- Transition écologique et développement durable
-- Transformation digitale des services publics
-- Innovation sociale et inclusion
-- Leadership et conduite du changement
+Cadres et managers du secteur public des organisations africaines francophones cherchant à améliorer la transformation organisationnelle et la prestation de services.
 
-## Impact
+## Les Transform'acteurs
 
-Transform'Action Africa contribue à former une nouvelle génération de leaders publics africains capables de conduire les transformations nécessaires pour relever les défis du 21e siècle.`,
-    content_en: `**Transform'Action Africa** is a pedagogical, collective and creative pathway designed for leaders conducting structural transformation within African public organizations.
+À l'issue du programme, les participants deviennent des « Transform'acteurs » dotés de capacités renforcées pour conduire le changement organisationnel au sein de leurs institutions.`,
+    content_en: `**Transform'Action Africa** is a pedagogical, collective and creative pathway designed for leaders driving structural transformation dynamics within African public organizations, in service of social and ecological transition.
 
 ## Our mission
 
-Supporting the social and ecological transition of the African continent by training executives of public organizations in systemic transformation methods.
+Training the public managers who transform Africa by strengthening the managerial and leadership skills of public sector executives in francophone Africa, to improve their professional practices and organizational performance.
+
+## Program format
+
+- **Duration**: 30 days spread over 6 months
+- **Format**: 3 weeks of in-person residential sessions combined with distance learning modules
+- **Adaptation**: Customized program reflecting the cultural and contextual specificities of African organizations
 
 ## Pedagogical approach
 
@@ -77,24 +105,26 @@ Transform'Action Africa offers an innovative pedagogy that combines:
 - **Learning by doing**: Participants work on concrete transformation projects within their organizations
 - **Collective intelligence**: Peer exchanges and co-construction of solutions
 - **Creativity**: Design thinking and social innovation methods
-- **Personalized support**: Individual coaching and mentoring by experts
+- **Collective problem-solving**: Creative methodologies adapted to the African context
 
-## Areas of intervention
+## Beneficiaries
 
-- Governance and public management
-- Ecological transition and sustainable development
-- Digital transformation of public services
-- Social innovation and inclusion
-- Leadership and change management
+Public sector executives and managers from francophone African organizations seeking to improve organizational transformation and service delivery.
 
-## Impact
+## The Transform'actors
 
-Transform'Action Africa contributes to training a new generation of African public leaders capable of leading the transformations necessary to meet the challenges of the 21st century.`,
-    content_ar: `**ترانسفورم أكشن أفريكا** هو مسار تعليمي جماعي وإبداعي مصمم للقادة الذين يقودون التحولات الهيكلية داخل المنظمات العامة الأفريقية.
+Upon completion of the program, participants become "Transform'actors" equipped with enhanced capabilities to lead organizational change within their institutions.`,
+    content_ar: `**ترانسفورم أكشن أفريكا** هو مسار تعليمي جماعي وإبداعي، مصمم للقادة الذين يقودون ديناميكيات التحول الهيكلي داخل المنظمات العامة الأفريقية، في خدمة التحول الاجتماعي والبيئي.
 
 ## مهمتنا
 
-دعم التحول الاجتماعي والبيئي للقارة الأفريقية من خلال تدريب مديري المنظمات العامة على أساليب التحول المنهجي.
+تدريب المديرين العموميين الذين يحولون أفريقيا من خلال تعزيز المهارات الإدارية والقيادية لكوادر القطاع العام في أفريقيا الناطقة بالفرنسية، لتحسين ممارساتهم المهنية وأداء منظماتهم.
+
+## شكل البرنامج
+
+- **المدة**: 30 يوماً موزعة على 6 أشهر
+- **الصيغة**: 3 أسابيع من الجلسات الحضورية مع وحدات التعلم عن بعد
+- **التكيف**: برنامج مخصص يعكس الخصوصيات الثقافية والسياقية للمنظمات الأفريقية
 
 ## النهج التربوي
 
@@ -103,15 +133,15 @@ Transform'Action Africa contributes to training a new generation of African publ
 - **التعلم بالممارسة**: يعمل المشاركون على مشاريع تحول ملموسة داخل منظماتهم
 - **الذكاء الجماعي**: تبادل الخبرات بين الأقران وبناء الحلول المشتركة
 - **الإبداع**: أساليب التفكير التصميمي والابتكار الاجتماعي
-- **الدعم الشخصي**: التوجيه الفردي والإرشاد من قبل الخبراء
+- **حل المشكلات الجماعي**: منهجيات إبداعية مكيفة مع السياق الأفريقي
 
-## مجالات التدخل
+## المستفيدون
 
-- الحوكمة والإدارة العامة
-- التحول البيئي والتنمية المستدامة
-- التحول الرقمي للخدمات العامة
-- الابتكار الاجتماعي والشمول
-- القيادة وإدارة التغيير`,
+كوادر ومديرو القطاع العام من المنظمات الأفريقية الناطقة بالفرنسية الساعين إلى تحسين التحول التنظيمي وتقديم الخدمات.
+
+## المحولون
+
+عند الانتهاء من البرنامج، يصبح المشاركون "محولين" مجهزين بقدرات معززة لقيادة التغيير التنظيمي داخل مؤسساتهم.`,
     image: 'https://picsum.photos/seed/transformaction-africa/1200/600',
     gallery: [
       'https://picsum.photos/seed/transformaction-africa-1/800/600',
@@ -122,9 +152,25 @@ Transform'Action Africa contributes to training a new generation of African publ
     status: 'active',
     featured: true,
     start_date: '2022-01-15',
-    partners: ['OIF', 'AFD', 'Union Européenne'],
-    countries: ['Sénégal', 'Côte d\'Ivoire', 'Cameroun', 'Bénin', 'Togo', 'Mali', 'Burkina Faso', 'Niger', 'Guinée', 'RDC', 'Madagascar', 'Mauritanie'],
-    website: 'https://transformaction-africa.org',
+    partners: [
+      { name: 'Agence Française de Développement (AFD)', website: 'https://www.afd.fr' },
+      { name: 'Makesense', logo: 'https://usenghor-francophonie.org/wp-content/uploads/2023/09/25.png', website: 'https://makesense.org' }
+    ],
+    countries: [
+      { name: 'Côte d\'Ivoire', code: 'CI' },
+      { name: 'Sénégal', code: 'SN' },
+      { name: 'Cameroun', code: 'CM' },
+      { name: 'Bénin', code: 'BJ' },
+      { name: 'Togo', code: 'TG' },
+      { name: 'Mali', code: 'ML' },
+      { name: 'Burkina Faso', code: 'BF' },
+      { name: 'Niger', code: 'NE' },
+      { name: 'Guinée', code: 'GN' },
+      { name: 'RDC', code: 'CD' },
+      { name: 'Madagascar', code: 'MG' },
+      { name: 'Mauritanie', code: 'MR' }
+    ],
+    website: 'https://usenghor-francophonie.org/transformaction/',
     budget: '5 millions EUR',
     beneficiaries: 'Cadres dirigeants des organisations publiques africaines'
   },
@@ -142,10 +188,10 @@ Transform'Action Africa contributes to training a new generation of African publ
 ## Objectifs
 
 - Renforcer les compétences des professionnels des ICC en Afrique
+- Réduire les inégalités de genre dans les industries culturelles et créatives africaines grâce à des parcours de formation adaptés
 - Favoriser l'échange des pratiques et savoir-faire dans le domaine des industries créatives
-- Accompagner l'émergence d'une économie créative durable en Afrique
 
-## Approche tripartite
+## Approche
 
 KreAfrika combine trois modalités complémentaires :
 
@@ -154,14 +200,17 @@ KreAfrika combine trois modalités complémentaires :
 - Contenus développés par des experts du secteur
 - Parcours personnalisés selon les profils
 
-### Séminaires présentiels
-- Ateliers pratiques et master classes
-- Rencontres avec des professionnels reconnus
-- Sessions de travail intensives
+### Séminaires régionaux
+
+Cinq séminaires régionaux organisés entre 2021 et 2025 abordant les grands défis du secteur :
+
+- **Dakar** : Politiques publiques dans les ICC
+- **Kinshasa & Nairobi** : Gestion des équipements culturels
+- **Abidjan & Alexandrie-Le Caire** : Entrepreneuriat et financement
 
 ### Réseautage professionnel
 - Mise en relation entre professionnels du secteur
-- Événements de networking
+- Événements de networking (ex: Bootcamp Marseille 2025)
 - Plateforme d'échange et de collaboration
 
 ## Secteurs couverts
@@ -171,22 +220,25 @@ KreAfrika combine trois modalités complémentaires :
 - Mode et design
 - Arts visuels et artisanat d'art
 - Édition et contenus numériques
-- Jeux vidéo et animation
 
 ## Partenaires
 
 - **Université Senghor** : Expertise académique et pédagogique
-- **TRACE** : Réseau média et connaissance du secteur créatif africain
-- **Campus Groupe AFD** : Expertise en formation professionnelle et développement`,
-    content_en: `**KreAfrika** is a project implemented jointly by Senghor University, TRACE media group, and Campus Groupe AFD, aimed at strengthening the skills of professionals in Cultural and Creative Industries (CCI) in Africa.
+- **TRACE** : Groupe médiatique et connaissance du secteur créatif africain
+- **Campus Groupe AFD** : Expertise en formation professionnelle et développement
+
+## Contact
+
+kreafrika@usenghor.org`,
+    content_en: `**KreAfrika** is a project implemented by Senghor University, TRACE media group, and Campus Groupe AFD, aimed at strengthening the skills of professionals in Cultural and Creative Industries (CCI) in Africa.
 
 ## Objectives
 
-- Professionalize actors in African cultural and creative industries
-- Facilitate knowledge exchange and networking within the creative sector
-- Support the emergence of a sustainable creative economy in Africa
+- Strengthen the skills of CCI professionals in Africa
+- Reduce gender inequality in African cultural and creative industries through adapted training pathways
+- Promote the exchange of practices and know-how in the creative industries field
 
-## Tripartite approach
+## Approach
 
 KreAfrika combines three complementary modalities:
 
@@ -195,14 +247,17 @@ KreAfrika combines three complementary modalities:
 - Content developed by industry experts
 - Personalized pathways according to profiles
 
-### In-person seminars
-- Practical workshops and master classes
-- Meetings with recognized professionals
-- Intensive work sessions
+### Regional seminars
+
+Five regional seminars organized between 2021 and 2025 addressing major sector challenges:
+
+- **Dakar**: Public policies in CCI
+- **Kinshasa & Nairobi**: Cultural facility management
+- **Abidjan & Alexandria-Cairo**: Entrepreneurship and financing
 
 ### Professional networking
 - Connecting professionals in the sector
-- Networking events
+- Networking events (e.g., Marseille Bootcamp 2025)
 - Exchange and collaboration platform
 
 ## Sectors covered
@@ -212,22 +267,25 @@ KreAfrika combines three complementary modalities:
 - Fashion and design
 - Visual arts and crafts
 - Publishing and digital content
-- Video games and animation
 
 ## Partners
 
 - **Senghor University**: Academic and pedagogical expertise
-- **TRACE**: Media network and knowledge of the African creative sector
-- **Campus Groupe AFD**: Expertise in professional training and development`,
-    content_ar: `**كري أفريكا** هو مشروع ينفذه بشكل مشترك جامعة سنغور ومجموعة TRACE الإعلامية وCampus Groupe AFD، يهدف إلى تعزيز مهارات المهنيين في الصناعات الثقافية والإبداعية في أفريقيا.
+- **TRACE**: Media group and knowledge of the African creative sector
+- **Campus Groupe AFD**: Expertise in professional training and development
+
+## Contact
+
+kreafrika@usenghor.org`,
+    content_ar: `**كري أفريكا** هو مشروع ينفذه جامعة سنغور ومجموعة TRACE الإعلامية وCampus Groupe AFD، يهدف إلى تعزيز مهارات المهنيين في الصناعات الثقافية والإبداعية في أفريقيا.
 
 ## الأهداف
 
-- احترافية الفاعلين في الصناعات الثقافية والإبداعية الأفريقية
-- تسهيل تبادل المعرفة والتواصل داخل القطاع الإبداعي
-- دعم ظهور اقتصاد إبداعي مستدام في أفريقيا
+- تعزيز مهارات المهنيين في الصناعات الثقافية والإبداعية في أفريقيا
+- الحد من عدم المساواة بين الجنسين في الصناعات الثقافية والإبداعية الأفريقية من خلال مسارات تدريبية مكيفة
+- تعزيز تبادل الممارسات والخبرات في مجال الصناعات الإبداعية
 
-## النهج الثلاثي
+## النهج
 
 يجمع كري أفريكا بين ثلاث طرق متكاملة:
 
@@ -236,14 +294,17 @@ KreAfrika combines three complementary modalities:
 - محتوى طوره خبراء الصناعة
 - مسارات مخصصة حسب الملفات الشخصية
 
-### الندوات الحضورية
-- ورش عمل عملية ودروس رئيسية
-- لقاءات مع محترفين معترف بهم
-- جلسات عمل مكثفة
+### الندوات الإقليمية
+
+خمس ندوات إقليمية نُظمت بين 2021 و2025 تتناول التحديات الكبرى للقطاع:
+
+- **داكار**: السياسات العامة في الصناعات الثقافية والإبداعية
+- **كينشاسا ونيروبي**: إدارة المرافق الثقافية
+- **أبيدجان والإسكندرية-القاهرة**: ريادة الأعمال والتمويل
 
 ### التواصل المهني
 - ربط المهنيين في القطاع
-- فعاليات التواصل
+- فعاليات التواصل (مثل: معسكر مرسيليا 2025)
 - منصة للتبادل والتعاون
 
 ## القطاعات المشمولة
@@ -251,7 +312,12 @@ KreAfrika combines three complementary modalities:
 - الموسيقى وفنون الأداء
 - السمعي البصري والسينما
 - الموضة والتصميم
-- الفنون البصرية والحرف اليدوية`,
+- الفنون البصرية والحرف اليدوية
+- النشر والمحتوى الرقمي
+
+## للتواصل
+
+kreafrika@usenghor.org`,
     image: 'https://picsum.photos/seed/kreafrika/1200/600',
     gallery: [
       'https://picsum.photos/seed/kreafrika-1/800/600',
@@ -261,10 +327,19 @@ KreAfrika combines three complementary modalities:
     category: 'culture',
     status: 'active',
     featured: true,
-    start_date: '2023-06-01',
-    partners: ['TRACE', 'Campus Groupe AFD', 'OIF'],
-    countries: ['Côte d\'Ivoire', 'Sénégal', 'Cameroun', 'Burkina Faso', 'Bénin', 'Mali', 'Togo', 'RDC'],
-    website: 'https://kreafrika.org',
+    start_date: '2021-01-01',
+    partners: [
+      { name: 'TRACE', logo: 'https://usenghor-francophonie.org/wp-content/uploads/2023/09/31.jpg', website: 'https://trace.tv' },
+      { name: 'Campus Groupe AFD', website: 'https://campus.afd.fr' }
+    ],
+    countries: [
+      { name: 'Sénégal', code: 'SN' },
+      { name: 'RDC', code: 'CD' },
+      { name: 'Kenya', code: 'KE' },
+      { name: 'Côte d\'Ivoire', code: 'CI' },
+      { name: 'Égypte', code: 'EG' }
+    ],
+    website: 'https://sites.google.com/usenghor.org/kreafrika/accueil',
     budget: '2,5 millions EUR',
     beneficiaries: 'Professionnels des Industries Culturelles et Créatives'
   },
@@ -330,8 +405,13 @@ Donations can be made online or by bank transfer. Every contribution, regardless
     status: 'active',
     featured: false,
     start_date: '2024-01-01',
-    partners: ['Alumni Senghor', 'Fondations partenaires'],
-    countries: ['International'],
+    partners: [
+      { name: 'Alumni Senghor' },
+      { name: 'Fondations partenaires' }
+    ],
+    countries: [
+      { name: 'International', code: 'UN' }
+    ],
     budget: 'Objectif : 1 million EUR',
     beneficiaries: '100 boursiers/an'
   },
@@ -399,8 +479,14 @@ Applications are evaluated by an independent committee based on strict criteria 
     status: 'active',
     featured: false,
     start_date: '2020-09-01',
-    partners: ['OIF', 'Pays bailleurs', 'Fondations partenaires'],
-    countries: ['35 pays francophones'],
+    partners: [
+      { name: 'OIF', logo: 'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg', website: 'https://www.francophonie.org' },
+      { name: 'Pays bailleurs' },
+      { name: 'Fondations partenaires' }
+    ],
+    countries: [
+      { name: '35 pays francophones', code: 'UN' }
+    ],
     beneficiaries: '200 boursiers actuels'
   },
   {
@@ -466,8 +552,15 @@ More than 50 partner universities in 25 countries.`,
     status: 'active',
     featured: false,
     start_date: '2018-01-01',
-    partners: ['AUF', 'CNRS', 'IRD', 'Universités partenaires'],
-    countries: ['25 pays'],
+    partners: [
+      { name: 'AUF', logo: 'https://usenghor-francophonie.org/wp-content/uploads/2023/09/03.png', website: 'https://www.auf.org' },
+      { name: 'CNRS', website: 'https://www.cnrs.fr' },
+      { name: 'IRD', website: 'https://www.ird.fr' },
+      { name: 'Universités partenaires' }
+    ],
+    countries: [
+      { name: '25 pays', code: 'UN' }
+    ],
     beneficiaries: '150 chercheurs'
   },
   {
@@ -537,8 +630,14 @@ Applications open in March 2025.`,
     status: 'upcoming',
     featured: false,
     start_date: '2025-06-01',
-    partners: ['Google', 'Microsoft', 'Orange Digital Center'],
-    countries: ['Afrique francophone'],
+    partners: [
+      { name: 'Google', website: 'https://www.google.com' },
+      { name: 'Microsoft', website: 'https://www.microsoft.com' },
+      { name: 'Orange Digital Center', website: 'https://www.orangedigitalcenter.com' }
+    ],
+    countries: [
+      { name: 'Afrique francophone', code: 'UN' }
+    ],
     beneficiaries: '50 leaders/an'
   }
 ]
