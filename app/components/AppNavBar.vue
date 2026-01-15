@@ -39,7 +39,7 @@ const primaryNavItems = [
       { key: 'doctorate', route: '/formations/doctorat', icon: 'fa-solid fa-book-open' },
       { key: 'masters', route: '/formations/masters', icon: 'fa-solid fa-graduation-cap', badge: 'popular' },
       { key: 'mastersAlexandria', route: '/formations/masters/alexandrie', icon: 'fa-solid fa-building-columns' },
-      { key: 'mastersExternal', route: '/formations/masters/campus-externalises', icon: 'fa-solid fa-globe' },
+      { key: 'mastersExternal', route: '/a-propos/partenaires#campus-externalises', icon: 'fa-solid fa-globe' },
       { key: 'mastersOnline', route: '/formations/masters/en-ligne', icon: 'fa-solid fa-laptop', badge: 'new' },
       { key: 'universityDiplomas', route: '/formations/diplomes-universite', icon: 'fa-solid fa-award' },
       { key: 'certifications', route: '/formations/certifiantes', icon: 'fa-solid fa-certificate' }

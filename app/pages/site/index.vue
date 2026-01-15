@@ -1,14 +1,9 @@
 <script setup lang="ts">
-import type { SiteFacility, SiteGalleryItem } from '~/composables/useMockData'
+import type { SiteFacility } from '~/composables/useMockData'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
-const {
-  getAllSiteFacilities,
-  getAllSiteGallery,
-  getSitePhotos,
-  getSiteVideos
-} = useMockData()
+const { getAllSiteFacilities } = useMockData()
 
 // SEO
 useSeoMeta({
@@ -18,31 +13,28 @@ useSeoMeta({
 
 // Get data
 const facilities = computed(() => getAllSiteFacilities())
-const gallery = computed(() => getAllSiteGallery())
-const photos = computed(() => getSitePhotos())
-const videos = computed(() => getSiteVideos())
 
-// Gallery tab
-const activeGalleryTab = ref<'all' | 'photos' | 'videos'>('all')
+// Image carousel state per facility
+const activeImageIndex = ref<Record<string, number>>({})
 
-const visibleGallery = computed(() => {
-  if (activeGalleryTab.value === 'photos') return photos.value
-  if (activeGalleryTab.value === 'videos') return videos.value
-  return gallery.value
-})
-
-// Lightbox
-const lightboxOpen = ref(false)
-const lightboxItem = ref<SiteGalleryItem | null>(null)
-
-const openLightbox = (item: SiteGalleryItem) => {
-  lightboxItem.value = item
-  lightboxOpen.value = true
+const getActiveImageIndex = (facilityId: string) => {
+  return activeImageIndex.value[facilityId] || 0
 }
 
-const closeLightbox = () => {
-  lightboxOpen.value = false
-  lightboxItem.value = null
+const setActiveImageIndex = (facilityId: string, index: number) => {
+  activeImageIndex.value[facilityId] = index
+}
+
+const nextImage = (facility: SiteFacility) => {
+  const currentIndex = getActiveImageIndex(facility.id)
+  const nextIndex = (currentIndex + 1) % facility.images.length
+  setActiveImageIndex(facility.id, nextIndex)
+}
+
+const prevImage = (facility: SiteFacility) => {
+  const currentIndex = getActiveImageIndex(facility.id)
+  const prevIndex = currentIndex === 0 ? facility.images.length - 1 : currentIndex - 1
+  setActiveImageIndex(facility.id, prevIndex)
 }
 
 // Localization helpers
@@ -62,12 +54,6 @@ const getLocalizedFacilityFeatures = (facility: SiteFacility) => {
   if (locale.value === 'en') return facility.features_en
   if (locale.value === 'ar') return facility.features_ar
   return facility.features_fr
-}
-
-const getLocalizedGalleryTitle = (item: SiteGalleryItem) => {
-  if (locale.value === 'en' && item.title_en) return item.title_en
-  if (locale.value === 'ar' && item.title_ar) return item.title_ar
-  return item.title_fr
 }
 
 // Stats
@@ -247,7 +233,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
             class="flex flex-col gap-8 lg:gap-12 items-center"
             :class="index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'"
           >
-            <!-- Image illustrative -->
+            <!-- Image Carousel -->
             <div class="w-full lg:w-5/12 flex-shrink-0">
               <div class="relative group">
                 <!-- Forme décorative derrière l'image -->
@@ -255,32 +241,69 @@ const getNextBgColor = (index: number, isDark: boolean) => {
                   class="absolute -inset-4 rounded-3xl opacity-30 blur-xl transition-all duration-500 group-hover:opacity-50"
                   :class="getFacilityColors(index).iconBg"
                 ></div>
-                <!-- Container image avec forme organique -->
+                <!-- Container carousel avec forme organique -->
                 <div class="relative overflow-hidden rounded-3xl shadow-2xl">
-                  <!-- Masque SVG pour forme organique -->
+                  <!-- Images carousel -->
                   <div
-                    class="aspect-[4/3] overflow-hidden"
+                    class="aspect-[4/3] overflow-hidden relative"
                     :style="{
                       clipPath: index % 2 === 0
                         ? 'polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%)'
                         : 'polygon(0 0, 100% 0, 100% 100%, 15% 100%, 0 85%)'
                     }"
                   >
-                    <img
-                      :src="facility.image"
-                      :alt="getLocalizedFacilityName(facility)"
-                      class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      loading="lazy"
+                    <!-- Images stack -->
+                    <div
+                      v-for="(image, imgIndex) in facility.images"
+                      :key="imgIndex"
+                      class="absolute inset-0 transition-opacity duration-500"
+                      :class="getActiveImageIndex(facility.id) === imgIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'"
+                    >
+                      <img
+                        :src="image"
+                        :alt="`${getLocalizedFacilityName(facility)} - ${imgIndex + 1}`"
+                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        loading="lazy"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Navigation arrows -->
+                  <button
+                    @click.stop="prevImage(facility)"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-chevron-left" class="w-4 h-4" />
+                  </button>
+                  <button
+                    @click.stop="nextImage(facility)"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-4 h-4" />
+                  </button>
+
+                  <!-- Dots indicators -->
+                  <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+                    <button
+                      v-for="(_, imgIndex) in facility.images"
+                      :key="imgIndex"
+                      @click.stop="setActiveImageIndex(facility.id, imgIndex)"
+                      class="w-2.5 h-2.5 rounded-full transition-all"
+                      :class="getActiveImageIndex(facility.id) === imgIndex
+                        ? 'bg-white scale-110'
+                        : 'bg-white/50 hover:bg-white/75'"
                     />
                   </div>
+
                   <!-- Overlay gradient -->
                   <div
-                    class="absolute inset-0 opacity-20"
+                    class="absolute inset-0 opacity-20 pointer-events-none"
                     :class="getFacilityColors(index).iconBg"
                   ></div>
+
                   <!-- Badge flottant avec icône -->
                   <div
-                    class="absolute bottom-4 shadow-lg flex items-center justify-center w-16 h-16 rounded-2xl"
+                    class="absolute bottom-4 shadow-lg flex items-center justify-center w-16 h-16 rounded-2xl z-20"
                     :class="[
                       getFacilityColors(index).iconBg,
                       index % 2 === 0 ? 'right-4' : 'left-4'
@@ -291,6 +314,26 @@ const getNextBgColor = (index: number, isDark: boolean) => {
                       class="w-8 h-8 text-white"
                     />
                   </div>
+                </div>
+
+                <!-- Thumbnails row -->
+                <div class="flex gap-2 mt-4">
+                  <button
+                    v-for="(image, imgIndex) in facility.images"
+                    :key="imgIndex"
+                    @click="setActiveImageIndex(facility.id, imgIndex)"
+                    class="flex-1 aspect-video rounded-lg overflow-hidden transition-all ring-offset-2"
+                    :class="getActiveImageIndex(facility.id) === imgIndex
+                      ? 'ring-2 ring-white opacity-100 scale-105'
+                      : 'opacity-50 hover:opacity-75 grayscale hover:grayscale-0'"
+                  >
+                    <img
+                      :src="image"
+                      :alt="`${getLocalizedFacilityName(facility)} - ${imgIndex + 1}`"
+                      class="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </button>
                 </div>
               </div>
             </div>
@@ -431,120 +474,6 @@ const getNextBgColor = (index: number, isDark: boolean) => {
       </div>
     </section>
 
-    <!-- Gallery Section -->
-    <section class="py-16 bg-white dark:bg-gray-950">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-          <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            {{ t('site.gallery.title') }}
-          </h2>
-          <p class="text-lg text-gray-600 dark:text-gray-400">
-            {{ t('site.gallery.subtitle') }}
-          </p>
-        </div>
-
-        <!-- Tabs -->
-        <div class="flex justify-center gap-4 mb-10">
-          <button
-            v-for="tab in (['all', 'photos', 'videos'] as const)"
-            :key="tab"
-            @click="activeGalleryTab = tab"
-            class="px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-200"
-            :class="activeGalleryTab === tab
-              ? 'bg-amber-600 text-white shadow-md'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
-          >
-            {{ t(`site.gallery.tabs.${tab}`) }}
-            <span class="ml-1 text-xs opacity-75">
-              ({{ tab === 'all' ? gallery.length : tab === 'photos' ? photos.length : videos.length }})
-            </span>
-          </button>
-        </div>
-
-        <!-- Gallery Grid -->
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div
-            v-for="item in visibleGallery"
-            :key="item.id"
-            @click="openLightbox(item)"
-            class="group relative aspect-video rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-lg transition-all duration-300"
-          >
-            <img
-              :src="item.thumbnail"
-              :alt="getLocalizedGalleryTitle(item)"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              loading="lazy"
-            >
-            <div class="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors"></div>
-
-            <!-- Play button for videos -->
-            <div
-              v-if="item.type === 'video'"
-              class="absolute inset-0 flex items-center justify-center"
-            >
-              <div class="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                <font-awesome-icon icon="fa-solid fa-play" class="w-6 h-6 text-amber-600 ml-1" />
-              </div>
-            </div>
-
-            <!-- Title overlay -->
-            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-              <p class="text-white font-medium text-sm">{{ getLocalizedGalleryTitle(item) }}</p>
-              <span class="text-white/70 text-xs">
-                {{ item.type === 'video' ? t('site.gallery.tabs.videos') : t('site.gallery.tabs.photos') }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Lightbox Modal -->
-    <Teleport to="body">
-      <Transition name="fade">
-        <div
-          v-if="lightboxOpen && lightboxItem"
-          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
-          @click.self="closeLightbox"
-        >
-          <!-- Close button -->
-          <button
-            @click="closeLightbox"
-            class="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
-          >
-            <font-awesome-icon icon="fa-solid fa-times" class="w-5 h-5 text-white" />
-          </button>
-
-          <!-- Content -->
-          <div class="max-w-5xl w-full">
-            <!-- Image -->
-            <img
-              v-if="lightboxItem.type === 'photo'"
-              :src="lightboxItem.url"
-              :alt="getLocalizedGalleryTitle(lightboxItem)"
-              class="w-full max-h-[80vh] object-contain rounded-lg"
-            >
-
-            <!-- Video -->
-            <div v-else class="aspect-video">
-              <iframe
-                :src="lightboxItem.url"
-                class="w-full h-full rounded-lg"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-              ></iframe>
-            </div>
-
-            <!-- Caption -->
-            <p class="text-white text-center mt-4 text-lg">
-              {{ getLocalizedGalleryTitle(lightboxItem) }}
-            </p>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
-
     <!-- Location Section -->
     <section class="py-16 bg-gray-50 dark:bg-gray-900">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -558,26 +487,34 @@ const getNextBgColor = (index: number, isDark: boolean) => {
         </div>
 
         <div class="grid lg:grid-cols-2 gap-12">
-          <!-- Map placeholder -->
-          <div class="aspect-video lg:aspect-square bg-gray-200 dark:bg-gray-800 rounded-2xl overflow-hidden relative">
+          <!-- Map image - clickable to open Google Maps -->
+          <a
+            href="https://www.google.com/maps/place/Senghor+University/@31.2018,29.9158,17z"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group aspect-video lg:aspect-square bg-gray-200 dark:bg-gray-800 rounded-2xl overflow-hidden relative block"
+          >
             <img
-              src="https://picsum.photos/seed/senghor-map/800/600"
-              alt="Campus location"
-              class="w-full h-full object-cover"
+              src="/images/bg/bg_stats_section.jpeg"
+              alt="Campus Université Senghor - Alexandrie"
+              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
             >
-            <div class="absolute inset-0 flex items-center justify-center">
-              <a
-                href="https://www.google.com/maps/place/Senghor+University/@31.2018,29.9158,17z"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="px-6 py-3 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 transition-colors shadow-lg flex items-center gap-2"
-              >
-                <font-awesome-icon icon="fa-solid fa-map-location-dot" class="w-5 h-5" />
+            <!-- Overlay gradient -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/70 transition-colors"></div>
+
+            <!-- Content overlay -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <!-- Map icon -->
+              <div class="w-20 h-20 bg-amber-600 rounded-full flex items-center justify-center mb-4 shadow-xl group-hover:scale-110 transition-transform">
+                <font-awesome-icon icon="fa-solid fa-map-location-dot" class="w-10 h-10 text-white" />
+              </div>
+              <span class="px-6 py-3 bg-white/90 dark:bg-gray-900/90 text-amber-600 dark:text-amber-400 font-semibold rounded-full shadow-lg flex items-center gap-2 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                <font-awesome-icon icon="fa-solid fa-external-link-alt" class="w-4 h-4" />
                 {{ t('site.location.openMaps') }}
-              </a>
+              </span>
             </div>
-          </div>
+          </a>
 
           <!-- Contact info -->
           <div class="space-y-6">
@@ -657,23 +594,6 @@ const getNextBgColor = (index: number, isDark: boolean) => {
 </template>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
 /* Wave separator styles */
 .wave-separator {
   position: relative;

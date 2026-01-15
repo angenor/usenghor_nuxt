@@ -215,7 +215,7 @@ const handleImageError = (e: Event) => {
 </script>
 
 <template>
-  <section class="relative py-16 lg:py-24 bg-white dark:bg-gray-950 transition-colors duration-300 overflow-visible">
+  <section id="campus-externalises" class="relative py-16 lg:py-24 bg-white dark:bg-gray-950 transition-colors duration-300 overflow-visible">
     <!-- Background Elements -->
     <div class="absolute inset-0 overflow-hidden">
       <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-amber-50/30 dark:from-blue-900/10 dark:via-transparent dark:to-amber-900/10"></div>
@@ -362,7 +362,15 @@ const handleImageError = (e: Event) => {
 
                 <!-- CTA -->
                 <NuxtLink
-                  v-if="selectedCampus.type === 'campus' && selectedCampus.slug"
+                  v-if="selectedCampus.type === 'headquarters'"
+                  :to="localePath('/site')"
+                  class="card-cta"
+                >
+                  {{ t('partners.campus.viewDetails') }}
+                  <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 ltr:ml-2 rtl:mr-2 rtl:rotate-180" />
+                </NuxtLink>
+                <NuxtLink
+                  v-else-if="selectedCampus.type === 'campus' && selectedCampus.slug"
                   :to="localePath(`/a-propos/partenaires/campus/${selectedCampus.slug}`)"
                   class="card-cta"
                 >
