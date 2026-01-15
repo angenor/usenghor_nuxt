@@ -17,7 +17,9 @@
       "viewAll": "Voir tout",
       "viewAllNews": "Toutes les actualités",
       "viewAllEvents": "Tous les événements",
-      "viewAllCalls": "Tous les appels"
+      "viewAllCalls": "Tous les appels",
+      "loadMore": "Afficher plus",
+      "showLess": "Afficher moins"
     },
     "calls": {
       "title": "Appels à candidatures",

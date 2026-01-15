@@ -17,7 +17,9 @@
       "viewAll": "View All",
       "viewAllNews": "All News",
       "viewAllEvents": "All Events",
-      "viewAllCalls": "All Calls"
+      "viewAllCalls": "All Calls",
+      "loadMore": "Load more",
+      "showLess": "Show less"
     },
     "calls": {
       "title": "Calls for Applications",

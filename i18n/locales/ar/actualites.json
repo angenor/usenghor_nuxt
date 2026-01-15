@@ -17,7 +17,9 @@
       "viewAll": "عرض الكل",
       "viewAllNews": "جميع الأخبار",
       "viewAllEvents": "جميع الفعاليات",
-      "viewAllCalls": "جميع الدعوات"
+      "viewAllCalls": "جميع الدعوات",
+      "loadMore": "عرض المزيد",
+      "showLess": "عرض أقل"
     },
     "calls": {
       "title": "دعوات الترشح",

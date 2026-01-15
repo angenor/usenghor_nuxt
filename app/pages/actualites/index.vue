@@ -20,8 +20,31 @@ const featuredNews = computed(() => allNews.value[0] || null)
 // Side news (2nd to 4th)
 const sideNews = computed(() => allNews.value.slice(1, 4))
 
-// Latest news (5th to 8th)
-const latestNews = computed(() => allNews.value.slice(4, 8))
+// Latest news - avec pagination
+const NEWS_PER_PAGE = 4
+const newsDisplayCount = ref(NEWS_PER_PAGE)
+
+// Toutes les actualités restantes (après featured + side)
+const remainingNews = computed(() => allNews.value.slice(4))
+
+// Latest news avec limite
+const latestNews = computed(() => remainingNews.value.slice(0, newsDisplayCount.value))
+
+// Vérifier s'il reste des actualités à afficher
+const hasMoreNews = computed(() => newsDisplayCount.value < remainingNews.value.length)
+
+// Vérifier si on affiche plus que le minimum
+const showingMore = computed(() => newsDisplayCount.value > NEWS_PER_PAGE)
+
+// Afficher plus d'actualités
+const loadMoreNews = () => {
+  newsDisplayCount.value += NEWS_PER_PAGE
+}
+
+// Réduire le nombre d'actualités affichées
+const showLessNews = () => {
+  newsDisplayCount.value = NEWS_PER_PAGE
+}
 
 // Localization helpers
 const getLocalizedTitle = (item: { title_fr: string; title_en?: string; title_ar?: string }) => {
@@ -211,6 +234,26 @@ const typeColors: Record<string, string> = {
               </div>
             </div>
           </article>
+        </div>
+
+        <!-- Boutons Afficher plus / moins -->
+        <div v-if="hasMoreNews || showingMore" class="flex justify-center gap-4 mt-10">
+          <button
+            v-if="hasMoreNews"
+            @click="loadMoreNews"
+            class="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors"
+          >
+            <font-awesome-icon icon="fa-solid fa-plus" class="w-4 h-4" />
+            {{ t('actualites.sections.loadMore') }}
+          </button>
+          <button
+            v-if="showingMore"
+            @click="showLessNews"
+            class="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors"
+          >
+            <font-awesome-icon icon="fa-solid fa-minus" class="w-4 h-4" />
+            {{ t('actualites.sections.showLess') }}
+          </button>
         </div>
       </section>
 
