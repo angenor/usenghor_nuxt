@@ -50,7 +50,7 @@ defineProps<Props>()
     <!-- Decorative bottom wave -->
     <div class="absolute bottom-0 left-0 right-0">
       <svg
-        class="w-full h-12 md:h-16 text-white dark:text-gray-900"
+        class="w-full h-12 md:h-16 text-white dark:text-gray-950"
         viewBox="0 0 1200 120"
         preserveAspectRatio="none"
       >
