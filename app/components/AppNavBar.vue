@@ -75,15 +75,16 @@ const secondaryNavItems = [
     icon: 'fa-solid fa-info-circle',
     singleLink: true, // Tout le bloc est un seul lien cliquable
     children: [
-      { key: 'mission', icon: 'fa-solid fa-bullseye' },
-      { key: 'history', icon: 'fa-solid fa-landmark' },
-      { key: 'governance', icon: 'fa-solid fa-sitemap' }
+      { key: 'mission', route: '/a-propos', icon: 'fa-solid fa-bullseye' },
+      { key: 'history', route: '/a-propos', icon: 'fa-solid fa-landmark' },
+      { key: 'governance', route: '/a-propos', icon: 'fa-solid fa-sitemap' }
     ]
   },
   {
     key: 'projects',
     route: '/projets',
     icon: 'fa-solid fa-rocket',
+    singleLink: true, // Tout le bloc est un seul lien cliquable
     children: [
       { key: 'transformAction', route: '/projets/transformaction', icon: 'fa-solid fa-rocket', badge: 'flagship' },
       { key: 'kreAfrika', route: '/projets/kreafrika', icon: 'fa-solid fa-lightbulb' },
@@ -94,22 +95,24 @@ const secondaryNavItems = [
     key: 'alumni',
     route: '/alumni',
     icon: 'fa-solid fa-user-graduate',
+    singleLink: true, // Tout le bloc est un seul lien cliquable
     children: [
       { key: 'alumniNetwork', route: '/alumni/reseau', icon: 'fa-solid fa-users', badge: '5000+' },
       { key: 'alumniProgram', route: '/alumni/programme', icon: 'fa-solid fa-star' }
     ]
   },
   {
-    key: 'campus',
-    route: '/campus',
+    key: 'site',
+    route: '/site',
     icon: 'fa-solid fa-building-columns',
+    singleLink: true, // Tout le bloc est un seul lien cliquable
     children: [
-      { key: 'housing', route: '/campus/logements', icon: 'fa-solid fa-house' },
-      { key: 'library', route: '/campus/bibliotheque', icon: 'fa-solid fa-book' },
-      { key: 'conferenceHall', route: '/campus/conferences', icon: 'fa-solid fa-microphone' },
-      { key: 'academicSpaces', route: '/campus/espaces-academiques', icon: 'fa-solid fa-chalkboard' },
-      { key: 'sports', route: '/campus/sports', icon: 'fa-solid fa-futbol' },
-      { key: 'hotel', route: '/campus/hotel', icon: 'fa-solid fa-hotel' }
+      { key: 'housing', route: '/site', icon: 'fa-solid fa-house' },
+      { key: 'library', route: '/site', icon: 'fa-solid fa-book' },
+      { key: 'conferenceHall', route: '/site', icon: 'fa-solid fa-microphone' },
+      { key: 'academicSpaces', route: '/site', icon: 'fa-solid fa-chalkboard' },
+      { key: 'sports', route: '/site', icon: 'fa-solid fa-futbol' },
+      { key: 'hotel', route: '/site', icon: 'fa-solid fa-hotel' }
     ]
   }
 ]

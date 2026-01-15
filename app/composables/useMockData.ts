@@ -183,6 +183,19 @@ export function useMockData() {
       .filter(c => c.campus_id === 'siege' && c.is_active && c.type === 'recrutement')
       .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
 
+  // === GETTERS PAR ID (pour pages de détails) ===
+  const getNewsById = (id: string) =>
+    mockCampusNews.find(n => n.id === id)
+
+  const getNewsBySlug = (slug: string) =>
+    mockCampusNews.find(n => n.url === `/actualites/${slug}` || n.id === slug)
+
+  const getCallById = (id: string) =>
+    mockCampusCalls.find(c => c.id === id)
+
+  const getEventById = (id: string) =>
+    mockCampusEvents.find(e => e.id === id)
+
   // === FORMATIONS ===
   const formations = computed(() => mockFormations.filter(f => f.is_published))
 
@@ -272,6 +285,12 @@ export function useMockData() {
     getAllOpenCalls,
     getAllClosedCalls,
     getAllRecruitments,
+
+    // Getters par ID (pages de détails)
+    getNewsById,
+    getNewsBySlug,
+    getCallById,
+    getEventById,
 
     // Getters formations
     getFormationsFeatured,

@@ -77,6 +77,40 @@
       "title": "No content",
       "description": "Come back soon to discover our latest news."
     },
-    "readMore": "Read more"
+    "readMore": "Read more",
+    "detail": {
+      "news": {
+        "breadcrumb": "News",
+        "relatedNews": "Related articles",
+        "backToNews": "Back to news"
+      },
+      "call": {
+        "breadcrumb": "Call",
+        "deadline": "Deadline",
+        "campus": "Campus",
+        "type": "Type",
+        "status": "Status",
+        "statusOpen": "Open",
+        "statusClosed": "Closed",
+        "partners": "Partners",
+        "apply": "Apply now",
+        "closed": "Applications closed",
+        "relatedCalls": "Other open calls",
+        "backToCalls": "Back to calls",
+        "daysLeft": "{count} day left | {count} days left",
+        "deadlinePassed": "Deadline passed"
+      },
+      "event": {
+        "breadcrumb": "Event",
+        "date": "Date",
+        "location": "Location",
+        "campus": "Campus",
+        "type": "Type",
+        "upcoming": "Upcoming",
+        "past": "Past",
+        "relatedEvents": "Other events",
+        "backToEvents": "Back to events"
+      }
+    }
   }
 }

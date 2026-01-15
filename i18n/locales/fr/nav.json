@@ -7,7 +7,7 @@
     "training": "Se former",
     "about": "Nous connaître",
     "alumni": "Nos alumni",
-    "campus": "Campus",
+    "site": "Notre site",
     "apply": "Candidater",
     "viewAll": "Voir tout",
     "exploreAll": "Tout explorer",
@@ -99,7 +99,7 @@
         "alumniProgram": "Programme alumni",
         "alumniProgramDesc": "Activités et services dédiés aux anciens"
       },
-      "campus": {
+      "site": {
         "housing": "Logements",
         "housingDesc": "Hébergement sur le campus de Borg el Arab",
         "library": "Bibliothèque",

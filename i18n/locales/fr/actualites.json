@@ -77,6 +77,40 @@
       "title": "Aucun contenu",
       "description": "Revenez bientôt pour découvrir nos dernières actualités."
     },
-    "readMore": "Lire la suite"
+    "readMore": "Lire la suite",
+    "detail": {
+      "news": {
+        "breadcrumb": "Actualité",
+        "relatedNews": "Articles similaires",
+        "backToNews": "Retour aux actualités"
+      },
+      "call": {
+        "breadcrumb": "Appel",
+        "deadline": "Date limite",
+        "campus": "Campus",
+        "type": "Type",
+        "status": "Statut",
+        "statusOpen": "En cours",
+        "statusClosed": "Clôturé",
+        "partners": "Partenaires",
+        "apply": "Postuler maintenant",
+        "closed": "Candidatures closes",
+        "relatedCalls": "Autres appels en cours",
+        "backToCalls": "Retour aux appels",
+        "daysLeft": "{count} jour restant | {count} jours restants",
+        "deadlinePassed": "Date limite dépassée"
+      },
+      "event": {
+        "breadcrumb": "Événement",
+        "date": "Date",
+        "location": "Lieu",
+        "campus": "Campus",
+        "type": "Type",
+        "upcoming": "À venir",
+        "past": "Passé",
+        "relatedEvents": "Autres événements",
+        "backToEvents": "Retour aux événements"
+      }
+    }
   }
 }

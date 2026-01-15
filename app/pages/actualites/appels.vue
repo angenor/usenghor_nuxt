@@ -2,6 +2,7 @@
 import type { CampusCall } from '~/composables/useMockData'
 
 const { t, locale } = useI18n()
+const localePath = useLocalePath()
 const { getAllCalls } = useMockData()
 const route = useRoute()
 const router = useRouter()
@@ -172,10 +173,11 @@ const daysUntilDeadline = (deadlineStr: string) => {
 
           <!-- Calls list -->
           <div v-if="filteredCalls.length > 0" class="space-y-6">
-            <article
+            <NuxtLink
               v-for="call in filteredCalls"
               :key="call.id"
-              class="group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-200 dark:border-gray-700"
+              :to="localePath(`/actualites/appels/${call.id}`)"
+              class="group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-200 dark:border-gray-700 block"
             >
               <div class="flex flex-col md:flex-row">
                 <!-- Image -->
@@ -239,25 +241,14 @@ const daysUntilDeadline = (deadlineStr: string) => {
                       </span>
                     </div>
 
-                    <a
-                      v-if="call.url && call.status === 'open'"
-                      :href="call.url"
-                      target="_blank"
-                      class="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors"
-                    >
-                      {{ t('actualites.calls.apply') }}
-                      <font-awesome-icon icon="fa-solid fa-external-link" class="w-4 h-4" />
-                    </a>
-                    <span
-                      v-else-if="call.status === 'closed'"
-                      class="inline-flex items-center gap-2 px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300 font-medium rounded-lg cursor-not-allowed"
-                    >
-                      {{ t('actualites.calls.closed') }}
+                    <span class="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white font-medium rounded-lg">
+                      {{ t('actualites.readMore') }}
+                      <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
                     </span>
                   </div>
                 </div>
               </div>
-            </article>
+            </NuxtLink>
           </div>
 
           <!-- Empty state -->

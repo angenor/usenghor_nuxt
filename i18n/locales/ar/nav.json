@@ -6,6 +6,8 @@
     "network": "شبكتنا",
     "training": "التكوين",
     "about": "من نحن",
+    "alumni": "خريجونا",
+    "site": "موقعنا",
     "apply": "تقديم طلب",
     "viewAll": "عرض الكل",
     "exploreAll": "استكشاف الكل",
@@ -67,9 +69,31 @@
       },
       "about": {
         "mission": "الرسالة والقيم",
+        "missionDesc": "اكتشف رؤيتنا وقيمنا التأسيسية",
         "history": "التاريخ",
+        "historyDesc": "مشروع سنغور منذ نشأته",
         "governance": "الحوكمة",
-        "campus": "حرم الإسكندرية"
+        "governanceDesc": "النصوص التأسيسية والدول المانحة ومجلس الإدارة"
+      },
+      "alumni": {
+        "alumniNetwork": "شبكة الخريجين",
+        "alumniNetworkDesc": "أكثر من 5000 خريج في 54 دولة أفريقية",
+        "alumniProgram": "برنامج الخريجين",
+        "alumniProgramDesc": "أنشطة وخدمات مخصصة للخريجين"
+      },
+      "site": {
+        "housing": "السكن",
+        "housingDesc": "إقامة في حرم برج العرب",
+        "library": "المكتبة",
+        "libraryDesc": "موارد وثائقية ومساحات للدراسة",
+        "conferenceHall": "قاعة المؤتمرات",
+        "conferenceHallDesc": "مساحات للفعاليات والندوات",
+        "academicSpaces": "المساحات الأكاديمية",
+        "academicSpacesDesc": "قاعات الدراسة والمختبرات",
+        "sports": "الرياضة",
+        "sportsDesc": "مسبح ومرافق رياضية",
+        "hotel": "الفندق",
+        "hotelDesc": "إقامة للزوار والضيوف"
       }
     },
     "language": "اللغة",

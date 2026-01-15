@@ -112,7 +112,7 @@ const typeColors: Record<string, string> = {
           <div class="lg:w-2/3">
             <div class="flex flex-col md:flex-row gap-6">
               <!-- Featured article -->
-              <div v-if="featuredNews" class="md:w-3/5 group">
+              <NuxtLink v-if="featuredNews" :to="localePath(`/actualites/${featuredNews.id}`)" class="md:w-3/5 group block">
                 <div class="overflow-hidden rounded-xl">
                   <img
                     :src="featuredNews.image || 'https://picsum.photos/seed/default/800/500'"
@@ -129,15 +129,8 @@ const typeColors: Record<string, string> = {
                     </span>
                   </div>
 
-                  <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white leading-tight">
-                    <NuxtLink
-                      v-if="featuredNews.url"
-                      :to="featuredNews.url"
-                      class="hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
-                    >
-                      {{ getLocalizedTitle(featuredNews) }}
-                    </NuxtLink>
-                    <span v-else>{{ getLocalizedTitle(featuredNews) }}</span>
+                  <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                    {{ getLocalizedTitle(featuredNews) }}
                   </h3>
 
                   <p class="mt-3 text-gray-600 dark:text-gray-400 text-base leading-relaxed line-clamp-3">
@@ -148,14 +141,15 @@ const typeColors: Record<string, string> = {
                     <span class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(featuredNews.date) }}</span>
                   </div>
                 </div>
-              </div>
+              </NuxtLink>
 
               <!-- Side articles -->
               <div class="md:w-2/5 space-y-0">
-                <article
+                <NuxtLink
                   v-for="(item, index) in sideNews"
                   :key="item.id"
-                  class="group py-4"
+                  :to="localePath(`/actualites/${item.id}`)"
+                  class="group block py-4"
                   :class="{ 'border-t border-gray-200 dark:border-gray-700': index > 0 }"
                 >
                   <div class="overflow-hidden rounded-lg mb-3">
@@ -167,24 +161,14 @@ const typeColors: Record<string, string> = {
                     >
                   </div>
 
-
-                  <h4 class="text-lg font-bold text-gray-900 dark:text-white leading-tight">
-                    <NuxtLink
-                      v-if="item.url"
-                      :to="item.url"
-                      class="hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
-                    >
-                      {{ getLocalizedTitle(item) }}
-                    </NuxtLink>
-                    <span v-else class="hover:text-amber-600 dark:hover:text-amber-400 cursor-pointer transition-colors">
-                      {{ getLocalizedTitle(item) }}
-                    </span>
+                  <h4 class="text-lg font-bold text-gray-900 dark:text-white leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                    {{ getLocalizedTitle(item) }}
                   </h4>
 
                   <div class="flex items-center gap-2 mt-2">
                     <span class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(item.date) }}</span>
                   </div>
-                </article>
+                </NuxtLink>
               </div>
             </div>
           </div>
@@ -206,10 +190,11 @@ const typeColors: Record<string, string> = {
         </h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <article
+          <NuxtLink
             v-for="item in latestNews"
             :key="item.id"
-            class="group"
+            :to="localePath(`/actualites/${item.id}`)"
+            class="group block"
           >
             <div class="overflow-hidden rounded-xl">
               <img
@@ -233,7 +218,7 @@ const typeColors: Record<string, string> = {
                 {{ formatDate(item.date) }}
               </div>
             </div>
-          </article>
+          </NuxtLink>
         </div>
 
         <!-- Boutons Afficher plus / moins -->
@@ -276,10 +261,11 @@ const typeColors: Record<string, string> = {
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <article
+          <NuxtLink
             v-for="event in upcomingEvents"
             :key="event.id"
-            class="group relative overflow-hidden rounded-xl h-72"
+            :to="localePath(`/actualites/evenements/${event.id}`)"
+            class="group relative overflow-hidden rounded-xl h-72 block"
           >
             <!-- Background image -->
             <img
@@ -314,7 +300,7 @@ const typeColors: Record<string, string> = {
                 </span>
               </div>
             </div>
-          </article>
+          </NuxtLink>
         </div>
       </section>
 
@@ -337,10 +323,11 @@ const typeColors: Record<string, string> = {
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <article
+          <NuxtLink
             v-for="call in openCalls"
             :key="call.id"
-            class="group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-200 dark:border-gray-700"
+            :to="localePath(`/actualites/appels/${call.id}`)"
+            class="group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-200 dark:border-gray-700 block"
           >
             <!-- Image -->
             <div class="overflow-hidden h-48">
@@ -374,18 +361,13 @@ const typeColors: Record<string, string> = {
                   <span class="ml-1 font-semibold text-red-600 dark:text-red-400">{{ formatShortDate(call.deadline) }}</span>
                 </div>
 
-                <a
-                  v-if="call.url"
-                  :href="call.url"
-                  target="_blank"
-                  class="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors"
-                >
-                  {{ t('actualites.calls.apply') }}
-                  <font-awesome-icon icon="fa-solid fa-external-link" class="w-3 h-3" />
-                </a>
+                <span class="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-600 text-white text-sm font-medium rounded-lg">
+                  {{ t('actualites.readMore') }}
+                  <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
+                </span>
               </div>
             </div>
-          </article>
+          </NuxtLink>
         </div>
       </section>
     </div>

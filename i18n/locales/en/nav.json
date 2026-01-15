@@ -6,6 +6,8 @@
     "network": "Our Network",
     "training": "Training",
     "about": "About",
+    "alumni": "Alumni",
+    "site": "Our Campus",
     "apply": "Apply Now",
     "viewAll": "View all",
     "exploreAll": "Explore all",
@@ -67,9 +69,31 @@
       },
       "about": {
         "mission": "Mission & Values",
+        "missionDesc": "Discover our vision and founding values",
         "history": "History",
+        "historyDesc": "The Senghor project since its origins",
         "governance": "Governance",
-        "campus": "Alexandria Campus"
+        "governanceDesc": "Founding texts, donor countries and board of directors"
+      },
+      "alumni": {
+        "alumniNetwork": "Alumni Network",
+        "alumniNetworkDesc": "Over 5,000 graduates across 54 African countries",
+        "alumniProgram": "Alumni Program",
+        "alumniProgramDesc": "Activities and services for former students"
+      },
+      "site": {
+        "housing": "Housing",
+        "housingDesc": "Accommodation on the Borg el Arab campus",
+        "library": "Library",
+        "libraryDesc": "Documentary resources and study spaces",
+        "conferenceHall": "Conference Hall",
+        "conferenceHallDesc": "Spaces for events and seminars",
+        "academicSpaces": "Academic Spaces",
+        "academicSpacesDesc": "Classrooms and laboratories",
+        "sports": "Sports",
+        "sportsDesc": "Swimming pool and sports facilities",
+        "hotel": "Hotel",
+        "hotelDesc": "Accommodation for visitors and guests"
       }
     },
     "language": "Language",

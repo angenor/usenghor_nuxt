@@ -77,6 +77,40 @@
       "title": "لا يوجد محتوى",
       "description": "عد قريباً لاكتشاف آخر أخبارنا."
     },
-    "readMore": "اقرأ المزيد"
+    "readMore": "اقرأ المزيد",
+    "detail": {
+      "news": {
+        "breadcrumb": "خبر",
+        "relatedNews": "مقالات مشابهة",
+        "backToNews": "العودة إلى الأخبار"
+      },
+      "call": {
+        "breadcrumb": "دعوة",
+        "deadline": "الموعد النهائي",
+        "campus": "الحرم",
+        "type": "النوع",
+        "status": "الحالة",
+        "statusOpen": "مفتوح",
+        "statusClosed": "مغلق",
+        "partners": "الشركاء",
+        "apply": "تقدم الآن",
+        "closed": "الترشحات مغلقة",
+        "relatedCalls": "دعوات أخرى مفتوحة",
+        "backToCalls": "العودة إلى الدعوات",
+        "daysLeft": "يوم متبقي | {count} أيام متبقية",
+        "deadlinePassed": "انتهى الموعد النهائي"
+      },
+      "event": {
+        "breadcrumb": "فعالية",
+        "date": "التاريخ",
+        "location": "المكان",
+        "campus": "الحرم",
+        "type": "النوع",
+        "upcoming": "قادمة",
+        "past": "سابقة",
+        "relatedEvents": "فعاليات أخرى",
+        "backToEvents": "العودة إلى الفعاليات"
+      }
+    }
   }
 }

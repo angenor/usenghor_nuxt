@@ -2,6 +2,7 @@
 import type { CampusEvent } from '~/composables/useMockData'
 
 const { t, locale } = useI18n()
+const localePath = useLocalePath()
 const { getUpcomingEvents, getPastEvents } = useMockData()
 
 // SEO
@@ -121,10 +122,11 @@ const typeColors: Record<string, string> = {
         </h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <article
+          <NuxtLink
             v-for="event in featuredEvents"
             :key="event.id"
-            class="group relative overflow-hidden rounded-xl h-80"
+            :to="localePath(`/actualites/evenements/${event.id}`)"
+            class="group relative overflow-hidden rounded-xl h-80 block"
           >
             <!-- Background image -->
             <img
@@ -168,7 +170,7 @@ const typeColors: Record<string, string> = {
                 </span>
               </div>
             </div>
-          </article>
+          </NuxtLink>
         </div>
       </section>
 
@@ -186,9 +188,10 @@ const typeColors: Record<string, string> = {
             </h2>
 
             <div class="space-y-6">
-              <article
+              <NuxtLink
                 v-for="event in otherUpcomingEvents"
                 :key="event.id"
+                :to="localePath(`/actualites/evenements/${event.id}`)"
                 class="group flex flex-col md:flex-row gap-4 pb-6 border-b border-gray-200 dark:border-gray-700"
               >
                 <!-- Thumbnail -->
@@ -231,7 +234,7 @@ const typeColors: Record<string, string> = {
                     </span>
                   </div>
                 </div>
-              </article>
+              </NuxtLink>
             </div>
           </section>
 
@@ -265,9 +268,10 @@ const typeColors: Record<string, string> = {
               leave-to-class="opacity-0 max-h-0"
             >
               <div v-show="showPastEvents" class="space-y-4 overflow-hidden">
-                <article
+                <NuxtLink
                   v-for="event in filteredPast.slice(0, 6)"
                   :key="event.id"
+                  :to="localePath(`/actualites/evenements/${event.id}`)"
                   class="group flex items-center gap-4 py-3 border-b border-gray-200 dark:border-gray-700 opacity-70 hover:opacity-100 transition-opacity"
                 >
                   <!-- Date badge -->
@@ -293,7 +297,7 @@ const typeColors: Record<string, string> = {
                       {{ getLocalizedTitle(event) }}
                     </h4>
                   </div>
-                </article>
+                </NuxtLink>
               </div>
             </transition>
           </section>
