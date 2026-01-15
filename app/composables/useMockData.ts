@@ -130,6 +130,54 @@ export function useMockData() {
   const getCampusFormationsRealisees = (campusId: string) =>
     mockCampusFormationsRealisees.filter(f => f.campus_id === campusId).sort((a, b) => b.year - a.year)
 
+  // === DONNÉES GLOBALES (tous campus confondus) ===
+  // Toutes les actualités triées par date décroissante
+  const getAllNews = () =>
+    [...mockCampusNews].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+  // Tous les événements triés par date croissante
+  const getAllEvents = () =>
+    [...mockCampusEvents].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+
+  // Événements à venir uniquement
+  const getUpcomingEvents = () => {
+    const now = new Date()
+    return [...mockCampusEvents]
+      .filter(e => new Date(e.date) >= now)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  }
+
+  // Événements passés
+  const getPastEvents = () => {
+    const now = new Date()
+    return [...mockCampusEvents]
+      .filter(e => new Date(e.date) < now)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  }
+
+  // Tous les appels (tous types, tous statuts)
+  const getAllCalls = () =>
+    [...mockCampusCalls].filter(c => c.is_active)
+      .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
+
+  // Tous les appels ouverts (hors recrutements)
+  const getAllOpenCalls = () =>
+    [...mockCampusCalls]
+      .filter(c => c.is_active && c.status === 'open' && c.type !== 'recrutement')
+      .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
+
+  // Tous les appels clos
+  const getAllClosedCalls = () =>
+    [...mockCampusCalls]
+      .filter(c => c.status === 'closed')
+      .sort((a, b) => new Date(b.deadline).getTime() - new Date(a.deadline).getTime())
+
+  // Tous les recrutements
+  const getAllRecruitments = () =>
+    [...mockCampusCalls]
+      .filter(c => c.is_active && c.type === 'recrutement')
+      .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
+
   // === FORMATIONS ===
   const formations = computed(() => mockFormations.filter(f => f.is_published))
 
@@ -209,6 +257,16 @@ export function useMockData() {
     getCampusMedia,
     getCampusMediaByType,
     getCampusFormationsRealisees,
+
+    // Getters globaux (tous campus)
+    getAllNews,
+    getAllEvents,
+    getUpcomingEvents,
+    getPastEvents,
+    getAllCalls,
+    getAllOpenCalls,
+    getAllClosedCalls,
+    getAllRecruitments,
 
     // Getters formations
     getFormationsFeatured,

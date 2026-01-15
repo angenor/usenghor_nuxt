@@ -1,0 +1,80 @@
+{
+  "actualites": {
+    "seo": {
+      "title": "News | Senghor University",
+      "description": "Find all the news from Senghor University: calls for applications, events, recruitment and news from our campuses."
+    },
+    "hero": {
+      "badge": "News",
+      "title": "All Senghor News",
+      "subtitle": "Calls for applications, events and news from our campuses across Francophone Africa"
+    },
+    "sections": {
+      "featured": "Featured",
+      "latestNews": "Latest News",
+      "upcomingEvents": "Upcoming Events",
+      "openCalls": "Open Calls",
+      "viewAll": "View All",
+      "viewAllNews": "All News",
+      "viewAllEvents": "All Events",
+      "viewAllCalls": "All Calls"
+    },
+    "calls": {
+      "title": "Calls for Applications",
+      "subtitle": "Apply to training programs, scholarships and research projects",
+      "filters": {
+        "all": "All",
+        "candidature": "Applications",
+        "bourse": "Scholarships",
+        "projet": "Projects",
+        "recrutement": "Recruitment"
+      },
+      "status": {
+        "all": "All statuses",
+        "open": "Open",
+        "closed": "Closed"
+      },
+      "deadline": "Deadline",
+      "apply": "Apply",
+      "closed": "Closed",
+      "noCalls": "No calls available at the moment",
+      "noResults": "No calls match your criteria"
+    },
+    "events": {
+      "title": "Events",
+      "subtitle": "Conferences, workshops and ceremonies at our campuses",
+      "featured": "Featured",
+      "upcoming": "Upcoming",
+      "past": "Past Events",
+      "noEvents": "No events scheduled at the moment",
+      "noResults": "No events match your criteria",
+      "filters": {
+        "all": "All",
+        "conference": "Conferences",
+        "atelier": "Workshops",
+        "ceremonie": "Ceremonies",
+        "autre": "Other"
+      },
+      "types": {
+        "conference": "Conference",
+        "atelier": "Workshop",
+        "ceremonie": "Ceremony",
+        "autre": "Other"
+      }
+    },
+    "campus": {
+      "from": "Campus",
+      "viewCampus": "View campus"
+    },
+    "sidebar": {
+      "upcomingEvents": "Upcoming Events",
+      "recentNews": "Recent News",
+      "openCalls": "Open Calls"
+    },
+    "empty": {
+      "title": "No content",
+      "description": "Come back soon to discover our latest news."
+    },
+    "readMore": "Read more"
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "actualites": {
+    "seo": {
+      "title": "Actualités | Université Senghor",
+      "description": "Retrouvez toutes les actualités de l'Université Senghor : appels à candidatures, événements, recrutements et nouvelles de nos campus."
+    },
+    "hero": {
+      "badge": "Actualités",
+      "title": "Toute l'actualité Senghor",
+      "subtitle": "Appels à candidatures, événements et nouvelles de nos campus à travers l'Afrique francophone"
+    },
+    "sections": {
+      "featured": "À la une",
+      "latestNews": "Dernières actualités",
+      "upcomingEvents": "Événements à venir",
+      "openCalls": "Appels en cours",
+      "viewAll": "Voir tout",
+      "viewAllNews": "Toutes les actualités",
+      "viewAllEvents": "Tous les événements",
+      "viewAllCalls": "Tous les appels"
+    },
+    "calls": {
+      "title": "Appels à candidatures",
+      "subtitle": "Postulez aux programmes de formation, bourses et projets de recherche",
+      "filters": {
+        "all": "Tous",
+        "candidature": "Candidatures",
+        "bourse": "Bourses",
+        "projet": "Projets",
+        "recrutement": "Recrutements"
+      },
+      "status": {
+        "all": "Tous les statuts",
+        "open": "En cours",
+        "closed": "Clos"
+      },
+      "deadline": "Date limite",
+      "apply": "Postuler",
+      "closed": "Clôturé",
+      "noCalls": "Aucun appel disponible pour le moment",
+      "noResults": "Aucun appel ne correspond à vos critères"
+    },
+    "events": {
+      "title": "Événements",
+      "subtitle": "Conférences, ateliers et cérémonies dans nos campus",
+      "featured": "À la une",
+      "upcoming": "À venir",
+      "past": "Événements passés",
+      "noEvents": "Aucun événement prévu pour le moment",
+      "noResults": "Aucun événement ne correspond à vos critères",
+      "filters": {
+        "all": "Tous",
+        "conference": "Conférences",
+        "atelier": "Ateliers",
+        "ceremonie": "Cérémonies",
+        "autre": "Autres"
+      },
+      "types": {
+        "conference": "Conférence",
+        "atelier": "Atelier",
+        "ceremonie": "Cérémonie",
+        "autre": "Autre"
+      }
+    },
+    "campus": {
+      "from": "Campus de",
+      "viewCampus": "Voir le campus"
+    },
+    "sidebar": {
+      "upcomingEvents": "Événements à venir",
+      "recentNews": "Actualités récentes",
+      "openCalls": "Appels en cours"
+    },
+    "empty": {
+      "title": "Aucun contenu",
+      "description": "Revenez bientôt pour découvrir nos dernières actualités."
+    },
+    "readMore": "Lire la suite"
+  }
+}
