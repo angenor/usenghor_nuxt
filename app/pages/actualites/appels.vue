@@ -3,6 +3,8 @@ import type { CampusCall } from '~/composables/useMockData'
 
 const { t, locale } = useI18n()
 const { getAllCalls } = useMockData()
+const route = useRoute()
+const router = useRouter()
 
 // SEO
 useSeoMeta({
@@ -10,9 +12,36 @@ useSeoMeta({
   description: () => t('actualites.calls.subtitle')
 })
 
-// Filters
-const selectedType = ref<'all' | CampusCall['type']>('all')
-const selectedStatus = ref<'all' | 'open' | 'closed'>('all')
+// Filters - initialized from query parameters
+const validTypes = ['all', 'candidature', 'bourse', 'projet', 'recrutement'] as const
+const validStatuses = ['all', 'open', 'closed'] as const
+
+const getInitialType = (): 'all' | CampusCall['type'] => {
+  const type = route.query.type as string
+  if (type && validTypes.includes(type as any)) {
+    return type as 'all' | CampusCall['type']
+  }
+  return 'all'
+}
+
+const getInitialStatus = (): 'all' | 'open' | 'closed' => {
+  const status = route.query.status as string
+  if (status && validStatuses.includes(status as any)) {
+    return status as 'all' | 'open' | 'closed'
+  }
+  return 'all'
+}
+
+const selectedType = ref<'all' | CampusCall['type']>(getInitialType())
+const selectedStatus = ref<'all' | 'open' | 'closed'>(getInitialStatus())
+
+// Update URL when filters change
+watch([selectedType, selectedStatus], () => {
+  const query: Record<string, string> = {}
+  if (selectedType.value !== 'all') query.type = selectedType.value
+  if (selectedStatus.value !== 'all') query.status = selectedStatus.value
+  router.replace({ query })
+})
 
 // All calls
 const allCalls = computed(() => getAllCalls())
