@@ -1,0 +1,64 @@
+{
+  "site": {
+    "seo": {
+      "title": "Alexandria Campus | Senghor University",
+      "description": "Discover the headquarters of Senghor University in Alexandria, Egypt: modern facilities, library, accommodation and exceptional living environment."
+    },
+    "hero": {
+      "badge": "Main Campus",
+      "title": "Our Alexandria Headquarters",
+      "subtitle": "A historic campus in the heart of the Mediterranean, offering an environment of excellence for training future African leaders"
+    },
+    "presentation": {
+      "title": "The Campus",
+      "description": "Senghor University occupies a magnificent historic building in the heart of Alexandria, just steps from the famous Bibliotheca Alexandrina. This exceptional site provides an environment conducive to study and personal growth, combining architectural heritage with modern infrastructure.",
+      "address": "1 Ahmed Orabi Square, El Mancheya, Alexandria, Egypt",
+      "stats": {
+        "surface": "Total area",
+        "surfaceValue": "15,000 m²",
+        "rooms": "Classrooms",
+        "roomsValue": "20+",
+        "capacity": "Capacity",
+        "capacityValue": "600 students",
+        "founded": "Founded in",
+        "foundedValue": "1990"
+      }
+    },
+    "facilities": {
+      "title": "Our Facilities",
+      "subtitle": "Modern infrastructure for training excellence",
+      "viewDetails": "Learn more",
+      "capacity": "Capacity"
+    },
+    "gallery": {
+      "title": "Gallery",
+      "subtitle": "Discover our campus in pictures",
+      "tabs": {
+        "all": "All",
+        "photos": "Photos",
+        "videos": "Videos"
+      },
+      "viewLarger": "View larger",
+      "playVideo": "Play video"
+    },
+    "location": {
+      "title": "Find Us",
+      "subtitle": "Located in the heart of Alexandria, near the Mediterranean",
+      "address": "Address",
+      "addressValue": "1 Ahmed Orabi Square, El Mancheya, Alexandria, Egypt",
+      "coordinates": "GPS Coordinates",
+      "coordinatesValue": "31.2018° N, 29.9158° E",
+      "phone": "Phone",
+      "phoneValue": "+20 3 484 3562",
+      "email": "Email",
+      "emailValue": "info{'@'}usenghor-francophonie.org",
+      "openMaps": "Open in Google Maps"
+    },
+    "cta": {
+      "title": "Visit Our Campus",
+      "description": "Discover our facilities and meet our team. We look forward to welcoming you.",
+      "visitButton": "Plan a visit",
+      "contactButton": "Contact us"
+    }
+  }
+}

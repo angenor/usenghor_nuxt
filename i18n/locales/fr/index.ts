@@ -18,6 +18,7 @@ import partners from './partners.json'
 import actualites from './actualites.json'
 import projets from './projets.json'
 import alumni from './alumni.json'
+import site from './site.json'
 
 export default {
   ...common,
@@ -39,5 +40,6 @@ export default {
   ...partners,
   ...actualites,
   ...projets,
-  ...alumni
+  ...alumni,
+  ...site
 }

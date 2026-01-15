@@ -30,74 +30,103 @@ export interface Project {
 
 export const mockProjects: Project[] = [
   {
-    id: 'project-transformaction',
-    slug: 'transformaction',
-    title_fr: 'TransformAction',
-    title_en: 'TransformAction',
-    title_ar: 'ترانسفورم أكشن',
-    description_fr: 'Programme phare de transformation digitale et de renforcement des capacités des jeunes africains francophones.',
-    description_en: 'Flagship digital transformation and capacity building program for young French-speaking Africans.',
-    description_ar: 'برنامج رائد للتحول الرقمي وبناء قدرات الشباب الأفريقي الناطق بالفرنسية.',
-    content_fr: `TransformAction est le programme phare de l'Université Senghor, conçu pour accompagner la transformation digitale en Afrique francophone.
+    id: 'project-transformaction-africa',
+    slug: 'transformaction-africa',
+    title_fr: 'Transform\'Action Africa',
+    title_en: 'Transform\'Action Africa',
+    title_ar: 'ترانسفورم أكشن أفريكا',
+    description_fr: 'Transform\'Action Africa est un parcours pédagogique, collectif et créatif, conçu pour les leaders qui conduisent des dynamiques de transformation structurelle au sein des organisations publiques africaines, au service de la transition sociale et écologique.',
+    description_en: 'Transform\'Action Africa is a pedagogical, collective and creative pathway designed for leaders driving structural transformation dynamics within African public organizations, in service of social and ecological transition.',
+    description_ar: 'ترانسفورم أكشن أفريكا هو مسار تعليمي جماعي وإبداعي، مصمم للقادة الذين يقودون ديناميكيات التحول الهيكلي داخل المنظمات العامة الأفريقية، في خدمة التحول الاجتماعي والبيئي.',
+    content_fr: `**Transform'Action Africa** est un parcours pédagogique, collectif et créatif, conçu pour les leaders qui conduisent des dynamiques de transformation structurelle au sein des organisations publiques africaines, au service de la transition sociale et écologique.
 
-## Objectifs
+## Notre mission
 
-- Former 10 000 jeunes aux compétences numériques d'ici 2027
-- Accompagner 500 startups dans leur développement digital
-- Créer un réseau de 200 formateurs certifiés dans 15 pays
+Accompagner les leaders africains dans la conduite de transformations structurelles au sein de leurs organisations, pour répondre aux défis de la transition sociale et écologique du continent.
 
-## Approche
+## Approche pédagogique
 
-Le programme combine formations en ligne, ateliers présentiels et accompagnement personnalisé. Les participants bénéficient d'un accès à une plateforme d'apprentissage innovante et à un réseau d'experts internationaux.
+Transform'Action Africa propose une pédagogie innovante qui combine :
 
-## Impact
+- **Apprentissage par l'action** : Les participants travaillent sur des projets concrets de transformation de leurs organisations
+- **Intelligence collective** : Échanges entre pairs et co-construction de solutions
+- **Créativité** : Méthodes de design thinking et d'innovation sociale
+- **Accompagnement personnalisé** : Coaching individuel et mentorat par des experts
 
-Depuis son lancement, TransformAction a déjà formé plus de 3 000 jeunes et accompagné 150 startups dans leur transformation digitale.`,
-    content_en: `TransformAction is Senghor University's flagship program, designed to support digital transformation in French-speaking Africa.
+## Domaines d'intervention
 
-## Objectives
-
-- Train 10,000 young people in digital skills by 2027
-- Support 500 startups in their digital development
-- Create a network of 200 certified trainers in 15 countries
-
-## Approach
-
-The program combines online training, in-person workshops, and personalized support. Participants benefit from access to an innovative learning platform and a network of international experts.
+- Gouvernance et management public
+- Transition écologique et développement durable
+- Transformation digitale des services publics
+- Innovation sociale et inclusion
+- Leadership et conduite du changement
 
 ## Impact
 
-Since its launch, TransformAction has already trained over 3,000 young people and supported 150 startups in their digital transformation.`,
-    content_ar: `ترانسفورم أكشن هو البرنامج الرائد لجامعة سنغور، المصمم لدعم التحول الرقمي في أفريقيا الناطقة بالفرنسية.
+Transform'Action Africa contribue à former une nouvelle génération de leaders publics africains capables de conduire les transformations nécessaires pour relever les défis du 21e siècle.`,
+    content_en: `**Transform'Action Africa** is a pedagogical, collective and creative pathway designed for leaders conducting structural transformation within African public organizations.
 
-## الأهداف
+## Our mission
 
-- تدريب 10,000 شاب على المهارات الرقمية بحلول عام 2027
-- دعم 500 شركة ناشئة في تطويرها الرقمي
-- إنشاء شبكة من 200 مدرب معتمد في 15 دولة
+Supporting the social and ecological transition of the African continent by training executives of public organizations in systemic transformation methods.
 
-## النهج
+## Pedagogical approach
 
-يجمع البرنامج بين التدريب عبر الإنترنت وورش العمل الحضورية والدعم الشخصي.
+Transform'Action Africa offers an innovative pedagogy that combines:
 
-## التأثير
+- **Learning by doing**: Participants work on concrete transformation projects within their organizations
+- **Collective intelligence**: Peer exchanges and co-construction of solutions
+- **Creativity**: Design thinking and social innovation methods
+- **Personalized support**: Individual coaching and mentoring by experts
 
-منذ إطلاقه، قام ترانسفورم أكشن بتدريب أكثر من 3,000 شاب ودعم 150 شركة ناشئة في تحولها الرقمي.`,
-    image: 'https://picsum.photos/seed/transformaction/1200/600',
+## Areas of intervention
+
+- Governance and public management
+- Ecological transition and sustainable development
+- Digital transformation of public services
+- Social innovation and inclusion
+- Leadership and change management
+
+## Impact
+
+Transform'Action Africa contributes to training a new generation of African public leaders capable of leading the transformations necessary to meet the challenges of the 21st century.`,
+    content_ar: `**ترانسفورم أكشن أفريكا** هو مسار تعليمي جماعي وإبداعي مصمم للقادة الذين يقودون التحولات الهيكلية داخل المنظمات العامة الأفريقية.
+
+## مهمتنا
+
+دعم التحول الاجتماعي والبيئي للقارة الأفريقية من خلال تدريب مديري المنظمات العامة على أساليب التحول المنهجي.
+
+## النهج التربوي
+
+يقدم ترانسفورم أكشن أفريكا منهجية تعليمية مبتكرة تجمع بين:
+
+- **التعلم بالممارسة**: يعمل المشاركون على مشاريع تحول ملموسة داخل منظماتهم
+- **الذكاء الجماعي**: تبادل الخبرات بين الأقران وبناء الحلول المشتركة
+- **الإبداع**: أساليب التفكير التصميمي والابتكار الاجتماعي
+- **الدعم الشخصي**: التوجيه الفردي والإرشاد من قبل الخبراء
+
+## مجالات التدخل
+
+- الحوكمة والإدارة العامة
+- التحول البيئي والتنمية المستدامة
+- التحول الرقمي للخدمات العامة
+- الابتكار الاجتماعي والشمول
+- القيادة وإدارة التغيير`,
+    image: 'https://picsum.photos/seed/transformaction-africa/1200/600',
     gallery: [
-      'https://picsum.photos/seed/transformaction-1/800/600',
-      'https://picsum.photos/seed/transformaction-2/800/600',
-      'https://picsum.photos/seed/transformaction-3/800/600'
+      'https://picsum.photos/seed/transformaction-africa-1/800/600',
+      'https://picsum.photos/seed/transformaction-africa-2/800/600',
+      'https://picsum.photos/seed/transformaction-africa-3/800/600'
     ],
-    category: 'numerique',
+    category: 'education',
     status: 'active',
     featured: true,
     start_date: '2022-01-15',
-    partners: ['OIF', 'AFD', 'Union Européenne', 'BAD'],
-    countries: ['Sénégal', 'Côte d\'Ivoire', 'Cameroun', 'Bénin', 'Togo', 'Mali', 'Burkina Faso', 'Niger', 'Guinée', 'RDC'],
-    website: 'https://transformaction.usenghor.org',
+    partners: ['OIF', 'AFD', 'Union Européenne'],
+    countries: ['Sénégal', 'Côte d\'Ivoire', 'Cameroun', 'Bénin', 'Togo', 'Mali', 'Burkina Faso', 'Niger', 'Guinée', 'RDC', 'Madagascar', 'Mauritanie'],
+    website: 'https://transformaction-africa.org',
     budget: '5 millions EUR',
-    beneficiaries: '10 000 jeunes'
+    beneficiaries: 'Cadres dirigeants des organisations publiques africaines'
   },
   {
     id: 'project-kreafrika',
@@ -105,79 +134,139 @@ Since its launch, TransformAction has already trained over 3,000 young people an
     title_fr: 'KreAfrika',
     title_en: 'KreAfrika',
     title_ar: 'كري أفريكا',
-    description_fr: 'Initiative de promotion de l\'entrepreneuriat culturel et créatif en Afrique francophone.',
-    description_en: 'Initiative promoting cultural and creative entrepreneurship in French-speaking Africa.',
-    description_ar: 'مبادرة لتعزيز ريادة الأعمال الثقافية والإبداعية في أفريقيا الناطقة بالفرنسية.',
-    content_fr: `KreAfrika est une initiative ambitieuse visant à structurer et développer les industries culturelles et créatives en Afrique francophone.
+    description_fr: 'KreAfrika est un projet mis en œuvre par l\'Université Senghor, le groupe médiatique TRACE et le Campus Groupe AFD, qui vise à renforcer les compétences des professionnels des Industries Culturelles et Créatives en Afrique. À travers des formations en ligne, des séminaires en présentiel et un réseau professionnel, KreAfrika favorise l\'échange des pratiques et savoir-faire dans le domaine des ICC.',
+    description_en: 'KreAfrika is a project implemented by Senghor University, TRACE media group and Campus Groupe AFD, aimed at strengthening the skills of professionals in Cultural and Creative Industries in Africa. Through online training, in-person seminars and a professional network, KreAfrika promotes the exchange of practices and know-how in the CCI field.',
+    description_ar: 'كري أفريكا هو مشروع ينفذه جامعة سنغور ومجموعة TRACE الإعلامية وCampus Groupe AFD، يهدف إلى تعزيز مهارات المهنيين في الصناعات الثقافية والإبداعية في أفريقيا. من خلال التدريب عبر الإنترنت والندوات الحضورية والشبكة المهنية، يعزز كري أفريكا تبادل الممارسات والخبرات في مجال الصناعات الثقافية والإبداعية.',
+    content_fr: `**KreAfrika** est un projet mis en œuvre par l'Université Senghor, le groupe médiatique TRACE et le Campus Groupe AFD, qui vise à renforcer les compétences des professionnels des Industries Culturelles et Créatives (ICC) en Afrique.
 
-## Mission
+## Objectifs
 
-Accompagner les entrepreneurs culturels dans le développement de leurs projets, de l'idéation à la mise sur le marché.
+- Renforcer les compétences des professionnels des ICC en Afrique
+- Favoriser l'échange des pratiques et savoir-faire dans le domaine des industries créatives
+- Accompagner l'émergence d'une économie créative durable en Afrique
 
-## Domaines d'intervention
+## Approche tripartite
 
-- Arts visuels et arts du spectacle
-- Musique et audiovisuel
+KreAfrika combine trois modalités complémentaires :
+
+### Formation en ligne
+- Modules de e-learning accessibles à distance
+- Contenus développés par des experts du secteur
+- Parcours personnalisés selon les profils
+
+### Séminaires présentiels
+- Ateliers pratiques et master classes
+- Rencontres avec des professionnels reconnus
+- Sessions de travail intensives
+
+### Réseautage professionnel
+- Mise en relation entre professionnels du secteur
+- Événements de networking
+- Plateforme d'échange et de collaboration
+
+## Secteurs couverts
+
+- Musique et arts du spectacle
+- Audiovisuel et cinéma
 - Mode et design
-- Patrimoine et tourisme culturel
-- Édition et littérature
+- Arts visuels et artisanat d'art
+- Édition et contenus numériques
+- Jeux vidéo et animation
 
-## Résultats attendus
+## Partenaires
 
-- 200 entrepreneurs accompagnés
-- 50 entreprises créées
-- 1000 emplois générés dans le secteur culturel`,
-    content_en: `KreAfrika is an ambitious initiative aimed at structuring and developing cultural and creative industries in French-speaking Africa.
+- **Université Senghor** : Expertise académique et pédagogique
+- **TRACE** : Réseau média et connaissance du secteur créatif africain
+- **Campus Groupe AFD** : Expertise en formation professionnelle et développement`,
+    content_en: `**KreAfrika** is a project implemented jointly by Senghor University, TRACE media group, and Campus Groupe AFD, aimed at strengthening the skills of professionals in Cultural and Creative Industries (CCI) in Africa.
 
-## Mission
+## Objectives
 
-Supporting cultural entrepreneurs in developing their projects, from ideation to market launch.
+- Professionalize actors in African cultural and creative industries
+- Facilitate knowledge exchange and networking within the creative sector
+- Support the emergence of a sustainable creative economy in Africa
 
-## Areas of intervention
+## Tripartite approach
 
-- Visual and performing arts
-- Music and audiovisual
+KreAfrika combines three complementary modalities:
+
+### Online training
+- E-learning modules accessible remotely
+- Content developed by industry experts
+- Personalized pathways according to profiles
+
+### In-person seminars
+- Practical workshops and master classes
+- Meetings with recognized professionals
+- Intensive work sessions
+
+### Professional networking
+- Connecting professionals in the sector
+- Networking events
+- Exchange and collaboration platform
+
+## Sectors covered
+
+- Music and performing arts
+- Audiovisual and cinema
 - Fashion and design
-- Heritage and cultural tourism
-- Publishing and literature
+- Visual arts and crafts
+- Publishing and digital content
+- Video games and animation
 
-## Expected results
+## Partners
 
-- 200 entrepreneurs supported
-- 50 companies created
-- 1000 jobs generated in the cultural sector`,
-    content_ar: `كري أفريكا هي مبادرة طموحة تهدف إلى هيكلة وتطوير الصناعات الثقافية والإبداعية في أفريقيا الناطقة بالفرنسية.
+- **Senghor University**: Academic and pedagogical expertise
+- **TRACE**: Media network and knowledge of the African creative sector
+- **Campus Groupe AFD**: Expertise in professional training and development`,
+    content_ar: `**كري أفريكا** هو مشروع ينفذه بشكل مشترك جامعة سنغور ومجموعة TRACE الإعلامية وCampus Groupe AFD، يهدف إلى تعزيز مهارات المهنيين في الصناعات الثقافية والإبداعية في أفريقيا.
 
-## المهمة
+## الأهداف
 
-دعم رواد الأعمال الثقافيين في تطوير مشاريعهم، من الفكرة إلى السوق.
+- احترافية الفاعلين في الصناعات الثقافية والإبداعية الأفريقية
+- تسهيل تبادل المعرفة والتواصل داخل القطاع الإبداعي
+- دعم ظهور اقتصاد إبداعي مستدام في أفريقيا
 
-## مجالات التدخل
+## النهج الثلاثي
 
-- الفنون البصرية وفنون الأداء
-- الموسيقى والسمعي البصري
+يجمع كري أفريكا بين ثلاث طرق متكاملة:
+
+### التدريب عبر الإنترنت
+- وحدات التعلم الإلكتروني عن بعد
+- محتوى طوره خبراء الصناعة
+- مسارات مخصصة حسب الملفات الشخصية
+
+### الندوات الحضورية
+- ورش عمل عملية ودروس رئيسية
+- لقاءات مع محترفين معترف بهم
+- جلسات عمل مكثفة
+
+### التواصل المهني
+- ربط المهنيين في القطاع
+- فعاليات التواصل
+- منصة للتبادل والتعاون
+
+## القطاعات المشمولة
+
+- الموسيقى وفنون الأداء
+- السمعي البصري والسينما
 - الموضة والتصميم
-- التراث والسياحة الثقافية
-
-## النتائج المتوقعة
-
-- 200 رائد أعمال مدعوم
-- 50 شركة منشأة
-- 1000 وظيفة في القطاع الثقافي`,
+- الفنون البصرية والحرف اليدوية`,
     image: 'https://picsum.photos/seed/kreafrika/1200/600',
     gallery: [
       'https://picsum.photos/seed/kreafrika-1/800/600',
-      'https://picsum.photos/seed/kreafrika-2/800/600'
+      'https://picsum.photos/seed/kreafrika-2/800/600',
+      'https://picsum.photos/seed/kreafrika-3/800/600'
     ],
     category: 'culture',
     status: 'active',
     featured: true,
     start_date: '2023-06-01',
-    partners: ['UNESCO', 'OIF', 'Institut français'],
-    countries: ['Côte d\'Ivoire', 'Sénégal', 'Cameroun', 'Maroc', 'Tunisie'],
-    website: 'https://kreafrika.usenghor.org',
-    budget: '2 millions EUR',
-    beneficiaries: '200 entrepreneurs'
+    partners: ['TRACE', 'Campus Groupe AFD', 'OIF'],
+    countries: ['Côte d\'Ivoire', 'Sénégal', 'Cameroun', 'Burkina Faso', 'Bénin', 'Mali', 'Togo', 'RDC'],
+    website: 'https://kreafrika.org',
+    budget: '2,5 millions EUR',
+    beneficiaries: 'Professionnels des Industries Culturelles et Créatives'
   },
   {
     id: 'project-levee-fonds',
