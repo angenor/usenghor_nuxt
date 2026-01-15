@@ -5,16 +5,18 @@ const localePath = useLocalePath()
 const { getNewsBySlug, getAllNews, getCampusById, getFlagEmoji } = useMockData()
 
 // Get the news item
-const slug = route.params.slug as string
-const news = computed(() => getNewsBySlug(slug))
+const slug = computed(() => route.params.slug as string)
+const news = computed(() => getNewsBySlug(slug.value))
 
-// 404 if not found
-if (!news.value) {
-  throw createError({
-    statusCode: 404,
-    statusMessage: 'Article not found'
-  })
-}
+// 404 if not found - use onMounted to check after hydration
+onMounted(() => {
+  if (!news.value) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Article not found'
+    })
+  }
+})
 
 // Get campus info
 const campus = computed(() => news.value ? getCampusById(news.value.campus_id) : null)
@@ -74,55 +76,63 @@ const getLocalizedTitleFor = (item: { title_fr: string; title_en?: string; title
 
 <template>
   <div v-if="news">
-    <!-- Hero with breadcrumb -->
-    <div class="relative bg-gray-900 py-16 lg:py-24">
-      <!-- Background image -->
+    <!-- Hero Section (PageHero style) -->
+    <section class="relative h-[50vh] min-h-[400px] max-h-[500px] overflow-hidden">
+      <!-- Background Image -->
       <div class="absolute inset-0">
         <img
           :src="news.image || 'https://picsum.photos/seed/news-hero/1920/600'"
           :alt="getLocalizedTitle"
-          class="w-full h-full object-cover opacity-30"
+          class="w-full h-full object-cover"
         >
-        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/80 to-gray-900/60"></div>
+        <!-- Gradient Overlays -->
+        <div class="absolute inset-0 bg-gradient-to-r from-gray-900/80 via-gray-900/60 to-gray-900/40"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-gray-900/70 via-transparent to-gray-900/30"></div>
       </div>
 
-      <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Breadcrumb -->
-        <nav class="mb-8">
-          <ol class="flex items-center space-x-2 text-sm">
-            <li>
-              <NuxtLink :to="localePath('/')" class="text-white/70 hover:text-white transition-colors">
-                {{ t('nav.home') }}
-              </NuxtLink>
-            </li>
-            <li class="flex items-center">
-              <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3 mx-2 text-white/40" />
-              <NuxtLink :to="localePath('/actualites')" class="text-white/70 hover:text-white transition-colors">
-                {{ t('actualites.hero.badge') }}
-              </NuxtLink>
-            </li>
-            <li class="flex items-center">
-              <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3 mx-2 text-white/40" />
-              <span class="text-amber-400 font-medium truncate max-w-xs">{{ getLocalizedTitle }}</span>
-            </li>
-          </ol>
-        </nav>
+      <!-- Content -->
+      <div class="relative z-10 h-full flex flex-col justify-center">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <!-- Breadcrumb -->
+          <nav class="mb-6">
+            <ol class="flex items-center space-x-2 text-sm">
+              <li>
+                <NuxtLink :to="localePath('/')" class="text-white/70 hover:text-white transition-colors duration-200">
+                  {{ t('nav.home') }}
+                </NuxtLink>
+              </li>
+              <li class="flex items-center">
+                <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3 mx-2 text-white/40" />
+                <NuxtLink :to="localePath('/actualites')" class="text-white/70 hover:text-white transition-colors duration-200">
+                  {{ t('actualites.hero.badge') }}
+                </NuxtLink>
+              </li>
+              <li class="flex items-center">
+                <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3 mx-2 text-white/40" />
+                <span class="text-amber-400 font-medium truncate max-w-xs">{{ getLocalizedTitle }}</span>
+              </li>
+            </ol>
+          </nav>
 
-        <!-- Meta info -->
-        <div class="flex flex-wrap items-center gap-3 mb-4">
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-600 text-white text-sm font-medium rounded-full">
-            <span>{{ campusFlag }}</span>
-            <span>{{ campusName }}</span>
-          </span>
-          <span class="text-white/70 text-sm">{{ formatDate(news.date) }}</span>
+          <!-- Meta info -->
+          <div class="flex flex-wrap items-center gap-3 mb-4">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-600 text-white text-sm font-medium rounded-full">
+              <span>{{ campusFlag }}</span>
+              <span>{{ campusName }}</span>
+            </span>
+            <span class="text-white/70 text-sm">{{ formatDate(news.date) }}</span>
+          </div>
+
+          <!-- Title -->
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-4">
+            {{ getLocalizedTitle }}
+          </h1>
         </div>
-
-        <!-- Title -->
-        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
-          {{ getLocalizedTitle }}
-        </h1>
       </div>
-    </div>
+
+      <!-- Bottom Gradient Fade -->
+      <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white dark:from-gray-900 to-transparent"></div>
+    </section>
 
     <!-- Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
