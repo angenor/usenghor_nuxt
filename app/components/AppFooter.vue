@@ -170,23 +170,18 @@ const socialLinks = [
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/formations/diplomes')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/formations/diplomes-universitaires')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
                   {{ t('footer.programs.diplomas') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/formations/certifications')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/formations/certifiantes')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
                   {{ t('footer.programs.certifications') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/formations/doctorat')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/formations/doctorats')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
                   {{ t('footer.programs.doctorate') }}
-                </NuxtLink>
-              </li>
-              <li>
-                <NuxtLink :to="localePath('/formations/fad')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
-                  {{ t('footer.programs.online') }}
                 </NuxtLink>
               </li>
             </ul>

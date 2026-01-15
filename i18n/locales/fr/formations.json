@@ -1,0 +1,91 @@
+{
+  "formations": {
+    "seo": {
+      "title": "Formations | Université Senghor",
+      "description": "Découvrez les formations de l'Université Senghor : masters, doctorats, diplômes d'université et formations certifiantes pour les cadres africains.",
+      "titleType": "{type} | Formations | Université Senghor",
+      "descriptionType": "Explorez nos programmes de {type} pour former les cadres africains de demain."
+    },
+    "hero": {
+      "badge": "Formations d'excellence",
+      "title": "Nos formations",
+      "subtitle": "Des programmes reconnus internationalement pour former les leaders africains de demain"
+    },
+    "types": {
+      "master": "Master",
+      "masters": "Masters",
+      "doctorat": "Doctorat",
+      "doctorats": "Doctorats",
+      "du": "Diplôme d'Université",
+      "diplomes-universitaires": "Diplômes d'Université",
+      "certifiante": "Formation certifiante",
+      "certifiantes": "Formations certifiantes"
+    },
+    "typeDescriptions": {
+      "masters": "Programmes de Master en 2 ans dispensés sur notre campus d'Alexandrie et nos campus externalisés",
+      "doctorats": "Programmes doctoraux en partenariat avec notre École doctorale",
+      "diplomes-universitaires": "Formations spécialisées courtes sanctionnées par un diplôme d'université",
+      "certifiantes": "Certifications professionnelles courtes et intensives"
+    },
+    "campus": {
+      "alexandrie": "Campus d'Alexandrie",
+      "externalise": "Campus externalisé",
+      "en_ligne": "Formation en ligne"
+    },
+    "filters": {
+      "all": "Toutes",
+      "campus": "Campus",
+      "department": "Département",
+      "applicationOpen": "Candidatures ouvertes"
+    },
+    "card": {
+      "duration": "Durée",
+      "credits": "crédits ECTS",
+      "applicationOpen": "Candidatures ouvertes",
+      "applicationClosed": "Candidatures closes",
+      "deadline": "Date limite",
+      "startDate": "Rentrée",
+      "viewDetails": "Voir le programme"
+    },
+    "detail": {
+      "overview": "Présentation",
+      "objectives": "Objectifs",
+      "program": "Programme",
+      "admission": "Admission",
+      "career": "Débouchés",
+      "duration": "Durée",
+      "credits": "Crédits",
+      "diploma": "Diplôme",
+      "department": "Département",
+      "apply": "Candidater",
+      "applicationDeadline": "Date limite de candidature",
+      "startDate": "Date de rentrée",
+      "relatedFormations": "Formations similaires",
+      "back": "Retour aux formations"
+    },
+    "index": {
+      "title": "Toutes nos formations",
+      "subtitle": "L'Université Senghor propose des formations d'excellence dans quatre domaines stratégiques pour le développement africain.",
+      "stats": {
+        "formations": "Formations",
+        "countries": "Pays partenaires",
+        "graduates": "Diplômés"
+      },
+      "featured": {
+        "title": "Formations à la une",
+        "badge": "En vedette"
+      },
+      "browseByType": "Explorer par type de formation",
+      "viewAll": "Voir toutes les formations"
+    },
+    "empty": {
+      "title": "Aucune formation trouvée",
+      "description": "Aucune formation ne correspond à vos critères de recherche."
+    },
+    "cta": {
+      "title": "Prêt à nous rejoindre ?",
+      "description": "Découvrez nos programmes et lancez votre candidature pour rejoindre la communauté Senghor.",
+      "button": "Candidater maintenant"
+    }
+  }
+}

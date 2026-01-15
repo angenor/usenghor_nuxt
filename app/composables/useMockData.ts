@@ -218,6 +218,30 @@ export function useMockData() {
   const getFormationBySlug = (slug: string) =>
     mockFormations.find(f => f.slug === slug)
 
+  // Get formations count by type
+  const getFormationsCountByType = () => {
+    const published = mockFormations.filter(f => f.is_published)
+    return {
+      master: published.filter(f => f.formation_type === 'master').length,
+      doctorat: published.filter(f => f.formation_type === 'doctorat').length,
+      du: published.filter(f => f.formation_type === 'du').length,
+      certifiante: published.filter(f => f.formation_type === 'certifiante').length
+    }
+  }
+
+  // Get formations with open applications
+  const getFormationsWithOpenApplications = () =>
+    mockFormations.filter(f => f.is_published && f.application_open)
+
+  // Get related formations (same type or department, excluding current)
+  const getRelatedFormations = (formation: Formation, limit = 3) =>
+    mockFormations
+      .filter(f => f.is_published && f.id !== formation.id && (
+        f.formation_type === formation.formation_type ||
+        f.department_id === formation.department_id
+      ))
+      .slice(0, limit)
+
   // === DOCUMENTS ===
   const documents = computed(() => mockDocuments.filter(d => d.is_public))
 
@@ -408,6 +432,9 @@ export function useMockData() {
     getFormationsByCampus,
     getFormationsByDepartment,
     getFormationBySlug,
+    getFormationsCountByType,
+    getFormationsWithOpenApplications,
+    getRelatedFormations,
 
     // Getters documents
     getDocumentsByCategory,

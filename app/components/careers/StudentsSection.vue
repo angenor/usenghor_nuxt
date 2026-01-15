@@ -17,19 +17,19 @@ const programs = [
   {
     key: 'doctoral',
     icon: 'fa-solid fa-flask',
-    link: '/formations/doctorat',
+    link: '/formations/doctorats',
     colors: ['#8b5cf6', '#c4b5fd'] // purple
   },
   {
     key: 'diplomes',
     icon: 'fa-solid fa-certificate',
-    link: '/formations/diplomes',
+    link: '/formations/diplomes-universitaires',
     colors: ['#f59e0b', '#fcd34d'] // amber
   },
   {
     key: 'certifications',
     icon: 'fa-solid fa-award',
-    link: '/formations/certifications',
+    link: '/formations/certifiantes',
     colors: ['#10b981', '#6ee7b7'] // emerald
   }
 ]

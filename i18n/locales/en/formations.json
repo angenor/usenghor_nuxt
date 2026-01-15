@@ -1,0 +1,91 @@
+{
+  "formations": {
+    "seo": {
+      "title": "Programs | Senghor University",
+      "description": "Discover Senghor University programs: masters, doctorates, university diplomas and certifications for African leaders.",
+      "titleType": "{type} | Programs | Senghor University",
+      "descriptionType": "Explore our {type} programs to train tomorrow's African leaders."
+    },
+    "hero": {
+      "badge": "Excellence in Education",
+      "title": "Our Programs",
+      "subtitle": "Internationally recognized programs to train tomorrow's African leaders"
+    },
+    "types": {
+      "master": "Master's",
+      "masters": "Master's Programs",
+      "doctorat": "Doctorate",
+      "doctorats": "Doctoral Programs",
+      "du": "University Diploma",
+      "diplomes-universitaires": "University Diplomas",
+      "certifiante": "Certificate Program",
+      "certifiantes": "Certificate Programs"
+    },
+    "typeDescriptions": {
+      "masters": "2-year Master's programs offered at our Alexandria campus and partner campuses",
+      "doctorats": "Doctoral programs in partnership with our Doctoral School",
+      "diplomes-universitaires": "Specialized short-term programs leading to a university diploma",
+      "certifiantes": "Short and intensive professional certifications"
+    },
+    "campus": {
+      "alexandrie": "Alexandria Campus",
+      "externalise": "Partner Campus",
+      "en_ligne": "Online Program"
+    },
+    "filters": {
+      "all": "All",
+      "campus": "Campus",
+      "department": "Department",
+      "applicationOpen": "Applications Open"
+    },
+    "card": {
+      "duration": "Duration",
+      "credits": "ECTS credits",
+      "applicationOpen": "Applications Open",
+      "applicationClosed": "Applications Closed",
+      "deadline": "Deadline",
+      "startDate": "Start Date",
+      "viewDetails": "View Program"
+    },
+    "detail": {
+      "overview": "Overview",
+      "objectives": "Objectives",
+      "program": "Curriculum",
+      "admission": "Admission",
+      "career": "Career Opportunities",
+      "duration": "Duration",
+      "credits": "Credits",
+      "diploma": "Degree",
+      "department": "Department",
+      "apply": "Apply Now",
+      "applicationDeadline": "Application Deadline",
+      "startDate": "Start Date",
+      "relatedFormations": "Related Programs",
+      "back": "Back to Programs"
+    },
+    "index": {
+      "title": "All Our Programs",
+      "subtitle": "Senghor University offers excellence programs in four strategic areas for African development.",
+      "stats": {
+        "formations": "Programs",
+        "countries": "Partner Countries",
+        "graduates": "Graduates"
+      },
+      "featured": {
+        "title": "Featured Programs",
+        "badge": "Featured"
+      },
+      "browseByType": "Browse by Program Type",
+      "viewAll": "View All Programs"
+    },
+    "empty": {
+      "title": "No programs found",
+      "description": "No programs match your search criteria."
+    },
+    "cta": {
+      "title": "Ready to Join Us?",
+      "description": "Discover our programs and start your application to join the Senghor community.",
+      "button": "Apply Now"
+    }
+  }
+}
