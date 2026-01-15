@@ -270,7 +270,7 @@ const handleImageError = (e: Event) => {
             @click="selectedCampus = campus; scrollToCampusCard()"
           >
             <span class="ltr:mr-1 rtl:ml-1">{{ getFlagEmoji(campus.country) }}</span>
-            {{ getLocalizedField(campus, 'city') }}
+            {{ getLocalizedField(campus, 'country') }}
           </button>
         </div>
       </div>

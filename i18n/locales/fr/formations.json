@@ -86,6 +86,10 @@
       "title": "Prêt à nous rejoindre ?",
       "description": "Découvrez nos programmes et lancez votre candidature pour rejoindre la communauté Senghor.",
       "button": "Candidater maintenant"
+    },
+    "sidebar": {
+      "otherTypes": "Autres formations",
+      "viewAll": "Voir tout"
     }
   }
 }

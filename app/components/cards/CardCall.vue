@@ -157,11 +157,12 @@ const typeBgColors: Record<string, string> = {
 .horizontal {
   display: inline-block;
   position: relative;
-  background: linear-gradient(to top right, rgba(255, 255, 255, 0.92) 50%, transparent 50%);
-  height: 101%;
-  width: 20%;
-  top: -0.5%;
+  height: 100%;
+  width: 30px;
   vertical-align: top;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 60' preserveAspectRatio='none'%3E%3Cpath d='M0,0 Q15,15 0,30 Q15,45 0,60 L0,60 L0,0 Z' fill='rgba(255,255,255,0.92)'/%3E%3C/svg%3E");
+  background-repeat: repeat-y;
+  background-size: 100% 60px;
 }
 
 .post-detail {
@@ -176,7 +177,7 @@ const typeBgColors: Record<string, string> = {
 }
 
 .dark .horizontal {
-  background: linear-gradient(to top right, rgba(17, 24, 39, 0.92) 50%, transparent 50%);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 60' preserveAspectRatio='none'%3E%3Cpath d='M0,0 Q15,15 0,30 Q15,45 0,60 L0,60 L0,0 Z' fill='rgba(17,24,39,0.92)'/%3E%3C/svg%3E");
 }
 
 .dark h3 {

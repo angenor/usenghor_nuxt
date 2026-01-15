@@ -161,6 +161,19 @@ const getLocalizedTitleFor = (f: Formation) => {
   if (locale.value === 'ar' && f.title_ar) return f.title_ar
   return f.title_fr
 }
+
+// Accordion state for semesters
+const openSemesters = ref<Set<number>>(new Set([7])) // Open first semester by default
+
+const toggleSemester = (num: number) => {
+  if (openSemesters.value.has(num)) {
+    openSemesters.value.delete(num)
+  } else {
+    openSemesters.value.add(num)
+  }
+  // Force reactivity
+  openSemesters.value = new Set(openSemesters.value)
+}
 </script>
 
 <template>
@@ -266,6 +279,66 @@ const getLocalizedTitleFor = (f: Formation) => {
             <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
               {{ getLocalizedDescription }}
             </p>
+          </div>
+
+          <!-- Program / Curriculum -->
+          <div v-if="formation.program && formation.program.length > 0" class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+              {{ t('formations.detail.program') }}
+            </h2>
+
+            <div class="space-y-4">
+              <div
+                v-for="semester in formation.program"
+                :key="semester.number"
+                class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden"
+              >
+                <!-- Semester header -->
+                <div
+                  class="bg-gray-50 dark:bg-gray-800 px-5 py-4 cursor-pointer flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  @click="toggleSemester(semester.number)"
+                >
+                  <h3 class="font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                    <span
+                      class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                      :class="typeConfig.bgColor + ' text-white'"
+                    >
+                      S{{ semester.number }}
+                    </span>
+                    {{ semester.title }}
+                  </h3>
+                  <font-awesome-icon
+                    :icon="openSemesters.has(semester.number) ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down'"
+                    class="w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform"
+                  />
+                </div>
+
+                <!-- Semester modules -->
+                <div
+                  v-show="openSemesters.has(semester.number)"
+                  class="bg-white dark:bg-gray-900 px-5 py-4"
+                >
+                  <ul class="space-y-2">
+                    <li
+                      v-for="(module, idx) in semester.modules"
+                      :key="idx"
+                      class="flex items-start gap-3 text-gray-700 dark:text-gray-300"
+                    >
+                      <font-awesome-icon
+                        icon="fa-solid fa-check"
+                        class="w-4 h-4 text-amber-500 mt-1 flex-shrink-0"
+                      />
+                      <span>
+                        {{ module.name }}
+                        <span v-if="module.credits" class="text-sm text-gray-500 dark:text-gray-400 ml-1">
+                          ({{ module.credits }} {{ t('formations.card.credits') }})
+                        </span>
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Application info -->

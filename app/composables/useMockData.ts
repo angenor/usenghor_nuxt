@@ -15,7 +15,7 @@ import { mockPaysBailleurs, getFlagEmoji, type PaysBailleur } from '@bank/mock-d
 import { mockConseilAdministration, type CAMember } from '@bank/mock-data/conseil-administration'
 import { mockCampusExternalises, campusPrincipal, type CampusExternalise } from '@bank/mock-data/campus-externalises'
 import { mockPartenaires, mockCharterOperators, mockCampusPartners, type Partenaire, type PartnerCategory, type PartnerType } from '@bank/mock-data/partenaires'
-import { mockFormations, type Formation } from '@bank/mock-data/formations'
+import { mockFormations, type Formation, type ProgramModule, type ProgramSemester } from '@bank/mock-data/formations'
 import { mockDocuments, type Document } from '@bank/mock-data/documents'
 import { mockCampusTeam, type CampusTeamMember } from '@bank/mock-data/campus-team'
 import { mockCampusCalls, type CampusCall } from '@bank/mock-data/campus-calls'
@@ -487,6 +487,8 @@ export type {
   PartnerCategory,
   PartnerType,
   Formation,
+  ProgramModule,
+  ProgramSemester,
   Document,
   CampusTeamMember,
   CampusCall,

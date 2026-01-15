@@ -21,33 +21,6 @@ const typeToSlug: Record<string, string> = {
   certifiante: 'certifiantes'
 }
 
-// Get localized title
-const getLocalizedTitle = computed(() => {
-  if (locale.value === 'en' && props.formation.title_en) {
-    return props.formation.title_en
-  }
-  if (locale.value === 'ar' && props.formation.title_ar) {
-    return props.formation.title_ar
-  }
-  return props.formation.title_fr
-})
-
-// Get localized description
-const getLocalizedDescription = computed(() => {
-  if (locale.value === 'en' && props.formation.short_description_en) {
-    return props.formation.short_description_en
-  }
-  return props.formation.short_description_fr
-})
-
-// Get localized duration
-const getLocalizedDuration = computed(() => {
-  if (locale.value === 'en' && props.formation.duration_en) {
-    return props.formation.duration_en
-  }
-  return props.formation.duration_fr
-})
-
 // Type badge colors
 const typeBgColors: Record<string, string> = {
   master: 'bg-indigo-500',
@@ -62,6 +35,33 @@ const campusBgColors: Record<string, string> = {
   externalise: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
   en_ligne: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
 }
+
+// Get localized title
+const localizedTitle = computed(() => {
+  if (locale.value === 'en' && props.formation.title_en) {
+    return props.formation.title_en
+  }
+  if (locale.value === 'ar' && props.formation.title_ar) {
+    return props.formation.title_ar
+  }
+  return props.formation.title_fr
+})
+
+// Get localized description
+const localizedDescription = computed(() => {
+  if (locale.value === 'en' && props.formation.short_description_en) {
+    return props.formation.short_description_en
+  }
+  return props.formation.short_description_fr
+})
+
+// Get localized duration
+const localizedDuration = computed(() => {
+  if (locale.value === 'en' && props.formation.duration_en) {
+    return props.formation.duration_en
+  }
+  return props.formation.duration_fr
+})
 
 // Detail page URL
 const detailUrl = computed(() => {
@@ -78,142 +78,83 @@ const formattedDeadline = computed(() => {
     { day: 'numeric', month: 'long', year: 'numeric' }
   )
 })
+
+// Image URL with fallback
+const imageUrl = computed(() => {
+  return props.formation.image || `https://picsum.photos/seed/${props.formation.slug}/800/500`
+})
 </script>
 
 <template>
-  <NuxtLink
-    :to="detailUrl"
-    class="blog-card group relative block w-full h-[380px] bg-cover bg-center bg-no-repeat overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
-    :style="{ backgroundImage: `url(${formation.image || 'https://picsum.photos/seed/' + formation.slug + '/800/500'})` }"
-  >
-    <!-- Content mask (white area on left) -->
-    <div class="content-mask">
-      <!-- Badges row -->
-      <div class="flex flex-wrap items-center gap-2 my-4">
+  <div class="group bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+    <NuxtLink :to="detailUrl" class="block">
+      <!-- Image -->
+      <div class="relative h-48 overflow-hidden">
+        <img
+          :src="imageUrl"
+          :alt="localizedTitle"
+          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+        />
         <!-- Type badge -->
         <span
           v-if="showType"
-          class="inline-block px-3 py-1.5 text-xs font-semibold text-white rounded shadow-md tracking-wide"
-          :class="typeBgColors[formation.formation_type]"
+          class="absolute top-4 left-4 px-3 py-1 text-xs font-semibold text-white rounded-full shadow-md"
+          :class="typeBgColors[props.formation.formation_type]"
         >
-          {{ t(`formations.types.${formation.formation_type}`) }}
+          {{ t(`formations.types.${props.formation.formation_type}`) }}
         </span>
-
-        <!-- Campus badge -->
+        <!-- Application open badge -->
         <span
-          class="inline-block px-2 py-1 text-xs font-medium rounded"
-          :class="campusBgColors[formation.campus]"
+          v-if="props.formation.application_open"
+          class="absolute top-4 right-4 px-2 py-1 text-xs font-medium bg-green-500 text-white rounded-full flex items-center gap-1"
         >
-          {{ t(`formations.campus.${formation.campus}`) }}
-        </span>
-
-        <!-- Application status badge -->
-        <span
-          v-if="formation.application_open"
-          class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded"
-        >
-          <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+          <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
           {{ t('formations.card.applicationOpen') }}
         </span>
       </div>
 
-      <!-- Title -->
-      <h3 class="text-xl lg:text-2xl font-extrabold text-gray-900 dark:text-white leading-tight mb-2 pb-1 border-b-2 border-gray-300 dark:border-gray-600 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-        {{ getLocalizedTitle }}
-      </h3>
+      <!-- Content -->
+      <div class="p-5">
+        <!-- Campus badge -->
+        <span
+          class="inline-block px-2 py-1 text-xs font-medium rounded mb-3"
+          :class="campusBgColors[props.formation.campus]"
+        >
+          {{ t(`formations.campus.${props.formation.campus}`) }}
+        </span>
 
-      <!-- Description -->
-      <p class="text-gray-700 dark:text-gray-300 text-sm lg:text-base leading-relaxed line-clamp-3 mt-2">
-        {{ getLocalizedDescription }}
-      </p>
+        <!-- Title -->
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+          {{ localizedTitle }}
+        </h3>
 
-      <!-- Info row -->
-      <div class="post-detail">
-        <!-- Duration -->
-        <font-awesome-icon icon="fa-solid fa-clock" class="inline-block w-4 h-4 mr-1.5 align-middle text-amber-500" />
-        <span class="text-sm text-gray-600 dark:text-gray-400">{{ getLocalizedDuration }}</span>
+        <!-- Description -->
+        <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 mb-4">
+          {{ localizedDescription }}
+        </p>
 
-        <!-- Credits -->
-        <template v-if="formation.credits">
-          <span class="mx-2 text-gray-400">•</span>
-          <font-awesome-icon icon="fa-solid fa-award" class="inline-block w-4 h-4 mr-1 align-middle text-amber-500" />
-          <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ formation.credits }}</span>
-          <span class="text-sm text-gray-600 dark:text-gray-400 ml-1">{{ t('formations.card.credits') }}</span>
-        </template>
-      </div>
+        <!-- Info row -->
+        <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+          <div class="flex items-center gap-1">
+            <font-awesome-icon icon="fa-solid fa-clock" class="w-4 h-4 text-amber-500" />
+            <span>{{ localizedDuration }}</span>
+          </div>
+          <div v-if="props.formation.credits" class="flex items-center gap-1">
+            <font-awesome-icon icon="fa-solid fa-award" class="w-4 h-4 text-amber-500" />
+            <span>{{ props.formation.credits }} {{ t('formations.card.credits') }}</span>
+          </div>
+        </div>
 
-      <!-- Deadline -->
-      <div v-if="formation.application_open && formattedDeadline" class="absolute bottom-4 left-8">
-        <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-          <font-awesome-icon icon="fa-solid fa-calendar-days" class="w-4 h-4 text-red-500" />
-          <span class="font-medium">{{ t('formations.card.deadline') }} :</span>
-          <span class="font-semibold text-red-600 dark:text-red-400">{{ formattedDeadline }}</span>
+        <!-- Deadline -->
+        <div v-if="props.formation.application_open && formattedDeadline" class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div class="flex items-center gap-2 text-sm">
+            <font-awesome-icon icon="fa-solid fa-calendar-days" class="w-4 h-4 text-red-500" />
+            <span class="text-gray-600 dark:text-gray-400">{{ t('formations.card.deadline') }} :</span>
+            <span class="font-semibold text-red-600 dark:text-red-400">{{ formattedDeadline }}</span>
+          </div>
         </div>
       </div>
-    </div>
-
-    <!-- Diagonal transition -->
-    <div class="horizontal" />
-  </NuxtLink>
+    </NuxtLink>
+  </div>
 </template>
-
-<style scoped>
-.blog-card {
-  background-color: #444;
-}
-
-.content-mask {
-  display: inline-block;
-  background: rgba(255, 255, 255, 0.92);
-  width: 61%;
-  height: 100%;
-  padding: 0.75em 0 0.75em 2em;
-  overflow: hidden;
-  vertical-align: top;
-  position: relative;
-}
-
-.horizontal {
-  display: inline-block;
-  position: relative;
-  background: linear-gradient(to top right, rgba(255, 255, 255, 0.92) 50%, transparent 50%);
-  height: 101%;
-  width: 20%;
-  top: -0.5%;
-  vertical-align: top;
-}
-
-.post-detail {
-  color: rgba(0, 0, 0, 0.55);
-  margin-top: 1.5rem;
-  padding-left: 2px;
-}
-
-/* Dark mode */
-.dark .content-mask {
-  background: rgba(17, 24, 39, 0.92);
-}
-
-.dark .horizontal {
-  background: linear-gradient(to top right, rgba(17, 24, 39, 0.92) 50%, transparent 50%);
-}
-
-.dark .post-detail {
-  color: rgba(255, 255, 255, 0.55);
-}
-
-/* Mobile: full width content, no diagonal */
-@media (max-width: 640px) {
-  .content-mask {
-    width: 100%;
-    padding: 1rem;
-  }
-  .horizontal {
-    display: none;
-  }
-  .blog-card {
-    height: auto;
-    min-height: 300px;
-  }
-}
-</style>

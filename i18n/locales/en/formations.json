@@ -86,6 +86,10 @@
       "title": "Ready to Join Us?",
       "description": "Discover our programs and start your application to join the Senghor community.",
       "button": "Apply Now"
+    },
+    "sidebar": {
+      "otherTypes": "Other Programs",
+      "viewAll": "View all"
     }
   }
 }
