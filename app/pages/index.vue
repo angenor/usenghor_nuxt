@@ -8,6 +8,6 @@
     <MissionSection />
     <HistorySection />
     <GovernanceSection />
-    <CampusSection />
+    <PartnersCampusMapSection />
   </div>
 </template>
