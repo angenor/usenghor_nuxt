@@ -25,6 +25,8 @@ import { mockCampusMedia, type CampusMedia } from '@bank/mock-data/campus-media'
 import { mockCampusFormationsRealisees, type CampusFormationRealisee } from '@bank/mock-data/campus-formations-realisees'
 import { mockProjects, type Project } from '@bank/mock-data/projets'
 import { mockAlumni, type Alumnus, type Industry } from '@bank/mock-data/alumni'
+import { mockSiteFacilities, type SiteFacility } from '@bank/mock-data/site-facilities'
+import { mockSiteGallery, type SiteGalleryItem, type MediaType } from '@bank/mock-data/site-gallery'
 
 export function useMockData() {
   // === DÉPARTEMENTS ===
@@ -293,6 +295,40 @@ export function useMockData() {
   const getAlumniCountries = () =>
     [...new Set(mockAlumni.filter(a => a.is_published).map(a => a.country))].sort()
 
+  // === SITE (SIÈGE ALEXANDRIE) ===
+  const siteFacilities = computed(() =>
+    [...mockSiteFacilities].sort((a, b) => a.sort_order - b.sort_order)
+  )
+
+  const getAllSiteFacilities = () =>
+    [...mockSiteFacilities].sort((a, b) => a.sort_order - b.sort_order)
+
+  const getSiteFacilityBySlug = (slug: string) =>
+    mockSiteFacilities.find(f => f.slug === slug)
+
+  const getSiteFacilityById = (id: string) =>
+    mockSiteFacilities.find(f => f.id === id)
+
+  // Galerie média du site
+  const siteGallery = computed(() =>
+    [...mockSiteGallery].sort((a, b) => a.sort_order - b.sort_order)
+  )
+
+  const getAllSiteGallery = () =>
+    [...mockSiteGallery].sort((a, b) => a.sort_order - b.sort_order)
+
+  const getSiteGalleryByType = (type: MediaType) =>
+    mockSiteGallery.filter(g => g.type === type).sort((a, b) => a.sort_order - b.sort_order)
+
+  const getSitePhotos = () =>
+    mockSiteGallery.filter(g => g.type === 'photo').sort((a, b) => a.sort_order - b.sort_order)
+
+  const getSiteVideos = () =>
+    mockSiteGallery.filter(g => g.type === 'video').sort((a, b) => a.sort_order - b.sort_order)
+
+  const getSiteGalleryByFacility = (facilityId: string) =>
+    mockSiteGallery.filter(g => g.facility_id === facilityId).sort((a, b) => a.sort_order - b.sort_order)
+
   return {
     // Données
     departments,
@@ -309,6 +345,8 @@ export function useMockData() {
     documents,
     projects,
     alumni,
+    siteFacilities,
+    siteGallery,
 
     // Getters départements
     getDepartmentById,
@@ -395,6 +433,16 @@ export function useMockData() {
     getAlumniGraduationYears,
     getAlumniCountries,
 
+    // Getters site (siège Alexandrie)
+    getAllSiteFacilities,
+    getSiteFacilityBySlug,
+    getSiteFacilityById,
+    getAllSiteGallery,
+    getSiteGalleryByType,
+    getSitePhotos,
+    getSiteVideos,
+    getSiteGalleryByFacility,
+
     // Utilitaires
     getFlagEmoji
   }
@@ -421,5 +469,8 @@ export type {
   CampusFormationRealisee,
   Project,
   Alumnus,
-  Industry
+  Industry,
+  SiteFacility,
+  SiteGalleryItem,
+  MediaType
 }

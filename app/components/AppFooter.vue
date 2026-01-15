@@ -138,7 +138,7 @@ const socialLinks = [
               <img
                 src="/images/logos/senghor_logo_vertical_blanc.png"
                 alt="Université Senghor"
-                class="h-48 lg:h-56 w-auto object-contain"
+                class="h-24 lg:h-28 w-auto object-contain"
               />
 
               <!-- Social Links -->
