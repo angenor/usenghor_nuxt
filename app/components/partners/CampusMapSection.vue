@@ -82,8 +82,13 @@ const allCampuses = computed<CampusItem[]>(() => {
   return [headquarters, ...external]
 })
 
-// Selected campus state - Alexandria (headquarters) by default
-const selectedCampus = ref<CampusItem>(allCampuses.value[0])
+// External campuses only (for the buttons list - excludes headquarters)
+const externalCampusesOnly = computed(() => {
+  return allCampuses.value.filter(c => c.type === 'campus')
+})
+
+// Selected campus state - First external campus by default
+const selectedCampus = ref<CampusItem>((externalCampusesOnly.value[0] ?? allCampuses.value[0])!)
 
 // Build colored countries from campus data
 const coloredCountries = computed(() => {
@@ -256,12 +261,11 @@ const handleImageError = (e: Event) => {
       <div ref="campusButtonsRef" class="mb-12">
         <div class="flex flex-wrap justify-center gap-3">
           <button
-            v-for="campus in allCampuses"
+            v-for="campus in externalCampusesOnly"
             :key="campus.id"
             class="campus-name-card"
             :class="{
-              'campus-name-card--active': selectedCampus.id === campus.id,
-              'campus-name-card--headquarters': campus.type === 'headquarters'
+              'campus-name-card--active': selectedCampus.id === campus.id
             }"
             @click="selectedCampus = campus; scrollToCampusCard()"
           >
