@@ -16,6 +16,7 @@ import careers from './careers.json'
 import organizationDetail from './organization-detail.json'
 import partners from './partners.json'
 import actualites from './actualites.json'
+import projets from './projets.json'
 
 export default {
   ...common,
@@ -35,5 +36,6 @@ export default {
   ...careers,
   ...organizationDetail,
   ...partners,
-  ...actualites
+  ...actualites,
+  ...projets
 }

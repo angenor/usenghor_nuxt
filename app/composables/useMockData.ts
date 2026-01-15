@@ -23,6 +23,7 @@ import { mockCampusEvents, type CampusEvent } from '@bank/mock-data/campus-event
 import { mockCampusNews, type CampusNews } from '@bank/mock-data/campus-news'
 import { mockCampusMedia, type CampusMedia } from '@bank/mock-data/campus-media'
 import { mockCampusFormationsRealisees, type CampusFormationRealisee } from '@bank/mock-data/campus-formations-realisees'
+import { mockProjects, type Project } from '@bank/mock-data/projets'
 
 export function useMockData() {
   // === DÉPARTEMENTS ===
@@ -223,6 +224,27 @@ export function useMockData() {
   const getTextesFondateurs = () =>
     getDocumentsByCategory('texte_fondateur')
 
+  // === PROJETS ===
+  const projects = computed(() => mockProjects)
+
+  const getAllProjects = () =>
+    [...mockProjects]
+
+  const getFeaturedProjects = () =>
+    mockProjects.filter(p => p.featured)
+
+  const getProjectsByCategory = (category: Project['category']) =>
+    mockProjects.filter(p => p.category === category)
+
+  const getProjectsByStatus = (status: Project['status']) =>
+    mockProjects.filter(p => p.status === status)
+
+  const getProjectBySlug = (slug: string) =>
+    mockProjects.find(p => p.slug === slug)
+
+  const getProjectById = (id: string) =>
+    mockProjects.find(p => p.id === id)
+
   return {
     // Données
     departments,
@@ -237,6 +259,7 @@ export function useMockData() {
     campusPartners,
     formations,
     documents,
+    projects,
 
     // Getters départements
     getDepartmentById,
@@ -303,6 +326,14 @@ export function useMockData() {
     getDocumentsByCategory,
     getTextesFondateurs,
 
+    // Getters projets
+    getAllProjects,
+    getFeaturedProjects,
+    getProjectsByCategory,
+    getProjectsByStatus,
+    getProjectBySlug,
+    getProjectById,
+
     // Utilitaires
     getFlagEmoji
   }
@@ -326,5 +357,6 @@ export type {
   CampusEvent,
   CampusNews,
   CampusMedia,
-  CampusFormationRealisee
+  CampusFormationRealisee,
+  Project
 }

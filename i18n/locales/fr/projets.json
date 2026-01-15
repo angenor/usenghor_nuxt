@@ -1,0 +1,74 @@
+{
+  "projets": {
+    "seo": {
+      "title": "Nos Projets | Université Senghor",
+      "description": "Découvrez les projets innovants de l'Université Senghor : TransformAction, KreAfrika et bien d'autres initiatives au service du développement en Afrique francophone."
+    },
+    "hero": {
+      "badge": "Projets",
+      "title": "Nos Projets",
+      "subtitle": "Des initiatives innovantes au service du développement de l'Afrique francophone"
+    },
+    "intro": {
+      "title": "Des projets à impact",
+      "description": "L'Université Senghor développe des projets innovants qui contribuent au développement durable de l'espace francophone. De la transformation digitale à l'entrepreneuriat culturel, nos initiatives ont un impact concret sur les communautés que nous servons.",
+      "stats": {
+        "projects": "projets actifs",
+        "countries": "pays concernés",
+        "beneficiaries": "bénéficiaires"
+      }
+    },
+    "featured": {
+      "title": "Projets phares",
+      "badge": "Phare",
+      "viewProject": "Découvrir le projet"
+    },
+    "list": {
+      "title": "Tous nos projets",
+      "showMore": "Voir plus de projets",
+      "showLess": "Voir moins"
+    },
+    "filters": {
+      "all": "Tous",
+      "category": "Catégorie",
+      "status": "Statut"
+    },
+    "categories": {
+      "education": "Éducation",
+      "culture": "Culture",
+      "entrepreneuriat": "Entrepreneuriat",
+      "recherche": "Recherche",
+      "numerique": "Numérique"
+    },
+    "status": {
+      "all": "Tous les statuts",
+      "active": "En cours",
+      "completed": "Terminé",
+      "upcoming": "À venir"
+    },
+    "detail": {
+      "back": "Retour aux projets",
+      "partners": "Partenaires",
+      "countries": "Pays concernés",
+      "period": "Période",
+      "budget": "Budget",
+      "beneficiaries": "Bénéficiaires",
+      "website": "Site web",
+      "visitWebsite": "Visiter le site",
+      "startDate": "Lancé en",
+      "endDate": "Terminé en",
+      "ongoing": "En cours",
+      "relatedProjects": "Projets similaires",
+      "gallery": "Galerie"
+    },
+    "empty": {
+      "title": "Aucun projet trouvé",
+      "description": "Aucun projet ne correspond à vos critères de recherche."
+    },
+    "cta": {
+      "title": "Vous souhaitez contribuer ?",
+      "description": "Rejoignez-nous pour soutenir nos projets et contribuer au développement de l'Afrique francophone.",
+      "button": "Nous contacter"
+    }
+  }
+}

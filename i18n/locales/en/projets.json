@@ -1,0 +1,74 @@
+{
+  "projets": {
+    "seo": {
+      "title": "Our Projects | Senghor University",
+      "description": "Discover Senghor University's innovative projects: TransformAction, KreAfrika and many other initiatives serving development in French-speaking Africa."
+    },
+    "hero": {
+      "badge": "Projects",
+      "title": "Our Projects",
+      "subtitle": "Innovative initiatives serving the development of French-speaking Africa"
+    },
+    "intro": {
+      "title": "Impactful projects",
+      "description": "Senghor University develops innovative projects that contribute to the sustainable development of the French-speaking world. From digital transformation to cultural entrepreneurship, our initiatives have a concrete impact on the communities we serve.",
+      "stats": {
+        "projects": "active projects",
+        "countries": "countries involved",
+        "beneficiaries": "beneficiaries"
+      }
+    },
+    "featured": {
+      "title": "Featured Projects",
+      "badge": "Featured",
+      "viewProject": "Discover the project"
+    },
+    "list": {
+      "title": "All our projects",
+      "showMore": "Show more projects",
+      "showLess": "Show less"
+    },
+    "filters": {
+      "all": "All",
+      "category": "Category",
+      "status": "Status"
+    },
+    "categories": {
+      "education": "Education",
+      "culture": "Culture",
+      "entrepreneuriat": "Entrepreneurship",
+      "recherche": "Research",
+      "numerique": "Digital"
+    },
+    "status": {
+      "all": "All statuses",
+      "active": "Active",
+      "completed": "Completed",
+      "upcoming": "Upcoming"
+    },
+    "detail": {
+      "back": "Back to projects",
+      "partners": "Partners",
+      "countries": "Countries involved",
+      "period": "Period",
+      "budget": "Budget",
+      "beneficiaries": "Beneficiaries",
+      "website": "Website",
+      "visitWebsite": "Visit website",
+      "startDate": "Launched in",
+      "endDate": "Ended in",
+      "ongoing": "Ongoing",
+      "relatedProjects": "Related projects",
+      "gallery": "Gallery"
+    },
+    "empty": {
+      "title": "No projects found",
+      "description": "No projects match your search criteria."
+    },
+    "cta": {
+      "title": "Want to contribute?",
+      "description": "Join us to support our projects and contribute to the development of French-speaking Africa.",
+      "button": "Contact us"
+    }
+  }
+}
