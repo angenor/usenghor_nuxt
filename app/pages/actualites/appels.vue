@@ -162,7 +162,6 @@ const daysUntilDeadline = (deadlineStr: string) => {
                 <!-- Content -->
                 <div class="md:w-2/3 p-6">
                   <div class="flex flex-wrap items-center gap-2 mb-3">
-                    <ActualitesCampusBadge :campus-id="call.campus_id" size="sm" />
                     <span class="inline-block px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 rounded">
                       {{ t(`actualites.calls.filters.${call.type}`) }}
                     </span>

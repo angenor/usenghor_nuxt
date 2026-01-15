@@ -146,7 +146,6 @@ const typeColors: Record<string, string> = {
                 >
                   {{ t(`actualites.events.types.${event.type}`) }}
                 </span>
-                <ActualitesCampusBadge :campus-id="event.campus_id" size="sm" :show-link="false" />
               </div>
 
               <h3 class="text-lg font-bold text-white leading-tight line-clamp-2 group-hover:underline">
@@ -211,7 +210,6 @@ const typeColors: Record<string, string> = {
                     >
                       {{ t(`actualites.events.types.${event.type}`) }}
                     </span>
-                    <ActualitesCampusBadge :campus-id="event.campus_id" size="sm" />
                   </div>
 
                   <h3 class="text-xl font-bold text-gray-900 dark:text-white leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
@@ -290,7 +288,6 @@ const typeColors: Record<string, string> = {
                       >
                         {{ t(`actualites.events.types.${event.type}`) }}
                       </span>
-                      <ActualitesCampusBadge :campus-id="event.campus_id" size="sm" />
                     </div>
                     <h4 class="text-base font-medium text-gray-900 dark:text-white truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                       {{ getLocalizedTitle(event) }}

@@ -104,7 +104,6 @@ const typeColors: Record<string, string> = {
                     <span class="inline-block px-3 py-1 text-xs font-semibold text-white bg-amber-600 rounded uppercase tracking-wide">
                       {{ t('actualites.sections.featured') }}
                     </span>
-                    <ActualitesCampusBadge :campus-id="featuredNews.campus_id" size="sm" />
                   </div>
 
                   <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white leading-tight">
@@ -145,7 +144,6 @@ const typeColors: Record<string, string> = {
                     >
                   </div>
 
-                  <ActualitesCampusBadge :campus-id="item.campus_id" size="sm" class="mb-2" />
 
                   <h4 class="text-lg font-bold text-gray-900 dark:text-white leading-tight">
                     <NuxtLink
@@ -209,8 +207,6 @@ const typeColors: Record<string, string> = {
             </div>
 
             <div class="mt-4">
-              <ActualitesCampusBadge :campus-id="item.campus_id" size="sm" class="mb-2" />
-
               <h3 class="text-lg font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                 {{ getLocalizedTitle(item) }}
               </h3>
@@ -271,7 +267,6 @@ const typeColors: Record<string, string> = {
                 >
                   {{ t(`actualites.events.types.${event.type}`) }}
                 </span>
-                <ActualitesCampusBadge :campus-id="event.campus_id" size="sm" :show-link="false" />
               </div>
 
               <h3 class="text-lg font-bold text-white leading-tight line-clamp-2 group-hover:underline">
@@ -326,7 +321,6 @@ const typeColors: Record<string, string> = {
             <!-- Content -->
             <div class="p-5">
               <div class="flex items-center gap-2 mb-3">
-                <ActualitesCampusBadge :campus-id="call.campus_id" size="sm" />
                 <span class="inline-block px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 rounded">
                   {{ t(`actualites.calls.filters.${call.type}`) }}
                 </span>

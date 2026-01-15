@@ -17,6 +17,152 @@ export interface CampusEvent {
 }
 
 export const mockCampusEvents: CampusEvent[] = [
+  // Siège - Alexandrie
+  {
+    id: 'event-siege-1',
+    campus_id: 'siege',
+    title_fr: 'Conférence inaugurale : L\'avenir de la Francophonie en Afrique',
+    title_en: 'Inaugural Conference: The Future of Francophonie in Africa',
+    title_ar: 'المؤتمر الافتتاحي: مستقبل الفرانكوفونية في أفريقيا',
+    date: '2025-02-15',
+    location_fr: 'Amphithéâtre principal, Université Senghor',
+    location_en: 'Main Amphitheater, Senghor University',
+    description_fr: 'Grande conférence réunissant des experts internationaux pour discuter des enjeux et perspectives de la Francophonie africaine.',
+    image: 'https://picsum.photos/seed/event-siege-1/600/400',
+    type: 'conference'
+  },
+  {
+    id: 'event-siege-2',
+    campus_id: 'siege',
+    title_fr: 'Atelier de formation en leadership',
+    title_en: 'Leadership Training Workshop',
+    title_ar: 'ورشة تدريب على القيادة',
+    date: '2025-02-28',
+    location_fr: 'Salle de conférence, Bâtiment A',
+    location_en: 'Conference Room, Building A',
+    description_fr: 'Atelier intensif de trois jours sur le développement du leadership pour les futurs décideurs africains.',
+    image: 'https://picsum.photos/seed/event-siege-2/600/400',
+    type: 'atelier'
+  },
+  {
+    id: 'event-siege-3',
+    campus_id: 'siege',
+    title_fr: 'Cérémonie de remise des diplômes 2024',
+    title_en: 'Graduation Ceremony 2024',
+    title_ar: 'حفل تخرج 2024',
+    date: '2025-03-22',
+    location_fr: 'Bibliothèque d\'Alexandrie',
+    location_en: 'Library of Alexandria',
+    description_fr: 'Cérémonie officielle de remise des diplômes pour la promotion 2024 en présence des autorités académiques et des partenaires.',
+    image: 'https://picsum.photos/seed/event-siege-3/600/400',
+    type: 'ceremonie'
+  },
+  {
+    id: 'event-siege-4',
+    campus_id: 'siege',
+    title_fr: 'Séminaire international sur la gouvernance',
+    title_en: 'International Seminar on Governance',
+    title_ar: 'ندوة دولية حول الحوكمة',
+    date: '2025-04-10',
+    location_fr: 'Amphithéâtre principal, Université Senghor',
+    location_en: 'Main Amphitheater, Senghor University',
+    description_fr: 'Séminaire réunissant chercheurs et praticiens autour des questions de gouvernance en Afrique francophone.',
+    image: 'https://picsum.photos/seed/event-siege-4/600/400',
+    type: 'conference'
+  },
+  {
+    id: 'event-siege-5',
+    campus_id: 'siege',
+    title_fr: 'Journée portes ouvertes',
+    title_en: 'Open Day',
+    title_ar: 'يوم مفتوح',
+    date: '2025-05-05',
+    location_fr: 'Université Senghor, Alexandrie',
+    location_en: 'Senghor University, Alexandria',
+    description_fr: 'Découvrez nos formations et rencontrez nos équipes pédagogiques lors de cette journée exceptionnelle.',
+    image: 'https://picsum.photos/seed/event-siege-5/600/400',
+    type: 'autre'
+  },
+  {
+    id: 'event-siege-6',
+    campus_id: 'siege',
+    title_fr: 'Atelier méthodologie de recherche',
+    title_en: 'Research Methodology Workshop',
+    title_ar: 'ورشة منهجية البحث',
+    date: '2025-05-20',
+    location_fr: 'Salle de recherche, Bâtiment B',
+    location_en: 'Research Room, Building B',
+    description_fr: 'Formation intensive sur les méthodologies de recherche appliquées au développement africain.',
+    image: 'https://picsum.photos/seed/event-siege-6/600/400',
+    type: 'atelier'
+  },
+  {
+    id: 'event-siege-7',
+    campus_id: 'siege',
+    title_fr: 'Forum des alumni',
+    title_en: 'Alumni Forum',
+    title_ar: 'منتدى الخريجين',
+    date: '2025-06-15',
+    location_fr: 'Centre de conférences, Alexandrie',
+    location_en: 'Conference Center, Alexandria',
+    description_fr: 'Rencontre annuelle des anciens étudiants pour échanger et renforcer le réseau Senghor.',
+    image: 'https://picsum.photos/seed/event-siege-7/600/400',
+    type: 'autre'
+  },
+  {
+    id: 'event-siege-8',
+    campus_id: 'siege',
+    title_fr: 'Cérémonie d\'ouverture de l\'année académique 2025-2026',
+    title_en: 'Opening Ceremony Academic Year 2025-2026',
+    title_ar: 'حفل افتتاح العام الدراسي 2025-2026',
+    date: '2025-09-15',
+    location_fr: 'Amphithéâtre principal, Université Senghor',
+    location_en: 'Main Amphitheater, Senghor University',
+    description_fr: 'Cérémonie officielle marquant le début de la nouvelle année académique.',
+    image: 'https://picsum.photos/seed/event-siege-8/600/400',
+    type: 'ceremonie'
+  },
+  // Événements passés pour Alexandrie
+  {
+    id: 'event-siege-past-1',
+    campus_id: 'siege',
+    title_fr: 'Conférence sur l\'intelligence artificielle et l\'éducation',
+    title_en: 'Conference on AI and Education',
+    title_ar: 'مؤتمر الذكاء الاصطناعي والتعليم',
+    date: '2024-12-05',
+    location_fr: 'Amphithéâtre principal, Université Senghor',
+    location_en: 'Main Amphitheater, Senghor University',
+    description_fr: 'Conférence sur les applications de l\'IA dans l\'enseignement supérieur en Afrique.',
+    image: 'https://picsum.photos/seed/event-siege-past-1/600/400',
+    type: 'conference'
+  },
+  {
+    id: 'event-siege-past-2',
+    campus_id: 'siege',
+    title_fr: 'Atelier entrepreneuriat africain',
+    title_en: 'African Entrepreneurship Workshop',
+    title_ar: 'ورشة ريادة الأعمال الأفريقية',
+    date: '2024-11-18',
+    location_fr: 'Salle de conférence, Bâtiment A',
+    location_en: 'Conference Room, Building A',
+    description_fr: 'Atelier pratique sur l\'entrepreneuriat et l\'innovation en Afrique.',
+    image: 'https://picsum.photos/seed/event-siege-past-2/600/400',
+    type: 'atelier'
+  },
+  {
+    id: 'event-siege-past-3',
+    campus_id: 'siege',
+    title_fr: 'Séminaire sur les politiques de santé publique',
+    title_en: 'Public Health Policy Seminar',
+    title_ar: 'ندوة سياسات الصحة العامة',
+    date: '2024-10-22',
+    location_fr: 'Université Senghor, Alexandrie',
+    location_en: 'Senghor University, Alexandria',
+    description_fr: 'Séminaire réunissant experts et décideurs sur les politiques de santé en Afrique francophone.',
+    image: 'https://picsum.photos/seed/event-siege-past-3/600/400',
+    type: 'conference'
+  },
+
   // Campus Dakar
   {
     id: 'event-dakar-1',

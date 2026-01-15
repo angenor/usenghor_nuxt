@@ -130,52 +130,57 @@ export function useMockData() {
   const getCampusFormationsRealisees = (campusId: string) =>
     mockCampusFormationsRealisees.filter(f => f.campus_id === campusId).sort((a, b) => b.year - a.year)
 
-  // === DONNÉES GLOBALES (tous campus confondus) ===
-  // Toutes les actualités triées par date décroissante
+  // === DONNÉES SIÈGE ALEXANDRIE (pour pages /actualites) ===
+  // Actualités du siège triées par date décroissante
   const getAllNews = () =>
-    [...mockCampusNews].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    [...mockCampusNews]
+      .filter(n => n.campus_id === 'siege')
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
-  // Tous les événements triés par date croissante
+  // Événements du siège triés par date croissante
   const getAllEvents = () =>
-    [...mockCampusEvents].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    [...mockCampusEvents]
+      .filter(e => e.campus_id === 'siege')
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
-  // Événements à venir uniquement
+  // Événements à venir (siège uniquement)
   const getUpcomingEvents = () => {
     const now = new Date()
     return [...mockCampusEvents]
-      .filter(e => new Date(e.date) >= now)
+      .filter(e => e.campus_id === 'siege' && new Date(e.date) >= now)
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
   }
 
-  // Événements passés
+  // Événements passés (siège uniquement)
   const getPastEvents = () => {
     const now = new Date()
     return [...mockCampusEvents]
-      .filter(e => new Date(e.date) < now)
+      .filter(e => e.campus_id === 'siege' && new Date(e.date) < now)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   }
 
-  // Tous les appels (tous types, tous statuts)
+  // Appels du siège (tous types, tous statuts)
   const getAllCalls = () =>
-    [...mockCampusCalls].filter(c => c.is_active)
+    [...mockCampusCalls]
+      .filter(c => c.campus_id === 'siege' && c.is_active)
       .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
 
-  // Tous les appels ouverts (hors recrutements)
+  // Appels ouverts du siège (hors recrutements)
   const getAllOpenCalls = () =>
     [...mockCampusCalls]
-      .filter(c => c.is_active && c.status === 'open' && c.type !== 'recrutement')
+      .filter(c => c.campus_id === 'siege' && c.is_active && c.status === 'open' && c.type !== 'recrutement')
       .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
 
-  // Tous les appels clos
+  // Appels clos du siège
   const getAllClosedCalls = () =>
     [...mockCampusCalls]
-      .filter(c => c.status === 'closed')
+      .filter(c => c.campus_id === 'siege' && c.status === 'closed')
       .sort((a, b) => new Date(b.deadline).getTime() - new Date(a.deadline).getTime())
 
-  // Tous les recrutements
+  // Recrutements du siège
   const getAllRecruitments = () =>
     [...mockCampusCalls]
-      .filter(c => c.is_active && c.type === 'recrutement')
+      .filter(c => c.campus_id === 'siege' && c.is_active && c.type === 'recrutement')
       .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
 
   // === FORMATIONS ===

@@ -16,6 +16,97 @@ export interface CampusNews {
 }
 
 export const mockCampusNews: CampusNews[] = [
+  // Siège - Alexandrie
+  {
+    id: 'news-siege-1',
+    campus_id: 'siege',
+    title_fr: 'L\'Université Senghor célèbre ses 35 ans au service de la Francophonie',
+    title_en: 'Senghor University celebrates 35 years serving the Francophonie',
+    title_ar: 'جامعة سنغور تحتفل بمرور 35 عامًا في خدمة الفرانكوفونية',
+    date: '2025-01-20',
+    excerpt_fr: 'L\'Université Senghor d\'Alexandrie a célébré son 35e anniversaire en présence de nombreuses personnalités de la Francophonie.',
+    excerpt_en: 'Senghor University of Alexandria celebrated its 35th anniversary in the presence of many Francophonie dignitaries.',
+    image: 'https://picsum.photos/seed/news-siege-1/600/400',
+    url: '/actualites/35-ans-senghor'
+  },
+  {
+    id: 'news-siege-2',
+    campus_id: 'siege',
+    title_fr: 'Nouveau partenariat stratégique avec l\'OIF',
+    title_en: 'New Strategic Partnership with OIF',
+    title_ar: 'شراكة استراتيجية جديدة مع المنظمة الدولية للفرنكوفونية',
+    date: '2025-01-18',
+    excerpt_fr: 'L\'Université Senghor renforce sa collaboration avec l\'Organisation Internationale de la Francophonie pour développer de nouveaux programmes.',
+    excerpt_en: 'Senghor University strengthens its collaboration with the International Organization of the Francophonie to develop new programs.',
+    image: 'https://picsum.photos/seed/news-siege-2/600/400'
+  },
+  {
+    id: 'news-siege-3',
+    campus_id: 'siege',
+    title_fr: 'Rentrée académique 2024-2025 : record d\'inscriptions',
+    title_en: '2024-2025 Academic Year: Record Enrollments',
+    title_ar: 'العام الدراسي 2024-2025: رقم قياسي في التسجيلات',
+    date: '2025-01-10',
+    excerpt_fr: 'L\'Université Senghor accueille cette année un nombre record d\'étudiants venus de 35 pays francophones.',
+    excerpt_en: 'Senghor University welcomes a record number of students from 35 French-speaking countries this year.',
+    image: 'https://picsum.photos/seed/news-siege-3/600/400'
+  },
+  {
+    id: 'news-siege-4',
+    campus_id: 'siege',
+    title_fr: 'Visite officielle du Secrétaire général de la Francophonie',
+    title_en: 'Official Visit of the Secretary General of the Francophonie',
+    title_ar: 'زيارة رسمية للأمين العام للفرانكوفونية',
+    date: '2024-12-15',
+    excerpt_fr: 'Le Secrétaire général de l\'OIF a effectué une visite de travail à l\'Université Senghor pour discuter des perspectives de coopération.',
+    excerpt_en: 'The OIF Secretary General made a working visit to Senghor University to discuss cooperation prospects.',
+    image: 'https://picsum.photos/seed/news-siege-4/600/400'
+  },
+  {
+    id: 'news-siege-5',
+    campus_id: 'siege',
+    title_fr: 'Lancement du nouveau Master en Intelligence Artificielle et Développement',
+    title_en: 'Launch of New Master in AI and Development',
+    title_ar: 'إطلاق ماجستير جديد في الذكاء الاصطناعي والتنمية',
+    date: '2024-12-01',
+    excerpt_fr: 'L\'Université Senghor lance un programme innovant alliant intelligence artificielle et problématiques de développement en Afrique.',
+    excerpt_en: 'Senghor University launches an innovative program combining artificial intelligence with development issues in Africa.',
+    image: 'https://picsum.photos/seed/news-siege-5/600/400'
+  },
+  {
+    id: 'news-siege-6',
+    campus_id: 'siege',
+    title_fr: 'Publication du rapport annuel 2024',
+    title_en: '2024 Annual Report Published',
+    title_ar: 'نشر التقرير السنوي 2024',
+    date: '2024-11-20',
+    excerpt_fr: 'Le rapport annuel 2024 met en lumière les réalisations de l\'université et ses perspectives de développement.',
+    excerpt_en: 'The 2024 annual report highlights the university\'s achievements and development prospects.',
+    image: 'https://picsum.photos/seed/news-siege-6/600/400'
+  },
+  {
+    id: 'news-siege-7',
+    campus_id: 'siege',
+    title_fr: 'Conférence internationale sur la gouvernance en Afrique',
+    title_en: 'International Conference on Governance in Africa',
+    title_ar: 'مؤتمر دولي حول الحوكمة في أفريقيا',
+    date: '2024-11-05',
+    excerpt_fr: 'L\'Université Senghor a organisé une conférence réunissant experts et décideurs autour des enjeux de gouvernance.',
+    excerpt_en: 'Senghor University organized a conference bringing together experts and decision-makers on governance issues.',
+    image: 'https://picsum.photos/seed/news-siege-7/600/400'
+  },
+  {
+    id: 'news-siege-8',
+    campus_id: 'siege',
+    title_fr: 'Signature d\'un accord avec l\'Université du Caire',
+    title_en: 'Agreement Signed with Cairo University',
+    title_ar: 'توقيع اتفاقية مع جامعة القاهرة',
+    date: '2024-10-25',
+    excerpt_fr: 'Un accord de coopération académique a été signé entre l\'Université Senghor et l\'Université du Caire.',
+    excerpt_en: 'An academic cooperation agreement was signed between Senghor University and Cairo University.',
+    image: 'https://picsum.photos/seed/news-siege-8/600/400'
+  },
+
   // Campus Dakar
   {
     id: 'news-dakar-1',

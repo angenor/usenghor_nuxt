@@ -21,6 +21,179 @@ export interface CampusCall {
 }
 
 export const mockCampusCalls: CampusCall[] = [
+  // Siège - Alexandrie
+  {
+    id: 'call-siege-1',
+    campus_id: 'siege',
+    title_fr: 'Appel à candidatures Master Développement 2025-2026',
+    title_en: 'Call for Applications Master Development 2025-2026',
+    title_ar: 'دعوة للتقدم لماجستير التنمية 2025-2026',
+    type: 'candidature',
+    status: 'open',
+    deadline: '2025-06-30',
+    description_fr: 'L\'Université Senghor ouvre ses candidatures pour le Master en Développement, formation phare destinée aux futurs cadres africains souhaitant contribuer au développement durable du continent.',
+    description_en: 'Senghor University opens applications for the Master in Development, a flagship program for future African leaders wishing to contribute to sustainable development of the continent.',
+    description_ar: 'تفتح جامعة سنغور باب التقديم لماجستير التنمية، البرنامج الرائد للقادة الأفارقة المستقبليين.',
+    image: 'https://picsum.photos/seed/call-siege-1/800/400',
+    partner_logos: [
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg',
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png'
+    ],
+    url: 'https://usenghor.org/candidatures/master-developpement',
+    is_active: true
+  },
+  {
+    id: 'call-siege-2',
+    campus_id: 'siege',
+    title_fr: 'Master Administration et Gestion des Entreprises 2025-2026',
+    title_en: 'Master in Business Administration 2025-2026',
+    title_ar: 'ماجستير إدارة الأعمال 2025-2026',
+    type: 'candidature',
+    status: 'open',
+    deadline: '2025-07-15',
+    description_fr: 'Formation d\'excellence en administration et gestion des entreprises, préparant les futurs dirigeants africains aux défis du management moderne.',
+    description_en: 'Excellence training in business administration, preparing future African leaders for modern management challenges.',
+    description_ar: 'تدريب متميز في إدارة الأعمال لإعداد القادة الأفارقة المستقبليين.',
+    image: 'https://picsum.photos/seed/call-siege-2/800/400',
+    partner_logos: [
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg',
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/03.png'
+    ],
+    url: 'https://usenghor.org/candidatures/master-administration',
+    is_active: true
+  },
+  {
+    id: 'call-siege-3',
+    campus_id: 'siege',
+    title_fr: 'Bourses d\'excellence OIF 2025',
+    title_en: 'OIF Excellence Scholarships 2025',
+    title_ar: 'منح التميز OIF 2025',
+    type: 'bourse',
+    status: 'open',
+    deadline: '2025-05-31',
+    description_fr: 'L\'Organisation Internationale de la Francophonie offre 30 bourses complètes pour les étudiants méritants souhaitant intégrer l\'Université Senghor.',
+    description_en: 'The International Organization of La Francophonie offers 30 full scholarships for deserving students wishing to join Senghor University.',
+    description_ar: 'تقدم المنظمة الدولية للفرنكوفونية 30 منحة كاملة للطلاب المستحقين.',
+    image: 'https://picsum.photos/seed/call-siege-3/800/400',
+    partner_logos: [
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg',
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/04.jpg'
+    ],
+    url: 'https://usenghor.org/bourses/excellence-oif',
+    is_active: true
+  },
+  {
+    id: 'call-siege-4',
+    campus_id: 'siege',
+    title_fr: 'Appel à projets de recherche 2025',
+    title_en: 'Research Projects Call 2025',
+    title_ar: 'دعوة لمشاريع البحث 2025',
+    type: 'projet',
+    status: 'open',
+    deadline: '2025-08-15',
+    description_fr: 'L\'Université Senghor lance un appel à projets pour financer des recherches sur les thématiques du développement durable, de la gouvernance et de la santé en Afrique.',
+    description_en: 'Senghor University launches a call for projects to fund research on sustainable development, governance and health in Africa.',
+    description_ar: 'تطلق جامعة سنغور دعوة لمشاريع لتمويل البحوث حول التنمية المستدامة.',
+    image: 'https://picsum.photos/seed/call-siege-4/800/400',
+    partner_logos: [
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png',
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg'
+    ],
+    url: 'https://usenghor.org/projets/recherche-2025',
+    is_active: true
+  },
+  {
+    id: 'call-siege-5',
+    campus_id: 'siege',
+    title_fr: 'Bourses de mobilité AUF 2025',
+    title_en: 'AUF Mobility Scholarships 2025',
+    title_ar: 'منح التنقل AUF 2025',
+    type: 'bourse',
+    status: 'open',
+    deadline: '2025-04-30',
+    description_fr: 'Programme de bourses en partenariat avec l\'Agence Universitaire de la Francophonie pour favoriser la mobilité des étudiants et enseignants.',
+    description_en: 'Scholarship program in partnership with the Agence Universitaire de la Francophonie to promote student and teacher mobility.',
+    description_ar: 'برنامج منح بالشراكة مع الوكالة الجامعية للفرنكوفونية.',
+    image: 'https://picsum.photos/seed/call-siege-5/800/400',
+    partner_logos: [
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png'
+    ],
+    url: 'https://usenghor.org/bourses/mobilite-auf',
+    is_active: true
+  },
+  // Recrutements - Siège
+  {
+    id: 'recruit-siege-1',
+    campus_id: 'siege',
+    title_fr: 'Enseignant-chercheur en Économie du Développement',
+    title_en: 'Lecturer-Researcher in Development Economics',
+    title_ar: 'أستاذ باحث في اقتصاديات التنمية',
+    type: 'recrutement',
+    status: 'open',
+    deadline: '2025-04-15',
+    description_fr: 'L\'Université Senghor recrute un enseignant-chercheur spécialisé en économie du développement. Doctorat exigé avec publications dans des revues à comité de lecture.',
+    description_en: 'Senghor University is recruiting a lecturer-researcher specialized in development economics. PhD required with publications in peer-reviewed journals.',
+    description_ar: 'تبحث جامعة سنغور عن أستاذ باحث متخصص في اقتصاديات التنمية.',
+    image: 'https://picsum.photos/seed/recruit-siege-1/800/400',
+    partner_logos: [],
+    url: 'https://usenghor.org/recrutements/enseignant-economie',
+    is_active: true
+  },
+  {
+    id: 'recruit-siege-2',
+    campus_id: 'siege',
+    title_fr: 'Responsable des relations internationales',
+    title_en: 'International Relations Manager',
+    title_ar: 'مدير العلاقات الدولية',
+    type: 'recrutement',
+    status: 'open',
+    deadline: '2025-05-01',
+    description_fr: 'Poste stratégique pour développer et coordonner les partenariats internationaux de l\'université. Master minimum, expérience en coopération internationale requise.',
+    description_en: 'Strategic position to develop and coordinate the university\'s international partnerships. Minimum Master\'s degree, experience in international cooperation required.',
+    description_ar: 'منصب استراتيجي لتطوير وتنسيق الشراكات الدولية للجامعة.',
+    image: 'https://picsum.photos/seed/recruit-siege-2/800/400',
+    partner_logos: [],
+    url: 'https://usenghor.org/recrutements/relations-internationales',
+    is_active: true
+  },
+  // Appels clos - Siège
+  {
+    id: 'call-siege-closed-1',
+    campus_id: 'siege',
+    title_fr: 'Master Santé Internationale 2024-2025',
+    title_en: 'Master in International Health 2024-2025',
+    title_ar: 'ماجستير الصحة الدولية 2024-2025',
+    type: 'candidature',
+    status: 'closed',
+    deadline: '2024-06-30',
+    description_fr: 'Formation spécialisée en santé publique internationale pour les professionnels de santé francophones.',
+    description_en: 'Specialized training in international public health for French-speaking health professionals.',
+    description_ar: 'تدريب متخصص في الصحة العامة الدولية.',
+    image: 'https://picsum.photos/seed/call-siege-closed-1/800/400',
+    partner_logos: [
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg'
+    ],
+    is_active: true
+  },
+  {
+    id: 'call-siege-closed-2',
+    campus_id: 'siege',
+    title_fr: 'Bourses doctorales 2024',
+    title_en: 'Doctoral Scholarships 2024',
+    title_ar: 'منح الدكتوراه 2024',
+    type: 'bourse',
+    status: 'closed',
+    deadline: '2024-05-15',
+    description_fr: 'Programme de bourses pour doctorants travaillant sur des thématiques de développement africain.',
+    description_en: 'Scholarship program for doctoral students working on African development topics.',
+    description_ar: 'برنامج منح لطلاب الدكتوراه.',
+    image: 'https://picsum.photos/seed/call-siege-closed-2/800/400',
+    partner_logos: [
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png'
+    ],
+    is_active: true
+  },
+
   // Campus Dakar
   {
     id: 'call-dakar-1',
