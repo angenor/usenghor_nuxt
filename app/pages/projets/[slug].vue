@@ -126,87 +126,74 @@ const renderedContent = computed(() => {
 
   return content
 })
+
+// Breadcrumb
+const breadcrumb = computed(() => [
+  { label: t('nav.home'), to: '/' },
+  { label: t('projets.hero.title'), to: '/projets' },
+  { label: getLocalizedTitle.value }
+])
 </script>
 
 <template>
   <div v-if="project">
-    <!-- Hero Section -->
-    <section class="relative h-[50vh] min-h-[400px] max-h-[500px] overflow-hidden">
-      <!-- Background Image -->
-      <div class="absolute inset-0">
-        <img
-          :src="project.image"
-          :alt="getLocalizedTitle"
-          class="w-full h-full object-cover"
-        >
-        <div class="absolute inset-0 bg-gradient-to-r from-gray-900/80 via-gray-900/60 to-gray-900/40"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-gray-900/70 via-transparent to-gray-900/30"></div>
-      </div>
-
-      <!-- Content -->
-      <div class="relative z-10 h-full flex flex-col justify-center">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <!-- Breadcrumb -->
-          <nav class="mb-6">
-            <ol class="flex items-center space-x-2 text-sm">
-              <li>
-                <NuxtLink :to="localePath('/')" class="text-white/70 hover:text-white transition-colors duration-200">
-                  {{ t('nav.home') }}
-                </NuxtLink>
-              </li>
-              <li class="flex items-center">
-                <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3 mx-2 text-white/40" />
-                <NuxtLink :to="localePath('/projets')" class="text-white/70 hover:text-white transition-colors duration-200">
-                  {{ t('projets.hero.title') }}
-                </NuxtLink>
-              </li>
-              <li class="flex items-center">
-                <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3 mx-2 text-white/40" />
-                <span class="text-amber-400 font-medium truncate max-w-xs">{{ getLocalizedTitle }}</span>
-              </li>
-            </ol>
-          </nav>
-
-          <!-- Badges -->
-          <div class="flex flex-wrap items-center gap-3 mb-4">
-            <span class="inline-block px-3 py-1 text-sm font-medium text-amber-900 bg-amber-400 rounded-full">
-              {{ t(`projets.categories.${project.category}`) }}
-            </span>
-            <span
-              class="inline-block px-3 py-1 text-sm font-medium rounded-full"
-              :class="statusClasses"
-            >
-              {{ t(`projets.status.${project.status}`) }}
-            </span>
-            <span
-              v-if="project.featured"
-              class="inline-block px-3 py-1 text-sm font-medium bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full"
-            >
-              {{ t('projets.featured.badge') }}
-            </span>
-          </div>
-
-          <!-- Title -->
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-4">
-            {{ getLocalizedTitle }}
-          </h1>
-
-          <!-- Subtitle -->
-          <p class="text-xl text-gray-300 max-w-3xl">
-            {{ getLocalizedDescription }}
-          </p>
-        </div>
-      </div>
-
-      <!-- Bottom Gradient -->
-      <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white dark:from-gray-950 to-transparent"></div>
-    </section>
+    <!-- Hero Section (universal background) -->
+    <PageHero
+      :title="getLocalizedTitle"
+      :subtitle="t(`projets.categories.${project.category}`)"
+      image="/images/bg/backgroud_senghor2.jpg"
+      :breadcrumb="breadcrumb"
+    />
 
     <!-- Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div class="flex flex-col lg:flex-row gap-12">
         <!-- Main content -->
         <article class="lg:w-2/3">
+          <!-- Cover Image (dans la section article uniquement) -->
+          <div class="mb-8">
+            <!-- Image avec badges -->
+            <div class="relative h-56 md:h-64 lg:h-72 rounded-2xl overflow-hidden shadow-lg">
+              <img
+                :src="project.image"
+                :alt="getLocalizedTitle"
+                class="w-full h-full object-cover"
+              />
+              <!-- Gradient overlay -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+              <!-- Badges on image -->
+              <div class="absolute bottom-4 left-4 right-4 flex flex-wrap items-center gap-2">
+                <!-- Category badge -->
+                <span class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold text-amber-900 bg-amber-400 rounded-full shadow-lg backdrop-blur-sm">
+                  {{ t(`projets.categories.${project.category}`) }}
+                </span>
+
+                <!-- Status badge -->
+                <span
+                  class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-full shadow-lg backdrop-blur-sm"
+                  :class="statusClasses"
+                >
+                  {{ t(`projets.status.${project.status}`) }}
+                </span>
+
+                <!-- Featured badge -->
+                <span
+                  v-if="project.featured"
+                  class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full shadow-lg"
+                >
+                  <font-awesome-icon icon="fa-solid fa-star" class="w-4 h-4" />
+                  {{ t('projets.featured.badge') }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Description en dessous -->
+            <p class="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed">
+              {{ getLocalizedDescription }}
+            </p>
+          </div>
+
           <!-- Info cards -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <!-- Period -->
@@ -343,19 +330,6 @@ const renderedContent = computed(() => {
             </div>
           </div>
 
-          <!-- Website CTA -->
-          <div v-if="project.website" class="mb-8">
-            <a
-              :href="project.website"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-3 px-8 py-4 bg-amber-600 hover:bg-amber-700 text-white text-lg font-bold rounded-xl transition-colors shadow-lg hover:shadow-xl"
-            >
-              <font-awesome-icon icon="fa-solid fa-external-link" class="w-5 h-5" />
-              {{ t('projets.detail.visitWebsite') }}
-            </a>
-          </div>
-
           <!-- Back button -->
           <div class="pt-8 border-t border-gray-200 dark:border-gray-700">
             <NuxtLink
@@ -445,17 +419,6 @@ const renderedContent = computed(() => {
                     {{ project.beneficiaries }}
                   </span>
                 </div>
-              </div>
-
-              <div v-if="project.website" class="mt-6">
-                <a
-                  :href="project.website"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="block w-full text-center px-4 py-3 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors"
-                >
-                  {{ t('projets.detail.visitWebsite') }}
-                </a>
               </div>
             </div>
 
