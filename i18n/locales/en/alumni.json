@@ -1,0 +1,65 @@
+{
+  "alumni": {
+    "seo": {
+      "title": "Our Alumni | Senghor University",
+      "description": "Discover the network of Senghor University graduates, active throughout the Francophonie"
+    },
+    "hero": {
+      "badge": "Alumni Network",
+      "title": "Our Alumni",
+      "subtitle": "A network of over 4,000 graduates active throughout the Francophonie"
+    },
+    "stats": {
+      "title": "Our network in numbers",
+      "alumni": "Alumni",
+      "countries": "Countries",
+      "sectors": "Industry sectors",
+      "promotions": "Cohorts"
+    },
+    "testimonials": {
+      "title": "Inspiring journeys",
+      "subtitle": "Discover the success stories of our graduates"
+    },
+    "list": {
+      "title": "All our alumni",
+      "showMore": "Show more",
+      "showLess": "Show less"
+    },
+    "filters": {
+      "all": "All",
+      "department": "Department",
+      "year": "Year",
+      "country": "Country"
+    },
+    "departments": {
+      "culture": "Culture",
+      "environnement": "Environment",
+      "management": "Management",
+      "sante": "Public Health"
+    },
+    "industries": {
+      "administration": "Public Administration",
+      "ong": "NGO / International Organization",
+      "entrepreneuriat": "Entrepreneurship / Private Sector",
+      "academie": "Education / Research",
+      "sante": "Healthcare",
+      "culture": "Culture / Heritage",
+      "environnement": "Environment",
+      "media": "Media / Communications"
+    },
+    "card": {
+      "promotion": "Cohort",
+      "position": "Current position",
+      "viewLinkedin": "View LinkedIn profile"
+    },
+    "cta": {
+      "title": "Join the network",
+      "description": "Stay connected with your former classmates and participate in alumni activities",
+      "button": "Contact us"
+    },
+    "empty": {
+      "title": "No alumni found",
+      "description": "Try adjusting your search filters"
+    }
+  }
+}

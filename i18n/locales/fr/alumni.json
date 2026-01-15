@@ -1,0 +1,65 @@
+{
+  "alumni": {
+    "seo": {
+      "title": "Nos Alumni | Université Senghor",
+      "description": "Découvrez le réseau des diplômés de l'Université Senghor, actifs dans toute la Francophonie"
+    },
+    "hero": {
+      "badge": "Réseau Alumni",
+      "title": "Nos Alumni",
+      "subtitle": "Un réseau de plus de 4000 diplômés actifs dans toute la Francophonie"
+    },
+    "stats": {
+      "title": "Notre réseau en chiffres",
+      "alumni": "Alumni",
+      "countries": "Pays",
+      "sectors": "Secteurs d'activité",
+      "promotions": "Promotions"
+    },
+    "testimonials": {
+      "title": "Parcours inspirants",
+      "subtitle": "Découvrez les success stories de nos diplômés"
+    },
+    "list": {
+      "title": "Tous nos alumni",
+      "showMore": "Voir plus",
+      "showLess": "Voir moins"
+    },
+    "filters": {
+      "all": "Tous",
+      "department": "Département",
+      "year": "Année",
+      "country": "Pays"
+    },
+    "departments": {
+      "culture": "Culture",
+      "environnement": "Environnement",
+      "management": "Management",
+      "sante": "Santé publique"
+    },
+    "industries": {
+      "administration": "Administration publique",
+      "ong": "ONG / Organisation internationale",
+      "entrepreneuriat": "Entrepreneuriat / Secteur privé",
+      "academie": "Enseignement / Recherche",
+      "sante": "Santé",
+      "culture": "Culture / Patrimoine",
+      "environnement": "Environnement",
+      "media": "Médias / Communication"
+    },
+    "card": {
+      "promotion": "Promotion",
+      "position": "Poste actuel",
+      "viewLinkedin": "Voir le profil LinkedIn"
+    },
+    "cta": {
+      "title": "Rejoignez le réseau",
+      "description": "Restez connecté avec vos anciens camarades et participez à la vie du réseau alumni",
+      "button": "Nous contacter"
+    },
+    "empty": {
+      "title": "Aucun alumni trouvé",
+      "description": "Essayez de modifier vos filtres de recherche"
+    }
+  }
+}

@@ -17,6 +17,7 @@ import organizationDetail from './organization-detail.json'
 import partners from './partners.json'
 import actualites from './actualites.json'
 import projets from './projets.json'
+import alumni from './alumni.json'
 
 export default {
   ...common,
@@ -37,5 +38,6 @@ export default {
   ...organizationDetail,
   ...partners,
   ...actualites,
-  ...projets
+  ...projets,
+  ...alumni
 }

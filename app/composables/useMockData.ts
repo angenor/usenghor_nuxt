@@ -24,6 +24,7 @@ import { mockCampusNews, type CampusNews } from '@bank/mock-data/campus-news'
 import { mockCampusMedia, type CampusMedia } from '@bank/mock-data/campus-media'
 import { mockCampusFormationsRealisees, type CampusFormationRealisee } from '@bank/mock-data/campus-formations-realisees'
 import { mockProjects, type Project } from '@bank/mock-data/projets'
+import { mockAlumni, type Alumnus, type Industry } from '@bank/mock-data/alumni'
 
 export function useMockData() {
   // === DÉPARTEMENTS ===
@@ -245,6 +246,53 @@ export function useMockData() {
   const getProjectById = (id: string) =>
     mockProjects.find(p => p.id === id)
 
+  // === ALUMNI ===
+  const alumni = computed(() => mockAlumni.filter(a => a.is_published))
+
+  const getAllAlumni = () =>
+    [...mockAlumni].filter(a => a.is_published)
+
+  const getFeaturedAlumni = () =>
+    mockAlumni.filter(a => a.is_published && a.is_featured)
+
+  const getAlumniByDepartment = (departmentId: string) =>
+    mockAlumni.filter(a => a.is_published && a.department_id === departmentId)
+
+  const getAlumniByYear = (year: number) =>
+    mockAlumni.filter(a => a.is_published && a.graduation_year === year)
+
+  const getAlumniByCountry = (country: string) =>
+    mockAlumni.filter(a => a.is_published && a.country === country)
+
+  const getAlumniByIndustry = (industry: Industry) =>
+    mockAlumni.filter(a => a.is_published && a.industry === industry)
+
+  const getAlumnusBySlug = (slug: string) =>
+    mockAlumni.find(a => a.slug === slug)
+
+  // Statistiques alumni
+  const getAlumniStats = () => {
+    const publishedAlumni = mockAlumni.filter(a => a.is_published)
+    const uniqueCountries = [...new Set(publishedAlumni.map(a => a.country))]
+    const uniqueIndustries = [...new Set(publishedAlumni.map(a => a.industry))]
+    const uniquePromotions = [...new Set(publishedAlumni.map(a => a.promotion))]
+
+    return {
+      total: publishedAlumni.length,
+      countries: uniqueCountries.length,
+      industries: uniqueIndustries.length,
+      promotions: uniquePromotions.length
+    }
+  }
+
+  // Liste des années de graduation uniques
+  const getAlumniGraduationYears = () =>
+    [...new Set(mockAlumni.filter(a => a.is_published).map(a => a.graduation_year))].sort((a, b) => b - a)
+
+  // Liste des pays uniques
+  const getAlumniCountries = () =>
+    [...new Set(mockAlumni.filter(a => a.is_published).map(a => a.country))].sort()
+
   return {
     // Données
     departments,
@@ -260,6 +308,7 @@ export function useMockData() {
     formations,
     documents,
     projects,
+    alumni,
 
     // Getters départements
     getDepartmentById,
@@ -334,6 +383,18 @@ export function useMockData() {
     getProjectBySlug,
     getProjectById,
 
+    // Getters alumni
+    getAllAlumni,
+    getFeaturedAlumni,
+    getAlumniByDepartment,
+    getAlumniByYear,
+    getAlumniByCountry,
+    getAlumniByIndustry,
+    getAlumnusBySlug,
+    getAlumniStats,
+    getAlumniGraduationYears,
+    getAlumniCountries,
+
     // Utilitaires
     getFlagEmoji
   }
@@ -358,5 +419,7 @@ export type {
   CampusNews,
   CampusMedia,
   CampusFormationRealisee,
-  Project
+  Project,
+  Alumnus,
+  Industry
 }
