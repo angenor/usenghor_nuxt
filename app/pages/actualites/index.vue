@@ -175,21 +175,12 @@ const typeColors: Record<string, string> = {
 
       <!-- Section 2: Latest News Grid -->
       <section v-if="latestNews.length > 0" class="mb-16">
-        <div class="flex items-center justify-between mb-8">
-          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
-            <span class="relative inline-block">
-              {{ t('actualites.sections.latestNews') }}
-              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
-            </span>
-          </h2>
-          <NuxtLink
-            :to="localePath('/actualites')"
-            class="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium flex items-center gap-1"
-          >
-            {{ t('actualites.sections.viewAll') }}
-            <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
-          </NuxtLink>
-        </div>
+        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-8">
+          <span class="relative inline-block">
+            {{ t('actualites.sections.latestNews') }}
+            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+          </span>
+        </h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <article
