@@ -61,7 +61,80 @@
       "applicationDeadline": "Application Deadline",
       "startDate": "Start Date",
       "relatedFormations": "Related Programs",
-      "back": "Back to Programs"
+      "back": "Back to Programs",
+      "downloadProgram": "Download Program",
+      "downloadPdf": "PDF"
+    },
+    "candidature": {
+      "seo": {
+        "title": "Application | Senghor University",
+        "description": "Submit your application to join Senghor University and its excellence programs."
+      },
+      "hero": {
+        "title": "Submit an Application",
+        "subtitle": "Join the Senghor community and train alongside Africa's future leaders"
+      },
+      "form": {
+        "title": "Application Form",
+        "subtitle": "Please fill in all required fields",
+        "personalInfo": "Personal Information",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email Address",
+        "phone": "Phone Number",
+        "birthDate": "Date of Birth",
+        "nationality": "Nationality",
+        "country": "Country of Residence",
+        "address": "Address",
+        "academicInfo": "Academic Background",
+        "lastDiploma": "Highest Degree Obtained",
+        "diplomaYear": "Year of Graduation",
+        "institution": "Institution",
+        "fieldOfStudy": "Field of Study",
+        "programChoice": "Program Selection",
+        "selectProgram": "Select a program",
+        "motivation": "Cover Letter",
+        "motivationPlaceholder": "Describe your motivations and career goals...",
+        "documents": "Required Documents",
+        "cv": "Resume (PDF)",
+        "diplomaCopy": "Diploma Copy (PDF)",
+        "idCopy": "ID Copy (PDF)",
+        "photo": "Passport Photo",
+        "submit": "Submit Application",
+        "submitting": "Submitting...",
+        "required": "Required field",
+        "success": {
+          "title": "Application Submitted!",
+          "message": "Your application has been successfully recorded. You will receive a confirmation email shortly.",
+          "back": "Back to Home"
+        },
+        "error": {
+          "title": "Error",
+          "message": "An error occurred while submitting your application. Please try again."
+        }
+      },
+      "info": {
+        "title": "Important Information",
+        "deadline": "Applications are open until",
+        "documents": "Required Documents",
+        "documentsList": [
+          "Updated resume",
+          "Copy of highest degree",
+          "Copy of ID or passport",
+          "Recent passport photo",
+          "Cover letter"
+        ],
+        "contact": "For questions, contact us at",
+        "process": {
+          "title": "Selection Process",
+          "steps": [
+            "Application receipt and verification",
+            "Review by selection committee",
+            "Interview (if shortlisted)",
+            "Results notification"
+          ]
+        }
+      }
     },
     "index": {
       "title": "All Our Programs",

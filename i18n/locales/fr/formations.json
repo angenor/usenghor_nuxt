@@ -61,7 +61,80 @@
       "applicationDeadline": "Date limite de candidature",
       "startDate": "Date de rentrée",
       "relatedFormations": "Formations similaires",
-      "back": "Retour aux formations"
+      "back": "Retour aux formations",
+      "downloadProgram": "Télécharger le programme",
+      "downloadPdf": "PDF"
+    },
+    "candidature": {
+      "seo": {
+        "title": "Candidature | Université Senghor",
+        "description": "Soumettez votre candidature pour rejoindre l'Université Senghor et ses programmes d'excellence."
+      },
+      "hero": {
+        "title": "Déposer une candidature",
+        "subtitle": "Rejoignez la communauté Senghor et formez-vous aux côtés des futurs leaders africains"
+      },
+      "form": {
+        "title": "Formulaire de candidature",
+        "subtitle": "Veuillez remplir tous les champs obligatoires",
+        "personalInfo": "Informations personnelles",
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "email": "Adresse e-mail",
+        "phone": "Téléphone",
+        "birthDate": "Date de naissance",
+        "nationality": "Nationalité",
+        "country": "Pays de résidence",
+        "address": "Adresse",
+        "academicInfo": "Parcours académique",
+        "lastDiploma": "Dernier diplôme obtenu",
+        "diplomaYear": "Année d'obtention",
+        "institution": "Établissement",
+        "fieldOfStudy": "Domaine d'études",
+        "programChoice": "Choix de formation",
+        "selectProgram": "Sélectionnez une formation",
+        "motivation": "Lettre de motivation",
+        "motivationPlaceholder": "Décrivez vos motivations et votre projet professionnel...",
+        "documents": "Documents à fournir",
+        "cv": "CV (PDF)",
+        "diplomaCopy": "Copie du diplôme (PDF)",
+        "idCopy": "Copie de la pièce d'identité (PDF)",
+        "photo": "Photo d'identité",
+        "submit": "Soumettre ma candidature",
+        "submitting": "Envoi en cours...",
+        "required": "Champ obligatoire",
+        "success": {
+          "title": "Candidature envoyée !",
+          "message": "Votre candidature a été enregistrée avec succès. Vous recevrez un e-mail de confirmation dans les prochaines minutes.",
+          "back": "Retour à l'accueil"
+        },
+        "error": {
+          "title": "Erreur",
+          "message": "Une erreur est survenue lors de l'envoi de votre candidature. Veuillez réessayer."
+        }
+      },
+      "info": {
+        "title": "Informations importantes",
+        "deadline": "Les candidatures sont ouvertes jusqu'au",
+        "documents": "Documents requis",
+        "documentsList": [
+          "CV à jour",
+          "Copie du dernier diplôme",
+          "Copie de la pièce d'identité ou passeport",
+          "Photo d'identité récente",
+          "Lettre de motivation"
+        ],
+        "contact": "Pour toute question, contactez-nous à",
+        "process": {
+          "title": "Processus de sélection",
+          "steps": [
+            "Réception et vérification du dossier",
+            "Étude du dossier par la commission",
+            "Entretien (si présélectionné)",
+            "Notification des résultats"
+          ]
+        }
+      }
     },
     "index": {
       "title": "Toutes nos formations",

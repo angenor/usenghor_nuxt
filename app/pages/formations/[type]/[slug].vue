@@ -178,52 +178,67 @@ const toggleSemester = (num: number) => {
 
 <template>
   <div v-if="formation">
-    <!-- Hero Section -->
+    <!-- Hero Section (universal background) -->
     <PageHero
       :title="getLocalizedTitle"
-      :subtitle="getLocalizedDescription"
-      :image="formation.image || `https://picsum.photos/seed/${formation.slug}/1200/600`"
+      :subtitle="t(`formations.typeDescriptions.${formationTypeToSlug[formation.formation_type]}`)"
+      image="/images/bg/backgroud_senghor2.jpg"
       :breadcrumb="breadcrumb"
     />
-
-    <!-- Badges Section -->
-    <section class="bg-white dark:bg-gray-950 py-6 border-b border-gray-200 dark:border-gray-800">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-wrap items-center gap-3">
-          <!-- Type badge -->
-          <span
-            class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold text-white rounded-full shadow-md"
-            :class="typeConfig.bgColor"
-          >
-            <font-awesome-icon :icon="typeConfig.icon" class="w-4 h-4" />
-            {{ t(`formations.types.${formation.formation_type}`) }}
-          </span>
-
-          <!-- Campus badge -->
-          <span
-            class="inline-block px-3 py-1.5 text-sm font-medium rounded-full"
-            :class="campusBgColors[formation.campus]"
-          >
-            {{ t(`formations.campus.${formation.campus}`) }}
-          </span>
-
-          <!-- Application status -->
-          <span
-            v-if="formation.application_open"
-            class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-green-500 text-white rounded-full"
-          >
-            <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-            {{ t('formations.card.applicationOpen') }}
-          </span>
-        </div>
-      </div>
-    </section>
 
     <!-- Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div class="flex flex-col lg:flex-row gap-12">
         <!-- Main content -->
         <article class="lg:w-2/3">
+          <!-- Cover Image (dans la section article uniquement) -->
+          <div class="mb-8">
+            <!-- Image avec badges -->
+            <div class="relative h-56 md:h-64 lg:h-72 rounded-2xl overflow-hidden shadow-lg">
+              <img
+                :src="formation.image || `https://picsum.photos/seed/${formation.slug}/1920/1080`"
+                :alt="getLocalizedTitle"
+                class="w-full h-full object-cover"
+              />
+              <!-- Gradient overlay -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+              <!-- Badges on image -->
+              <div class="absolute bottom-4 left-4 right-4 flex flex-wrap items-center gap-2">
+                <!-- Type badge -->
+                <span
+                  class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold text-white rounded-full shadow-lg backdrop-blur-sm"
+                  :class="typeConfig.bgColor"
+                >
+                  <font-awesome-icon :icon="typeConfig.icon" class="w-4 h-4" />
+                  {{ t(`formations.types.${formation.formation_type}`) }}
+                </span>
+
+                <!-- Campus badge -->
+                <span
+                  class="inline-block px-3 py-1.5 text-sm font-medium rounded-full backdrop-blur-sm bg-white/90 dark:bg-gray-900/90"
+                  :class="campusBgColors[formation.campus]"
+                >
+                  {{ t(`formations.campus.${formation.campus}`) }}
+                </span>
+
+                <!-- Application status -->
+                <span
+                  v-if="formation.application_open"
+                  class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-green-500 text-white rounded-full shadow-lg"
+                >
+                  <span class="w-2 h-2 bg-white rounded-full animate-pulse" />
+                  {{ t('formations.card.applicationOpen') }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Description en dessous -->
+            <p class="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed">
+              {{ getLocalizedDescription }}
+            </p>
+          </div>
+
           <!-- Info cards -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <!-- Duration -->
@@ -269,16 +284,6 @@ const toggleSemester = (num: number) => {
                 {{ getLocalizedDepartmentName }}
               </div>
             </div>
-          </div>
-
-          <!-- Description section -->
-          <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              {{ t('formations.detail.overview') }}
-            </h2>
-            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-              {{ getLocalizedDescription }}
-            </p>
           </div>
 
           <!-- Program / Curriculum -->
@@ -367,7 +372,7 @@ const toggleSemester = (num: number) => {
             </div>
 
             <NuxtLink
-              :to="localePath('/actualites/appels')"
+              :to="localePath('/candidatures') + `?formation=${formation.slug}`"
               class="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-colors shadow-md"
             >
               <font-awesome-icon icon="fa-solid fa-paper-plane" class="w-4 h-4" />
@@ -461,11 +466,34 @@ const toggleSemester = (num: number) => {
 
               <div v-if="formation.application_open" class="mt-6">
                 <NuxtLink
-                  :to="localePath('/actualites/appels')"
+                  :to="localePath('/candidatures') + `?formation=${formation.slug}`"
                   class="block w-full text-center px-4 py-3 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors"
                 >
                   {{ t('formations.detail.apply') }}
                 </NuxtLink>
+              </div>
+
+              <!-- Download PDF button -->
+              <div class="mt-4">
+                <a
+                  v-if="formation.pdf_url"
+                  :href="formation.pdf_url"
+                  target="_blank"
+                  class="flex items-center justify-center gap-2 w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors border border-gray-200 dark:border-gray-600"
+                >
+                  <font-awesome-icon icon="fa-solid fa-file-pdf" class="w-5 h-5 text-red-500" />
+                  {{ t('formations.detail.downloadProgram') }}
+                </a>
+                <a
+                  v-else
+                  href="#"
+                  class="flex items-center justify-center gap-2 w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500 font-medium rounded-lg cursor-not-allowed border border-gray-100 dark:border-gray-700"
+                  @click.prevent
+                >
+                  <font-awesome-icon icon="fa-solid fa-file-pdf" class="w-5 h-5" />
+                  {{ t('formations.detail.downloadProgram') }}
+                  <span class="text-xs">({{ t('formations.card.deadline') }})</span>
+                </a>
               </div>
             </div>
 

@@ -105,6 +105,13 @@ const getLocalizedTitle = (f: any) => {
   if (locale.value === 'ar' && f.title_ar) return f.title_ar
   return f.title_fr
 }
+
+// Get thumbnail version of image (100x100)
+const getThumbnail = (f: any) => {
+  if (!f.image) return `https://picsum.photos/seed/${f.slug}/100/100`
+  // Convert large image URL to thumbnail size
+  return f.image.replace(/\/\d+\/\d+$/, '/100/100')
+}
 </script>
 
 <template>
@@ -236,7 +243,7 @@ const getLocalizedTitle = (f: any) => {
                     <!-- Thumbnail -->
                     <div class="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200 dark:bg-gray-700">
                       <img
-                        :src="formation.image || `https://picsum.photos/seed/${formation.slug}/100/100`"
+                        :src="getThumbnail(formation)"
                         :alt="getLocalizedTitle(formation)"
                         class="w-full h-full object-cover"
                         loading="lazy"

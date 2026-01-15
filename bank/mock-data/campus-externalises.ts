@@ -32,6 +32,27 @@ export interface CampusExternalise {
 
 export const mockCampusExternalises: CampusExternalise[] = [
   {
+    id: 'campus-abidjan',
+    slug: 'abidjan',
+    name_fr: 'Campus d\'Abidjan',
+    name_en: 'Abidjan Campus',
+    name_ar: 'حرم أبيدجان',
+    country: 'CI',
+    country_fr: 'Côte d\'Ivoire',
+    country_en: 'Ivory Coast',
+    country_ar: 'ساحل العاج',
+    city_fr: 'Abidjan',
+    city_en: 'Abidjan',
+    address_fr: 'Cocody, Abidjan',
+    description_fr: 'Le campus d\'Abidjan est spécialisé dans les formations en Culture et Management.',
+    image: 'https://picsum.photos/seed/campus-abidjan/800/500',
+    contact_email: 'abidjan@usenghor.org',
+    latitude: 5.3600,
+    longitude: -4.0083,
+    is_active: true,
+    sort_order: 1
+  },
+  {
     id: 'campus-dakar',
     slug: 'dakar',
     name_fr: 'Campus de Dakar',
@@ -51,7 +72,7 @@ export const mockCampusExternalises: CampusExternalise[] = [
     latitude: 14.6928,
     longitude: -17.4467,
     is_active: true,
-    sort_order: 1
+    sort_order: 2
   },
   {
     id: 'campus-yaounde',
@@ -71,27 +92,6 @@ export const mockCampusExternalises: CampusExternalise[] = [
     contact_email: 'yaounde@usenghor.org',
     latitude: 3.8667,
     longitude: 11.5167,
-    is_active: true,
-    sort_order: 2
-  },
-  {
-    id: 'campus-abidjan',
-    slug: 'abidjan',
-    name_fr: 'Campus d\'Abidjan',
-    name_en: 'Abidjan Campus',
-    name_ar: 'حرم أبيدجان',
-    country: 'CI',
-    country_fr: 'Côte d\'Ivoire',
-    country_en: 'Ivory Coast',
-    country_ar: 'ساحل العاج',
-    city_fr: 'Abidjan',
-    city_en: 'Abidjan',
-    address_fr: 'Cocody, Abidjan',
-    description_fr: 'Le campus d\'Abidjan est spécialisé dans les formations en Culture et Management.',
-    image: 'https://picsum.photos/seed/campus-abidjan/800/500',
-    contact_email: 'abidjan@usenghor.org',
-    latitude: 5.3600,
-    longitude: -4.0083,
     is_active: true,
     sort_order: 3
   },
@@ -221,6 +221,28 @@ export const mockCampusExternalises: CampusExternalise[] = [
     longitude: 105.8542,
     is_active: true,
     sort_order: 9
+  },
+  {
+    id: 'campus-antananarivo',
+    slug: 'antananarivo',
+    name_fr: 'Campus d\'Antananarivo',
+    name_en: 'Antananarivo Campus',
+    name_ar: 'حرم أنتاناناريفو',
+    country: 'MG',
+    country_fr: 'Madagascar',
+    country_en: 'Madagascar',
+    country_ar: 'مدغشقر',
+    city_fr: 'Antananarivo',
+    city_en: 'Antananarivo',
+    city_ar: 'أنتاناناريفو',
+    description_fr: 'Le campus d\'Antananarivo propose des formations adaptées aux besoins de l\'Océan Indien francophone.',
+    description_en: 'The Antananarivo campus offers programs adapted to the needs of the French-speaking Indian Ocean region.',
+    image: 'https://picsum.photos/seed/campus-antananarivo/800/500',
+    contact_email: 'antananarivo@usenghor.org',
+    latitude: -18.8792,
+    longitude: 47.5079,
+    is_active: true,
+    sort_order: 10
   }
 ]
 
