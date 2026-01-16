@@ -118,11 +118,10 @@
         "deadline": "Les candidatures sont ouvertes jusqu'au",
         "documents": "Documents requis",
         "documentsList": [
-          "CV à jour",
-          "Copie du dernier diplôme",
-          "Copie de la pièce d'identité ou passeport",
-          "Photo d'identité récente",
-          "Lettre de motivation"
+          "CV à jour (PDF)",
+          "Copie du dernier diplôme (PDF)",
+          "Copie de la pièce d'identité ou passeport (PDF)",
+          "Photo d'identité récente (JPG, PNG)"
         ],
         "contact": "Pour toute question, contactez-nous à",
         "process": {

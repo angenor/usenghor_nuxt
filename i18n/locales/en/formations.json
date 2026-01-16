@@ -118,11 +118,10 @@
         "deadline": "Applications are open until",
         "documents": "Required Documents",
         "documentsList": [
-          "Updated resume",
-          "Copy of highest degree",
-          "Copy of ID or passport",
-          "Recent passport photo",
-          "Cover letter"
+          "Updated resume (PDF)",
+          "Copy of highest degree (PDF)",
+          "Copy of ID or passport (PDF)",
+          "Recent passport photo (JPG, PNG)"
         ],
         "contact": "For questions, contact us at",
         "process": {

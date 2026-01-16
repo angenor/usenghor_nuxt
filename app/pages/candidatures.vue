@@ -1,5 +1,21 @@
 <script setup lang="ts">
 const { t, locale } = useI18n()
+
+// Liste des documents requis
+const documentsList = [
+  'formations.candidature.info.documentsList.0',
+  'formations.candidature.info.documentsList.1',
+  'formations.candidature.info.documentsList.2',
+  'formations.candidature.info.documentsList.3'
+]
+
+// Étapes du processus de sélection
+const processSteps = [
+  'formations.candidature.info.process.steps.0',
+  'formations.candidature.info.process.steps.1',
+  'formations.candidature.info.process.steps.2',
+  'formations.candidature.info.process.steps.3'
+]
 const localePath = useLocalePath()
 const route = useRoute()
 const { getFormationsWithOpenApplications, getFormationBySlug } = useMockData()
@@ -98,7 +114,7 @@ const breadcrumb = computed(() => [
 </script>
 
 <template>
-  <div>
+  <div >
     <!-- Hero -->
     <PageHero
       :title="t('formations.candidature.hero.title')"
@@ -497,12 +513,12 @@ const breadcrumb = computed(() => [
                   </h4>
                   <ul class="space-y-2">
                     <li
-                      v-for="(doc, index) in t('formations.candidature.info.documentsList')"
+                      v-for="(docKey, index) in documentsList"
                       :key="index"
                       class="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400"
                     >
                       <font-awesome-icon icon="fa-solid fa-check" class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      {{ doc }}
+                      {{ t(docKey) }}
                     </li>
                   </ul>
                 </div>
@@ -514,14 +530,14 @@ const breadcrumb = computed(() => [
                   </h4>
                   <ol class="space-y-3">
                     <li
-                      v-for="(step, index) in t('formations.candidature.info.process.steps')"
+                      v-for="(stepKey, index) in processSteps"
                       :key="index"
                       class="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400"
                     >
                       <span class="w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xs font-bold flex-shrink-0">
                         {{ index + 1 }}
                       </span>
-                      {{ step }}
+                      {{ t(stepKey) }}
                     </li>
                   </ol>
                 </div>
