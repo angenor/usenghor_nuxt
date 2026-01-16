@@ -257,15 +257,15 @@ onUnmounted(() => {
           <!-- Decorative Stats -->
           <div ref="statsRef" class="hidden lg:flex absolute right-16 top-1/2 -translate-y-1/2 flex-col gap-6">
             <div class="stat-card text-center p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/10 transition-all duration-500" :class="{ 'stat-visible': hasAnimated }">
-              <div class="text-4xl font-bold text-brand-blue-400 mb-1 tabular-nums">{{ animatedStats.countries }}+</div>
+              <div class="text-4xl font-bold text-white mb-1 tabular-nums">{{ animatedStats.countries }}+</div>
               <div class="text-sm text-white/70">{{ t('mission.experience.stats.countries') }}</div>
             </div>
             <div class="stat-card text-center p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/10 transition-all duration-500 delay-100" :class="{ 'stat-visible': hasAnimated }">
-              <div class="text-4xl font-bold text-brand-blue-400 mb-1 tabular-nums">{{ animatedStats.graduates.toLocaleString() }}+</div>
+              <div class="text-4xl font-bold text-white mb-1 tabular-nums">{{ animatedStats.graduates.toLocaleString() }}+</div>
               <div class="text-sm text-white/70">{{ t('mission.experience.stats.graduates') }}</div>
             </div>
             <div class="stat-card text-center p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/10 transition-all duration-500 delay-200" :class="{ 'stat-visible': hasAnimated }">
-              <div class="text-4xl font-bold text-brand-blue-400 mb-1 tabular-nums">{{ animatedStats.years }}+</div>
+              <div class="text-4xl font-bold text-white mb-1 tabular-nums">{{ animatedStats.years }}+</div>
               <div class="text-sm text-white/70">{{ t('mission.experience.stats.years') }}</div>
             </div>
           </div>
