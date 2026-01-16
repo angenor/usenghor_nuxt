@@ -46,10 +46,10 @@ onMounted(() => {
 // Couleurs par groupe
 const groupColors = {
   rectorat: {
-    bg: 'bg-amber-100 dark:bg-amber-900/30',
-    text: 'text-amber-600 dark:text-amber-400',
-    border: 'border-amber-200 dark:border-amber-800',
-    line: 'bg-amber-200 dark:bg-amber-800'
+    bg: 'bg-brand-blue-100 dark:bg-brand-blue-900/30',
+    text: 'text-brand-blue-600 dark:text-brand-blue-400',
+    border: 'border-brand-blue-200 dark:border-brand-blue-800',
+    line: 'bg-brand-blue-200 dark:bg-brand-blue-800'
   },
   departements: {
     bg: 'bg-purple-100 dark:bg-purple-900/30',
@@ -58,16 +58,16 @@ const groupColors = {
     line: 'bg-purple-200 dark:bg-purple-800'
   },
   academique: {
-    bg: 'bg-blue-100 dark:bg-blue-900/30',
-    text: 'text-blue-600 dark:text-blue-400',
-    border: 'border-blue-200 dark:border-blue-800',
-    line: 'bg-blue-200 dark:bg-blue-800'
+    bg: 'bg-brand-red-100 dark:bg-brand-red-900/30',
+    text: 'text-brand-red-600 dark:text-brand-red-400',
+    border: 'border-brand-red-200 dark:border-brand-red-800',
+    line: 'bg-brand-red-200 dark:bg-brand-red-800'
   },
   administratif: {
-    bg: 'bg-emerald-100 dark:bg-emerald-900/30',
-    text: 'text-emerald-600 dark:text-emerald-400',
-    border: 'border-emerald-200 dark:border-emerald-800',
-    line: 'bg-emerald-200 dark:bg-emerald-800'
+    bg: 'bg-brand-blue-100 dark:bg-brand-blue-900/30',
+    text: 'text-brand-blue-600 dark:text-brand-blue-400',
+    border: 'border-brand-blue-200 dark:border-brand-blue-800',
+    line: 'bg-brand-blue-200 dark:bg-brand-blue-800'
   }
 }
 
@@ -129,7 +129,7 @@ const getDeptName = (dept: any) => {
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
           <span class="relative inline-block">
             {{ t('organization.orgchart.title') }}
-            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
           </span>
         </h2>
         <p class="mt-6 text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
@@ -176,7 +176,7 @@ const getDeptName = (dept: any) => {
                   <h4 class="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
                     {{ getServiceName(service) }}
                   </h4>
-                  <span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                  <span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                     <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
                     <span>{{ t('organization.departments.view_programs') }}</span>
                   </span>
@@ -268,7 +268,7 @@ const getDeptName = (dept: any) => {
                   <h4 class="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
                     {{ getServiceName(service) }}
                   </h4>
-                  <span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  <span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 group-hover:text-brand-red-600 dark:group-hover:text-brand-red-400 transition-colors">
                     <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
                     <span>{{ t('organization.departments.view_programs') }}</span>
                   </span>
@@ -314,7 +314,7 @@ const getDeptName = (dept: any) => {
                   <h4 class="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
                     {{ getServiceName(service) }}
                   </h4>
-                  <span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                  <span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                     <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
                     <span>{{ t('organization.departments.view_programs') }}</span>
                   </span>

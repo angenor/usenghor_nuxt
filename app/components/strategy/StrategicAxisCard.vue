@@ -1,7 +1,7 @@
 <script setup lang="ts">
 interface Props {
   icon: string
-  color: 'amber' | 'blue' | 'emerald' | 'green' | 'purple'
+  color: 'blue' | 'red' | 'purple'
   title: string
   description: string
   objectives: string[]
@@ -23,25 +23,15 @@ const getIcon = (iconName: string): string => {
 
 // Color classes mapping
 const colorClasses: Record<string, { bg: string; accent: string; icon: string }> = {
-  amber: {
-    bg: 'bg-amber-400',
-    accent: 'bg-amber-100 dark:bg-amber-900/30',
-    icon: 'text-amber-600 dark:text-amber-400'
-  },
   blue: {
-    bg: 'bg-blue-400',
-    accent: 'bg-blue-100 dark:bg-blue-900/30',
-    icon: 'text-blue-600 dark:text-blue-400'
+    bg: 'bg-brand-blue-400',
+    accent: 'bg-brand-blue-100 dark:bg-brand-blue-900/30',
+    icon: 'text-brand-blue-600 dark:text-brand-blue-400'
   },
-  emerald: {
-    bg: 'bg-emerald-400',
-    accent: 'bg-emerald-100 dark:bg-emerald-900/30',
-    icon: 'text-emerald-600 dark:text-emerald-400'
-  },
-  green: {
-    bg: 'bg-green-400',
-    accent: 'bg-green-100 dark:bg-green-900/30',
-    icon: 'text-green-600 dark:text-green-400'
+  red: {
+    bg: 'bg-brand-red-400',
+    accent: 'bg-brand-red-100 dark:bg-brand-red-900/30',
+    icon: 'text-brand-red-600 dark:text-brand-red-400'
   },
   purple: {
     bg: 'bg-purple-400',
@@ -50,7 +40,7 @@ const colorClasses: Record<string, { bg: string; accent: string; icon: string }>
   }
 }
 
-const colors = computed(() => colorClasses[props.color] || colorClasses.amber)
+const colors = computed(() => colorClasses[props.color] || colorClasses.blue)
 </script>
 
 <template>

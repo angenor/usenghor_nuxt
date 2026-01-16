@@ -86,27 +86,35 @@ const teamMembers = computed(() => {
 
 // Get color based on entity type and category
 const entityColor = computed(() => {
-  if (!entity) return 'amber'
+  if (!entity) return 'blue'
   if (entityType === 'departement') {
     return 'purple'
   }
   // For services, color based on category
   const service = entity as any
-  if (service.category === 'rectorat') return 'amber'
-  if (service.category === 'academique') return 'blue'
-  if (service.category === 'administratif') return 'emerald'
+  if (service.category === 'rectorat') return 'blue'
+  if (service.category === 'academique') return 'red'
+  if (service.category === 'administratif') return 'blue'
   return 'gray'
 })
 
 // Color palette
 const colorPalette: Record<string, { bg: string; bgLight: string; text: string; border: string; gradient: string; hoverBg: string }> = {
-  amber: {
-    bg: 'bg-amber-500',
-    bgLight: 'bg-amber-100 dark:bg-amber-900/30',
-    text: 'text-amber-600 dark:text-amber-400',
-    border: 'border-amber-500',
-    gradient: 'from-amber-500 to-amber-600',
-    hoverBg: 'hover:bg-amber-50 dark:hover:bg-amber-900/20'
+  blue: {
+    bg: 'bg-brand-blue-500',
+    bgLight: 'bg-brand-blue-100 dark:bg-brand-blue-900/30',
+    text: 'text-brand-blue-600 dark:text-brand-blue-400',
+    border: 'border-brand-blue-500',
+    gradient: 'from-brand-blue-500 to-brand-blue-600',
+    hoverBg: 'hover:bg-brand-blue-50 dark:hover:bg-brand-blue-900/20'
+  },
+  red: {
+    bg: 'bg-brand-red-500',
+    bgLight: 'bg-brand-red-100 dark:bg-brand-red-900/30',
+    text: 'text-brand-red-600 dark:text-brand-red-400',
+    border: 'border-brand-red-500',
+    gradient: 'from-brand-red-500 to-brand-red-600',
+    hoverBg: 'hover:bg-brand-red-50 dark:hover:bg-brand-red-900/20'
   },
   purple: {
     bg: 'bg-purple-500',
@@ -115,22 +123,6 @@ const colorPalette: Record<string, { bg: string; bgLight: string; text: string; 
     border: 'border-purple-500',
     gradient: 'from-purple-500 to-purple-600',
     hoverBg: 'hover:bg-purple-50 dark:hover:bg-purple-900/20'
-  },
-  blue: {
-    bg: 'bg-blue-500',
-    bgLight: 'bg-blue-100 dark:bg-blue-900/30',
-    text: 'text-blue-600 dark:text-blue-400',
-    border: 'border-blue-500',
-    gradient: 'from-blue-500 to-blue-600',
-    hoverBg: 'hover:bg-blue-50 dark:hover:bg-blue-900/20'
-  },
-  emerald: {
-    bg: 'bg-emerald-500',
-    bgLight: 'bg-emerald-100 dark:bg-emerald-900/30',
-    text: 'text-emerald-600 dark:text-emerald-400',
-    border: 'border-emerald-500',
-    gradient: 'from-emerald-500 to-emerald-600',
-    hoverBg: 'hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
   },
   gray: {
     bg: 'bg-gray-500',
@@ -418,47 +410,47 @@ type TimelineColor = {
 }
 
 const defaultTimelineColor: TimelineColor = {
-  solid: '#46b8e9',
-  gradient: 'from-cyan-500 to-blue-500',
-  bgLight: 'bg-cyan-100 dark:bg-cyan-900/30',
-  text: 'text-cyan-600 dark:text-cyan-400',
-  arrowLeft: 'border-l-cyan-500',
-  arrowRight: 'border-r-cyan-500'
+  solid: '#2b4bbf',
+  gradient: 'from-brand-blue-500 to-brand-blue-600',
+  bgLight: 'bg-brand-blue-100 dark:bg-brand-blue-900/30',
+  text: 'text-brand-blue-600 dark:text-brand-blue-400',
+  arrowLeft: 'border-l-brand-blue-500',
+  arrowRight: 'border-r-brand-blue-500'
 }
 
 const timelineColors: TimelineColor[] = [
   defaultTimelineColor,
   {
-    solid: '#3ee9d1',
-    gradient: 'from-teal-400 to-emerald-500',
-    bgLight: 'bg-teal-100 dark:bg-teal-900/30',
-    text: 'text-teal-600 dark:text-teal-400',
-    arrowLeft: 'border-l-teal-400',
-    arrowRight: 'border-r-teal-400'
+    solid: '#f32525',
+    gradient: 'from-brand-red-500 to-brand-red-600',
+    bgLight: 'bg-brand-red-100 dark:bg-brand-red-900/30',
+    text: 'text-brand-red-600 dark:text-brand-red-400',
+    arrowLeft: 'border-l-brand-red-500',
+    arrowRight: 'border-r-brand-red-500'
   },
   {
-    solid: '#ce43eb',
-    gradient: 'from-purple-500 to-pink-500',
-    bgLight: 'bg-purple-100 dark:bg-purple-900/30',
-    text: 'text-purple-600 dark:text-purple-400',
-    arrowLeft: 'border-l-purple-500',
-    arrowRight: 'border-r-purple-500'
+    solid: '#233da0',
+    gradient: 'from-brand-blue-600 to-brand-blue-700',
+    bgLight: 'bg-brand-blue-100 dark:bg-brand-blue-900/30',
+    text: 'text-brand-blue-600 dark:text-brand-blue-400',
+    arrowLeft: 'border-l-brand-blue-600',
+    arrowRight: 'border-r-brand-blue-600'
   },
   {
-    solid: '#4d92eb',
-    gradient: 'from-blue-500 to-indigo-500',
-    bgLight: 'bg-blue-100 dark:bg-blue-900/30',
-    text: 'text-blue-600 dark:text-blue-400',
-    arrowLeft: 'border-l-blue-500',
-    arrowRight: 'border-r-blue-500'
+    solid: '#c21f1f',
+    gradient: 'from-brand-red-600 to-brand-red-700',
+    bgLight: 'bg-brand-red-100 dark:bg-brand-red-900/30',
+    text: 'text-brand-red-600 dark:text-brand-red-400',
+    arrowLeft: 'border-l-brand-red-600',
+    arrowRight: 'border-r-brand-red-600'
   },
   {
-    solid: '#f59e0b',
-    gradient: 'from-amber-500 to-orange-500',
-    bgLight: 'bg-amber-100 dark:bg-amber-900/30',
-    text: 'text-amber-600 dark:text-amber-400',
-    arrowLeft: 'border-l-amber-500',
-    arrowRight: 'border-r-amber-500'
+    solid: '#2b4bbf',
+    gradient: 'from-brand-blue-500 to-brand-blue-600',
+    bgLight: 'bg-brand-blue-100 dark:bg-brand-blue-900/30',
+    text: 'text-brand-blue-600 dark:text-brand-blue-400',
+    arrowLeft: 'border-l-brand-blue-500',
+    arrowRight: 'border-r-brand-blue-500'
   }
 ]
 
@@ -749,8 +741,8 @@ const formatDate = (dateStr: string) => {
                     class="px-3 py-1 rounded-full text-xs font-semibold"
                     :class="{
                       'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': project.status === 'completed',
-                      'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400': project.status === 'ongoing',
-                      'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400': project.status === 'planned'
+                      'bg-brand-blue-100 text-brand-blue-700 dark:bg-brand-blue-900/30 dark:text-brand-blue-400': project.status === 'ongoing',
+                      'bg-brand-red-100 text-brand-red-700 dark:bg-brand-red-900/30 dark:text-brand-red-400': project.status === 'planned'
                     }"
                   >
                     {{ t(`organizationDetail.projects.status.${project.status}`) }}
@@ -820,7 +812,7 @@ const formatDate = (dateStr: string) => {
                   <font-awesome-icon icon="fa-solid fa-calendar" class="w-4 h-4 mr-2" />
                   {{ formatDate(news.date) }}
                 </p>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                   {{ news.title }}
                 </h3>
                 <p class="text-gray-600 dark:text-gray-400 mb-4">{{ news.excerpt }}</p>
@@ -1166,18 +1158,18 @@ const formatDate = (dateStr: string) => {
 }
 
 /* Card colors and arrow colors */
-.demo-card--step1 { background-color: #46b8e9; }
-.demo-card--step1 .head::after { border-color: #46b8e9; }
+.demo-card--step1 { background-color: #2b4bbf; }
+.demo-card--step1 .head::after { border-color: #2b4bbf; }
 
-.demo-card--step2 { background-color: #3ee9d1; }
-.demo-card--step2 .head::after { border-color: #3ee9d1; }
+.demo-card--step2 { background-color: #f32525; }
+.demo-card--step2 .head::after { border-color: #f32525; }
 
-.demo-card--step3 { background-color: #ce43eb; }
-.demo-card--step3 .head::after { border-color: #ce43eb; }
+.demo-card--step3 { background-color: #233da0; }
+.demo-card--step3 .head::after { border-color: #233da0; }
 
-.demo-card--step4 { background-color: #4d92eb; }
-.demo-card--step4 .head::after { border-color: #4d92eb; }
+.demo-card--step4 { background-color: #c21f1f; }
+.demo-card--step4 .head::after { border-color: #c21f1f; }
 
-.demo-card--step5 { background-color: #f59e0b; }
-.demo-card--step5 .head::after { border-color: #f59e0b; }
+.demo-card--step5 { background-color: #2b4bbf; }
+.demo-card--step5 .head::after { border-color: #2b4bbf; }
 </style>

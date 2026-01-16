@@ -40,9 +40,9 @@ const getIcon = (iconName: string): string => {
 
 // Colors for project cards
 const projectColors = [
-  { bg: 'bg-amber-100 dark:bg-amber-900/30', icon: 'text-amber-600 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-800' },
-  { bg: 'bg-blue-100 dark:bg-blue-900/30', icon: 'text-blue-600 dark:text-blue-400', border: 'border-blue-200 dark:border-blue-800' },
-  { bg: 'bg-emerald-100 dark:bg-emerald-900/30', icon: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-200 dark:border-emerald-800' },
+  { bg: 'bg-brand-blue-100 dark:bg-brand-blue-900/30', icon: 'text-brand-blue-600 dark:text-brand-blue-400', border: 'border-brand-blue-200 dark:border-brand-blue-800' },
+  { bg: 'bg-brand-red-100 dark:bg-brand-red-900/30', icon: 'text-brand-red-600 dark:text-brand-red-400', border: 'border-brand-red-200 dark:border-brand-red-800' },
+  { bg: 'bg-brand-blue-100 dark:bg-brand-blue-900/30', icon: 'text-brand-blue-600 dark:text-brand-blue-400', border: 'border-brand-blue-200 dark:border-brand-blue-800' },
   { bg: 'bg-purple-100 dark:bg-purple-900/30', icon: 'text-purple-600 dark:text-purple-400', border: 'border-purple-200 dark:border-purple-800' }
 ]
 </script>
@@ -58,7 +58,7 @@ const projectColors = [
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
           <span class="relative inline-block">
             {{ props.title }}
-            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
           </span>
         </h2>
         <p v-if="props.subtitle" class="mt-6 text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
@@ -108,7 +108,7 @@ const projectColors = [
       </div>
 
       <!-- CTA Block -->
-      <div class="bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-8 lg:p-12 text-center">
+      <div class="bg-brand-blue-50 dark:bg-brand-blue-900/20 rounded-2xl p-8 lg:p-12 text-center">
         <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-4">
           {{ props.ctaTitle }}
         </h3>
@@ -117,7 +117,7 @@ const projectColors = [
         </p>
         <NuxtLink
           :to="localePath(props.ctaLink)"
-          class="group inline-flex items-center gap-3 px-8 py-4 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/30 hover:-translate-y-0.5"
+          class="group inline-flex items-center gap-3 px-8 py-4 bg-brand-blue-500 hover:bg-brand-blue-600 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-brand-blue-500/30 hover:-translate-y-0.5"
         >
           <font-awesome-icon icon="fa-solid fa-envelope" class="w-5 h-5" />
           <span>{{ props.ctaButton }}</span>

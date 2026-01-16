@@ -12,7 +12,7 @@ const programs = [
     key: 'masters',
     icon: 'fa-solid fa-graduation-cap',
     link: '/formations/masters',
-    colors: ['#3b82f6', '#93c5fd'] // blue
+    colors: ['#2b4bbf', '#8aabff'] // brand-blue
   },
   {
     key: 'doctoral',
@@ -24,13 +24,13 @@ const programs = [
     key: 'diplomes',
     icon: 'fa-solid fa-certificate',
     link: '/formations/diplomes-universitaires',
-    colors: ['#f59e0b', '#fcd34d'] // amber
+    colors: ['#f32525', '#ffa0a0'] // brand-red
   },
   {
     key: 'certifications',
     icon: 'fa-solid fa-award',
     link: '/formations/certifiantes',
-    colors: ['#10b981', '#6ee7b7'] // emerald
+    colors: ['#2b4bbf', '#5478e6'] // brand-blue
   }
 ]
 
@@ -55,7 +55,7 @@ const galleryImages = [
       <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mb-16">
         <!-- Text Content -->
         <div class="order-2 lg:order-1">
-          <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium mb-6 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
+          <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium mb-6 bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400">
             <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-3.5 h-3.5 mr-2" />
             {{ t('careers.opportunities.students.title') }}
           </span>
@@ -69,7 +69,7 @@ const galleryImages = [
           <!-- Stats Row -->
           <div class="flex flex-wrap gap-6 mb-8">
             <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center">
+              <div class="w-12 h-12 rounded-xl bg-brand-blue-500 flex items-center justify-center">
                 <font-awesome-icon icon="fa-solid fa-users" class="w-5 h-5 text-white" />
               </div>
               <div>
@@ -87,7 +87,7 @@ const galleryImages = [
               </div>
             </div>
             <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center">
+              <div class="w-12 h-12 rounded-xl bg-brand-red-500 flex items-center justify-center">
                 <font-awesome-icon icon="fa-solid fa-award" class="w-5 h-5 text-white" />
               </div>
               <div>
@@ -108,7 +108,7 @@ const galleryImages = [
                 :alt="galleryImages[0].alt"
                 class="w-full h-full object-cover"
               />
-              <div class="absolute inset-0 bg-gradient-to-t from-blue-600/40 to-transparent"></div>
+              <div class="absolute inset-0 bg-gradient-to-t from-brand-blue-600/40 to-transparent"></div>
             </div>
 
             <!-- Top right -->
@@ -132,7 +132,7 @@ const galleryImages = [
 
             <!-- Bottom right -->
             <div class="bento-item bento-item--accent">
-              <div class="w-full h-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center p-4">
+              <div class="w-full h-full bg-gradient-to-br from-brand-blue-500 to-brand-blue-600 flex items-center justify-center p-4">
                 <div class="text-center text-white">
                   <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-8 h-8 mb-2" />
                   <p class="text-sm font-medium">Alexandrie, Égypte</p>
@@ -142,7 +142,7 @@ const galleryImages = [
           </div>
 
           <!-- Decorative elements -->
-          <div class="absolute -top-4 -right-4 w-24 h-24 bg-blue-200 dark:bg-blue-800/30 rounded-full blur-2xl opacity-60"></div>
+          <div class="absolute -top-4 -right-4 w-24 h-24 bg-brand-blue-200 dark:bg-brand-blue-800/30 rounded-full blur-2xl opacity-60"></div>
           <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-purple-200 dark:bg-purple-800/30 rounded-full blur-2xl opacity-60"></div>
         </div>
       </div>
@@ -154,8 +154,8 @@ const galleryImages = [
           <!-- Why study with us -->
           <div class="mb-10">
             <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
-              <span class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                <font-awesome-icon icon="fa-solid fa-star" class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span class="w-10 h-10 rounded-xl bg-brand-blue-100 dark:bg-brand-blue-900/30 flex items-center justify-center">
+                <font-awesome-icon icon="fa-solid fa-star" class="w-4 h-4 text-brand-blue-600 dark:text-brand-blue-400" />
               </span>
               {{ t('careers.students.why.title') }}
             </h3>
@@ -163,9 +163,9 @@ const galleryImages = [
               <div
                 v-for="(item, index) in whyItems"
                 :key="index"
-                class="group flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 hover:shadow-md"
+                class="group flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-brand-blue-300 dark:hover:border-brand-blue-700 transition-all duration-300 hover:shadow-md"
               >
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-blue-500 to-brand-blue-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                   <font-awesome-icon icon="fa-solid fa-check" class="w-4 h-4 text-white" />
                 </div>
                 <span class="text-gray-700 dark:text-gray-300 pt-0.5">{{ item }}</span>
@@ -180,17 +180,17 @@ const galleryImages = [
               alt="Campus"
               class="absolute inset-0 w-full h-full object-cover"
             />
-            <div class="absolute inset-0 bg-gradient-to-r from-blue-600/95 to-blue-500/90"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-brand-blue-600/95 to-brand-blue-500/90"></div>
             <div class="relative p-8 text-white">
               <h4 class="text-xl font-bold mb-2">
                 {{ t('careers.students.cta.title') }}
               </h4>
-              <p class="text-blue-100 mb-6">
+              <p class="text-brand-blue-100 mb-6">
                 {{ t('careers.students.cta.text') }}
               </p>
               <NuxtLink
                 :to="localePath('/inscription')"
-                class="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+                class="inline-flex items-center gap-2 px-6 py-3 bg-white text-brand-blue-600 font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
               >
                 <font-awesome-icon icon="fa-solid fa-file-pen" class="w-4 h-4" />
                 {{ t('careers.students.cta.button') }}

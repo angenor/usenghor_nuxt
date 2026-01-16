@@ -12,7 +12,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  color: 'amber',
+  color: 'blue',
   imagePosition: 'left',
   icon: 'arrow-right'
 })
@@ -41,23 +41,17 @@ const getIcon = (iconName: string): string => {
 
 // Color classes
 const colorClasses: Record<string, { badge: string, button: string, overlay: string, decoration: string }> = {
-  amber: {
-    badge: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
-    button: 'bg-amber-500 hover:bg-amber-600 hover:shadow-amber-500/30',
-    overlay: 'from-amber-500/20',
-    decoration: 'bg-amber-500/10'
-  },
   blue: {
-    badge: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
-    button: 'bg-blue-500 hover:bg-blue-600 hover:shadow-blue-500/30',
-    overlay: 'from-blue-500/20',
-    decoration: 'bg-blue-500/10'
+    badge: 'bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400',
+    button: 'bg-brand-blue-500 hover:bg-brand-blue-600 hover:shadow-brand-blue-500/30',
+    overlay: 'from-brand-blue-500/20',
+    decoration: 'bg-brand-blue-500/10'
   },
-  emerald: {
-    badge: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
-    button: 'bg-emerald-500 hover:bg-emerald-600 hover:shadow-emerald-500/30',
-    overlay: 'from-emerald-500/20',
-    decoration: 'bg-emerald-500/10'
+  red: {
+    badge: 'bg-brand-red-100 dark:bg-brand-red-900/30 text-brand-red-700 dark:text-brand-red-400',
+    button: 'bg-brand-red-500 hover:bg-brand-red-600 hover:shadow-brand-red-500/30',
+    overlay: 'from-brand-red-500/20',
+    decoration: 'bg-brand-red-500/10'
   },
   purple: {
     badge: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400',
@@ -65,27 +59,15 @@ const colorClasses: Record<string, { badge: string, button: string, overlay: str
     overlay: 'from-purple-500/20',
     decoration: 'bg-purple-500/10'
   },
-  rose: {
-    badge: 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400',
-    button: 'bg-rose-500 hover:bg-rose-600 hover:shadow-rose-500/30',
-    overlay: 'from-rose-500/20',
-    decoration: 'bg-rose-500/10'
-  },
   cyan: {
     badge: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400',
     button: 'bg-cyan-500 hover:bg-cyan-600 hover:shadow-cyan-500/30',
     overlay: 'from-cyan-500/20',
     decoration: 'bg-cyan-500/10'
-  },
-  lime: {
-    badge: 'bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-400',
-    button: 'bg-lime-600 hover:bg-lime-700 hover:shadow-lime-500/30',
-    overlay: 'from-lime-500/20',
-    decoration: 'bg-lime-500/10'
   }
 }
 
-const colors = computed(() => colorClasses[props.color] || colorClasses.amber)
+const colors = computed(() => colorClasses[props.color] || colorClasses.blue)
 </script>
 
 <template>

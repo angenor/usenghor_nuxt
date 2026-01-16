@@ -23,16 +23,16 @@ const typeToSlug: Record<string, string> = {
 
 // Type badge colors
 const typeBgColors: Record<string, string> = {
-  master: 'bg-indigo-500',
-  doctorat: 'bg-purple-600',
-  du: 'bg-teal-500',
-  certifiante: 'bg-rose-500'
+  master: 'bg-brand-blue-500',
+  doctorat: 'bg-brand-red-600',
+  du: 'bg-brand-blue-600',
+  certifiante: 'bg-brand-red-500'
 }
 
 // Campus badge colors
 const campusBgColors: Record<string, string> = {
-  alexandrie: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
-  externalise: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+  alexandrie: 'bg-brand-blue-100 text-brand-blue-800 dark:bg-brand-blue-900/30 dark:text-brand-blue-400',
+  externalise: 'bg-brand-red-100 text-brand-red-800 dark:bg-brand-red-900/30 dark:text-brand-red-400',
   en_ligne: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
 }
 
@@ -125,7 +125,7 @@ const imageUrl = computed(() => {
         </span>
 
         <!-- Title -->
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
           {{ localizedTitle }}
         </h3>
 
@@ -137,11 +137,11 @@ const imageUrl = computed(() => {
         <!-- Info row -->
         <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
           <div class="flex items-center gap-1">
-            <font-awesome-icon icon="fa-solid fa-clock" class="w-4 h-4 text-amber-500" />
+            <font-awesome-icon icon="fa-solid fa-clock" class="w-4 h-4 text-brand-blue-500" />
             <span>{{ localizedDuration }}</span>
           </div>
           <div v-if="props.formation.credits" class="flex items-center gap-1">
-            <font-awesome-icon icon="fa-solid fa-award" class="w-4 h-4 text-amber-500" />
+            <font-awesome-icon icon="fa-solid fa-award" class="w-4 h-4 text-brand-blue-500" />
             <span>{{ props.formation.credits }} {{ t('formations.card.credits') }}</span>
           </div>
         </div>

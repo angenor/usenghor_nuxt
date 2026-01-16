@@ -24,7 +24,7 @@ const { mapRef, activeStep } = useScrollytellingMap({
     <!-- Header HORS de la carte -->
     <div class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-        <span class="w-1.5 h-6 bg-blue-500 rounded-full"></span>
+        <span class="w-1.5 h-6 bg-brand-blue-500 rounded-full"></span>
         Chronologie des adhésions
       </h3>
       <p class="text-gray-600 dark:text-gray-300 max-w-2xl">
@@ -49,7 +49,7 @@ const { mapRef, activeStep } = useScrollytellingMap({
             :class="{ 'step-active': activeStep === index }"
             @click="emit('openDrawer', pays)"
           >
-            <h3 class="text-lg font-bold text-amber-600 dark:text-amber-400">
+            <h3 class="text-lg font-bold text-brand-blue-600 dark:text-brand-blue-400">
               {{ pays.member_since }}
             </h3>
             <h4 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2 mt-1">
@@ -71,7 +71,7 @@ const { mapRef, activeStep } = useScrollytellingMap({
         <!-- Fallback pour SSR : timeline simple -->
         <div class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-            <span class="w-1.5 h-6 bg-blue-500 rounded-full"></span>
+            <span class="w-1.5 h-6 bg-brand-blue-500 rounded-full"></span>
             Chronologie des adhésions
           </h3>
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -121,7 +121,7 @@ const { mapRef, activeStep } = useScrollytellingMap({
   font-weight: 700;
   width: 36px;
   height: 36px;
-  background-color: #f59e0b;
+  background-color: #2b4bbf;
   color: white;
   border-radius: 50%;
   display: inline-flex;
@@ -135,8 +135,8 @@ const { mapRef, activeStep } = useScrollytellingMap({
 
 /* État actif */
 .step-card.step-active {
-  border-color: #f59e0b;
-  box-shadow: 0 0 0 2px #f59e0b, 2px 4px 15px rgba(245, 158, 11, 0.35);
+  border-color: #2b4bbf;
+  box-shadow: 0 0 0 2px #2b4bbf, 2px 4px 15px rgba(43, 75, 191, 0.35);
 }
 
 /* Dark mode */
@@ -151,15 +151,15 @@ const { mapRef, activeStep } = useScrollytellingMap({
 }
 
 :is(.dark) .step-card.step-active {
-  border-color: #f59e0b;
-  box-shadow: 0 0 0 2px #f59e0b, 2px 4px 15px rgba(245, 158, 11, 0.3);
+  border-color: #2b4bbf;
+  box-shadow: 0 0 0 2px #2b4bbf, 2px 4px 15px rgba(43, 75, 191, 0.3);
 }
 </style>
 
 <!-- Styles globaux pour Leaflet -->
 <style>
 .number-icon {
-  background: #f59e0b;
+  background: #2b4bbf;
   color: white;
   border-radius: 50%;
   width: 28px !important;

@@ -81,7 +81,7 @@ export function useScrollytellingMap(options: UseScrollytellingMapOptions) {
 
     // Polyline VIDE au départ
     polylineRef.value = L.polyline([], {
-      color: '#f59e0b',
+      color: '#2b4bbf',
       dashArray: '12 12',
       weight: 3
     }).addTo(map)
@@ -128,9 +128,9 @@ export function useScrollytellingMap(options: UseScrollytellingMapOptions) {
           if (layer) {
             if (idx <= stepIndex) {
               layer.setStyle({
-                fillColor: '#f59e0b',
+                fillColor: '#2b4bbf',
                 fillOpacity: 0.4,
-                color: '#d97706',
+                color: '#233da0',
                 weight: 2
               })
             }

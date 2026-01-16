@@ -58,10 +58,10 @@ const daysRemaining = computed(() => {
 
 // Type badge colors
 const typeBgColors: Record<string, string> = {
-  candidature: 'bg-blue-500',
-  projet: 'bg-emerald-500',
-  bourse: 'bg-purple-500',
-  recrutement: 'bg-indigo-500'
+  candidature: 'bg-brand-blue-500',
+  projet: 'bg-brand-blue-600',
+  bourse: 'bg-brand-red-500',
+  recrutement: 'bg-brand-red-600'
 }
 </script>
 
@@ -87,7 +87,7 @@ const typeBgColors: Record<string, string> = {
           :href="call.url"
           target="_blank"
           rel="noopener noreferrer"
-          class="hover:text-amber-600 transition-colors duration-200"
+          class="hover:text-brand-blue-600 transition-colors duration-200"
         >
           {{ getLocalizedTitle }}
         </a>
@@ -103,7 +103,7 @@ const typeBgColors: Record<string, string> = {
       <div class="post-detail">
         <font-awesome-icon icon="fa-regular fa-calendar" class="inline-block w-4 h-4 mr-2 align-middle" />
         <span class="text-sm text-gray-600">{{ formattedDeadline }}</span>
-        <span v-if="isDeadlineSoon" class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-amber-500 text-white text-xs font-medium rounded-full animate-pulse">
+        <span v-if="isDeadlineSoon" class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-brand-red-500 text-white text-xs font-medium rounded-full animate-pulse">
           {{ daysRemaining }}j
         </span>
       </div>
@@ -130,7 +130,7 @@ const typeBgColors: Record<string, string> = {
       :href="call.url"
       target="_blank"
       rel="noopener noreferrer"
-      class="absolute bottom-5 right-5 inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 z-20"
+      class="absolute bottom-5 right-5 inline-flex items-center gap-2 px-5 py-2.5 bg-brand-blue-500 hover:bg-brand-blue-600 text-white text-sm font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 z-20"
     >
       <span>{{ t('partners.campus.calls.apply') }}</span>
       <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />

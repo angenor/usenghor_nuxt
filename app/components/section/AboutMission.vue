@@ -59,7 +59,7 @@ const scrollToSection = () => {
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
             <span class="relative inline-block">
               {{ props.title }}
-              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
             </span>
           </h2>
 
@@ -68,7 +68,7 @@ const scrollToSection = () => {
           </p>
 
           <!-- Accompagner la transformation de l'Afrique -->
-          <div v-if="props.transformText" class="mb-8 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border-l-4 border-amber-500">
+          <div v-if="props.transformText" class="mb-8 p-4 bg-brand-blue-50 dark:bg-brand-blue-900/20 rounded-xl border-l-4 border-brand-blue-500">
             <p class="text-gray-700 dark:text-gray-200 font-medium italic">
               {{ props.transformText }}
             </p>
@@ -82,7 +82,7 @@ const scrollToSection = () => {
                 :key="index"
                 class="inline-flex items-center gap-2 text-gray-700 dark:text-gray-300"
               >
-                <span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>
+                <span class="w-2 h-2 rounded-full bg-brand-blue-500 flex-shrink-0"></span>
                 <span class="font-medium">{{ item.label }}</span>
               </li>
             </ul>
@@ -90,7 +90,7 @@ const scrollToSection = () => {
             <!-- CTA Button -->
             <button
               type="button"
-              class="group inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-white font-semibold rounded-full transition-all duration-300 hover:bg-amber-600 hover:shadow-lg hover:shadow-amber-500/30 hover:-translate-y-0.5"
+              class="group inline-flex items-center gap-2 px-6 py-3 bg-brand-blue-500 text-white font-semibold rounded-full transition-all duration-300 hover:bg-brand-blue-600 hover:shadow-lg hover:shadow-brand-blue-500/30 hover:-translate-y-0.5"
               @click="scrollToSection"
             >
               <span>{{ props.ctaLabel }}</span>
@@ -110,8 +110,8 @@ const scrollToSection = () => {
               :class="[
                 'group inline-flex items-center gap-3 px-6 py-3 font-semibold rounded-full transition-all duration-300 hover:-translate-y-0.5',
                 index === 0
-                  ? 'bg-amber-500 text-white hover:bg-amber-600 hover:shadow-lg hover:shadow-amber-500/30'
-                  : 'border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-amber-500 hover:text-amber-600 dark:hover:border-amber-500 dark:hover:text-amber-400'
+                  ? 'bg-brand-blue-500 text-white hover:bg-brand-blue-600 hover:shadow-lg hover:shadow-brand-blue-500/30'
+                  : 'border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-brand-blue-500 hover:text-brand-blue-600 dark:hover:border-brand-blue-500 dark:hover:text-brand-blue-400'
               ]"
             >
               <font-awesome-icon
@@ -134,7 +134,7 @@ const scrollToSection = () => {
 
 <style scoped>
 .illustration-bordered {
-  --c: #f59e0b; /* amber-500 */
+  --c: #2b4bbf; /* brand-blue-500 */
   --b: 6px; /* thickness of the border */
   --o: 20px; /* control the offset */
 
@@ -150,6 +150,6 @@ const scrollToSection = () => {
 }
 
 :root.dark .illustration-bordered {
-  --c: #fbbf24; /* amber-400 for dark mode */
+  --c: #5478e6; /* brand-blue-400 for dark mode */
 }
 </style>

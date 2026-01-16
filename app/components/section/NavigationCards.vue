@@ -34,15 +34,15 @@ const getIcon = (iconName: string): string => {
   return iconMap[iconName] || 'fa-solid fa-arrow-right'
 }
 
-// Colors for each card (7 colors for all navigation items)
+// Colors for each card (alternating brand colors)
 const cardColors = [
-  { gradient: 'from-amber-500 to-orange-600', hover: 'group-hover:text-amber-500' },
-  { gradient: 'from-blue-500 to-indigo-600', hover: 'group-hover:text-blue-500' },
-  { gradient: 'from-emerald-500 to-teal-600', hover: 'group-hover:text-emerald-500' },
-  { gradient: 'from-purple-500 to-pink-600', hover: 'group-hover:text-purple-500' },
-  { gradient: 'from-rose-500 to-red-600', hover: 'group-hover:text-rose-500' },
-  { gradient: 'from-cyan-500 to-blue-600', hover: 'group-hover:text-cyan-500' },
-  { gradient: 'from-lime-500 to-green-600', hover: 'group-hover:text-lime-500' }
+  { gradient: 'from-brand-blue-500 to-brand-blue-600', hover: 'group-hover:text-brand-blue-500' },
+  { gradient: 'from-brand-red-500 to-brand-red-600', hover: 'group-hover:text-brand-red-500' },
+  { gradient: 'from-brand-blue-400 to-brand-blue-500', hover: 'group-hover:text-brand-blue-500' },
+  { gradient: 'from-purple-500 to-purple-600', hover: 'group-hover:text-purple-500' },
+  { gradient: 'from-brand-red-400 to-brand-red-500', hover: 'group-hover:text-brand-red-500' },
+  { gradient: 'from-brand-blue-500 to-brand-blue-700', hover: 'group-hover:text-brand-blue-500' },
+  { gradient: 'from-brand-red-500 to-brand-red-700', hover: 'group-hover:text-brand-red-500' }
 ]
 </script>
 

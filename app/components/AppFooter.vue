@@ -42,8 +42,8 @@ const socialLinks = [
   <footer class="relative bg-gray-900 dark:bg-gray-950 text-white overflow-hidden">
     <!-- Decorative Background -->
     <div class="absolute inset-0 overflow-hidden">
-      <div class="absolute -top-40 -right-40 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl"></div>
-      <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+      <div class="absolute -top-40 -right-40 w-80 h-80 bg-brand-blue-500/10 rounded-full blur-3xl"></div>
+      <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-brand-red-500/10 rounded-full blur-3xl"></div>
       <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
     </div>
 
@@ -55,7 +55,7 @@ const socialLinks = [
             <!-- Newsletter Content -->
             <div>
               <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-blue-400 to-brand-blue-600 flex items-center justify-center">
                   <font-awesome-icon icon="fa-solid fa-envelope" class="w-5 h-5 text-white" />
                 </div>
                 <h3 class="text-2xl font-bold text-white">{{ t('footer.newsletter.title') }}</h3>
@@ -76,13 +76,13 @@ const socialLinks = [
                       required
                       :placeholder="t('footer.newsletter.placeholder')"
                       :disabled="isSubmitting"
-                      class="w-full px-5 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300 disabled:opacity-50"
+                      class="w-full px-5 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent transition-all duration-300 disabled:opacity-50"
                     />
                   </div>
                   <button
                     type="submit"
                     :disabled="isSubmitting"
-                    class="group px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold rounded-xl transition-all duration-300 hover:from-amber-600 hover:to-amber-700 hover:shadow-lg hover:shadow-amber-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    class="group px-8 py-4 bg-gradient-to-r from-brand-blue-500 to-brand-blue-600 text-white font-semibold rounded-xl transition-all duration-300 hover:from-brand-blue-600 hover:to-brand-blue-700 hover:shadow-lg hover:shadow-brand-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     <span v-if="isSubmitting">{{ t('footer.newsletter.subscribing') }}</span>
                     <span v-else>{{ t('footer.newsletter.subscribe') }}</span>
@@ -149,7 +149,7 @@ const socialLinks = [
                   :href="social.url"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-gray-400 hover:bg-amber-500 hover:text-white transition-all duration-300 hover:scale-110"
+                  class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-gray-400 hover:bg-brand-blue-500 hover:text-white transition-all duration-300 hover:scale-110"
                   :aria-label="social.name"
                 >
                   <font-awesome-icon :icon="social.icon" class="w-4 h-4" />
@@ -165,22 +165,22 @@ const socialLinks = [
             </h4>
             <ul class="space-y-3">
               <li>
-                <NuxtLink :to="localePath('/formations/masters')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/formations/masters')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.programs.masters') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/formations/diplomes-universitaires')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/formations/diplomes-universitaires')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.programs.diplomas') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/formations/certifiantes')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/formations/certifiantes')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.programs.certifications') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/formations/doctorats')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/formations/doctorats')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.programs.doctorate') }}
                 </NuxtLink>
               </li>
@@ -194,27 +194,27 @@ const socialLinks = [
             </h4>
             <ul class="space-y-3">
               <li>
-                <NuxtLink :to="localePath('/a-propos')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/a-propos')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.university.about') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/a-propos/mission')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/a-propos/mission')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.university.mission') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/a-propos/gouvernance')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/a-propos/gouvernance')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.university.governance') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/a-propos/campus')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/a-propos/campus')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.university.campus') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/a-propos/histoire')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/a-propos/histoire')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.university.history') }}
                 </NuxtLink>
               </li>
@@ -228,27 +228,27 @@ const socialLinks = [
             </h4>
             <ul class="space-y-3">
               <li>
-                <NuxtLink :to="localePath('/actualites')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/actualites')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.resources.news') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/evenements')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/evenements')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.resources.events') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/emplois')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/emplois')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.resources.jobs') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/bibliotheque')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/bibliotheque')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.resources.library') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/faq')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/faq')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.resources.faq') }}
                 </NuxtLink>
               </li>
@@ -262,22 +262,22 @@ const socialLinks = [
             </h4>
             <ul class="space-y-3">
               <li>
-                <NuxtLink :to="localePath('/reseau/alumni')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/reseau/alumni')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.network.alumni') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/reseau/partenaires')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/reseau/partenaires')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.network.partners') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/reseau/campus')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/reseau/campus')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.network.externalCampuses') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/contact')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/contact')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.network.contact') }}
                 </NuxtLink>
               </li>
@@ -290,7 +290,7 @@ const socialLinks = [
           <div class="grid md:grid-cols-3 gap-6">
             <div class="flex items-start gap-3">
               <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                <font-awesome-icon icon="fa-solid fa-location-dot" class="w-4 h-4 text-amber-400" />
+                <font-awesome-icon icon="fa-solid fa-location-dot" class="w-4 h-4 text-brand-blue-400" />
               </div>
               <div>
                 <h5 class="text-sm font-medium text-white mb-1">{{ t('footer.contact.addressTitle') }}</h5>
@@ -299,22 +299,22 @@ const socialLinks = [
             </div>
             <div class="flex items-start gap-3">
               <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                <font-awesome-icon icon="fa-solid fa-phone" class="w-4 h-4 text-amber-400" />
+                <font-awesome-icon icon="fa-solid fa-phone" class="w-4 h-4 text-brand-blue-400" />
               </div>
               <div>
                 <h5 class="text-sm font-medium text-white mb-1">{{ t('footer.contact.phoneTitle') }}</h5>
-                <a href="tel:+20348435044" class="text-sm text-gray-400 hover:text-amber-400 transition-colors">
+                <a href="tel:+20348435044" class="text-sm text-gray-400 hover:text-brand-blue-400 transition-colors">
                   {{ t('footer.contact.phone') }}
                 </a>
               </div>
             </div>
             <div class="flex items-start gap-3">
               <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                <font-awesome-icon icon="fa-solid fa-envelope" class="w-4 h-4 text-amber-400" />
+                <font-awesome-icon icon="fa-solid fa-envelope" class="w-4 h-4 text-brand-blue-400" />
               </div>
               <div>
                 <h5 class="text-sm font-medium text-white mb-1">Email</h5>
-                <a href="mailto:info@usenghor.org" class="text-sm text-gray-400 hover:text-amber-400 transition-colors">
+                <a href="mailto:info@usenghor.org" class="text-sm text-gray-400 hover:text-brand-blue-400 transition-colors">
                   {{ t('footer.contact.email') }}
                 </a>
               </div>
@@ -332,23 +332,23 @@ const socialLinks = [
               <span>© {{ t('footer.bottom.copyright', { year: currentYear }) }}</span>
               <span class="hidden sm:inline">•</span>
               <span class="flex items-center gap-2">
-                <font-awesome-icon icon="fa-solid fa-globe" class="w-4 h-4 text-amber-400" />
+                <font-awesome-icon icon="fa-solid fa-globe" class="w-4 h-4 text-brand-blue-400" />
                 {{ t('footer.bottom.oif') }}
               </span>
             </div>
 
             <!-- Legal Links -->
             <div class="flex flex-wrap items-center justify-center gap-6 text-sm">
-              <NuxtLink :to="localePath('/mentions-legales')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+              <NuxtLink :to="localePath('/mentions-legales')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                 {{ t('footer.legal.terms') }}
               </NuxtLink>
-              <NuxtLink :to="localePath('/confidentialite')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+              <NuxtLink :to="localePath('/confidentialite')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                 {{ t('footer.legal.privacy') }}
               </NuxtLink>
-              <NuxtLink :to="localePath('/cookies')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+              <NuxtLink :to="localePath('/cookies')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                 {{ t('footer.legal.cookies') }}
               </NuxtLink>
-              <NuxtLink :to="localePath('/accessibilite')" class="text-gray-400 hover:text-amber-400 transition-colors duration-300">
+              <NuxtLink :to="localePath('/accessibilite')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                 {{ t('footer.legal.accessibility') }}
               </NuxtLink>
             </div>

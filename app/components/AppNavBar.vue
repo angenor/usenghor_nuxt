@@ -239,8 +239,8 @@ onUnmounted(() => {
               :class="[
                 isScrolled
                   ? activeDropdown === item.key
-                    ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/25'
-                    : 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 hover:bg-amber-500 hover:text-white hover:shadow-lg hover:shadow-amber-500/25'
+                    ? 'bg-brand-blue-500 text-white shadow-lg shadow-brand-blue-500/25'
+                    : 'bg-brand-blue-50 dark:bg-brand-blue-900/20 text-brand-blue-700 dark:text-brand-blue-400 hover:bg-brand-blue-500 hover:text-white hover:shadow-lg hover:shadow-brand-blue-500/25'
                   : activeDropdown === item.key
                     ? 'bg-white text-gray-900 shadow-lg'
                     : 'bg-white/15 text-white backdrop-blur-sm hover:bg-white hover:text-gray-900'
@@ -281,7 +281,7 @@ onUnmounted(() => {
                       <div class="relative p-6 h-full flex flex-col justify-end min-h-[320px]">
                         <div class="mb-4">
                           <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/15 text-white backdrop-blur-sm border border-white/10">
-                            <font-awesome-icon icon="fa-solid fa-star" class="w-3 h-3 mr-1.5 text-amber-400" />
+                            <font-awesome-icon icon="fa-solid fa-star" class="w-3 h-3 mr-1.5 text-brand-blue-400" />
                             {{ t(`nav.dropdowns.${item.key}.${item.featured.titleKey}`) }}
                           </span>
                         </div>
@@ -289,7 +289,7 @@ onUnmounted(() => {
                         <p class="text-white/70 text-sm leading-relaxed mb-4">{{ t(`nav.dropdowns.${item.key}.${item.featured.descKey}`) }}</p>
                         <NuxtLink
                           :to="localePath(item.route)"
-                          class="inline-flex items-center gap-2 text-sm font-semibold text-amber-400 hover:text-amber-300 hover:gap-3 transition-all duration-300"
+                          class="inline-flex items-center gap-2 text-sm font-semibold text-brand-blue-400 hover:text-brand-blue-300 hover:gap-3 transition-all duration-300"
                         >
                           <span>{{ t('nav.exploreAll') }}</span>
                           <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
@@ -306,8 +306,8 @@ onUnmounted(() => {
                           :to="localePath(child.route)"
                           class="group flex items-start gap-3 p-3 rounded-xl transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                         >
-                          <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center transition-all duration-300 group-hover:bg-amber-50 dark:group-hover:bg-amber-900/30">
-                            <font-awesome-icon :icon="child.icon" class="text-gray-400 dark:text-gray-500 group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors" />
+                          <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center transition-all duration-300 group-hover:bg-brand-blue-50 dark:group-hover:bg-brand-blue-900/30">
+                            <font-awesome-icon :icon="child.icon" class="text-gray-400 dark:text-gray-500 group-hover:text-brand-blue-500 dark:group-hover:text-brand-blue-400 transition-colors" />
                           </div>
                           <div class="flex-1 min-w-0 pt-0.5">
                             <div class="flex items-center gap-2">
@@ -317,7 +317,7 @@ onUnmounted(() => {
                               <span
                                 v-if="child.badge"
                                 class="px-1.5 py-0.5 text-[9px] font-semibold uppercase rounded"
-                                :class="child.badge === 'new' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : child.badge === 'popular' ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'"
+                                :class="child.badge === 'new' ? 'bg-brand-red-50 dark:bg-brand-red-900/30 text-brand-red-600 dark:text-brand-red-400' : child.badge === 'popular' ? 'bg-brand-blue-50 dark:bg-brand-blue-900/30 text-brand-blue-600 dark:text-brand-blue-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'"
                               >
                                 {{ child.badge === 'new' ? t('nav.badges.new') : child.badge === 'popular' ? t('nav.badges.popular') : child.badge }}
                               </span>
@@ -386,10 +386,10 @@ onUnmounted(() => {
                       <NuxtLink
                         v-if="section.singleLink"
                         :to="localePath(section.route)"
-                        class="group block p-3 rounded-xl bg-gray-50/50 dark:bg-gray-800/50 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all duration-200 cursor-pointer"
+                        class="group block p-3 rounded-xl bg-gray-50/50 dark:bg-gray-800/50 hover:bg-brand-blue-50 dark:hover:bg-brand-blue-900/20 transition-all duration-200 cursor-pointer"
                       >
-                        <div class="flex items-center gap-2 mb-3 text-sm font-semibold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                          <font-awesome-icon :icon="section.icon" class="w-4 h-4 text-amber-500" />
+                        <div class="flex items-center gap-2 mb-3 text-sm font-semibold text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
+                          <font-awesome-icon :icon="section.icon" class="w-4 h-4 text-brand-blue-500" />
                           {{ t(`nav.${section.key}`) }}
                           <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
@@ -397,7 +397,7 @@ onUnmounted(() => {
                           <div
                             v-for="child in section.children"
                             :key="child.key"
-                            class="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-600 dark:text-gray-400 group-hover:text-amber-600/80 dark:group-hover:text-amber-400/80 transition-colors"
+                            class="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-600 dark:text-gray-400 group-hover:text-brand-blue-600/80 dark:group-hover:text-brand-blue-400/80 transition-colors"
                           >
                             <font-awesome-icon :icon="child.icon" class="w-3 h-3 opacity-50 group-hover:opacity-100" />
                             <span>{{ t(`nav.dropdowns.${section.key}.${child.key}`) }}</span>
@@ -412,9 +412,9 @@ onUnmounted(() => {
                       >
                         <NuxtLink
                           :to="localePath(section.route)"
-                          class="flex items-center gap-2 mb-3 text-sm font-semibold text-gray-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                          class="flex items-center gap-2 mb-3 text-sm font-semibold text-gray-900 dark:text-white hover:text-brand-blue-600 dark:hover:text-brand-blue-400 transition-colors"
                         >
-                          <font-awesome-icon :icon="section.icon" class="w-4 h-4 text-amber-500" />
+                          <font-awesome-icon :icon="section.icon" class="w-4 h-4 text-brand-blue-500" />
                           {{ t(`nav.${section.key}`) }}
                           <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3 ml-auto opacity-0 group-hover:opacity-100" />
                         </NuxtLink>
@@ -423,7 +423,7 @@ onUnmounted(() => {
                             v-for="child in section.children"
                             :key="child.key"
                             :to="localePath(child.route)"
-                            class="group flex items-center gap-2 px-2 py-1.5 text-xs text-gray-600 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg hover:bg-white dark:hover:bg-gray-700 transition-all duration-200"
+                            class="group flex items-center gap-2 px-2 py-1.5 text-xs text-gray-600 dark:text-gray-400 hover:text-brand-blue-600 dark:hover:text-brand-blue-400 rounded-lg hover:bg-white dark:hover:bg-gray-700 transition-all duration-200"
                           >
                             <font-awesome-icon :icon="child.icon" class="w-3 h-3 opacity-50 group-hover:opacity-100" />
                             <span>{{ t(`nav.dropdowns.${section.key}.${child.key}`) }}</span>
@@ -525,7 +525,7 @@ onUnmounted(() => {
                   class="flex items-center gap-3 w-full px-4 py-2.5 text-sm transition-colors duration-200"
                   :class="[
                     locale === lang.code
-                      ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 font-medium'
+                      ? 'bg-brand-blue-50 dark:bg-brand-blue-900/20 text-brand-blue-700 dark:text-brand-blue-400 font-medium'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                   ]"
                 >
@@ -538,7 +538,7 @@ onUnmounted(() => {
                   <font-awesome-icon
                     v-if="locale === lang.code"
                     icon="fa-solid fa-check"
-                    class="w-3 h-3 ltr:ml-auto rtl:mr-auto text-amber-500"
+                    class="w-3 h-3 ltr:ml-auto rtl:mr-auto text-brand-blue-500"
                   />
                 </button>
               </div>
@@ -547,11 +547,11 @@ onUnmounted(() => {
 
           <!-- CTA Button -->
           <NuxtLink
-            :to="localePath('/inscription')"
+            :to="localePath('/carrieres')"
             class="group relative inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl overflow-hidden transition-all duration-300 ml-2"
             :class="[
               isScrolled
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/30 hover:-translate-y-0.5'
+                ? 'bg-gradient-to-r from-brand-blue-500 to-brand-blue-600 text-white shadow-lg shadow-brand-blue-500/25 hover:shadow-xl hover:shadow-brand-blue-500/30 hover:-translate-y-0.5'
                 : 'bg-white text-gray-900 hover:bg-gray-100 shadow-lg'
             ]"
           >
@@ -605,10 +605,10 @@ onUnmounted(() => {
             <NuxtLink
               v-else-if="item.singleLink"
               :to="localePath(item.route)"
-              class="group block px-4 py-3.5 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all duration-200"
+              class="group block px-4 py-3.5 rounded-xl hover:bg-brand-blue-50 dark:hover:bg-brand-blue-900/20 transition-all duration-200"
               @click="isMobileMenuOpen = false"
             >
-              <div class="flex items-center justify-between text-gray-700 dark:text-gray-200 font-medium group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+              <div class="flex items-center justify-between text-gray-700 dark:text-gray-200 font-medium group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                 <span>{{ t(`nav.${item.key}`) }}</span>
                 <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
@@ -616,7 +616,7 @@ onUnmounted(() => {
                 <span
                   v-for="child in item.children"
                   :key="child.key"
-                  class="inline-flex items-center gap-1.5 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-md group-hover:bg-amber-100 dark:group-hover:bg-amber-900/30 group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors"
+                  class="inline-flex items-center gap-1.5 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-md group-hover:bg-brand-blue-100 dark:group-hover:bg-brand-blue-900/30 group-hover:text-brand-blue-700 dark:group-hover:text-brand-blue-400 transition-colors"
                 >
                   <font-awesome-icon :icon="child.icon" class="w-3 h-3" />
                   {{ t(`nav.dropdowns.${item.key}.${child.key}`) }}
@@ -687,7 +687,7 @@ onUnmounted(() => {
             @click="toggleDarkMode"
             class="flex items-center justify-center gap-3 w-full px-4 py-3 text-gray-600 dark:text-gray-300 font-medium rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
           >
-            <font-awesome-icon v-if="isDark" icon="fa-solid fa-sun" class="w-4 h-4 text-amber-400" />
+            <font-awesome-icon v-if="isDark" icon="fa-solid fa-sun" class="w-4 h-4 text-brand-blue-400" />
             <font-awesome-icon v-else icon="fa-solid fa-moon" class="w-4 h-4 text-gray-400" />
             <span>{{ isDark ? t('theme.lightMode') : t('theme.darkMode') }}</span>
           </button>
@@ -706,7 +706,7 @@ onUnmounted(() => {
                 class="flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-all duration-200"
                 :class="[
                   locale === lang.code
-                    ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 ring-2 ring-amber-500/50'
+                    ? 'bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 ring-2 ring-brand-blue-500/50'
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                 ]"
               >
@@ -722,7 +722,7 @@ onUnmounted(() => {
 
           <!-- CTA Button Mobile -->
           <NuxtLink
-            :to="localePath('/inscription')"
+            :to="localePath('/carrieres')"
             class="flex items-center justify-center gap-2 w-full px-4 py-4 mt-3 text-center bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-300 shadow-lg"
             @click="isMobileMenuOpen = false"
           >
@@ -753,7 +753,7 @@ onUnmounted(() => {
         <font-awesome-icon
           :icon="isDark ? 'fa-solid fa-moon' : 'fa-solid fa-sun'"
           class="w-5 h-5"
-          :class="isDark ? 'text-indigo-400' : 'text-amber-500'"
+          :class="isDark ? 'text-brand-blue-400' : 'text-brand-blue-500'"
         />
         <span class="text-sm font-medium">{{ t(isDark ? 'theme.darkMode' : 'theme.lightMode') }}</span>
       </div>

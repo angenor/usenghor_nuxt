@@ -18,17 +18,17 @@ const { elementRef: orgChartRef } = useScrollAnimation({ animation: 'fadeInUp', 
 // Color classes for gradient avatars
 const getColorClasses = (color: string) => {
   const colors: Record<string, { bg: string; badge: string; ring: string }> = {
-    emerald: { bg: 'bg-gradient-to-br from-emerald-500 to-teal-600', badge: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300', ring: 'ring-emerald-500/30' },
-    cyan: { bg: 'bg-gradient-to-br from-cyan-500 to-blue-600', badge: 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300', ring: 'ring-cyan-500/30' },
-    amber: { bg: 'bg-gradient-to-br from-amber-500 to-orange-600', badge: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300', ring: 'ring-amber-500/30' },
-    purple: { bg: 'bg-gradient-to-br from-purple-500 to-indigo-600', badge: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300', ring: 'ring-purple-500/30' }
+    blue: { bg: 'bg-gradient-to-br from-brand-blue-500 to-brand-blue-600', badge: 'bg-brand-blue-100 dark:bg-brand-blue-900/40 text-brand-blue-700 dark:text-brand-blue-300', ring: 'ring-brand-blue-500/30' },
+    red: { bg: 'bg-gradient-to-br from-brand-red-500 to-brand-red-600', badge: 'bg-brand-red-100 dark:bg-brand-red-900/40 text-brand-red-700 dark:text-brand-red-300', ring: 'ring-brand-red-500/30' },
+    purple: { bg: 'bg-gradient-to-br from-purple-500 to-purple-600', badge: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300', ring: 'ring-purple-500/30' },
+    cyan: { bg: 'bg-gradient-to-br from-cyan-500 to-cyan-600', badge: 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300', ring: 'ring-cyan-500/30' }
   }
-  return colors[color] || colors.emerald
+  return colors[color] || colors.blue
 }
 
 // Assign colors to VP and member positions
-const vpColors = ['cyan', 'amber', 'purple', 'emerald']
-const memberColors = ['cyan', 'amber', 'purple', 'emerald', 'cyan', 'amber', 'purple', 'emerald']
+const vpColors = ['blue', 'red', 'purple', 'blue']
+const memberColors = ['blue', 'red', 'purple', 'blue', 'red', 'purple', 'blue', 'red']
 
 // Refs for leader-line
 const presidentRef = ref<HTMLElement | null>(null)
@@ -63,7 +63,7 @@ const drawLines = async () => {
     vpRefs.value.forEach(vpEl => {
       if (vpEl && presidentRef.value) {
         const line = new LeaderLine(presidentRef.value, vpEl, {
-          color: 'rgba(16, 185, 129, 0.5)',
+          color: 'rgba(43, 75, 191, 0.5)',
           size: 2,
           path: 'straight',
           startSocket: 'bottom',
@@ -85,7 +85,7 @@ const drawLines = async () => {
       memberRefs.value.forEach(memberEl => {
         if (memberEl) {
           const line = new LeaderLine(centerVp, memberEl, {
-            color: 'rgba(99, 102, 241, 0.4)',
+            color: 'rgba(243, 37, 37, 0.4)',
             size: 2,
             path: 'straight',
             startSocket: 'bottom',
@@ -128,9 +128,9 @@ watch([() => props.vicePresidents, () => props.members], () => {
   <section class="relative py-16 lg:py-24 bg-white dark:bg-gray-950 transition-colors duration-300 overflow-hidden">
     <!-- Animated Background -->
     <div class="absolute inset-0 overflow-hidden">
-      <div class="absolute inset-0 bg-gradient-to-br from-emerald-50/50 via-transparent to-blue-50/50 dark:from-emerald-900/10 dark:via-transparent dark:to-blue-900/10"></div>
-      <div class="absolute -top-40 -right-40 w-80 h-80 bg-emerald-200/30 dark:bg-emerald-500/10 rounded-full blur-3xl animate-blob"></div>
-      <div class="absolute top-1/2 -left-20 w-96 h-96 bg-blue-200/30 dark:bg-blue-500/10 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+      <div class="absolute inset-0 bg-gradient-to-br from-brand-blue-50/50 via-transparent to-brand-red-50/50 dark:from-brand-blue-900/10 dark:via-transparent dark:to-brand-red-900/10"></div>
+      <div class="absolute -top-40 -right-40 w-80 h-80 bg-brand-blue-200/30 dark:bg-brand-blue-500/10 rounded-full blur-3xl animate-blob"></div>
+      <div class="absolute top-1/2 -left-20 w-96 h-96 bg-brand-red-200/30 dark:bg-brand-red-500/10 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
       <div class="absolute -bottom-40 right-1/3 w-72 h-72 bg-purple-200/20 dark:bg-purple-500/10 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
       <div class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
     </div>
@@ -138,7 +138,7 @@ watch([() => props.vicePresidents, () => props.members], () => {
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div ref="headerRef" class="text-center mb-16 lg:mb-20">
-        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 mb-4">
+        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 mb-4">
           <font-awesome-icon icon="fa-solid fa-landmark" class="w-3.5 h-3.5 mr-2" />
           {{ t('governance.board.title') }}
         </span>
@@ -162,7 +162,7 @@ watch([() => props.vicePresidents, () => props.members], () => {
             >
               <div class="flex flex-col items-center">
                 <div class="president-avatar-ring p-1 rounded-full mb-4">
-                  <div class="bg-gradient-to-br from-emerald-500 to-teal-600 w-20 h-20 rounded-full flex items-center justify-center overflow-hidden">
+                  <div class="bg-gradient-to-br from-brand-blue-500 to-brand-blue-600 w-20 h-20 rounded-full flex items-center justify-center overflow-hidden">
                     <img
                       v-if="props.president.photo"
                       :src="props.president.photo"
@@ -178,7 +178,7 @@ watch([() => props.vicePresidents, () => props.members], () => {
                 <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-1 text-center">
                   {{ props.president.civility }} {{ props.president.first_name }} {{ props.president.last_name }}
                 </h4>
-                <span class="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 px-4 py-1.5 rounded-full text-sm font-medium border border-emerald-200 dark:border-emerald-800">
+                <span class="bg-brand-blue-100 dark:bg-brand-blue-900/40 text-brand-blue-700 dark:text-brand-blue-300 px-4 py-1.5 rounded-full text-sm font-medium border border-brand-blue-200 dark:border-brand-blue-800">
                   Président du Conseil
                 </span>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">{{ props.president.representing_fr }}</p>
@@ -227,7 +227,7 @@ watch([() => props.vicePresidents, () => props.members], () => {
                 v-for="(member, index) in props.members"
                 :key="member.id"
                 :ref="(el) => setMemberRef(el, index)"
-                class="org-card bg-white dark:bg-gray-800/50 rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 hover:border-emerald-300 dark:hover:border-emerald-600 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 w-44"
+                class="org-card bg-white dark:bg-gray-800/50 rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 hover:border-brand-blue-300 dark:hover:border-brand-blue-600 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 w-44"
               >
                 <div class="flex flex-col items-center text-center">
                   <div :class="[getColorClasses(memberColors[index % memberColors.length]).bg, 'w-12 h-12 rounded-full flex items-center justify-center mb-2 ring-4 ring-opacity-30 overflow-hidden', getColorClasses(memberColors[index % memberColors.length]).ring]">
@@ -330,7 +330,7 @@ watch([() => props.vicePresidents, () => props.members], () => {
 
 /* President avatar ring - static gradient border */
 .president-avatar-ring {
-  background: linear-gradient(135deg, #10b981, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #2b4bbf, #f32525, #8b5cf6);
   padding: 3px;
 }
 
