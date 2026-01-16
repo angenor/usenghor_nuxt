@@ -86,24 +86,12 @@ const breadcrumb = computed(() => [
         <!-- Main content -->
         <article class="lg:w-2/3">
           <!-- Cover image -->
-          <div class="relative rounded-xl overflow-hidden shadow-lg mb-8">
+          <div class="rounded-xl overflow-hidden shadow-lg mb-8">
             <img
               :src="call.image"
               :alt="getLocalizedTitle"
               class="w-full h-64 md:h-80 object-cover"
             />
-            <!-- Partner logos overlay -->
-            <div v-if="call.partner_logos && call.partner_logos.length > 0" class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-              <div class="flex items-center justify-end gap-3 flex-wrap">
-                <img
-                  v-for="(logo, index) in call.partner_logos.slice(0, 4)"
-                  :key="index"
-                  :src="logo"
-                  alt="Partner logo"
-                  class="h-10 w-auto bg-white rounded-lg p-1"
-                />
-              </div>
-            </div>
           </div>
 
           <!-- Status badge -->
@@ -279,6 +267,22 @@ const breadcrumb = computed(() => [
                     {{ formatDeadline(call.deadline) }}
                   </span>
                 </div>
+              </div>
+            </div>
+
+            <!-- Partner logos -->
+            <div v-if="call.partner_logos && call.partner_logos.length > 0" class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+              <h3 class="font-bold text-gray-900 dark:text-white mb-4">
+                {{ t('projets.detail.partners') }}
+              </h3>
+              <div class="flex flex-wrap items-center justify-center gap-4">
+                <img
+                  v-for="(logo, index) in call.partner_logos"
+                  :key="index"
+                  :src="logo"
+                  alt="Partner logo"
+                  class="h-12 w-auto object-contain"
+                />
               </div>
             </div>
 
