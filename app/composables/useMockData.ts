@@ -272,6 +272,37 @@ export function useMockData() {
   const getProjectById = (id: string) =>
     mockProjects.find(p => p.id === id)
 
+  // === DONNÉES PROJET (appels, actualités, médias liés à un projet) ===
+  const getProjectCalls = (projectId: string) =>
+    mockCampusCalls.filter(c => c.project_id === projectId && c.is_active && c.status === 'open')
+
+  const getProjectClosedCalls = (projectId: string) =>
+    mockCampusCalls.filter(c => c.project_id === projectId && c.is_active && c.status === 'closed')
+
+  const getProjectAllCalls = (projectId: string) =>
+    mockCampusCalls.filter(c => c.project_id === projectId && c.is_active)
+
+  const getProjectCallBySlug = (projectSlug: string, callSlug: string) => {
+    const project = getProjectBySlug(projectSlug)
+    if (!project) return null
+    return mockCampusCalls.find(c => c.project_id === project.id && c.slug === callSlug)
+  }
+
+  const getProjectNews = (projectId: string) =>
+    mockCampusNews
+      .filter(n => n.project_id === projectId)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+  const getProjectMedia = (projectId: string) =>
+    mockCampusMedia
+      .filter(m => m.project_id === projectId)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+  const getProjectMediaByType = (projectId: string, type: CampusMedia['type']) =>
+    mockCampusMedia
+      .filter(m => m.project_id === projectId && m.type === type)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
   // === ALUMNI ===
   const alumni = computed(() => mockAlumni.filter(a => a.is_published))
 
@@ -447,6 +478,15 @@ export function useMockData() {
     getProjectsByStatus,
     getProjectBySlug,
     getProjectById,
+
+    // Getters données projet (appels, actualités, médias)
+    getProjectCalls,
+    getProjectClosedCalls,
+    getProjectAllCalls,
+    getProjectCallBySlug,
+    getProjectNews,
+    getProjectMedia,
+    getProjectMediaByType,
 
     // Getters alumni
     getAllAlumni,

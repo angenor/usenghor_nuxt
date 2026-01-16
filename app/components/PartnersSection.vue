@@ -4,7 +4,6 @@ const { t } = useI18n()
 const { elementRef: headerRef } = useScrollAnimation({ animation: 'fadeInDown' })
 const { elementRef: foundingTextsRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.15 })
 const { elementRef: donorCountriesRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.2 })
-const { elementRef: boardRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.1 })
 
 const donorCountries = [
   { code: 'FR', name: 'France' },
@@ -21,24 +20,6 @@ const donorCountries = [
   { code: 'BF', name: 'Burkina Faso' }
 ]
 
-const orgChart = {
-  president: { initials: 'HH', nameKey: 'governance.board.president.name', roleKey: 'governance.board.president.role', color: 'emerald' },
-  directors: [
-    { id: 'secretary', initials: 'MK', nameKey: 'governance.board.secretary.name', roleKey: 'governance.board.secretary.role', color: 'cyan' },
-    { id: 'treasurer', initials: 'AB', nameKey: 'governance.board.treasurer.name', roleKey: 'governance.board.treasurer.role', color: 'amber' },
-    { id: 'programs', initials: 'FN', nameKey: 'governance.board.programs.name', roleKey: 'governance.board.programs.role', color: 'purple' }
-  ]
-}
-
-const getColorClasses = (color: string) => {
-  const colors: Record<string, { bg: string; badge: string }> = {
-    emerald: { bg: 'bg-gradient-to-br from-brand-blue-500 to-brand-blue-600', badge: 'bg-brand-blue-100 dark:bg-brand-blue-900/40 text-brand-blue-700 dark:text-brand-blue-300' },
-    cyan: { bg: 'bg-gradient-to-br from-cyan-500 to-blue-600', badge: 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300' },
-    amber: { bg: 'bg-gradient-to-br from-brand-red-500 to-brand-red-600', badge: 'bg-brand-red-100 dark:bg-brand-red-900/40 text-brand-red-700 dark:text-brand-red-300' },
-    purple: { bg: 'bg-gradient-to-br from-purple-500 to-indigo-600', badge: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' }
-  }
-  return colors[color] || colors.emerald
-}
 </script>
 
 <template>
@@ -119,7 +100,7 @@ const getColorClasses = (color: string) => {
       </div>
 
       <!-- Pays Bailleurs Section -->
-      <div ref="donorCountriesRef" class="mb-20">
+      <div ref="donorCountriesRef">
         <div class="text-center mb-12">
           <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-4">
             {{ t('governance.donorCountries.title') }}
@@ -172,67 +153,6 @@ const getColorClasses = (color: string) => {
                   <span class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
                     {{ country.name }}
                   </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Conseil d'Administration - Organigramme -->
-      <div ref="boardRef" class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-3xl p-8 lg:p-12 overflow-x-auto">
-        <div class="text-center mb-12">
-          <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            {{ t('governance.board.title') }}
-          </h3>
-          <p class="text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-            {{ t('governance.board.description') }}
-          </p>
-        </div>
-
-        <!-- Hierarchical Org Chart -->
-        <div class="org-chart min-w-[800px]">
-          <!-- Niveau 1 : Président -->
-          <div class="flex justify-center mb-8">
-            <div class="org-node connector-down">
-              <div class="org-card bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 w-72">
-                <div class="flex flex-col items-center">
-                  <div class="president-avatar-ring p-1 rounded-full mb-4">
-                    <div :class="[getColorClasses(orgChart.president.color).bg, 'w-20 h-20 rounded-full flex items-center justify-center']">
-                      <span class="text-2xl font-bold text-white">{{ orgChart.president.initials }}</span>
-                    </div>
-                  </div>
-                  <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-1">
-                    {{ t(orgChart.president.nameKey) }}
-                  </h4>
-                  <span :class="[getColorClasses(orgChart.president.color).badge, 'px-4 py-1.5 rounded-full text-sm font-medium border']">
-                    {{ t(orgChart.president.roleKey) }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Niveau 2 : Directeurs -->
-          <div class="horizontal-line pt-8">
-            <div class="flex justify-center gap-6 flex-wrap">
-              <div
-                v-for="director in orgChart.directors"
-                :key="director.id"
-                class="org-node connector-up"
-              >
-                <div class="org-card bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 w-56">
-                  <div class="flex flex-col items-center">
-                    <div :class="[getColorClasses(director.color).bg, 'w-16 h-16 rounded-full flex items-center justify-center mb-3 ring-4 ring-opacity-30', getColorClasses(director.color).bg.includes('emerald') ? 'ring-emerald-500/30' : getColorClasses(director.color).bg.includes('cyan') ? 'ring-cyan-500/30' : getColorClasses(director.color).bg.includes('amber') ? 'ring-amber-500/30' : 'ring-purple-500/30']">
-                      <span class="text-lg font-bold text-white">{{ director.initials }}</span>
-                    </div>
-                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-1 text-center">
-                      {{ t(director.nameKey) }}
-                    </h4>
-                    <span :class="[getColorClasses(director.color).badge, 'px-3 py-1 rounded-full text-xs font-medium border text-center']">
-                      {{ t(director.roleKey) }}
-                    </span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -352,64 +272,6 @@ const getColorClasses = (color: string) => {
   }
 }
 
-/* Org Chart Layout */
-.org-chart {
-  padding: 1rem 0;
-}
-
-.org-node {
-  position: relative;
-}
-
-.org-card {
-  position: relative;
-}
-
-/* Connector down - vertical line going down from element */
-.connector-down::after {
-  content: '';
-  position: absolute;
-  bottom: -32px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  height: 32px;
-  background: linear-gradient(to bottom, #2b4bbf, #f32525);
-}
-
-/* Connector up - vertical line going up to element */
-.connector-up::before {
-  content: '';
-  position: absolute;
-  top: -32px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  height: 32px;
-  background: linear-gradient(to bottom, #f32525, #2b4bbf);
-}
-
-/* Horizontal line for grouping children */
-.horizontal-line {
-  position: relative;
-}
-
-.horizontal-line::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 15%;
-  right: 15%;
-  height: 2px;
-  background: linear-gradient(to right, transparent, #2b4bbf, #f32525, #2b4bbf, transparent);
-}
-
-/* President avatar ring - static gradient border */
-.president-avatar-ring {
-  background: linear-gradient(135deg, #2b4bbf, #f32525, #8b5cf6);
-  padding: 3px;
-}
-
 /* Marquee Animation for Donor Countries */
 .marquee-container {
   padding: 1rem 0;
@@ -440,21 +302,5 @@ const getColorClasses = (color: string) => {
 /* Pause animation on hover */
 .marquee-track:hover .animate-marquee {
   animation-play-state: paused;
-}
-
-/* Card entrance animation */
-.org-card {
-  animation: fadeInUp 0.6s ease-out forwards;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 </style>

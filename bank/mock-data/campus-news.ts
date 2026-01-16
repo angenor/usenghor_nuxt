@@ -5,6 +5,7 @@
 export interface CampusNews {
   id: string
   campus_id: string
+  project_id?: string // Optional link to a project
   title_fr: string
   title_en?: string
   title_ar?: string
@@ -333,5 +334,111 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-11-25',
     excerpt_fr: 'Témoignages des étudiants sur leurs stages dans les hôpitaux partenaires.',
     image: 'https://picsum.photos/seed/news-cotonou-2/600/400'
+  },
+
+  // ============================================
+  // ACTUALITÉS LIÉES AUX PROJETS
+  // ============================================
+
+  // Transform'Action Africa - Actualités
+  {
+    id: 'news-transformaction-1',
+    campus_id: 'siege',
+    project_id: 'project-transformaction-africa',
+    title_fr: 'Clôture de la Cohorte 2024 : 45 Transform\'acteurs diplômés',
+    title_en: '2024 Cohort Closing: 45 Transform\'actors Graduated',
+    title_ar: 'اختتام فوج 2024: تخرج 45 محولاً',
+    date: '2025-01-10',
+    excerpt_fr: 'La cérémonie de clôture de la Cohorte 2024 a célébré 45 cadres dirigeants venus de 12 pays africains, désormais équipés pour conduire le changement dans leurs organisations.',
+    excerpt_en: 'The 2024 Cohort closing ceremony celebrated 45 senior executives from 12 African countries, now equipped to drive change in their organizations.',
+    image: 'https://picsum.photos/seed/news-ta-1/800/500',
+    url: '/actualites/transformaction-cohorte-2024'
+  },
+  {
+    id: 'news-transformaction-2',
+    campus_id: 'siege',
+    project_id: 'project-transformaction-africa',
+    title_fr: 'Session présentielle à Abidjan : immersion dans l\'innovation publique',
+    title_en: 'In-person Session in Abidjan: Immersion in Public Innovation',
+    title_ar: 'الجلسة الحضورية في أبيدجان: الانغماس في الابتكار العام',
+    date: '2024-11-15',
+    excerpt_fr: 'La deuxième session présentielle de la Cohorte 2024 s\'est tenue à Abidjan avec des ateliers sur l\'innovation dans le secteur public africain.',
+    excerpt_en: 'The second in-person session of the 2024 Cohort was held in Abidjan with workshops on innovation in the African public sector.',
+    image: 'https://picsum.photos/seed/news-ta-2/800/500'
+  },
+  {
+    id: 'news-transformaction-3',
+    campus_id: 'siege',
+    project_id: 'project-transformaction-africa',
+    title_fr: 'Nouveau partenariat avec le PNUD pour Transform\'Action Africa',
+    title_en: 'New Partnership with UNDP for Transform\'Action Africa',
+    title_ar: 'شراكة جديدة مع برنامج الأمم المتحدة الإنمائي',
+    date: '2024-09-20',
+    excerpt_fr: 'L\'Université Senghor et le PNUD signent un accord de partenariat pour renforcer l\'impact de Transform\'Action Africa sur la gouvernance publique.',
+    excerpt_en: 'Senghor University and UNDP sign a partnership agreement to strengthen Transform\'Action Africa\'s impact on public governance.',
+    image: 'https://picsum.photos/seed/news-ta-3/800/500'
+  },
+  {
+    id: 'news-transformaction-4',
+    campus_id: 'siege',
+    project_id: 'project-transformaction-africa',
+    title_fr: 'Témoignage : Marie Koné, Transform\'actrice 2023',
+    title_en: 'Testimonial: Marie Koné, Transform\'actor 2023',
+    title_ar: 'شهادة: ماري كوني، محولة 2023',
+    date: '2024-07-05',
+    excerpt_fr: 'Marie Koné, Directrice des Ressources Humaines au Ministère de la Fonction Publique de Côte d\'Ivoire, partage son expérience Transform\'Action.',
+    excerpt_en: 'Marie Koné, HR Director at the Ministry of Public Service of Côte d\'Ivoire, shares her Transform\'Action experience.',
+    image: 'https://picsum.photos/seed/news-ta-4/800/500'
+  },
+
+  // KreAfrika - Actualités
+  {
+    id: 'news-kreafrika-1',
+    campus_id: 'siege',
+    project_id: 'project-kreafrika',
+    title_fr: 'KreAfrika au Festival de Cannes 2025',
+    title_en: 'KreAfrika at Cannes Festival 2025',
+    title_ar: 'كري أفريكا في مهرجان كان 2025',
+    date: '2025-01-08',
+    excerpt_fr: 'KreAfrika sera présent au Marché du Film de Cannes 2025 pour accompagner 10 professionnels africains du cinéma et de l\'audiovisuel.',
+    excerpt_en: 'KreAfrika will be present at the Cannes Film Market 2025 to support 10 African cinema and audiovisual professionals.',
+    image: 'https://picsum.photos/seed/news-kreafrika-1/800/500',
+    url: '/actualites/kreafrika-cannes-2025'
+  },
+  {
+    id: 'news-kreafrika-2',
+    campus_id: 'siege',
+    project_id: 'project-kreafrika',
+    title_fr: 'Séminaire de Kinshasa : 120 professionnels formés',
+    title_en: 'Kinshasa Seminar: 120 Professionals Trained',
+    title_ar: 'ندوة كينشاسا: تدريب 120 محترفاً',
+    date: '2024-12-01',
+    excerpt_fr: 'Le séminaire régional KreAfrika de Kinshasa a réuni 120 professionnels des industries créatives d\'Afrique centrale sur la gestion des équipements culturels.',
+    excerpt_en: 'The KreAfrika regional seminar in Kinshasa brought together 120 creative industries professionals from Central Africa on cultural facility management.',
+    image: 'https://picsum.photos/seed/news-kreafrika-2/800/500'
+  },
+  {
+    id: 'news-kreafrika-3',
+    campus_id: 'siege',
+    project_id: 'project-kreafrika',
+    title_fr: 'Lancement de la plateforme e-learning KreAfrika',
+    title_en: 'Launch of KreAfrika E-learning Platform',
+    title_ar: 'إطلاق منصة التعلم الإلكتروني كري أفريكا',
+    date: '2024-10-15',
+    excerpt_fr: 'La nouvelle plateforme de formation en ligne KreAfrika propose 15 modules gratuits pour les professionnels des industries créatives africaines.',
+    excerpt_en: 'The new KreAfrika online training platform offers 15 free modules for African creative industries professionals.',
+    image: 'https://picsum.photos/seed/news-kreafrika-3/800/500'
+  },
+  {
+    id: 'news-kreafrika-4',
+    campus_id: 'campus-abidjan',
+    project_id: 'project-kreafrika',
+    title_fr: 'KreAfrika et le MASA : un partenariat renforcé',
+    title_en: 'KreAfrika and MASA: A Strengthened Partnership',
+    title_ar: 'كري أفريكا وMASA: شراكة معززة',
+    date: '2024-08-20',
+    excerpt_fr: 'KreAfrika devient partenaire officiel du Marché des Arts du Spectacle Africain (MASA) pour les éditions 2025 et 2026.',
+    excerpt_en: 'KreAfrika becomes official partner of the African Performing Arts Market (MASA) for the 2025 and 2026 editions.',
+    image: 'https://picsum.photos/seed/news-kreafrika-4/800/500'
   }
 ]

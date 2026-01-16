@@ -7,7 +7,7 @@
     <HeroSection />
     <MissionSection />
     <HistorySection />
-    <GovernanceSection />
+    <PartnersSection />
     <PartnersCampusMapSection />
   </div>
 </template>

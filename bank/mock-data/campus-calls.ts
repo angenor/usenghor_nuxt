@@ -5,15 +5,21 @@
 export interface CampusCall {
   id: string
   campus_id: string
+  project_id?: string // Optional link to a project
+  slug?: string // URL-friendly identifier for detail pages
   title_fr: string
   title_en?: string
   title_ar?: string
-  type: 'candidature' | 'projet' | 'bourse' | 'recrutement'
+  type: 'candidature' | 'projet' | 'bourse' | 'recrutement' | 'bootcamp' | 'scholarship' | 'competition'
   status: 'open' | 'closed'
   deadline: string
   description_fr: string
   description_en?: string
   description_ar?: string
+  content_fr?: string // Full content for detail page
+  content_en?: string
+  content_ar?: string
+  requirements?: string[] // List of requirements for the call
   image: string
   partner_logos: string[]
   url?: string
@@ -517,6 +523,340 @@ export const mockCampusCalls: CampusCall[] = [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.png'
     ],
     url: 'https://usenghor.org/recrutements/assistant-admin',
+    is_active: true
+  },
+
+  // ============================================
+  // APPELS LIÉS AUX PROJETS
+  // ============================================
+
+  // Transform'Action Africa - Appels
+  {
+    id: 'call-transformaction-cohorte-2025',
+    campus_id: 'siege',
+    project_id: 'project-transformaction-africa',
+    slug: 'cohorte-2025',
+    title_fr: 'Appel à candidatures - Cohorte 2025',
+    title_en: 'Call for Applications - 2025 Cohort',
+    title_ar: 'دعوة للتقدم - فوج 2025',
+    type: 'candidature',
+    status: 'open',
+    deadline: '2025-06-30',
+    description_fr: 'Rejoignez la nouvelle cohorte Transform\'Action Africa 2025. Ce parcours de 6 mois est destiné aux cadres dirigeants des organisations publiques africaines souhaitant conduire le changement.',
+    description_en: 'Join the new Transform\'Action Africa 2025 cohort. This 6-month program is designed for senior executives from African public organizations seeking to drive change.',
+    description_ar: 'انضم إلى فوج ترانسفورم أكشن أفريكا 2025 الجديد. هذا المسار المكون من 6 أشهر مخصص للكوادر العليا في المنظمات العامة الأفريقية.',
+    requirements: [
+      'Être cadre dirigeant du secteur public africain',
+      'Minimum 5 ans d\'expérience professionnelle',
+      'Capacité démontrée à conduire des projets de transformation',
+      'Soutien de l\'organisation d\'origine',
+      'Maîtrise du français à l\'oral et à l\'écrit'
+    ],
+    content_fr: `## Présentation
+
+Transform'Action Africa lance son appel à candidatures pour la **Cohorte 2025**. Ce programme d'excellence est conçu pour les cadres dirigeants qui souhaitent transformer leurs organisations et contribuer au développement de l'Afrique.
+
+## Profil recherché
+
+- Cadres dirigeants du secteur public africain
+- Minimum 5 ans d'expérience professionnelle
+- Capacité à conduire des projets de transformation
+- Engagement envers le développement durable
+
+## Programme
+
+Le parcours de 6 mois comprend :
+
+- **3 semaines de sessions présentielles** à Alexandrie et Abidjan
+- **Modules de formation à distance** entre les sessions
+- **Accompagnement personnalisé** par des experts internationaux
+- **Projet de transformation** appliqué à votre organisation
+
+## Calendrier
+
+- **Date limite de candidature** : 30 juin 2025
+- **Annonce des résultats** : 15 juillet 2025
+- **Début du programme** : Septembre 2025
+
+## Frais et bourses
+
+Des bourses partielles et complètes sont disponibles pour les candidats méritants. Les frais de participation incluent :
+- Formation
+- Hébergement durant les sessions présentielles
+- Documentation pédagogique
+
+## Comment postuler
+
+1. Remplissez le formulaire de candidature en ligne
+2. Joignez votre CV et lettre de motivation
+3. Fournissez une lettre de recommandation de votre organisation`,
+    content_en: `## Overview
+
+Transform'Action Africa launches its call for applications for the **2025 Cohort**. This excellence program is designed for senior executives who wish to transform their organizations and contribute to Africa's development.
+
+## Target Profile
+
+- Senior executives from the African public sector
+- Minimum 5 years of professional experience
+- Ability to lead transformation projects
+- Commitment to sustainable development
+
+## Program
+
+The 6-month pathway includes:
+
+- **3 weeks of in-person sessions** in Alexandria and Abidjan
+- **Distance learning modules** between sessions
+- **Personalized coaching** by international experts
+- **Transformation project** applied to your organization
+
+## Timeline
+
+- **Application deadline**: June 30, 2025
+- **Results announcement**: July 15, 2025
+- **Program start**: September 2025
+
+## Fees and Scholarships
+
+Partial and full scholarships are available for deserving candidates. Participation fees include:
+- Training
+- Accommodation during in-person sessions
+- Educational materials
+
+## How to Apply
+
+1. Complete the online application form
+2. Attach your CV and motivation letter
+3. Provide a recommendation letter from your organization`,
+    content_ar: `## نظرة عامة
+
+يطلق ترانسفورم أكشن أفريكا دعوته للتقدم لفوج 2025. هذا البرنامج المتميز مصمم للمديرين التنفيذيين الذين يرغبون في تحويل منظماتهم والمساهمة في تنمية أفريقيا.
+
+## الملف المطلوب
+
+- كوادر قيادية من القطاع العام الأفريقي
+- خبرة مهنية لا تقل عن 5 سنوات
+- القدرة على قيادة مشاريع التحول
+- الالتزام بالتنمية المستدامة`,
+    image: 'https://picsum.photos/seed/call-ta-2025/800/400',
+    partner_logos: [
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg',
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png'
+    ],
+    is_active: true
+  },
+  {
+    id: 'call-transformaction-bourses-2025',
+    campus_id: 'siege',
+    project_id: 'project-transformaction-africa',
+    slug: 'bourses-excellence-2025',
+    title_fr: 'Bourses d\'excellence Transform\'Action 2025',
+    title_en: 'Transform\'Action Excellence Scholarships 2025',
+    title_ar: 'منح التميز ترانسفورم أكشن 2025',
+    type: 'bourse',
+    status: 'open',
+    deadline: '2025-05-31',
+    description_fr: 'L\'AFD et l\'Université Senghor offrent 20 bourses complètes pour les candidats les plus méritants de la cohorte 2025.',
+    description_en: 'AFD and Senghor University offer 20 full scholarships for the most deserving candidates of the 2025 cohort.',
+    description_ar: 'تقدم AFD وجامعة سنغور 20 منحة كاملة للمرشحين الأكثر استحقاقاً من فوج 2025.',
+    content_fr: `## Bourses d'excellence Transform'Action
+
+L'Agence Française de Développement (AFD) et l'Université Senghor offrent **20 bourses complètes** pour la Cohorte 2025 de Transform'Action Africa.
+
+## Ce que couvre la bourse
+
+- Frais de formation intégraux
+- Hébergement et restauration durant les sessions
+- Transport international
+- Allocation pour matériel pédagogique
+
+## Critères de sélection
+
+Les bourses sont attribuées sur la base de :
+- Excellence du parcours professionnel
+- Potentiel de leadership
+- Impact attendu sur l'organisation d'origine
+- Motivation et engagement
+
+## Processus
+
+Les candidatures aux bourses sont évaluées en même temps que les candidatures au programme. Cochez la case "Demande de bourse" dans le formulaire de candidature.`,
+    content_en: `## Transform'Action Excellence Scholarships
+
+The French Development Agency (AFD) and Senghor University offer **20 full scholarships** for the 2025 Cohort of Transform'Action Africa.
+
+## What the scholarship covers
+
+- Full training fees
+- Accommodation and meals during sessions
+- International transportation
+- Educational materials allowance
+
+## Selection criteria
+
+Scholarships are awarded based on:
+- Excellence of professional background
+- Leadership potential
+- Expected impact on home organization
+- Motivation and commitment`,
+    image: 'https://picsum.photos/seed/call-ta-bourses/800/400',
+    partner_logos: [
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png',
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg'
+    ],
+    is_active: true
+  },
+  {
+    id: 'call-transformaction-closed-2024',
+    campus_id: 'siege',
+    project_id: 'project-transformaction-africa',
+    slug: 'cohorte-2024',
+    title_fr: 'Appel à candidatures - Cohorte 2024',
+    title_en: 'Call for Applications - 2024 Cohort',
+    title_ar: 'دعوة للتقدم - فوج 2024',
+    type: 'candidature',
+    status: 'closed',
+    deadline: '2024-06-30',
+    description_fr: 'La cohorte 2024 a accueilli 45 cadres dirigeants de 12 pays africains francophones.',
+    description_en: 'The 2024 cohort welcomed 45 senior executives from 12 French-speaking African countries.',
+    description_ar: 'استقبل فوج 2024 45 مديراً تنفيذياً من 12 دولة أفريقية ناطقة بالفرنسية.',
+    image: 'https://picsum.photos/seed/call-ta-2024/800/400',
+    partner_logos: [
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg'
+    ],
+    is_active: true
+  },
+
+  // KreAfrika - Appels
+  {
+    id: 'call-kreafrika-bootcamp-2025',
+    campus_id: 'siege',
+    project_id: 'project-kreafrika',
+    slug: 'bootcamp-marseille-2025',
+    title_fr: 'Bootcamp KreAfrika - Marseille 2025',
+    title_en: 'KreAfrika Bootcamp - Marseille 2025',
+    title_ar: 'معسكر كري أفريكا - مرسيليا 2025',
+    type: 'candidature',
+    status: 'open',
+    deadline: '2025-04-15',
+    description_fr: 'Participez au Bootcamp KreAfrika à Marseille : 5 jours intensifs de formation, networking et opportunités business pour les professionnels des industries créatives africaines.',
+    description_en: 'Join the KreAfrika Bootcamp in Marseille: 5 intensive days of training, networking and business opportunities for African creative industries professionals.',
+    description_ar: 'انضم إلى معسكر كري أفريكا في مرسيليا: 5 أيام مكثفة من التدريب والتواصل وفرص الأعمال.',
+    requirements: [
+      'Minimum 3 ans d\'expérience dans les industries culturelles et créatives',
+      'Porteur d\'un projet à fort potentiel de développement',
+      'Maîtrise du français (niveau B2 minimum)',
+      'Disponibilité pour les 5 jours complets du bootcamp',
+      'Passeport valide avec possibilité d\'obtenir un visa Schengen'
+    ],
+    content_fr: `## Bootcamp KreAfrika - Marseille 2025
+
+KreAfrika organise son premier **Bootcamp international** à Marseille du 15 au 19 juin 2025, en partenariat avec Aix-Marseille French Tech et le Festival de Cannes.
+
+## Programme
+
+### Jour 1 : Masterclasses
+- Stratégie de développement international
+- Financement des projets culturels
+- Propriété intellectuelle et droits d'auteur
+
+### Jour 2-3 : Ateliers pratiques
+- Pitch et présentation de projets
+- Marketing digital et réseaux sociaux
+- Production et distribution
+
+### Jour 4 : Networking
+- Rencontres B2B avec des partenaires européens
+- Tables rondes avec des professionnels
+- Speed-meeting investisseurs
+
+### Jour 5 : Restitution
+- Présentation des projets
+- Remise des certificats
+- Cocktail de clôture
+
+## Profil recherché
+
+- Professionnels des ICC avec minimum 3 ans d'expérience
+- Porteurs de projets à fort potentiel
+- Entrepreneurs culturels en phase de développement
+
+## Conditions
+
+- 30 places disponibles
+- Prise en charge : formation, hébergement, restauration
+- Transport à la charge des participants`,
+    content_en: `## KreAfrika Bootcamp - Marseille 2025
+
+KreAfrika organizes its first **international Bootcamp** in Marseille from June 15-19, 2025, in partnership with Aix-Marseille French Tech and the Cannes Festival.
+
+## Program
+
+### Day 1: Masterclasses
+- International development strategy
+- Cultural project financing
+- Intellectual property and copyright
+
+### Days 2-3: Practical Workshops
+- Pitching and project presentation
+- Digital marketing and social media
+- Production and distribution
+
+### Day 4: Networking
+- B2B meetings with European partners
+- Round tables with professionals
+- Investor speed-meeting
+
+### Day 5: Wrap-up
+- Project presentations
+- Certificate ceremony
+- Closing cocktail`,
+    image: 'https://picsum.photos/seed/call-kreafrika-bootcamp/800/400',
+    partner_logos: [
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/31.jpg',
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png'
+    ],
+    is_active: true
+  },
+  {
+    id: 'call-kreafrika-seminaire-abidjan',
+    campus_id: 'campus-abidjan',
+    project_id: 'project-kreafrika',
+    slug: 'seminaire-abidjan-2025',
+    title_fr: 'Séminaire régional KreAfrika - Abidjan',
+    title_en: 'KreAfrika Regional Seminar - Abidjan',
+    title_ar: 'ندوة كري أفريكا الإقليمية - أبيدجان',
+    type: 'candidature',
+    status: 'open',
+    deadline: '2025-03-31',
+    description_fr: 'Séminaire de 3 jours sur l\'entrepreneuriat et le financement des industries créatives en Afrique de l\'Ouest.',
+    description_en: '3-day seminar on entrepreneurship and financing of creative industries in West Africa.',
+    description_ar: 'ندوة لمدة 3 أيام حول ريادة الأعمال وتمويل الصناعات الإبداعية في غرب أفريقيا.',
+    content_fr: `## Séminaire régional - Entrepreneuriat et Financement
+
+Le campus d'Abidjan accueille le 5ème séminaire régional KreAfrika, consacré à l'entrepreneuriat et au financement des industries créatives.
+
+## Thématiques
+
+- Modèles économiques innovants pour les ICC
+- Accès au financement : fonds, subventions, investisseurs
+- Structuration juridique des entreprises culturelles
+- Cas pratiques et témoignages d'entrepreneurs
+
+## Dates
+
+14-16 mai 2025
+
+## Intervenants
+
+- Experts en financement culturel
+- Entrepreneurs à succès du secteur
+- Représentants des bailleurs de fonds`,
+    image: 'https://picsum.photos/seed/call-kreafrika-abidjan/800/400',
+    partner_logos: [
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.png',
+      'https://usenghor-francophonie.org/wp-content/uploads/2023/09/31.jpg'
+    ],
     is_active: true
   }
 ]

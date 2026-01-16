@@ -26,7 +26,7 @@ const { t } = useI18n()
     <!-- Content -->
     <MissionSection />
     <HistorySection />
-    <GovernanceSection />
+    <PartnersSection />
     <CampusSection />
   </div>
 </template>

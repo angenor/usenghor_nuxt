@@ -9,6 +9,90 @@
       "title": "Our Projects",
       "subtitle": "Innovative initiatives serving the development of French-speaking Africa"
     },
+    "tabs": {
+      "presentation": "Overview",
+      "appels": "Calls",
+      "actualites": "News",
+      "partenaires": "Partners",
+      "mediatheque": "Media Library"
+    },
+    "appels": {
+      "title": "Open Calls",
+      "closedTitle": "Closed Calls",
+      "noAppels": "No open calls for this project",
+      "noClosedAppels": "No closed calls",
+      "deadline": "Deadline",
+      "type": "Call Type",
+      "types": {
+        "candidature": "Application",
+        "projet": "Project",
+        "bourse": "Scholarship",
+        "scholarship": "Scholarship",
+        "bootcamp": "Bootcamp",
+        "recrutement": "Recruitment",
+        "competition": "Competition"
+      },
+      "status": "Status",
+      "statusOpen": "Open",
+      "statusClosed": "Closed",
+      "requirements": "Requirements",
+      "ctaTitle": "Ready to apply?",
+      "ctaDescription": "Submit your application before the deadline to participate in this call.",
+      "postuler": "Apply Now",
+      "closedDescription": "This call is no longer accepting applications.",
+      "project": "Related Project",
+      "quickInfo": "Key Information",
+      "share": "Share",
+      "seeDetails": "See details",
+      "back": "Back to project"
+    },
+    "postuler": {
+      "title": "Apply",
+      "subtitle": "Application Form",
+      "back": "Back to call",
+      "form": {
+        "civilite": "Title",
+        "mr": "Mr.",
+        "mme": "Ms.",
+        "nom": "Last Name",
+        "prenom": "First Name",
+        "email": "Email",
+        "telephone": "Phone",
+        "pays": "Country of Residence",
+        "organisation": "Organization",
+        "fonction": "Position",
+        "motivation": "Cover Letter",
+        "cv": "CV (PDF)",
+        "submit": "Submit Application",
+        "required": "Required field",
+        "selectFile": "Select a file",
+        "maxSize": "Max size: 5 MB"
+      },
+      "success": {
+        "title": "Application Submitted",
+        "message": "Your application has been successfully submitted. We will contact you soon."
+      }
+    },
+    "actualites": {
+      "title": "Project News",
+      "noActualites": "No news for this project",
+      "readMore": "Read more"
+    },
+    "partenaires": {
+      "title": "Project Partners",
+      "noPartenaires": "No partners for this project",
+      "funding": "Funding",
+      "technical": "Technical",
+      "institutional": "Institutional"
+    },
+    "mediatheque": {
+      "title": "Media Library",
+      "videos": "Videos",
+      "photos": "Photos",
+      "noMedia": "No media available",
+      "noVideos": "No videos available",
+      "noPhotos": "No photos available"
+    },
     "intro": {
       "title": "Impactful projects",
       "description": "Senghor University develops innovative projects that contribute to the sustainable development of the French-speaking world. From digital transformation to cultural entrepreneurship, our initiatives have a concrete impact on the communities we serve.",

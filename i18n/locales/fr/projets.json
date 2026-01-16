@@ -9,6 +9,90 @@
       "title": "Nos Projets",
       "subtitle": "Des initiatives innovantes au service du développement de l'Afrique francophone"
     },
+    "tabs": {
+      "presentation": "Présentation",
+      "appels": "Appels",
+      "actualites": "Actualités",
+      "partenaires": "Partenaires",
+      "mediatheque": "Médiathèque"
+    },
+    "appels": {
+      "title": "Appels en cours",
+      "closedTitle": "Appels clôturés",
+      "noAppels": "Aucun appel en cours pour ce projet",
+      "noClosedAppels": "Aucun appel clôturé",
+      "deadline": "Date limite",
+      "type": "Type d'appel",
+      "types": {
+        "candidature": "Candidature",
+        "projet": "Projet",
+        "bourse": "Bourse",
+        "scholarship": "Bourse",
+        "bootcamp": "Bootcamp",
+        "recrutement": "Recrutement",
+        "competition": "Concours"
+      },
+      "status": "Statut",
+      "statusOpen": "Ouvert",
+      "statusClosed": "Clôturé",
+      "requirements": "Conditions requises",
+      "ctaTitle": "Prêt à postuler ?",
+      "ctaDescription": "Soumettez votre candidature avant la date limite pour participer à cet appel.",
+      "postuler": "Postuler maintenant",
+      "closedDescription": "Cet appel n'accepte plus de candidatures.",
+      "project": "Projet associé",
+      "quickInfo": "Informations clés",
+      "share": "Partager",
+      "seeDetails": "Voir les détails",
+      "back": "Retour au projet"
+    },
+    "postuler": {
+      "title": "Postuler",
+      "subtitle": "Formulaire de candidature",
+      "back": "Retour à l'appel",
+      "form": {
+        "civilite": "Civilité",
+        "mr": "M.",
+        "mme": "Mme",
+        "nom": "Nom",
+        "prenom": "Prénom",
+        "email": "Email",
+        "telephone": "Téléphone",
+        "pays": "Pays de résidence",
+        "organisation": "Organisation",
+        "fonction": "Fonction",
+        "motivation": "Lettre de motivation",
+        "cv": "CV (PDF)",
+        "submit": "Envoyer ma candidature",
+        "required": "Champ obligatoire",
+        "selectFile": "Sélectionner un fichier",
+        "maxSize": "Taille max : 5 Mo"
+      },
+      "success": {
+        "title": "Candidature envoyée",
+        "message": "Votre candidature a bien été enregistrée. Nous vous contacterons prochainement."
+      }
+    },
+    "actualites": {
+      "title": "Actualités du projet",
+      "noActualites": "Aucune actualité pour ce projet",
+      "readMore": "Lire la suite"
+    },
+    "partenaires": {
+      "title": "Partenaires du projet",
+      "noPartenaires": "Aucun partenaire pour ce projet",
+      "funding": "Financement",
+      "technical": "Technique",
+      "institutional": "Institutionnel"
+    },
+    "mediatheque": {
+      "title": "Médiathèque",
+      "videos": "Vidéos",
+      "photos": "Photos",
+      "noMedia": "Aucun média disponible",
+      "noVideos": "Aucune vidéo disponible",
+      "noPhotos": "Aucune photo disponible"
+    },
     "intro": {
       "title": "Des projets à impact",
       "description": "L'Université Senghor développe des projets innovants qui contribuent au développement durable de l'espace francophone. De la transformation digitale à l'entrepreneuriat culturel, nos initiatives ont un impact concret sur les communautés que nous servons.",

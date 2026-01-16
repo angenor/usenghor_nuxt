@@ -5,6 +5,7 @@
 export interface CampusMedia {
   id: string
   campus_id: string
+  project_id?: string // Optional link to a project
   type: 'video' | 'photo'
   title_fr: string
   title_en?: string
@@ -206,5 +207,123 @@ export const mockCampusMedia: CampusMedia[] = [
     url: 'https://picsum.photos/seed/media-cotonou-3/1200/800',
     thumbnail: 'https://picsum.photos/seed/media-cotonou-3/400/300',
     date: '2024-04-07'
+  },
+
+  // ============================================
+  // MÉDIAS LIÉS AUX PROJETS
+  // ============================================
+
+  // Transform'Action Africa - Médias
+  {
+    id: 'media-transformaction-1',
+    campus_id: 'siege',
+    project_id: 'project-transformaction-africa',
+    type: 'video',
+    title_fr: 'Présentation de Transform\'Action Africa',
+    title_en: 'Transform\'Action Africa Presentation',
+    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    thumbnail: 'https://picsum.photos/seed/media-ta-1/400/225',
+    date: '2024-09-15'
+  },
+  {
+    id: 'media-transformaction-2',
+    campus_id: 'siege',
+    project_id: 'project-transformaction-africa',
+    type: 'video',
+    title_fr: 'Témoignages des Transform\'acteurs 2023',
+    title_en: 'Transform\'actors 2023 Testimonials',
+    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    thumbnail: 'https://picsum.photos/seed/media-ta-2/400/225',
+    date: '2024-06-20'
+  },
+  {
+    id: 'media-transformaction-3',
+    campus_id: 'siege',
+    project_id: 'project-transformaction-africa',
+    type: 'photo',
+    title_fr: 'Session présentielle Alexandrie 2024',
+    title_en: 'Alexandria In-person Session 2024',
+    url: 'https://picsum.photos/seed/media-ta-3/1200/800',
+    thumbnail: 'https://picsum.photos/seed/media-ta-3/400/300',
+    date: '2024-10-05'
+  },
+  {
+    id: 'media-transformaction-4',
+    campus_id: 'siege',
+    project_id: 'project-transformaction-africa',
+    type: 'photo',
+    title_fr: 'Cérémonie de clôture Cohorte 2024',
+    title_en: '2024 Cohort Closing Ceremony',
+    url: 'https://picsum.photos/seed/media-ta-4/1200/800',
+    thumbnail: 'https://picsum.photos/seed/media-ta-4/400/300',
+    date: '2025-01-10'
+  },
+  {
+    id: 'media-transformaction-5',
+    campus_id: 'siege',
+    project_id: 'project-transformaction-africa',
+    type: 'photo',
+    title_fr: 'Ateliers de design thinking',
+    title_en: 'Design Thinking Workshops',
+    url: 'https://picsum.photos/seed/media-ta-5/1200/800',
+    thumbnail: 'https://picsum.photos/seed/media-ta-5/400/300',
+    date: '2024-11-18'
+  },
+
+  // KreAfrika - Médias
+  {
+    id: 'media-kreafrika-1',
+    campus_id: 'siege',
+    project_id: 'project-kreafrika',
+    type: 'video',
+    title_fr: 'KreAfrika : Former les leaders des industries créatives',
+    title_en: 'KreAfrika: Training Creative Industries Leaders',
+    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    thumbnail: 'https://picsum.photos/seed/media-kreafrika-1/400/225',
+    date: '2024-05-10'
+  },
+  {
+    id: 'media-kreafrika-2',
+    campus_id: 'siege',
+    project_id: 'project-kreafrika',
+    type: 'video',
+    title_fr: 'Retour sur le séminaire de Dakar',
+    title_en: 'Dakar Seminar Highlights',
+    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    thumbnail: 'https://picsum.photos/seed/media-kreafrika-2/400/225',
+    date: '2024-03-25'
+  },
+  {
+    id: 'media-kreafrika-3',
+    campus_id: 'siege',
+    project_id: 'project-kreafrika',
+    type: 'photo',
+    title_fr: 'Séminaire régional de Kinshasa',
+    title_en: 'Kinshasa Regional Seminar',
+    url: 'https://picsum.photos/seed/media-kreafrika-3/1200/800',
+    thumbnail: 'https://picsum.photos/seed/media-kreafrika-3/400/300',
+    date: '2024-12-01'
+  },
+  {
+    id: 'media-kreafrika-4',
+    campus_id: 'siege',
+    project_id: 'project-kreafrika',
+    type: 'photo',
+    title_fr: 'Networking au MASA 2024',
+    title_en: 'MASA 2024 Networking',
+    url: 'https://picsum.photos/seed/media-kreafrika-4/1200/800',
+    thumbnail: 'https://picsum.photos/seed/media-kreafrika-4/400/300',
+    date: '2024-03-10'
+  },
+  {
+    id: 'media-kreafrika-5',
+    campus_id: 'campus-abidjan',
+    project_id: 'project-kreafrika',
+    type: 'photo',
+    title_fr: 'Participants du module e-learning',
+    title_en: 'E-learning Module Participants',
+    url: 'https://picsum.photos/seed/media-kreafrika-5/1200/800',
+    thumbnail: 'https://picsum.photos/seed/media-kreafrika-5/400/300',
+    date: '2024-11-05'
   }
 ]
