@@ -148,6 +148,17 @@ const getThumbnail = (f: any) => {
                     {{ t(filter.label) }}
                   </button>
                 </div>
+                <!-- Lien vers partenaires quand campus externalisé est sélectionné -->
+                <div v-if="selectedCampus === 'externalise'" class="mt-3">
+                  <NuxtLink
+                    :to="localePath('/a-propos/partenaires')"
+                    class="inline-flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-handshake" class="w-4 h-4" />
+                    {{ t('formations.filters.viewPartners') }}
+                    <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
+                  </NuxtLink>
+                </div>
               </div>
 
               <!-- Application status toggle -->
