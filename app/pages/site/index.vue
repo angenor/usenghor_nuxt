@@ -67,60 +67,60 @@ const stats = computed(() => [
 // Color configuration per facility (rotating colors)
 const facilityColors = [
   {
-    bgLight: 'bg-amber-100',
-    bgDark: 'dark:bg-amber-900',
-    bgLightHex: '#fef3c7',
-    bgDarkHex: '#78350f',
-    textDark: 'dark:text-amber-100',
-    iconBg: 'bg-amber-500'
+    bgLight: 'bg-brand-blue-100',
+    bgDark: 'dark:bg-brand-blue-900',
+    bgLightHex: '#dbe4f8',
+    bgDarkHex: '#1a2e73',
+    textDark: 'dark:text-brand-blue-100',
+    iconBg: 'bg-brand-blue-500'
   },
   {
-    bgLight: 'bg-emerald-100',
-    bgDark: 'dark:bg-emerald-900',
-    bgLightHex: '#d1fae5',
-    bgDarkHex: '#064e3b',
-    textDark: 'dark:text-emerald-100',
-    iconBg: 'bg-emerald-500'
+    bgLight: 'bg-brand-red-100',
+    bgDark: 'dark:bg-brand-red-900',
+    bgLightHex: '#fee2e2',
+    bgDarkHex: '#7f1d1d',
+    textDark: 'dark:text-brand-red-100',
+    iconBg: 'bg-brand-red-500'
   },
   {
-    bgLight: 'bg-purple-100',
-    bgDark: 'dark:bg-purple-900',
-    bgLightHex: '#f3e8ff',
-    bgDarkHex: '#581c87',
-    textDark: 'dark:text-purple-100',
-    iconBg: 'bg-purple-500'
+    bgLight: 'bg-brand-blue-50',
+    bgDark: 'dark:bg-brand-blue-950',
+    bgLightHex: '#edf1fc',
+    bgDarkHex: '#0f1a42',
+    textDark: 'dark:text-brand-blue-50',
+    iconBg: 'bg-brand-blue-600'
   },
   {
-    bgLight: 'bg-sky-100',
-    bgDark: 'dark:bg-sky-900',
-    bgLightHex: '#e0f2fe',
-    bgDarkHex: '#0c4a6e',
-    textDark: 'dark:text-sky-100',
-    iconBg: 'bg-sky-500'
+    bgLight: 'bg-brand-red-50',
+    bgDark: 'dark:bg-brand-red-950',
+    bgLightHex: '#fef2f2',
+    bgDarkHex: '#450a0a',
+    textDark: 'dark:text-brand-red-50',
+    iconBg: 'bg-brand-red-600'
   },
   {
-    bgLight: 'bg-rose-100',
-    bgDark: 'dark:bg-rose-900',
-    bgLightHex: '#ffe4e6',
-    bgDarkHex: '#881337',
-    textDark: 'dark:text-rose-100',
-    iconBg: 'bg-rose-500'
+    bgLight: 'bg-brand-blue-200',
+    bgDark: 'dark:bg-brand-blue-800',
+    bgLightHex: '#c3d1f4',
+    bgDarkHex: '#233da0',
+    textDark: 'dark:text-brand-blue-200',
+    iconBg: 'bg-brand-blue-400'
   },
   {
-    bgLight: 'bg-indigo-100',
-    bgDark: 'dark:bg-indigo-900',
-    bgLightHex: '#e0e7ff',
-    bgDarkHex: '#312e81',
-    textDark: 'dark:text-indigo-100',
-    iconBg: 'bg-indigo-500'
+    bgLight: 'bg-brand-red-200',
+    bgDark: 'dark:bg-brand-red-800',
+    bgLightHex: '#fecaca',
+    bgDarkHex: '#991b1b',
+    textDark: 'dark:text-brand-red-200',
+    iconBg: 'bg-brand-red-400'
   },
   {
-    bgLight: 'bg-teal-100',
-    bgDark: 'dark:bg-teal-900',
-    bgLightHex: '#ccfbf1',
-    bgDarkHex: '#134e4a',
-    textDark: 'dark:text-teal-100',
-    iconBg: 'bg-teal-500'
+    bgLight: 'bg-brand-blue-100',
+    bgDark: 'dark:bg-brand-blue-900',
+    bgLightHex: '#dbe4f8',
+    bgDarkHex: '#1a2e73',
+    textDark: 'dark:text-brand-blue-100',
+    iconBg: 'bg-brand-blue-500'
   }
 ]
 
@@ -144,10 +144,10 @@ const getNextBgColor = (index: number, isDark: boolean) => {
   <div>
     <!-- Hero -->
     <section class="relative py-16 md:py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
-      <div class="absolute inset-0 opacity-10 heropattern-topography-amber-500"></div>
+      <div class="absolute inset-0 opacity-10 heropattern-topography-brand-blue-500"></div>
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
-          <span class="inline-block px-4 py-1.5 text-sm font-semibold text-amber-900 bg-amber-400 rounded-full mb-6">
+          <span class="inline-block px-4 py-1.5 text-sm font-semibold text-brand-blue-900 bg-brand-blue-400 rounded-full mb-6">
             {{ t('site.hero.badge') }}
           </span>
           <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
@@ -178,7 +178,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
               {{ t('site.presentation.description') }}
             </p>
             <div class="flex items-center gap-3 text-gray-600 dark:text-gray-400">
-              <font-awesome-icon icon="fa-solid fa-location-dot" class="w-5 h-5 text-amber-600" />
+              <font-awesome-icon icon="fa-solid fa-location-dot" class="w-5 h-5 text-brand-blue-600" />
               <span>{{ t('site.presentation.address') }}</span>
             </div>
           </div>
@@ -190,7 +190,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
               :key="stat.label"
               class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 text-center"
             >
-              <div class="text-3xl font-bold text-amber-600 dark:text-amber-400 mb-2">
+              <div class="text-3xl font-bold text-brand-blue-600 dark:text-brand-blue-400 mb-2">
                 {{ stat.value }}
               </div>
               <div class="text-sm text-gray-600 dark:text-gray-400">
@@ -210,7 +210,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
             <span class="relative inline-block">
               {{ t('site.facilities.title') }}
-              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
             </span>
           </h2>
           <p class="mt-6 text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
@@ -506,10 +506,10 @@ const getNextBgColor = (index: number, isDark: boolean) => {
             <!-- Content overlay -->
             <div class="absolute inset-0 flex flex-col items-center justify-center">
               <!-- Map icon -->
-              <div class="w-20 h-20 bg-amber-600 rounded-full flex items-center justify-center mb-4 shadow-xl group-hover:scale-110 transition-transform">
+              <div class="w-20 h-20 bg-brand-blue-600 rounded-full flex items-center justify-center mb-4 shadow-xl group-hover:scale-110 transition-transform">
                 <font-awesome-icon icon="fa-solid fa-map-location-dot" class="w-10 h-10 text-white" />
               </div>
-              <span class="px-6 py-3 bg-white/90 dark:bg-gray-900/90 text-amber-600 dark:text-amber-400 font-semibold rounded-full shadow-lg flex items-center gap-2 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+              <span class="px-6 py-3 bg-white/90 dark:bg-gray-900/90 text-brand-blue-600 dark:text-brand-blue-400 font-semibold rounded-full shadow-lg flex items-center gap-2 group-hover:bg-brand-blue-600 group-hover:text-white transition-colors">
                 <font-awesome-icon icon="fa-solid fa-external-link-alt" class="w-4 h-4" />
                 {{ t('site.location.openMaps') }}
               </span>
@@ -520,8 +520,8 @@ const getNextBgColor = (index: number, isDark: boolean) => {
           <div class="space-y-6">
             <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
               <div class="flex items-start gap-4">
-                <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <font-awesome-icon icon="fa-solid fa-location-dot" class="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                <div class="w-12 h-12 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <font-awesome-icon icon="fa-solid fa-location-dot" class="w-6 h-6 text-brand-blue-600 dark:text-brand-blue-400" />
                 </div>
                 <div>
                   <h3 class="font-bold text-gray-900 dark:text-white mb-1">{{ t('site.location.address') }}</h3>
@@ -532,8 +532,8 @@ const getNextBgColor = (index: number, isDark: boolean) => {
 
             <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
               <div class="flex items-start gap-4">
-                <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <font-awesome-icon icon="fa-solid fa-globe" class="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                <div class="w-12 h-12 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <font-awesome-icon icon="fa-solid fa-globe" class="w-6 h-6 text-brand-blue-600 dark:text-brand-blue-400" />
                 </div>
                 <div>
                   <h3 class="font-bold text-gray-900 dark:text-white mb-1">{{ t('site.location.coordinates') }}</h3>
@@ -544,8 +544,8 @@ const getNextBgColor = (index: number, isDark: boolean) => {
 
             <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
               <div class="flex items-start gap-4">
-                <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <font-awesome-icon icon="fa-solid fa-phone" class="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                <div class="w-12 h-12 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <font-awesome-icon icon="fa-solid fa-phone" class="w-6 h-6 text-brand-blue-600 dark:text-brand-blue-400" />
                 </div>
                 <div>
                   <h3 class="font-bold text-gray-900 dark:text-white mb-1">{{ t('site.location.phone') }}</h3>
@@ -556,8 +556,8 @@ const getNextBgColor = (index: number, isDark: boolean) => {
 
             <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
               <div class="flex items-start gap-4">
-                <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <font-awesome-icon icon="fa-solid fa-envelope" class="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                <div class="w-12 h-12 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <font-awesome-icon icon="fa-solid fa-envelope" class="w-6 h-6 text-brand-blue-600 dark:text-brand-blue-400" />
                 </div>
                 <div>
                   <h3 class="font-bold text-gray-900 dark:text-white mb-1">{{ t('site.location.email') }}</h3>
@@ -571,18 +571,18 @@ const getNextBgColor = (index: number, isDark: boolean) => {
     </section>
 
     <!-- CTA Section -->
-    <section class="py-16 bg-gradient-to-r from-amber-500 to-amber-600">
+    <section class="py-16 bg-gradient-to-r from-brand-blue-500 to-brand-blue-600">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl font-bold text-white mb-4">
           {{ t('site.cta.title') }}
         </h2>
-        <p class="text-lg text-amber-100 mb-8">
+        <p class="text-lg text-brand-blue-100 mb-8">
           {{ t('site.cta.description') }}
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <NuxtLink
             :to="localePath('/contact')"
-            class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-amber-600 font-semibold rounded-lg hover:bg-amber-50 transition-colors shadow-lg"
+            class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-brand-blue-600 font-semibold rounded-lg hover:bg-brand-blue-50 transition-colors shadow-lg"
           >
             {{ t('site.cta.contactButton') }}
             <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />

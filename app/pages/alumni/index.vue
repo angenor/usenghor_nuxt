@@ -136,10 +136,10 @@ const resetFilters = () => {
   <div>
     <!-- Hero -->
     <section class="relative py-16 md:py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
-      <div class="absolute inset-0 opacity-10 heropattern-topography-amber-500"></div>
+      <div class="absolute inset-0 opacity-10 heropattern-topography-brand-blue-500"></div>
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
-          <span class="inline-block px-4 py-1.5 text-sm font-semibold text-amber-900 bg-amber-400 rounded-full mb-6">
+          <span class="inline-block px-4 py-1.5 text-sm font-semibold text-brand-blue-900 bg-brand-blue-400 rounded-full mb-6">
             {{ t('alumni.hero.badge') }}
           </span>
           <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
@@ -168,7 +168,7 @@ const resetFilters = () => {
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
           <div v-for="stat in stats" :key="stat.label" class="text-center">
-            <div class="text-4xl md:text-5xl font-bold text-amber-600 dark:text-amber-400 mb-2">
+            <div class="text-4xl md:text-5xl font-bold text-brand-blue-600 dark:text-brand-blue-400 mb-2">
               {{ stat.value }}
             </div>
             <div class="text-sm text-gray-600 dark:text-gray-400">
@@ -201,7 +201,7 @@ const resetFilters = () => {
               <!-- Quote icon -->
               <font-awesome-icon
                 icon="fa-solid fa-quote-left"
-                class="w-10 h-10 text-amber-400 dark:text-amber-500 mb-6"
+                class="w-10 h-10 text-brand-blue-400 dark:text-brand-blue-500 mb-6"
               />
 
               <!-- Testimonial -->
@@ -214,14 +214,14 @@ const resetFilters = () => {
                 <img
                   :src="alumnus.photo"
                   :alt="`${alumnus.first_name} ${alumnus.last_name}`"
-                  class="w-16 h-16 rounded-full object-cover ring-2 ring-amber-400"
+                  class="w-16 h-16 rounded-full object-cover ring-2 ring-brand-blue-400"
                   loading="lazy"
                 >
                 <div>
                   <h3 class="font-bold text-gray-900 dark:text-white">
                     {{ alumnus.civility }} {{ alumnus.first_name }} {{ alumnus.last_name }}
                   </h3>
-                  <p class="text-amber-600 dark:text-amber-400 font-medium">
+                  <p class="text-brand-blue-600 dark:text-brand-blue-400 font-medium">
                     {{ getLocalizedPosition(alumnus) }}
                   </p>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -239,7 +239,7 @@ const resetFilters = () => {
                 :href="alumnus.linkedin"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center gap-2 mt-4 text-sm text-gray-600 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                class="inline-flex items-center gap-2 mt-4 text-sm text-gray-600 dark:text-gray-400 hover:text-brand-blue-600 dark:hover:text-brand-blue-400 transition-colors"
               >
                 <font-awesome-icon icon="fa-brands fa-linkedin" class="w-4 h-4" />
                 {{ t('alumni.card.viewLinkedin') }}
@@ -269,7 +269,7 @@ const resetFilters = () => {
                 @click="selectedDepartment = dept.id"
                 class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
                 :class="selectedDepartment === dept.id
-                  ? 'bg-amber-600 text-white shadow-md'
+                  ? 'bg-brand-blue-600 text-white shadow-md'
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
               >
                 {{ t(dept.label) }}
@@ -282,7 +282,7 @@ const resetFilters = () => {
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mr-4">{{ t('alumni.filters.year') }} :</span>
             <select
               v-model="selectedYear"
-              class="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-0 focus:ring-2 focus:ring-amber-500"
+              class="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-0 focus:ring-2 focus:ring-brand-blue-500"
             >
               <option value="all">{{ t('alumni.filters.all') }}</option>
               <option v-for="year in graduationYears" :key="year" :value="String(year)">
@@ -296,7 +296,7 @@ const resetFilters = () => {
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mr-4">{{ t('alumni.filters.country') }} :</span>
             <select
               v-model="selectedCountry"
-              class="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-0 focus:ring-2 focus:ring-amber-500"
+              class="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-0 focus:ring-2 focus:ring-brand-blue-500"
             >
               <option value="all">{{ t('alumni.filters.all') }}</option>
               <option v-for="country in countries" :key="country" :value="country">
@@ -319,14 +319,14 @@ const resetFilters = () => {
                 <img
                   :src="alumnus.photo"
                   :alt="`${alumnus.first_name} ${alumnus.last_name}`"
-                  class="w-16 h-16 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-700 group-hover:ring-amber-400 transition-all"
+                  class="w-16 h-16 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-700 group-hover:ring-brand-blue-400 transition-all"
                   loading="lazy"
                 >
                 <div>
-                  <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                  <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                     {{ alumnus.civility }} {{ alumnus.first_name }} {{ alumnus.last_name }}
                   </h3>
-                  <p class="text-sm text-amber-600 dark:text-amber-400 font-medium">
+                  <p class="text-sm text-brand-blue-600 dark:text-brand-blue-400 font-medium">
                     {{ getLocalizedPosition(alumnus) }}
                   </p>
                 </div>
@@ -358,7 +358,7 @@ const resetFilters = () => {
                 :href="alumnus.linkedin"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center gap-2 mt-4 text-sm text-gray-500 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                class="inline-flex items-center gap-2 mt-4 text-sm text-gray-500 dark:text-gray-400 hover:text-brand-blue-600 dark:hover:text-brand-blue-400 transition-colors"
               >
                 <font-awesome-icon icon="fa-brands fa-linkedin" class="w-4 h-4" />
                 {{ t('alumni.card.viewLinkedin') }}
@@ -376,7 +376,7 @@ const resetFilters = () => {
           </p>
           <button
             @click="resetFilters"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 transition-colors"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-brand-blue-600 text-white font-medium rounded-lg hover:bg-brand-blue-700 transition-colors"
           >
             <font-awesome-icon icon="fa-solid fa-rotate-left" class="w-4 h-4" />
             {{ t('alumni.filters.all') }}
@@ -400,17 +400,17 @@ const resetFilters = () => {
     </section>
 
     <!-- CTA Section -->
-    <section class="py-16 bg-gradient-to-r from-amber-500 to-amber-600">
+    <section class="py-16 bg-gradient-to-r from-brand-blue-500 to-brand-blue-600">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl font-bold text-white mb-4">
           {{ t('alumni.cta.title') }}
         </h2>
-        <p class="text-lg text-amber-100 mb-8">
+        <p class="text-lg text-brand-blue-100 mb-8">
           {{ t('alumni.cta.description') }}
         </p>
         <NuxtLink
           :to="localePath('/contact')"
-          class="inline-flex items-center gap-2 px-8 py-4 bg-white text-amber-600 font-semibold rounded-lg hover:bg-amber-50 transition-colors shadow-lg"
+          class="inline-flex items-center gap-2 px-8 py-4 bg-white text-brand-blue-600 font-semibold rounded-lg hover:bg-brand-blue-50 transition-colors shadow-lg"
         >
           {{ t('alumni.cta.button') }}
           <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
