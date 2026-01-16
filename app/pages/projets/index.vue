@@ -121,10 +121,10 @@ const stats = computed(() => [
   <div>
     <!-- Hero -->
     <section class="relative py-16 md:py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
-      <div class="absolute inset-0 opacity-10 heropattern-topography-amber-500"></div>
+      <div class="absolute inset-0 opacity-10 heropattern-topography-brand-blue-500"></div>
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
-          <span class="inline-block px-4 py-1.5 text-sm font-semibold text-amber-900 bg-amber-400 rounded-full mb-6">
+          <span class="inline-block px-4 py-1.5 text-sm font-semibold text-brand-blue-900 bg-brand-blue-400 rounded-full mb-6">
             {{ t('projets.hero.badge') }}
           </span>
           <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
@@ -157,7 +157,7 @@ const stats = computed(() => [
         <!-- Stats -->
         <div class="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
           <div v-for="stat in stats" :key="stat.label" class="text-center">
-            <div class="text-4xl font-bold text-amber-600 dark:text-amber-400 mb-2">
+            <div class="text-4xl font-bold text-brand-blue-600 dark:text-brand-blue-400 mb-2">
               {{ stat.value }}
             </div>
             <div class="text-sm text-gray-600 dark:text-gray-400">
@@ -175,7 +175,7 @@ const stats = computed(() => [
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
             {{ t('projets.featured.title') }}
           </h2>
-          <span class="inline-block px-3 py-1 text-xs font-semibold text-amber-800 bg-amber-200 dark:bg-amber-900/50 dark:text-amber-300 rounded-full uppercase tracking-wide">
+          <span class="inline-block px-3 py-1 text-xs font-semibold text-brand-blue-800 bg-brand-blue-200 dark:bg-brand-blue-900/50 dark:text-brand-blue-300 rounded-full uppercase tracking-wide">
             {{ t('projets.featured.badge') }}
           </span>
         </div>
@@ -200,7 +200,7 @@ const stats = computed(() => [
             <!-- Content -->
             <div class="p-6">
               <div class="flex items-center gap-2 mb-3">
-                <span class="inline-block px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 rounded">
+                <span class="inline-block px-2 py-0.5 text-xs font-medium text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded">
                   {{ t(`projets.categories.${project.category}`) }}
                 </span>
                 <span
@@ -215,7 +215,7 @@ const stats = computed(() => [
                 </span>
               </div>
 
-              <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+              <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                 {{ getLocalizedTitle(project) }}
               </h3>
 
@@ -227,7 +227,7 @@ const stats = computed(() => [
                 <div class="text-sm text-gray-500 dark:text-gray-400">
                   {{ t('projets.detail.startDate') }} {{ formatDate(project.start_date) }}
                 </div>
-                <span class="inline-flex items-center gap-2 text-amber-600 dark:text-amber-400 font-medium">
+                <span class="inline-flex items-center gap-2 text-brand-blue-600 dark:text-brand-blue-400 font-medium">
                   {{ t('projets.featured.viewProject') }}
                   <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </span>
@@ -257,7 +257,7 @@ const stats = computed(() => [
                 @click="selectedCategory = filter.value as any"
                 class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
                 :class="selectedCategory === filter.value
-                  ? 'bg-amber-600 text-white shadow-md'
+                  ? 'bg-brand-blue-600 text-white shadow-md'
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
               >
                 {{ t(filter.label) }}
@@ -303,7 +303,7 @@ const stats = computed(() => [
 
             <div class="p-5">
               <div class="flex items-center gap-2 mb-3">
-                <span class="inline-block px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 rounded">
+                <span class="inline-block px-2 py-0.5 text-xs font-medium text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded">
                   {{ t(`projets.categories.${project.category}`) }}
                 </span>
                 <span
@@ -318,7 +318,7 @@ const stats = computed(() => [
                 </span>
               </div>
 
-              <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors line-clamp-2">
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors line-clamp-2">
                 {{ getLocalizedTitle(project) }}
               </h3>
 
@@ -355,17 +355,17 @@ const stats = computed(() => [
     </section>
 
     <!-- CTA Section -->
-    <section class="py-16 bg-gradient-to-r from-amber-500 to-amber-600">
+    <section class="py-16 bg-gradient-to-r from-brand-blue-500 to-brand-blue-600">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl font-bold text-white mb-4">
           {{ t('projets.cta.title') }}
         </h2>
-        <p class="text-lg text-amber-100 mb-8">
+        <p class="text-lg text-brand-blue-100 mb-8">
           {{ t('projets.cta.description') }}
         </p>
         <NuxtLink
           :to="localePath('/contact')"
-          class="inline-flex items-center gap-2 px-8 py-4 bg-white text-amber-600 font-semibold rounded-lg hover:bg-amber-50 transition-colors shadow-lg"
+          class="inline-flex items-center gap-2 px-8 py-4 bg-white text-brand-blue-600 font-semibold rounded-lg hover:bg-brand-blue-50 transition-colors shadow-lg"
         >
           {{ t('projets.cta.button') }}
           <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />

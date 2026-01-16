@@ -20,15 +20,15 @@ const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', t
               :alt="t('about.preview.strategy.title')"
               class="w-full h-auto object-cover aspect-[4/3]"
             />
-            <div class="absolute inset-0 bg-gradient-to-tr from-emerald-500/20 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-tr from-brand-red-500/20 to-transparent"></div>
           </div>
-          <div class="absolute -bottom-4 -left-4 w-24 h-24 rounded-2xl -z-10 bg-emerald-500/10"></div>
-          <div class="absolute -top-4 -right-4 w-32 h-32 rounded-full -z-10 bg-emerald-500/10"></div>
+          <div class="absolute -bottom-4 -left-4 w-24 h-24 rounded-2xl -z-10 bg-brand-red-500/10"></div>
+          <div class="absolute -top-4 -right-4 w-32 h-32 rounded-full -z-10 bg-brand-red-500/10"></div>
         </div>
 
         <!-- Content -->
         <div class="order-1 lg:order-2">
-          <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium mb-6 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+          <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium mb-6 bg-brand-red-100 dark:bg-brand-red-900/30 text-brand-red-700 dark:text-brand-red-400">
             <font-awesome-icon icon="fa-solid fa-chart-line" class="w-3.5 h-3.5 mr-2" />
             {{ t('about.preview.strategy.title') }}
           </span>
@@ -43,7 +43,7 @@ const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', t
 
           <NuxtLink
             :to="localePath('/a-propos/strategie')"
-            class="group inline-flex items-center gap-2 px-6 py-3 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 bg-emerald-500 hover:bg-emerald-600 hover:shadow-emerald-500/30"
+            class="group inline-flex items-center gap-2 px-6 py-3 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 bg-brand-red-500 hover:bg-brand-red-600 hover:shadow-brand-red-500/30"
           >
             <span>{{ t('common.discover') }}</span>
             <font-awesome-icon

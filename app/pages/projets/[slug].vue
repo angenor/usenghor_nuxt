@@ -165,7 +165,7 @@ const breadcrumb = computed(() => [
               <!-- Badges on image -->
               <div class="absolute bottom-4 left-4 right-4 flex flex-wrap items-center gap-2">
                 <!-- Category badge -->
-                <span class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold text-amber-900 bg-amber-400 rounded-full shadow-lg backdrop-blur-sm">
+                <span class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold text-brand-blue-900 bg-brand-blue-400 rounded-full shadow-lg backdrop-blur-sm">
                   {{ t(`projets.categories.${project.category}`) }}
                 </span>
 
@@ -180,7 +180,7 @@ const breadcrumb = computed(() => [
                 <!-- Featured badge -->
                 <span
                   v-if="project.featured"
-                  class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full shadow-lg"
+                  class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-gradient-to-r from-brand-red-500 to-brand-red-600 text-white rounded-full shadow-lg"
                 >
                   <font-awesome-icon icon="fa-solid fa-star" class="w-4 h-4" />
                   {{ t('projets.featured.badge') }}
@@ -256,7 +256,7 @@ const breadcrumb = computed(() => [
           <!-- Gallery -->
           <div v-if="project.gallery && project.gallery.length > 0" class="mb-8">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <font-awesome-icon icon="fa-solid fa-images" class="text-amber-500" />
+              <font-awesome-icon icon="fa-solid fa-images" class="text-brand-blue-500" />
               {{ t('projets.detail.gallery') }}
             </h3>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -274,7 +274,7 @@ const breadcrumb = computed(() => [
           <!-- Partners -->
           <div v-if="project.partners.length > 0" class="mb-8">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <font-awesome-icon icon="fa-solid fa-handshake" class="text-amber-500" />
+              <font-awesome-icon icon="fa-solid fa-handshake" class="text-brand-blue-500" />
               {{ t('projets.detail.partners') }}
             </h3>
             <div class="flex flex-wrap items-center gap-6">
@@ -314,14 +314,14 @@ const breadcrumb = computed(() => [
           <!-- Countries list -->
           <div v-if="project.countries.length > 0" class="mb-8">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <font-awesome-icon icon="fa-solid fa-globe-africa" class="text-amber-500" />
+              <font-awesome-icon icon="fa-solid fa-globe-africa" class="text-brand-blue-500" />
               {{ t('projets.detail.countries') }}
             </h3>
             <div class="flex flex-wrap gap-2">
               <span
                 v-for="country in project.countries"
                 :key="country.code"
-                class="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-full text-sm"
+                class="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-blue-50 dark:bg-brand-blue-900/20 text-brand-blue-700 dark:text-brand-blue-400 rounded-full text-sm"
               >
                 <span v-if="country.code !== 'UN'" class="text-lg">{{ getFlagEmoji(country.code) }}</span>
                 <font-awesome-icon v-else icon="fa-solid fa-globe" class="w-4 h-4" />
@@ -334,7 +334,7 @@ const breadcrumb = computed(() => [
           <div class="pt-8 border-t border-gray-200 dark:border-gray-700">
             <NuxtLink
               :to="localePath('/projets')"
-              class="inline-flex items-center gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors"
+              class="inline-flex items-center gap-2 text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 font-medium transition-colors"
             >
               <font-awesome-icon icon="fa-solid fa-arrow-left" class="w-4 h-4" />
               {{ t('projets.detail.back') }}
@@ -346,7 +346,7 @@ const breadcrumb = computed(() => [
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
               <span class="relative inline-block">
                 {{ t('projets.detail.relatedProjects') }}
-                <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+                <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
               </span>
             </h2>
 
@@ -368,12 +368,12 @@ const breadcrumb = computed(() => [
 
                 <div class="p-4">
                   <div class="flex items-center gap-2 mb-2">
-                    <span class="inline-block px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 rounded">
+                    <span class="inline-block px-2 py-0.5 text-xs font-medium text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded">
                       {{ t(`projets.categories.${item.category}`) }}
                     </span>
                   </div>
 
-                  <h3 class="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                  <h3 class="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                     {{ getLocalizedTitleFor(item) }}
                   </h3>
                 </div>
@@ -429,7 +429,7 @@ const breadcrumb = computed(() => [
               </h3>
               <NuxtLink
                 :to="localePath('/projets')"
-                class="inline-flex items-center gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors"
+                class="inline-flex items-center gap-2 text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 font-medium transition-colors"
               >
                 {{ t('projets.detail.back') }}
                 <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />

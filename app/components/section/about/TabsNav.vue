@@ -98,7 +98,7 @@ const scrollToAnchor = async (anchor: string, anchorPage?: string) => {
               :class="[
                 'group flex items-center gap-2 px-3 sm:px-4 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200',
                 isActive(tab.to, tab.exact) || (tab.key === 'about' && isOnSubPage)
-                  ? 'border-amber-500 text-amber-600 dark:text-amber-400'
+                  ? 'border-brand-blue-500 text-brand-blue-600 dark:text-brand-blue-400'
                   : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
               ]"
             >
@@ -106,7 +106,7 @@ const scrollToAnchor = async (anchor: string, anchorPage?: string) => {
                 :icon="tab.icon"
                 :class="[
                   'w-4 h-4 transition-colors duration-200',
-                  isActive(tab.to, tab.exact) || (tab.key === 'about' && isOnSubPage) ? 'text-amber-500' : 'text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300'
+                  isActive(tab.to, tab.exact) || (tab.key === 'about' && isOnSubPage) ? 'text-brand-blue-500' : 'text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300'
                 ]"
               />
               <span class="hidden sm:inline">{{ tab.label }}</span>
@@ -130,7 +130,7 @@ const scrollToAnchor = async (anchor: string, anchorPage?: string) => {
             :class="[
               'group flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200',
               isActive(subTab.to)
-                ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+                ? 'bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400'
                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200'
             ]"
           >
@@ -138,7 +138,7 @@ const scrollToAnchor = async (anchor: string, anchorPage?: string) => {
               :icon="subTab.icon"
               :class="[
                 'w-3.5 h-3.5 transition-colors duration-200',
-                isActive(subTab.to) ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300'
+                isActive(subTab.to) ? 'text-brand-blue-600 dark:text-brand-blue-400' : 'text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300'
               ]"
             />
             <span>{{ subTab.label }}</span>

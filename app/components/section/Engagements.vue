@@ -37,11 +37,11 @@ const getIcon = (iconName: string): string => {
 
 // Accent colors for each card
 const accentColors = [
-  'bg-amber-400',
-  'bg-blue-400',
-  'bg-emerald-400',
-  'bg-purple-400',
-  'bg-rose-400'
+  'bg-brand-blue-400',
+  'bg-brand-red-400',
+  'bg-brand-blue-500',
+  'bg-brand-red-500',
+  'bg-brand-blue-600'
 ]
 </script>
 
@@ -57,7 +57,7 @@ const accentColors = [
         <h2 v-if="props.title" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
           <span class="relative inline-block">
             {{ props.title }}
-            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
           </span>
         </h2>
       </div>
@@ -119,7 +119,7 @@ const accentColors = [
           </span>
           <font-awesome-icon
             icon="fa-solid fa-download"
-            class="w-4 h-4 text-gray-400 group-hover:text-amber-500 transition-colors duration-300"
+            class="w-4 h-4 text-gray-400 group-hover:text-brand-blue-500 transition-colors duration-300"
           />
         </a>
       </div>

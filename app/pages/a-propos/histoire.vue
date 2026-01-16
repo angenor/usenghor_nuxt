@@ -346,7 +346,7 @@ onUnmounted(() => {
               <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
                 <span class="relative inline-block">
                   {{ t('history.title') }}
-                  <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+                  <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
                 </span>
               </h2>
               <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">

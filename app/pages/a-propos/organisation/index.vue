@@ -45,7 +45,7 @@ const { elementRef: ctaRef } = useScrollAnimation({ animation: 'zoomIn', thresho
     <!-- CTA Section -->
     <section class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
       <div ref="ctaRef" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div class="bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-8 lg:p-12 hover:shadow-xl transition-shadow duration-300">
+        <div class="bg-brand-blue-50 dark:bg-brand-blue-900/20 rounded-2xl p-8 lg:p-12 hover:shadow-xl transition-shadow duration-300">
           <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-4">
             {{ t('organization.cta.title') }}
           </h3>
@@ -54,7 +54,7 @@ const { elementRef: ctaRef } = useScrollAnimation({ animation: 'zoomIn', thresho
           </p>
           <NuxtLink
             :to="localePath('/a-propos/equipe')"
-            class="group inline-flex items-center gap-3 px-8 py-4 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/30 hover:-translate-y-0.5"
+            class="group inline-flex items-center gap-3 px-8 py-4 bg-brand-blue-500 hover:bg-brand-blue-600 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-brand-blue-500/30 hover:-translate-y-0.5"
           >
             <font-awesome-icon icon="fa-solid fa-users" class="w-5 h-5" />
             <span>{{ t('organization.cta.button') }}</span>
