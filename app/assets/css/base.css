@@ -30,13 +30,13 @@ html {
 
 /* Focus visible styles */
 :focus-visible {
-  outline: 2px solid rgb(245 158 11);
+  outline: 2px solid rgb(43 75 191);
   outline-offset: 2px;
 }
 
 /* Selection colors */
 ::selection {
-  background-color: rgb(245 158 11 / 0.3);
+  background-color: rgb(43 75 191 / 0.3);
   color: inherit;
 }
 

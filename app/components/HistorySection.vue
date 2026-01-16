@@ -20,20 +20,20 @@ const founders = [
     <!-- Animated Background -->
     <div class="absolute inset-0 overflow-hidden">
       <!-- Gradient Mesh -->
-      <div class="absolute inset-0 bg-gradient-to-br from-amber-50/30 via-transparent to-blue-50/30 dark:from-amber-900/5 dark:via-transparent dark:to-blue-900/5"></div>
+      <div class="absolute inset-0 bg-gradient-to-br from-brand-blue-50/30 via-transparent to-brand-red-50/30 dark:from-brand-blue-900/5 dark:via-transparent dark:to-brand-red-900/5"></div>
 
       <!-- Grid Pattern -->
       <div class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
 
       <!-- Decorative Elements -->
-      <div class="absolute top-20 right-1/4 w-64 h-64 bg-amber-200/20 dark:bg-amber-500/5 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-20 left-1/4 w-80 h-80 bg-blue-200/20 dark:bg-blue-500/5 rounded-full blur-3xl"></div>
+      <div class="absolute top-20 right-1/4 w-64 h-64 bg-brand-blue-200/20 dark:bg-brand-blue-500/5 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-20 left-1/4 w-80 h-80 bg-brand-red-200/20 dark:bg-brand-red-500/5 rounded-full blur-3xl"></div>
     </div>
 
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div ref="headerRef" class="text-center mb-16 lg:mb-20">
-        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 mb-4">
+        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 mb-4">
           <font-awesome-icon icon="fa-solid fa-landmark" class="w-3.5 h-3.5 mr-2" />
           {{ t('history.badge') }}
         </span>
@@ -48,11 +48,11 @@ const founders = [
       <!-- Timeline -->
       <div class="relative">
         <!-- Timeline Line -->
-        <div class="hidden lg:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-400 via-amber-500 to-blue-500 transform -translate-x-1/2"></div>
+        <div class="hidden lg:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-brand-blue-400 via-brand-blue-500 to-brand-red-500 transform -translate-x-1/2"></div>
 
         <!-- Section 1: Genesis -->
         <div class="relative mb-16 lg:mb-24">
-          <div class="hidden lg:flex absolute left-1/2 top-8 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 items-center justify-center shadow-lg shadow-amber-500/30 z-10">
+          <div class="hidden lg:flex absolute left-1/2 top-8 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-br from-brand-blue-400 to-brand-blue-600 items-center justify-center shadow-lg shadow-brand-blue-500/30 z-10">
             <font-awesome-icon icon="fa-solid fa-seedling" class="w-5 h-5 text-white" />
           </div>
 
@@ -60,14 +60,14 @@ const founders = [
             <div ref="genesisRef" class="lg:text-right lg:pr-16">
               <div class="history-box bg-white dark:bg-gray-800 backdrop-blur-xl rounded-3xl p-8 lg:p-10 border border-gray-900 dark:border-gray-600">
                 <div class="lg:hidden flex items-center gap-4 mb-6">
-                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
+                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-blue-400 to-brand-blue-600 flex items-center justify-center">
                     <font-awesome-icon icon="fa-solid fa-seedling" class="w-4 h-4 text-white" />
                   </div>
-                  <span class="text-sm font-semibold text-amber-600 dark:text-amber-400">1989</span>
+                  <span class="text-sm font-semibold text-brand-blue-600 dark:text-brand-blue-400">1989</span>
                 </div>
 
                 <div class="hidden lg:block mb-4">
-                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-blue-100 dark:bg-brand-blue-900/40 text-brand-blue-700 dark:text-brand-blue-300">
                     {{ t('history.genesis.date') }}
                   </span>
                 </div>
@@ -82,14 +82,14 @@ const founders = [
 
                 <div class="space-y-3">
                   <div class="flex items-start gap-3 lg:flex-row-reverse lg:text-right">
-                    <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
-                      <font-awesome-icon icon="fa-solid fa-handshake" class="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-brand-blue-100 dark:bg-brand-blue-900/40 flex items-center justify-center">
+                      <font-awesome-icon icon="fa-solid fa-handshake" class="w-4 h-4 text-brand-blue-600 dark:text-brand-blue-400" />
                     </div>
                     <p class="text-sm text-gray-600 dark:text-gray-400">{{ t('history.genesis.point1') }}</p>
                   </div>
                   <div class="flex items-start gap-3 lg:flex-row-reverse lg:text-right">
-                    <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
-                      <font-awesome-icon icon="fa-solid fa-bullseye" class="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-brand-blue-100 dark:bg-brand-blue-900/40 flex items-center justify-center">
+                      <font-awesome-icon icon="fa-solid fa-bullseye" class="w-4 h-4 text-brand-blue-600 dark:text-brand-blue-400" />
                     </div>
                     <p class="text-sm text-gray-600 dark:text-gray-400">{{ t('history.genesis.point2') }}</p>
                   </div>
@@ -112,10 +112,10 @@ const founders = [
                 <div
                   v-for="founder in founders"
                   :key="founder.name"
-                  class="group bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4 border border-gray-100 dark:border-gray-700/50 hover:border-amber-300 dark:hover:border-amber-600 transition-all duration-300"
+                  class="group bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4 border border-gray-100 dark:border-gray-700/50 hover:border-brand-blue-300 dark:hover:border-brand-blue-600 transition-all duration-300"
                 >
-                  <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400/20 to-orange-500/20 dark:from-amber-400/10 dark:to-orange-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
-                    <font-awesome-icon :icon="founder.icon" class="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                  <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-blue-400/20 to-brand-blue-500/20 dark:from-brand-blue-400/10 dark:to-brand-blue-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <font-awesome-icon :icon="founder.icon" class="w-5 h-5 text-brand-blue-600 dark:text-brand-blue-400" />
                   </div>
                   <h5 class="font-semibold text-gray-900 dark:text-white text-sm mb-1">{{ founder.name }}</h5>
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ t(founder.role) }}</p>
@@ -127,7 +127,7 @@ const founders = [
 
         <!-- Section 2: USenghor -->
         <div class="relative">
-          <div class="hidden lg:flex absolute left-1/2 top-8 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 items-center justify-center shadow-lg shadow-blue-500/30 z-10">
+          <div class="hidden lg:flex absolute left-1/2 top-8 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-br from-brand-red-400 to-brand-red-600 items-center justify-center shadow-lg shadow-brand-red-500/30 z-10">
             <font-awesome-icon icon="fa-solid fa-university" class="w-5 h-5 text-white" />
           </div>
 
@@ -137,14 +137,14 @@ const founders = [
             <div ref="usenghorRef" class="lg:pl-16">
               <div class="animated-border-box rounded-3xl p-8 lg:p-10">
                 <div class="lg:hidden flex items-center gap-4 mb-6">
-                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-red-400 to-brand-red-600 flex items-center justify-center">
                     <font-awesome-icon icon="fa-solid fa-university" class="w-4 h-4 text-white" />
                   </div>
-                  <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">{{ t('history.usenghor.since') }}</span>
+                  <span class="text-sm font-semibold text-brand-red-600 dark:text-brand-red-400">{{ t('history.usenghor.since') }}</span>
                 </div>
 
                 <div class="hidden lg:block mb-4">
-                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-red-100 dark:bg-brand-red-900/40 text-brand-red-700 dark:text-brand-red-300">
                     {{ t('history.usenghor.since') }}
                   </span>
                 </div>
@@ -158,18 +158,18 @@ const founders = [
                 </p>
 
                 <div class="space-y-4">
-                  <div class="flex items-center gap-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-                    <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
-                      <font-awesome-icon icon="fa-solid fa-door-open" class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <div class="flex items-center gap-4 p-3 bg-brand-red-50 dark:bg-brand-red-900/20 rounded-xl">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-brand-red-100 dark:bg-brand-red-900/40 flex items-center justify-center">
+                      <font-awesome-icon icon="fa-solid fa-door-open" class="w-5 h-5 text-brand-red-600 dark:text-brand-red-400" />
                     </div>
                     <div>
                       <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('history.usenghor.milestone1.title') }}</p>
                       <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('history.usenghor.milestone1.desc') }}</p>
                     </div>
                   </div>
-                  <div class="flex items-center gap-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-                    <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
-                      <font-awesome-icon icon="fa-solid fa-award" class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <div class="flex items-center gap-4 p-3 bg-brand-red-50 dark:bg-brand-red-900/20 rounded-xl">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-brand-red-100 dark:bg-brand-red-900/40 flex items-center justify-center">
+                      <font-awesome-icon icon="fa-solid fa-award" class="w-5 h-5 text-brand-red-600 dark:text-brand-red-400" />
                     </div>
                     <div>
                       <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('history.usenghor.milestone2.title') }}</p>
@@ -192,7 +192,7 @@ const founders = [
             <div class="relative px-8 py-12 lg:px-16 lg:py-16">
               <div class="max-w-3xl mx-auto text-center">
                 <div class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-white/10 backdrop-blur-sm text-white border border-white/20 mb-6">
-                  <font-awesome-icon icon="fa-solid fa-star" class="w-3.5 h-3.5 mr-2 text-amber-400" />
+                  <font-awesome-icon icon="fa-solid fa-star" class="w-3.5 h-3.5 mr-2 text-brand-blue-400" />
                   {{ t('history.legacy.badge') }}
                 </div>
 
@@ -206,15 +206,15 @@ const founders = [
 
                 <div class="flex flex-wrap justify-center gap-4">
                   <div class="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10">
-                    <font-awesome-icon icon="fa-solid fa-globe-africa" class="w-4 h-4 text-amber-400" />
+                    <font-awesome-icon icon="fa-solid fa-globe-africa" class="w-4 h-4 text-brand-blue-400" />
                     <span class="text-sm text-white">{{ t('history.legacy.tag1') }}</span>
                   </div>
                   <div class="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10">
-                    <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-4 h-4 text-amber-400" />
+                    <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-4 h-4 text-brand-blue-400" />
                     <span class="text-sm text-white">{{ t('history.legacy.tag2') }}</span>
                   </div>
                   <div class="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10">
-                    <font-awesome-icon icon="fa-solid fa-handshake-angle" class="w-4 h-4 text-amber-400" />
+                    <font-awesome-icon icon="fa-solid fa-handshake-angle" class="w-4 h-4 text-brand-blue-400" />
                     <span class="text-sm text-white">{{ t('history.legacy.tag3') }}</span>
                   </div>
                 </div>
@@ -291,8 +291,8 @@ const founders = [
   --gradient-border: conic-gradient(
     from var(--border-angle),
     transparent 25%,
-    #f59e0b,
-    #3b82f6 99%,
+    #2b4bbf,
+    #f32525 99%,
     transparent
   );
 

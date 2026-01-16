@@ -94,13 +94,13 @@ const selectedCampus = ref<CampusItem>((externalCampusesOnly.value[0] ?? allCamp
 const coloredCountries = computed(() => {
   const countries: Record<string, { color: string; type: string; slug?: string }> = {
     // Headquarters (Egypt)
-    eg: { color: '#f59e0b', type: 'headquarters' }
+    eg: { color: '#2b4bbf', type: 'headquarters' }
   }
 
   // Add external campuses
   campusExternalises.value.forEach(campus => {
     countries[campus.country.toLowerCase()] = {
-      color: '#3b82f6',
+      color: '#f32525',
       type: 'campus',
       slug: campus.slug
     }
@@ -218,22 +218,22 @@ const handleImageError = (e: Event) => {
   <section id="campus-externalises" class="relative py-16 lg:py-24 bg-white dark:bg-gray-950 transition-colors duration-300 overflow-visible">
     <!-- Background Elements -->
     <div class="absolute inset-0 overflow-hidden">
-      <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-amber-50/30 dark:from-blue-900/10 dark:via-transparent dark:to-amber-900/10"></div>
-      <div class="absolute -top-40 -right-40 w-96 h-96 bg-blue-200/20 dark:bg-blue-500/10 rounded-full blur-3xl animate-blob"></div>
-      <div class="absolute bottom-0 -left-40 w-80 h-80 bg-amber-200/20 dark:bg-amber-500/10 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+      <div class="absolute inset-0 bg-gradient-to-br from-brand-blue-50/50 via-transparent to-brand-red-50/30 dark:from-brand-blue-900/10 dark:via-transparent dark:to-brand-red-900/10"></div>
+      <div class="absolute -top-40 -right-40 w-96 h-96 bg-brand-blue-200/20 dark:bg-brand-blue-500/10 rounded-full blur-3xl animate-blob"></div>
+      <div class="absolute bottom-0 -left-40 w-80 h-80 bg-brand-red-200/20 dark:bg-brand-red-500/10 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
     </div>
 
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Section Header -->
       <div ref="headerRef" class="text-center mb-12 lg:mb-16">
-        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 mb-4">
+        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 mb-4">
           <font-awesome-icon icon="fa-solid fa-globe-africa" class="w-3.5 h-3.5 mr-2" />
           {{ t('partners.campus.title') }}
         </span>
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
           <span class="relative inline-block">
             {{ t('partners.campus.title') }}
-            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
           </span>
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
@@ -244,11 +244,11 @@ const handleImageError = (e: Event) => {
       <!-- Legend -->
       <div class="flex flex-wrap justify-center gap-4 lg:gap-6 mb-8">
         <div class="flex items-center gap-2">
-          <span class="w-4 h-4 rounded-full bg-amber-500"></span>
+          <span class="w-4 h-4 rounded-full bg-brand-blue-500"></span>
           <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('partners.campus.headquarters') }}</span>
         </div>
         <div class="flex items-center gap-2">
-          <span class="w-4 h-4 rounded-full bg-blue-500"></span>
+          <span class="w-4 h-4 rounded-full bg-brand-red-500"></span>
           <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('partners.campus.externalCampus') }}</span>
         </div>
         <div class="flex items-center gap-2">
@@ -343,7 +343,7 @@ const handleImageError = (e: Event) => {
                 <!-- Badge -->
                 <div
                   class="absolute top-4 ltr:left-4 rtl:right-4 px-3 py-1 rounded-full text-xs font-semibold text-white"
-                  :class="selectedCampus.type === 'headquarters' ? 'bg-amber-500' : 'bg-blue-500'"
+                  :class="selectedCampus.type === 'headquarters' ? 'bg-brand-blue-500' : 'bg-brand-red-500'"
                 >
                   {{ selectedCampus.type === 'headquarters' ? t('partners.campus.headquarters') : t('partners.campus.externalCampus') }}
                 </div>
@@ -442,7 +442,7 @@ const handleImageError = (e: Event) => {
 }
 
 .tooltip-clickable:hover {
-  background: rgba(59, 130, 246, 0.95);
+  background: rgba(43, 75, 191, 0.95);
   transform: translateY(-50%) scale(1.05);
 }
 
@@ -506,7 +506,7 @@ const handleImageError = (e: Event) => {
   padding-left: 30px;
   background:
     repeating-linear-gradient(#0000 0 calc(1.4rem - 1px), #e5e7eb 0 1.4rem) right bottom / 100% 100%,
-    linear-gradient(#3b82f6 0 0) 30px 0 / 2px 100% #fff;
+    linear-gradient(#2b4bbf 0 0) 30px 0 / 2px 100% #fff;
   background-repeat: no-repeat;
   line-height: 1.4rem;
   -webkit-mask: radial-gradient(circle 0.8rem at 2px 50%, #0000 98%, #000) 0 0 / 100% 2.8rem;
@@ -519,7 +519,7 @@ const handleImageError = (e: Event) => {
   padding-right: 30px;
   background:
     repeating-linear-gradient(#0000 0 calc(1.4rem - 1px), #e5e7eb 0 1.4rem) left bottom / 100% 100%,
-    linear-gradient(#3b82f6 0 0) calc(100% - 30px) 0 / 2px 100% #fff;
+    linear-gradient(#2b4bbf 0 0) calc(100% - 30px) 0 / 2px 100% #fff;
   background-repeat: no-repeat;
   -webkit-mask: radial-gradient(circle 0.8rem at calc(100% - 2px) 50%, #0000 98%, #000) 0 0 / 100% 2.8rem;
   mask: radial-gradient(circle 0.8rem at calc(100% - 2px) 50%, #0000 98%, #000) 0 0 / 100% 2.8rem;
@@ -528,14 +528,14 @@ const handleImageError = (e: Event) => {
 :root.dark .campus-card {
   background:
     repeating-linear-gradient(#0000 0 calc(1.4rem - 1px), #374151 0 1.4rem) right bottom / 100% 100%,
-    linear-gradient(#3b82f6 0 0) 30px 0 / 2px 100% #1f2937;
+    linear-gradient(#2b4bbf 0 0) 30px 0 / 2px 100% #1f2937;
   background-repeat: no-repeat;
 }
 
 :root.dark[dir="rtl"] .campus-card {
   background:
     repeating-linear-gradient(#0000 0 calc(1.4rem - 1px), #374151 0 1.4rem) left bottom / 100% 100%,
-    linear-gradient(#3b82f6 0 0) calc(100% - 30px) 0 / 2px 100% #1f2937;
+    linear-gradient(#2b4bbf 0 0) calc(100% - 30px) 0 / 2px 100% #1f2937;
   background-repeat: no-repeat;
 }
 
@@ -665,8 +665,8 @@ const handleImageError = (e: Event) => {
   height: 12px;
   background: linear-gradient(
     to bottom,
-    rgba(59, 130, 246, 0.6) 0%,
-    rgba(59, 130, 246, 0.4) 100%
+    rgba(43, 75, 191, 0.6) 0%,
+    rgba(43, 75, 191, 0.4) 100%
   );
   border-radius: 2px;
 }
@@ -749,7 +749,7 @@ const handleImageError = (e: Event) => {
 }
 
 .campus-name-card--active::before {
-  background: rgba(59, 130, 246, 0.6);
+  background: rgba(43, 75, 191, 0.6);
 }
 
 .campus-name-card--headquarters {

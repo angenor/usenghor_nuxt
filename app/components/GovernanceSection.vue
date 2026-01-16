@@ -32,9 +32,9 @@ const orgChart = {
 
 const getColorClasses = (color: string) => {
   const colors: Record<string, { bg: string; badge: string }> = {
-    emerald: { bg: 'bg-gradient-to-br from-emerald-500 to-teal-600', badge: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300' },
+    emerald: { bg: 'bg-gradient-to-br from-brand-blue-500 to-brand-blue-600', badge: 'bg-brand-blue-100 dark:bg-brand-blue-900/40 text-brand-blue-700 dark:text-brand-blue-300' },
     cyan: { bg: 'bg-gradient-to-br from-cyan-500 to-blue-600', badge: 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300' },
-    amber: { bg: 'bg-gradient-to-br from-amber-500 to-orange-600', badge: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' },
+    amber: { bg: 'bg-gradient-to-br from-brand-red-500 to-brand-red-600', badge: 'bg-brand-red-100 dark:bg-brand-red-900/40 text-brand-red-700 dark:text-brand-red-300' },
     purple: { bg: 'bg-gradient-to-br from-purple-500 to-indigo-600', badge: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' }
   }
   return colors[color] || colors.emerald
@@ -45,9 +45,9 @@ const getColorClasses = (color: string) => {
   <section class="relative py-16 lg:py-24 bg-white dark:bg-gray-950 transition-colors duration-300 overflow-hidden">
     <!-- Animated Background -->
     <div class="absolute inset-0 overflow-hidden">
-      <div class="absolute inset-0 bg-gradient-to-br from-emerald-50/50 via-transparent to-blue-50/50 dark:from-emerald-900/10 dark:via-transparent dark:to-blue-900/10"></div>
-      <div class="absolute -top-40 -right-40 w-80 h-80 bg-emerald-200/30 dark:bg-emerald-500/10 rounded-full blur-3xl animate-blob"></div>
-      <div class="absolute top-1/2 -left-20 w-96 h-96 bg-blue-200/30 dark:bg-blue-500/10 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+      <div class="absolute inset-0 bg-gradient-to-br from-brand-blue-50/50 via-transparent to-brand-red-50/50 dark:from-brand-blue-900/10 dark:via-transparent dark:to-brand-red-900/10"></div>
+      <div class="absolute -top-40 -right-40 w-80 h-80 bg-brand-blue-200/30 dark:bg-brand-blue-500/10 rounded-full blur-3xl animate-blob"></div>
+      <div class="absolute top-1/2 -left-20 w-96 h-96 bg-brand-red-200/30 dark:bg-brand-red-500/10 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
       <div class="absolute -bottom-40 right-1/3 w-72 h-72 bg-purple-200/20 dark:bg-purple-500/10 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
       <div class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
     </div>
@@ -55,7 +55,7 @@ const getColorClasses = (color: string) => {
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div ref="headerRef" class="text-center mb-16 lg:mb-20">
-        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 mb-4">
+        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 mb-4">
           <font-awesome-icon icon="fa-solid fa-landmark" class="w-3.5 h-3.5 mr-2" />
           {{ t('governance.badge') }}
         </span>
@@ -84,7 +84,7 @@ const getColorClasses = (color: string) => {
           </div>
 
           <div class="space-y-6">
-            <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">
+            <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-brand-blue-100 dark:bg-brand-blue-900/40 text-brand-blue-700 dark:text-brand-blue-300">
               <font-awesome-icon icon="fa-solid fa-scroll" class="w-3 h-3 mr-2" />
               {{ t('governance.foundingTexts.badge') }}
             </div>
@@ -96,20 +96,20 @@ const getColorClasses = (color: string) => {
             </p>
             <ul class="space-y-3">
               <li class="flex items-start gap-3">
-                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center mt-0.5">
-                  <font-awesome-icon icon="fa-solid fa-check" class="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-brand-blue-100 dark:bg-brand-blue-900/40 flex items-center justify-center mt-0.5">
+                  <font-awesome-icon icon="fa-solid fa-check" class="w-3 h-3 text-brand-blue-600 dark:text-brand-blue-400" />
                 </div>
                 <span class="text-gray-700 dark:text-gray-300">{{ t('governance.foundingTexts.point1') }}</span>
               </li>
               <li class="flex items-start gap-3">
-                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center mt-0.5">
-                  <font-awesome-icon icon="fa-solid fa-check" class="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-brand-blue-100 dark:bg-brand-blue-900/40 flex items-center justify-center mt-0.5">
+                  <font-awesome-icon icon="fa-solid fa-check" class="w-3 h-3 text-brand-blue-600 dark:text-brand-blue-400" />
                 </div>
                 <span class="text-gray-700 dark:text-gray-300">{{ t('governance.foundingTexts.point2') }}</span>
               </li>
               <li class="flex items-start gap-3">
-                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center mt-0.5">
-                  <font-awesome-icon icon="fa-solid fa-check" class="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-brand-blue-100 dark:bg-brand-blue-900/40 flex items-center justify-center mt-0.5">
+                  <font-awesome-icon icon="fa-solid fa-check" class="w-3 h-3 text-brand-blue-600 dark:text-brand-blue-400" />
                 </div>
                 <span class="text-gray-700 dark:text-gray-300">{{ t('governance.foundingTexts.point3') }}</span>
               </li>
@@ -142,7 +142,7 @@ const getColorClasses = (color: string) => {
               <div
                 v-for="country in donorCountries"
                 :key="'first-' + country.code"
-                class="flex-shrink-0 group relative bg-white dark:bg-gray-800/50 rounded-xl px-6 py-4 border border-gray-200/50 dark:border-gray-700/50 hover:border-emerald-300 dark:hover:border-emerald-600 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10"
+                class="flex-shrink-0 group relative bg-white dark:bg-gray-800/50 rounded-xl px-6 py-4 border border-gray-200/50 dark:border-gray-700/50 hover:border-brand-blue-300 dark:hover:border-brand-blue-600 transition-all duration-300 hover:shadow-lg hover:shadow-brand-blue-500/10"
               >
                 <div class="flex items-center gap-3">
                   <img
@@ -161,7 +161,7 @@ const getColorClasses = (color: string) => {
               <div
                 v-for="country in donorCountries"
                 :key="'second-' + country.code"
-                class="flex-shrink-0 group relative bg-white dark:bg-gray-800/50 rounded-xl px-6 py-4 border border-gray-200/50 dark:border-gray-700/50 hover:border-emerald-300 dark:hover:border-emerald-600 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10"
+                class="flex-shrink-0 group relative bg-white dark:bg-gray-800/50 rounded-xl px-6 py-4 border border-gray-200/50 dark:border-gray-700/50 hover:border-brand-blue-300 dark:hover:border-brand-blue-600 transition-all duration-300 hover:shadow-lg hover:shadow-brand-blue-500/10"
               >
                 <div class="flex items-center gap-3">
                   <img
@@ -293,9 +293,9 @@ const getColorClasses = (color: string) => {
   justify-content: center;
   width: 100%;
   height: 100%;
-  background: linear-gradient(19deg, #10b981 0%, #6366f1 50%, #8b5cf6 100%);
+  background: linear-gradient(19deg, #2b4bbf 0%, #f32525 50%, #8b5cf6 100%);
   border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-  box-shadow: 15px 15px 50px rgba(16, 185, 129, 0.3), -15px -15px 50px rgba(99, 102, 241, 0.2);
+  box-shadow: 15px 15px 50px rgba(43, 75, 191, 0.3), -15px -15px 50px rgba(243, 37, 37, 0.2);
   animation: morphing 10s ease-in-out infinite;
   overflow: hidden;
   padding: 8px;
@@ -314,23 +314,23 @@ const getColorClasses = (color: string) => {
 @keyframes morphing {
   0% {
     border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-    box-shadow: 15px 15px 50px rgba(16, 185, 129, 0.3), -15px -15px 50px rgba(99, 102, 241, 0.2);
+    box-shadow: 15px 15px 50px rgba(43, 75, 191, 0.3), -15px -15px 50px rgba(243, 37, 37, 0.2);
   }
   25% {
     border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%;
-    box-shadow: -10px 15px 50px rgba(139, 92, 246, 0.3), 10px -15px 50px rgba(16, 185, 129, 0.2);
+    box-shadow: -10px 15px 50px rgba(139, 92, 246, 0.3), 10px -15px 50px rgba(43, 75, 191, 0.2);
   }
   50% {
     border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%;
-    box-shadow: -15px -10px 50px rgba(16, 185, 129, 0.3), 15px 10px 50px rgba(99, 102, 241, 0.2);
+    box-shadow: -15px -10px 50px rgba(43, 75, 191, 0.3), 15px 10px 50px rgba(243, 37, 37, 0.2);
   }
   75% {
     border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%;
-    box-shadow: 10px -15px 50px rgba(139, 92, 246, 0.3), -10px 15px 50px rgba(16, 185, 129, 0.2);
+    box-shadow: 10px -15px 50px rgba(139, 92, 246, 0.3), -10px 15px 50px rgba(43, 75, 191, 0.2);
   }
   100% {
     border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-    box-shadow: 15px 15px 50px rgba(16, 185, 129, 0.3), -15px -15px 50px rgba(99, 102, 241, 0.2);
+    box-shadow: 15px 15px 50px rgba(43, 75, 191, 0.3), -15px -15px 50px rgba(243, 37, 37, 0.2);
   }
 }
 
@@ -374,7 +374,7 @@ const getColorClasses = (color: string) => {
   transform: translateX(-50%);
   width: 2px;
   height: 32px;
-  background: linear-gradient(to bottom, #10b981, #6366f1);
+  background: linear-gradient(to bottom, #2b4bbf, #f32525);
 }
 
 /* Connector up - vertical line going up to element */
@@ -386,7 +386,7 @@ const getColorClasses = (color: string) => {
   transform: translateX(-50%);
   width: 2px;
   height: 32px;
-  background: linear-gradient(to bottom, #6366f1, #10b981);
+  background: linear-gradient(to bottom, #f32525, #2b4bbf);
 }
 
 /* Horizontal line for grouping children */
@@ -401,12 +401,12 @@ const getColorClasses = (color: string) => {
   left: 15%;
   right: 15%;
   height: 2px;
-  background: linear-gradient(to right, transparent, #10b981, #6366f1, #10b981, transparent);
+  background: linear-gradient(to right, transparent, #2b4bbf, #f32525, #2b4bbf, transparent);
 }
 
 /* President avatar ring - static gradient border */
 .president-avatar-ring {
-  background: linear-gradient(135deg, #10b981, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #2b4bbf, #f32525, #8b5cf6);
   padding: 3px;
 }
 

@@ -66,22 +66,22 @@ onUnmounted(() => {
     <!-- Animated Background -->
     <div class="absolute inset-0 overflow-hidden">
       <!-- Gradient Mesh -->
-      <div class="absolute inset-0 bg-gradient-to-br from-amber-50/50 via-transparent to-blue-50/50 dark:from-amber-900/10 dark:via-transparent dark:to-blue-900/10"></div>
+      <div class="absolute inset-0 bg-gradient-to-br from-brand-blue-50/50 via-transparent to-brand-red-50/50 dark:from-brand-blue-900/10 dark:via-transparent dark:to-brand-red-900/10"></div>
 
       <!-- Animated Blobs -->
-      <div class="absolute -top-40 -left-40 w-80 h-80 bg-amber-200/30 dark:bg-amber-500/10 rounded-full blur-3xl animate-blob"></div>
-      <div class="absolute top-1/2 -right-20 w-96 h-96 bg-blue-200/30 dark:bg-blue-500/10 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+      <div class="absolute -top-40 -left-40 w-80 h-80 bg-brand-blue-200/30 dark:bg-brand-blue-500/10 rounded-full blur-3xl animate-blob"></div>
+      <div class="absolute top-1/2 -right-20 w-96 h-96 bg-brand-red-200/30 dark:bg-brand-red-500/10 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
       <div class="absolute -bottom-40 left-1/3 w-72 h-72 bg-purple-200/20 dark:bg-purple-500/10 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
 
       <!-- Grid Pattern -->
       <div class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.03)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
 
       <!-- Floating Particles -->
-      <div class="absolute top-20 left-1/4 w-2 h-2 bg-amber-400/40 rounded-full animate-float"></div>
-      <div class="absolute top-40 right-1/4 w-3 h-3 bg-blue-400/40 rounded-full animate-float animation-delay-1000"></div>
+      <div class="absolute top-20 left-1/4 w-2 h-2 bg-brand-blue-400/40 rounded-full animate-float"></div>
+      <div class="absolute top-40 right-1/4 w-3 h-3 bg-brand-red-400/40 rounded-full animate-float animation-delay-1000"></div>
       <div class="absolute bottom-40 left-1/3 w-2 h-2 bg-purple-400/40 rounded-full animate-float animation-delay-3000"></div>
-      <div class="absolute top-1/3 right-1/3 w-1.5 h-1.5 bg-amber-400/50 rounded-full animate-float animation-delay-2000"></div>
-      <div class="absolute bottom-1/4 right-1/4 w-2.5 h-2.5 bg-blue-400/30 rounded-full animate-float animation-delay-4000"></div>
+      <div class="absolute top-1/3 right-1/3 w-1.5 h-1.5 bg-brand-blue-400/50 rounded-full animate-float animation-delay-2000"></div>
+      <div class="absolute bottom-1/4 right-1/4 w-2.5 h-2.5 bg-brand-red-400/30 rounded-full animate-float animation-delay-4000"></div>
 
       <!-- Subtle Radial Gradient -->
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-radial-gradient opacity-30 dark:opacity-20"></div>
@@ -90,7 +90,7 @@ onUnmounted(() => {
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div ref="headerRef" class="text-center mb-16 lg:mb-20">
-        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 mb-4">
+        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 mb-4">
           <font-awesome-icon icon="fa-solid fa-compass" class="w-3.5 h-3.5 mr-2" />
           {{ t('mission.badge') }}
         </span>
@@ -108,38 +108,38 @@ onUnmounted(() => {
         <div ref="missionCardRef" class="card-wrapper group perspective-1000">
           <div class="card-3d relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl p-8 lg:p-10 border border-white/50 dark:border-gray-700/50 overflow-hidden transition-all duration-500">
             <!-- Animated Glow Border -->
-            <div class="absolute -inset-[2px] rounded-3xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500 -z-10 animate-gradient-x"></div>
+            <div class="absolute -inset-[2px] rounded-3xl bg-gradient-to-r from-brand-blue-400 via-brand-blue-500 to-brand-blue-400 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500 -z-10 animate-gradient-x"></div>
             <div class="absolute inset-0 rounded-3xl bg-white dark:bg-gray-800 -z-5"></div>
 
             <!-- Floating Orb -->
-            <div class="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-amber-400/40 to-orange-500/40 rounded-full blur-2xl group-hover:scale-150 group-hover:opacity-80 transition-all duration-700"></div>
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-brand-blue-400/40 to-brand-blue-500/40 rounded-full blur-2xl group-hover:scale-150 group-hover:opacity-80 transition-all duration-700"></div>
 
             <!-- Animated Lines -->
             <div class="absolute top-0 left-0 w-full h-full overflow-hidden rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-              <div class="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-amber-400/50 to-transparent animate-line-down"></div>
-              <div class="absolute top-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber-400/50 to-transparent animate-line-right"></div>
+              <div class="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-brand-blue-400/50 to-transparent animate-line-down"></div>
+              <div class="absolute top-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-brand-blue-400/50 to-transparent animate-line-right"></div>
             </div>
 
             <!-- Icon with Pulse Effect -->
             <div class="relative mb-8 inline-block">
-              <div class="absolute inset-0 w-16 h-16 rounded-2xl bg-amber-500 blur-xl opacity-50 group-hover:opacity-80 group-hover:scale-125 transition-all duration-500"></div>
-              <div class="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-orange-600 flex items-center justify-center shadow-2xl shadow-amber-500/50 group-hover:shadow-amber-500/70 transition-shadow duration-500 group-hover:scale-110 transform">
+              <div class="absolute inset-0 w-16 h-16 rounded-2xl bg-brand-blue-500 blur-xl opacity-50 group-hover:opacity-80 group-hover:scale-125 transition-all duration-500"></div>
+              <div class="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-blue-400 via-brand-blue-500 to-brand-blue-600 flex items-center justify-center shadow-2xl shadow-brand-blue-500/50 group-hover:shadow-brand-blue-500/70 transition-shadow duration-500 group-hover:scale-110 transform">
                 <font-awesome-icon icon="fa-solid fa-bullseye" class="w-7 h-7 text-white" />
               </div>
               <!-- Orbiting Dot -->
-              <div class="absolute w-2 h-2 bg-amber-300 rounded-full orbit-animation"></div>
+              <div class="absolute w-2 h-2 bg-brand-blue-300 rounded-full orbit-animation"></div>
             </div>
 
             <!-- Content -->
             <div class="relative z-10">
-              <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors duration-300">
+              <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors duration-300">
                 {{ t('mission.mission.title') }}
               </h3>
               <p class="text-gray-600 dark:text-gray-300 text-lg leading-relaxed mb-6">
                 {{ t('mission.mission.description') }}
               </p>
               <div class="flex items-center gap-3">
-                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 text-amber-700 dark:text-amber-300 border border-amber-200/50 dark:border-amber-700/50 group-hover:scale-105 transition-transform duration-300">
+                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-brand-blue-100 to-brand-blue-200 dark:from-brand-blue-900/40 dark:to-brand-blue-800/40 text-brand-blue-700 dark:text-brand-blue-300 border border-brand-blue-200/50 dark:border-brand-blue-700/50 group-hover:scale-105 transition-transform duration-300">
                   <font-awesome-icon icon="fa-solid fa-wand-magic-sparkles" class="w-4 h-4 mr-2 animate-pulse" />
                   {{ t('mission.mission.tagline') }}
                 </span>
@@ -148,7 +148,7 @@ onUnmounted(() => {
 
             <!-- Corner Accent -->
             <div class="absolute bottom-0 right-0 w-32 h-32">
-              <div class="absolute bottom-4 right-4 w-20 h-20 border-r-2 border-b-2 border-amber-400/30 rounded-br-3xl group-hover:border-amber-400/60 group-hover:scale-110 transition-all duration-500"></div>
+              <div class="absolute bottom-4 right-4 w-20 h-20 border-r-2 border-b-2 border-brand-blue-400/30 rounded-br-3xl group-hover:border-brand-blue-400/60 group-hover:scale-110 transition-all duration-500"></div>
             </div>
           </div>
         </div>
@@ -157,31 +157,31 @@ onUnmounted(() => {
         <div ref="visionCardRef" class="card-wrapper group perspective-1000">
           <div class="card-3d relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl p-8 lg:p-10 border border-white/50 dark:border-gray-700/50 overflow-hidden transition-all duration-500">
             <!-- Animated Glow Border -->
-            <div class="absolute -inset-[2px] rounded-3xl bg-gradient-to-r from-blue-400 via-indigo-500 to-blue-400 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500 -z-10 animate-gradient-x"></div>
+            <div class="absolute -inset-[2px] rounded-3xl bg-gradient-to-r from-brand-red-400 via-brand-red-500 to-brand-red-400 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500 -z-10 animate-gradient-x"></div>
             <div class="absolute inset-0 rounded-3xl bg-white dark:bg-gray-800 -z-5"></div>
 
             <!-- Floating Orb -->
-            <div class="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-blue-400/40 to-indigo-500/40 rounded-full blur-2xl group-hover:scale-150 group-hover:opacity-80 transition-all duration-700"></div>
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-brand-red-400/40 to-brand-red-500/40 rounded-full blur-2xl group-hover:scale-150 group-hover:opacity-80 transition-all duration-700"></div>
 
             <!-- Animated Lines -->
             <div class="absolute top-0 left-0 w-full h-full overflow-hidden rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-              <div class="absolute top-0 right-1/4 w-px h-full bg-gradient-to-b from-transparent via-blue-400/50 to-transparent animate-line-down animation-delay-500"></div>
-              <div class="absolute bottom-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-400/50 to-transparent animate-line-right animation-delay-500"></div>
+              <div class="absolute top-0 right-1/4 w-px h-full bg-gradient-to-b from-transparent via-brand-red-400/50 to-transparent animate-line-down animation-delay-500"></div>
+              <div class="absolute bottom-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-brand-red-400/50 to-transparent animate-line-right animation-delay-500"></div>
             </div>
 
             <!-- Icon with Pulse Effect -->
             <div class="relative mb-8 inline-block">
-              <div class="absolute inset-0 w-16 h-16 rounded-2xl bg-blue-500 blur-xl opacity-50 group-hover:opacity-80 group-hover:scale-125 transition-all duration-500"></div>
-              <div class="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-600 flex items-center justify-center shadow-2xl shadow-blue-500/50 group-hover:shadow-blue-500/70 transition-shadow duration-500 group-hover:scale-110 transform">
+              <div class="absolute inset-0 w-16 h-16 rounded-2xl bg-brand-red-500 blur-xl opacity-50 group-hover:opacity-80 group-hover:scale-125 transition-all duration-500"></div>
+              <div class="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-red-400 via-brand-red-500 to-brand-red-600 flex items-center justify-center shadow-2xl shadow-brand-red-500/50 group-hover:shadow-brand-red-500/70 transition-shadow duration-500 group-hover:scale-110 transform">
                 <font-awesome-icon icon="fa-solid fa-eye" class="w-7 h-7 text-white" />
               </div>
               <!-- Orbiting Dot -->
-              <div class="absolute w-2 h-2 bg-blue-300 rounded-full orbit-animation animation-delay-1000"></div>
+              <div class="absolute w-2 h-2 bg-brand-red-300 rounded-full orbit-animation animation-delay-1000"></div>
             </div>
 
             <!-- Content -->
             <div class="relative z-10">
-              <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+              <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-brand-red-600 dark:group-hover:text-brand-red-400 transition-colors duration-300">
                 {{ t('mission.vision.title') }}
               </h3>
               <p class="text-gray-600 dark:text-gray-300 text-lg leading-relaxed mb-6">
@@ -189,15 +189,15 @@ onUnmounted(() => {
               </p>
               <!-- Vision Keywords -->
               <div class="flex flex-wrap gap-2">
-                <span class="px-3 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-full border border-blue-200/50 dark:border-blue-700/50">{{ t('mission.vision.keywords.innovation') }}</span>
-                <span class="px-3 py-1 text-xs font-medium bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded-full border border-indigo-200/50 dark:border-indigo-700/50">{{ t('mission.vision.keywords.excellence') }}</span>
+                <span class="px-3 py-1 text-xs font-medium bg-brand-red-100 dark:bg-brand-red-900/40 text-brand-red-700 dark:text-brand-red-300 rounded-full border border-brand-red-200/50 dark:border-brand-red-700/50">{{ t('mission.vision.keywords.innovation') }}</span>
+                <span class="px-3 py-1 text-xs font-medium bg-brand-blue-100 dark:bg-brand-blue-900/40 text-brand-blue-700 dark:text-brand-blue-300 rounded-full border border-brand-blue-200/50 dark:border-brand-blue-700/50">{{ t('mission.vision.keywords.excellence') }}</span>
                 <span class="px-3 py-1 text-xs font-medium bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 rounded-full border border-purple-200/50 dark:border-purple-700/50">{{ t('mission.vision.keywords.impact') }}</span>
               </div>
             </div>
 
             <!-- Corner Accent -->
             <div class="absolute bottom-0 right-0 w-32 h-32">
-              <div class="absolute bottom-4 right-4 w-20 h-20 border-r-2 border-b-2 border-blue-400/30 rounded-br-3xl group-hover:border-blue-400/60 group-hover:scale-110 transition-all duration-500"></div>
+              <div class="absolute bottom-4 right-4 w-20 h-20 border-r-2 border-b-2 border-brand-red-400/30 rounded-br-3xl group-hover:border-brand-red-400/60 group-hover:scale-110 transition-all duration-500"></div>
             </div>
           </div>
         </div>
@@ -218,7 +218,7 @@ onUnmounted(() => {
         <div class="relative px-8 py-16 lg:px-16 lg:py-20">
           <div class="max-w-2xl">
             <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-white/10 backdrop-blur-sm text-white border border-white/20 mb-6">
-              <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-3.5 h-3.5 mr-2 text-amber-400" />
+              <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-3.5 h-3.5 mr-2 text-brand-blue-400" />
               {{ t('mission.experience.badge') }}
             </span>
 
@@ -232,22 +232,22 @@ onUnmounted(() => {
 
             <div class="flex flex-wrap gap-4 mb-8">
               <div class="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10">
-                <font-awesome-icon icon="fa-solid fa-briefcase" class="w-4 h-4 text-amber-400" />
+                <font-awesome-icon icon="fa-solid fa-briefcase" class="w-4 h-4 text-brand-blue-400" />
                 <span class="text-sm text-white">{{ t('mission.experience.features.immersion') }}</span>
               </div>
               <div class="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10">
-                <font-awesome-icon icon="fa-solid fa-lightbulb" class="w-4 h-4 text-amber-400" />
+                <font-awesome-icon icon="fa-solid fa-lightbulb" class="w-4 h-4 text-brand-blue-400" />
                 <span class="text-sm text-white">{{ t('mission.experience.features.creativity') }}</span>
               </div>
               <div class="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10">
-                <font-awesome-icon icon="fa-solid fa-users" class="w-4 h-4 text-amber-400" />
+                <font-awesome-icon icon="fa-solid fa-users" class="w-4 h-4 text-brand-blue-400" />
                 <span class="text-sm text-white">{{ t('mission.experience.features.network') }}</span>
               </div>
             </div>
 
             <NuxtLink
               to="/about/experience"
-              class="group inline-flex items-center gap-2 px-8 py-4 bg-amber-500 text-white font-semibold rounded-full transition-all duration-300 hover:bg-amber-600 hover:shadow-xl hover:shadow-amber-500/30 hover:-translate-y-1"
+              class="group inline-flex items-center gap-2 px-8 py-4 bg-brand-blue-500 text-white font-semibold rounded-full transition-all duration-300 hover:bg-brand-blue-600 hover:shadow-xl hover:shadow-brand-blue-500/30 hover:-translate-y-1"
             >
               <span>{{ t('mission.experience.cta') }}</span>
               <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -257,15 +257,15 @@ onUnmounted(() => {
           <!-- Decorative Stats -->
           <div ref="statsRef" class="hidden lg:flex absolute right-16 top-1/2 -translate-y-1/2 flex-col gap-6">
             <div class="stat-card text-center p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/10 transition-all duration-500" :class="{ 'stat-visible': hasAnimated }">
-              <div class="text-4xl font-bold text-amber-400 mb-1 tabular-nums">{{ animatedStats.countries }}+</div>
+              <div class="text-4xl font-bold text-brand-blue-400 mb-1 tabular-nums">{{ animatedStats.countries }}+</div>
               <div class="text-sm text-white/70">{{ t('mission.experience.stats.countries') }}</div>
             </div>
             <div class="stat-card text-center p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/10 transition-all duration-500 delay-100" :class="{ 'stat-visible': hasAnimated }">
-              <div class="text-4xl font-bold text-amber-400 mb-1 tabular-nums">{{ animatedStats.graduates.toLocaleString() }}+</div>
+              <div class="text-4xl font-bold text-brand-blue-400 mb-1 tabular-nums">{{ animatedStats.graduates.toLocaleString() }}+</div>
               <div class="text-sm text-white/70">{{ t('mission.experience.stats.graduates') }}</div>
             </div>
             <div class="stat-card text-center p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/10 transition-all duration-500 delay-200" :class="{ 'stat-visible': hasAnimated }">
-              <div class="text-4xl font-bold text-amber-400 mb-1 tabular-nums">{{ animatedStats.years }}+</div>
+              <div class="text-4xl font-bold text-brand-blue-400 mb-1 tabular-nums">{{ animatedStats.years }}+</div>
               <div class="text-sm text-white/70">{{ t('mission.experience.stats.years') }}</div>
             </div>
           </div>
@@ -343,11 +343,11 @@ onUnmounted(() => {
 
 /* Radial Gradient Background */
 .bg-radial-gradient {
-  background: radial-gradient(ellipse at center, rgba(251, 191, 36, 0.1) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(43, 75, 191, 0.1) 0%, transparent 70%);
 }
 
 :root.dark .bg-radial-gradient {
-  background: radial-gradient(ellipse at center, rgba(251, 191, 36, 0.05) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(43, 75, 191, 0.05) 0%, transparent 70%);
 }
 
 /* 3D Card Effects */

@@ -112,7 +112,7 @@ onUnmounted(() => {
           <div class="flex flex-wrap gap-4 animate__animated animate__fadeInUp animate__delay-2s">
             <NuxtLink
               :to="localePath('/formations')"
-              class="group relative inline-flex items-center px-8 py-4 bg-amber-500 text-white font-semibold rounded-full overflow-hidden transition-all duration-300 hover:bg-amber-600 hover:shadow-2xl hover:shadow-amber-500/30 hover:-translate-y-1"
+              class="group relative inline-flex items-center px-8 py-4 bg-brand-blue-500 text-white font-semibold rounded-full overflow-hidden transition-all duration-300 hover:bg-brand-blue-600 hover:shadow-2xl hover:shadow-brand-blue-500/30 hover:-translate-y-1"
             >
               <span class="relative z-10">{{ t('hero.cta.discover') }}</span>
               <font-awesome-icon icon="fa-solid fa-arrow-right" class="relative z-10 w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
@@ -156,12 +156,12 @@ onUnmounted(() => {
         @click="goToSlide(index, true)"
         class="group relative h-3 transition-all duration-500 rounded-full overflow-hidden"
         :class="[
-          currentSlide === index ? 'w-12 bg-amber-500' : 'w-3 bg-white/40 hover:bg-white/60'
+          currentSlide === index ? 'w-12 bg-brand-blue-500' : 'w-3 bg-white/40 hover:bg-white/60'
         ]"
       >
         <span
           v-if="currentSlide === index"
-          class="absolute inset-0 bg-amber-300 animate-progress"
+          class="absolute inset-0 bg-brand-blue-300 animate-progress"
         ></span>
       </button>
     </div>
