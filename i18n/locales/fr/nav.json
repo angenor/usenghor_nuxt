@@ -51,7 +51,9 @@
         "universityDiplomas": "Diplômes d'université",
         "universityDiplomasDesc": "Formations spécialisées d'une année académique",
         "certifications": "Formations certifiantes",
-        "certificationsDesc": "Certifications professionnelles courtes et intensives"
+        "certificationsDesc": "Certifications professionnelles courtes et intensives",
+        "externalCampus": "Campus externalisés",
+        "externalCampusDesc": "Formations délocalisées dans nos campus partenaires"
       },
       "projects": {
         "transformAction": "Transform'Action Africa",
