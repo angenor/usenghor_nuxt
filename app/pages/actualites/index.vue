@@ -81,9 +81,9 @@ const formatShortDate = (dateStr: string) => {
 
 // Event type colors
 const typeColors: Record<string, string> = {
-  conference: 'bg-red-600',
-  atelier: 'bg-indigo-600',
-  ceremonie: 'bg-amber-600',
+  conference: 'bg-brand-red-600',
+  atelier: 'bg-brand-blue-600',
+  ceremonie: 'bg-brand-blue-500',
   autre: 'bg-gray-600'
 }
 </script>
@@ -103,7 +103,7 @@ const typeColors: Record<string, string> = {
         <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-8">
           <span class="relative inline-block">
             {{ t('actualites.sections.featured') }}
-            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
           </span>
         </h2>
 
@@ -124,12 +124,12 @@ const typeColors: Record<string, string> = {
 
                 <div class="mt-5">
                   <div class="flex items-center gap-2 mb-3">
-                    <span class="inline-block px-3 py-1 text-xs font-semibold text-white bg-amber-600 rounded uppercase tracking-wide">
+                    <span class="inline-block px-3 py-1 text-xs font-semibold text-white bg-brand-blue-600 rounded uppercase tracking-wide">
                       {{ t('actualites.sections.featured') }}
                     </span>
                   </div>
 
-                  <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                  <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white leading-tight group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                     {{ getLocalizedTitle(featuredNews) }}
                   </h3>
 
@@ -161,7 +161,7 @@ const typeColors: Record<string, string> = {
                     >
                   </div>
 
-                  <h4 class="text-lg font-bold text-gray-900 dark:text-white leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                  <h4 class="text-lg font-bold text-gray-900 dark:text-white leading-tight group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                     {{ getLocalizedTitle(item) }}
                   </h4>
 
@@ -185,7 +185,7 @@ const typeColors: Record<string, string> = {
         <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-8">
           <span class="relative inline-block">
             {{ t('actualites.sections.latestNews') }}
-            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
           </span>
         </h2>
 
@@ -206,7 +206,7 @@ const typeColors: Record<string, string> = {
             </div>
 
             <div class="mt-4">
-              <h3 class="text-lg font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                 {{ getLocalizedTitle(item) }}
               </h3>
 
@@ -226,7 +226,7 @@ const typeColors: Record<string, string> = {
           <button
             v-if="hasMoreNews"
             @click="loadMoreNews"
-            class="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors"
+            class="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue-600 hover:bg-brand-blue-700 text-white font-medium rounded-lg transition-colors"
           >
             <font-awesome-icon icon="fa-solid fa-plus" class="w-4 h-4" />
             {{ t('actualites.sections.loadMore') }}
@@ -248,12 +248,12 @@ const typeColors: Record<string, string> = {
           <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
             <span class="relative inline-block">
               {{ t('actualites.sections.upcomingEvents') }}
-              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
             </span>
           </h2>
           <NuxtLink
             :to="localePath('/actualites/evenements')"
-            class="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium flex items-center gap-1"
+            class="text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 font-medium flex items-center gap-1"
           >
             {{ t('actualites.sections.viewAllEvents') }}
             <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
@@ -310,12 +310,12 @@ const typeColors: Record<string, string> = {
           <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
             <span class="relative inline-block">
               {{ t('actualites.sections.openCalls') }}
-              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
             </span>
           </h2>
           <NuxtLink
             :to="localePath('/actualites/appels')"
-            class="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium flex items-center gap-1"
+            class="text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 font-medium flex items-center gap-1"
           >
             {{ t('actualites.sections.viewAllCalls') }}
             <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
@@ -342,12 +342,12 @@ const typeColors: Record<string, string> = {
             <!-- Content -->
             <div class="p-5">
               <div class="flex items-center gap-2 mb-3">
-                <span class="inline-block px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 rounded">
+                <span class="inline-block px-2 py-0.5 text-xs font-medium text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded">
                   {{ t(`actualites.calls.filters.${call.type}`) }}
                 </span>
               </div>
 
-              <h3 class="text-lg font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                 {{ getLocalizedTitle(call) }}
               </h3>
 
@@ -361,7 +361,7 @@ const typeColors: Record<string, string> = {
                   <span class="ml-1 font-semibold text-red-600 dark:text-red-400">{{ formatShortDate(call.deadline) }}</span>
                 </div>
 
-                <span class="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-600 text-white text-sm font-medium rounded-lg">
+                <span class="inline-flex items-center gap-1 px-3 py-1.5 bg-brand-blue-600 text-white text-sm font-medium rounded-lg">
                   {{ t('actualites.readMore') }}
                   <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
                 </span>

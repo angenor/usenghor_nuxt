@@ -109,14 +109,14 @@ const getLocalizedTitleFor = (item: { title_fr: string; title_en?: string; title
               </li>
               <li class="flex items-center">
                 <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3 mx-2 text-white/40" />
-                <span class="text-amber-400 font-medium truncate max-w-xs">{{ getLocalizedTitle }}</span>
+                <span class="text-brand-blue-400 font-medium truncate max-w-xs">{{ getLocalizedTitle }}</span>
               </li>
             </ol>
           </nav>
 
           <!-- Meta info -->
           <div class="flex flex-wrap items-center gap-3 mb-4">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-600 text-white text-sm font-medium rounded-full">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-blue-600 text-white text-sm font-medium rounded-full">
               <span>{{ campusFlag }}</span>
               <span>{{ campusName }}</span>
             </span>
@@ -172,7 +172,7 @@ const getLocalizedTitleFor = (item: { title_fr: string; title_en?: string; title
           <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
             <NuxtLink
               :to="localePath('/actualites')"
-              class="inline-flex items-center gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors"
+              class="inline-flex items-center gap-2 text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 font-medium transition-colors"
             >
               <font-awesome-icon icon="fa-solid fa-arrow-left" class="w-4 h-4" />
               {{ t('actualites.detail.news.backToNews') }}
@@ -184,7 +184,7 @@ const getLocalizedTitleFor = (item: { title_fr: string; title_en?: string; title
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
               <span class="relative inline-block">
                 {{ t('actualites.detail.news.relatedNews') }}
-                <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+                <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
               </span>
             </h2>
 
@@ -204,7 +204,7 @@ const getLocalizedTitleFor = (item: { title_fr: string; title_en?: string; title
                     >
                   </div>
 
-                  <h3 class="text-base font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                  <h3 class="text-base font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                     {{ getLocalizedTitleFor(item) }}
                   </h3>
 

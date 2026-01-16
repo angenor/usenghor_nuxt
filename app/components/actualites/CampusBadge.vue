@@ -44,7 +44,7 @@ const sizeClasses = computed(() => {
   <NuxtLink
     v-if="campus && showLink"
     :to="campusLink"
-    class="inline-flex items-center gap-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-400 transition-colors duration-200"
+    class="inline-flex items-center gap-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full hover:bg-brand-blue-100 dark:hover:bg-brand-blue-900/30 hover:text-brand-blue-700 dark:hover:text-brand-blue-400 transition-colors duration-200"
     :class="sizeClasses"
   >
     <span>{{ flag }}</span>

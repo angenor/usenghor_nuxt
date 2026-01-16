@@ -136,7 +136,7 @@ const daysUntilDeadline = (deadlineStr: string) => {
               @click="selectedType = filter.value as any"
               class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
               :class="selectedType === filter.value
-                ? 'bg-amber-600 text-white shadow-md'
+                ? 'bg-brand-blue-600 text-white shadow-md'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
             >
               {{ t(filter.label) }}
@@ -193,7 +193,7 @@ const daysUntilDeadline = (deadlineStr: string) => {
                 <!-- Content -->
                 <div class="md:w-2/3 p-6">
                   <div class="flex flex-wrap items-center gap-2 mb-3">
-                    <span class="inline-block px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 rounded">
+                    <span class="inline-block px-2 py-0.5 text-xs font-medium text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded">
                       {{ t(`actualites.calls.filters.${call.type}`) }}
                     </span>
                     <span
@@ -210,7 +210,7 @@ const daysUntilDeadline = (deadlineStr: string) => {
                     </span>
                   </div>
 
-                  <h3 class="text-xl font-bold text-gray-900 dark:text-white leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                  <h3 class="text-xl font-bold text-gray-900 dark:text-white leading-tight group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                     {{ getLocalizedTitle(call) }}
                   </h3>
 
@@ -241,7 +241,7 @@ const daysUntilDeadline = (deadlineStr: string) => {
                       </span>
                     </div>
 
-                    <span class="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white font-medium rounded-lg">
+                    <span class="inline-flex items-center gap-2 px-4 py-2 bg-brand-blue-600 text-white font-medium rounded-lg">
                       {{ t('actualites.readMore') }}
                       <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
                     </span>

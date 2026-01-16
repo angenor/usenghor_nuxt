@@ -14,17 +14,17 @@ const selectedIndex = ref(-1)
 const searchInputRef = ref<HTMLInputElement | null>(null)
 
 const searchData = [
-  { id: 1, type: 'formation', title: 'Master Administration des Entreprises', subtitle: 'Formation • 2 ans', icon: 'fa-solid fa-graduation-cap', route: '/programs/masters' },
-  { id: 2, type: 'formation', title: 'Master Gestion du Patrimoine Culturel', subtitle: 'Formation • 2 ans', icon: 'fa-solid fa-graduation-cap', route: '/programs/masters' },
-  { id: 3, type: 'news', title: 'Appel à candidatures Master 2025', subtitle: 'Actualité', icon: 'fa-solid fa-bullhorn', route: '/news' },
-  { id: 4, type: 'about', title: 'Campus d\'Alexandrie', subtitle: 'À propos', icon: 'fa-solid fa-map-location-dot', route: '/about/campus' }
+  { id: 1, type: 'formation', title: 'Master Administration des Entreprises', subtitle: 'Formation • 2 ans', icon: 'fa-solid fa-graduation-cap', route: '/formations/masters' },
+  { id: 2, type: 'formation', title: 'Master Gestion du Patrimoine Culturel', subtitle: 'Formation • 2 ans', icon: 'fa-solid fa-graduation-cap', route: '/formations/masters' },
+  { id: 3, type: 'news', title: 'Appel à candidatures Master 2025', subtitle: 'Actualité', icon: 'fa-solid fa-bullhorn', route: '/actualites/appels' },
+  { id: 4, type: 'about', title: 'Campus d\'Alexandrie', subtitle: 'À propos', icon: 'fa-solid fa-map-location-dot', route: '/site' }
 ]
 
 const popularSuggestions = [
-  { title: 'Masters', icon: 'fa-solid fa-graduation-cap', route: '/programs/masters' },
-  { title: 'Candidatures', icon: 'fa-solid fa-bullhorn', route: '/news' },
-  { title: 'Alumni', icon: 'fa-solid fa-user-graduate', route: '/network/alumni' },
-  { title: 'Campus', icon: 'fa-solid fa-map-location-dot', route: '/about/campus' }
+  { title: 'Masters', icon: 'fa-solid fa-graduation-cap', route: '/formations/masters' },
+  { title: 'Candidatures', icon: 'fa-solid fa-bullhorn', route: '/actualites/appels' },
+  { title: 'Alumni', icon: 'fa-solid fa-user-graduate', route: '/alumni' },
+  { title: 'Campus', icon: 'fa-solid fa-map-location-dot', route: '/site' }
 ]
 
 const filteredResults = computed(() => {

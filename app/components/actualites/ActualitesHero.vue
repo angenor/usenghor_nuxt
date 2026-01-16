@@ -12,7 +12,7 @@ defineProps<Props>()
 <template>
   <section class="relative py-16 md:py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
     <!-- Background pattern -->
-    <div class="absolute inset-0 opacity-10 heropattern-topography-amber-500"></div>
+    <div class="absolute inset-0 opacity-10 heropattern-topography-brand-blue-500"></div>
 
     <!-- Background image overlay -->
     <div
@@ -27,7 +27,7 @@ defineProps<Props>()
         <!-- Badge -->
         <span
           v-if="badge"
-          class="inline-block px-4 py-1.5 text-sm font-semibold text-amber-900 bg-amber-400 rounded-full mb-6"
+          class="inline-block px-4 py-1.5 text-sm font-semibold text-brand-blue-900 bg-brand-blue-400 rounded-full mb-6"
         >
           {{ badge }}
         </span>

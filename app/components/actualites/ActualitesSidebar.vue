@@ -44,9 +44,9 @@ const getCampusFlag = (campusId: string) => {
 
 // Event type colors
 const typeColors: Record<string, string> = {
-  conference: 'bg-red-600',
-  atelier: 'bg-indigo-600',
-  ceremonie: 'bg-amber-600',
+  conference: 'bg-brand-red-600',
+  atelier: 'bg-brand-blue-600',
+  ceremonie: 'bg-brand-blue-500',
   autre: 'bg-gray-600'
 }
 </script>
@@ -56,7 +56,7 @@ const typeColors: Record<string, string> = {
     <!-- Upcoming Events -->
     <div v-if="showEvents && upcomingEvents.length > 0" class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5">
       <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-        <font-awesome-icon icon="fa-solid fa-calendar" class="text-amber-500" />
+        <font-awesome-icon icon="fa-solid fa-calendar" class="text-brand-blue-500" />
         {{ t('actualites.sidebar.upcomingEvents') }}
       </h3>
 
@@ -69,8 +69,8 @@ const typeColors: Record<string, string> = {
           <div class="flex items-start gap-3">
             <!-- Date badge -->
             <div class="flex-shrink-0 w-12 text-center">
-              <div class="bg-amber-100 dark:bg-amber-900/30 rounded-lg py-1.5">
-                <div class="text-xs text-amber-700 dark:text-amber-400 font-medium">
+              <div class="bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded-lg py-1.5">
+                <div class="text-xs text-brand-blue-700 dark:text-brand-blue-400 font-medium">
                   {{ formatDate(event.date) }}
                 </div>
               </div>
@@ -84,7 +84,7 @@ const typeColors: Record<string, string> = {
               >
                 {{ t(`actualites.events.types.${event.type}`) }}
               </span>
-              <h4 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+              <h4 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                 {{ getLocalizedTitle(event) }}
               </h4>
               <div class="flex items-center gap-1 mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -97,7 +97,7 @@ const typeColors: Record<string, string> = {
 
       <NuxtLink
         :to="localePath('/actualites/evenements')"
-        class="inline-flex items-center gap-1 mt-4 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300"
+        class="inline-flex items-center gap-1 mt-4 text-sm font-medium text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300"
       >
         {{ t('actualites.sections.viewAllEvents') }}
         <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
@@ -107,7 +107,7 @@ const typeColors: Record<string, string> = {
     <!-- Recent News -->
     <div v-if="showNews && recentNews.length > 0" class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5">
       <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-        <font-awesome-icon icon="fa-solid fa-newspaper" class="text-amber-500" />
+        <font-awesome-icon icon="fa-solid fa-newspaper" class="text-brand-blue-500" />
         {{ t('actualites.sidebar.recentNews') }}
       </h3>
 
@@ -129,7 +129,7 @@ const typeColors: Record<string, string> = {
 
           <!-- Content -->
           <div class="flex-1 min-w-0">
-            <h4 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+            <h4 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
               {{ getLocalizedTitle(news) }}
             </h4>
             <div class="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -142,7 +142,7 @@ const typeColors: Record<string, string> = {
 
       <NuxtLink
         :to="localePath('/actualites')"
-        class="inline-flex items-center gap-1 mt-4 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300"
+        class="inline-flex items-center gap-1 mt-4 text-sm font-medium text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300"
       >
         {{ t('actualites.sections.viewAllNews') }}
         <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
@@ -152,7 +152,7 @@ const typeColors: Record<string, string> = {
     <!-- Open Calls -->
     <div v-if="showCalls && openCalls.length > 0" class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5">
       <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-        <font-awesome-icon icon="fa-solid fa-bullhorn" class="text-amber-500" />
+        <font-awesome-icon icon="fa-solid fa-bullhorn" class="text-brand-blue-500" />
         {{ t('actualites.sidebar.openCalls') }}
       </h3>
 
@@ -162,7 +162,7 @@ const typeColors: Record<string, string> = {
           :key="call.id"
           class="group"
         >
-          <h4 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+          <h4 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
             {{ getLocalizedTitle(call) }}
           </h4>
           <div class="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -176,7 +176,7 @@ const typeColors: Record<string, string> = {
 
       <NuxtLink
         :to="localePath('/actualites/appels')"
-        class="inline-flex items-center gap-1 mt-4 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300"
+        class="inline-flex items-center gap-1 mt-4 text-sm font-medium text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300"
       >
         {{ t('actualites.sections.viewAllCalls') }}
         <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />

@@ -77,10 +77,10 @@ const daysUntilDeadline = computed(() => {
 
 // Type badge colors
 const typeBadgeColors: Record<string, string> = {
-  candidature: 'bg-blue-600',
-  bourse: 'bg-green-600',
+  candidature: 'bg-brand-blue-600',
+  bourse: 'bg-brand-blue-500',
   projet: 'bg-purple-600',
-  recrutement: 'bg-orange-600'
+  recrutement: 'bg-brand-red-600'
 }
 
 // Related calls (same type, open, excluding current)
@@ -142,7 +142,7 @@ const formatShortDate = (dateStr: string) => {
               </li>
               <li class="flex items-center">
                 <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3 mx-2 text-white/40" />
-                <span class="text-amber-400 font-medium truncate max-w-xs">{{ getLocalizedTitle }}</span>
+                <span class="text-brand-blue-400 font-medium truncate max-w-xs">{{ getLocalizedTitle }}</span>
               </li>
             </ol>
           </nav>
@@ -271,7 +271,7 @@ const formatShortDate = (dateStr: string) => {
           <!-- Partners -->
           <div v-if="call.partner_logos && call.partner_logos.length > 0" class="mb-8">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <font-awesome-icon icon="fa-solid fa-handshake" class="text-amber-500" />
+              <font-awesome-icon icon="fa-solid fa-handshake" class="text-brand-blue-500" />
               {{ t('actualites.detail.call.partners') }}
             </h3>
             <div class="flex flex-wrap items-center gap-6 p-6 bg-gray-50 dark:bg-gray-800 rounded-xl">
@@ -292,7 +292,7 @@ const formatShortDate = (dateStr: string) => {
               v-if="call.url && call.status === 'open'"
               :href="call.url"
               target="_blank"
-              class="inline-flex items-center gap-3 px-8 py-4 bg-amber-600 hover:bg-amber-700 text-white text-lg font-bold rounded-xl transition-colors shadow-lg hover:shadow-xl"
+              class="inline-flex items-center gap-3 px-8 py-4 bg-brand-blue-600 hover:bg-brand-blue-700 text-white text-lg font-bold rounded-xl transition-colors shadow-lg hover:shadow-xl"
             >
               <font-awesome-icon icon="fa-solid fa-paper-plane" class="w-5 h-5" />
               {{ t('actualites.detail.call.apply') }}
@@ -311,7 +311,7 @@ const formatShortDate = (dateStr: string) => {
           <div class="pt-8 border-t border-gray-200 dark:border-gray-700">
             <NuxtLink
               :to="localePath('/actualites/appels')"
-              class="inline-flex items-center gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors"
+              class="inline-flex items-center gap-2 text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 font-medium transition-colors"
             >
               <font-awesome-icon icon="fa-solid fa-arrow-left" class="w-4 h-4" />
               {{ t('actualites.detail.call.backToCalls') }}
@@ -323,7 +323,7 @@ const formatShortDate = (dateStr: string) => {
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
               <span class="relative inline-block">
                 {{ t('actualites.detail.call.relatedCalls') }}
-                <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+                <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
               </span>
             </h2>
 
@@ -353,7 +353,7 @@ const formatShortDate = (dateStr: string) => {
                       </span>
                     </div>
 
-                    <h3 class="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                    <h3 class="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                       {{ getLocalizedTitleFor(item) }}
                     </h3>
 

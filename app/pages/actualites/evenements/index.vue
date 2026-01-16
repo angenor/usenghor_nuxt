@@ -78,9 +78,9 @@ const formatShortDate = (dateStr: string) => {
 
 // Event type colors
 const typeColors: Record<string, string> = {
-  conference: 'bg-red-600',
-  atelier: 'bg-indigo-600',
-  ceremonie: 'bg-amber-600',
+  conference: 'bg-brand-red-600',
+  atelier: 'bg-brand-blue-600',
+  ceremonie: 'bg-brand-blue-500',
   autre: 'bg-gray-600'
 }
 </script>
@@ -104,7 +104,7 @@ const typeColors: Record<string, string> = {
             @click="selectedType = filter.value as any"
             class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
             :class="selectedType === filter.value
-              ? 'bg-amber-600 text-white shadow-md'
+              ? 'bg-brand-blue-600 text-white shadow-md'
               : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
           >
             {{ t(filter.label) }}
@@ -117,7 +117,7 @@ const typeColors: Record<string, string> = {
         <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-8">
           <span class="relative inline-block">
             {{ t('actualites.events.featured') }}
-            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
           </span>
         </h2>
 
@@ -183,7 +183,7 @@ const typeColors: Record<string, string> = {
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
               <span class="relative inline-block">
                 {{ t('actualites.events.upcoming') }}
-                <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+                <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
               </span>
             </h2>
 
@@ -215,7 +215,7 @@ const typeColors: Record<string, string> = {
                     </span>
                   </div>
 
-                  <h3 class="text-xl font-bold text-gray-900 dark:text-white leading-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                  <h3 class="text-xl font-bold text-gray-900 dark:text-white leading-tight group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                     {{ getLocalizedTitle(event) }}
                   </h3>
 
@@ -248,7 +248,7 @@ const typeColors: Record<string, string> = {
           <section v-if="filteredPast.length > 0">
             <button
               @click="showPastEvents = !showPastEvents"
-              class="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white mb-6 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+              class="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white mb-6 hover:text-brand-blue-600 dark:hover:text-brand-blue-400 transition-colors"
             >
               <font-awesome-icon
                 icon="fa-solid fa-chevron-right"
@@ -293,7 +293,7 @@ const typeColors: Record<string, string> = {
                         {{ t(`actualites.events.types.${event.type}`) }}
                       </span>
                     </div>
-                    <h4 class="text-base font-medium text-gray-900 dark:text-white truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                    <h4 class="text-base font-medium text-gray-900 dark:text-white truncate group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                       {{ getLocalizedTitle(event) }}
                     </h4>
                   </div>
