@@ -6,6 +6,7 @@
   <div>
     <HeroSection />
     <MissionSection />
+    <FormationsSection />
     <HistorySection />
     <PartnersSection />
     <PartnersCampusMapSection />
