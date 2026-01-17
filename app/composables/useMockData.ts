@@ -163,6 +163,20 @@ export function useMockData() {
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   }
 
+  // Événements à la une (featured, à venir uniquement)
+  const getFeaturedEvents = () => {
+    const now = new Date()
+    return [...mockCampusEvents]
+      .filter(e => e.is_featured && new Date(e.date) >= now)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  }
+
+  // Actualités à la une (featured)
+  const getFeaturedNews = () =>
+    [...mockCampusNews]
+      .filter(n => n.is_featured)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
   // Appels du siège (tous types, tous statuts)
   const getAllCalls = () =>
     [...mockCampusCalls]
@@ -446,6 +460,8 @@ export function useMockData() {
     getAllEvents,
     getUpcomingEvents,
     getPastEvents,
+    getFeaturedEvents,
+    getFeaturedNews,
     getAllCalls,
     getAllOpenCalls,
     getAllClosedCalls,

@@ -29,5 +29,17 @@
     "title": "Page en développement",
     "message": "Cette page est actuellement en cours de construction. Revenez bientôt pour découvrir son contenu.",
     "backHome": "Retour à l'accueil"
+  },
+  "widget": {
+    "featured": {
+      "title": "À la une",
+      "events": "Événements",
+      "news": "Actualités",
+      "viewAllEvents": "Voir tous les événements",
+      "viewAllNews": "Voir toutes les actualités",
+      "close": "Fermer",
+      "minimize": "Réduire",
+      "expand": "Agrandir"
+    }
   }
 }

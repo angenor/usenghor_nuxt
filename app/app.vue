@@ -26,5 +26,6 @@ const showMainNavbar = computed(() => {
       <NuxtPage />
     </main>
     <AppFooter />
+    <EventsWidget />
   </div>
 </template>

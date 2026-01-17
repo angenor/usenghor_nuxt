@@ -148,6 +148,9 @@ const getImageUrl = (formation: Formation) => {
     </div>
 
     <!-- Decorative bottom shape - same color as HistorySection to create overlap effect -->
-    <div class="bg-white dark:bg-gray-950 absolute bottom-0 w-full h-[25vh] rounded-tr-[14rem]"></div>
+    <div class="bg-white dark:bg-gray-950 absolute bottom-0 w-full h-[25vh] rounded-tr-[14rem]">
+      <!-- Grid pattern on bottom shape -->
+      <div class="absolute inset-0 rounded-tr-[14rem] bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
+    </div>
   </section>
 </template>

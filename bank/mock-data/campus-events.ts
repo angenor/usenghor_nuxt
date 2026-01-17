@@ -14,6 +14,7 @@ export interface CampusEvent {
   description_fr: string
   image?: string
   type: 'conference' | 'atelier' | 'ceremonie' | 'autre'
+  is_featured?: boolean
 }
 
 export const mockCampusEvents: CampusEvent[] = [
@@ -29,7 +30,8 @@ export const mockCampusEvents: CampusEvent[] = [
     location_en: 'Main Amphitheater, Senghor University',
     description_fr: 'Grande conférence réunissant des experts internationaux pour discuter des enjeux et perspectives de la Francophonie africaine.',
     image: 'https://picsum.photos/seed/event-siege-1/600/400',
-    type: 'conference'
+    type: 'conference',
+    is_featured: true
   },
   {
     id: 'event-siege-2',
@@ -55,7 +57,8 @@ export const mockCampusEvents: CampusEvent[] = [
     location_en: 'Library of Alexandria',
     description_fr: 'Cérémonie officielle de remise des diplômes pour la promotion 2025 en présence des autorités académiques et des partenaires.',
     image: 'https://picsum.photos/seed/event-siege-3/600/400',
-    type: 'ceremonie'
+    type: 'ceremonie',
+    is_featured: true
   },
   {
     id: 'event-siege-4',

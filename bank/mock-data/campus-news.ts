@@ -14,6 +14,7 @@ export interface CampusNews {
   excerpt_en?: string
   image?: string
   url?: string
+  is_featured?: boolean
 }
 
 export const mockCampusNews: CampusNews[] = [
@@ -28,7 +29,8 @@ export const mockCampusNews: CampusNews[] = [
     excerpt_fr: 'L\'Université Senghor d\'Alexandrie a célébré son 35e anniversaire en présence de nombreuses personnalités de la Francophonie.',
     excerpt_en: 'Senghor University of Alexandria celebrated its 35th anniversary in the presence of many Francophonie dignitaries.',
     image: 'https://picsum.photos/seed/news-siege-1/600/400',
-    url: '/actualites/35-ans-senghor'
+    url: '/actualites/35-ans-senghor',
+    is_featured: true
   },
   {
     id: 'news-siege-2',
@@ -39,7 +41,8 @@ export const mockCampusNews: CampusNews[] = [
     date: '2025-01-18',
     excerpt_fr: 'L\'Université Senghor renforce sa collaboration avec l\'Organisation Internationale de la Francophonie pour développer de nouveaux programmes.',
     excerpt_en: 'Senghor University strengthens its collaboration with the International Organization of the Francophonie to develop new programs.',
-    image: 'https://picsum.photos/seed/news-siege-2/600/400'
+    image: 'https://picsum.photos/seed/news-siege-2/600/400',
+    is_featured: true
   },
   {
     id: 'news-siege-3',

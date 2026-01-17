@@ -29,5 +29,17 @@
     "title": "Page under development",
     "message": "This page is currently under construction. Come back soon to discover its content.",
     "backHome": "Back to home"
+  },
+  "widget": {
+    "featured": {
+      "title": "Featured",
+      "events": "Events",
+      "news": "News",
+      "viewAllEvents": "View all events",
+      "viewAllNews": "View all news",
+      "close": "Close",
+      "minimize": "Minimize",
+      "expand": "Expand"
+    }
   }
 }
