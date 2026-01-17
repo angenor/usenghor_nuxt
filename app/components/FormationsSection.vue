@@ -147,7 +147,7 @@ const getImageUrl = (formation: Formation) => {
       </div>
     </div>
 
-    <!-- Decorative bottom shape -->
-    <div class="bg-gray-200 dark:bg-gray-800 absolute bottom-0 w-full h-[25vh] rounded-tr-[14rem]"></div>
+    <!-- Decorative bottom shape - same color as HistorySection to create overlap effect -->
+    <div class="bg-white dark:bg-gray-950 absolute bottom-0 w-full h-[25vh] rounded-tr-[14rem]"></div>
   </section>
 </template>
