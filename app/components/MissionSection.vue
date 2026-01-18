@@ -187,11 +187,13 @@ onUnmounted(() => {
               <p class="text-gray-600 dark:text-gray-300 text-lg leading-relaxed mb-6">
                 {{ t('mission.vision.description') }}
               </p>
-              <!-- Vision Keywords -->
+              <!-- Vision Values -->
               <div class="flex flex-wrap gap-2">
-                <span class="px-3 py-1 text-xs font-medium bg-brand-red-100 dark:bg-brand-red-900/40 text-brand-red-700 dark:text-brand-red-300 rounded-full border border-brand-red-200/50 dark:border-brand-red-700/50">{{ t('mission.vision.keywords.innovation') }}</span>
-                <span class="px-3 py-1 text-xs font-medium bg-brand-blue-100 dark:bg-brand-blue-900/40 text-brand-blue-700 dark:text-brand-blue-300 rounded-full border border-brand-blue-200/50 dark:border-brand-blue-700/50">{{ t('mission.vision.keywords.excellence') }}</span>
-                <span class="px-3 py-1 text-xs font-medium bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 rounded-full border border-purple-200/50 dark:border-purple-700/50">{{ t('mission.vision.keywords.impact') }}</span>
+                <span class="px-3 py-1.5 text-xs font-medium bg-brand-blue-100 dark:bg-brand-blue-900/40 text-brand-blue-700 dark:text-brand-blue-300 rounded-full border border-brand-blue-200/50 dark:border-brand-blue-700/50">{{ t('mission.vision.values.excellence') }}</span>
+                <span class="px-3 py-1.5 text-xs font-medium bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 rounded-full border border-purple-200/50 dark:border-purple-700/50">{{ t('mission.vision.values.ethics') }}</span>
+                <span class="px-3 py-1.5 text-xs font-medium bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 rounded-full border border-green-200/50 dark:border-green-700/50">{{ t('mission.vision.values.inclusion') }}</span>
+                <span class="px-3 py-1.5 text-xs font-medium bg-brand-red-100 dark:bg-brand-red-900/40 text-brand-red-700 dark:text-brand-red-300 rounded-full border border-brand-red-200/50 dark:border-brand-red-700/50">{{ t('mission.vision.values.innovation') }}</span>
+                <span class="px-3 py-1.5 text-xs font-medium bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 rounded-full border border-amber-200/50 dark:border-amber-700/50">{{ t('mission.vision.values.solidarity') }}</span>
               </div>
             </div>
 

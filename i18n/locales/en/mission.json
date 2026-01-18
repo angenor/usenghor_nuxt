@@ -11,10 +11,12 @@
     "vision": {
       "title": "Our Vision",
       "description": "Become a major player in the training and capacity building of executives in Africa and for Africa.",
-      "keywords": {
-        "innovation": "Innovation",
+      "values": {
         "excellence": "Excellence",
-        "impact": "Impact"
+        "ethics": "Ethics",
+        "inclusion": "Inclusion",
+        "innovation": "Innovation",
+        "solidarity": "Solidarity"
       }
     },
     "experience": {

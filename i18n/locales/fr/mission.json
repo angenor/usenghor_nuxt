@@ -11,10 +11,12 @@
     "vision": {
       "title": "Notre Vision",
       "description": "Devenir un acteur majeur de la formation et du renforcement de capacités des cadres en Afrique et pour l'Afrique.",
-      "keywords": {
-        "innovation": "Innovation",
+      "values": {
         "excellence": "Excellence",
-        "impact": "Impact"
+        "ethics": "Éthique",
+        "inclusion": "Inclusion",
+        "innovation": "Innovation",
+        "solidarity": "Solidarité"
       }
     },
     "experience": {

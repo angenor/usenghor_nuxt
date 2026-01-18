@@ -11,10 +11,12 @@
     "vision": {
       "title": "رؤيتنا",
       "description": "أن نصبح فاعلاً رئيسياً في تكوين وبناء قدرات الكوادر في أفريقيا ومن أجل أفريقيا.",
-      "keywords": {
-        "innovation": "الابتكار",
+      "values": {
         "excellence": "التميز",
-        "impact": "التأثير"
+        "ethics": "الأخلاق",
+        "inclusion": "الشمولية",
+        "innovation": "الابتكار",
+        "solidarity": "التضامن"
       }
     },
     "experience": {

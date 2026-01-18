@@ -63,10 +63,13 @@ const getImageUrl = (formation: Formation) => {
     <!-- Header -->
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
       <div ref="headerRef" class="text-center mb-12 lg:mb-16">
-        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 mb-4">
+        <NuxtLink
+          :to="localePath('/carrieres') + '#etudiants'"
+          class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 mb-4 hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors cursor-pointer"
+        >
           <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-3.5 h-3.5 mr-2" />
           {{ t('formations.index.featured.badge') }}
-        </span>
+        </NuxtLink>
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
           {{ t('formations.index.featured.title') }}
         </h2>
