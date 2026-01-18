@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const { t } = useI18n()
 const { conseilAdministration, getTextesFondateurs, getCAPresident } = useMockData()
-const { paysBailleurs, egypte, otherFounders, laterMembers } = usePaysBailleursData()
+const { paysBailleurs, egypte, northernFounders, africanFounders, laterMembers } = usePaysBailleursData()
 const { selectedPays, openDrawer, closeDrawer } = useCountryDrawer()
 
 // SEO
@@ -53,7 +53,8 @@ const observers = computed(() =>
     <GovernanceDonorCountriesSection
       :pays-bailleurs="paysBailleurs"
       :egypte="egypte"
-      :other-founders="otherFounders"
+      :northern-founders="northernFounders"
+      :african-founders="africanFounders"
       @open-drawer="openDrawer"
     />
 

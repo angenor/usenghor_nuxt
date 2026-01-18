@@ -243,6 +243,28 @@ export const mockCampusExternalises: CampusExternalise[] = [
     longitude: 47.5079,
     is_active: true,
     sort_order: 10
+  },
+  {
+    id: 'campus-kinshasa',
+    slug: 'kinshasa',
+    name_fr: 'Campus de Kinshasa',
+    name_en: 'Kinshasa Campus',
+    name_ar: 'حرم كينشاسا',
+    country: 'CD',
+    country_fr: 'République Démocratique du Congo',
+    country_en: 'Democratic Republic of the Congo',
+    country_ar: 'جمهورية الكونغو الديمقراطية',
+    city_fr: 'Kinshasa',
+    city_en: 'Kinshasa',
+    city_ar: 'كينشاسا',
+    description_fr: 'Le campus de Kinshasa propose des formations en Management et Développement pour l\'Afrique Centrale francophone.',
+    description_en: 'The Kinshasa campus offers Management and Development programs for French-speaking Central Africa.',
+    image: 'https://picsum.photos/seed/campus-kinshasa/800/500',
+    contact_email: 'kinshasa@usenghor.org',
+    latitude: -4.4419,
+    longitude: 15.2663,
+    is_active: true,
+    sort_order: 11
   }
 ]
 

@@ -4,7 +4,8 @@ import type { PaysBailleur } from '@bank/mock-data/pays-bailleurs'
 interface Props {
   paysBailleurs: PaysBailleur[]
   egypte: PaysBailleur | undefined
-  otherFounders: PaysBailleur[]
+  northernFounders: PaysBailleur[]
+  africanFounders: PaysBailleur[]
 }
 
 const props = defineProps<Props>()
@@ -105,24 +106,50 @@ const { elementRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.
           </div>
         </div>
 
-        <!-- 5 autres fondateurs en grille -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-          <button
-            v-for="pays in props.otherFounders"
-            :key="pays.id"
-            class="founder-card group"
-            @click="emit('openDrawer', pays)"
-          >
-            <span class="text-4xl sm:text-5xl block mb-3 group-hover:scale-110 transition-transform duration-300">
-              {{ getFlagEmoji(pays.code) }}
-            </span>
-            <h4 class="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">
-              {{ pays.name_fr }}
-            </h4>
-            <span class="text-xs text-amber-600 dark:text-amber-400 mt-1 block">
-              Membre fondateur
-            </span>
-          </button>
+        <!-- Pays du Nord fondateurs -->
+        <div class="mb-6">
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 font-medium">Pays du Nord</p>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            <button
+              v-for="pays in props.northernFounders"
+              :key="pays.id"
+              class="founder-card group"
+              @click="emit('openDrawer', pays)"
+            >
+              <span class="text-4xl sm:text-5xl block mb-3 group-hover:scale-110 transition-transform duration-300">
+                {{ getFlagEmoji(pays.code) }}
+              </span>
+              <h4 class="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">
+                {{ pays.name_fr }}
+              </h4>
+              <span class="text-xs text-amber-600 dark:text-amber-400 mt-1 block">
+                Membre fondateur
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Pays africains fondateurs -->
+        <div>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 font-medium">Pays africains</p>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <button
+              v-for="pays in props.africanFounders"
+              :key="pays.id"
+              class="founder-card group"
+              @click="emit('openDrawer', pays)"
+            >
+              <span class="text-4xl sm:text-5xl block mb-3 group-hover:scale-110 transition-transform duration-300">
+                {{ getFlagEmoji(pays.code) }}
+              </span>
+              <h4 class="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">
+                {{ pays.name_fr }}
+              </h4>
+              <span class="text-xs text-amber-600 dark:text-amber-400 mt-1 block">
+                Membre fondateur
+              </span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

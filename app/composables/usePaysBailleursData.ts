@@ -5,12 +5,25 @@
 export function usePaysBailleursData() {
   const { paysBailleurs, getFlagEmoji } = useMockData()
 
+  // Codes des pays du Nord (non-africains)
+  const northernCodes = ['FR', 'CA', 'QC', 'CH', 'BE']
+
   // Égypte (pays hôte - hero card)
   const egypte = computed(() =>
     paysBailleurs.value.find(p => p.code === 'EG')
   )
 
-  // Autres fondateurs 1989 (France, Sénégal, Cameroun, CI, Gabon)
+  // Pays du Nord fondateurs (France, Canada, Québec, Suisse, Wallonie-Bruxelles)
+  const northernFounders = computed(() =>
+    paysBailleurs.value.filter(p => p.member_since === 1989 && northernCodes.includes(p.code))
+  )
+
+  // Pays africains fondateurs 1989 (Sénégal, Cameroun, CI, Gabon)
+  const africanFounders = computed(() =>
+    paysBailleurs.value.filter(p => p.member_since === 1989 && !northernCodes.includes(p.code) && p.code !== 'EG')
+  )
+
+  // Tous les autres fondateurs 1989 (pour compatibilité)
   const otherFounders = computed(() =>
     paysBailleurs.value.filter(p => p.member_since === 1989 && p.code !== 'EG')
   )
@@ -32,6 +45,8 @@ export function usePaysBailleursData() {
   return {
     paysBailleurs,
     egypte,
+    northernFounders,
+    africanFounders,
     otherFounders,
     laterMembers,
     timelineYears,
