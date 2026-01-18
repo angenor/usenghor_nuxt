@@ -269,63 +269,67 @@ const mockObjectives = computed(() => [
   }
 ])
 
-const mockAchievements = computed(() => [
-  {
-    year: '2024',
-    subtitle: locale.value === 'fr' ? 'Qualité' : locale.value === 'ar' ? 'الجودة' : 'Quality',
-    title: locale.value === 'fr' ? 'Certification internationale' : locale.value === 'ar' ? 'شهادة دولية' : 'International certification',
-    description: locale.value === 'fr'
-      ? 'Obtention de la certification qualité pour nos programmes de formation. Cette reconnaissance internationale atteste de l\'excellence de notre approche pédagogique.'
-      : locale.value === 'ar'
-        ? 'الحصول على شهادة الجودة لبرامجنا التدريبية. هذا الاعتراف الدولي يشهد على تميز نهجنا التربوي.'
-        : 'Quality certification obtained for our training programs. This international recognition attests to the excellence of our pedagogical approach.',
-    image: '/images/bg/backgroud_senghor1.jpg'
-  },
-  {
-    year: '2023',
-    subtitle: locale.value === 'fr' ? 'Coopération' : locale.value === 'ar' ? 'التعاون' : 'Cooperation',
-    title: locale.value === 'fr' ? 'Nouveau partenariat' : locale.value === 'ar' ? 'شراكة جديدة' : 'New partnership',
-    description: locale.value === 'fr'
-      ? 'Signature d\'un accord de coopération avec 5 universités africaines majeures, renforçant notre réseau d\'échanges académiques sur le continent.'
-      : locale.value === 'ar'
-        ? 'توقيع اتفاقية تعاون مع 5 جامعات أفريقية كبرى، مما يعزز شبكة التبادل الأكاديمي في القارة.'
-        : 'Cooperation agreement signed with 5 major African universities, strengthening our academic exchange network across the continent.',
-    image: '/images/bg/backgroud_senghor2.jpg'
-  },
-  {
-    year: '2022',
-    subtitle: locale.value === 'fr' ? 'Innovation' : locale.value === 'ar' ? 'الابتكار' : 'Innovation',
-    title: locale.value === 'fr' ? 'Digitalisation complète' : locale.value === 'ar' ? 'الرقمنة الكاملة' : 'Full digitalization',
-    description: locale.value === 'fr'
-      ? 'Mise en place de la plateforme d\'enseignement à distance permettant à nos étudiants de suivre leurs cours depuis n\'importe où dans le monde.'
-      : locale.value === 'ar'
-        ? 'إنشاء منصة التعليم عن بُعد التي تتيح لطلابنا متابعة دروسهم من أي مكان في العالم.'
-        : 'Implementation of the distance learning platform allowing our students to attend classes from anywhere in the world.',
-    image: '/images/bg/backgroud_senghor3.jpg'
-  },
-  {
-    year: '2021',
-    subtitle: locale.value === 'fr' ? 'Recherche' : locale.value === 'ar' ? 'البحث' : 'Research',
-    title: locale.value === 'fr' ? 'Centre de recherche' : locale.value === 'ar' ? 'مركز البحث' : 'Research center',
-    description: locale.value === 'fr'
-      ? 'Création du centre de recherche sur le développement durable en Afrique, avec 15 chercheurs permanents et 30 doctorants.'
-      : locale.value === 'ar'
-        ? 'إنشاء مركز البحث حول التنمية المستدامة في أفريقيا، مع 15 باحثًا دائمًا و30 طالب دكتوراه.'
-        : 'Creation of the research center on sustainable development in Africa, with 15 permanent researchers and 30 doctoral students.',
-    image: '/images/bg/bg_mission_section.jpeg'
-  },
-  {
-    year: '2020',
-    subtitle: locale.value === 'fr' ? 'Expansion' : locale.value === 'ar' ? 'التوسع' : 'Expansion',
-    title: locale.value === 'fr' ? 'Nouveaux programmes' : locale.value === 'ar' ? 'برامج جديدة' : 'New programs',
-    description: locale.value === 'fr'
-      ? 'Lancement de 3 nouveaux masters professionnels en environnement, santé publique et gouvernance numérique pour répondre aux défis contemporains.'
-      : locale.value === 'ar'
-        ? 'إطلاق 3 ماسترات مهنية جديدة في البيئة والصحة العامة والحوكمة الرقمية لمواجهة التحديات المعاصرة.'
-        : 'Launch of 3 new professional masters in environment, public health and digital governance to address contemporary challenges.',
-    image: '/images/bg/bg_stats_section.jpeg'
-  }
-])
+const mockAchievements = computed(() => {
+  const achievements = [
+    {
+      year: '2024',
+      subtitle: locale.value === 'fr' ? 'Qualité' : locale.value === 'ar' ? 'الجودة' : 'Quality',
+      title: locale.value === 'fr' ? 'Certification internationale' : locale.value === 'ar' ? 'شهادة دولية' : 'International certification',
+      description: locale.value === 'fr'
+        ? 'Obtention de la certification qualité pour nos programmes de formation. Cette reconnaissance internationale atteste de l\'excellence de notre approche pédagogique.'
+        : locale.value === 'ar'
+          ? 'الحصول على شهادة الجودة لبرامجنا التدريبية. هذا الاعتراف الدولي يشهد على تميز نهجنا التربوي.'
+          : 'Quality certification obtained for our training programs. This international recognition attests to the excellence of our pedagogical approach.',
+      image: '/images/bg/backgroud_senghor1.jpg'
+    },
+    {
+      year: '2023',
+      subtitle: locale.value === 'fr' ? 'Coopération' : locale.value === 'ar' ? 'التعاون' : 'Cooperation',
+      title: locale.value === 'fr' ? 'Nouveau partenariat' : locale.value === 'ar' ? 'شراكة جديدة' : 'New partnership',
+      description: locale.value === 'fr'
+        ? 'Signature d\'un accord de coopération avec 5 universités africaines majeures, renforçant notre réseau d\'échanges académiques sur le continent.'
+        : locale.value === 'ar'
+          ? 'توقيع اتفاقية تعاون مع 5 جامعات أفريقية كبرى، مما يعزز شبكة التبادل الأكاديمي في القارة.'
+          : 'Cooperation agreement signed with 5 major African universities, strengthening our academic exchange network across the continent.',
+      image: '/images/bg/backgroud_senghor2.jpg'
+    },
+    {
+      year: '2022',
+      subtitle: locale.value === 'fr' ? 'Innovation' : locale.value === 'ar' ? 'الابتكار' : 'Innovation',
+      title: locale.value === 'fr' ? 'Digitalisation complète' : locale.value === 'ar' ? 'الرقمنة الكاملة' : 'Full digitalization',
+      description: locale.value === 'fr'
+        ? 'Mise en place de la plateforme d\'enseignement à distance permettant à nos étudiants de suivre leurs cours depuis n\'importe où dans le monde.'
+        : locale.value === 'ar'
+          ? 'إنشاء منصة التعليم عن بُعد التي تتيح لطلابنا متابعة دروسهم من أي مكان في العالم.'
+          : 'Implementation of the distance learning platform allowing our students to attend classes from anywhere in the world.',
+      image: '/images/bg/backgroud_senghor3.jpg'
+    },
+    {
+      year: '2021',
+      subtitle: locale.value === 'fr' ? 'Recherche' : locale.value === 'ar' ? 'البحث' : 'Research',
+      title: locale.value === 'fr' ? 'Centre de recherche' : locale.value === 'ar' ? 'مركز البحث' : 'Research center',
+      description: locale.value === 'fr'
+        ? 'Création du centre de recherche sur le développement durable en Afrique, avec 15 chercheurs permanents et 30 doctorants.'
+        : locale.value === 'ar'
+          ? 'إنشاء مركز البحث حول التنمية المستدامة في أفريقيا، مع 15 باحثًا دائمًا و30 طالب دكتوراه.'
+          : 'Creation of the research center on sustainable development in Africa, with 15 permanent researchers and 30 doctoral students.',
+      image: '/images/bg/bg_mission_section.jpeg'
+    },
+    {
+      year: '2020',
+      subtitle: locale.value === 'fr' ? 'Expansion' : locale.value === 'ar' ? 'التوسع' : 'Expansion',
+      title: locale.value === 'fr' ? 'Nouveaux programmes' : locale.value === 'ar' ? 'برامج جديدة' : 'New programs',
+      description: locale.value === 'fr'
+        ? 'Lancement de 3 nouveaux masters professionnels en environnement, santé publique et gouvernance numérique pour répondre aux défis contemporains.'
+        : locale.value === 'ar'
+          ? 'إطلاق 3 ماسترات مهنية جديدة في البيئة والصحة العامة والحوكمة الرقمية لمواجهة التحديات المعاصرة.'
+          : 'Launch of 3 new professional masters in environment, public health and digital governance to address contemporary challenges.',
+      image: '/images/bg/bg_stats_section.jpeg'
+    }
+  ]
+  // Tri chronologique (du plus ancien au plus récent)
+  return achievements.sort((a, b) => parseInt(a.year) - parseInt(b.year))
+})
 
 const mockProjects = computed(() => [
   {
@@ -693,7 +697,7 @@ const formatDate = (dateStr: string) => {
               <!-- Head -->
               <div class="head" :style="{ backgroundColor: getTimelineColor(index).solid }">
                 <div class="number-box">
-                  <span>{{ String(index + 1).padStart(2, '0') }}</span>
+                  <span>{{ achievement.year }}</span>
                 </div>
                 <h2>
                   <span class="small">{{ achievement.subtitle }}</span>
