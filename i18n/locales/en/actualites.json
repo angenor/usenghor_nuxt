@@ -36,11 +36,12 @@
         "open": "Open",
         "closed": "Closed"
       },
-      "deadline": "Deadline",
+      "deadline": "Registration deadline",
       "apply": "Apply",
       "closed": "Closed",
       "noCalls": "No calls available at the moment",
-      "noResults": "No calls match your criteria"
+      "noResults": "No calls match your criteria",
+      "viewArchive": "View archive"
     },
     "events": {
       "title": "Events",
@@ -86,7 +87,7 @@
       },
       "call": {
         "breadcrumb": "Call",
-        "deadline": "Deadline",
+        "deadline": "Registration deadline",
         "campus": "Campus",
         "type": "Type",
         "status": "Status",

@@ -36,11 +36,12 @@
         "open": "En cours",
         "closed": "Clos"
       },
-      "deadline": "Date limite",
+      "deadline": "Date limite d'inscription",
       "apply": "Postuler",
       "closed": "Clôturé",
       "noCalls": "Aucun appel disponible pour le moment",
-      "noResults": "Aucun appel ne correspond à vos critères"
+      "noResults": "Aucun appel ne correspond à vos critères",
+      "viewArchive": "Voir l'archive"
     },
     "events": {
       "title": "Événements",
@@ -86,7 +87,7 @@
       },
       "call": {
         "breadcrumb": "Appel",
-        "deadline": "Date limite",
+        "deadline": "Date limite d'inscription",
         "campus": "Campus",
         "type": "Type",
         "status": "Statut",

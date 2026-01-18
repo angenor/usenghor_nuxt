@@ -99,11 +99,6 @@ const formatDate = (dateStr: string) => {
   )
 }
 
-// Check if deadline has passed
-const isDeadlinePassed = (deadlineStr: string) => {
-  return new Date(deadlineStr) < new Date()
-}
-
 // Days until deadline
 const daysUntilDeadline = (deadlineStr: string) => {
   const deadline = new Date(deadlineStr)
@@ -177,44 +172,67 @@ const daysUntilDeadline = (deadlineStr: string) => {
               v-for="call in filteredCalls"
               :key="call.id"
               :to="localePath(`/actualites/appels/${call.id}`)"
-              class="group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-200 dark:border-gray-700 block"
+              class="group rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border block"
+              :class="call.status === 'closed'
+                ? 'bg-gray-50 dark:bg-gray-800/50 border-gray-300 dark:border-gray-600 opacity-80 hover:opacity-100'
+                : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'"
             >
               <div class="flex flex-col md:flex-row">
                 <!-- Image -->
-                <div class="md:w-1/3 overflow-hidden">
+                <div class="md:w-1/3 overflow-hidden relative">
                   <img
                     :src="call.image || 'https://picsum.photos/seed/default-call/800/400'"
                     :alt="getLocalizedTitle(call)"
                     class="w-full h-48 md:h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    :class="call.status === 'closed' ? 'grayscale group-hover:grayscale-0' : ''"
                     loading="lazy"
                   >
+                  <!-- Closed overlay -->
+                  <div
+                    v-if="call.status === 'closed'"
+                    class="absolute inset-0 bg-gray-900/20 dark:bg-gray-900/40 flex items-center justify-center"
+                  >
+                    <span class="px-3 py-1.5 bg-gray-700 dark:bg-gray-600 text-white text-sm font-semibold rounded-full">
+                      {{ t('actualites.calls.closed') }}
+                    </span>
+                  </div>
                 </div>
 
                 <!-- Content -->
                 <div class="md:w-2/3 p-6">
                   <div class="flex flex-wrap items-center gap-2 mb-3">
-                    <span class="inline-block px-2 py-0.5 text-xs font-medium text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded">
+                    <span
+                      class="inline-block px-2 py-0.5 text-xs font-medium rounded"
+                      :class="call.status === 'closed'
+                        ? 'text-gray-600 dark:text-gray-400 bg-gray-200 dark:bg-gray-700'
+                        : 'text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30'"
+                    >
                       {{ t(`actualites.calls.filters.${call.type}`) }}
                     </span>
                     <span
-                      v-if="call.status === 'closed'"
-                      class="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-200 dark:bg-gray-700 rounded"
-                    >
-                      {{ t('actualites.calls.closed') }}
-                    </span>
-                    <span
-                      v-else-if="daysUntilDeadline(call.deadline) <= 7 && daysUntilDeadline(call.deadline) > 0"
+                      v-if="call.status === 'open' && daysUntilDeadline(call.deadline) <= 7 && daysUntilDeadline(call.deadline) > 0"
                       class="inline-block px-2 py-0.5 text-xs font-medium text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded animate-pulse"
                     >
                       {{ daysUntilDeadline(call.deadline) }} jours restants
                     </span>
+                    <span
+                      v-else-if="call.status === 'open'"
+                      class="inline-block px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded"
+                    >
+                      {{ t('actualites.calls.status.open') }}
+                    </span>
                   </div>
 
-                  <h3 class="text-xl font-bold text-gray-900 dark:text-white leading-tight group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
+                  <h3
+                    class="text-xl font-bold leading-tight transition-colors"
+                    :class="call.status === 'closed'
+                      ? 'text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200'
+                      : 'text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400'"
+                  >
                     {{ getLocalizedTitle(call) }}
                   </h3>
 
-                  <p class="mt-3 text-gray-600 dark:text-gray-400 line-clamp-3">
+                  <p class="mt-3 line-clamp-3" :class="call.status === 'closed' ? 'text-gray-500 dark:text-gray-500' : 'text-gray-600 dark:text-gray-400'">
                     {{ getLocalizedDescription(call) }}
                   </p>
 
@@ -230,19 +248,24 @@ const daysUntilDeadline = (deadlineStr: string) => {
                     >
                   </div>
 
-                  <div class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between mt-6 pt-4 border-t" :class="call.status === 'closed' ? 'border-gray-300 dark:border-gray-600' : 'border-gray-200 dark:border-gray-700'">
                     <div class="text-sm">
                       <span class="text-gray-500 dark:text-gray-400">{{ t('actualites.calls.deadline') }}:</span>
                       <span
                         class="ml-1 font-semibold"
-                        :class="isDeadlinePassed(call.deadline) ? 'text-gray-400 dark:text-gray-500' : 'text-red-600 dark:text-red-400'"
+                        :class="call.status === 'closed' ? 'text-gray-400 dark:text-gray-500 line-through' : 'text-red-600 dark:text-red-400'"
                       >
                         {{ formatDate(call.deadline) }}
                       </span>
                     </div>
 
-                    <span class="inline-flex items-center gap-2 px-4 py-2 bg-brand-blue-600 text-white font-medium rounded-lg">
-                      {{ t('actualites.readMore') }}
+                    <span
+                      class="inline-flex items-center gap-2 px-4 py-2 font-medium rounded-lg"
+                      :class="call.status === 'closed'
+                        ? 'bg-gray-500 text-white'
+                        : 'bg-brand-blue-600 text-white'"
+                    >
+                      {{ call.status === 'closed' ? t('actualites.calls.viewArchive') : t('actualites.readMore') }}
                       <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
                     </span>
                   </div>
