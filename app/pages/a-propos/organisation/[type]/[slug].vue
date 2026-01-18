@@ -327,8 +327,8 @@ const mockAchievements = computed(() => {
       image: '/images/bg/bg_stats_section.jpeg'
     }
   ]
-  // Tri chronologique (du plus ancien au plus récent)
-  return achievements.sort((a, b) => parseInt(a.year) - parseInt(b.year))
+  // Tri chronologique (du plus récent au plus ancien)
+  return achievements.sort((a, b) => parseInt(b.year) - parseInt(a.year))
 })
 
 const mockProjects = computed(() => [
@@ -696,8 +696,10 @@ const formatDate = (dateStr: string) => {
             >
               <!-- Head -->
               <div class="head" :style="{ backgroundColor: getTimelineColor(index).solid }">
+                <!-- Timeline year marker -->
+                <span class="timeline-year">{{ achievement.year }}</span>
                 <div class="number-box">
-                  <span>{{ achievement.year }}</span>
+                  <span>{{ String(index + 1).padStart(2, '0') }}</span>
                 </div>
                 <h2>
                   <span class="small">{{ achievement.subtitle }}</span>
@@ -986,6 +988,29 @@ const formatDate = (dateStr: string) => {
   background: rgba(0, 0, 0, 0.17);
 }
 
+/* Timeline year - positioned on the center line (mobile: above card) */
+.demo-card .head .timeline-year {
+  display: block;
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+  background: #f7f7f7;
+  padding: 4px 12px;
+  border-radius: 20px;
+  z-index: 10;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+:global(.dark) .demo-card .head .timeline-year {
+  background: rgb(31 41 55);
+  color: #d1d5db;
+}
+
 .demo-card .head h2 {
   text-transform: uppercase;
   font-size: 1.3rem;
@@ -1107,18 +1132,28 @@ const formatDate = (dateStr: string) => {
   }
 
   .demo-card:nth-child(odd) .head::before {
-    position: absolute;
-    content: "";
-    width: 9px;
-    height: 9px;
-    background-color: #bdbdbd;
-    border-radius: 9px;
-    box-shadow: 0px 0px 2px 8px #f7f7f7;
-    left: 490px; /* 450 + 45 - 4.5 */
+    display: none;
   }
 
-  :global(.dark) .demo-card:nth-child(odd) .head::before {
-    box-shadow: 0px 0px 2px 8px rgb(31 41 55);
+  .demo-card:nth-child(odd) .head .timeline-year {
+    position: absolute;
+    left: calc(100% + 25px);
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    font-weight: 700;
+    color: #374151;
+    background: #f7f7f7;
+    padding: 4px 10px;
+    border-radius: 20px;
+    z-index: 10;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  :global(.dark) .demo-card:nth-child(odd) .head .timeline-year {
+    background: rgb(31 41 55);
+    color: #d1d5db;
   }
 
   /* Even cards - right side */
@@ -1139,18 +1174,30 @@ const formatDate = (dateStr: string) => {
   }
 
   .demo-card:nth-child(even) .head::before {
-    position: absolute;
-    content: "";
-    width: 9px;
-    height: 9px;
-    background-color: #bdbdbd;
-    border-radius: 9px;
-    box-shadow: 0px 0px 2px 8px #f7f7f7;
-    right: 489px; /* 450 + 45 - 4.5 - 1 */
+    display: none;
   }
 
-  :global(.dark) .demo-card:nth-child(even) .head::before {
-    box-shadow: 0px 0px 2px 8px rgb(31 41 55);
+  .demo-card:nth-child(even) .head .timeline-year {
+    position: absolute;
+    left: auto;
+    right: auto;
+    left: -70px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    font-weight: 700;
+    color: #374151;
+    background: #f7f7f7;
+    padding: 4px 10px;
+    border-radius: 20px;
+    z-index: 10;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  :global(.dark) .demo-card:nth-child(even) .head .timeline-year {
+    background: rgb(31 41 55);
+    color: #d1d5db;
   }
 
   /* Stagger for second card */
