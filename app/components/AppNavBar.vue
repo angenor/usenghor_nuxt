@@ -57,7 +57,6 @@ const primaryNavItems = [
     },
     children: [
       { key: 'callsForApplications', route: '/actualites/appels', icon: 'fa-solid fa-bullhorn' },
-      { key: 'callsOpen', route: '/actualites/appels?status=open', icon: 'fa-solid fa-clock', badge: 'new' },
       { key: 'recruitment', route: '/actualites/appels?type=recrutement', icon: 'fa-solid fa-briefcase' },
       { key: 'events', route: '/actualites/evenements', icon: 'fa-solid fa-calendar-days' }
     ]
