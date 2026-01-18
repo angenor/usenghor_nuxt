@@ -18,6 +18,13 @@ const hasMedia = computed(() => videos.value.length > 0 || photos.value.length >
 // Active tab
 const activeMediaTab = ref<'videos' | 'photos'>('videos')
 
+// Album modal state
+const albumModalOpen = ref(false)
+
+const openPhotoAlbum = () => {
+  albumModalOpen.value = true
+}
+
 // Localization helpers
 const getLocalizedTitle = (item: any) => {
   if (locale.value === 'en' && item.title_en) return item.title_en
@@ -138,29 +145,22 @@ const getYouTubeId = (url: string) => {
         <div v-if="photos.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
           {{ t('projets.mediatheque.noPhotos') }}
         </div>
-        <div v-else class="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-          <a
-            v-for="photo in photos"
-            :key="photo.id"
-            :href="photo.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="group relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800"
-          >
-            <img
-              :src="photo.thumbnail || photo.url"
-              :alt="getLocalizedTitle(photo)"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-            <!-- Overlay on hover -->
-            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-end">
-              <div class="p-4 text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                <h3 class="font-medium text-sm">{{ getLocalizedTitle(photo) }}</h3>
-                <p class="text-xs text-white/70">{{ formatDate(photo.date) }}</p>
-              </div>
-            </div>
-          </a>
+        <div v-else class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <!-- Album card with stacked images -->
+          <MediaAlbumCard
+            :title="t('projets.mediatheque.photoAlbum')"
+            :items="photos"
+            @click="openPhotoAlbum"
+          />
         </div>
+
+        <!-- Album modal -->
+        <MediaAlbumModal
+          :open="albumModalOpen"
+          :title="t('projets.mediatheque.photoAlbum')"
+          :items="photos"
+          @close="albumModalOpen = false"
+        />
       </div>
     </template>
   </div>

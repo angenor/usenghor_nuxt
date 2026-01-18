@@ -91,7 +91,8 @@
       "photos": "Photos",
       "noMedia": "No media available",
       "noVideos": "No videos available",
-      "noPhotos": "No photos available"
+      "noPhotos": "No photos available",
+      "photoAlbum": "Photo Album"
     },
     "intro": {
       "title": "Impactful projects",

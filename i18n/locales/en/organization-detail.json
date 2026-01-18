@@ -68,7 +68,8 @@
       },
       "download": "Download",
       "viewGallery": "View gallery",
-      "empty": "No media available at the moment."
+      "empty": "No media available at the moment.",
+      "photoAlbum": "Photo Album"
     },
     "cta": {
       "contact": "Contact us",

@@ -104,7 +104,8 @@
         "title": "Media Library",
         "videos": "Videos",
         "photos": "Photos",
-        "viewGallery": "View gallery"
+        "viewGallery": "View gallery",
+        "photoAlbum": "Photo Album"
       },
       "formations": {
         "title": "Completed Programs",

@@ -104,7 +104,8 @@
         "title": "Médiathèque",
         "videos": "Vidéos",
         "photos": "Photos",
-        "viewGallery": "Voir la galerie"
+        "viewGallery": "Voir la galerie",
+        "photoAlbum": "Album photos"
       },
       "formations": {
         "title": "Formations réalisées",

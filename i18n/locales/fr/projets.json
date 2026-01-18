@@ -91,7 +91,8 @@
       "photos": "Photos",
       "noMedia": "Aucun média disponible",
       "noVideos": "Aucune vidéo disponible",
-      "noPhotos": "Aucune photo disponible"
+      "noPhotos": "Aucune photo disponible",
+      "photoAlbum": "Album photos"
     },
     "intro": {
       "title": "Des projets à impact",

@@ -386,18 +386,25 @@ const mockNews = computed(() => [
   }
 ])
 
-const mockMedia = {
+const mockMedia = computed(() => ({
   photos: [
-    { src: '/images/bg/backgroud_senghor1.jpg', alt: 'Campus Senghor' },
-    { src: '/images/bg/backgroud_senghor2.jpg', alt: 'Événement universitaire' },
-    { src: '/images/bg/backgroud_senghor3.jpg', alt: 'Étudiants' },
-    { src: '/images/bg/bg_mission_section.jpeg', alt: 'Bibliothèque' },
-    { src: '/images/bg/bg_stats_section.jpeg', alt: 'Conférence' },
-    { src: '/images/bg/backgroud_senghor1.jpg', alt: 'Remise de diplômes' }
+    { id: 'photo-1', title_fr: 'Campus Senghor', title_en: 'Senghor Campus', url: '/images/bg/backgroud_senghor1.jpg', thumbnail: '/images/bg/backgroud_senghor1.jpg' },
+    { id: 'photo-2', title_fr: 'Événement universitaire', title_en: 'University Event', url: '/images/bg/backgroud_senghor2.jpg', thumbnail: '/images/bg/backgroud_senghor2.jpg' },
+    { id: 'photo-3', title_fr: 'Étudiants', title_en: 'Students', url: '/images/bg/backgroud_senghor3.jpg', thumbnail: '/images/bg/backgroud_senghor3.jpg' },
+    { id: 'photo-4', title_fr: 'Bibliothèque', title_en: 'Library', url: '/images/bg/bg_mission_section.jpeg', thumbnail: '/images/bg/bg_mission_section.jpeg' },
+    { id: 'photo-5', title_fr: 'Conférence', title_en: 'Conference', url: '/images/bg/bg_stats_section.jpeg', thumbnail: '/images/bg/bg_stats_section.jpeg' },
+    { id: 'photo-6', title_fr: 'Remise de diplômes', title_en: 'Graduation Ceremony', url: '/images/bg/backgroud_senghor1.jpg', thumbnail: '/images/bg/backgroud_senghor1.jpg' }
   ]
-}
+}))
 
 const activeMediaTab = ref('photos')
+
+// Album modal state
+const albumModalOpen = ref(false)
+
+const openPhotoAlbum = () => {
+  albumModalOpen.value = true
+}
 
 // Timeline colors for achievements
 type TimelineColor = {
@@ -871,25 +878,23 @@ const formatDate = (dateStr: string) => {
             </button>
           </div>
 
-          <!-- Photos Gallery -->
-          <div v-if="activeMediaTab === 'photos'" class="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <div
-              v-for="(photo, index) in mockMedia.photos"
-              :key="index"
-              class="relative aspect-square rounded-xl overflow-hidden group cursor-pointer"
-            >
-              <img
-                :src="photo.src"
-                :alt="photo.alt"
-                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          <!-- Photos Gallery - Album Style -->
+          <div v-if="activeMediaTab === 'photos'">
+            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <MediaAlbumCard
+                :title="t('organizationDetail.media.photoAlbum')"
+                :items="mockMedia.photos"
+                @click="openPhotoAlbum"
               />
-              <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center">
-                <font-awesome-icon
-                  icon="fa-solid fa-expand"
-                  class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                />
-              </div>
             </div>
+
+            <!-- Album modal -->
+            <MediaAlbumModal
+              :open="albumModalOpen"
+              :title="t('organizationDetail.media.photoAlbum')"
+              :items="mockMedia.photos"
+              @close="albumModalOpen = false"
+            />
           </div>
 
           <!-- Videos / Documents placeholder -->
