@@ -95,7 +95,7 @@ const secondaryNavItems = [
     icon: 'fa-solid fa-user-graduate',
     singleLink: true, // Tout le bloc est un seul lien cliquable
     children: [
-      { key: 'alumniNetwork', route: '/alumni/reseau', icon: 'fa-solid fa-users', badge: '5000+' },
+      { key: 'alumniNetwork', route: '/alumni/reseau', icon: 'fa-solid fa-users', badge: '4200+' },
       { key: 'alumniProgram', route: '/alumni/programme', icon: 'fa-solid fa-star' }
     ]
   },

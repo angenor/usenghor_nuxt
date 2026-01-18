@@ -118,7 +118,7 @@ const getDepartmentName = (deptId: string) => {
 
 // Stats display
 const stats = computed(() => [
-  { value: '4000+', label: t('alumni.stats.alumni') },
+  { value: '4200+', label: t('alumni.stats.alumni') },
   { value: `${alumniStats.value.countries}+`, label: t('alumni.stats.countries') },
   { value: `${alumniStats.value.industries}`, label: t('alumni.stats.sectors') },
   { value: '30+', label: t('alumni.stats.promotions') }

@@ -14,7 +14,7 @@ useSeoMeta({
 const stats = computed(() => [
   { value: '30+', label: t('about.stats.years') },
   { value: '15', label: t('about.stats.countries') },
-  { value: '5000+', label: t('about.stats.alumni') },
+  { value: '4200+', label: t('about.stats.alumni') },
   { value: '50+', label: t('about.stats.programs') }
 ])
 
