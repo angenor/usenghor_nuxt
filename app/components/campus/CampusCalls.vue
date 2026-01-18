@@ -159,7 +159,7 @@ const formatDate = (dateStr: string) => {
           class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200"
           :class="[
             activeFilter === filter.id
-              ? 'bg-amber-500 text-white shadow-md'
+              ? 'bg-brand-blue-500 text-white shadow-md'
               : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
           ]"
           @click="activeFilter = filter.id"
@@ -189,7 +189,7 @@ const formatDate = (dateStr: string) => {
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-8">
             <span class="relative inline-block">
               {{ t('partners.campus.calls.title') }}
-              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-red-500 to-brand-red-300 rounded-full"></span>
             </span>
           </h2>
 
@@ -205,7 +205,7 @@ const formatDate = (dateStr: string) => {
             <!-- Show more/less button -->
             <button
               v-if="calls.length > ITEMS_LIMIT"
-              class="mt-6 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+              class="mt-6 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 transition-colors"
               @click="toggleSection('calls')"
             >
               <font-awesome-icon
@@ -228,7 +228,7 @@ const formatDate = (dateStr: string) => {
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-8">
             <span class="relative inline-block">
               {{ t('partners.campus.formations.title') }}
-              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-red-500 to-brand-red-300 rounded-full"></span>
             </span>
           </h2>
 
@@ -244,7 +244,7 @@ const formatDate = (dateStr: string) => {
             <!-- Show more/less button -->
             <button
               v-if="formationsRealisees.length > ITEMS_LIMIT"
-              class="mt-6 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+              class="mt-6 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 transition-colors"
               @click="toggleSection('formations')"
             >
               <font-awesome-icon
@@ -283,7 +283,7 @@ const formatDate = (dateStr: string) => {
             <!-- Show more/less button -->
             <button
               v-if="closedCalls.length > ITEMS_LIMIT"
-              class="mt-6 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+              class="mt-6 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 transition-colors"
               @click="toggleSection('closed')"
             >
               <font-awesome-icon
@@ -322,7 +322,7 @@ const formatDate = (dateStr: string) => {
             <!-- Show more/less button -->
             <button
               v-if="recruitments.length > ITEMS_LIMIT"
-              class="mt-6 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+              class="mt-6 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 transition-colors"
               @click="toggleSection('recruitments')"
             >
               <font-awesome-icon
@@ -346,7 +346,7 @@ const formatDate = (dateStr: string) => {
         <!-- Events Section -->
         <div class="mb-6">
           <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <font-awesome-icon icon="fa-solid fa-calendar-days" class="w-5 h-5 text-amber-500" />
+            <font-awesome-icon icon="fa-solid fa-calendar-days" class="w-5 h-5 text-brand-red-500" />
             {{ hasUpcomingEvents ? t('partners.campus.calls.sidebar.upcomingEvents') : t('partners.campus.calls.sidebar.recentEvents') }}
           </h3>
 
@@ -370,7 +370,7 @@ const formatDate = (dateStr: string) => {
               </div>
               <!-- Content -->
               <div class="flex-1 flex flex-col justify-center">
-                <h4 class="text-sm font-semibold text-gray-900 dark:text-white leading-tight line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-white leading-tight line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                   {{ getLocalizedEventTitle(event) }}
                 </h4>
                 <span class="text-xs text-gray-500 dark:text-gray-400 mt-1 inline-flex items-center gap-1">
@@ -383,7 +383,7 @@ const formatDate = (dateStr: string) => {
             <!-- View all events link -->
             <a
               href="#events"
-              class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+              class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 transition-colors"
             >
               {{ t('partners.campus.calls.sidebar.viewAllEvents') }}
               <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
@@ -401,7 +401,7 @@ const formatDate = (dateStr: string) => {
         <!-- News Section -->
         <div>
           <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <font-awesome-icon icon="fa-solid fa-newspaper" class="w-5 h-5 text-amber-500" />
+            <font-awesome-icon icon="fa-solid fa-newspaper" class="w-5 h-5 text-brand-red-500" />
             {{ t('partners.campus.calls.sidebar.recentNews') }}
           </h3>
 
@@ -425,7 +425,7 @@ const formatDate = (dateStr: string) => {
               </div>
               <!-- Content -->
               <div class="flex-1 flex flex-col justify-center">
-                <h4 class="text-sm font-semibold text-gray-900 dark:text-white leading-tight line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-white leading-tight line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                   <a v-if="news.url" :href="news.url">
                     {{ getLocalizedNewsTitle(news) }}
                   </a>
@@ -440,7 +440,7 @@ const formatDate = (dateStr: string) => {
             <!-- View all news link -->
             <a
               href="#news"
-              class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+              class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 transition-colors"
             >
               {{ t('partners.campus.calls.sidebar.viewAllNews') }}
               <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
@@ -458,7 +458,7 @@ const formatDate = (dateStr: string) => {
         <!-- Partners Section -->
         <div>
           <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <font-awesome-icon icon="fa-solid fa-handshake" class="w-5 h-5 text-amber-500" />
+            <font-awesome-icon icon="fa-solid fa-handshake" class="w-5 h-5 text-brand-red-500" />
             {{ t('partners.campus.tabs.partners') }}
           </h3>
 
@@ -468,7 +468,7 @@ const formatDate = (dateStr: string) => {
               :key="partner.id"
               :href="partner.website || '#'"
               :title="getLocalizedPartnerName(partner)"
-              class="group flex items-center justify-center p-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500 transition-colors"
+              class="group flex items-center justify-center p-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-brand-blue-400 dark:hover:border-brand-blue-500 transition-colors"
             >
               <img
                 :src="partner.logo"
@@ -483,7 +483,7 @@ const formatDate = (dateStr: string) => {
           <a
             v-if="sidebarPartners.length > 0"
             href="#partners"
-            class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+            class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 transition-colors"
           >
             {{ t('partners.campus.calls.sidebar.viewAllPartners') }}
             <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
@@ -500,7 +500,7 @@ const formatDate = (dateStr: string) => {
         <!-- Team Section -->
         <div>
           <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <font-awesome-icon icon="fa-solid fa-users" class="w-5 h-5 text-amber-500" />
+            <font-awesome-icon icon="fa-solid fa-users" class="w-5 h-5 text-brand-red-500" />
             {{ t('partners.campus.tabs.team') }}
           </h3>
 
@@ -531,7 +531,7 @@ const formatDate = (dateStr: string) => {
           <a
             v-if="sidebarTeam.length > 0"
             href="#team"
-            class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+            class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 transition-colors"
           >
             {{ t('partners.campus.calls.sidebar.viewAllTeam') }}
             <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />

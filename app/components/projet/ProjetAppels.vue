@@ -54,7 +54,7 @@ const getTypeBadgeClasses = (type: string) => {
     case 'projet':
       return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400'
     case 'recrutement':
-      return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+      return 'bg-brand-red-100 dark:bg-brand-red-900/30 text-brand-red-700 dark:text-brand-red-400'
     default:
       return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400'
   }

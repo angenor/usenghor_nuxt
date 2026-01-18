@@ -47,14 +47,14 @@ const colorConfig: Record<string, {
     badgeText: 'text-emerald-700 dark:text-emerald-200'
   },
   '#F59E0B': {
-    bgLight: 'bg-amber-100',
-    bgDark: 'dark:bg-amber-900',
-    bgLightHex: '#fef3c7', // amber-100
-    bgDarkHex: '#78350f', // amber-900
-    textDark: 'dark:text-amber-100',
-    iconBg: 'bg-amber-500',
-    badgeBg: 'bg-white/60 dark:bg-amber-800/60',
-    badgeText: 'text-amber-700 dark:text-amber-200'
+    bgLight: 'bg-brand-blue-100',
+    bgDark: 'dark:bg-brand-blue-900',
+    bgLightHex: '#dce6ff', // brand-blue-100
+    bgDarkHex: '#1e3a8a', // brand-blue-900
+    textDark: 'dark:text-brand-blue-100',
+    iconBg: 'bg-brand-blue-500',
+    badgeBg: 'bg-white/60 dark:bg-brand-blue-800/60',
+    badgeText: 'text-brand-blue-700 dark:text-brand-blue-200'
   },
   '#EF4444': {
     bgLight: 'bg-rose-100',
@@ -137,7 +137,7 @@ const getDeptImage = (deptId: string) => deptImages[deptId] || 'https://picsum.p
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
           <span class="relative inline-block">
             {{ t('organization.departments.title') }}
-            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-red-500 to-brand-red-300 rounded-full"></span>
           </span>
         </h2>
         <p class="mt-6 text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">

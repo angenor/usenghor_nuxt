@@ -33,7 +33,7 @@ const selectFilter = (value: Partenaire['partner_type'] | 'all') => {
       class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
       :class="[
         modelValue === filter.value
-          ? 'bg-amber-500 text-white shadow-md'
+          ? 'bg-brand-blue-500 text-white shadow-md'
           : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
       ]"
       @click="selectFilter(filter.value)"

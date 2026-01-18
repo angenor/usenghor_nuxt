@@ -65,7 +65,7 @@ const getImageUrl = (formation: Formation) => {
       <div ref="headerRef" class="text-center mb-12 lg:mb-16">
         <NuxtLink
           :to="localePath('/carrieres') + '#etudiants'"
-          class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 mb-4 hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors cursor-pointer"
+          class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 mb-4 hover:bg-brand-blue-200 dark:hover:bg-brand-blue-900/50 transition-colors cursor-pointer"
         >
           <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-3.5 h-3.5 mr-2" />
           {{ t('formations.index.featured.badge') }}
@@ -106,17 +106,17 @@ const getImageUrl = (formation: Formation) => {
             <div class="lg:rounded-l-[30px] lg:rounded-t-[30px] bg-white dark:bg-gray-800 lg:absolute bottom-6 -right-10 xl:-right-8 lg:w-[16rem] xl:w-[14rem] px-6 xl:px-5 py-5 lg:h-80 xl:h-72 shadow-lg transition-all duration-300 group-hover:shadow-xl">
               <!-- Duration -->
               <span class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
-                <font-awesome-icon icon="fa-solid fa-clock" class="w-3.5 h-3.5 text-amber-500" />
+                <font-awesome-icon icon="fa-solid fa-clock" class="w-3.5 h-3.5 text-brand-red-500" />
                 {{ getLocalizedDuration(formation) }}
               </span>
 
               <!-- Title -->
-              <h3 class="text-xl xl:text-lg font-bold leading-tight mt-1.5 mb-2.5 text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors line-clamp-2">
+              <h3 class="text-xl xl:text-lg font-bold leading-tight mt-1.5 mb-2.5 text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors line-clamp-2">
                 {{ getLocalizedTitle(formation) }}
               </h3>
 
               <!-- Campus -->
-              <span class="inline-block text-amber-500 dark:text-amber-400 text-sm capitalize hover:underline">
+              <span class="inline-block text-brand-blue-500 dark:text-brand-blue-400 text-sm capitalize hover:underline">
                 {{ t(`formations.campus.${formation.campus}`) }}
               </span>
 
@@ -128,9 +128,9 @@ const getImageUrl = (formation: Formation) => {
               <!-- Read more link -->
               <NuxtLink
                 :to="getDetailUrl(formation)"
-                class="flex justify-end items-center uppercase text-amber-600 dark:text-amber-400 font-semibold text-sm hover:text-amber-500 transition-colors"
+                class="flex justify-end items-center uppercase text-brand-blue-600 dark:text-brand-blue-400 font-semibold text-sm hover:text-brand-blue-500 transition-colors"
               >
-                <span class="mr-4 block w-10 h-0.5 bg-amber-600 dark:bg-amber-400 transition-all group-hover:w-14"></span>
+                <span class="mr-4 block w-10 h-0.5 bg-brand-blue-600 dark:bg-brand-blue-400 transition-all group-hover:w-14"></span>
                 {{ t('formations.card.viewDetails') }}
               </NuxtLink>
             </div>
@@ -142,7 +142,7 @@ const getImageUrl = (formation: Formation) => {
       <div class="text-center relative z-10">
         <NuxtLink
           :to="localePath('/carrieres') + '#etudiants'"
-          class="inline-flex items-center gap-2 px-8 py-4 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+          class="inline-flex items-center gap-2 px-8 py-4 bg-brand-blue-600 hover:bg-brand-blue-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
         >
           {{ t('formations.index.viewAll') }}
           <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />

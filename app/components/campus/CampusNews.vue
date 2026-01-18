@@ -49,7 +49,7 @@ const formatDate = (dateStr: string) => {
     <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-8">
       <span class="relative inline-block">
         {{ t('partners.campus.news.title') }}
-        <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+        <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-red-500 to-brand-red-300 rounded-full"></span>
       </span>
     </h2>
 
@@ -72,7 +72,7 @@ const formatDate = (dateStr: string) => {
             <!-- Content -->
             <div class="mt-5">
               <!-- Featured Badge -->
-              <span class="inline-block px-3 py-1 text-xs font-semibold text-white bg-amber-600 rounded uppercase tracking-wide mb-3">
+              <span class="inline-block px-3 py-1 text-xs font-semibold text-white bg-brand-blue-600 rounded uppercase tracking-wide mb-3">
                 {{ t('partners.campus.news.featured') }}
               </span>
 
@@ -81,11 +81,11 @@ const formatDate = (dateStr: string) => {
                 <a
                   v-if="featuredNews.url"
                   :href="featuredNews.url"
-                  class="hover:text-amber-600 dark:hover:text-amber-400 hover:underline transition-colors duration-200"
+                  class="hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200"
                 >
                   {{ getLocalizedTitle(featuredNews) }}
                 </a>
-                <span v-else class="cursor-pointer hover:text-amber-600 dark:hover:text-amber-400 hover:underline transition-colors duration-200">
+                <span v-else class="cursor-pointer hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200">
                   {{ getLocalizedTitle(featuredNews) }}
                 </span>
               </h3>
@@ -131,11 +131,11 @@ const formatDate = (dateStr: string) => {
                   <a
                     v-if="item.url"
                     :href="item.url"
-                    class="hover:text-amber-600 dark:hover:text-amber-400 hover:underline transition-colors duration-200"
+                    class="hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200"
                   >
                     {{ getLocalizedTitle(item) }}
                   </a>
-                  <span v-else class="cursor-pointer hover:text-amber-600 dark:hover:text-amber-400 hover:underline transition-colors duration-200">
+                  <span v-else class="cursor-pointer hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200">
                     {{ getLocalizedTitle(item) }}
                   </span>
                 </h4>
@@ -177,11 +177,11 @@ const formatDate = (dateStr: string) => {
             <a
               v-if="item.url"
               :href="item.url"
-              class="hover:text-amber-600 dark:hover:text-amber-400 hover:underline transition-colors duration-200"
+              class="hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200"
             >
               {{ getLocalizedTitle(item) }}
             </a>
-            <span v-else class="cursor-pointer hover:text-amber-600 dark:hover:text-amber-400 hover:underline transition-colors duration-200">
+            <span v-else class="cursor-pointer hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200">
               {{ getLocalizedTitle(item) }}
             </span>
           </h4>

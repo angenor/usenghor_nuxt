@@ -240,11 +240,11 @@ defineExpose({
 }
 
 .cdx-quote__text {
-  @apply border-l-4 border-amber-500 pl-4 italic;
+  @apply border-l-4 border-brand-red-500 pl-4 italic;
 }
 
 .cdx-marker {
-  @apply bg-amber-200 dark:bg-amber-600;
+  @apply bg-brand-blue-200 dark:bg-brand-blue-600;
 }
 
 .ce-inline-toolbar {

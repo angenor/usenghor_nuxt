@@ -160,7 +160,7 @@ onUnmounted(() => {
                   v-for="(item, index) in items"
                   :key="item.id"
                   type="button"
-                  class="group relative aspect-square rounded-xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  class="group relative aspect-square rounded-xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-brand-blue-500"
                   @click="openSingleView(index)"
                 >
                   <img
@@ -221,7 +221,7 @@ onUnmounted(() => {
                 :key="item.id"
                 type="button"
                 class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden transition-all"
-                :class="index === currentIndex ? 'ring-2 ring-amber-500 ring-offset-2 dark:ring-offset-gray-900' : 'opacity-60 hover:opacity-100'"
+                :class="index === currentIndex ? 'ring-2 ring-brand-blue-500 ring-offset-2 dark:ring-offset-gray-900' : 'opacity-60 hover:opacity-100'"
                 @click="currentIndex = index"
               >
                 <img

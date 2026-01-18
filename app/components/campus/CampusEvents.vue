@@ -46,7 +46,7 @@ const formatDate = (dateStr: string) => {
 const typeColors: Record<string, string> = {
   conference: 'bg-red-600',
   atelier: 'bg-indigo-600',
-  ceremonie: 'bg-amber-600',
+  ceremonie: 'bg-brand-blue-600',
   autre: 'bg-gray-600'
 }
 
@@ -62,15 +62,15 @@ const getTypeLabel = (type: string) => {
     <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-8">
       <span class="relative inline-block">
         {{ t('partners.campus.events.title') }}
-        <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+        <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-red-500 to-brand-red-300 rounded-full"></span>
       </span>
     </h2>
 
     <div v-if="events.length > 0">
       <!-- Section 1: Trending/Featured Events (4 cards with hover effect) -->
       <div v-if="featuredEvents.length > 0" class="mb-10">
-        <h3 class="border-b-2 border-amber-600 mb-6">
-          <span class="bg-amber-600 px-3 py-1.5 text-white uppercase tracking-wide text-sm font-semibold">
+        <h3 class="border-b-2 border-brand-blue-600 mb-6">
+          <span class="bg-brand-blue-600 px-3 py-1.5 text-white uppercase tracking-wide text-sm font-semibold">
             {{ t('partners.campus.events.featured') }}
           </span>
         </h3>
@@ -176,7 +176,7 @@ const getTypeLabel = (type: string) => {
                   </span>
                   <!-- Title -->
                   <h4 class="text-gray-900 dark:text-white font-bold text-xl md:text-2xl pb-2 leading-tight">
-                    <a href="#" class="hover:text-amber-600 dark:hover:text-amber-400 hover:underline transition-colors duration-200">
+                    <a href="#" class="hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200">
                       {{ getLocalizedTitle(event) }}
                     </a>
                   </h4>
@@ -239,7 +239,7 @@ const getTypeLabel = (type: string) => {
 
               <!-- Title -->
               <h4 class="text-gray-900 dark:text-white font-bold text-xl md:text-2xl pb-3 leading-tight mt-2">
-                <a href="#" class="hover:text-amber-600 dark:hover:text-amber-400 hover:underline transition-colors duration-200">
+                <a href="#" class="hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200">
                   {{ getLocalizedTitle(highlightedEvent) }}
                 </a>
               </h4>

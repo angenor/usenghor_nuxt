@@ -208,7 +208,7 @@ const toggleMobileMenu = () => {
                   class="flex items-center gap-3 w-full px-4 py-2.5 text-sm transition-colors duration-200"
                   :class="[
                     locale === lang.code
-                      ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 font-medium'
+                      ? 'bg-brand-blue-50 dark:bg-brand-blue-900/20 text-brand-blue-700 dark:text-brand-blue-400 font-medium'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                   ]"
                 >
@@ -221,7 +221,7 @@ const toggleMobileMenu = () => {
                   <font-awesome-icon
                     v-if="locale === lang.code"
                     icon="fa-solid fa-check"
-                    class="w-3 h-3 ltr:ml-auto rtl:mr-auto text-amber-500"
+                    class="w-3 h-3 ltr:ml-auto rtl:mr-auto text-brand-red-500"
                   />
                 </button>
               </div>
@@ -279,7 +279,7 @@ const toggleMobileMenu = () => {
             @click="toggleDarkMode"
             class="flex items-center justify-center gap-3 w-full px-4 py-3 text-gray-600 dark:text-gray-300 font-medium rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
           >
-            <font-awesome-icon v-if="isDark" icon="fa-solid fa-sun" class="w-4 h-4 text-amber-400" />
+            <font-awesome-icon v-if="isDark" icon="fa-solid fa-sun" class="w-4 h-4 text-brand-red-400" />
             <font-awesome-icon v-else icon="fa-solid fa-moon" class="w-4 h-4 text-gray-400" />
             <span>{{ isDark ? t('theme.lightMode') : t('theme.darkMode') }}</span>
           </button>
@@ -298,7 +298,7 @@ const toggleMobileMenu = () => {
                 class="flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-all duration-200"
                 :class="[
                   locale === lang.code
-                    ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 ring-2 ring-amber-500/50'
+                    ? 'bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 ring-2 ring-brand-blue-500/50'
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                 ]"
               >
@@ -345,7 +345,7 @@ const toggleMobileMenu = () => {
         <font-awesome-icon
           :icon="isDark ? 'fa-solid fa-moon' : 'fa-solid fa-sun'"
           class="w-5 h-5"
-          :class="isDark ? 'text-indigo-400' : 'text-amber-500'"
+          :class="isDark ? 'text-indigo-400' : 'text-brand-red-500'"
         />
         <span class="text-sm font-medium">{{ t(isDark ? 'theme.darkMode' : 'theme.lightMode') }}</span>
       </div>

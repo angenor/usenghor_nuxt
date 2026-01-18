@@ -89,7 +89,7 @@ onUnmounted(() => {
     ></div>
 
     <!-- Dark Overlay with Gradient -->
-    <div class="absolute inset-0 bg-gradient-to-r from-amber-900/85 via-amber-800/80 to-amber-900/85"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-brand-blue-900/85 via-brand-blue-800/80 to-brand-blue-900/85"></div>
 
     <!-- Content -->
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

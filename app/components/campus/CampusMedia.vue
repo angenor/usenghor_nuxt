@@ -29,14 +29,14 @@ const openPhotoAlbum = () => {
     <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
       <span class="relative inline-block">
         {{ t('partners.campus.media.title') }}
-        <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+        <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-red-500 to-brand-red-300 rounded-full"></span>
       </span>
     </h2>
 
     <!-- Videos Section -->
     <div v-if="videos.length > 0" class="mb-10">
       <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
-        <font-awesome-icon icon="fa-solid fa-video" class="w-4 h-4 text-amber-500" />
+        <font-awesome-icon icon="fa-solid fa-video" class="w-4 h-4 text-brand-red-500" />
         {{ t('partners.campus.media.videos') }}
       </h4>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -62,7 +62,7 @@ const openPhotoAlbum = () => {
             </div>
           </div>
           <div class="p-4">
-            <h5 class="font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+            <h5 class="font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
               {{ getLocalizedTitle(video) }}
             </h5>
           </div>
@@ -73,7 +73,7 @@ const openPhotoAlbum = () => {
     <!-- Photos Section - Album Style -->
     <div v-if="photos.length > 0">
       <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
-        <font-awesome-icon icon="fa-solid fa-images" class="w-4 h-4 text-amber-500" />
+        <font-awesome-icon icon="fa-solid fa-images" class="w-4 h-4 text-brand-red-500" />
         {{ t('partners.campus.media.photos') }}
       </h4>
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

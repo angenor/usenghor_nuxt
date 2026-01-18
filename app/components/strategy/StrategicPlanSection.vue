@@ -32,10 +32,10 @@ const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', t
               class="w-full h-auto object-cover aspect-[4/3]"
             />
             <!-- Gradient overlay -->
-            <div class="absolute inset-0 bg-gradient-to-t from-amber-900/30 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-brand-blue-900/30 to-transparent"></div>
           </div>
           <!-- Decorative element -->
-          <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-amber-400 rounded-xl -z-10"></div>
+          <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-brand-red-400 rounded-xl -z-10"></div>
         </div>
 
         <!-- Content -->
@@ -44,7 +44,7 @@ const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', t
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
             <span class="relative inline-block">
               {{ props.title }}
-              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-red-500 to-brand-red-300 rounded-full"></span>
             </span>
           </h2>
 
@@ -70,7 +70,7 @@ const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', t
               </span>
               <font-awesome-icon
                 icon="fa-solid fa-download"
-                class="w-4 h-4 text-gray-400 group-hover:text-amber-500 transition-colors duration-300"
+                class="w-4 h-4 text-gray-400 group-hover:text-brand-blue-500 transition-colors duration-300"
               />
             </a>
           </div>

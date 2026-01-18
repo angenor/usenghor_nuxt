@@ -56,14 +56,14 @@ const isCharterOperator = (partner: Partenaire) => partner.category === 'charter
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Section Header -->
       <div class="text-center mb-12">
-        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 mb-4">
+        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 mb-4">
           <font-awesome-icon icon="fa-solid fa-handshake" class="w-3.5 h-3.5 mr-2" />
           {{ t('partners.campus.badge') }}
         </span>
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
           <span class="relative inline-block">
             {{ t('partners.hero.title') }}
-            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-red-500 to-brand-red-300 rounded-full"></span>
           </span>
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
@@ -79,8 +79,8 @@ const isCharterOperator = (partner: Partenaire) => partner.category === 'charter
             :key="option.value"
             class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200"
             :class="selectedFilter === option.value
-              ? 'bg-amber-600 text-white shadow-lg shadow-amber-500/25'
-              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-amber-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 hover:border-amber-300 dark:hover:border-amber-700'"
+              ? 'bg-brand-blue-600 text-white shadow-lg shadow-brand-blue-500/25'
+              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-brand-blue-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 hover:border-brand-blue-300 dark:hover:border-brand-blue-700'"
             @click="selectedFilter = option.value"
           >
             <font-awesome-icon :icon="option.icon" class="w-4 h-4" />
@@ -110,13 +110,13 @@ const isCharterOperator = (partner: Partenaire) => partner.category === 'charter
             rel="noopener noreferrer"
             class="group relative flex flex-col items-center p-4 lg:p-6 rounded-xl hover:shadow-lg transition-all duration-300 border"
             :class="isCharterOperator(partner)
-              ? 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200 dark:border-amber-800 hover:border-amber-400 dark:hover:border-amber-600'
+              ? 'bg-gradient-to-br from-brand-blue-50 to-brand-red-50 dark:from-brand-blue-900/20 dark:to-brand-red-900/20 border-brand-blue-200 dark:border-brand-blue-800 hover:border-brand-blue-400 dark:hover:border-brand-blue-600'
               : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:border-cyan-200 dark:hover:border-cyan-800'"
           >
             <!-- Charter badge -->
             <div
               v-if="isCharterOperator(partner)"
-              class="absolute -top-5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-full uppercase tracking-wide text-center"
+              class="absolute -top-5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-brand-red-500 text-white text-[10px] font-bold rounded-full uppercase tracking-wide text-center"
             >
               {{ t('partners.filters.charter') }}
             </div>
@@ -141,7 +141,7 @@ const isCharterOperator = (partner: Partenaire) => partner.category === 'charter
             <h3
               class="text-xs lg:text-sm font-medium text-center transition-colors line-clamp-2"
               :class="isCharterOperator(partner)
-                ? 'text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400'
+                ? 'text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400'
                 : 'text-gray-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400'"
             >
               {{ getLocalizedName(partner) }}
@@ -152,7 +152,7 @@ const isCharterOperator = (partner: Partenaire) => partner.category === 'charter
               <font-awesome-icon
                 icon="fa-solid fa-arrow-up-right-from-square"
                 class="w-3 h-3"
-                :class="isCharterOperator(partner) ? 'text-amber-500' : 'text-cyan-500'"
+                :class="isCharterOperator(partner) ? 'text-brand-red-500' : 'text-cyan-500'"
               />
             </div>
           </a>
@@ -171,15 +171,15 @@ const isCharterOperator = (partner: Partenaire) => partner.category === 'charter
       <!-- Stats -->
       <div class="mt-12 flex flex-wrap justify-center gap-8 text-center">
         <div>
-          <div class="text-3xl font-bold text-amber-600 dark:text-amber-400">{{ partenaires.length }}</div>
+          <div class="text-3xl font-bold text-brand-blue-600 dark:text-brand-blue-400">{{ partenaires.length }}</div>
           <div class="text-sm text-gray-500 dark:text-gray-400">{{ t('partners.campus.stats.institutions') }}</div>
         </div>
         <div>
-          <div class="text-3xl font-bold text-amber-600 dark:text-amber-400">30+</div>
+          <div class="text-3xl font-bold text-brand-blue-600 dark:text-brand-blue-400">30+</div>
           <div class="text-sm text-gray-500 dark:text-gray-400">{{ t('partners.campus.stats.countries') }}</div>
         </div>
         <div>
-          <div class="text-3xl font-bold text-amber-600 dark:text-amber-400">5</div>
+          <div class="text-3xl font-bold text-brand-blue-600 dark:text-brand-blue-400">5</div>
           <div class="text-sm text-gray-500 dark:text-gray-400">{{ t('partners.campus.stats.continents') }}</div>
         </div>
       </div>

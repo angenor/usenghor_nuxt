@@ -13,14 +13,14 @@ const localePath = useLocalePath()
 </script>
 
 <template>
-  <section class="py-20 lg:py-40 bg-gradient-to-b from-amber-50 to-white dark:from-gray-800 dark:to-gray-900">
+  <section class="py-20 lg:py-40 bg-gradient-to-b from-brand-blue-50 to-white dark:from-gray-800 dark:to-gray-900">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <!-- Icon -->
       <div class="mb-8">
-        <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-amber-100 dark:bg-amber-900/30">
+        <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-brand-blue-100 dark:bg-brand-blue-900/30">
           <font-awesome-icon
             :icon="props.icon"
-            class="w-12 h-12 text-amber-500"
+            class="w-12 h-12 text-brand-red-500"
           />
         </div>
       </div>
@@ -42,14 +42,14 @@ const localePath = useLocalePath()
           <span>En cours de développement</span>
         </div>
         <div class="w-full max-w-xs mx-auto h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-          <div class="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full animate-pulse" style="width: 35%"></div>
+          <div class="h-full bg-gradient-to-r from-brand-blue-400 to-brand-blue-500 rounded-full animate-pulse" style="width: 35%"></div>
         </div>
       </div>
 
       <!-- Back button -->
       <NuxtLink
         :to="localePath('/')"
-        class="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-white font-semibold rounded-full transition-all duration-300 hover:bg-amber-600 hover:shadow-lg hover:shadow-amber-500/30 hover:-translate-y-0.5"
+        class="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue-500 text-white font-semibold rounded-full transition-all duration-300 hover:bg-brand-blue-600 hover:shadow-lg hover:shadow-brand-blue-500/30 hover:-translate-y-0.5"
       >
         <font-awesome-icon icon="fa-solid fa-arrow-left" class="w-4 h-4" />
         <span>{{ t('wip.backHome') }}</span>

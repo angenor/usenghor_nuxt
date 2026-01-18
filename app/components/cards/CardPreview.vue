@@ -9,7 +9,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  color: 'amber'
+  color: 'brand-blue'
 })
 
 const localePath = useLocalePath()
@@ -32,7 +32,8 @@ const getIcon = (iconName: string): string => {
 
 // Color classes for icon badge
 const colorClasses: Record<string, string> = {
-  amber: 'bg-amber-500',
+  'brand-blue': 'bg-brand-blue-500',
+  'brand-red': 'bg-brand-red-500',
   blue: 'bg-blue-500',
   emerald: 'bg-emerald-500',
   purple: 'bg-purple-500',
@@ -41,7 +42,7 @@ const colorClasses: Record<string, string> = {
   lime: 'bg-lime-500'
 }
 
-const badgeColor = computed(() => colorClasses[props.color] || colorClasses.amber)
+const badgeColor = computed(() => colorClasses[props.color] || colorClasses['brand-blue'])
 </script>
 
 <template>
@@ -74,7 +75,7 @@ const badgeColor = computed(() => colorClasses[props.color] || colorClasses.ambe
 
     <!-- Content -->
     <div class="absolute bottom-0 left-0 right-0 p-5 text-white">
-      <h3 class="text-xl font-bold mb-1 transition-colors duration-300 group-hover:text-amber-300">
+      <h3 class="text-xl font-bold mb-1 transition-colors duration-300 group-hover:text-brand-blue-300">
         {{ props.title }}
       </h3>
       <p class="text-sm text-gray-200 line-clamp-2">
@@ -82,7 +83,7 @@ const badgeColor = computed(() => colorClasses[props.color] || colorClasses.ambe
       </p>
 
       <!-- Arrow indicator -->
-      <div class="mt-3 flex items-center gap-2 text-sm font-medium text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <div class="mt-3 flex items-center gap-2 text-sm font-medium text-brand-red-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <span>Découvrir</span>
         <font-awesome-icon
           icon="fa-solid fa-arrow-right"

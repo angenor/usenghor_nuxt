@@ -35,10 +35,10 @@ const getIcon = (iconName: string): string => {
 // Color classes mapping
 const colorClasses: Record<string, { bg: string; bgLight: string; border: string; text: string }> = {
   amber: {
-    bg: 'bg-amber-500',
-    bgLight: 'bg-amber-100 dark:bg-amber-900/30',
-    border: 'border-amber-300 dark:border-amber-700',
-    text: 'text-amber-600 dark:text-amber-400'
+    bg: 'bg-brand-blue-500',
+    bgLight: 'bg-brand-blue-100 dark:bg-brand-blue-900/30',
+    border: 'border-brand-blue-300 dark:border-brand-blue-700',
+    text: 'text-brand-blue-600 dark:text-brand-blue-400'
   },
   blue: {
     bg: 'bg-blue-500',
@@ -81,7 +81,7 @@ const getColors = (color: string) => colorClasses[color] || colorClasses.amber
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
           <span class="relative inline-block">
             {{ props.title }}
-            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-red-500 to-brand-red-300 rounded-full"></span>
           </span>
         </h2>
         <p v-if="props.subtitle" class="mt-6 text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">

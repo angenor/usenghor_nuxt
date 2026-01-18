@@ -34,7 +34,7 @@ const getTabUrl = (tabId: string) => {
           class="flex-shrink-0 flex items-center gap-2 px-4 py-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
           :class="[
             activeTab === tab.id
-              ? 'border-amber-500 text-amber-600 dark:text-amber-400'
+              ? 'border-brand-blue-500 text-brand-blue-600 dark:text-brand-blue-400'
               : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
           ]"
         >

@@ -51,7 +51,7 @@ const { getFlagEmoji } = useMockData()
           <div class="p-6 space-y-6 overflow-y-auto h-[calc(100%-88px)]">
             <!-- Badge contribution -->
             <div v-if="props.pays.contribution_type_fr">
-              <span class="inline-block px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-sm font-medium">
+              <span class="inline-block px-4 py-2 bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 rounded-full text-sm font-medium">
                 {{ props.pays.contribution_type_fr }}
               </span>
             </div>
@@ -69,8 +69,8 @@ const { getFlagEmoji } = useMockData()
             <!-- Infos -->
             <div class="space-y-4">
               <div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
-                  <font-awesome-icon icon="fa-solid fa-location-dot" class="text-amber-600 dark:text-amber-400" />
+                <div class="w-10 h-10 bg-brand-red-100 dark:bg-brand-red-900/30 rounded-full flex items-center justify-center">
+                  <font-awesome-icon icon="fa-solid fa-location-dot" class="text-brand-red-600 dark:text-brand-red-400" />
                 </div>
                 <div>
                   <p class="text-xs text-gray-500 dark:text-gray-400">Capitale</p>

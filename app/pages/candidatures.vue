@@ -140,7 +140,7 @@ const breadcrumb = computed(() => [
             </p>
             <NuxtLink
               :to="localePath('/')"
-              class="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors"
+              class="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue-600 hover:bg-brand-blue-700 text-white font-medium rounded-lg transition-colors"
             >
               <font-awesome-icon icon="fa-solid fa-home" class="w-4 h-4" />
               {{ t('formations.candidature.form.success.back') }}
@@ -154,11 +154,11 @@ const breadcrumb = computed(() => [
           <div class="flex-1">
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
               <!-- Form Header -->
-              <div class="bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-8">
+              <div class="bg-gradient-to-r from-brand-blue-500 to-brand-blue-600 px-6 py-8">
                 <h2 class="text-2xl font-bold text-white mb-2">
                   {{ t('formations.candidature.form.title') }}
                 </h2>
-                <p class="text-amber-100">
+                <p class="text-brand-blue-100">
                   {{ t('formations.candidature.form.subtitle') }}
                 </p>
               </div>
@@ -167,13 +167,13 @@ const breadcrumb = computed(() => [
                 <!-- Program Selection -->
                 <div>
                   <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <font-awesome-icon icon="fa-solid fa-graduation-cap" class="text-amber-500" />
+                    <font-awesome-icon icon="fa-solid fa-graduation-cap" class="text-brand-red-500" />
                     {{ t('formations.candidature.form.programChoice') }}
                   </h3>
                   <select
                     v-model="selectedFormationSlug"
                     required
-                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent"
                   >
                     <option value="" disabled>{{ t('formations.candidature.form.selectProgram') }}</option>
                     <option
@@ -189,7 +189,7 @@ const breadcrumb = computed(() => [
                 <!-- Personal Information -->
                 <div>
                   <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <font-awesome-icon icon="fa-solid fa-user" class="text-amber-500" />
+                    <font-awesome-icon icon="fa-solid fa-user" class="text-brand-red-500" />
                     {{ t('formations.candidature.form.personalInfo') }}
                   </h3>
                   <div class="grid md:grid-cols-2 gap-4">
@@ -201,7 +201,7 @@ const breadcrumb = computed(() => [
                         v-model="form.firstName"
                         type="text"
                         required
-                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent"
                       >
                     </div>
                     <div>
@@ -212,7 +212,7 @@ const breadcrumb = computed(() => [
                         v-model="form.lastName"
                         type="text"
                         required
-                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent"
                       >
                     </div>
                     <div>
@@ -223,7 +223,7 @@ const breadcrumb = computed(() => [
                         v-model="form.email"
                         type="email"
                         required
-                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent"
                       >
                     </div>
                     <div>
@@ -234,7 +234,7 @@ const breadcrumb = computed(() => [
                         v-model="form.phone"
                         type="tel"
                         required
-                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent"
                       >
                     </div>
                     <div>
@@ -245,7 +245,7 @@ const breadcrumb = computed(() => [
                         v-model="form.birthDate"
                         type="date"
                         required
-                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent"
                       >
                     </div>
                     <div>
@@ -256,7 +256,7 @@ const breadcrumb = computed(() => [
                         v-model="form.nationality"
                         type="text"
                         required
-                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent"
                       >
                     </div>
                     <div>
@@ -267,7 +267,7 @@ const breadcrumb = computed(() => [
                         v-model="form.country"
                         type="text"
                         required
-                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent"
                       >
                     </div>
                     <div class="md:col-span-2">
@@ -278,7 +278,7 @@ const breadcrumb = computed(() => [
                         v-model="form.address"
                         type="text"
                         required
-                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent"
                       >
                     </div>
                   </div>
@@ -287,7 +287,7 @@ const breadcrumb = computed(() => [
                 <!-- Academic Information -->
                 <div>
                   <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <font-awesome-icon icon="fa-solid fa-book" class="text-amber-500" />
+                    <font-awesome-icon icon="fa-solid fa-book" class="text-brand-red-500" />
                     {{ t('formations.candidature.form.academicInfo') }}
                   </h3>
                   <div class="grid md:grid-cols-2 gap-4">
@@ -299,7 +299,7 @@ const breadcrumb = computed(() => [
                         v-model="form.lastDiploma"
                         type="text"
                         required
-                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent"
                       >
                     </div>
                     <div>
@@ -312,7 +312,7 @@ const breadcrumb = computed(() => [
                         min="1990"
                         max="2025"
                         required
-                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent"
                       >
                     </div>
                     <div>
@@ -323,7 +323,7 @@ const breadcrumb = computed(() => [
                         v-model="form.institution"
                         type="text"
                         required
-                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent"
                       >
                     </div>
                     <div>
@@ -334,7 +334,7 @@ const breadcrumb = computed(() => [
                         v-model="form.fieldOfStudy"
                         type="text"
                         required
-                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent"
                       >
                     </div>
                   </div>
@@ -343,7 +343,7 @@ const breadcrumb = computed(() => [
                 <!-- Motivation Letter -->
                 <div>
                   <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <font-awesome-icon icon="fa-solid fa-pen" class="text-amber-500" />
+                    <font-awesome-icon icon="fa-solid fa-pen" class="text-brand-red-500" />
                     {{ t('formations.candidature.form.motivation') }}
                   </h3>
                   <textarea
@@ -351,14 +351,14 @@ const breadcrumb = computed(() => [
                     rows="6"
                     required
                     :placeholder="t('formations.candidature.form.motivationPlaceholder')"
-                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent resize-none"
                   ></textarea>
                 </div>
 
                 <!-- Documents -->
                 <div>
                   <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <font-awesome-icon icon="fa-solid fa-paperclip" class="text-amber-500" />
+                    <font-awesome-icon icon="fa-solid fa-paperclip" class="text-brand-red-500" />
                     {{ t('formations.candidature.form.documents') }}
                   </h3>
                   <div class="grid md:grid-cols-2 gap-4">
@@ -375,7 +375,7 @@ const breadcrumb = computed(() => [
                           @change="(e) => handleFileSelect(e, cvFile)"
                           class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                         >
-                        <div class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-amber-500 transition-colors">
+                        <div class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-brand-blue-500 transition-colors">
                           <font-awesome-icon icon="fa-solid fa-file-pdf" class="w-6 h-6 text-red-500" />
                           <span class="text-gray-600 dark:text-gray-400 text-sm truncate">
                             {{ cvFile?.name || t('formations.candidature.form.cv') }}
@@ -397,7 +397,7 @@ const breadcrumb = computed(() => [
                           @change="(e) => handleFileSelect(e, diplomaFile)"
                           class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                         >
-                        <div class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-amber-500 transition-colors">
+                        <div class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-brand-blue-500 transition-colors">
                           <font-awesome-icon icon="fa-solid fa-file-pdf" class="w-6 h-6 text-red-500" />
                           <span class="text-gray-600 dark:text-gray-400 text-sm truncate">
                             {{ diplomaFile?.name || t('formations.candidature.form.diplomaCopy') }}
@@ -419,7 +419,7 @@ const breadcrumb = computed(() => [
                           @change="(e) => handleFileSelect(e, idFile)"
                           class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                         >
-                        <div class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-amber-500 transition-colors">
+                        <div class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-brand-blue-500 transition-colors">
                           <font-awesome-icon icon="fa-solid fa-file-pdf" class="w-6 h-6 text-red-500" />
                           <span class="text-gray-600 dark:text-gray-400 text-sm truncate">
                             {{ idFile?.name || t('formations.candidature.form.idCopy') }}
@@ -441,7 +441,7 @@ const breadcrumb = computed(() => [
                           @change="(e) => handleFileSelect(e, photoFile)"
                           class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                         >
-                        <div class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-amber-500 transition-colors">
+                        <div class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-brand-blue-500 transition-colors">
                           <font-awesome-icon icon="fa-solid fa-image" class="w-6 h-6 text-blue-500" />
                           <span class="text-gray-600 dark:text-gray-400 text-sm truncate">
                             {{ photoFile?.name || t('formations.candidature.form.photo') }}
@@ -457,7 +457,7 @@ const breadcrumb = computed(() => [
                   <button
                     type="submit"
                     :disabled="isSubmitting"
-                    class="w-full flex items-center justify-center gap-2 px-6 py-4 bg-amber-600 hover:bg-amber-700 disabled:bg-amber-400 text-white font-semibold rounded-lg transition-colors"
+                    class="w-full flex items-center justify-center gap-2 px-6 py-4 bg-brand-blue-600 hover:bg-brand-blue-700 disabled:bg-brand-blue-400 text-white font-semibold rounded-lg transition-colors"
                   >
                     <font-awesome-icon
                       v-if="isSubmitting"
@@ -502,7 +502,7 @@ const breadcrumb = computed(() => [
               <!-- Important Information -->
               <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                  <font-awesome-icon icon="fa-solid fa-circle-info" class="text-amber-500" />
+                  <font-awesome-icon icon="fa-solid fa-circle-info" class="text-brand-red-500" />
                   {{ t('formations.candidature.info.title') }}
                 </h3>
 
@@ -534,7 +534,7 @@ const breadcrumb = computed(() => [
                       :key="index"
                       class="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400"
                     >
-                      <span class="w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                      <span class="w-6 h-6 rounded-full bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-600 dark:text-brand-blue-400 flex items-center justify-center text-xs font-bold flex-shrink-0">
                         {{ index + 1 }}
                       </span>
                       {{ t(stepKey) }}
@@ -547,7 +547,7 @@ const breadcrumb = computed(() => [
                   <p class="text-sm text-gray-600 dark:text-gray-400">
                     {{ t('formations.candidature.info.contact') }}
                   </p>
-                  <a href="mailto:candidatures@usenghor.edu.eg" class="text-amber-600 dark:text-amber-400 hover:underline font-medium">
+                  <a href="mailto:candidatures@usenghor.edu.eg" class="text-brand-blue-600 dark:text-brand-blue-400 hover:underline font-medium">
                     candidatures@usenghor.edu.eg
                   </a>
                 </div>
@@ -556,7 +556,7 @@ const breadcrumb = computed(() => [
               <!-- Back Link -->
               <NuxtLink
                 :to="localePath('/carrieres') + '#etudiants'"
-                class="flex items-center gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors"
+                class="flex items-center gap-2 text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 font-medium transition-colors"
               >
                 <font-awesome-icon icon="fa-solid fa-arrow-left" class="w-4 h-4" />
                 {{ t('formations.detail.back') }}

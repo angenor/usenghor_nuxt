@@ -72,7 +72,7 @@ const typeIcons: Record<string, string> = {
         :alt="getLocalizedTitle"
         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
       >
-      <div v-else class="w-full h-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
+      <div v-else class="w-full h-full bg-gradient-to-br from-brand-blue-400 to-brand-blue-600 flex items-center justify-center">
         <font-awesome-icon :icon="typeIcons[event.type]" class="w-12 h-12 text-white/50" />
       </div>
 
@@ -96,13 +96,13 @@ const typeIcons: Record<string, string> = {
     <!-- Content -->
     <div class="flex-1 p-5 flex flex-col">
       <!-- Date -->
-      <div class="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-sm font-medium mb-2">
+      <div class="flex items-center gap-2 text-brand-red-600 dark:text-brand-red-400 text-sm font-medium mb-2">
         <font-awesome-icon icon="fa-solid fa-calendar" class="w-4 h-4" />
         {{ formattedDate }}
       </div>
 
       <!-- Title -->
-      <h3 class="font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+      <h3 class="font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
         {{ getLocalizedTitle }}
       </h3>
 

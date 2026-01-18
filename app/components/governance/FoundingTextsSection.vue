@@ -40,7 +40,7 @@ const formatFileSize = (bytes: number) => {
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
             <span class="relative inline-block">
               {{ t('governance.foundingTexts.title') }}
-              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-red-500 to-brand-red-300 rounded-full"></span>
             </span>
           </h2>
           <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
@@ -63,7 +63,7 @@ const formatFileSize = (bytes: number) => {
                   :style="{ backgroundImage: `url(${doc.cover_image || 'https://picsum.photos/seed/' + doc.id + '/400/500'})` }"
                 >
                   <div class="flip-card-inner">
-                    <div class="w-14 h-14 bg-amber-500/80 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4">
+                    <div class="w-14 h-14 bg-brand-red-500/80 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4">
                       <font-awesome-icon icon="fa-solid fa-file-pdf" class="text-white text-2xl" />
                     </div>
                     <h4 class="text-white font-bold text-base leading-tight line-clamp-3">
@@ -91,7 +91,7 @@ const formatFileSize = (bytes: number) => {
                     <a
                       :href="doc.file_url"
                       download
-                      class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600
+                      class="inline-flex items-center gap-2 px-4 py-2 bg-brand-blue-500 hover:bg-brand-blue-600
                              rounded-lg text-white text-sm font-medium transition-all shadow-lg"
                       @click.stop
                     >

@@ -67,7 +67,7 @@ const formattedDate = computed(() => {
       </div>
 
       <!-- Title -->
-      <h3 class="font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+      <h3 class="font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
         {{ getLocalizedTitle }}
       </h3>
 
@@ -80,7 +80,7 @@ const formattedDate = computed(() => {
       <a
         v-if="news.url"
         :href="news.url"
-        class="inline-flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+        class="inline-flex items-center gap-2 text-sm font-medium text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 transition-colors"
       >
         {{ t('partners.campus.news.readMore') }}
         <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />

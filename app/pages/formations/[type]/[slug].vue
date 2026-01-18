@@ -107,7 +107,7 @@ const typeConfig = computed(() => {
 
 // Campus badge classes
 const campusBgColors: Record<string, string> = {
-  alexandrie: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+  alexandrie: 'bg-brand-blue-100 text-brand-blue-800 dark:bg-brand-blue-900/30 dark:text-brand-blue-400',
   externalise: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
   en_ligne: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
 }
@@ -331,7 +331,7 @@ const toggleSemester = (num: number) => {
                     >
                       <font-awesome-icon
                         icon="fa-solid fa-check"
-                        class="w-4 h-4 text-amber-500 mt-1 flex-shrink-0"
+                        class="w-4 h-4 text-brand-red-500 mt-1 flex-shrink-0"
                       />
                       <span>
                         {{ module.name }}
@@ -347,9 +347,9 @@ const toggleSemester = (num: number) => {
           </div>
 
           <!-- Application info -->
-          <div v-if="formation.application_open" class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl p-6 mb-8 border border-amber-200 dark:border-amber-800">
+          <div v-if="formation.application_open" class="bg-gradient-to-r from-brand-blue-50 to-brand-red-50 dark:from-brand-blue-900/20 dark:to-brand-red-900/20 rounded-xl p-6 mb-8 border border-brand-blue-200 dark:border-brand-blue-800">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <font-awesome-icon icon="fa-solid fa-file-pen" class="text-amber-500" />
+              <font-awesome-icon icon="fa-solid fa-file-pen" class="text-brand-red-500" />
               {{ t('formations.detail.admission') }}
             </h3>
 
@@ -373,7 +373,7 @@ const toggleSemester = (num: number) => {
 
             <NuxtLink
               :to="localePath('/candidatures') + `?formation=${formation.slug}`"
-              class="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-colors shadow-md"
+              class="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-brand-blue-600 hover:bg-brand-blue-700 text-white font-semibold rounded-lg transition-colors shadow-md"
             >
               <font-awesome-icon icon="fa-solid fa-paper-plane" class="w-4 h-4" />
               {{ t('formations.detail.apply') }}
@@ -384,7 +384,7 @@ const toggleSemester = (num: number) => {
           <div class="pt-8 border-t border-gray-200 dark:border-gray-700">
             <NuxtLink
               :to="localePath(`/formations/${typeSlug}`)"
-              class="inline-flex items-center gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors"
+              class="inline-flex items-center gap-2 text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 font-medium transition-colors"
             >
               <font-awesome-icon icon="fa-solid fa-arrow-left" class="w-4 h-4" />
               {{ t('formations.detail.back') }}
@@ -396,7 +396,7 @@ const toggleSemester = (num: number) => {
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
               <span class="relative inline-block">
                 {{ t('formations.detail.relatedFormations') }}
-                <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+                <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-red-500 to-brand-red-300 rounded-full"></span>
               </span>
             </h2>
 
@@ -418,12 +418,12 @@ const toggleSemester = (num: number) => {
 
                 <div class="p-4">
                   <div class="flex items-center gap-2 mb-2">
-                    <span class="inline-block px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 rounded">
+                    <span class="inline-block px-2 py-0.5 text-xs font-medium text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded">
                       {{ t(`formations.types.${related.formation_type}`) }}
                     </span>
                   </div>
 
-                  <h3 class="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                  <h3 class="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                     {{ getLocalizedTitleFor(related) }}
                   </h3>
                 </div>
@@ -467,7 +467,7 @@ const toggleSemester = (num: number) => {
               <div v-if="formation.application_open" class="mt-6">
                 <NuxtLink
                   :to="localePath('/candidatures') + `?formation=${formation.slug}`"
-                  class="block w-full text-center px-4 py-3 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors"
+                  class="block w-full text-center px-4 py-3 bg-brand-blue-600 hover:bg-brand-blue-700 text-white font-medium rounded-lg transition-colors"
                 >
                   {{ t('formations.detail.apply') }}
                 </NuxtLink>
@@ -504,7 +504,7 @@ const toggleSemester = (num: number) => {
               </h3>
               <NuxtLink
                 :to="localePath(`/formations/${typeSlug}`)"
-                class="inline-flex items-center gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors"
+                class="inline-flex items-center gap-2 text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 font-medium transition-colors"
               >
                 {{ t('formations.detail.back') }}
                 <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />

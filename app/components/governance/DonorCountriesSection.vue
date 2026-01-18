@@ -46,15 +46,15 @@ const { elementRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.
         <!-- Stats animées -->
         <div class="flex flex-wrap justify-center gap-8 sm:gap-12 mt-8">
           <div class="text-center">
-            <span class="text-4xl sm:text-5xl font-bold text-amber-500">{{ props.paysBailleurs.length }}</span>
+            <span class="text-4xl sm:text-5xl font-bold text-brand-red-500">{{ props.paysBailleurs.length }}</span>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Pays membres</p>
           </div>
           <div class="text-center">
-            <span class="text-4xl sm:text-5xl font-bold text-amber-500">35+</span>
+            <span class="text-4xl sm:text-5xl font-bold text-brand-red-500">35+</span>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Années de partenariat</p>
           </div>
           <div class="text-center">
-            <span class="text-4xl sm:text-5xl font-bold text-amber-500">3</span>
+            <span class="text-4xl sm:text-5xl font-bold text-brand-red-500">3</span>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Continents</p>
           </div>
         </div>
@@ -63,16 +63,16 @@ const { elementRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.
       <!-- Pays fondateurs 1989 -->
       <div class="mb-16">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-          <span class="w-1.5 h-6 bg-amber-500 rounded-full"></span>
+          <span class="w-1.5 h-6 bg-brand-red-500 rounded-full"></span>
           Pays fondateurs
         </h3>
 
         <!-- Égypte : Hero card -->
         <div
           v-if="props.egypte"
-          class="bg-gradient-to-br from-amber-500 via-amber-500 to-amber-600
+          class="bg-gradient-to-br from-brand-blue-500 via-brand-blue-500 to-brand-blue-600
                  rounded-3xl p-6 sm:p-8 text-white mb-6 relative overflow-hidden cursor-pointer
-                 hover:shadow-2xl hover:shadow-amber-500/20 transition-all duration-300"
+                 hover:shadow-2xl hover:shadow-brand-blue-500/20 transition-all duration-300"
           @click="emit('openDrawer', props.egypte)"
         >
           <!-- Decorative elements -->
@@ -122,7 +122,7 @@ const { elementRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.
               <h4 class="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">
                 {{ pays.name_fr }}
               </h4>
-              <span class="text-xs text-amber-600 dark:text-amber-400 mt-1 block">
+              <span class="text-xs text-brand-blue-600 dark:text-brand-blue-400 mt-1 block">
                 Membre fondateur
               </span>
             </button>
@@ -145,7 +145,7 @@ const { elementRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.
               <h4 class="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">
                 {{ pays.name_fr }}
               </h4>
-              <span class="text-xs text-amber-600 dark:text-amber-400 mt-1 block">
+              <span class="text-xs text-brand-blue-600 dark:text-brand-blue-400 mt-1 block">
                 Membre fondateur
               </span>
             </button>
@@ -160,7 +160,7 @@ const { elementRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.
 .founder-card {
   @apply bg-white dark:bg-gray-800 rounded-2xl p-6 text-center
          border border-gray-100 dark:border-gray-700
-         hover:border-amber-300 dark:hover:border-amber-600
+         hover:border-brand-blue-300 dark:hover:border-brand-blue-600
          hover:shadow-lg hover:-translate-y-1
          transition-all duration-300 cursor-pointer;
 }

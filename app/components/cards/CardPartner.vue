@@ -49,7 +49,7 @@ const typeLabel = computed(() => {
       <!-- Strategic Badge -->
       <div
         v-if="partner.is_strategic"
-        class="absolute top-3 right-3 px-2 py-1 bg-amber-500 text-white text-xs font-semibold rounded-full flex items-center gap-1"
+        class="absolute top-3 right-3 px-2 py-1 bg-brand-red-500 text-white text-xs font-semibold rounded-full flex items-center gap-1"
       >
         <font-awesome-icon icon="fa-solid fa-star" class="w-3 h-3" />
         <span class="hidden sm:inline">{{ t('partners.card.strategic') }}</span>
@@ -67,7 +67,7 @@ const typeLabel = computed(() => {
       </span>
 
       <!-- Name -->
-      <h3 class="font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+      <h3 class="font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
         {{ getLocalizedName }}
       </h3>
 
@@ -86,7 +86,7 @@ const typeLabel = computed(() => {
           :href="partner.website"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+          class="inline-flex items-center gap-2 text-sm font-medium text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 transition-colors"
         >
           <font-awesome-icon icon="fa-solid fa-external-link-alt" class="w-3.5 h-3.5" />
           {{ t('partners.card.visitWebsite') }}

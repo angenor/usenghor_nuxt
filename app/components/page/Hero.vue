@@ -46,7 +46,7 @@ const localePath = useLocalePath()
               >
                 {{ item.label }}
               </NuxtLink>
-              <span v-else class="text-amber-400 font-medium">{{ item.label }}</span>
+              <span v-else class="text-brand-red-400 font-medium">{{ item.label }}</span>
               <font-awesome-icon
                 v-if="index < props.breadcrumb.length - 1"
                 icon="fa-solid fa-chevron-right"

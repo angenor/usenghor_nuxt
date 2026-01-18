@@ -33,11 +33,11 @@ const opportunities = [
     icon: 'fa-solid fa-handshake',
     anchor: '#partenaires',
     color: {
-      bg: 'bg-amber-100 dark:bg-amber-900/30',
-      iconBg: 'bg-amber-500',
-      text: 'text-amber-600 dark:text-amber-400',
-      border: 'border-amber-200 dark:border-amber-800',
-      hover: 'hover:border-amber-400 dark:hover:border-amber-600'
+      bg: 'bg-brand-blue-100 dark:bg-brand-blue-900/30',
+      iconBg: 'bg-brand-blue-500',
+      text: 'text-brand-blue-600 dark:text-brand-blue-400',
+      border: 'border-brand-blue-200 dark:border-brand-blue-800',
+      hover: 'hover:border-brand-blue-400 dark:hover:border-brand-blue-600'
     }
   }
 ]

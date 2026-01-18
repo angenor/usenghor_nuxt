@@ -77,7 +77,7 @@ function renderBlock(type: string, data: BlockData): string {
 
     case 'quote':
       return `
-        <blockquote class="border-l-4 border-amber-500 pl-4 italic">
+        <blockquote class="border-l-4 border-brand-red-500 pl-4 italic">
           <p>${data.text || ''}</p>
           ${data.caption ? `<cite class="block text-sm text-gray-500 dark:text-gray-400 mt-2">— ${data.caption}</cite>` : ''}
         </blockquote>
@@ -192,7 +192,7 @@ const renderedHtml = computed(() => {
 }
 
 .editorjs-renderer a {
-  @apply text-amber-600 dark:text-amber-400 hover:underline;
+  @apply text-brand-blue-600 dark:text-brand-blue-400 hover:underline;
 }
 
 .editorjs-renderer code {
@@ -200,6 +200,6 @@ const renderedHtml = computed(() => {
 }
 
 .editorjs-renderer mark {
-  @apply bg-amber-200 dark:bg-amber-600 px-0.5;
+  @apply bg-brand-blue-200 dark:bg-brand-blue-600 px-0.5;
 }
 </style>

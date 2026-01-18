@@ -125,7 +125,7 @@ watch(() => props.isOpen, (isOpen) => {
                   class="flex items-center gap-4 p-3 rounded-xl transition-colors"
                   :class="[
                     idx === selectedIndex
-                      ? 'bg-amber-50 dark:bg-amber-900/20'
+                      ? 'bg-brand-blue-50 dark:bg-brand-blue-900/20'
                       : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                   ]"
                   @click="closeModal"
@@ -155,7 +155,7 @@ watch(() => props.isOpen, (isOpen) => {
                     v-for="suggestion in popularSuggestions"
                     :key="suggestion.title"
                     :to="suggestion.route"
-                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-amber-500 hover:text-white transition-colors"
+                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-brand-blue-500 hover:text-white transition-colors"
                     @click="closeModal"
                   >
                     <font-awesome-icon :icon="suggestion.icon" class="w-3.5 h-3.5" />

@@ -22,7 +22,7 @@ const getLocalizedRole = (member: any) => {
     <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
       <span class="relative inline-block">
         {{ t('partners.campus.team.title') }}
-        <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"></span>
+        <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-red-500 to-brand-red-300 rounded-full"></span>
       </span>
     </h2>
 
@@ -47,7 +47,7 @@ const getLocalizedRole = (member: any) => {
           <h4 class="font-bold text-gray-900 dark:text-white mb-1">
             {{ member.name }}
           </h4>
-          <p class="text-sm text-amber-600 dark:text-amber-400 mb-3">
+          <p class="text-sm text-brand-red-600 dark:text-brand-red-400 mb-3">
             {{ getLocalizedRole(member) }}
           </p>
 
@@ -55,7 +55,7 @@ const getLocalizedRole = (member: any) => {
           <a
             v-if="member.email"
             :href="`mailto:${member.email}`"
-            class="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+            class="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-brand-blue-600 dark:hover:text-brand-blue-400 transition-colors"
           >
             <font-awesome-icon icon="fa-solid fa-envelope" class="w-4 h-4" />
             {{ t('partners.campus.team.contact') }}

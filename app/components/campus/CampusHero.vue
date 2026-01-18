@@ -49,7 +49,7 @@ defineExpose({ titleRef })
 
     <!-- Decorative elements -->
     <div class="absolute inset-0 overflow-hidden">
-      <div class="absolute -top-40 -right-40 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl"></div>
+      <div class="absolute -top-40 -right-40 w-96 h-96 bg-brand-red-500/20 rounded-full blur-3xl"></div>
       <div class="absolute bottom-0 -left-40 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl"></div>
     </div>
 
@@ -95,7 +95,7 @@ defineExpose({ titleRef })
               :href="campus.website"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 rounded-lg font-medium transition-colors"
+              class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-blue-500 hover:bg-brand-blue-600 rounded-lg font-medium transition-colors"
             >
               <font-awesome-icon icon="fa-solid fa-external-link-alt" class="w-4 h-4" />
               {{ t('partners.card.visitWebsite') }}
@@ -117,7 +117,7 @@ defineExpose({ titleRef })
             </div>
           </div>
           <!-- Decorative frame -->
-          <div class="absolute -bottom-4 -right-4 w-full h-full border-2 border-amber-500/30 rounded-2xl -z-10"></div>
+          <div class="absolute -bottom-4 -right-4 w-full h-full border-2 border-brand-blue-500/30 rounded-2xl -z-10"></div>
         </div>
       </div>
     </div>

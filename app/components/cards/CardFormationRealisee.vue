@@ -72,7 +72,7 @@ const typeLabels: Record<string, string> = {
         <font-awesome-icon icon="fa-solid fa-calendar-check" class="inline-block w-4 h-4 mr-2 align-middle" />
         <span class="text-sm text-gray-600">{{ formation.promotion }}</span>
         <span class="mx-2 text-gray-400">•</span>
-        <font-awesome-icon icon="fa-solid fa-user-graduate" class="inline-block w-4 h-4 mr-1 align-middle text-amber-500" />
+        <font-awesome-icon icon="fa-solid fa-user-graduate" class="inline-block w-4 h-4 mr-1 align-middle text-brand-red-500" />
         <span class="text-sm font-semibold text-gray-700">{{ formation.graduates_count }}</span>
         <span class="text-sm text-gray-600 ml-1">{{ t('partners.campus.formations.graduates') }}</span>
       </div>

@@ -27,7 +27,7 @@ const totalCount = computed(() => props.itemCount ?? props.items.length)
 <template>
   <button
     type="button"
-    class="group relative w-full text-left focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 rounded-2xl"
+    class="group relative w-full text-left focus:outline-none focus:ring-2 focus:ring-brand-blue-500 focus:ring-offset-2 rounded-2xl"
     @click="emit('click')"
   >
     <!-- Stacked images container -->
@@ -96,7 +96,7 @@ const totalCount = computed(() => props.itemCount ?? props.items.length)
 
     <!-- Album title -->
     <div class="mt-4 px-1">
-      <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors line-clamp-2">
+      <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors line-clamp-2">
         {{ title }}
       </h3>
       <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">

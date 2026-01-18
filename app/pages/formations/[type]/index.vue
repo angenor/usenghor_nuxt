@@ -142,7 +142,7 @@ const getThumbnail = (f: any) => {
                     @click="selectedCampus = filter.value as any"
                     class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
                     :class="selectedCampus === filter.value
-                      ? 'bg-amber-600 text-white shadow-md'
+                      ? 'bg-brand-blue-600 text-white shadow-md'
                       : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
                   >
                     {{ t(filter.label) }}
@@ -152,7 +152,7 @@ const getThumbnail = (f: any) => {
                 <div v-if="selectedCampus === 'externalise'" class="mt-3">
                   <NuxtLink
                     :to="localePath('/a-propos/partenaires')"
-                    class="inline-flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+                    class="inline-flex items-center gap-2 text-sm text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 transition-colors"
                   >
                     <font-awesome-icon icon="fa-solid fa-handshake" class="w-4 h-4" />
                     {{ t('formations.filters.viewPartners') }}
@@ -169,7 +169,7 @@ const getThumbnail = (f: any) => {
                     type="checkbox"
                     class="sr-only peer"
                   >
-                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-amber-600"></div>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-blue-300 dark:peer-focus:ring-brand-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-brand-blue-600"></div>
                   <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">
                     {{ t('formations.filters.applicationOpen') }}
                   </span>
@@ -200,7 +200,7 @@ const getThumbnail = (f: any) => {
             <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
               <NuxtLink
                 :to="localePath('/carrieres') + '#etudiants'"
-                class="inline-flex items-center gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors"
+                class="inline-flex items-center gap-2 text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 font-medium transition-colors"
               >
                 <font-awesome-icon icon="fa-solid fa-arrow-left" class="w-4 h-4" />
                 {{ t('formations.detail.back') }}
@@ -212,7 +212,7 @@ const getThumbnail = (f: any) => {
           <aside class="lg:w-80 flex-shrink-0">
             <div class="sticky top-24 space-y-6">
               <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <font-awesome-icon icon="fa-solid fa-compass" class="w-5 h-5 text-amber-500" />
+                <font-awesome-icon icon="fa-solid fa-compass" class="w-5 h-5 text-brand-red-500" />
                 {{ t('formations.sidebar.otherTypes') }}
               </h3>
 
@@ -234,7 +234,7 @@ const getThumbnail = (f: any) => {
                     >
                       <font-awesome-icon :icon="`fa-solid ${type.icon}`" class="w-4 h-4" />
                     </span>
-                    <span class="font-semibold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                    <span class="font-semibold text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                       {{ type.label }}
                     </span>
                   </div>
@@ -261,7 +261,7 @@ const getThumbnail = (f: any) => {
                       />
                     </div>
                     <!-- Title -->
-                    <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors line-clamp-2 leading-tight">
+                    <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors line-clamp-2 leading-tight">
                       {{ getLocalizedTitle(formation) }}
                     </span>
                   </NuxtLink>
@@ -270,7 +270,7 @@ const getThumbnail = (f: any) => {
                 <!-- View all link -->
                 <NuxtLink
                   :to="localePath(`/formations/${type.slug}`)"
-                  class="flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 dark:bg-gray-800 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  class="flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 dark:bg-gray-800 text-sm font-medium text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                 >
                   {{ t('formations.sidebar.viewAll') }}
                   <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
@@ -283,17 +283,17 @@ const getThumbnail = (f: any) => {
     </section>
 
     <!-- CTA Section -->
-    <section class="py-16 bg-gradient-to-r from-amber-500 to-amber-600">
+    <section class="py-16 bg-gradient-to-r from-brand-blue-500 to-brand-blue-600">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl font-bold text-white mb-4">
           {{ t('formations.cta.title') }}
         </h2>
-        <p class="text-lg text-amber-100 mb-8">
+        <p class="text-lg text-brand-blue-100 mb-8">
           {{ t('formations.cta.description') }}
         </p>
         <NuxtLink
           :to="localePath('/actualites/appels')"
-          class="inline-flex items-center gap-2 px-8 py-4 bg-white text-amber-600 font-semibold rounded-lg hover:bg-amber-50 transition-colors shadow-lg"
+          class="inline-flex items-center gap-2 px-8 py-4 bg-white text-brand-blue-600 font-semibold rounded-lg hover:bg-brand-blue-50 transition-colors shadow-lg"
         >
           {{ t('formations.cta.button') }}
           <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
