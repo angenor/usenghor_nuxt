@@ -699,7 +699,7 @@ const formatDate = (dateStr: string) => {
                 <!-- Timeline year marker -->
                 <span class="timeline-year">{{ achievement.year }}</span>
                 <div class="number-box">
-                  <span>{{ String(index + 1).padStart(2, '0') }}</span>
+                  <span>{{ String(mockAchievements.length - index).padStart(2, '0') }}</span>
                 </div>
                 <h2>
                   <span class="small">{{ achievement.subtitle }}</span>

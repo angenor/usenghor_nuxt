@@ -61,7 +61,16 @@ const filteredCalls = computed(() => {
     calls = calls.filter(c => c.status === selectedStatus.value)
   }
 
-  return calls
+  // Sort: open calls first, then closed calls
+  // Within each group, sort by deadline (soonest first)
+  return [...calls].sort((a, b) => {
+    // Open calls come before closed calls
+    if (a.status !== b.status) {
+      return a.status === 'open' ? -1 : 1
+    }
+    // Within same status, sort by deadline
+    return new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
+  })
 })
 
 // Filter options
