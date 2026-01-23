@@ -47,15 +47,11 @@ const { elementRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.
         <div class="flex flex-wrap justify-center gap-8 sm:gap-12 mt-8">
           <div class="text-center">
             <span class="text-4xl sm:text-5xl font-bold text-brand-red-500">{{ props.paysBailleurs.length }}</span>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Pays membres</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Pays bailleurs</p>
           </div>
           <div class="text-center">
             <span class="text-4xl sm:text-5xl font-bold text-brand-red-500">35+</span>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Années de partenariat</p>
-          </div>
-          <div class="text-center">
-            <span class="text-4xl sm:text-5xl font-bold text-brand-red-500">3</span>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Continents</p>
           </div>
         </div>
       </div>
@@ -106,50 +102,24 @@ const { elementRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.
           </div>
         </div>
 
-        <!-- Pays du Nord fondateurs -->
-        <div class="mb-6">
-          <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 font-medium">Pays du Nord</p>
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-            <button
-              v-for="pays in props.northernFounders"
-              :key="pays.id"
-              class="founder-card group"
-              @click="emit('openDrawer', pays)"
-            >
-              <span class="text-4xl sm:text-5xl block mb-3 group-hover:scale-110 transition-transform duration-300">
-                {{ getFlagEmoji(pays.code) }}
-              </span>
-              <h4 class="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">
-                {{ pays.name_fr }}
-              </h4>
-              <span class="text-xs text-brand-blue-600 dark:text-brand-blue-400 mt-1 block">
-                Membre fondateur
-              </span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Pays africains fondateurs -->
-        <div>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 font-medium">Pays africains</p>
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            <button
-              v-for="pays in props.africanFounders"
-              :key="pays.id"
-              class="founder-card group"
-              @click="emit('openDrawer', pays)"
-            >
-              <span class="text-4xl sm:text-5xl block mb-3 group-hover:scale-110 transition-transform duration-300">
-                {{ getFlagEmoji(pays.code) }}
-              </span>
-              <h4 class="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">
-                {{ pays.name_fr }}
-              </h4>
-              <span class="text-xs text-brand-blue-600 dark:text-brand-blue-400 mt-1 block">
-                Membre fondateur
-              </span>
-            </button>
-          </div>
+        <!-- Pays bailleurs fondateurs -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          <button
+            v-for="pays in props.northernFounders"
+            :key="pays.id"
+            class="founder-card group"
+            @click="emit('openDrawer', pays)"
+          >
+            <span class="text-4xl sm:text-5xl block mb-3 group-hover:scale-110 transition-transform duration-300">
+              {{ getFlagEmoji(pays.code) }}
+            </span>
+            <h4 class="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">
+              {{ pays.name_fr }}
+            </h4>
+            <span class="text-xs text-brand-blue-600 dark:text-brand-blue-400 mt-1 block">
+              Membre fondateur
+            </span>
+          </button>
         </div>
       </div>
     </div>

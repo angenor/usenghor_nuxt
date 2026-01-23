@@ -8,18 +8,19 @@ const { elementRef: donorCountriesRef } = useScrollAnimation({ animation: 'fadeI
 const donorCountries = [
   { code: 'FR', name: 'France' },
   { code: 'CA', name: 'Canada' },
-  { code: 'BE', name: 'Belgique' },
+  { code: 'BE', name: 'Wallonie-Bruxelles' },
   { code: 'CH', name: 'Suisse' },
-  { code: 'EG', name: 'Égypte' },
-  { code: 'SN', name: 'Sénégal' },
-  { code: 'CM', name: 'Cameroun' },
-  { code: 'CI', name: "Côte d'Ivoire" },
-  { code: 'MA', name: 'Maroc' },
-  { code: 'TN', name: 'Tunisie' },
-  { code: 'GA', name: 'Gabon' },
-  { code: 'BF', name: 'Burkina Faso' }
+  { code: 'QC', name: 'Québec' },
+  { code: 'EG', name: 'Égypte' }
 ]
 
+// Fonction pour obtenir l'URL du drapeau (gère le cas spécial du Québec)
+const getFlagUrl = (code: string) => {
+  if (code === 'QC') {
+    return 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Flag_of_Quebec.svg/120px-Flag_of_Quebec.svg.png'
+  }
+  return `https://flagcdn.com/w80/${code.toLowerCase()}.png`
+}
 </script>
 
 <template>
@@ -127,7 +128,7 @@ const donorCountries = [
               >
                 <div class="flex items-center gap-3">
                   <img
-                    :src="`https://flagcdn.com/w80/${country.code.toLowerCase()}.png`"
+                    :src="getFlagUrl(country.code)"
                     :alt="country.name"
                     class="w-10 h-7 object-cover rounded shadow-sm group-hover:scale-110 transition-transform duration-300"
                   />
@@ -146,7 +147,7 @@ const donorCountries = [
               >
                 <div class="flex items-center gap-3">
                   <img
-                    :src="`https://flagcdn.com/w80/${country.code.toLowerCase()}.png`"
+                    :src="getFlagUrl(country.code)"
                     :alt="country.name"
                     class="w-10 h-7 object-cover rounded shadow-sm group-hover:scale-110 transition-transform duration-300"
                   />

@@ -58,8 +58,9 @@ const observers = computed(() =>
       @open-drawer="openDrawer"
     />
 
-    <!-- Section 3: Chronologie des adhésions -->
+    <!-- Section 3: Chronologie des adhésions (masquée si aucun pays ultérieur) -->
     <GovernanceChronologyMapSection
+      v-if="laterMembers.length > 0"
       :countries="laterMembers"
       @open-drawer="openDrawer"
     />
