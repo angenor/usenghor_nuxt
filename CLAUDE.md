@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-USenghor is a multilingual website built with Nuxt 4 for Université Senghor (Alexandria, Egypt). The site supports French (default), English, and Arabic (RTL).
+USenghor is a multilingual website for Université Senghor (Alexandria, Egypt), built with Nuxt 4. The site supports French (default), English, and Arabic (RTL).
 
 ## Commands
 
@@ -13,78 +13,87 @@ pnpm dev          # Start dev server on http://localhost:3000
 pnpm build        # Build for production
 pnpm preview      # Preview production build locally
 pnpm generate     # Generate static site
+pnpm lint         # Run ESLint
+
+# Deployment (Firebase Hosting)
+firebase deploy   # Deploy to Firebase (requires firebase-tools)
 ```
 
 ## Architecture
 
 **Directory Structure (Nuxt 4 convention - app/ directory):**
 - `app/` - Main application code
-  - `components/` - Vue components (auto-imported)
-  - `composables/` - Vue composables (auto-imported): `useDarkMode`, `useScrollAnimation`
-  - `pages/` - File-based routing: `index.vue`, `about.vue`
+  - `components/` - Vue components (auto-imported), organized by feature: `campus/`, `governance/`, `partners/`, `strategy/`, `team/`, `careers/`, `actualites/`, `projets/`, etc.
+  - `composables/` - Vue composables (auto-imported): `useDarkMode`, `useScrollAnimation`, `useMockData`, `useEditorJS`, `useCountryDrawer`, `usePaysBailleursData`, `useScrollytellingMap`
+  - `pages/` - File-based routing with nested routes: `index.vue`, `about.vue`, `a-propos/`, `formations/`, `actualites/`, `projets/`, `alumni/`, `site/`
   - `plugins/` - Nuxt plugins: Font Awesome setup
   - `stores/` - Pinia stores
-  - `assets/css/` - Tailwind CSS: `main.css` imports `base.css`
-- `i18n/locales/` - Translation files organized by language folder (`fr/`, `en/`, `ar/`), each containing thematic JSON files (`common.json`, `nav.json`, `hero.json`, `history.json`, `mission.json`, `campus.json`, `governance.json`, `footer.json`, `search.json`, `courses.json`) merged via `index.ts`
-- `public/images/` - Static images (bg, gallery, logos)
-- `bank/` - Project documentation/specs
+  - `assets/css/` - `main.css` (Tailwind), `timeline.css` (timeline components)
+- `i18n/locales/` - Translation files by language (`fr/`, `en/`, `ar/`), each with thematic JSON files merged via `index.ts`
+- `bank/` - Project documentation, specs, and mock data
+  - `mock-data/` - TypeScript mock data files mirroring the PostgreSQL schema
+  - `modele_de_donnee/` - Database schema (`schema.sql`) and MCD
+- `public/images/` - Static images
 
-**Key Modules (configured in nuxt.config.ts):**
-- `@nuxt/content` - Content management
+**Path Aliases:**
+- `@bank` → `./bank` (configured in nuxt.config.ts)
+
+**Key Modules (nuxt.config.ts):**
 - `@nuxtjs/tailwindcss` - Styling with dark mode (`class` strategy)
 - `@pinia/nuxt` - State management
 - `@nuxtjs/i18n` - Internationalization (strategy: `prefix_except_default`)
 - `@nuxt/image` - Image optimization
+- `@nuxt/eslint` - Linting
+- `@nuxt/test-utils/module` - Testing utilities
 
 **i18n Behavior:**
-- French URLs: `/`, `/about`
-- English URLs: `/en`, `/en/about`
-- Arabic URLs: `/ar`, `/ar/about` (RTL direction applied automatically)
+- French URLs: `/`, `/a-propos/histoire`
+- English URLs: `/en`, `/en/a-propos/histoire`
+- Arabic URLs: `/ar`, `/ar/a-propos/histoire` (RTL direction applied via `app.vue` watcher)
 - Browser language detection with cookie persistence
 - **French: toujours utiliser les accents** (é, è, ê, à, ç, etc.)
-
-**Component Structure:**
-- `app.vue` handles global layout, RTL switching, and includes `AppNavBar` + `AppFooter`
-- Section components: `HeroSection`, `MissionSection`, `HistorySection`, `GovernanceSection`, `CampusSection`
-- Uses Font Awesome icons via `@fortawesome/vue-fontawesome`
 
 **Styling:**
 - Tailwind CSS with Inter Variable font
 - Dark mode via `dark:` variants (toggled by `useDarkMode` composable)
-- Custom amber color palette defined in `tailwind.config.ts`
+- Custom brand colors: `brand-blue-*` and `brand-red-*` palettes in `tailwind.config.ts`
+- `tailwindcss-hero-patterns` for section backgrounds: `heropattern-{pattern}-{color}-{shade}`
 - Animate.css for animations
-- [`tailwindcss-hero-patterns`](https://github.com/svengau/tailwindcss-hero-patterns) for section backgrounds: `heropattern-{pattern}-{color}-{shade}` (ex: `heropattern-jigsaw-gray-100`)
+- GSAP + Lenis for smooth scrolling and advanced animations
+- Leaflet for interactive maps
+
+## Data Model
+
+The site uses a comprehensive data model defined in `bank/modele_de_donnee/schema.sql` (PostgreSQL). Key entities:
+- **Organization**: departments, services, staff, conseil_administration, pays_bailleurs
+- **Academic**: formations (master, doctorat, DU, certifiante), campus_externalises
+- **Content**: actualites, appels, evenements, projets, alumni
+- **Infrastructure**: campus_facilities, documents, medias
+
+All fields are trilingual (`*_fr`, `*_en`, `*_ar`).
 
 ## Mock Data
 
 For development without a database, use the `useMockData` composable:
 
 ```ts
-const { departments, staff, formations, getFlagEmoji } = useMockData()
+const {
+  departments, formations, staff, projects, alumni,
+  getCampusBySlug, getFormationBySlug, getAllNews, getFeaturedEvents
+} = useMockData()
 ```
 
-Mock data files are in `bank/mock-data/` and mirror the PostgreSQL schema in `bank/modele_de_donnee/schema.sql`.
+Mock data files in `bank/mock-data/` export typed data matching the PostgreSQL schema. Types are re-exported from `useMockData.ts`.
 
-## Placeholder Images & Avatars
+## EditorJS Integration
 
-For development and mockups, use these placeholder services:
+Rich text content uses EditorJS:
+- `EditorJS.vue` - Editor component with configured tools (header, list, quote, embed, image, table, etc.)
+- `EditorJSRenderer.vue` - Renders EditorJS JSON blocks to HTML
+- `useEditorJS` composable for programmatic control
 
-### Random Images (Picsum Photos)
-```
-https://picsum.photos/{width}/{height}
-```
-**Examples:**
-- `https://picsum.photos/400/300` - 400x300 image
-- `https://picsum.photos/800/600` - 800x600 image
-- `https://picsum.photos/1920/1080` - Full HD image
-- `https://picsum.photos/seed/{unique-id}/400/300` - Seeded (consistent) image
+## Placeholder Images
 
-### Random Avatars (Pravatar)
-```
-https://i.pravatar.cc/{size}
-```
-**Examples:**
-- `https://i.pravatar.cc/150` - 150x150 avatar
-- `https://i.pravatar.cc/64` - 64x64 avatar (small)
-- `https://i.pravatar.cc/300` - 300x300 avatar (large)
-- `https://i.pravatar.cc/150?u={unique-id}` - Consistent avatar for same ID
+For development mockups:
+- **Images**: `https://picsum.photos/{width}/{height}` or `https://picsum.photos/seed/{id}/{w}/{h}` for consistent images
+- **Avatars**: `https://i.pravatar.cc/{size}` or `https://i.pravatar.cc/{size}?u={id}` for consistent avatars
