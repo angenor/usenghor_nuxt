@@ -683,3 +683,659 @@ export const exportSubscribersToCSV = (subscribers: NewsletterSubscriber[]): str
 
   return [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n')
 }
+
+// ============================================================================
+// CAMPAGNES NEWSLETTER
+// ============================================================================
+
+export type CampaignStatus = 'draft' | 'scheduled' | 'sent'
+
+export interface NewsletterCampaign {
+  id: string
+  title: string
+  subject: string
+  html_content: string | null
+  text_content: string | null
+  status: CampaignStatus
+  scheduled_send_at: string | null
+  sent_at: string | null
+  recipient_count: number
+  open_count: number
+  click_count: number
+  unsubscribe_count: number
+  error_count: number
+  created_by_external_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface NewsletterSend {
+  id: string
+  campaign_id: string
+  subscriber_id: string
+  email: string
+  status: 'sent' | 'opened' | 'clicked' | 'error'
+  sent_at: string
+  opened_at: string | null
+  clicked_at: string | null
+  error_message: string | null
+}
+
+// Labels et couleurs pour les statuts de campagne
+export const campaignStatusLabels: Record<CampaignStatus, string> = {
+  draft: 'Brouillon',
+  scheduled: 'Programmée',
+  sent: 'Envoyée'
+}
+
+export const campaignStatusColors: Record<CampaignStatus, string> = {
+  draft: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+  scheduled: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+  sent: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+}
+
+// Mock data - campagnes newsletter
+export const mockNewsletterCampaigns: NewsletterCampaign[] = [
+  {
+    id: 'camp_001',
+    title: 'Newsletter Janvier 2025',
+    subject: 'Les actualités de l\'Université Senghor - Janvier 2025',
+    html_content: '<h1>Newsletter</h1><p>Contenu...</p>',
+    text_content: 'Newsletter - Contenu...',
+    status: 'sent',
+    scheduled_send_at: null,
+    sent_at: '2025-01-15T10:00:00Z',
+    recipient_count: 3200,
+    open_count: 1440,
+    click_count: 256,
+    unsubscribe_count: 8,
+    error_count: 12,
+    created_by_external_id: 'user_admin_001',
+    created_at: '2025-01-10T14:00:00Z',
+    updated_at: '2025-01-15T10:00:00Z'
+  },
+  {
+    id: 'camp_002',
+    title: 'Newsletter Décembre 2024',
+    subject: 'Bilan de l\'année 2024 - Université Senghor',
+    html_content: '<h1>Bilan 2024</h1><p>Contenu...</p>',
+    text_content: 'Bilan 2024 - Contenu...',
+    status: 'sent',
+    scheduled_send_at: null,
+    sent_at: '2024-12-20T09:00:00Z',
+    recipient_count: 3150,
+    open_count: 1512,
+    click_count: 315,
+    unsubscribe_count: 5,
+    error_count: 8,
+    created_by_external_id: 'user_admin_001',
+    created_at: '2024-12-15T10:00:00Z',
+    updated_at: '2024-12-20T09:00:00Z'
+  },
+  {
+    id: 'camp_003',
+    title: 'Newsletter Novembre 2024',
+    subject: 'Nouvelles formations et partenariats - Novembre 2024',
+    html_content: '<h1>Novembre</h1><p>Contenu...</p>',
+    text_content: 'Novembre - Contenu...',
+    status: 'sent',
+    scheduled_send_at: null,
+    sent_at: '2024-11-18T10:30:00Z',
+    recipient_count: 3100,
+    open_count: 1333,
+    click_count: 248,
+    unsubscribe_count: 6,
+    error_count: 5,
+    created_by_external_id: 'user_admin_001',
+    created_at: '2024-11-12T11:00:00Z',
+    updated_at: '2024-11-18T10:30:00Z'
+  },
+  {
+    id: 'camp_004',
+    title: 'Newsletter Octobre 2024',
+    subject: 'Rentrée académique 2024-2025',
+    html_content: '<h1>Rentrée</h1><p>Contenu...</p>',
+    text_content: 'Rentrée - Contenu...',
+    status: 'sent',
+    scheduled_send_at: null,
+    sent_at: '2024-10-10T09:00:00Z',
+    recipient_count: 3050,
+    open_count: 1464,
+    click_count: 305,
+    unsubscribe_count: 4,
+    error_count: 7,
+    created_by_external_id: 'user_admin_001',
+    created_at: '2024-10-05T14:00:00Z',
+    updated_at: '2024-10-10T09:00:00Z'
+  },
+  {
+    id: 'camp_005',
+    title: 'Newsletter Septembre 2024',
+    subject: 'Préparez votre rentrée à l\'Université Senghor',
+    html_content: '<h1>Septembre</h1><p>Contenu...</p>',
+    text_content: 'Septembre - Contenu...',
+    status: 'sent',
+    scheduled_send_at: null,
+    sent_at: '2024-09-12T10:00:00Z',
+    recipient_count: 3000,
+    open_count: 1290,
+    click_count: 240,
+    unsubscribe_count: 7,
+    error_count: 10,
+    created_by_external_id: 'user_admin_001',
+    created_at: '2024-09-08T09:00:00Z',
+    updated_at: '2024-09-12T10:00:00Z'
+  },
+  {
+    id: 'camp_006',
+    title: 'Newsletter Été 2024',
+    subject: 'Actualités estivales - Juillet-Août 2024',
+    html_content: '<h1>Été 2024</h1><p>Contenu...</p>',
+    text_content: 'Été 2024 - Contenu...',
+    status: 'sent',
+    scheduled_send_at: null,
+    sent_at: '2024-08-01T10:00:00Z',
+    recipient_count: 2950,
+    open_count: 1180,
+    click_count: 177,
+    unsubscribe_count: 10,
+    error_count: 15,
+    created_by_external_id: 'user_admin_002',
+    created_at: '2024-07-28T11:00:00Z',
+    updated_at: '2024-08-01T10:00:00Z'
+  },
+  {
+    id: 'camp_007',
+    title: 'Newsletter Juin 2024',
+    subject: 'Résultats des formations et cérémonies de remise de diplômes',
+    html_content: '<h1>Juin 2024</h1><p>Contenu...</p>',
+    text_content: 'Juin 2024 - Contenu...',
+    status: 'sent',
+    scheduled_send_at: null,
+    sent_at: '2024-06-20T09:30:00Z',
+    recipient_count: 2900,
+    open_count: 1392,
+    click_count: 290,
+    unsubscribe_count: 3,
+    error_count: 6,
+    created_by_external_id: 'user_admin_001',
+    created_at: '2024-06-15T14:00:00Z',
+    updated_at: '2024-06-20T09:30:00Z'
+  },
+  {
+    id: 'camp_008',
+    title: 'Newsletter Mai 2024',
+    subject: 'Conférences et événements - Mai 2024',
+    html_content: '<h1>Mai 2024</h1><p>Contenu...</p>',
+    text_content: 'Mai 2024 - Contenu...',
+    status: 'sent',
+    scheduled_send_at: null,
+    sent_at: '2024-05-15T10:00:00Z',
+    recipient_count: 2850,
+    open_count: 1197,
+    click_count: 228,
+    unsubscribe_count: 5,
+    error_count: 8,
+    created_by_external_id: 'user_admin_001',
+    created_at: '2024-05-10T10:00:00Z',
+    updated_at: '2024-05-15T10:00:00Z'
+  },
+  {
+    id: 'camp_009',
+    title: 'Newsletter Avril 2024',
+    subject: 'Nouveaux projets de développement - Avril 2024',
+    html_content: '<h1>Avril 2024</h1><p>Contenu...</p>',
+    text_content: 'Avril 2024 - Contenu...',
+    status: 'sent',
+    scheduled_send_at: null,
+    sent_at: '2024-04-18T10:00:00Z',
+    recipient_count: 2800,
+    open_count: 1232,
+    click_count: 252,
+    unsubscribe_count: 4,
+    error_count: 5,
+    created_by_external_id: 'user_admin_002',
+    created_at: '2024-04-12T09:00:00Z',
+    updated_at: '2024-04-18T10:00:00Z'
+  },
+  {
+    id: 'camp_010',
+    title: 'Newsletter Mars 2024',
+    subject: 'Ouverture des inscriptions - Mars 2024',
+    html_content: '<h1>Mars 2024</h1><p>Contenu...</p>',
+    text_content: 'Mars 2024 - Contenu...',
+    status: 'sent',
+    scheduled_send_at: null,
+    sent_at: '2024-03-14T10:00:00Z',
+    recipient_count: 2750,
+    open_count: 1320,
+    click_count: 302,
+    unsubscribe_count: 6,
+    error_count: 4,
+    created_by_external_id: 'user_admin_001',
+    created_at: '2024-03-08T14:00:00Z',
+    updated_at: '2024-03-14T10:00:00Z'
+  },
+  {
+    id: 'camp_011',
+    title: 'Newsletter Février 2024',
+    subject: 'Partenariats internationaux - Février 2024',
+    html_content: '<h1>Février 2024</h1><p>Contenu...</p>',
+    text_content: 'Février 2024 - Contenu...',
+    status: 'sent',
+    scheduled_send_at: null,
+    sent_at: '2024-02-15T10:00:00Z',
+    recipient_count: 2700,
+    open_count: 1188,
+    click_count: 243,
+    unsubscribe_count: 5,
+    error_count: 7,
+    created_by_external_id: 'user_admin_001',
+    created_at: '2024-02-10T11:00:00Z',
+    updated_at: '2024-02-15T10:00:00Z'
+  },
+  {
+    id: 'camp_012',
+    title: 'Newsletter Janvier 2024',
+    subject: 'Bonne année 2024 - Université Senghor',
+    html_content: '<h1>Janvier 2024</h1><p>Contenu...</p>',
+    text_content: 'Janvier 2024 - Contenu...',
+    status: 'sent',
+    scheduled_send_at: null,
+    sent_at: '2024-01-12T10:00:00Z',
+    recipient_count: 2650,
+    open_count: 1166,
+    click_count: 239,
+    unsubscribe_count: 8,
+    error_count: 9,
+    created_by_external_id: 'user_admin_001',
+    created_at: '2024-01-08T09:00:00Z',
+    updated_at: '2024-01-12T10:00:00Z'
+  },
+  // Campagnes en brouillon ou programmées
+  {
+    id: 'camp_013',
+    title: 'Newsletter Février 2025',
+    subject: 'Les actualités de Février 2025',
+    html_content: '<h1>Février 2025</h1><p>En cours de rédaction...</p>',
+    text_content: null,
+    status: 'draft',
+    scheduled_send_at: null,
+    sent_at: null,
+    recipient_count: 0,
+    open_count: 0,
+    click_count: 0,
+    unsubscribe_count: 0,
+    error_count: 0,
+    created_by_external_id: 'user_admin_001',
+    created_at: '2025-01-20T10:00:00Z',
+    updated_at: '2025-01-22T14:30:00Z'
+  },
+  {
+    id: 'camp_014',
+    title: 'Annonce Conférence Internationale',
+    subject: 'Invitation - Conférence sur le développement durable en Afrique',
+    html_content: '<h1>Conférence</h1><p>Contenu...</p>',
+    text_content: 'Conférence - Contenu...',
+    status: 'scheduled',
+    scheduled_send_at: '2025-02-01T09:00:00Z',
+    sent_at: null,
+    recipient_count: 3200,
+    open_count: 0,
+    click_count: 0,
+    unsubscribe_count: 0,
+    error_count: 0,
+    created_by_external_id: 'user_admin_001',
+    created_at: '2025-01-18T11:00:00Z',
+    updated_at: '2025-01-23T15:00:00Z'
+  }
+]
+
+// ============================================================================
+// STATISTIQUES NEWSLETTER
+// ============================================================================
+
+export interface NewsletterGlobalStats {
+  period: {
+    from: string
+    to: string
+  }
+  subscribers: {
+    total_active: number
+    new_this_period: number
+    unsubscribed_this_period: number
+    growth_rate: number
+  }
+  campaigns: {
+    sent_count: number
+    total_emails_sent: number
+    avg_open_rate: number
+    avg_click_rate: number
+    avg_unsubscribe_rate: number
+  }
+}
+
+export interface SubscriberEvolutionPoint {
+  period: string
+  new_subscribers: number
+  unsubscribes: number
+  net_growth: number
+}
+
+export interface CampaignPerformance {
+  campaign_id: string
+  title: string
+  sent_at: string
+  recipient_count: number
+  open_rate: number
+  click_rate: number
+  unsubscribe_rate: number
+}
+
+export interface SourceDistribution {
+  source: SubscriberSource
+  count: number
+  percentage: number
+}
+
+export interface BestSendTime {
+  hour: number
+  open_rate: number
+}
+
+export interface BestSendDay {
+  day: string
+  day_label: string
+  open_rate: number
+}
+
+export interface SendTimeRecommendation {
+  by_hour: BestSendTime[]
+  by_day: BestSendDay[]
+  recommendation: {
+    best_day: string
+    best_day_label: string
+    best_hour: number
+  }
+}
+
+export interface PeriodComparison {
+  period1: NewsletterGlobalStats
+  period2: NewsletterGlobalStats
+  comparison: {
+    subscribers_growth: string
+    open_rate_change: string
+    click_rate_change: string
+  }
+}
+
+// Calculer les statistiques globales pour une période
+export const getNewsletterGlobalStats = (dateFrom?: string, dateTo?: string): NewsletterGlobalStats => {
+  const now = new Date()
+  const from = dateFrom ? new Date(dateFrom) : new Date(now.getFullYear(), now.getMonth() - 1, 1)
+  const to = dateTo ? new Date(dateTo) : now
+
+  // Filtrer les abonnés pour la période
+  const activeSubscribers = mockNewsletterSubscribers.filter(s => s.active)
+  const newSubscribers = mockNewsletterSubscribers.filter(s => {
+    const subscribedDate = new Date(s.subscribed_at)
+    return subscribedDate >= from && subscribedDate <= to && s.active
+  })
+  const unsubscribedThisPeriod = mockNewsletterSubscribers.filter(s => {
+    if (!s.unsubscribed_at) return false
+    const unsubDate = new Date(s.unsubscribed_at)
+    return unsubDate >= from && unsubDate <= to
+  })
+
+  // Filtrer les campagnes envoyées dans la période
+  const sentCampaigns = mockNewsletterCampaigns.filter(c => {
+    if (c.status !== 'sent' || !c.sent_at) return false
+    const sentDate = new Date(c.sent_at)
+    return sentDate >= from && sentDate <= to
+  })
+
+  // Calculer les taux moyens
+  const totalEmails = sentCampaigns.reduce((sum, c) => sum + c.recipient_count, 0)
+  const totalOpens = sentCampaigns.reduce((sum, c) => sum + c.open_count, 0)
+  const totalClicks = sentCampaigns.reduce((sum, c) => sum + c.click_count, 0)
+  const totalUnsubs = sentCampaigns.reduce((sum, c) => sum + c.unsubscribe_count, 0)
+
+  const avgOpenRate = totalEmails > 0 ? (totalOpens / totalEmails) * 100 : 0
+  const avgClickRate = totalEmails > 0 ? (totalClicks / totalEmails) * 100 : 0
+  const avgUnsubRate = totalEmails > 0 ? (totalUnsubs / totalEmails) * 100 : 0
+
+  // Calcul du taux de croissance
+  const previousPeriodStart = new Date(from)
+  previousPeriodStart.setMonth(previousPeriodStart.getMonth() - 1)
+  const previousActiveCount = mockNewsletterSubscribers.filter(s => {
+    const subscribedDate = new Date(s.subscribed_at)
+    return subscribedDate < from && s.active
+  }).length
+  const growthRate = previousActiveCount > 0
+    ? ((activeSubscribers.length - previousActiveCount) / previousActiveCount) * 100
+    : 0
+
+  return {
+    period: {
+      from: from.toISOString().split('T')[0],
+      to: to.toISOString().split('T')[0]
+    },
+    subscribers: {
+      total_active: activeSubscribers.length,
+      new_this_period: newSubscribers.length,
+      unsubscribed_this_period: unsubscribedThisPeriod.length,
+      growth_rate: Math.round(growthRate * 10) / 10
+    },
+    campaigns: {
+      sent_count: sentCampaigns.length,
+      total_emails_sent: totalEmails,
+      avg_open_rate: Math.round(avgOpenRate * 10) / 10,
+      avg_click_rate: Math.round(avgClickRate * 10) / 10,
+      avg_unsubscribe_rate: Math.round(avgUnsubRate * 100) / 100
+    }
+  }
+}
+
+// Évolution des abonnés par mois
+export const getSubscriberEvolution = (dateFrom?: string, dateTo?: string, granularity: 'day' | 'week' | 'month' = 'month'): SubscriberEvolutionPoint[] => {
+  const now = new Date()
+  const from = dateFrom ? new Date(dateFrom) : new Date(now.getFullYear() - 1, now.getMonth(), 1)
+  const to = dateTo ? new Date(dateTo) : now
+
+  const data: SubscriberEvolutionPoint[] = []
+
+  if (granularity === 'month') {
+    const current = new Date(from.getFullYear(), from.getMonth(), 1)
+    while (current <= to) {
+      const monthStart = new Date(current)
+      const monthEnd = new Date(current.getFullYear(), current.getMonth() + 1, 0, 23, 59, 59)
+
+      const newSubs = mockNewsletterSubscribers.filter(s => {
+        const date = new Date(s.subscribed_at)
+        return date >= monthStart && date <= monthEnd
+      }).length
+
+      const unsubs = mockNewsletterSubscribers.filter(s => {
+        if (!s.unsubscribed_at) return false
+        const date = new Date(s.unsubscribed_at)
+        return date >= monthStart && date <= monthEnd
+      }).length
+
+      data.push({
+        period: `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}`,
+        new_subscribers: newSubs,
+        unsubscribes: unsubs,
+        net_growth: newSubs - unsubs
+      })
+
+      current.setMonth(current.getMonth() + 1)
+    }
+  }
+
+  return data
+}
+
+// Performance des campagnes
+export const getCampaignPerformance = (dateFrom?: string, dateTo?: string, sortBy: 'sent_at' | 'open_rate' | 'click_rate' = 'sent_at', sortOrder: 'asc' | 'desc' = 'desc'): CampaignPerformance[] => {
+  const now = new Date()
+  const from = dateFrom ? new Date(dateFrom) : new Date(now.getFullYear() - 1, now.getMonth(), 1)
+  const to = dateTo ? new Date(dateTo) : now
+
+  let campaigns = mockNewsletterCampaigns
+    .filter(c => {
+      if (c.status !== 'sent' || !c.sent_at) return false
+      const sentDate = new Date(c.sent_at)
+      return sentDate >= from && sentDate <= to
+    })
+    .map(c => ({
+      campaign_id: c.id,
+      title: c.title,
+      sent_at: c.sent_at!,
+      recipient_count: c.recipient_count,
+      open_rate: c.recipient_count > 0 ? Math.round((c.open_count / c.recipient_count) * 1000) / 10 : 0,
+      click_rate: c.recipient_count > 0 ? Math.round((c.click_count / c.recipient_count) * 1000) / 10 : 0,
+      unsubscribe_rate: c.recipient_count > 0 ? Math.round((c.unsubscribe_count / c.recipient_count) * 1000) / 10 : 0
+    }))
+
+  // Tri
+  campaigns.sort((a, b) => {
+    let comparison = 0
+    switch (sortBy) {
+      case 'sent_at':
+        comparison = new Date(a.sent_at).getTime() - new Date(b.sent_at).getTime()
+        break
+      case 'open_rate':
+        comparison = a.open_rate - b.open_rate
+        break
+      case 'click_rate':
+        comparison = a.click_rate - b.click_rate
+        break
+    }
+    return sortOrder === 'desc' ? -comparison : comparison
+  })
+
+  return campaigns
+}
+
+// Répartition par source d'inscription
+export const getSourceDistribution = (): SourceDistribution[] => {
+  const activeSubscribers = mockNewsletterSubscribers.filter(s => s.active)
+  const total = activeSubscribers.length
+
+  const counts: Record<SubscriberSource, number> = {
+    website_form: 0,
+    manual: 0,
+    import: 0,
+    registration: 0,
+    event: 0
+  }
+
+  activeSubscribers.forEach(s => {
+    counts[s.source]++
+  })
+
+  return Object.entries(counts)
+    .map(([source, count]) => ({
+      source: source as SubscriberSource,
+      count,
+      percentage: total > 0 ? Math.round((count / total) * 1000) / 10 : 0
+    }))
+    .sort((a, b) => b.count - a.count)
+}
+
+// Meilleures heures d'envoi (simulé)
+export const getBestSendTimes = (): SendTimeRecommendation => {
+  // Données simulées basées sur des patterns typiques
+  const byHour: BestSendTime[] = [
+    { hour: 9, open_rate: 48.5 },
+    { hour: 10, open_rate: 46.2 },
+    { hour: 11, open_rate: 42.8 },
+    { hour: 14, open_rate: 44.1 },
+    { hour: 15, open_rate: 41.5 },
+    { hour: 16, open_rate: 38.2 },
+    { hour: 17, open_rate: 35.0 },
+    { hour: 8, open_rate: 40.5 }
+  ].sort((a, b) => b.open_rate - a.open_rate)
+
+  const dayLabels: Record<string, string> = {
+    monday: 'Lundi',
+    tuesday: 'Mardi',
+    wednesday: 'Mercredi',
+    thursday: 'Jeudi',
+    friday: 'Vendredi',
+    saturday: 'Samedi',
+    sunday: 'Dimanche'
+  }
+
+  const byDay: BestSendDay[] = [
+    { day: 'tuesday', day_label: 'Mardi', open_rate: 46.5 },
+    { day: 'wednesday', day_label: 'Mercredi', open_rate: 45.2 },
+    { day: 'thursday', day_label: 'Jeudi', open_rate: 44.8 },
+    { day: 'monday', day_label: 'Lundi', open_rate: 42.1 },
+    { day: 'friday', day_label: 'Vendredi', open_rate: 38.5 },
+    { day: 'saturday', day_label: 'Samedi', open_rate: 32.0 },
+    { day: 'sunday', day_label: 'Dimanche', open_rate: 28.5 }
+  ].sort((a, b) => b.open_rate - a.open_rate)
+
+  return {
+    by_hour: byHour,
+    by_day: byDay,
+    recommendation: {
+      best_day: byDay[0].day,
+      best_day_label: byDay[0].day_label,
+      best_hour: byHour[0].hour
+    }
+  }
+}
+
+// Comparaison de deux périodes
+export const comparePeriods = (
+  period1From: string, period1To: string,
+  period2From: string, period2To: string
+): PeriodComparison => {
+  const stats1 = getNewsletterGlobalStats(period1From, period1To)
+  const stats2 = getNewsletterGlobalStats(period2From, period2To)
+
+  const subscribersChange = stats1.subscribers.total_active - stats2.subscribers.total_active
+  const openRateChange = stats1.campaigns.avg_open_rate - stats2.campaigns.avg_open_rate
+  const clickRateChange = stats1.campaigns.avg_click_rate - stats2.campaigns.avg_click_rate
+
+  return {
+    period1: stats1,
+    period2: stats2,
+    comparison: {
+      subscribers_growth: `${subscribersChange >= 0 ? '+' : ''}${subscribersChange}`,
+      open_rate_change: `${openRateChange >= 0 ? '+' : ''}${openRateChange.toFixed(1)}%`,
+      click_rate_change: `${clickRateChange >= 0 ? '+' : ''}${clickRateChange.toFixed(1)}%`
+    }
+  }
+}
+
+// Récupérer toutes les campagnes
+export const getAllCampaigns = (): NewsletterCampaign[] => {
+  return [...mockNewsletterCampaigns].sort((a, b) =>
+    new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+  )
+}
+
+// Récupérer une campagne par ID
+export const getCampaignById = (id: string): NewsletterCampaign | undefined => {
+  return mockNewsletterCampaigns.find(c => c.id === id)
+}
+
+// Statistiques des campagnes
+export const getCampaignStats = () => {
+  const sentCampaigns = mockNewsletterCampaigns.filter(c => c.status === 'sent')
+  const totalEmails = sentCampaigns.reduce((sum, c) => sum + c.recipient_count, 0)
+  const totalOpens = sentCampaigns.reduce((sum, c) => sum + c.open_count, 0)
+  const totalClicks = sentCampaigns.reduce((sum, c) => sum + c.click_count, 0)
+
+  return {
+    total: mockNewsletterCampaigns.length,
+    sent: sentCampaigns.length,
+    draft: mockNewsletterCampaigns.filter(c => c.status === 'draft').length,
+    scheduled: mockNewsletterCampaigns.filter(c => c.status === 'scheduled').length,
+    avg_open_rate: totalEmails > 0 ? Math.round((totalOpens / totalEmails) * 1000) / 10 : 0,
+    avg_click_rate: totalEmails > 0 ? Math.round((totalClicks / totalEmails) * 1000) / 10 : 0
+  }
+}

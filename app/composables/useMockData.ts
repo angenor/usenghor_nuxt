@@ -401,12 +401,57 @@ import {
   validateEmail as validateSubscriberEmail,
   simulateImport,
   exportSubscribersToCSV,
+  // Statistiques newsletter
+  getNewsletterGlobalStats,
+  getSubscriberEvolution,
+  getCampaignPerformance,
+  getSourceDistribution,
+  getBestSendTimes,
+  comparePeriods as compareNewsletterPeriods,
   type NewsletterSubscriber,
   type SubscriberSource,
   type SubscriberFilters,
   type SubscriberStats,
-  type ImportResult
+  type ImportResult,
+  type NewsletterGlobalStats,
+  type SubscriberEvolutionPoint,
+  type CampaignPerformance,
+  type SourceDistribution,
+  type SendTimeRecommendation,
+  type PeriodComparison
 } from '@bank/mock-data/newsletter-subscribers'
+import {
+  mockNewsletterCampaigns,
+  mockNewsletterSends,
+  campaignStatusLabels,
+  campaignStatusColors,
+  sendStatusLabels,
+  sendStatusColors,
+  generateCampaignId,
+  generateSendId,
+  defaultHtmlTemplate,
+  templateVariables,
+  getAllCampaigns as getAllCampaignsFromMock,
+  getCampaignById as getCampaignByIdFromMock,
+  getCampaignStats as getCampaignStatsFromMock,
+  getCampaignRecipients as getCampaignRecipientsFromMock,
+  getCampaignGlobalStats,
+  canEditCampaign,
+  canDeleteCampaign,
+  canSendCampaign,
+  canScheduleCampaign,
+  canUnscheduleCampaign,
+  duplicateCampaign as duplicateCampaignFromMock,
+  getActiveSubscribersCount,
+  type NewsletterCampaign,
+  type NewsletterCampaignWithStats,
+  type NewsletterSend,
+  type CampaignStatus,
+  type SendStatus,
+  type CampaignFilters,
+  type CampaignStats,
+  type CampaignRecipient
+} from '@bank/mock-data/newsletter-campaigns'
 
 export function useMockData() {
   // === DÉPARTEMENTS ===
@@ -1707,7 +1752,39 @@ export function useMockData() {
     sourceLabels,
     sourceColors,
     generateSubscriberId,
-    generateUnsubscribeToken
+    generateUnsubscribeToken,
+
+    // Newsletter - Statistiques
+    getNewsletterGlobalStats,
+    getSubscriberEvolution,
+    getCampaignPerformance,
+    getSourceDistribution,
+    getBestSendTimes,
+    compareNewsletterPeriods,
+
+    // Newsletter - Campagnes (admin)
+    newsletterCampaigns: mockNewsletterCampaigns,
+    newsletterSends: mockNewsletterSends,
+    getAllCampaigns: getAllCampaignsFromMock,
+    getCampaignById: getCampaignByIdFromMock,
+    getCampaignStats: getCampaignStatsFromMock,
+    getCampaignRecipients: getCampaignRecipientsFromMock,
+    getCampaignGlobalStats,
+    canEditCampaign,
+    canDeleteCampaign,
+    canSendCampaign,
+    canScheduleCampaign,
+    canUnscheduleCampaign,
+    duplicateCampaign: duplicateCampaignFromMock,
+    getActiveSubscribersCount,
+    campaignStatusLabels,
+    campaignStatusColors,
+    sendStatusLabels,
+    sendStatusColors,
+    generateCampaignId,
+    generateSendId,
+    defaultHtmlTemplate,
+    templateVariables
   }
 }
 
@@ -1847,7 +1924,22 @@ export type {
   SubscriberSource,
   SubscriberFilters,
   SubscriberStats,
-  ImportResult
+  ImportResult,
+  NewsletterCampaign,
+  NewsletterCampaignWithStats,
+  NewsletterSend,
+  CampaignStatus,
+  SendStatus,
+  CampaignFilters,
+  CampaignStats,
+  CampaignRecipient,
+  // Newsletter statistics types
+  NewsletterGlobalStats,
+  SubscriberEvolutionPoint,
+  CampaignPerformance,
+  SourceDistribution,
+  SendTimeRecommendation,
+  PeriodComparison
 }
 
 // Re-export utility function
