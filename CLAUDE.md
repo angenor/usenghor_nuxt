@@ -92,6 +92,40 @@ Rich text content uses EditorJS:
 - `EditorJSRenderer.vue` - Renders EditorJS JSON blocks to HTML
 - `useEditorJS` composable for programmatic control
 
+## Admin Rich Text Editor
+
+Pour tous les champs de texte riche dans l'espace admin, utiliser le composant `AdminRichTextEditor` (`app/components/admin/RichTextEditor.vue`). Ce composant encapsule EditorJS avec support multilingue (FR, EN, AR) et styling admin.
+
+**Utilisation basique (une seule langue) :**
+```vue
+<AdminRichTextEditor
+  v-model="content"
+  title="Contenu"
+  description="Rédigez le contenu..."
+  placeholder="Commencez à écrire..."
+  :min-height="400"
+  required
+/>
+```
+
+**Utilisation multilingue (3 langues avec tabs) :**
+```vue
+<AdminRichTextEditor
+  v-model="contentFr"
+  v-model:model-value-en="contentEn"
+  v-model:model-value-ar="contentAr"
+  title="Contenu détaillé"
+  description="Rédigez le contenu complet..."
+  icon="fa-solid fa-file-lines"
+  icon-color="text-indigo-500"
+  placeholder="Commencez à écrire..."
+  placeholder-en="Start writing..."
+  placeholder-ar="ابدأ في كتابة..."
+  :min-height="400"
+  @change="onContentChange"
+/>
+```
+
 ## Placeholder Images
 
 For development mockups:

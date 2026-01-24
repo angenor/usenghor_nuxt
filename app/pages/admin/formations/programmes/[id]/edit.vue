@@ -53,9 +53,6 @@ const form = ref({
 const contentFr = ref<OutputData | undefined>(undefined)
 const contentEn = ref<OutputData | undefined>(undefined)
 
-// Tab active pour l'éditeur
-const activeContentTab = ref<'fr' | 'en'>('fr')
-
 // Charger les données du programme dans le formulaire
 watchEffect(() => {
   if (program.value) {
@@ -367,87 +364,18 @@ const regenerateSlug = () => {
       </div>
 
       <!-- Contenu détaillé (EditorJS) -->
-      <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
-        <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
-          <font-awesome-icon icon="fa-solid fa-file-lines" class="w-5 h-5 text-indigo-500" />
-          Contenu détaillé
-        </h2>
-        <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
-          Rédigez le contenu complet de la formation avec l'éditeur riche (titres, listes, images, etc.)
-        </p>
-
-        <!-- Tabs FR/EN -->
-        <div class="mb-4 border-b border-gray-200 dark:border-gray-700">
-          <nav class="-mb-px flex gap-4">
-            <button
-              type="button"
-              :class="[
-                'pb-3 px-1 text-sm font-medium border-b-2 transition-colors',
-                activeContentTab === 'fr'
-                  ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-              ]"
-              @click="activeContentTab = 'fr'"
-            >
-              <font-awesome-icon icon="fa-solid fa-flag" class="w-3 h-3 mr-1" />
-              Français
-            </button>
-            <button
-              type="button"
-              :class="[
-                'pb-3 px-1 text-sm font-medium border-b-2 transition-colors',
-                activeContentTab === 'en'
-                  ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-              ]"
-              @click="activeContentTab = 'en'"
-            >
-              <font-awesome-icon icon="fa-solid fa-globe" class="w-3 h-3 mr-1" />
-              English
-            </button>
-          </nav>
-        </div>
-
-        <!-- Éditeur Français -->
-        <div v-show="activeContentTab === 'fr'">
-          <ClientOnly>
-            <EditorJS
-              v-model="contentFr"
-              placeholder="Décrivez en détail la formation, les objectifs, le programme, les débouchés..."
-              :min-height="400"
-              @change="onContentChange"
-            />
-            <template #fallback>
-              <div class="flex h-[400px] items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
-                <div class="text-center">
-                  <font-awesome-icon icon="fa-solid fa-spinner" class="w-6 h-6 animate-spin text-gray-400" />
-                  <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Chargement de l'éditeur...</p>
-                </div>
-              </div>
-            </template>
-          </ClientOnly>
-        </div>
-
-        <!-- Éditeur Anglais -->
-        <div v-show="activeContentTab === 'en'">
-          <ClientOnly>
-            <EditorJS
-              v-model="contentEn"
-              placeholder="Describe the program in detail, objectives, curriculum, career opportunities..."
-              :min-height="400"
-              @change="onContentChange"
-            />
-            <template #fallback>
-              <div class="flex h-[400px] items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
-                <div class="text-center">
-                  <font-awesome-icon icon="fa-solid fa-spinner" class="w-6 h-6 animate-spin text-gray-400" />
-                  <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading editor...</p>
-                </div>
-              </div>
-            </template>
-          </ClientOnly>
-        </div>
-      </div>
+      <AdminRichTextEditor
+        v-model="contentFr"
+        v-model:model-value-en="contentEn"
+        title="Contenu détaillé"
+        description="Rédigez le contenu complet de la formation avec l'éditeur riche (titres, listes, images, etc.)"
+        icon="fa-solid fa-file-lines"
+        icon-color="text-indigo-500"
+        placeholder="Décrivez en détail la formation, les objectifs, le programme, les débouchés..."
+        placeholder-en="Describe the program in detail, objectives, curriculum, career opportunities..."
+        :min-height="400"
+        @change="onContentChange"
+      />
 
       <!-- Détails académiques -->
       <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">

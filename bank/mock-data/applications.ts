@@ -1299,7 +1299,7 @@ export const mockApplications: Application[] = [
   },
 ]
 
-// Fonction pour obtenir les statistiques
+// Fonction pour obtenir les statistiques de base
 export function getApplicationsStats() {
   const stats = {
     total: mockApplications.length,
@@ -1320,7 +1320,7 @@ export function getApplicationsStats() {
 
 // Fonction pour obtenir les statistiques par évaluateur
 export function getReviewerStats() {
-  const stats: Record<string, { reviewer: Reviewer; assigned: number; reviewed: number; pending: number }> = {}
+  const stats: Record<string, { reviewer: Reviewer; assigned: number; reviewed: number; pending: number; avg_review_time_days: number }> = {}
 
   mockApplications.forEach((app) => {
     if (app.reviewer) {
@@ -1330,11 +1330,17 @@ export function getReviewerStats() {
           assigned: 0,
           reviewed: 0,
           pending: 0,
+          avg_review_time_days: 0,
         }
       }
       stats[app.reviewer.id].assigned++
       if (app.reviewed_at) {
         stats[app.reviewer.id].reviewed++
+        // Calcul du temps de traitement moyen
+        const submittedDate = new Date(app.submitted_at)
+        const reviewedDate = new Date(app.reviewed_at)
+        const daysDiff = (reviewedDate.getTime() - submittedDate.getTime()) / (1000 * 60 * 60 * 24)
+        stats[app.reviewer.id].avg_review_time_days += daysDiff
       }
       else {
         stats[app.reviewer.id].pending++
@@ -1342,5 +1348,294 @@ export function getReviewerStats() {
     }
   })
 
+  // Calculer la moyenne
+  Object.values(stats).forEach((s) => {
+    if (s.reviewed > 0) {
+      s.avg_review_time_days = Math.round((s.avg_review_time_days / s.reviewed) * 10) / 10
+    }
+  })
+
   return Object.values(stats)
+}
+
+// Interface pour les statistiques globales
+export interface ApplicationStatistics {
+  total: number
+  pending: number
+  acceptance_rate: number
+  completion_rate: number
+  by_status: Record<ApplicationStatus, number>
+}
+
+// Fonction pour obtenir les statistiques globales avec filtres
+export function getGlobalStatistics(options?: {
+  date_from?: string
+  date_to?: string
+  call_ids?: string[]
+  program_ids?: string[]
+}): ApplicationStatistics {
+  let filteredApps = [...mockApplications]
+
+  // Filtre par date
+  if (options?.date_from) {
+    const fromDate = new Date(options.date_from)
+    filteredApps = filteredApps.filter(a => new Date(a.submitted_at) >= fromDate)
+  }
+  if (options?.date_to) {
+    const toDate = new Date(options.date_to)
+    filteredApps = filteredApps.filter(a => new Date(a.submitted_at) <= toDate)
+  }
+
+  // Filtre par appel
+  if (options?.call_ids?.length) {
+    filteredApps = filteredApps.filter(a => a.call_id && options.call_ids!.includes(a.call_id))
+  }
+
+  // Filtre par programme
+  if (options?.program_ids?.length) {
+    filteredApps = filteredApps.filter(a => a.program_external_id && options.program_ids!.includes(a.program_external_id))
+  }
+
+  const total = filteredApps.length
+  const by_status: Record<ApplicationStatus, number> = {
+    submitted: 0,
+    under_review: 0,
+    accepted: 0,
+    rejected: 0,
+    waitlisted: 0,
+    incomplete: 0,
+  }
+
+  filteredApps.forEach((app) => {
+    by_status[app.status]++
+  })
+
+  const pending = by_status.submitted + by_status.under_review
+  const decided = by_status.accepted + by_status.rejected + by_status.waitlisted
+  const acceptance_rate = decided > 0 ? Math.round((by_status.accepted / decided) * 1000) / 10 : 0
+  const complete = filteredApps.filter(a => a.is_complete).length
+  const completion_rate = total > 0 ? Math.round((complete / total) * 1000) / 10 : 0
+
+  return {
+    total,
+    pending,
+    acceptance_rate,
+    completion_rate,
+    by_status,
+  }
+}
+
+// Interface pour les statistiques temporelles
+export interface TimelineDataPoint {
+  period: string
+  count: number
+}
+
+// Fonction pour obtenir l'évolution temporelle
+export function getTimelineStatistics(options?: {
+  date_from?: string
+  date_to?: string
+  granularity?: 'day' | 'week' | 'month'
+  call_ids?: string[]
+}): TimelineDataPoint[] {
+  let filteredApps = [...mockApplications]
+
+  // Filtre par date
+  if (options?.date_from) {
+    const fromDate = new Date(options.date_from)
+    filteredApps = filteredApps.filter(a => new Date(a.submitted_at) >= fromDate)
+  }
+  if (options?.date_to) {
+    const toDate = new Date(options.date_to)
+    filteredApps = filteredApps.filter(a => new Date(a.submitted_at) <= toDate)
+  }
+
+  // Filtre par appel
+  if (options?.call_ids?.length) {
+    filteredApps = filteredApps.filter(a => a.call_id && options.call_ids!.includes(a.call_id))
+  }
+
+  const granularity = options?.granularity || 'month'
+  const grouped: Record<string, number> = {}
+
+  filteredApps.forEach((app) => {
+    const date = new Date(app.submitted_at)
+    let key: string
+
+    switch (granularity) {
+      case 'day':
+        key = date.toISOString().split('T')[0]
+        break
+      case 'week': {
+        const startOfWeek = new Date(date)
+        startOfWeek.setDate(date.getDate() - date.getDay())
+        key = startOfWeek.toISOString().split('T')[0]
+        break
+      }
+      case 'month':
+      default:
+        key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+    }
+
+    grouped[key] = (grouped[key] || 0) + 1
+  })
+
+  return Object.entries(grouped)
+    .map(([period, count]) => ({ period, count }))
+    .sort((a, b) => a.period.localeCompare(b.period))
+}
+
+// Interface pour les statistiques par programme
+export interface ProgramStatistics {
+  program_id: string
+  program_title: string
+  total: number
+  accepted: number
+  acceptance_rate: number
+}
+
+// Fonction pour obtenir les statistiques par programme
+export function getStatisticsByProgram(options?: {
+  date_from?: string
+  date_to?: string
+  call_ids?: string[]
+}): ProgramStatistics[] {
+  let filteredApps = [...mockApplications]
+
+  // Filtre par date
+  if (options?.date_from) {
+    const fromDate = new Date(options.date_from)
+    filteredApps = filteredApps.filter(a => new Date(a.submitted_at) >= fromDate)
+  }
+  if (options?.date_to) {
+    const toDate = new Date(options.date_to)
+    filteredApps = filteredApps.filter(a => new Date(a.submitted_at) <= toDate)
+  }
+
+  // Filtre par appel
+  if (options?.call_ids?.length) {
+    filteredApps = filteredApps.filter(a => a.call_id && options.call_ids!.includes(a.call_id))
+  }
+
+  const grouped: Record<string, { title: string; total: number; accepted: number }> = {}
+
+  filteredApps.forEach((app) => {
+    if (app.program) {
+      const key = app.program.id
+      if (!grouped[key]) {
+        grouped[key] = { title: app.program.title, total: 0, accepted: 0 }
+      }
+      grouped[key].total++
+      if (app.status === 'accepted') {
+        grouped[key].accepted++
+      }
+    }
+  })
+
+  return Object.entries(grouped)
+    .map(([program_id, data]) => ({
+      program_id,
+      program_title: data.title,
+      total: data.total,
+      accepted: data.accepted,
+      acceptance_rate: data.total > 0 ? Math.round((data.accepted / data.total) * 1000) / 10 : 0,
+    }))
+    .sort((a, b) => b.total - a.total)
+}
+
+// Interface pour les statistiques par pays
+export interface CountryStatistics {
+  country_name: string
+  count: number
+}
+
+// Fonction pour obtenir les statistiques par pays (nationalité)
+export function getStatisticsByCountry(options?: {
+  date_from?: string
+  date_to?: string
+  call_ids?: string[]
+}): CountryStatistics[] {
+  let filteredApps = [...mockApplications]
+
+  // Filtre par date
+  if (options?.date_from) {
+    const fromDate = new Date(options.date_from)
+    filteredApps = filteredApps.filter(a => new Date(a.submitted_at) >= fromDate)
+  }
+  if (options?.date_to) {
+    const toDate = new Date(options.date_to)
+    filteredApps = filteredApps.filter(a => new Date(a.submitted_at) <= toDate)
+  }
+
+  // Filtre par appel
+  if (options?.call_ids?.length) {
+    filteredApps = filteredApps.filter(a => a.call_id && options.call_ids!.includes(a.call_id))
+  }
+
+  const grouped: Record<string, number> = {}
+
+  filteredApps.forEach((app) => {
+    const country = app.nationality || 'Non renseigné'
+    grouped[country] = (grouped[country] || 0) + 1
+  })
+
+  return Object.entries(grouped)
+    .map(([country_name, count]) => ({ country_name, count }))
+    .sort((a, b) => b.count - a.count)
+}
+
+// Interface pour les statistiques par appel
+export interface CallStatistics {
+  call_id: string
+  call_title: string
+  total: number
+  submitted: number
+  under_review: number
+  accepted: number
+  rejected: number
+  waitlisted: number
+  incomplete: number
+}
+
+// Fonction pour obtenir les statistiques par appel
+export function getStatisticsByCall(options?: {
+  date_from?: string
+  date_to?: string
+}): CallStatistics[] {
+  let filteredApps = [...mockApplications]
+
+  // Filtre par date
+  if (options?.date_from) {
+    const fromDate = new Date(options.date_from)
+    filteredApps = filteredApps.filter(a => new Date(a.submitted_at) >= fromDate)
+  }
+  if (options?.date_to) {
+    const toDate = new Date(options.date_to)
+    filteredApps = filteredApps.filter(a => new Date(a.submitted_at) <= toDate)
+  }
+
+  const grouped: Record<string, CallStatistics> = {}
+
+  filteredApps.forEach((app) => {
+    if (app.call) {
+      const key = app.call.id
+      if (!grouped[key]) {
+        grouped[key] = {
+          call_id: app.call.id,
+          call_title: app.call.title,
+          total: 0,
+          submitted: 0,
+          under_review: 0,
+          accepted: 0,
+          rejected: 0,
+          waitlisted: 0,
+          incomplete: 0,
+        }
+      }
+      grouped[key].total++
+      grouped[key][app.status]++
+    }
+  })
+
+  return Object.values(grouped).sort((a, b) => b.total - a.total)
 }

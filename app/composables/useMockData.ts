@@ -64,6 +64,11 @@ import {
   experienceDurationLabels,
   getApplicationsStats,
   getReviewerStats,
+  getGlobalStatistics,
+  getTimelineStatistics,
+  getStatisticsByProgram,
+  getStatisticsByCountry,
+  getStatisticsByCall,
   generateApplicationId,
   generateDegreeId,
   generateDocId,
@@ -75,8 +80,74 @@ import {
   type EmploymentStatus,
   type ExperienceDuration,
   type Salutation,
-  type Reviewer
+  type Reviewer,
+  type ApplicationStatistics,
+  type TimelineDataPoint,
+  type ProgramStatistics,
+  type CountryStatistics,
+  type CallStatistics
 } from '@bank/mock-data/applications'
+import {
+  mockNews,
+  mockNewsTags,
+  mockNewsAuthors,
+  newsStatusLabels,
+  newsStatusColors,
+  highlightStatusLabels,
+  highlightStatusColors,
+  getNewsStats,
+  getFilteredNews,
+  getNewsById as getAdminNewsById,
+  getNewsBySlug as getAdminNewsBySlug,
+  generateNewsId,
+  generateTagId as generateNewsTagId,
+  generateMediaId,
+  type News,
+  type NewsTag,
+  type NewsMedia,
+  type NewsAuthor,
+  type NewsStatus,
+  type HighlightStatus,
+  type NewsStats,
+  type NewsFilters,
+  type EditorJSContent,
+  type EditorJSBlock
+} from '@bank/mock-data/news'
+import {
+  mockTags,
+  tagColors,
+  availableIcons,
+  generateTagId,
+  slugify,
+  getAllTags as getAllTagsFromMock,
+  getTagById as getTagByIdFromMock,
+  getTagBySlug as getTagBySlugFromMock,
+  getTagStats,
+  isTagUsed,
+  type Tag,
+  type TagStats
+} from '@bank/mock-data/tags'
+import {
+  mockEvents,
+  eventTypeLabels,
+  eventTypeColors,
+  eventStatusLabels,
+  eventStatusColors,
+  generateEventId,
+  generateEventPartnerId,
+  getAllEvents as getAllEventsFromMock,
+  getEventById as getEventByIdFromMock,
+  getEventBySlug as getEventBySlugFromMock,
+  getEventStats,
+  getFilteredEvents,
+  slugifyEvent,
+  type Event,
+  type EventPartner,
+  type EventType,
+  type EventStatus,
+  type EventStats,
+  type EventFilters
+} from '@bank/mock-data/events'
 
 export function useMockData() {
   // === DÉPARTEMENTS ===
@@ -648,6 +719,71 @@ export function useMockData() {
   const reviewers = computed(() => mockReviewers)
   const getAllReviewers = () => [...mockReviewers]
 
+  // === ACTUALITÉS (ADMIN) ===
+  const news = computed(() => mockNews)
+  const newsTags = computed(() => mockNewsTags)
+  const newsAuthors = computed(() => mockNewsAuthors)
+
+  // Récupérer toutes les actualités (admin)
+  const getAllAdminNews = () =>
+    [...mockNews].sort((a, b) =>
+      new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+    )
+
+  // Récupérer une actualité par ID (admin)
+  const getAdminNewsItemById = (id: string) => getAdminNewsById(id)
+
+  // Récupérer une actualité par slug (admin)
+  const getAdminNewsItemBySlug = (slug: string) => getAdminNewsBySlug(slug)
+
+  // Récupérer les actualités filtrées (admin)
+  const getAdminFilteredNews = (filters?: NewsFilters) => getFilteredNews(filters)
+
+  // Statistiques des actualités (admin)
+  const getAdminNewsStats = () => getNewsStats()
+
+  // Récupérer tous les tags
+  const getAllNewsTags = () => [...mockNewsTags]
+
+  // Récupérer tous les auteurs
+  const getAllNewsAuthors = () => [...mockNewsAuthors]
+
+  // === ÉTIQUETTES (TAGS) ===
+  const tags = computed(() => mockTags)
+
+  // Récupérer tous les tags
+  const getAllTags = () => getAllTagsFromMock()
+
+  // Récupérer un tag par ID
+  const getTagById = (id: string) => getTagByIdFromMock(id)
+
+  // Récupérer un tag par slug
+  const getTagBySlug = (slug: string) => getTagBySlugFromMock(slug)
+
+  // Statistiques des tags
+  const getTagStatistics = () => getTagStats()
+
+  // Vérifier si un tag est utilisé
+  const checkTagUsed = (tagId: string) => isTagUsed(tagId)
+
+  // === ÉVÉNEMENTS (ADMIN) ===
+  const events = computed(() => mockEvents)
+
+  // Récupérer tous les événements (admin)
+  const getAllAdminEvents = () => getAllEventsFromMock()
+
+  // Récupérer un événement par ID (admin)
+  const getAdminEventById = (id: string) => getEventByIdFromMock(id)
+
+  // Récupérer un événement par slug (admin)
+  const getAdminEventBySlug = (slug: string) => getEventBySlugFromMock(slug)
+
+  // Récupérer les événements filtrés (admin)
+  const getAdminFilteredEvents = (filters?: EventFilters) => getFilteredEvents(filters)
+
+  // Statistiques des événements (admin)
+  const getAdminEventStats = () => getEventStats()
+
   return {
     // Données
     departments,
@@ -858,7 +994,59 @@ export function useMockData() {
     experienceDurationLabels,
     generateApplicationId,
     generateDegreeId,
-    generateDocId
+    generateDocId,
+
+    // Statistiques avancées des candidatures
+    getGlobalStatistics,
+    getTimelineStatistics,
+    getStatisticsByProgram,
+    getStatisticsByCountry,
+    getStatisticsByCall,
+
+    // Actualités (admin)
+    news,
+    newsTags,
+    newsAuthors,
+    getAllAdminNews,
+    getAdminNewsItemById,
+    getAdminNewsItemBySlug,
+    getAdminFilteredNews,
+    getAdminNewsStats,
+    getAllNewsTags,
+    getAllNewsAuthors,
+    newsStatusLabels,
+    newsStatusColors,
+    highlightStatusLabels,
+    highlightStatusColors,
+    generateNewsId,
+    generateMediaId,
+
+    // Étiquettes (tags)
+    tags,
+    getAllTags,
+    getTagById,
+    getTagBySlug,
+    getTagStatistics,
+    checkTagUsed,
+    tagColors,
+    availableIcons,
+    generateTagId,
+    slugify,
+
+    // Événements (admin)
+    events,
+    getAllAdminEvents,
+    getAdminEventById,
+    getAdminEventBySlug,
+    getAdminFilteredEvents,
+    getAdminEventStats,
+    eventTypeLabels,
+    eventTypeColors,
+    eventStatusLabels,
+    eventStatusColors,
+    generateEventId,
+    generateEventPartnerId,
+    slugifyEvent
   }
 }
 
@@ -913,7 +1101,30 @@ export type {
   EmploymentStatus,
   ExperienceDuration,
   Salutation,
-  Reviewer
+  Reviewer,
+  ApplicationStatistics,
+  TimelineDataPoint,
+  ProgramStatistics,
+  CountryStatistics,
+  CallStatistics,
+  News,
+  NewsTag,
+  NewsMedia,
+  NewsAuthor,
+  NewsStatus,
+  HighlightStatus,
+  NewsStats,
+  NewsFilters,
+  EditorJSContent,
+  EditorJSBlock,
+  Tag,
+  TagStats,
+  Event,
+  EventPartner,
+  EventType,
+  EventStatus,
+  EventStats,
+  EventFilters
 }
 
 // Re-export utility function
