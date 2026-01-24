@@ -68,7 +68,11 @@ const saveForm = async () => {
     const callData = {
       ...form.value,
       description_rich: description.value,
+      description_rich_en: descriptionEn.value,
+      description_rich_ar: descriptionAr.value,
       conditions: conditions.value,
+      conditions_en: conditionsEn.value,
+      conditions_ar: conditionsAr.value,
       created_at: now,
       updated_at: now
     }
@@ -235,25 +239,31 @@ const goBack = () => {
     <!-- Description détaillée -->
     <AdminRichTextEditor
       v-model="description"
+      v-model:model-value-en="descriptionEn"
+      v-model:model-value-ar="descriptionAr"
       title="Description détaillée"
       description="Décrivez l'appel en détail : contexte, objectifs, profils recherchés..."
       icon="fa-solid fa-file-lines"
       icon-color="text-blue-500"
       placeholder="Rédigez la description complète de l'appel..."
+      placeholder-en="Write a detailed description of the call..."
+      placeholder-ar="اكتب وصفاً تفصيلياً للدعوة..."
       :min-height="300"
-      :multilingual="false"
     />
 
     <!-- Conditions de participation -->
     <AdminRichTextEditor
       v-model="conditions"
+      v-model:model-value-en="conditionsEn"
+      v-model:model-value-ar="conditionsAr"
       title="Conditions de participation"
       description="Précisez les critères d'éligibilité et les conditions de participation"
       icon="fa-solid fa-clipboard-check"
       icon-color="text-green-500"
       placeholder="Listez les conditions de participation..."
+      placeholder-en="List the participation conditions..."
+      placeholder-ar="قم بإدراج شروط المشاركة..."
       :min-height="250"
-      :multilingual="false"
     />
 
     <!-- Footer actions -->
