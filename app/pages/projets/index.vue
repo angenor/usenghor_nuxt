@@ -3,7 +3,7 @@ import type { Project } from '~/composables/useMockData'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
-const { getAllProjects, getFeaturedProjects } = useMockData()
+const { getAllProjects, getFeaturedProjects, getAllProjectCategories } = useMockData()
 
 // SEO
 useSeoMeta({
@@ -12,16 +12,18 @@ useSeoMeta({
 })
 
 // Filters
-const validCategories = ['all', 'education', 'culture', 'entrepreneuriat', 'recherche', 'numerique'] as const
-const validStatuses = ['all', 'active', 'completed', 'upcoming'] as const
+const validStatuses = ['all', 'planned', 'ongoing', 'completed', 'suspended'] as const
 
 const route = useRoute()
 const router = useRouter()
 
+// Get categories from mock data
+const categories = computed(() => getAllProjectCategories())
+
 const getInitialCategory = () => {
   const cat = route.query.category as string
-  if (cat && validCategories.includes(cat as any)) {
-    return cat as typeof validCategories[number]
+  if (cat && (cat === 'all' || categories.value.some(c => c.slug === cat))) {
+    return cat
   }
   return 'all'
 }
@@ -34,7 +36,7 @@ const getInitialStatus = () => {
   return 'all'
 }
 
-const selectedCategory = ref<typeof validCategories[number]>(getInitialCategory())
+const selectedCategory = ref<string>(getInitialCategory())
 const selectedStatus = ref<typeof validStatuses[number]>(getInitialStatus())
 
 // Update URL when filters change
@@ -45,16 +47,19 @@ watch([selectedCategory, selectedStatus], () => {
   router.replace({ query })
 })
 
-// Data
-const allProjects = computed(() => getAllProjects())
-const featuredProjects = computed(() => getFeaturedProjects())
+// Data - only published projects
+const allProjects = computed(() => getAllProjects().filter(p => p.publication_status === 'published'))
+const featuredProjects = computed(() => getFeaturedProjects().filter(p => p.publication_status === 'published'))
 
 // Filtered projects (non-featured only)
 const filteredProjects = computed(() => {
   let projects = allProjects.value.filter(p => !p.featured)
 
   if (selectedCategory.value !== 'all') {
-    projects = projects.filter(p => p.category === selectedCategory.value)
+    const category = categories.value.find(c => c.slug === selectedCategory.value)
+    if (category) {
+      projects = projects.filter(p => p.category_ids.includes(category.id))
+    }
   }
 
   if (selectedStatus.value !== 'all') {
@@ -71,22 +76,25 @@ const visibleProjects = computed(() => {
   return filteredProjects.value.slice(0, 4)
 })
 
-// Filter options
-const categoryFilters = [
-  { value: 'all', label: 'projets.filters.all' },
-  { value: 'education', label: 'projets.categories.education' },
-  { value: 'culture', label: 'projets.categories.culture' },
-  { value: 'entrepreneuriat', label: 'projets.categories.entrepreneuriat' },
-  { value: 'recherche', label: 'projets.categories.recherche' },
-  { value: 'numerique', label: 'projets.categories.numerique' }
-]
+// Filter options - dynamic from categories
+const categoryFilters = computed(() => [
+  { value: 'all', label: t('projets.filters.all') },
+  ...categories.value.map(c => ({ value: c.slug, label: c.name }))
+])
 
 const statusFilters = [
   { value: 'all', label: 'projets.status.all' },
-  { value: 'active', label: 'projets.status.active' },
-  { value: 'completed', label: 'projets.status.completed' },
-  { value: 'upcoming', label: 'projets.status.upcoming' }
+  { value: 'ongoing', label: 'projets.status.ongoing' },
+  { value: 'planned', label: 'projets.status.planned' },
+  { value: 'completed', label: 'projets.status.completed' }
 ]
+
+// Helper to get first category name from IDs
+const getFirstCategoryName = (project: Project) => {
+  if (!project.category_ids || project.category_ids.length === 0) return ''
+  const category = categories.value.find(c => c.id === project.category_ids[0])
+  return category?.name || ''
+}
 
 // Localization helpers
 const getLocalizedTitle = (project: Project) => {
@@ -96,9 +104,9 @@ const getLocalizedTitle = (project: Project) => {
 }
 
 const getLocalizedDescription = (project: Project) => {
-  if (locale.value === 'en') return project.description_en
-  if (locale.value === 'ar') return project.description_ar
-  return project.description_fr
+  if (locale.value === 'en') return project.summary_en || ''
+  if (locale.value === 'ar') return project.summary_ar || ''
+  return project.summary_fr || ''
 }
 
 const formatDate = (dateStr: string) => {
@@ -111,7 +119,7 @@ const formatDate = (dateStr: string) => {
 
 // Stats
 const stats = computed(() => [
-  { value: allProjects.value.filter(p => p.status === 'active').length, label: t('projets.intro.stats.projects') },
+  { value: allProjects.value.filter(p => p.status === 'ongoing').length, label: t('projets.intro.stats.projects') },
   { value: '15+', label: t('projets.intro.stats.countries') },
   { value: '10K+', label: t('projets.intro.stats.beneficiaries') }
 ])
@@ -190,7 +198,7 @@ const stats = computed(() => [
             <!-- Image -->
             <div class="aspect-video overflow-hidden">
               <img
-                :src="project.image"
+                :src="project.cover_image"
                 :alt="getLocalizedTitle(project)"
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
@@ -200,15 +208,16 @@ const stats = computed(() => [
             <!-- Content -->
             <div class="p-6">
               <div class="flex items-center gap-2 mb-3">
-                <span class="inline-block px-2 py-0.5 text-xs font-medium text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded">
-                  {{ t(`projets.categories.${project.category}`) }}
+                <span v-if="getFirstCategoryName(project)" class="inline-block px-2 py-0.5 text-xs font-medium text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded">
+                  {{ getFirstCategoryName(project) }}
                 </span>
                 <span
                   class="inline-block px-2 py-0.5 text-xs font-medium rounded"
                   :class="{
-                    'text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30': project.status === 'active',
-                    'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700': project.status === 'completed',
-                    'text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30': project.status === 'upcoming'
+                    'text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30': project.status === 'ongoing',
+                    'text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30': project.status === 'completed',
+                    'text-yellow-700 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30': project.status === 'planned',
+                    'text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/30': project.status === 'suspended'
                   }"
                 >
                   {{ t(`projets.status.${project.status}`) }}
@@ -246,41 +255,35 @@ const stats = computed(() => [
         </h2>
 
         <!-- Filters -->
-        <div class="mb-10 space-y-6">
+        <div class="mb-10 space-y-4">
           <!-- Category filters -->
-          <div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mr-4">{{ t('projets.filters.category') }} :</span>
-            <div class="inline-flex flex-wrap gap-2 mt-2">
-              <button
-                v-for="filter in categoryFilters"
-                :key="filter.value"
-                @click="selectedCategory = filter.value as any"
-                class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
-                :class="selectedCategory === filter.value
-                  ? 'bg-brand-blue-600 text-white shadow-md'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
-              >
-                {{ t(filter.label) }}
-              </button>
-            </div>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="filter in categoryFilters"
+              :key="filter.value"
+              @click="selectedCategory = filter.value as any"
+              class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
+              :class="selectedCategory === filter.value
+                ? 'bg-brand-blue-600 text-white shadow-md'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
+            >
+              {{ filter.label }}
+            </button>
           </div>
 
           <!-- Status filters -->
-          <div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mr-4">{{ t('projets.filters.status') }} :</span>
-            <div class="inline-flex flex-wrap gap-2 mt-2">
-              <button
-                v-for="filter in statusFilters"
-                :key="filter.value"
-                @click="selectedStatus = filter.value as any"
-                class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
-                :class="selectedStatus === filter.value
-                  ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-md'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
-              >
-                {{ t(filter.label) }}
-              </button>
-            </div>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="filter in statusFilters"
+              :key="filter.value"
+              @click="selectedStatus = filter.value as any"
+              class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
+              :class="selectedStatus === filter.value
+                ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-md'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
+            >
+              {{ t(filter.label) }}
+            </button>
           </div>
         </div>
 
@@ -294,7 +297,7 @@ const stats = computed(() => [
           >
             <div class="aspect-video overflow-hidden">
               <img
-                :src="project.image"
+                :src="project.cover_image"
                 :alt="getLocalizedTitle(project)"
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
@@ -303,15 +306,16 @@ const stats = computed(() => [
 
             <div class="p-5">
               <div class="flex items-center gap-2 mb-3">
-                <span class="inline-block px-2 py-0.5 text-xs font-medium text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded">
-                  {{ t(`projets.categories.${project.category}`) }}
+                <span v-if="getFirstCategoryName(project)" class="inline-block px-2 py-0.5 text-xs font-medium text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded">
+                  {{ getFirstCategoryName(project) }}
                 </span>
                 <span
                   class="inline-block px-2 py-0.5 text-xs font-medium rounded"
                   :class="{
-                    'text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30': project.status === 'active',
-                    'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700': project.status === 'completed',
-                    'text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30': project.status === 'upcoming'
+                    'text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30': project.status === 'ongoing',
+                    'text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30': project.status === 'completed',
+                    'text-yellow-700 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30': project.status === 'planned',
+                    'text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/30': project.status === 'suspended'
                   }"
                 >
                   {{ t(`projets.status.${project.status}`) }}

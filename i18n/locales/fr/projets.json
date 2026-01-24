@@ -127,9 +127,10 @@
     },
     "status": {
       "all": "Tous les statuts",
-      "active": "En cours",
+      "ongoing": "En cours",
+      "planned": "Planifié",
       "completed": "Terminé",
-      "upcoming": "À venir"
+      "suspended": "Suspendu"
     },
     "detail": {
       "back": "Retour aux projets",

@@ -127,9 +127,10 @@
     },
     "status": {
       "all": "جميع الحالات",
-      "active": "نشط",
+      "ongoing": "جاري",
+      "planned": "مخطط",
       "completed": "مكتمل",
-      "upcoming": "قادم"
+      "suspended": "معلق"
     },
     "detail": {
       "back": "العودة إلى المشاريع",

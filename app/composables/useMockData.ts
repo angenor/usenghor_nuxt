@@ -17,13 +17,50 @@ import { mockCampusExternalises, campusPrincipal, type CampusExternalise } from 
 import { mockPartenaires, mockCharterOperators, mockCampusPartners, type Partenaire, type PartnerCategory, type PartnerType } from '@bank/mock-data/partenaires'
 import { mockFormations, type Formation, type ProgramModule, type ProgramSemester } from '@bank/mock-data/formations'
 import { mockDocuments, type Document } from '@bank/mock-data/documents'
-import { mockCampusTeam, type CampusTeamMember } from '@bank/mock-data/campus-team'
+import {
+  mockCampusTeam,
+  getAllCampusTeamMembers,
+  getCampusTeamMemberById as getCampusTeamMemberByIdFromMock,
+  getCampusTeamByCampus,
+  countTeamMembersByCampus,
+  getCampusTeamStats,
+  searchAvailableUsers,
+  mockAvailableUsers,
+  commonPositions,
+  generateCampusTeamId,
+  type CampusTeamMember,
+  type CampusTeamUser,
+  type CampusTeamFilters
+} from '@bank/mock-data/campus-team'
 import { mockCampusCalls, type CampusCall } from '@bank/mock-data/campus-calls'
 import { mockCampusEvents, type CampusEvent } from '@bank/mock-data/campus-events'
 import { mockCampusNews, type CampusNews } from '@bank/mock-data/campus-news'
 import { mockCampusMedia, type CampusMedia } from '@bank/mock-data/campus-media'
 import { mockCampusFormationsRealisees, type CampusFormationRealisee } from '@bank/mock-data/campus-formations-realisees'
-import { mockProjects, type Project, type ProjectPartner, type ProjectCountry, getFlagEmoji as getProjectFlagEmoji } from '@bank/mock-data/projets'
+import {
+  mockProjects,
+  getAllProjectsAdmin,
+  getProjectByIdAdmin,
+  getProjectBySlugAdmin,
+  getFilteredProjects as getFilteredProjectsFromMock,
+  getProjectStats,
+  projectStatusLabels,
+  projectStatusColors,
+  projectPublicationStatusLabels,
+  projectPublicationStatusColors,
+  generateProjectId,
+  generateProjectPartnerId,
+  generateProjectCountryId,
+  slugifyProject,
+  getFlagEmoji as getProjectFlagEmoji,
+  type Project,
+  type ProjectPartner,
+  type ProjectCountry,
+  type ProjectStatus,
+  type PublicationStatus as ProjectPublicationStatus,
+  type ProjectFilters,
+  type ProjectStats
+} from '@bank/mock-data/projets'
 import { mockAlumni, type Alumnus, type Industry } from '@bank/mock-data/alumni'
 import { mockSiteFacilities, type SiteFacility } from '@bank/mock-data/site-facilities'
 import { mockSiteGallery, type SiteGalleryItem, type MediaType } from '@bank/mock-data/site-gallery'
@@ -184,6 +221,192 @@ import {
   type ProjectCallStats,
   type ProjectCallFilters
 } from '@bank/mock-data/project-calls'
+import {
+  mockProjectCategories,
+  categoryIcons,
+  generateProjectCategoryId,
+  slugifyCategory,
+  getAllProjectCategories as getAllProjectCategoriesFromMock,
+  getProjectCategoryById as getProjectCategoryByIdFromMock,
+  getProjectCategoryBySlug as getProjectCategoryBySlugFromMock,
+  getFilteredProjectCategories,
+  getProjectCategoryStats,
+  isProjectCategoryUsed,
+  checkProjectCategoryUsage,
+  type ProjectCategory,
+  type ProjectCategoryStats,
+  type ProjectCategoryFilters,
+  type CategoryUsage
+} from '@bank/mock-data/project-categories'
+import {
+  mockDepartmentsAdmin,
+  departmentIcons,
+  generateDepartmentId,
+  generateDepartmentCode,
+  getAllDepartmentsAdmin as getAllDepartmentsAdminFromMock,
+  getDepartmentByIdAdmin as getDepartmentByIdAdminFromMock,
+  getDepartmentByCodeAdmin as getDepartmentByCodeAdminFromMock,
+  getFilteredDepartmentsAdmin as getFilteredDepartmentsAdminFromMock,
+  getDepartmentStats,
+  checkDepartmentUsage,
+  getDepartmentHeadCandidates as getDepartmentHeadCandidatesFromMock,
+  getDepartmentsForSelect as getDepartmentsForSelectFromMock,
+  type DepartmentAdmin,
+  type DepartmentStats,
+  type DepartmentFilters,
+  type DepartmentUsage
+} from '@bank/mock-data/departments-admin'
+import {
+  mockServiceObjectives,
+  mockServiceAchievements,
+  mockServiceProjects,
+  serviceProjectStatusLabels,
+  serviceProjectStatusColors,
+  achievementTypes,
+  generateServiceObjectiveId,
+  generateServiceAchievementId,
+  generateServiceProjectId,
+  getServiceObjectives as getServiceObjectivesFromMock,
+  getServiceObjectiveById as getServiceObjectiveByIdFromMock,
+  getServiceAchievements as getServiceAchievementsFromMock,
+  getServiceAchievementById as getServiceAchievementByIdFromMock,
+  getServiceAchievementsByType as getServiceAchievementsByTypeFromMock,
+  getServiceProjects as getServiceProjectsFromMock,
+  getServiceProjectById as getServiceProjectByIdFromMock,
+  getServiceProjectsByStatus as getServiceProjectsByStatusFromMock,
+  getServiceOverview as getServiceOverviewFromMock,
+  getServiceObjectivesStats as getServiceObjectivesStatsFromMock,
+  getServicesWithData as getServicesWithDataFromMock,
+  getServicesGroupedByCategory as getServicesGroupedByCategoryFromMock,
+  type ServiceObjective,
+  type ServiceAchievement,
+  type ServiceProject,
+  type ServiceProjectStatus,
+  type ServiceOverview,
+  type ServiceObjectivesStats,
+  type ServiceWithData
+} from '@bank/mock-data/service-objectives'
+import {
+  mockServicesAdmin,
+  serviceCategoryLabels,
+  generateServiceId,
+  getAllServicesAdmin as getAllServicesAdminFromMock,
+  getServiceByIdAdmin as getServiceByIdAdminFromMock,
+  getServicesByDepartmentId as getServicesByDepartmentIdFromMock,
+  getFilteredServicesAdmin as getFilteredServicesAdminFromMock,
+  getServicesGroupedByDepartment as getServicesGroupedByDepartmentFromMock,
+  getServiceStats,
+  checkServiceUsage,
+  getServiceHeadCandidates as getServiceHeadCandidatesFromMock,
+  getServicesForSelect as getServicesForSelectFromMock,
+  getDepartmentsForServiceSelect as getDepartmentsForServiceSelectFromMock,
+  type ServiceAdmin,
+  type ServiceStats,
+  type ServiceFilters,
+  type ServiceUsage,
+  type ServicesByDepartment
+} from '@bank/mock-data/services-admin'
+import {
+  mockCampusAdmin,
+  mockCampusPartnersAdmin,
+  generateCampusId,
+  generateCampusCode,
+  getAllCampusAdmin as getAllCampusAdminFromMock,
+  getCampusByIdAdmin as getCampusByIdAdminFromMock,
+  getCampusByCodeAdmin as getCampusByCodeAdminFromMock,
+  getFilteredCampusAdmin as getFilteredCampusAdminFromMock,
+  getCampusStats,
+  checkCampusUsage,
+  getCampusPartnersById as getCampusPartnersByIdFromMock,
+  getCampusForSelect as getCampusForSelectFromMock,
+  getCampusCountries as getCampusCountriesFromMock,
+  getCampusHeadCandidates as getCampusHeadCandidatesFromMock,
+  type CampusAdmin,
+  type CampusPartnerAdmin,
+  type CampusStats,
+  type CampusFilters,
+  type CampusUsage
+} from '@bank/mock-data/campus-admin'
+import {
+  mockPartnersAdmin,
+  mockCountries,
+  partnerTypeLabels,
+  partnerTypeColors,
+  generatePartnerId,
+  getAllPartnersAdmin as getAllPartnersAdminFromMock,
+  getPartnerByIdAdmin as getPartnerByIdAdminFromMock,
+  getFilteredPartnersAdmin as getFilteredPartnersAdminFromMock,
+  getPartnersByType as getPartnersByTypeFromMock,
+  getPartnerStats,
+  checkPartnerAssociations,
+  getPartnersForSelect as getPartnersForSelectFromMock,
+  getCountriesForSelect as getCountriesForSelectFromMock,
+  getPartnerTypesForSelect as getPartnerTypesForSelectFromMock,
+  type PartnerAdmin,
+  type PartnerStats,
+  type PartnerFilters,
+  type PartnerAssociations,
+  type PartnerTypeSql,
+  type CountryOption
+} from '@bank/mock-data/partners-admin'
+import {
+  mockMediaAdmin,
+  mockAlbumsAdmin,
+  mockAlbumMediaAdmin,
+  generateAlbumId,
+  getAllAlbumsAdmin as getAllAlbumsAdminFromMock,
+  getAlbumByIdAdmin as getAlbumByIdAdminFromMock,
+  getFilteredAlbumsAdmin as getFilteredAlbumsAdminFromMock,
+  getAlbumStats,
+  checkAlbumUsage,
+  getAlbumMediaAdmin as getAlbumMediaAdminFromMock,
+  getAllMediaAdmin as getAllMediaAdminFromMock,
+  getMediaByIdAdmin as getMediaByIdAdminFromMock,
+  getMediaByTypeAdmin as getMediaByTypeAdminFromMock,
+  getFilteredMediaAdmin as getFilteredMediaAdminFromMock,
+  getMediaStats,
+  checkMediaUsage,
+  getAvailableMediaForAlbum as getAvailableMediaForAlbumFromMock,
+  getAlbumsForSelect as getAlbumsForSelectFromMock,
+  albumStatusLabels,
+  albumStatusColors,
+  mediaTypeLabels,
+  mediaTypeIcons,
+  mediaTypeColors,
+  formatFileSize,
+  formatDuration,
+  type MediaAdmin,
+  type AlbumAdmin,
+  type AlbumMediaAdmin,
+  type AlbumStats,
+  type AlbumFilters,
+  type AlbumUsage,
+  type MediaFilters,
+  type MediaStats,
+  type MediaUsageResult,
+  type MediaType as AlbumMediaType,
+  type PublicationStatus as AlbumPublicationStatus
+} from '@bank/mock-data/albums-admin'
+import {
+  mockNewsletterSubscribers,
+  sourceLabels,
+  sourceColors,
+  generateSubscriberId,
+  generateUnsubscribeToken,
+  getAllSubscribers as getAllSubscribersFromMock,
+  getSubscriberById as getSubscriberByIdFromMock,
+  getSubscriberByEmail as getSubscriberByEmailFromMock,
+  isEmailTaken as isEmailTakenFromMock,
+  getSubscriberStats,
+  validateEmail as validateSubscriberEmail,
+  simulateImport,
+  exportSubscribersToCSV,
+  type NewsletterSubscriber,
+  type SubscriberSource,
+  type SubscriberFilters,
+  type SubscriberStats,
+  type ImportResult
+} from '@bank/mock-data/newsletter-subscribers'
 
 export function useMockData() {
   // === DÉPARTEMENTS ===
@@ -244,6 +467,67 @@ export function useMockData() {
   const getCampusBySlug = (slug: string) =>
     mockCampusExternalises.find(c => c.slug === slug)
 
+  // === PAYS AFRICAINS (pour projets) ===
+  const africanCountries = [
+    { code: 'DZ', name: 'Algérie' },
+    { code: 'AO', name: 'Angola' },
+    { code: 'BJ', name: 'Bénin' },
+    { code: 'BW', name: 'Botswana' },
+    { code: 'BF', name: 'Burkina Faso' },
+    { code: 'BI', name: 'Burundi' },
+    { code: 'CV', name: 'Cap-Vert' },
+    { code: 'CM', name: 'Cameroun' },
+    { code: 'CF', name: 'Centrafrique' },
+    { code: 'TD', name: 'Tchad' },
+    { code: 'KM', name: 'Comores' },
+    { code: 'CG', name: 'Congo' },
+    { code: 'CD', name: 'RDC' },
+    { code: 'CI', name: 'Côte d\'Ivoire' },
+    { code: 'DJ', name: 'Djibouti' },
+    { code: 'EG', name: 'Égypte' },
+    { code: 'GQ', name: 'Guinée équatoriale' },
+    { code: 'ER', name: 'Érythrée' },
+    { code: 'SZ', name: 'Eswatini' },
+    { code: 'ET', name: 'Éthiopie' },
+    { code: 'GA', name: 'Gabon' },
+    { code: 'GM', name: 'Gambie' },
+    { code: 'GH', name: 'Ghana' },
+    { code: 'GN', name: 'Guinée' },
+    { code: 'GW', name: 'Guinée-Bissau' },
+    { code: 'KE', name: 'Kenya' },
+    { code: 'LS', name: 'Lesotho' },
+    { code: 'LR', name: 'Liberia' },
+    { code: 'LY', name: 'Libye' },
+    { code: 'MG', name: 'Madagascar' },
+    { code: 'MW', name: 'Malawi' },
+    { code: 'ML', name: 'Mali' },
+    { code: 'MR', name: 'Mauritanie' },
+    { code: 'MU', name: 'Maurice' },
+    { code: 'MA', name: 'Maroc' },
+    { code: 'MZ', name: 'Mozambique' },
+    { code: 'NA', name: 'Namibie' },
+    { code: 'NE', name: 'Niger' },
+    { code: 'NG', name: 'Nigeria' },
+    { code: 'RW', name: 'Rwanda' },
+    { code: 'ST', name: 'Sao Tomé-et-Príncipe' },
+    { code: 'SN', name: 'Sénégal' },
+    { code: 'SC', name: 'Seychelles' },
+    { code: 'SL', name: 'Sierra Leone' },
+    { code: 'SO', name: 'Somalie' },
+    { code: 'ZA', name: 'Afrique du Sud' },
+    { code: 'SS', name: 'Soudan du Sud' },
+    { code: 'SD', name: 'Soudan' },
+    { code: 'TZ', name: 'Tanzanie' },
+    { code: 'TG', name: 'Togo' },
+    { code: 'TN', name: 'Tunisie' },
+    { code: 'UG', name: 'Ouganda' },
+    { code: 'ZM', name: 'Zambie' },
+    { code: 'ZW', name: 'Zimbabwe' },
+    { code: 'UN', name: 'International' }
+  ]
+
+  const countries = africanCountries
+
   // === PARTENAIRES ===
   const partenaires = computed(() => mockPartenaires.filter(p => p.is_active))
 
@@ -264,7 +548,24 @@ export function useMockData() {
 
   // === DONNÉES CAMPUS (équipes, appels, événements, actualités, médias) ===
   const getCampusTeam = (campusId: string) =>
-    mockCampusTeam.filter(m => m.campus_id === campusId)
+    mockCampusTeam.filter(m => m.campus_id === campusId && m.active).sort((a, b) => a.display_order - b.display_order)
+
+  // === ÉQUIPES CAMPUS (ADMIN) ===
+  const campusTeamAdmin = computed(() => mockCampusTeam)
+
+  const getAllCampusTeamAdmin = (filters?: CampusTeamFilters) => getAllCampusTeamMembers(filters)
+
+  const getCampusTeamMemberById = (id: string) => getCampusTeamMemberByIdFromMock(id)
+
+  const getCampusTeamByCampusAdmin = (campusId: string, activeOnly = true) => getCampusTeamByCampus(campusId, activeOnly)
+
+  const countCampusTeamMembers = (campusId: string, activeOnly = true) => countTeamMembersByCampus(campusId, activeOnly)
+
+  const getCampusTeamStatsAdmin = () => getCampusTeamStats()
+
+  const searchUsersForTeam = (query: string) => searchAvailableUsers(query)
+
+  const availableUsers = computed(() => mockAvailableUsers)
 
   const getCampusCalls = (campusId: string) =>
     mockCampusCalls.filter(c => c.campus_id === campusId && c.is_active && c.status === 'open' && c.type !== 'recrutement')
@@ -866,6 +1167,90 @@ export function useMockData() {
   // Liste des projets pour le select
   const getProjectsForCallSelect = () => getProjectsForSelect()
 
+  // === CATÉGORIES DE PROJETS (ADMIN) ===
+  const projectCategories = computed(() => mockProjectCategories)
+
+  // Récupérer toutes les catégories de projets
+  const getAllProjectCategories = () => getAllProjectCategoriesFromMock()
+
+  // Récupérer une catégorie par ID
+  const getProjectCategoryById = (id: string) => getProjectCategoryByIdFromMock(id)
+
+  // Récupérer une catégorie par slug
+  const getProjectCategoryBySlug = (slug: string) => getProjectCategoryBySlugFromMock(slug)
+
+  // Récupérer les catégories filtrées
+  const getFilteredProjectCategoriesAdmin = (filters?: ProjectCategoryFilters) => getFilteredProjectCategories(filters)
+
+  // Statistiques des catégories de projets
+  const getProjectCategoriesStats = () => getProjectCategoryStats()
+
+  // Vérifier si une catégorie est utilisée
+  const checkProjectCategoryUsed = (categoryId: string) => isProjectCategoryUsed(categoryId)
+
+  // Vérifier l'utilisation d'une catégorie (pour la suppression)
+  const getProjectCategoryUsage = (categoryId: string) => checkProjectCategoryUsage(categoryId)
+
+  // === DÉPARTEMENTS (ADMIN) ===
+  const departmentsAdmin = computed(() => mockDepartmentsAdmin)
+
+  // Récupérer tous les départements (admin)
+  const getAllDepartmentsAdmin = () => getAllDepartmentsAdminFromMock()
+
+  // Récupérer un département par ID (admin)
+  const getDepartmentByIdAdmin = (id: string) => getDepartmentByIdAdminFromMock(id)
+
+  // Récupérer un département par code (admin)
+  const getDepartmentByCodeAdmin = (code: string) => getDepartmentByCodeAdminFromMock(code)
+
+  // Récupérer les départements filtrés (admin)
+  const getFilteredDepartmentsAdmin = (filters?: DepartmentFilters) => getFilteredDepartmentsAdminFromMock(filters)
+
+  // Statistiques des départements
+  const getDepartmentsStats = () => getDepartmentStats()
+
+  // Vérifier l'utilisation d'un département (pour la suppression)
+  const getDepartmentUsage = (departmentId: string) => checkDepartmentUsage(departmentId)
+
+  // Liste des responsables potentiels
+  const getDepartmentHeadCandidates = () => getDepartmentHeadCandidatesFromMock()
+
+  // Liste des départements pour select
+  const getDepartmentsForSelect = () => getDepartmentsForSelectFromMock()
+
+  // === SERVICES (ADMIN) ===
+  const servicesAdmin = computed(() => mockServicesAdmin)
+
+  // Récupérer tous les services (admin)
+  const getAllServicesAdmin = () => getAllServicesAdminFromMock()
+
+  // Récupérer un service par ID (admin)
+  const getServiceByIdAdmin = (id: string) => getServiceByIdAdminFromMock(id)
+
+  // Récupérer les services d'un département
+  const getServicesByDepartmentIdAdmin = (departmentId: string) => getServicesByDepartmentIdFromMock(departmentId)
+
+  // Récupérer les services filtrés (admin)
+  const getFilteredServicesAdmin = (filters?: ServiceFilters) => getFilteredServicesAdminFromMock(filters)
+
+  // Récupérer les services groupés par département
+  const getServicesGroupedByDepartmentAdmin = () => getServicesGroupedByDepartmentFromMock()
+
+  // Statistiques des services
+  const getServicesStats = () => getServiceStats()
+
+  // Vérifier l'utilisation d'un service (pour la suppression)
+  const getServiceUsage = (serviceId: string) => checkServiceUsage(serviceId)
+
+  // Liste des responsables potentiels pour un service
+  const getServiceHeadCandidates = () => getServiceHeadCandidatesFromMock()
+
+  // Liste des services pour select
+  const getServicesForSelect = () => getServicesForSelectFromMock()
+
+  // Liste des départements pour le select dans formulaire service
+  const getDepartmentsForServiceSelect = () => getDepartmentsForServiceSelectFromMock()
+
   return {
     // Données
     departments,
@@ -1155,7 +1540,174 @@ export function useMockData() {
     projectCallTypeColors,
     projectCallStatusLabels,
     projectCallStatusColors,
-    generateProjectCallId
+    generateProjectCallId,
+
+    // Catégories de projets (admin)
+    projectCategories,
+    getAllProjectCategories,
+    getProjectCategoryById,
+    getProjectCategoryBySlug,
+    getFilteredProjectCategoriesAdmin,
+    getProjectCategoriesStats,
+    checkProjectCategoryUsed,
+    getProjectCategoryUsage,
+    categoryIcons,
+    generateProjectCategoryId,
+    slugifyCategory,
+
+    // Projets (admin)
+    getAllProjectsAdmin,
+    getProjectByIdAdmin,
+    getProjectBySlugAdmin,
+    getFilteredProjectsAdmin: getFilteredProjectsFromMock,
+    getProjectStatsAdmin: getProjectStats,
+    projectStatusLabels,
+    projectStatusColors,
+    projectPublicationStatusLabels,
+    projectPublicationStatusColors,
+    generateProjectId,
+    generateProjectPartnerId,
+    generateProjectCountryId,
+    slugifyProject,
+    countries,
+
+    // Départements (admin)
+    departmentsAdmin,
+    getAllDepartmentsAdmin,
+    getDepartmentByIdAdmin,
+    getDepartmentByCodeAdmin,
+    getFilteredDepartmentsAdmin,
+    getDepartmentsStats,
+    getDepartmentUsage,
+    getDepartmentHeadCandidates,
+    getDepartmentsForSelect,
+    departmentIcons,
+    generateDepartmentId,
+    generateDepartmentCode,
+
+    // Services (admin)
+    servicesAdmin,
+    getAllServicesAdmin,
+    getServiceByIdAdmin,
+    getServicesByDepartmentIdAdmin,
+    getFilteredServicesAdmin,
+    getServicesGroupedByDepartmentAdmin,
+    getServicesStats,
+    getServiceUsage,
+    getServiceHeadCandidates,
+    getServicesForSelect,
+    getDepartmentsForServiceSelect,
+    serviceCategoryLabels,
+    generateServiceId,
+
+    // Équipes campus (admin)
+    campusTeamAdmin,
+    getAllCampusTeamAdmin,
+    getCampusTeamMemberById,
+    getCampusTeamByCampusAdmin,
+    countCampusTeamMembers,
+    getCampusTeamStatsAdmin,
+    searchUsersForTeam,
+    availableUsers,
+    commonPositions,
+    generateCampusTeamId,
+
+    // Objectifs, réalisations et projets de services (admin)
+    serviceObjectives: mockServiceObjectives,
+    serviceAchievements: mockServiceAchievements,
+    serviceProjects: mockServiceProjects,
+    getServiceObjectives: getServiceObjectivesFromMock,
+    getServiceObjectiveById: getServiceObjectiveByIdFromMock,
+    getServiceAchievements: getServiceAchievementsFromMock,
+    getServiceAchievementById: getServiceAchievementByIdFromMock,
+    getServiceAchievementsByType: getServiceAchievementsByTypeFromMock,
+    getServiceProjects: getServiceProjectsFromMock,
+    getServiceProjectById: getServiceProjectByIdFromMock,
+    getServiceProjectsByStatus: getServiceProjectsByStatusFromMock,
+    getServiceOverview: getServiceOverviewFromMock,
+    getServiceObjectivesStats: getServiceObjectivesStatsFromMock,
+    getServicesWithData: getServicesWithDataFromMock,
+    getServicesGroupedByCategory: getServicesGroupedByCategoryFromMock,
+    serviceProjectStatusLabels,
+    serviceProjectStatusColors,
+    achievementTypes,
+    generateServiceObjectiveId,
+    generateServiceAchievementId,
+    generateServiceProjectId,
+
+    // Campus (admin)
+    campusAdmin: mockCampusAdmin,
+    campusPartnersAdmin: mockCampusPartnersAdmin,
+    getAllCampusAdmin: getAllCampusAdminFromMock,
+    getCampusByIdAdmin: getCampusByIdAdminFromMock,
+    getCampusByCodeAdmin: getCampusByCodeAdminFromMock,
+    getFilteredCampusAdmin: getFilteredCampusAdminFromMock,
+    getCampusStatsAdmin: getCampusStats,
+    getCampusUsage: checkCampusUsage,
+    getCampusPartnersById: getCampusPartnersByIdFromMock,
+    getCampusForSelect: getCampusForSelectFromMock,
+    getCampusCountries: getCampusCountriesFromMock,
+    getCampusHeadCandidates: getCampusHeadCandidatesFromMock,
+    generateCampusId,
+    generateCampusCode,
+
+    // Partenaires (admin)
+    partnersAdmin: mockPartnersAdmin,
+    countriesForPartners: mockCountries,
+    getAllPartnersAdmin: getAllPartnersAdminFromMock,
+    getPartnerByIdAdmin: getPartnerByIdAdminFromMock,
+    getFilteredPartnersAdmin: getFilteredPartnersAdminFromMock,
+    getPartnersByTypeAdmin: getPartnersByTypeFromMock,
+    getPartnerStatsAdmin: getPartnerStats,
+    getPartnerAssociations: checkPartnerAssociations,
+    getPartnersForSelect: getPartnersForSelectFromMock,
+    getCountriesForSelect: getCountriesForSelectFromMock,
+    getPartnerTypesForSelect: getPartnerTypesForSelectFromMock,
+    partnerTypeLabels,
+    partnerTypeColors,
+    generatePartnerId,
+
+    // Albums et médias (admin)
+    albumsAdmin: mockAlbumsAdmin,
+    mediaAdmin: mockMediaAdmin,
+    albumMediaAdmin: mockAlbumMediaAdmin,
+    getAllAlbumsAdmin: getAllAlbumsAdminFromMock,
+    getAlbumByIdAdmin: getAlbumByIdAdminFromMock,
+    getFilteredAlbumsAdmin: getFilteredAlbumsAdminFromMock,
+    getAlbumStatsAdmin: getAlbumStats,
+    getAlbumUsage: checkAlbumUsage,
+    getAlbumMediaAdmin: getAlbumMediaAdminFromMock,
+    getAllMediaAdmin: getAllMediaAdminFromMock,
+    getMediaByIdAdmin: getMediaByIdAdminFromMock,
+    getMediaByTypeAdmin: getMediaByTypeAdminFromMock,
+    getFilteredMediaAdmin: getFilteredMediaAdminFromMock,
+    getMediaStatsAdmin: getMediaStats,
+    getMediaUsage: checkMediaUsage,
+    getAvailableMediaForAlbum: getAvailableMediaForAlbumFromMock,
+    getAlbumsForSelect: getAlbumsForSelectFromMock,
+    albumStatusLabels,
+    albumStatusColors,
+    mediaTypeLabels,
+    mediaTypeIcons,
+    mediaTypeColors,
+    formatFileSize,
+    formatDuration,
+    generateAlbumId,
+
+    // Newsletter - Abonnés (admin)
+    newsletterSubscribers: mockNewsletterSubscribers,
+    getAllSubscribers: getAllSubscribersFromMock,
+    getSubscriberById: getSubscriberByIdFromMock,
+    getSubscriberByEmail: getSubscriberByEmailFromMock,
+    isSubscriberEmailTaken: isEmailTakenFromMock,
+    getSubscriberStatsAdmin: getSubscriberStats,
+    validateSubscriberEmail,
+    simulateSubscriberImport: simulateImport,
+    exportSubscribersToCSV,
+    sourceLabels,
+    sourceColors,
+    generateSubscriberId,
+    generateUnsubscribeToken
   }
 }
 
@@ -1175,6 +1727,8 @@ export type {
   ProgramSemester,
   Document,
   CampusTeamMember,
+  CampusTeamUser,
+  CampusTeamFilters,
   CampusCall,
   CampusEvent,
   CampusNews,
@@ -1242,7 +1796,58 @@ export type {
   ProjectCallType,
   ProjectCallStatus,
   ProjectCallStats,
-  ProjectCallFilters
+  ProjectCallFilters,
+  ProjectCategory,
+  ProjectCategoryStats,
+  ProjectCategoryFilters,
+  CategoryUsage,
+  ProjectStatus,
+  ProjectPublicationStatus,
+  ProjectFilters,
+  ProjectStats,
+  DepartmentAdmin,
+  DepartmentStats,
+  DepartmentFilters,
+  DepartmentUsage,
+  ServiceObjective,
+  ServiceAchievement,
+  ServiceProject,
+  ServiceProjectStatus,
+  ServiceOverview,
+  ServiceObjectivesStats,
+  ServiceWithData,
+  ServiceAdmin,
+  ServiceStats,
+  ServiceFilters,
+  ServiceUsage,
+  ServicesByDepartment,
+  CampusAdmin,
+  CampusPartnerAdmin,
+  CampusStats,
+  CampusFilters,
+  CampusUsage,
+  PartnerAdmin,
+  PartnerStats,
+  PartnerFilters,
+  PartnerAssociations,
+  PartnerTypeSql,
+  CountryOption,
+  MediaAdmin,
+  AlbumAdmin,
+  AlbumMediaAdmin,
+  AlbumStats,
+  AlbumFilters,
+  AlbumUsage,
+  MediaFilters,
+  MediaStats,
+  MediaUsageResult,
+  AlbumMediaType,
+  AlbumPublicationStatus,
+  NewsletterSubscriber,
+  SubscriberSource,
+  SubscriberFilters,
+  SubscriberStats,
+  ImportResult
 }
 
 // Re-export utility function

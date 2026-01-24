@@ -127,9 +127,10 @@
     },
     "status": {
       "all": "All statuses",
-      "active": "Active",
+      "ongoing": "Ongoing",
+      "planned": "Planned",
       "completed": "Completed",
-      "upcoming": "Upcoming"
+      "suspended": "Suspended"
     },
     "detail": {
       "back": "Back to projects",

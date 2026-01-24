@@ -373,9 +373,12 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
               </td>
               <td class="px-4 py-3">
                 <div>
-                  <div class="font-medium text-gray-900 dark:text-white">
+                  <NuxtLink
+                    :to="`/admin/projets/appels/${call.id}`"
+                    class="font-medium text-gray-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
+                  >
                     {{ call.title }}
-                  </div>
+                  </NuxtLink>
                   <div v-if="call.description" class="mt-1 max-w-xs truncate text-sm text-gray-500 dark:text-gray-400">
                     {{ call.description }}
                   </div>
@@ -424,6 +427,13 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
                     </select>
                   </div>
 
+                  <NuxtLink
+                    :to="`/admin/projets/appels/${call.id}`"
+                    class="rounded p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-green-600 dark:hover:bg-gray-700"
+                    title="Voir"
+                  >
+                    <font-awesome-icon :icon="['fas', 'eye']" />
+                  </NuxtLink>
                   <NuxtLink
                     :to="`/admin/projets/appels/${call.id}/edit`"
                     class="rounded p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-700"
