@@ -31,45 +31,68 @@ const newTagName = ref('')
 const newsId = computed(() => route.params.id as string)
 const originalNews = computed(() => getAdminNewsItemById(newsId.value))
 
-// 404 handling
-if (!originalNews.value) {
-  throw createError({
-    statusCode: 404,
-    statusMessage: 'Actualité non trouvée'
-  })
-}
-
 // Contenu EditorJS (séparé du formulaire pour éviter les problèmes de réactivité)
-const content = ref<OutputData | undefined>(originalNews.value?.content as OutputData | undefined)
-const contentEn = ref<OutputData | undefined>((originalNews.value as any)?.content_en as OutputData | undefined)
-const contentAr = ref<OutputData | undefined>((originalNews.value as any)?.content_ar as OutputData | undefined)
+const content = ref<OutputData | undefined>(undefined)
+const contentEn = ref<OutputData | undefined>(undefined)
+const contentAr = ref<OutputData | undefined>(undefined)
 const contentChanged = ref(false)
+const formInitialized = ref(false)
 
 // Handler pour les changements de contenu
 const onContentChange = () => {
   contentChanged.value = true
 }
 
-// Form data (initialized from original news)
+// Form data
 const form = reactive({
-  title: originalNews.value?.title || '',
-  slug: originalNews.value?.slug || '',
-  summary: originalNews.value?.summary || '',
-  video_url: originalNews.value?.video_url || '',
-  cover_image: originalNews.value?.cover_image || '',
-  cover_image_alt: originalNews.value?.cover_image_alt || '',
-  author_id: originalNews.value?.author.id || '',
-  tags: originalNews.value?.tags.map(t => t.id) || [] as string[],
-  campus_id: originalNews.value?.campus_id || '',
-  department_id: originalNews.value?.department_id || '',
-  service_id: originalNews.value?.service_id || '',
-  event_id: originalNews.value?.event_id || '',
-  project_id: originalNews.value?.project_id || '',
-  status: originalNews.value?.status || 'draft' as NewsStatus,
-  highlight_status: originalNews.value?.highlight_status || 'standard' as HighlightStatus,
-  published_at: originalNews.value?.published_at ? originalNews.value.published_at.slice(0, 16) : '',
-  visible_from: originalNews.value?.visible_from ? originalNews.value.visible_from.slice(0, 16) : ''
+  title: '',
+  slug: '',
+  summary: '',
+  video_url: '',
+  cover_image: '',
+  cover_image_alt: '',
+  author_id: '',
+  tags: [] as string[],
+  campus_id: '',
+  department_id: '',
+  service_id: '',
+  event_id: '',
+  project_id: '',
+  status: 'draft' as NewsStatus,
+  highlight_status: 'standard' as HighlightStatus,
+  published_at: '',
+  visible_from: ''
 })
+
+// Initialiser le formulaire une seule fois quand les données sont disponibles
+watch(originalNews, (news) => {
+  if (news && !formInitialized.value) {
+    form.title = news.title || ''
+    form.slug = news.slug || ''
+    form.summary = news.summary || ''
+    form.video_url = news.video_url || ''
+    form.cover_image = news.cover_image || ''
+    form.cover_image_alt = news.cover_image_alt || ''
+    form.author_id = news.author?.id || ''
+    form.tags = news.tags?.map(t => t.id) || []
+    form.campus_id = news.campus_id || ''
+    form.department_id = news.department_id || ''
+    form.service_id = news.service_id || ''
+    form.event_id = news.event_id || ''
+    form.project_id = news.project_id || ''
+    form.status = news.status || 'draft'
+    form.highlight_status = news.highlight_status || 'standard'
+    form.published_at = news.published_at ? news.published_at.slice(0, 16) : ''
+    form.visible_from = news.visible_from ? news.visible_from.slice(0, 16) : ''
+
+    // Charger le contenu EditorJS
+    content.value = news.content as OutputData | undefined
+    contentEn.value = (news as any).content_en as OutputData | undefined
+    contentAr.value = (news as any).content_ar as OutputData | undefined
+
+    formInitialized.value = true
+  }
+}, { immediate: true })
 
 // === COMPUTED ===
 const allTags = computed(() => getAllNewsTags())
@@ -679,5 +702,21 @@ function createTag() {
         </div>
       </div>
     </Teleport>
+  </div>
+
+  <!-- 404 - Actualité non trouvée -->
+  <div v-else class="flex flex-col items-center justify-center py-16">
+    <font-awesome-icon icon="fa-solid fa-newspaper" class="h-16 w-16 text-gray-300 dark:text-gray-600" />
+    <h1 class="mt-6 text-2xl font-bold text-gray-900 dark:text-white">Actualité non trouvée</h1>
+    <p class="mt-2 text-gray-500 dark:text-gray-400">
+      L'actualité demandée n'existe pas ou a été supprimée.
+    </p>
+    <NuxtLink
+      to="/admin/contenus/actualites"
+      class="mt-6 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+    >
+      <font-awesome-icon icon="fa-solid fa-arrow-left" class="h-4 w-4" />
+      Retour à la liste
+    </NuxtLink>
   </div>
 </template>

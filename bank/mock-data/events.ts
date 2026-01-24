@@ -3,6 +3,8 @@
  * Gestion complète des événements pour le back-office
  */
 
+import type { EditorJSContent } from './news'
+
 export type EventType = 'conference' | 'workshop' | 'ceremony' | 'seminar' | 'symposium' | 'other'
 export type EventStatus = 'draft' | 'published' | 'archived'
 
@@ -23,7 +25,14 @@ export interface Event {
   type: EventType
   type_other?: string
   description?: string
-  content?: string
+  /** Contenu riche FR (EditorJS format) */
+  content?: EditorJSContent
+  /** Contenu riche EN (EditorJS format) */
+  content_en?: EditorJSContent
+  /** Contenu riche AR (EditorJS format) */
+  content_ar?: EditorJSContent
+  /** Contenu HTML legacy (pour migration) */
+  content_html?: string
   cover_image?: string
 
   // Dates

@@ -148,6 +148,42 @@ import {
   type EventStats,
   type EventFilters
 } from '@bank/mock-data/events'
+import {
+  mockRegistrations,
+  registrationStatusLabels,
+  registrationStatusColors,
+  generateRegistrationId,
+  getAllRegistrations as getAllRegistrationsFromMock,
+  getRegistrationById as getRegistrationByIdFromMock,
+  getRegistrationsByEventId as getRegistrationsByEventIdFromMock,
+  getGlobalRegistrationStats,
+  getEventRegistrationStats,
+  getFilteredRegistrations,
+  getEventsWithRegistrations,
+  type EventRegistration,
+  type RegistrationStatus,
+  type RegistrationStats,
+  type RegistrationFilters
+} from '@bank/mock-data/event-registrations'
+import {
+  mockProjectCalls,
+  projectCallTypeLabels,
+  projectCallTypeColors,
+  projectCallStatusLabels,
+  projectCallStatusColors,
+  generateProjectCallId,
+  getAllProjectCalls as getAllProjectCallsFromMock,
+  getProjectCallById as getProjectCallByIdFromMock,
+  getProjectCallsByProjectId as getProjectCallsByProjectIdFromMock,
+  getProjectCallStats,
+  getFilteredProjectCalls,
+  getProjectsForSelect,
+  type ProjectCall,
+  type ProjectCallType,
+  type ProjectCallStatus,
+  type ProjectCallStats,
+  type ProjectCallFilters
+} from '@bank/mock-data/project-calls'
 
 export function useMockData() {
   // === DÉPARTEMENTS ===
@@ -784,6 +820,52 @@ export function useMockData() {
   // Statistiques des événements (admin)
   const getAdminEventStats = () => getEventStats()
 
+  // === INSCRIPTIONS AUX ÉVÉNEMENTS (ADMIN) ===
+  const registrations = computed(() => mockRegistrations)
+
+  // Récupérer toutes les inscriptions
+  const getAllRegistrations = () => getAllRegistrationsFromMock()
+
+  // Récupérer une inscription par ID
+  const getRegistrationById = (id: string) => getRegistrationByIdFromMock(id)
+
+  // Récupérer les inscriptions pour un événement
+  const getRegistrationsByEventId = (eventId: string) => getRegistrationsByEventIdFromMock(eventId)
+
+  // Statistiques globales des inscriptions
+  const getRegistrationStats = () => getGlobalRegistrationStats()
+
+  // Statistiques des inscriptions pour un événement
+  const getEventRegistrationStatsById = (eventId: string, capacity?: number) =>
+    getEventRegistrationStats(eventId, capacity)
+
+  // Récupérer les inscriptions filtrées
+  const getAdminFilteredRegistrations = (filters?: RegistrationFilters) => getFilteredRegistrations(filters)
+
+  // Liste des événements avec inscriptions (pour le select)
+  const getEventsForRegistrationFilter = () => getEventsWithRegistrations()
+
+  // === APPELS À PROJETS (ADMIN) ===
+  const projectCalls = computed(() => mockProjectCalls)
+
+  // Récupérer tous les appels à projets
+  const getAllProjectCalls = () => getAllProjectCallsFromMock()
+
+  // Récupérer un appel par ID
+  const getProjectCallById = (id: string) => getProjectCallByIdFromMock(id)
+
+  // Récupérer les appels d'un projet
+  const getProjectCallsByProjectId = (projectId: string) => getProjectCallsByProjectIdFromMock(projectId)
+
+  // Récupérer les appels filtrés
+  const getFilteredProjectCallsAdmin = (filters?: ProjectCallFilters) => getFilteredProjectCalls(filters)
+
+  // Statistiques des appels à projets
+  const getProjectCallsStats = () => getProjectCallStats()
+
+  // Liste des projets pour le select
+  const getProjectsForCallSelect = () => getProjectsForSelect()
+
   return {
     // Données
     departments,
@@ -1046,7 +1128,34 @@ export function useMockData() {
     eventStatusColors,
     generateEventId,
     generateEventPartnerId,
-    slugifyEvent
+    slugifyEvent,
+
+    // Inscriptions aux événements (admin)
+    registrations,
+    getAllRegistrations,
+    getRegistrationById,
+    getRegistrationsByEventId,
+    getRegistrationStats,
+    getEventRegistrationStatsById,
+    getAdminFilteredRegistrations,
+    getEventsForRegistrationFilter,
+    registrationStatusLabels,
+    registrationStatusColors,
+    generateRegistrationId,
+
+    // Appels à projets (admin)
+    projectCalls,
+    getAllProjectCalls,
+    getProjectCallById,
+    getProjectCallsByProjectId,
+    getFilteredProjectCallsAdmin,
+    getProjectCallsStats,
+    getProjectsForCallSelect,
+    projectCallTypeLabels,
+    projectCallTypeColors,
+    projectCallStatusLabels,
+    projectCallStatusColors,
+    generateProjectCallId
   }
 }
 
@@ -1124,7 +1233,16 @@ export type {
   EventType,
   EventStatus,
   EventStats,
-  EventFilters
+  EventFilters,
+  EventRegistration,
+  RegistrationStatus,
+  RegistrationStats,
+  RegistrationFilters,
+  ProjectCall,
+  ProjectCallType,
+  ProjectCallStatus,
+  ProjectCallStats,
+  ProjectCallFilters
 }
 
 // Re-export utility function

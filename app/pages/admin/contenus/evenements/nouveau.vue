@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Event, EventType, EventStatus } from '~/composables/useMockData'
+import type { OutputData } from '@editorjs/editorjs'
 
 definePageMeta({
   layout: 'admin'
@@ -20,6 +21,11 @@ const {
 // Onglet actif
 const activeTab = ref<'general' | 'datetime' | 'location' | 'registration' | 'associations' | 'options'>('general')
 
+// Contenu EditorJS (séparé du formulaire pour éviter les problèmes de réactivité)
+const content = ref<OutputData | undefined>(undefined)
+const contentEn = ref<OutputData | undefined>(undefined)
+const contentAr = ref<OutputData | undefined>(undefined)
+
 // État du formulaire
 const form = ref<Partial<Event>>({
   id: generateEventId(),
@@ -29,7 +35,6 @@ const form = ref<Partial<Event>>({
   type: 'conference',
   type_other: '',
   description: '',
-  content: '',
   cover_image: '',
   start_date: '',
   end_date: '',
@@ -117,12 +122,18 @@ const isSaving = ref(false)
 const saveForm = async () => {
   isSaving.value = true
   try {
-    // Ajout des métadonnées
+    // Ajout des métadonnées et du contenu EditorJS
     const now = new Date().toISOString()
-    form.value.created_at = now
-    form.value.updated_at = now
+    const eventData = {
+      ...form.value,
+      content: content.value,
+      content_en: contentEn.value,
+      content_ar: contentAr.value,
+      created_at: now,
+      updated_at: now
+    }
 
-    console.log('Creating event:', form.value)
+    console.log('Creating event:', eventData)
     // En production: POST /api/admin/events
     await new Promise(resolve => setTimeout(resolve, 1000))
     router.push('/admin/contenus/evenements')
@@ -284,19 +295,6 @@ const tabs = [
               placeholder="Brève description de l'événement..."
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
-          </div>
-
-          <div class="sm:col-span-2">
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Contenu détaillé
-            </label>
-            <textarea
-              v-model="form.content"
-              rows="8"
-              placeholder="Description complète, programme, intervenants... (HTML autorisé)"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            />
-            <p class="mt-1 text-xs text-gray-500">Vous pouvez utiliser du HTML pour formater le contenu</p>
           </div>
 
           <div class="sm:col-span-2">
@@ -638,6 +636,21 @@ const tabs = [
         </div>
       </div>
     </div>
+
+    <!-- Contenu détaillé -->
+    <AdminRichTextEditor
+      v-model="content"
+      v-model:model-value-en="contentEn"
+      v-model:model-value-ar="contentAr"
+      title="Contenu détaillé"
+      description="Rédigez le contenu complet de l'événement : programme, intervenants, informations pratiques..."
+      icon="fa-solid fa-file-lines"
+      icon-color="text-indigo-500"
+      placeholder="Décrivez en détail l'événement..."
+      placeholder-en="Describe the event in detail..."
+      placeholder-ar="صف الحدث بالتفصيل..."
+      :min-height="400"
+    />
 
     <!-- Footer actions -->
     <div class="sticky bottom-0 -mx-4 -mb-4 border-t border-gray-200 bg-gray-50 px-4 py-4 dark:border-gray-700 dark:bg-gray-900 sm:-mx-6 sm:px-6">
