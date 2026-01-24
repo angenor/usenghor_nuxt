@@ -64,7 +64,32 @@ import {
 import { mockAlumni, type Alumnus, type Industry } from '@bank/mock-data/alumni'
 import { mockSiteFacilities, type SiteFacility } from '@bank/mock-data/site-facilities'
 import { mockSiteGallery, type SiteGalleryItem, type MediaType } from '@bank/mock-data/site-gallery'
-import { mockAuditLogs, mockActiveUsersCount, type AuditLog, type AuditAction } from '@bank/mock-data/audit-logs'
+import {
+  mockAuditLogs,
+  mockActiveUsersCount,
+  auditActionLabels,
+  auditActionColors,
+  auditActionIcons,
+  tableLabels as auditTableLabels,
+  generateAuditLogId,
+  getAllAuditLogs as getAllAuditLogsFromMock,
+  getAuditLogById as getAuditLogByIdFromMock,
+  getAuditLogsByUserId as getAuditLogsByUserIdFromMock,
+  getAuditLogsByRecord as getAuditLogsByRecordFromMock,
+  getRecentAuditLogs as getRecentAuditLogsFromMock,
+  getAuditStats,
+  getDistinctTables as getAuditDistinctTables,
+  getDistinctUsers as getAuditDistinctUsers,
+  formatIpAddress,
+  formatUserAgent,
+  getTableLabel,
+  type AuditLog,
+  type AuditAction,
+  type AuditLogDetail,
+  type AuditChange,
+  type AuditLogFilters,
+  type AuditStats
+} from '@bank/mock-data/audit-logs'
 import { mockProgramSkills, generateSkillId, type ProgramSkill } from '@bank/mock-data/program-skills'
 import { mockProgramCareerOpportunities, generateCareerOpportunityId, type ProgramCareerOpportunity } from '@bank/mock-data/program-career-opportunities'
 import { mockProgramSemesters, mockProgramCourses, generateSemesterId, generateCourseId, type ProgramSemesterData, type ProgramCourse } from '@bank/mock-data/program-semesters'
@@ -452,6 +477,282 @@ import {
   type CampaignStats,
   type CampaignRecipient
 } from '@bank/mock-data/newsletter-campaigns'
+import {
+  mockEditorialCategories,
+  mockEditorialStatistics,
+  mockEditorialStatisticsHistory,
+  valueTypeLabels,
+  valueTypeColors,
+  generateStatisticId,
+  generateHistoryId,
+  getAllStatistics as getAllStatisticsFromMock,
+  getStatisticById as getStatisticByIdFromMock,
+  getStatisticByKey as getStatisticByKeyFromMock,
+  isKeyTaken as isStatisticKeyTakenFromMock,
+  getStatisticHistory as getStatisticHistoryFromMock,
+  getAllCategories as getAllEditorialCategoriesFromMock,
+  getCategoryById as getEditorialCategoryByIdFromMock,
+  getCategoryByCode as getEditorialCategoryByCodeFromMock,
+  getAvailableYears as getStatisticAvailableYearsFromMock,
+  getEditorialGlobalStats,
+  formatStatisticValue,
+  canEditStatistic,
+  canDeleteStatistic,
+  type EditorialValueType,
+  type EditorialCategory,
+  type EditorialStatistic,
+  type EditorialStatisticHistory,
+  type StatisticFilters,
+  type EditorialGlobalStats
+} from '@bank/mock-data/editorial-statistics'
+import {
+  mockContactInfo,
+  mockContactAddress,
+  mockContactPhones,
+  mockContactEmails,
+  mockContactHours,
+  mockContactFormConfig,
+  mockDepartmentContacts,
+  mockSocialMediaLinks,
+  mockEditorialContactContents,
+  mockContactHistory,
+  mockContactCategory,
+  getContactInfo as getContactInfoFromMock,
+  getContactAddress as getContactAddressFromMock,
+  getContactPhones as getContactPhonesFromMock,
+  getContactEmails as getContactEmailsFromMock,
+  getContactHours as getContactHoursFromMock,
+  getContactFormConfig as getContactFormConfigFromMock,
+  getDepartmentContacts as getDepartmentContactsFromMock,
+  getDepartmentContactById as getDepartmentContactByIdFromMock,
+  getSocialMediaLinks as getSocialMediaLinksFromMock,
+  getContactHistory as getContactHistoryFromMock,
+  getContactStats,
+  generateDepartmentContactId,
+  validateContactEmail,
+  validatePhoneNumber,
+  validateCoordinates,
+  formatPhoneNumber,
+  getGoogleMapsUrl,
+  getGoogleMapsUrlWithCoords,
+  getMailtoLink,
+  getTelLink,
+  contactSectionLabels,
+  contactSectionIcons,
+  socialMediaLabels,
+  socialMediaIcons,
+  socialMediaColors,
+  type ContactInfo,
+  type ContactAddress,
+  type ContactPhones,
+  type ContactEmails,
+  type ContactHours,
+  type ContactFormConfig,
+  type DepartmentContact,
+  type SocialMediaLinks,
+  type EditorialContactContent,
+  type ContactHistory,
+  type ContactStats
+} from '@bank/mock-data/editorial-contact'
+import {
+  mockSocialMediaLinks as mockSocialMediaLinksAdmin,
+  platformLabels,
+  platformIcons,
+  platformColors,
+  platformBadgeColors,
+  platformUrlPatterns,
+  platformUrlExamples,
+  generateSocialMediaId,
+  getAllSocialMedia as getAllSocialMediaFromMock,
+  getActiveSocialMedia as getActiveSocialMediaFromMock,
+  getSocialMediaById as getSocialMediaByIdFromMock,
+  getSocialMediaByPlatform as getSocialMediaByPlatformFromMock,
+  isPlatformUsed as isPlatformUsedFromMock,
+  validateSocialMediaUrl,
+  getNextDisplayOrder as getNextSocialMediaDisplayOrder,
+  getSocialMediaStats,
+  getAvailablePlatforms as getAvailablePlatformsFromMock,
+  formatSocialMediaUrl,
+  getPlatformIcon,
+  type SocialMediaPlatform,
+  type SocialMediaLink,
+  type SocialMediaStats
+} from '@bank/mock-data/editorial-social-media'
+import {
+  mockLegalPages,
+  mockLegalPageHistory,
+  mockLegalCategory,
+  getAllLegalPages as getAllLegalPagesFromMock,
+  getLegalPageByKey as getLegalPageByKeyFromMock,
+  getLegalPageById as getLegalPageByIdFromMock,
+  getLegalPageHistory as getLegalPageHistoryFromMock,
+  getLegalPagesStats,
+  canEditLegalPage,
+  generateLegalHistoryId,
+  legalPageLabels,
+  legalPageDescriptions,
+  legalPageIcons,
+  legalPageColors,
+  legalPageKeys,
+  type LegalPageKey,
+  type LegalPage,
+  type LegalPageHistory,
+  type LegalPagesStats
+} from '@bank/mock-data/editorial-legal'
+import {
+  mockValuesCategory,
+  mockValueSections,
+  mockCoreValues,
+  mockValuesHistory,
+  getAllValueSections as getAllValueSectionsFromMock,
+  getValueSectionById as getValueSectionByIdFromMock,
+  getValueSectionByKey as getValueSectionByKeyFromMock,
+  getAllCoreValues as getAllCoreValuesFromMock,
+  getCoreValueById as getCoreValueByIdFromMock,
+  isCoreValueTitleTaken as isCoreValueTitleTakenFromMock,
+  getValueHistory as getValueHistoryFromMock,
+  getAllValueHistory as getAllValueHistoryFromMock,
+  getNextCoreValueOrder as getNextCoreValueOrderFromMock,
+  getValuesGlobalStats,
+  canEditValueSection,
+  validateCoreValueTitle,
+  validateCoreValueDescription,
+  valueSectionLabels,
+  valueSectionDescriptions,
+  valueSectionIcons,
+  valueSectionColors,
+  availableIcons as coreValueAvailableIcons,
+  generateValueSectionId,
+  generateCoreValueId,
+  generateValueHistoryId,
+  type ValueSectionKey,
+  type ValueSection,
+  type CoreValue,
+  type ValueHistory,
+  type ValuesGlobalStats
+} from '@bank/mock-data/editorial-values'
+import {
+  mockCountriesRef,
+  getAllCountriesRef as getAllCountriesRefFromMock,
+  getActiveCountriesRef as getActiveCountriesRefFromMock,
+  getCountryByIdRef as getCountryByIdRefFromMock,
+  getCountryByIsoCodeRef as getCountryByIsoCodeRefFromMock,
+  isIsoCodeTaken as isIsoCodeTakenFromMock,
+  isIsoCode3Taken as isIsoCode3TakenFromMock,
+  getCountryStats as getCountryStatsFromMock,
+  getCountryFlagEmoji,
+  formatPhoneCodeDisplay,
+  validatePhoneCodeFormat,
+  validateIsoCode,
+  validateIsoCode3,
+  getCountriesForSelectRef as getCountriesForSelectRefFromMock,
+  generateCountryId,
+  type Country,
+  type CountryFilters,
+  type CountryStats
+} from '@bank/mock-data/ref-countries'
+import {
+  mockPermissions,
+  mockRoles,
+  mockRolePermissions,
+  permissionCategoryLabels,
+  generatePermissionId,
+  generateRoleId,
+  getAllPermissions as getAllPermissionsFromMock,
+  getPermissionById as getPermissionByIdFromMock,
+  getPermissionByCode as getPermissionByCodeFromMock,
+  isPermissionCodeTaken as isPermissionCodeTakenFromMock,
+  getPermissionsByCategory as getPermissionsByCategoryFromMock,
+  getPermissionCategories as getPermissionCategoriesFromMock,
+  getAllRoles as getAllRolesFromMock,
+  getRoleById as getRoleByIdFromMock,
+  getRoleByCode as getRoleByCodeFromMock,
+  getRolesByPermission as getRolesByPermissionFromMock,
+  getPermissionsByRole as getPermissionsByRoleFromMock,
+  roleHasPermission as roleHasPermissionFromMock,
+  getPermissionMatrix as getPermissionMatrixFromMock,
+  getPermissionStats as getPermissionStatsFromMock,
+  validatePermissionCode,
+  canDeletePermission as canDeletePermissionFromMock,
+  canEditRole as canEditRoleFromMock,
+  type Permission,
+  type Role,
+  type RolePermission,
+  type PermissionFilters,
+  type PermissionCategory,
+  type PermissionWithRoles,
+  type PermissionStats,
+  type PermissionMatrix,
+  type PermissionMatrixCategory,
+  type PermissionMatrixItem,
+  type PermissionMatrixChange
+} from '@bank/mock-data/admin-permissions'
+import {
+  mockUserRoles,
+  systemRoleCodes,
+  getUserCountByRole,
+  getPermissionCountByRole,
+  isSystemRole,
+  getAllRolesWithDetails as getAllRolesWithDetailsFromMock,
+  getRoleWithPermissions as getRoleWithPermissionsFromMock,
+  getUsersByRole as getUsersByRoleFromMock,
+  getPermissionsByCategoryForRole as getPermissionsByCategoryForRoleFromMock,
+  getRoleStats as getRoleStatsFromMock,
+  isRoleCodeAvailable as isRoleCodeAvailableFromMock,
+  validateRoleCode,
+  validateRoleName,
+  validateHierarchyLevel,
+  canDeleteRole as canDeleteRoleFromMock,
+  canModifyRole as canModifyRoleFromMock,
+  duplicateRole as duplicateRoleFromMock,
+  hierarchyLevelLabels,
+  getHierarchyLevelLabel,
+  getHierarchyLevelColor,
+  type RoleWithDetails,
+  type RoleWithPermissions,
+  type RoleUser,
+  type RoleFilters,
+  type RoleStats,
+  type PermissionCategoryGroup
+} from '@bank/mock-data/admin-roles'
+import {
+  mockUsers,
+  mockUserRoles as mockUserRolesAdmin,
+  mockCampuses as mockUserCampuses,
+  salutationLabels as userSalutationLabels,
+  salutationOptions,
+  statusColors as userStatusColors,
+  verificationColors,
+  roleColors,
+  generateUserId,
+  getFullName,
+  getUserRoles as getUserRolesFromMock,
+  enrichUser,
+  getAllUsersAdmin as getAllUsersAdminFromMock,
+  getUserByIdAdmin as getUserByIdAdminFromMock,
+  getUserByEmailAdmin as getUserByEmailAdminFromMock,
+  isEmailTakenUser as isEmailTakenUserFromMock,
+  getUserStats as getUserStatsFromMock,
+  getRolesForSelect as getRolesForSelectFromMock,
+  getCampusesForUserSelect as getCampusesForUserSelectFromMock,
+  getCountriesForUserSelect as getCountriesForUserSelectFromMock,
+  validateUserEmail,
+  validatePassword,
+  formatLastLogin,
+  getRoleColor,
+  canDeleteUser as canDeleteUserFromMock,
+  canDeactivateUser as canDeactivateUserFromMock,
+  getUserActivityHistory as getUserActivityHistoryFromMock,
+  type User,
+  type UserRole as UserRoleAdmin,
+  type UserWithRelations,
+  type UserFilters,
+  type UserStats,
+  type UserFormData,
+  type UserSalutation,
+  type BulkAction,
+  type BulkActionRequest
+} from '@bank/mock-data/users-admin'
 
 export function useMockData() {
   // === DÉPARTEMENTS ===
@@ -904,10 +1205,7 @@ export function useMockData() {
   // === AUDIT LOGS ===
   const auditLogs = computed(() => mockAuditLogs)
 
-  const getRecentAuditLogs = (limit = 10) =>
-    [...mockAuditLogs]
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, limit)
+  const getRecentAuditLogs = (limit = 10) => getRecentAuditLogsFromMock(limit)
 
   const getAuditLogsByAction = (action: AuditAction) =>
     mockAuditLogs
@@ -915,6 +1213,50 @@ export function useMockData() {
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
   const getActiveUsersCount = () => mockActiveUsersCount
+
+  // Fonctions d'audit avancées
+  const getAllAuditLogs = (filters?: AuditLogFilters) => getAllAuditLogsFromMock(filters)
+  const getAuditLogById = (id: string) => getAuditLogByIdFromMock(id)
+  const getAuditLogsByUserId = (userId: string) => getAuditLogsByUserIdFromMock(userId)
+  const getAuditLogsByRecord = (tableName: string, recordId: string) => getAuditLogsByRecordFromMock(tableName, recordId)
+  const getAuditStatistics = (dateFrom?: string, dateTo?: string) => getAuditStats(dateFrom, dateTo)
+  const getAuditDistinctTablesList = () => getAuditDistinctTables()
+  const getAuditDistinctUsersList = () => getAuditDistinctUsers()
+
+  // === UTILISATEURS (ADMIN) ===
+  const usersAdmin = computed(() => mockUsers)
+
+  // Récupérer tous les utilisateurs (admin)
+  const getAllUsersAdmin = (filters?: UserFilters) => getAllUsersAdminFromMock(filters)
+
+  // Récupérer un utilisateur par ID (admin)
+  const getUserByIdAdmin = (id: string) => getUserByIdAdminFromMock(id)
+
+  // Récupérer un utilisateur par email (admin)
+  const getUserByEmailAdmin = (email: string) => getUserByEmailAdminFromMock(email)
+
+  // Vérifier si un email est pris
+  const isUserEmailTaken = (email: string, excludeId?: string) => isEmailTakenUserFromMock(email, excludeId)
+
+  // Statistiques des utilisateurs
+  const getUserStatsAdmin = () => getUserStatsFromMock()
+
+  // Récupérer les rôles d'un utilisateur
+  const getUserRolesAdmin = (userId: string) => getUserRolesFromMock(userId)
+
+  // Récupérer l'historique d'activité d'un utilisateur
+  const getUserActivityHistory = (userId: string) => getUserActivityHistoryFromMock(userId)
+
+  // Vérifier si un utilisateur peut être supprimé
+  const canDeleteUser = (userId: string) => canDeleteUserFromMock(userId)
+
+  // Vérifier si un utilisateur peut être désactivé
+  const canDeactivateUser = (userId: string) => canDeactivateUserFromMock(userId)
+
+  // Listes pour les sélecteurs
+  const getRolesForUserSelect = () => getRolesForSelectFromMock()
+  const getCampusesForUserSelect = () => getCampusesForUserSelectFromMock()
+  const getCountriesForUserSelectAdmin = () => getCountriesForUserSelectFromMock()
 
   // === COMPÉTENCES (SKILLS) ===
   const programSkills = computed(() => mockProgramSkills)
@@ -1429,6 +1771,21 @@ export function useMockData() {
     getRecentAuditLogs,
     getAuditLogsByAction,
     getActiveUsersCount,
+    getAllAuditLogs,
+    getAuditLogById,
+    getAuditLogsByUserId,
+    getAuditLogsByRecord,
+    getAuditStatistics,
+    getAuditDistinctTablesList,
+    getAuditDistinctUsersList,
+    auditActionLabels,
+    auditActionColors,
+    auditActionIcons,
+    auditTableLabels,
+    generateAuditLogId,
+    formatIpAddress,
+    formatUserAgent,
+    getTableLabel,
 
     // Getters compétences (skills)
     programSkills,
@@ -1784,7 +2141,225 @@ export function useMockData() {
     generateCampaignId,
     generateSendId,
     defaultHtmlTemplate,
-    templateVariables
+    templateVariables,
+
+    // Chiffres clés (éditorial)
+    editorialCategories: mockEditorialCategories,
+    editorialStatistics: mockEditorialStatistics,
+    editorialStatisticsHistory: mockEditorialStatisticsHistory,
+    getAllStatistics: getAllStatisticsFromMock,
+    getStatisticById: getStatisticByIdFromMock,
+    getStatisticByKey: getStatisticByKeyFromMock,
+    isStatisticKeyTaken: isStatisticKeyTakenFromMock,
+    getStatisticHistory: getStatisticHistoryFromMock,
+    getAllEditorialCategories: getAllEditorialCategoriesFromMock,
+    getEditorialCategoryById: getEditorialCategoryByIdFromMock,
+    getEditorialCategoryByCode: getEditorialCategoryByCodeFromMock,
+    getStatisticAvailableYears: getStatisticAvailableYearsFromMock,
+    getEditorialGlobalStats,
+    formatStatisticValue,
+    canEditStatistic,
+    canDeleteStatistic,
+    valueTypeLabels,
+    valueTypeColors,
+    generateStatisticId,
+    generateHistoryId,
+
+    // Informations de contact (éditorial)
+    contactInfo: mockContactInfo,
+    contactAddress: mockContactAddress,
+    contactPhones: mockContactPhones,
+    contactEmails: mockContactEmails,
+    contactHours: mockContactHours,
+    contactFormConfig: mockContactFormConfig,
+    departmentContacts: mockDepartmentContacts,
+    socialMediaLinks: mockSocialMediaLinks,
+    editorialContactContents: mockEditorialContactContents,
+    contactHistory: mockContactHistory,
+    contactCategory: mockContactCategory,
+    getContactInfo: getContactInfoFromMock,
+    getContactAddress: getContactAddressFromMock,
+    getContactPhones: getContactPhonesFromMock,
+    getContactEmails: getContactEmailsFromMock,
+    getContactHours: getContactHoursFromMock,
+    getContactFormConfig: getContactFormConfigFromMock,
+    getDepartmentContacts: getDepartmentContactsFromMock,
+    getDepartmentContactById: getDepartmentContactByIdFromMock,
+    getSocialMediaLinks: getSocialMediaLinksFromMock,
+    getContactHistory: getContactHistoryFromMock,
+    getContactStats,
+    generateDepartmentContactId,
+    validateContactEmail,
+    validatePhoneNumber,
+    validateCoordinates,
+    formatPhoneNumber,
+    getGoogleMapsUrl,
+    getGoogleMapsUrlWithCoords,
+    getMailtoLink,
+    getTelLink,
+    contactSectionLabels,
+    contactSectionIcons,
+    socialMediaLabels,
+    socialMediaIcons,
+    socialMediaColors,
+
+    // Réseaux sociaux (éditorial - gestion admin)
+    socialMediaLinksAdmin: mockSocialMediaLinksAdmin,
+    getAllSocialMedia: getAllSocialMediaFromMock,
+    getActiveSocialMedia: getActiveSocialMediaFromMock,
+    getSocialMediaById: getSocialMediaByIdFromMock,
+    getSocialMediaByPlatform: getSocialMediaByPlatformFromMock,
+    isPlatformUsed: isPlatformUsedFromMock,
+    validateSocialMediaUrl,
+    getNextSocialMediaDisplayOrder,
+    getSocialMediaStats,
+    getAvailablePlatforms: getAvailablePlatformsFromMock,
+    formatSocialMediaUrl,
+    getPlatformIcon,
+    platformLabels,
+    platformIcons,
+    platformColors,
+    platformBadgeColors,
+    platformUrlPatterns,
+    platformUrlExamples,
+    generateSocialMediaId,
+
+    // Pages légales (éditorial)
+    legalPages: mockLegalPages,
+    legalPageHistory: mockLegalPageHistory,
+    legalCategory: mockLegalCategory,
+    getAllLegalPages: getAllLegalPagesFromMock,
+    getLegalPageByKey: getLegalPageByKeyFromMock,
+    getLegalPageById: getLegalPageByIdFromMock,
+    getLegalPageHistory: getLegalPageHistoryFromMock,
+    getLegalPagesStats,
+    canEditLegalPage,
+    generateLegalHistoryId,
+    legalPageLabels,
+    legalPageDescriptions,
+    legalPageIcons,
+    legalPageColors,
+    legalPageKeys,
+
+    // Valeurs éditoriaux (mission, vision, valeurs fondamentales)
+    valuesCategory: mockValuesCategory,
+    valueSections: mockValueSections,
+    coreValues: mockCoreValues,
+    valuesHistory: mockValuesHistory,
+    getAllValueSections: getAllValueSectionsFromMock,
+    getValueSectionById: getValueSectionByIdFromMock,
+    getValueSectionByKey: getValueSectionByKeyFromMock,
+    getAllCoreValues: getAllCoreValuesFromMock,
+    getCoreValueById: getCoreValueByIdFromMock,
+    isCoreValueTitleTaken: isCoreValueTitleTakenFromMock,
+    getValueHistory: getValueHistoryFromMock,
+    getAllValueHistory: getAllValueHistoryFromMock,
+    getNextCoreValueOrder: getNextCoreValueOrderFromMock,
+    getValuesGlobalStats,
+    canEditValueSection,
+    validateCoreValueTitle,
+    validateCoreValueDescription,
+    valueSectionLabels,
+    valueSectionDescriptions,
+    valueSectionIcons,
+    valueSectionColors,
+    coreValueAvailableIcons,
+    generateValueSectionId,
+    generateCoreValueId,
+    generateValueHistoryId,
+
+    // Pays (références)
+    countriesRef: mockCountriesRef,
+    getAllCountriesRef: getAllCountriesRefFromMock,
+    getActiveCountriesRef: getActiveCountriesRefFromMock,
+    getCountryByIdRef: getCountryByIdRefFromMock,
+    getCountryByIsoCodeRef: getCountryByIsoCodeRefFromMock,
+    isIsoCodeTaken: isIsoCodeTakenFromMock,
+    isIsoCode3Taken: isIsoCode3TakenFromMock,
+    getCountryStats: getCountryStatsFromMock,
+    getCountryFlagEmoji,
+    formatPhoneCodeDisplay,
+    validatePhoneCodeFormat,
+    validateIsoCode,
+    validateIsoCode3,
+    getCountriesForSelectRef: getCountriesForSelectRefFromMock,
+    generateCountryId,
+
+    // Permissions et rôles (administration)
+    permissions: mockPermissions,
+    roles: mockRoles,
+    rolePermissions: mockRolePermissions,
+    permissionCategoryLabels,
+    getAllPermissions: getAllPermissionsFromMock,
+    getPermissionById: getPermissionByIdFromMock,
+    getPermissionByCode: getPermissionByCodeFromMock,
+    isPermissionCodeTaken: isPermissionCodeTakenFromMock,
+    getPermissionsByCategory: getPermissionsByCategoryFromMock,
+    getPermissionCategories: getPermissionCategoriesFromMock,
+    getAllRoles: getAllRolesFromMock,
+    getRoleById: getRoleByIdFromMock,
+    getRoleByCode: getRoleByCodeFromMock,
+    getRolesByPermission: getRolesByPermissionFromMock,
+    getPermissionsByRole: getPermissionsByRoleFromMock,
+    roleHasPermission: roleHasPermissionFromMock,
+    getPermissionMatrix: getPermissionMatrixFromMock,
+    getPermissionStats: getPermissionStatsFromMock,
+    validatePermissionCode,
+    canDeletePermission: canDeletePermissionFromMock,
+    canEditRole: canEditRoleFromMock,
+    generatePermissionId,
+    generateRoleId,
+
+    // Rôles (administration avancée)
+    userRoles: mockUserRoles,
+    systemRoleCodes,
+    getUserCountByRole,
+    getPermissionCountByRole,
+    isSystemRole,
+    getAllRolesWithDetails: getAllRolesWithDetailsFromMock,
+    getRoleWithPermissions: getRoleWithPermissionsFromMock,
+    getUsersByRole: getUsersByRoleFromMock,
+    getPermissionsByCategoryForRole: getPermissionsByCategoryForRoleFromMock,
+    getRoleStats: getRoleStatsFromMock,
+    isRoleCodeAvailable: isRoleCodeAvailableFromMock,
+    validateRoleCode,
+    validateRoleName,
+    validateHierarchyLevel,
+    canDeleteRole: canDeleteRoleFromMock,
+    canModifyRole: canModifyRoleFromMock,
+    duplicateRole: duplicateRoleFromMock,
+    hierarchyLevelLabels,
+    getHierarchyLevelLabel,
+    getHierarchyLevelColor,
+
+    // Utilisateurs (administration)
+    usersAdmin,
+    userRolesAdmin: mockUserRolesAdmin,
+    userCampuses: mockUserCampuses,
+    getAllUsersAdmin,
+    getUserByIdAdmin,
+    getUserByEmailAdmin,
+    isUserEmailTaken,
+    getUserStatsAdmin,
+    getUserRolesAdmin,
+    getUserActivityHistory,
+    canDeleteUser,
+    canDeactivateUser,
+    getRolesForUserSelect,
+    getCampusesForUserSelect,
+    getCountriesForUserSelectAdmin,
+    userSalutationLabels,
+    salutationOptions,
+    userStatusColors,
+    verificationColors,
+    roleColors,
+    generateUserId,
+    getFullName,
+    enrichUser,
+    validateUserEmail,
+    validatePassword,
+    formatLastLogin,
+    getRoleColor
   }
 }
 
@@ -1821,6 +2396,10 @@ export type {
   MediaType,
   AuditLog,
   AuditAction,
+  AuditLogDetail,
+  AuditChange,
+  AuditLogFilters,
+  AuditStats,
   ProgramSkill,
   ProgramCareerOpportunity,
   ProgramSemesterData,
@@ -1939,7 +2518,74 @@ export type {
   CampaignPerformance,
   SourceDistribution,
   SendTimeRecommendation,
-  PeriodComparison
+  PeriodComparison,
+  // Editorial statistics types
+  EditorialValueType,
+  EditorialCategory,
+  EditorialStatistic,
+  EditorialStatisticHistory,
+  StatisticFilters,
+  EditorialGlobalStats,
+  // Editorial contact types
+  ContactInfo,
+  ContactAddress,
+  ContactPhones,
+  ContactEmails,
+  ContactHours,
+  ContactFormConfig,
+  DepartmentContact,
+  SocialMediaLinks,
+  EditorialContactContent,
+  ContactHistory,
+  ContactStats,
+  // Editorial social media types
+  SocialMediaPlatform,
+  SocialMediaLink,
+  SocialMediaStats,
+  // Editorial legal types
+  LegalPageKey,
+  LegalPage,
+  LegalPageHistory,
+  LegalPagesStats,
+  // Editorial values types
+  ValueSectionKey,
+  ValueSection,
+  CoreValue,
+  ValueHistory,
+  ValuesGlobalStats,
+  // Reference countries types
+  Country,
+  CountryFilters,
+  CountryStats,
+  // Permissions and roles types
+  Permission,
+  Role,
+  RolePermission,
+  PermissionFilters,
+  PermissionCategory,
+  PermissionWithRoles,
+  PermissionStats,
+  PermissionMatrix,
+  PermissionMatrixCategory,
+  PermissionMatrixItem,
+  PermissionMatrixChange,
+  // Admin roles types
+  RoleWithDetails,
+  RoleWithPermissions,
+  RoleUser,
+  RoleFilters,
+  RoleStats,
+  PermissionCategoryGroup,
+  // Admin users types
+  User,
+  UserRoleAdmin,
+  UserWithRelations,
+  UserFilters,
+  UserStats,
+  UserFormData,
+  UserSalutation,
+  BulkAction,
+  BulkActionRequest
 }
 
 // Re-export utility function
