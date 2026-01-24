@@ -30,6 +30,7 @@ import { mockSiteGallery, type SiteGalleryItem, type MediaType } from '@bank/moc
 import { mockAuditLogs, mockActiveUsersCount, type AuditLog, type AuditAction } from '@bank/mock-data/audit-logs'
 import { mockProgramSkills, generateSkillId, type ProgramSkill } from '@bank/mock-data/program-skills'
 import { mockProgramCareerOpportunities, generateCareerOpportunityId, type ProgramCareerOpportunity } from '@bank/mock-data/program-career-opportunities'
+import { mockProgramSemesters, mockProgramCourses, generateSemesterId, generateCourseId, type ProgramSemesterData, type ProgramCourse } from '@bank/mock-data/program-semesters'
 
 export function useMockData() {
   // === DÉPARTEMENTS ===
@@ -454,6 +455,63 @@ export function useMockData() {
     return programIds.map(id => mockFormations.find(f => f.id === id)).filter(Boolean)
   }
 
+  // === SEMESTRES ET COURS ===
+  const programSemesters = computed(() => mockProgramSemesters)
+  const programCourses = computed(() => mockProgramCourses)
+
+  // Récupérer tous les semestres d'un programme
+  const getSemestersByProgram = (programId: string) =>
+    [...mockProgramSemesters]
+      .filter(s => s.program_id === programId)
+      .sort((a, b) => a.display_order - b.display_order)
+
+  // Récupérer un semestre par ID
+  const getSemesterById = (semesterId: string) =>
+    mockProgramSemesters.find(s => s.id === semesterId)
+
+  // Récupérer tous les cours d'un semestre
+  const getCoursesBySemester = (semesterId: string) =>
+    [...mockProgramCourses]
+      .filter(c => c.semester_id === semesterId)
+      .sort((a, b) => a.display_order - b.display_order)
+
+  // Récupérer un cours par ID
+  const getCourseById = (courseId: string) =>
+    mockProgramCourses.find(c => c.id === courseId)
+
+  // Récupérer tous les cours d'un programme (à travers ses semestres)
+  const getCoursesByProgram = (programId: string) => {
+    const semesterIds = mockProgramSemesters
+      .filter(s => s.program_id === programId)
+      .map(s => s.id)
+    return mockProgramCourses
+      .filter(c => semesterIds.includes(c.semester_id))
+      .sort((a, b) => a.display_order - b.display_order)
+  }
+
+  // Récupérer les programmes qui ont des semestres définis
+  const getProgramsWithSemesters = () => {
+    const programIds = [...new Set(mockProgramSemesters.map(s => s.program_id))]
+    return programIds.map(id => mockFormations.find(f => f.id === id)).filter(Boolean)
+  }
+
+  // Calculer le total des crédits d'un semestre
+  const getSemesterTotalCredits = (semesterId: string) =>
+    mockProgramCourses
+      .filter(c => c.semester_id === semesterId)
+      .reduce((sum, c) => sum + (c.credits || 0), 0)
+
+  // Calculer le total des heures d'un semestre
+  const getSemesterTotalHours = (semesterId: string) => {
+    const courses = mockProgramCourses.filter(c => c.semester_id === semesterId)
+    return {
+      lecture: courses.reduce((sum, c) => sum + c.lecture_hours, 0),
+      tutorial: courses.reduce((sum, c) => sum + c.tutorial_hours, 0),
+      practical: courses.reduce((sum, c) => sum + c.practical_hours, 0),
+      total: courses.reduce((sum, c) => sum + c.lecture_hours + c.tutorial_hours + c.practical_hours, 0)
+    }
+  }
+
   return {
     // Données
     departments,
@@ -604,6 +662,20 @@ export function useMockData() {
     getProgramsWithCareerOpportunities,
     generateCareerOpportunityId,
 
+    // Getters semestres et cours
+    programSemesters,
+    programCourses,
+    getSemestersByProgram,
+    getSemesterById,
+    getCoursesBySemester,
+    getCourseById,
+    getCoursesByProgram,
+    getProgramsWithSemesters,
+    getSemesterTotalCredits,
+    getSemesterTotalHours,
+    generateSemesterId,
+    generateCourseId,
+
     // Utilitaires
     getFlagEmoji
   }
@@ -641,7 +713,9 @@ export type {
   AuditLog,
   AuditAction,
   ProgramSkill,
-  ProgramCareerOpportunity
+  ProgramCareerOpportunity,
+  ProgramSemesterData,
+  ProgramCourse
 }
 
 // Re-export utility function

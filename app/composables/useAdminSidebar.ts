@@ -484,6 +484,13 @@ export function useAdminSidebar() {
   // Vérifie si une route est active
   const isRouteActive = (itemRoute?: string) => {
     if (!itemRoute) return false
+
+    // Cas spécial pour le tableau de bord : correspondance exacte uniquement
+    if (itemRoute === '/admin') {
+      return route.path === '/admin' || route.path === '/admin/'
+    }
+
+    // Pour les autres routes : correspondance exacte ou préfixe
     return route.path === itemRoute || route.path.startsWith(itemRoute + '/')
   }
 

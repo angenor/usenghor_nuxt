@@ -7,6 +7,19 @@
 export type FormationType = 'doctorat' | 'master' | 'du' | 'certifiante'
 export type CampusType = 'alexandrie' | 'externalise' | 'en_ligne'
 
+// Type pour le contenu EditorJS (compatible avec OutputData)
+export interface EditorJSBlock {
+  id?: string
+  type: string
+  data: Record<string, unknown>
+}
+
+export interface EditorJSContent {
+  time?: number
+  blocks: EditorJSBlock[]
+  version?: string
+}
+
 export interface ProgramModule {
   name: string
   credits?: number
@@ -27,6 +40,9 @@ export interface Formation {
   title_ar?: string
   short_description_fr: string
   short_description_en?: string
+  // Contenu détaillé (EditorJS format)
+  content_fr?: EditorJSContent
+  content_en?: EditorJSContent
   department_id: string
   campus: CampusType
   campus_externalise_id?: string
@@ -34,6 +50,7 @@ export interface Formation {
   duration_en?: string
   credits?: number
   diploma_fr?: string
+  diploma_en?: string
   image?: string
   pdf_url?: string
   is_published: boolean
