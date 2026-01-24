@@ -31,6 +31,52 @@ import { mockAuditLogs, mockActiveUsersCount, type AuditLog, type AuditAction } 
 import { mockProgramSkills, generateSkillId, type ProgramSkill } from '@bank/mock-data/program-skills'
 import { mockProgramCareerOpportunities, generateCareerOpportunityId, type ProgramCareerOpportunity } from '@bank/mock-data/program-career-opportunities'
 import { mockProgramSemesters, mockProgramCourses, generateSemesterId, generateCourseId, type ProgramSemesterData, type ProgramCourse } from '@bank/mock-data/program-semesters'
+import {
+  mockApplicationCalls,
+  callTypeLabels,
+  callTypeColors,
+  callStatusLabels,
+  callStatusColors,
+  publicationStatusLabels,
+  publicationStatusColors,
+  generateCallId,
+  generateCriteriaId,
+  generateCoverageId,
+  generateDocumentId,
+  generateScheduleId,
+  type ApplicationCall,
+  type EligibilityCriteria,
+  type CallCoverage,
+  type RequiredDocument,
+  type CallScheduleItem,
+  type CallType,
+  type CallStatus,
+  type PublicationStatus
+} from '@bank/mock-data/application-calls'
+import {
+  mockApplications,
+  mockReviewers,
+  applicationStatusLabels,
+  applicationStatusColors,
+  salutationLabels,
+  maritalStatusLabels,
+  employmentStatusLabels,
+  experienceDurationLabels,
+  getApplicationsStats,
+  getReviewerStats,
+  generateApplicationId,
+  generateDegreeId,
+  generateDocId,
+  type Application,
+  type ApplicationDegree,
+  type ApplicationDocument,
+  type ApplicationStatus,
+  type MaritalStatus,
+  type EmploymentStatus,
+  type ExperienceDuration,
+  type Salutation,
+  type Reviewer
+} from '@bank/mock-data/applications'
 
 export function useMockData() {
   // === DÉPARTEMENTS ===
@@ -512,6 +558,96 @@ export function useMockData() {
     }
   }
 
+  // === APPELS À CANDIDATURES (ADMIN) ===
+  const applicationCalls = computed(() => mockApplicationCalls)
+
+  // Récupérer tous les appels
+  const getAllApplicationCalls = () =>
+    [...mockApplicationCalls].sort((a, b) =>
+      new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+    )
+
+  // Récupérer un appel par ID
+  const getApplicationCallById = (id: string) =>
+    mockApplicationCalls.find(c => c.id === id)
+
+  // Récupérer un appel par slug
+  const getApplicationCallBySlug = (slug: string) =>
+    mockApplicationCalls.find(c => c.slug === slug)
+
+  // Appels par type
+  const getApplicationCallsByType = (type: CallType) =>
+    mockApplicationCalls.filter(c => c.type === type)
+
+  // Appels par statut
+  const getApplicationCallsByStatus = (status: CallStatus) =>
+    mockApplicationCalls.filter(c => c.status === status)
+
+  // Appels par statut de publication
+  const getApplicationCallsByPublicationStatus = (status: PublicationStatus) =>
+    mockApplicationCalls.filter(c => c.publication_status === status)
+
+  // Appels publiés et en cours
+  const getPublishedOngoingCalls = () =>
+    mockApplicationCalls.filter(c =>
+      c.publication_status === 'published' &&
+      (c.status === 'ongoing' || c.status === 'upcoming')
+    )
+
+  // Statistiques des appels
+  const getApplicationCallsStats = () => ({
+    total: mockApplicationCalls.length,
+    published: mockApplicationCalls.filter(c => c.publication_status === 'published').length,
+    draft: mockApplicationCalls.filter(c => c.publication_status === 'draft').length,
+    ongoing: mockApplicationCalls.filter(c => c.status === 'ongoing').length,
+    upcoming: mockApplicationCalls.filter(c => c.status === 'upcoming').length,
+    closed: mockApplicationCalls.filter(c => c.status === 'closed').length,
+    totalApplications: mockApplicationCalls.reduce((sum, c) => sum + (c.applications_count || 0), 0)
+  })
+
+  // === CANDIDATURES (DOSSIERS) ===
+  const applications = computed(() => mockApplications)
+
+  // Récupérer toutes les candidatures
+  const getAllApplications = () =>
+    [...mockApplications].sort((a, b) =>
+      new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime()
+    )
+
+  // Récupérer une candidature par ID
+  const getApplicationById = (id: string) =>
+    mockApplications.find(a => a.id === id)
+
+  // Récupérer une candidature par référence
+  const getApplicationByReference = (reference: string) =>
+    mockApplications.find(a => a.reference_number === reference)
+
+  // Candidatures par statut
+  const getApplicationsByStatus = (status: ApplicationStatus) =>
+    mockApplications.filter(a => a.status === status)
+
+  // Candidatures par appel
+  const getApplicationsByCall = (callId: string) =>
+    mockApplications.filter(a => a.call_id === callId)
+
+  // Candidatures par évaluateur
+  const getApplicationsByReviewer = (reviewerId: string) =>
+    mockApplications.filter(a => a.reviewer_external_id === reviewerId)
+
+  // Candidatures non assignées
+  const getUnassignedApplications = () =>
+    mockApplications.filter(a => !a.reviewer_external_id && a.status === 'submitted')
+
+  // Statistiques des candidatures (utilise la fonction du mock)
+  const getApplicationsStatistics = getApplicationsStats
+
+  // Statistiques par évaluateur (utilise la fonction du mock)
+  const getReviewersStatistics = getReviewerStats
+
+  // Liste des évaluateurs
+  const reviewers = computed(() => mockReviewers)
+  const getAllReviewers = () => [...mockReviewers]
+
   return {
     // Données
     departments,
@@ -677,7 +813,52 @@ export function useMockData() {
     generateCourseId,
 
     // Utilitaires
-    getFlagEmoji
+    getFlagEmoji,
+
+    // Appels à candidatures (admin)
+    applicationCalls,
+    getAllApplicationCalls,
+    getApplicationCallById,
+    getApplicationCallBySlug,
+    getApplicationCallsByType,
+    getApplicationCallsByStatus,
+    getApplicationCallsByPublicationStatus,
+    getPublishedOngoingCalls,
+    getApplicationCallsStats,
+    callTypeLabels,
+    callTypeColors,
+    callStatusLabels,
+    callStatusColors,
+    publicationStatusLabels,
+    publicationStatusColors,
+    generateCallId,
+    generateCriteriaId,
+    generateCoverageId,
+    generateDocumentId,
+    generateScheduleId,
+
+    // Candidatures (dossiers)
+    applications,
+    reviewers,
+    getAllApplications,
+    getApplicationById,
+    getApplicationByReference,
+    getApplicationsByStatus,
+    getApplicationsByCall,
+    getApplicationsByReviewer,
+    getUnassignedApplications,
+    getApplicationsStatistics,
+    getReviewersStatistics,
+    getAllReviewers,
+    applicationStatusLabels,
+    applicationStatusColors,
+    salutationLabels,
+    maritalStatusLabels,
+    employmentStatusLabels,
+    experienceDurationLabels,
+    generateApplicationId,
+    generateDegreeId,
+    generateDocId
   }
 }
 
@@ -715,7 +896,24 @@ export type {
   ProgramSkill,
   ProgramCareerOpportunity,
   ProgramSemesterData,
-  ProgramCourse
+  ProgramCourse,
+  ApplicationCall,
+  EligibilityCriteria,
+  CallCoverage,
+  RequiredDocument,
+  CallScheduleItem,
+  CallType,
+  CallStatus,
+  PublicationStatus,
+  Application,
+  ApplicationDegree,
+  ApplicationDocument,
+  ApplicationStatus,
+  MaritalStatus,
+  EmploymentStatus,
+  ExperienceDuration,
+  Salutation,
+  Reviewer
 }
 
 // Re-export utility function
