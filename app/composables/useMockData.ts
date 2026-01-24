@@ -29,6 +29,7 @@ import { mockSiteFacilities, type SiteFacility } from '@bank/mock-data/site-faci
 import { mockSiteGallery, type SiteGalleryItem, type MediaType } from '@bank/mock-data/site-gallery'
 import { mockAuditLogs, mockActiveUsersCount, type AuditLog, type AuditAction } from '@bank/mock-data/audit-logs'
 import { mockProgramSkills, generateSkillId, type ProgramSkill } from '@bank/mock-data/program-skills'
+import { mockProgramCareerOpportunities, generateCareerOpportunityId, type ProgramCareerOpportunity } from '@bank/mock-data/program-career-opportunities'
 
 export function useMockData() {
   // === DÉPARTEMENTS ===
@@ -434,6 +435,25 @@ export function useMockData() {
     return programIds.map(id => mockFormations.find(f => f.id === id)).filter(Boolean)
   }
 
+  // === DÉBOUCHÉS (CAREER OPPORTUNITIES) ===
+  const programCareerOpportunities = computed(() => mockProgramCareerOpportunities)
+
+  const getCareerOpportunitiesByProgram = (programId: string) =>
+    [...mockProgramCareerOpportunities]
+      .filter(c => c.program_id === programId)
+      .sort((a, b) => a.display_order - b.display_order)
+
+  const getCareerOpportunityById = (id: string) =>
+    mockProgramCareerOpportunities.find(c => c.id === id)
+
+  const getAllCareerOpportunities = () =>
+    [...mockProgramCareerOpportunities].sort((a, b) => a.display_order - b.display_order)
+
+  const getProgramsWithCareerOpportunities = () => {
+    const programIds = [...new Set(mockProgramCareerOpportunities.map(c => c.program_id))]
+    return programIds.map(id => mockFormations.find(f => f.id === id)).filter(Boolean)
+  }
+
   return {
     // Données
     departments,
@@ -576,6 +596,14 @@ export function useMockData() {
     getProgramsWithSkills,
     generateSkillId,
 
+    // Getters débouchés (career opportunities)
+    programCareerOpportunities,
+    getCareerOpportunitiesByProgram,
+    getCareerOpportunityById,
+    getAllCareerOpportunities,
+    getProgramsWithCareerOpportunities,
+    generateCareerOpportunityId,
+
     // Utilitaires
     getFlagEmoji
   }
@@ -612,7 +640,8 @@ export type {
   MediaType,
   AuditLog,
   AuditAction,
-  ProgramSkill
+  ProgramSkill,
+  ProgramCareerOpportunity
 }
 
 // Re-export utility function
