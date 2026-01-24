@@ -67,6 +67,60 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   background: rgb(75 85 99 / 0.7);
 }
 
+/* Fix scroll trackpad macOS pour conteneurs nested */
+.overflow-y-auto,
+.overflow-y-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+/* Scrollbar visible pour admin */
+.admin-scrollbar {
+  scrollbar-width: auto;
+  scrollbar-color: rgb(156 163 175) rgb(229 231 235);
+}
+
+.admin-scrollbar::-webkit-scrollbar {
+  width: 12px;
+  background: rgb(229 231 235);
+}
+
+.admin-scrollbar::-webkit-scrollbar-track {
+  background: rgb(229 231 235);
+  border-radius: 6px;
+}
+
+.admin-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(156 163 175);
+  border-radius: 6px;
+  border: 2px solid rgb(229 231 235);
+}
+
+.admin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgb(107 114 128);
+}
+
+html.dark .admin-scrollbar {
+  scrollbar-color: rgb(75 85 99) rgb(55 65 81);
+}
+
+html.dark .admin-scrollbar::-webkit-scrollbar {
+  background: rgb(55 65 81);
+}
+
+html.dark .admin-scrollbar::-webkit-scrollbar-track {
+  background: rgb(55 65 81);
+}
+
+html.dark .admin-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(75 85 99);
+  border-color: rgb(55 65 81);
+}
+
+html.dark .admin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgb(107 114 128);
+}
+
 /* ===========================================
    Section Bubble Waves - Département Styles
    =========================================== */

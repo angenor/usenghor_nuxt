@@ -27,6 +27,8 @@ import { mockProjects, type Project, type ProjectPartner, type ProjectCountry, g
 import { mockAlumni, type Alumnus, type Industry } from '@bank/mock-data/alumni'
 import { mockSiteFacilities, type SiteFacility } from '@bank/mock-data/site-facilities'
 import { mockSiteGallery, type SiteGalleryItem, type MediaType } from '@bank/mock-data/site-gallery'
+import { mockAuditLogs, mockActiveUsersCount, type AuditLog, type AuditAction } from '@bank/mock-data/audit-logs'
+import { mockProgramSkills, generateSkillId, type ProgramSkill } from '@bank/mock-data/program-skills'
 
 export function useMockData() {
   // === DÉPARTEMENTS ===
@@ -398,6 +400,40 @@ export function useMockData() {
   const getSiteGalleryByFacility = (facilityId: string) =>
     mockSiteGallery.filter(g => g.facility_id === facilityId).sort((a, b) => a.sort_order - b.sort_order)
 
+  // === AUDIT LOGS ===
+  const auditLogs = computed(() => mockAuditLogs)
+
+  const getRecentAuditLogs = (limit = 10) =>
+    [...mockAuditLogs]
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, limit)
+
+  const getAuditLogsByAction = (action: AuditAction) =>
+    mockAuditLogs
+      .filter(log => log.action === action)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+
+  const getActiveUsersCount = () => mockActiveUsersCount
+
+  // === COMPÉTENCES (SKILLS) ===
+  const programSkills = computed(() => mockProgramSkills)
+
+  const getSkillsByProgram = (programId: string) =>
+    [...mockProgramSkills]
+      .filter(s => s.program_id === programId)
+      .sort((a, b) => a.display_order - b.display_order)
+
+  const getSkillById = (skillId: string) =>
+    mockProgramSkills.find(s => s.id === skillId)
+
+  const getAllSkills = () =>
+    [...mockProgramSkills].sort((a, b) => a.display_order - b.display_order)
+
+  const getProgramsWithSkills = () => {
+    const programIds = [...new Set(mockProgramSkills.map(s => s.program_id))]
+    return programIds.map(id => mockFormations.find(f => f.id === id)).filter(Boolean)
+  }
+
   return {
     // Données
     departments,
@@ -526,6 +562,20 @@ export function useMockData() {
     getSiteVideos,
     getSiteGalleryByFacility,
 
+    // Getters audit logs
+    auditLogs,
+    getRecentAuditLogs,
+    getAuditLogsByAction,
+    getActiveUsersCount,
+
+    // Getters compétences (skills)
+    programSkills,
+    getSkillsByProgram,
+    getSkillById,
+    getAllSkills,
+    getProgramsWithSkills,
+    generateSkillId,
+
     // Utilitaires
     getFlagEmoji
   }
@@ -559,7 +609,10 @@ export type {
   Industry,
   SiteFacility,
   SiteGalleryItem,
-  MediaType
+  MediaType,
+  AuditLog,
+  AuditAction,
+  ProgramSkill
 }
 
 // Re-export utility function

@@ -55,7 +55,7 @@ const { isDark, toggle: toggleDarkMode } = useDarkMode()
     </div>
 
     <!-- Navigation -->
-    <nav class="flex-1 overflow-y-auto py-4 px-3">
+    <nav class="admin-scrollbar flex-1 min-h-0 overflow-y-scroll py-4 px-3" data-lenis-prevent>
       <ul class="space-y-1">
         <li v-for="item in sidebarItems" :key="item.id">
           <!-- Item sans enfants (lien direct) -->
@@ -240,3 +240,5 @@ const { isDark, toggle: toggleDarkMode } = useDarkMode()
     </div>
   </aside>
 </template>
+
+<!-- Styles scrollbar dans base.css avec classe .admin-scrollbar -->
