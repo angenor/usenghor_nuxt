@@ -5,6 +5,11 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   ssr: true,
+  runtimeConfig: {
+    public: {
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+    }
+  },
   alias: {
     '@bank': fileURLToPath(new URL('./bank', import.meta.url))
   },
@@ -13,6 +18,12 @@ export default defineNuxtConfig({
     prerender: {
       failOnError: false,
       crawlLinks: true
+    },
+    devProxy: {
+      '/api': {
+        target: 'http://localhost:8000/api',
+        changeOrigin: true
+      }
     }
   },
   vite: {

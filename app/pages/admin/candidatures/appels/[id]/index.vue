@@ -1,32 +1,51 @@
 <script setup lang="ts">
-import type { ApplicationCall } from '~/composables/useMockData'
+import type { ApplicationCallWithDetails } from '~/types/api'
+import {
+  callTypeLabels,
+  callTypeColors,
+  callStatusLabels,
+  callStatusColors,
+  publicationStatusLabels,
+  publicationStatusColors,
+} from '~/composables/useApplicationCallsApi'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: 'admin-auth',
 })
 
 const route = useRoute()
 const router = useRouter()
 
 const {
-  getApplicationCallById,
-  callTypeLabels,
-  callTypeColors,
-  callStatusLabels,
-  callStatusColors,
-  publicationStatusLabels,
-  publicationStatusColors
-} = useMockData()
+  getCallById,
+  togglePublication,
+  updateCallStatus,
+  createCall: apiCreateCall,
+} = useApplicationCallsApi()
 
-// Récupérer l'appel
-const call = computed(() => getApplicationCallById(route.params.id as string))
+// === STATE ===
+const call = ref<ApplicationCallWithDetails | null>(null)
+const loading = ref(false)
+const error = ref<string | null>(null)
+const actionLoading = ref(false)
 
-// Redirection si appel non trouvé
-if (!call.value) {
-  router.push('/admin/candidatures/appels')
+// === FETCH ===
+async function fetchCall() {
+  loading.value = true
+  error.value = null
+  try {
+    call.value = await getCallById(route.params.id as string)
+  } catch {
+    error.value = 'Erreur lors du chargement de l\'appel'
+  } finally {
+    loading.value = false
+  }
 }
 
-// Navigation
+onMounted(fetchCall)
+
+// === NAVIGATION ===
 const goBack = () => {
   router.push('/admin/candidatures/appels')
 }
@@ -35,38 +54,63 @@ const editCall = () => {
   router.push(`/admin/candidatures/appels/${route.params.id}/edit`)
 }
 
-const duplicateCall = () => {
-  console.log('Duplicating call:', call.value?.id)
-  // En production: POST /api/admin/application-calls/{id}/duplicate
+const duplicateCall = async () => {
+  if (!call.value) return
+  actionLoading.value = true
+  try {
+    const original = call.value
+    const result = await apiCreateCall({
+      title: `${original.title} (copie)`,
+      slug: `${original.slug}-copie-${Date.now()}`,
+      description: original.description,
+      type: original.type,
+      status: 'upcoming',
+      opening_date: original.opening_date,
+      deadline: original.deadline,
+      program_start_date: original.program_start_date,
+      program_end_date: original.program_end_date,
+      target_audience: original.target_audience,
+      registration_fee: original.registration_fee,
+      currency: original.currency,
+      use_internal_form: original.use_internal_form,
+      external_form_url: original.external_form_url,
+      publication_status: 'draft',
+    })
+    router.push(`/admin/candidatures/appels/${result.id}`)
+  } catch {
+    error.value = 'Erreur lors de la duplication'
+  } finally {
+    actionLoading.value = false
+  }
 }
 
-// Formatage
-const formatDate = (dateString?: string) => {
+// === FORMATAGE ===
+const formatDate = (dateString?: string | null) => {
   if (!dateString) return '-'
   return new Date(dateString).toLocaleDateString('fr-FR', {
     day: 'numeric',
     month: 'long',
-    year: 'numeric'
+    year: 'numeric',
   })
 }
 
-const formatDateTime = (dateString?: string) => {
+const formatDateTime = (dateString?: string | null) => {
   if (!dateString) return '-'
   return new Date(dateString).toLocaleDateString('fr-FR', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   })
 }
 
-const isDeadlinePassed = (deadline?: string) => {
+const isDeadlinePassed = (deadline?: string | null) => {
   if (!deadline) return false
   return new Date(deadline) < new Date()
 }
 
-const getDaysRemaining = (deadline?: string) => {
+const getDaysRemaining = (deadline?: string | null) => {
   if (!deadline) return null
   const now = new Date()
   const deadlineDate = new Date(deadline)
@@ -74,26 +118,73 @@ const getDaysRemaining = (deadline?: string) => {
   return Math.ceil(diff / (1000 * 60 * 60 * 24))
 }
 
-// Toggle publication
-const togglePublish = () => {
-  console.log('Toggle publish:', call.value?.id)
-  // En production: POST /api/admin/application-calls/{id}/status
+// === ACTIONS ===
+const togglePublish = async () => {
+  if (!call.value) return
+  actionLoading.value = true
+  try {
+    await togglePublication(call.value.id)
+    await fetchCall()
+  } catch {
+    error.value = 'Erreur lors du changement de publication'
+  } finally {
+    actionLoading.value = false
+  }
 }
 
-// Toggle status
-const closeCall = () => {
-  console.log('Close call:', call.value?.id)
-  // En production: POST /api/admin/application-calls/{id}/status
+const closeCall = async () => {
+  if (!call.value) return
+  actionLoading.value = true
+  try {
+    await updateCallStatus(call.value.id, 'closed')
+    await fetchCall()
+  } catch {
+    error.value = 'Erreur lors de la fermeture'
+  } finally {
+    actionLoading.value = false
+  }
 }
 
-const reopenCall = () => {
-  console.log('Reopen call:', call.value?.id)
-  // En production: POST /api/admin/application-calls/{id}/status
+const reopenCall = async () => {
+  if (!call.value) return
+  actionLoading.value = true
+  try {
+    await updateCallStatus(call.value.id, 'ongoing')
+    await fetchCall()
+  } catch {
+    error.value = 'Erreur lors de la réouverture'
+  } finally {
+    actionLoading.value = false
+  }
 }
 </script>
 
 <template>
-  <div v-if="call" class="space-y-6">
+  <!-- Loading -->
+  <div v-if="loading" class="flex items-center justify-center py-12">
+    <div class="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+  </div>
+
+  <!-- Error -->
+  <div v-else-if="error && !call" class="flex flex-col items-center justify-center py-12">
+    <div class="mb-4 rounded-full bg-red-100 p-4 dark:bg-red-900/30">
+      <font-awesome-icon icon="fa-solid fa-exclamation-triangle" class="h-8 w-8 text-red-400" />
+    </div>
+    <h3 class="mb-2 font-medium text-gray-900 dark:text-white">Erreur</h3>
+    <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">{{ error }}</p>
+    <button
+      class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+      @click="goBack"
+    >
+      Retour à la liste
+    </button>
+  </div>
+
+  <div v-else-if="call" class="space-y-6">
+    <!-- Error banner (for action errors) -->
+    <div v-if="error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400">
+      {{ error }}
+    </div>
     <!-- Header -->
     <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div class="flex items-start gap-4">
@@ -382,13 +473,6 @@ const reopenCall = () => {
               </span>
             </div>
 
-            <!-- Candidatures -->
-            <div class="flex items-center justify-between">
-              <span class="text-sm text-gray-500 dark:text-gray-400">Candidatures</span>
-              <span class="text-lg font-bold text-indigo-600 dark:text-indigo-400">
-                {{ call.applications_count || 0 }}
-              </span>
-            </div>
           </div>
 
           <!-- Actions -->
@@ -550,12 +634,11 @@ const reopenCall = () => {
 
           <div class="space-y-2">
             <NuxtLink
-              v-if="call.applications_count && call.applications_count > 0"
               :to="`/admin/candidatures/dossiers?call_id=${call.id}`"
               class="flex items-center gap-2 rounded-lg border border-gray-200 p-3 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
             >
               <font-awesome-icon icon="fa-solid fa-folder-open" class="h-4 w-4 text-gray-400" />
-              Voir les {{ call.applications_count }} candidature(s)
+              Voir les candidatures
             </NuxtLink>
             <button
               class="flex w-full items-center gap-2 rounded-lg border border-gray-200 p-3 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"

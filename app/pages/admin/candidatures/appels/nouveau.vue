@@ -1,46 +1,59 @@
 <script setup lang="ts">
-import type { ApplicationCall, CallType, PublicationStatus } from '~/composables/useMockData'
+import type { CallType, PublicationStatus, CallEligibilityCriteriaCreate, CallCoverageCreate, CallRequiredDocumentCreate, CallScheduleCreate } from '~/types/api'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: 'admin-auth',
 })
 
 const router = useRouter()
 
 const {
-  generateCallId,
-  generateCriteriaId,
-  generateCoverageId,
-  generateDocumentId,
-  generateScheduleId
-} = useMockData()
+  createCall: apiCreateCall,
+  addCriterion: apiAddCriterion,
+  addCoverage: apiAddCoverage,
+  addRequiredDocument: apiAddRequiredDocument,
+  addScheduleItem: apiAddScheduleItem,
+} = useApplicationCallsApi()
 
 // Onglet actif
 const activeTab = ref<'general' | 'dates' | 'eligibility' | 'coverage' | 'documents' | 'schedule' | 'options'>('general')
 
+// Types locaux pour le formulaire (sans id/call_id, le backend les génère)
+interface LocalCriterion extends CallEligibilityCriteriaCreate { _key: number }
+interface LocalCoverage extends CallCoverageCreate { _key: number }
+interface LocalDocument extends CallRequiredDocumentCreate { _key: number }
+interface LocalScheduleItem extends CallScheduleCreate { _key: number }
+
+let nextKey = 0
+const genKey = () => ++nextKey
+
 // État du formulaire
-const form = ref<Partial<ApplicationCall>>({
-  id: generateCallId(),
+const form = ref({
   title: '',
   slug: '',
   description: '',
-  type: 'application',
-  status: 'upcoming',
+  type: 'application' as CallType,
+  status: 'upcoming' as const,
   opening_date: '',
   deadline: '',
   program_start_date: '',
   program_end_date: '',
   target_audience: '',
-  registration_fee: undefined,
+  registration_fee: undefined as number | undefined,
   currency: 'EUR',
   use_internal_form: true,
   external_form_url: '',
-  publication_status: 'draft',
-  eligibility_criteria: [],
-  coverage: [],
-  required_documents: [],
-  schedule: []
+  publication_status: 'draft' as PublicationStatus,
 })
+
+// Sous-entités locales (seront POST après création de l'appel)
+const criteria = ref<LocalCriterion[]>([])
+const coverageItems = ref<LocalCoverage[]>([])
+const documents = ref<LocalDocument[]>([])
+const scheduleItems = ref<LocalScheduleItem[]>([])
+
+const error = ref<string | null>(null)
 
 // Auto-génération du slug
 const generateSlug = (title: string) => {
@@ -68,20 +81,17 @@ const newCriterion = ref({ criterion: '', is_mandatory: true })
 
 const addCriterion = () => {
   if (!newCriterion.value.criterion.trim()) return
-  const criteria = form.value.eligibility_criteria || []
-  criteria.push({
-    id: generateCriteriaId(),
-    call_id: form.value.id || '',
+  criteria.value.push({
+    _key: genKey(),
     criterion: newCriterion.value.criterion,
     is_mandatory: newCriterion.value.is_mandatory,
-    display_order: criteria.length + 1
+    display_order: criteria.value.length + 1,
   })
-  form.value.eligibility_criteria = criteria
   newCriterion.value = { criterion: '', is_mandatory: true }
 }
 
 const removeCriterion = (index: number) => {
-  form.value.eligibility_criteria?.splice(index, 1)
+  criteria.value.splice(index, 1)
 }
 
 // === GESTION DES PRISES EN CHARGE ===
@@ -89,20 +99,17 @@ const newCoverage = ref({ item: '', description: '' })
 
 const addCoverage = () => {
   if (!newCoverage.value.item.trim()) return
-  const coverage = form.value.coverage || []
-  coverage.push({
-    id: generateCoverageId(),
-    call_id: form.value.id || '',
+  coverageItems.value.push({
+    _key: genKey(),
     item: newCoverage.value.item,
-    description: newCoverage.value.description || undefined,
-    display_order: coverage.length + 1
+    description: newCoverage.value.description || null,
+    display_order: coverageItems.value.length + 1,
   })
-  form.value.coverage = coverage
   newCoverage.value = { item: '', description: '' }
 }
 
 const removeCoverage = (index: number) => {
-  form.value.coverage?.splice(index, 1)
+  coverageItems.value.splice(index, 1)
 }
 
 // === GESTION DES DOCUMENTS ===
@@ -111,34 +118,31 @@ const newDocument = ref({
   description: '',
   is_mandatory: true,
   accepted_formats: 'pdf',
-  max_size_mb: 5
+  max_size_mb: 5,
 })
 
 const addDocument = () => {
   if (!newDocument.value.document_name.trim()) return
-  const documents = form.value.required_documents || []
-  documents.push({
-    id: generateDocumentId(),
-    call_id: form.value.id || '',
+  documents.value.push({
+    _key: genKey(),
     document_name: newDocument.value.document_name,
-    description: newDocument.value.description || undefined,
+    description: newDocument.value.description || null,
     is_mandatory: newDocument.value.is_mandatory,
-    accepted_formats: newDocument.value.accepted_formats || undefined,
-    max_size_mb: newDocument.value.max_size_mb || undefined,
-    display_order: documents.length + 1
+    accepted_formats: newDocument.value.accepted_formats || null,
+    max_size_mb: newDocument.value.max_size_mb || null,
+    display_order: documents.value.length + 1,
   })
-  form.value.required_documents = documents
   newDocument.value = {
     document_name: '',
     description: '',
     is_mandatory: true,
     accepted_formats: 'pdf',
-    max_size_mb: 5
+    max_size_mb: 5,
   }
 }
 
 const removeDocument = (index: number) => {
-  form.value.required_documents?.splice(index, 1)
+  documents.value.splice(index, 1)
 }
 
 // === GESTION DU CALENDRIER ===
@@ -146,39 +150,107 @@ const newScheduleItem = ref({
   step: '',
   start_date: '',
   end_date: '',
-  description: ''
+  description: '',
 })
 
-const addScheduleItem = () => {
+const addScheduleItemLocal = () => {
   if (!newScheduleItem.value.step.trim()) return
-  const schedule = form.value.schedule || []
-  schedule.push({
-    id: generateScheduleId(),
-    call_id: form.value.id || '',
+  scheduleItems.value.push({
+    _key: genKey(),
     step: newScheduleItem.value.step,
-    start_date: newScheduleItem.value.start_date || undefined,
-    end_date: newScheduleItem.value.end_date || undefined,
-    description: newScheduleItem.value.description || undefined,
-    display_order: schedule.length + 1
+    start_date: newScheduleItem.value.start_date || null,
+    end_date: newScheduleItem.value.end_date || null,
+    description: newScheduleItem.value.description || null,
+    display_order: scheduleItems.value.length + 1,
   })
-  form.value.schedule = schedule
   newScheduleItem.value = { step: '', start_date: '', end_date: '', description: '' }
 }
 
 const removeScheduleItem = (index: number) => {
-  form.value.schedule?.splice(index, 1)
+  scheduleItems.value.splice(index, 1)
 }
 
 // === SAUVEGARDE ===
 const isSaving = ref(false)
 
 const saveForm = async () => {
+  if (!form.value.title.trim() || !form.value.slug.trim()) {
+    error.value = 'Le titre et le slug sont obligatoires'
+    activeTab.value = 'general'
+    return
+  }
+
   isSaving.value = true
+  error.value = null
+
   try {
-    console.log('Creating call:', form.value)
-    // En production: POST /api/admin/application-calls
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    router.push('/admin/candidatures/appels')
+    // 1) Créer l'appel
+    const result = await apiCreateCall({
+      title: form.value.title,
+      slug: form.value.slug,
+      description: form.value.description || null,
+      type: form.value.type,
+      status: form.value.status,
+      opening_date: form.value.opening_date || null,
+      deadline: form.value.deadline || null,
+      program_start_date: form.value.program_start_date || null,
+      program_end_date: form.value.program_end_date || null,
+      target_audience: form.value.target_audience || null,
+      registration_fee: form.value.registration_fee || null,
+      currency: form.value.currency,
+      use_internal_form: form.value.use_internal_form,
+      external_form_url: form.value.external_form_url || null,
+      publication_status: form.value.publication_status,
+    })
+
+    const callId = result.id
+
+    // 2) Créer les sous-entités en parallèle
+    const promises: Promise<unknown>[] = []
+
+    for (const c of criteria.value) {
+      promises.push(apiAddCriterion(callId, {
+        criterion: c.criterion,
+        is_mandatory: c.is_mandatory,
+        display_order: c.display_order,
+      }))
+    }
+
+    for (const c of coverageItems.value) {
+      promises.push(apiAddCoverage(callId, {
+        item: c.item,
+        description: c.description,
+        display_order: c.display_order,
+      }))
+    }
+
+    for (const d of documents.value) {
+      promises.push(apiAddRequiredDocument(callId, {
+        document_name: d.document_name,
+        description: d.description,
+        is_mandatory: d.is_mandatory,
+        accepted_formats: d.accepted_formats,
+        max_size_mb: d.max_size_mb,
+        display_order: d.display_order,
+      }))
+    }
+
+    for (const s of scheduleItems.value) {
+      promises.push(apiAddScheduleItem(callId, {
+        step: s.step,
+        start_date: s.start_date,
+        end_date: s.end_date,
+        description: s.description,
+        display_order: s.display_order,
+      }))
+    }
+
+    await Promise.all(promises)
+
+    // 3) Rediriger vers le détail
+    router.push(`/admin/candidatures/appels/${callId}`)
+  } catch {
+    error.value = 'Erreur lors de la création de l\'appel'
   } finally {
     isSaving.value = false
   }
@@ -202,12 +274,17 @@ const tabs = [
   { id: 'coverage', label: 'Prises en charge', icon: 'fa-solid fa-hand-holding-heart' },
   { id: 'documents', label: 'Documents', icon: 'fa-solid fa-file-alt' },
   { id: 'schedule', label: 'Calendrier', icon: 'fa-solid fa-clock' },
-  { id: 'options', label: 'Options', icon: 'fa-solid fa-cog' }
+  { id: 'options', label: 'Options', icon: 'fa-solid fa-cog' },
 ] as const
 </script>
 
 <template>
   <div class="space-y-6">
+    <!-- Error -->
+    <div v-if="error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400">
+      {{ error }}
+    </div>
+
     <!-- Header -->
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex items-center gap-4">
@@ -425,10 +502,10 @@ const tabs = [
             Critères d'éligibilité
           </h3>
 
-          <div v-if="form.eligibility_criteria && form.eligibility_criteria.length > 0" class="mb-4 space-y-2">
+          <div v-if="criteria && criteria.length > 0" class="mb-4 space-y-2">
             <div
-              v-for="(criterion, index) in form.eligibility_criteria"
-              :key="criterion.id"
+              v-for="(criterion, index) in criteria"
+              :key="criterion._key"
               class="flex items-center gap-3 rounded-lg border border-gray-200 p-3 dark:border-gray-700"
             >
               <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-400">
@@ -480,10 +557,10 @@ const tabs = [
             Éléments pris en charge
           </h3>
 
-          <div v-if="form.coverage && form.coverage.length > 0" class="mb-4 space-y-2">
+          <div v-if="coverageItems && coverageItems.length > 0" class="mb-4 space-y-2">
             <div
-              v-for="(item, index) in form.coverage"
-              :key="item.id"
+              v-for="(item, index) in coverageItems"
+              :key="item._key"
               class="flex items-start gap-3 rounded-lg border border-gray-200 p-3 dark:border-gray-700"
             >
               <div class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
@@ -521,8 +598,8 @@ const tabs = [
             Documents requis
           </h3>
 
-          <div v-if="form.required_documents && form.required_documents.length > 0" class="mb-4 space-y-2">
-            <div v-for="(doc, index) in form.required_documents" :key="doc.id" class="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+          <div v-if="documents && documents.length > 0" class="mb-4 space-y-2">
+            <div v-for="(doc, index) in documents" :key="doc._key" class="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
               <div class="flex items-start justify-between">
                 <div class="flex items-start gap-3">
                   <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
@@ -583,8 +660,8 @@ const tabs = [
             Étapes du calendrier
           </h3>
 
-          <div v-if="form.schedule && form.schedule.length > 0" class="mb-4 space-y-2">
-            <div v-for="(item, index) in form.schedule" :key="item.id" class="flex items-start gap-3 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+          <div v-if="scheduleItems && scheduleItems.length > 0" class="mb-4 space-y-2">
+            <div v-for="(item, index) in scheduleItems" :key="item._key" class="flex items-start gap-3 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
               <span class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">{{ index + 1 }}</span>
               <div class="flex-1">
                 <p class="font-medium text-gray-700 dark:text-gray-300">{{ item.step }}</p>
@@ -618,7 +695,7 @@ const tabs = [
                 <input v-model="newScheduleItem.description" type="text" placeholder="Description (optionnel)" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               </div>
               <div class="flex justify-end sm:col-span-2">
-                <button class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700" @click="addScheduleItem">
+                <button class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700" @click="addScheduleItemLocal">
                   <font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4" />
                   Ajouter
                 </button>
