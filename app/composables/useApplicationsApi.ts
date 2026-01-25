@@ -6,10 +6,12 @@ import type {
   ApplicationWithDetails,
   EmploymentStatus,
   ExperienceDuration,
+  ExtendedApplicationStatistics,
   MaritalStatus,
   MessageResponse,
   PaginatedResponse,
   Salutation,
+  StatisticsFilters,
 } from '~/types/api'
 
 // Labels UI (frontend-only)
@@ -125,6 +127,19 @@ export function useApplicationsApi() {
     })
   }
 
+  async function getExtendedStatistics(
+    filters: StatisticsFilters = {},
+  ): Promise<ExtendedApplicationStatistics> {
+    return apiFetch<ExtendedApplicationStatistics>('/api/admin/applications/statistics/extended', {
+      query: {
+        call_id: filters.call_id || undefined,
+        date_from: filters.date_from || undefined,
+        date_to: filters.date_to || undefined,
+        granularity: filters.granularity || 'month',
+      },
+    })
+  }
+
   // =========================================================================
   // Documents Validation
   // =========================================================================
@@ -153,6 +168,7 @@ export function useApplicationsApi() {
 
     // Statistics
     getStatistics,
+    getExtendedStatistics,
 
     // Documents
     validateDocument,

@@ -315,6 +315,53 @@ export interface ApplicationStatistics {
 }
 
 // ============================================================================
+// Extended Application Statistics
+// ============================================================================
+
+export interface TimelineDataPoint {
+  period: string
+  count: number
+}
+
+export interface ProgramStatistics {
+  program_id: string
+  program_title: string
+  total: number
+  accepted: number
+  acceptance_rate: number
+}
+
+export interface CallStatistics {
+  call_id: string
+  call_title: string
+  total: number
+  submitted: number
+  under_review: number
+  accepted: number
+  rejected: number
+  waitlisted: number
+  incomplete: number
+}
+
+export interface ExtendedApplicationStatistics {
+  total: number
+  pending: number
+  acceptance_rate: number
+  completion_rate: number
+  by_status: Record<ApplicationStatus, number>
+  timeline: TimelineDataPoint[]
+  by_program: ProgramStatistics[]
+  by_call: CallStatistics[]
+}
+
+export interface StatisticsFilters {
+  call_id?: string
+  date_from?: string
+  date_to?: string
+  granularity?: 'day' | 'week' | 'month'
+}
+
+// ============================================================================
 // Application Status Update
 // ============================================================================
 

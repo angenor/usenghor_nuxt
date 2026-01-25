@@ -1,20 +1,26 @@
 <script setup lang="ts">
-import type { ApplicationStatus, ApplicationStatistics, TimelineDataPoint, ProgramStatistics, CountryStatistics, CallStatistics } from '~/composables/useMockData'
+import type {
+  ApplicationStatus,
+  ExtendedApplicationStatistics,
+  TimelineDataPoint,
+  ProgramStatistics,
+  CallStatistics,
+  StatisticsFilters,
+} from '~/types/api'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
 })
 
-const {
-  getGlobalStatistics,
-  getTimelineStatistics,
-  getStatisticsByProgram,
-  getStatisticsByCountry,
-  getStatisticsByCall,
-  getReviewersStatistics,
-  getAllApplicationCalls,
-  applicationStatusLabels
-} = useMockData()
+// API Composables
+const { getExtendedStatistics, applicationStatusLabels } = useApplicationsApi()
+const { listCalls } = useApplicationCallsApi()
+
+// === ÉTATS ===
+const loading = ref(true)
+const error = ref<string | null>(null)
+const stats = ref<ExtendedApplicationStatistics | null>(null)
+const calls = ref<{ id: string; title: string }[]>([])
 
 // === FILTRES ===
 const dateFrom = ref('')
@@ -54,43 +60,79 @@ const setPeriodPreset = (preset: typeof periodPreset.value) => {
   }
 }
 
-// Initialisation avec l'année en cours
-onMounted(() => {
-  setPeriodPreset('year')
-})
+// === CHARGEMENT DES DONNÉES ===
+async function loadStatistics() {
+  loading.value = true
+  error.value = null
 
-// Options de filtres
-const filterOptions = computed(() => {
-  return {
-    date_from: dateFrom.value || undefined,
-    date_to: dateTo.value || undefined,
-    call_ids: selectedCallId.value ? [selectedCallId.value] : undefined
+  try {
+    const filters: StatisticsFilters = {
+      call_id: selectedCallId.value || undefined,
+      date_from: dateFrom.value || undefined,
+      date_to: dateTo.value || undefined,
+      granularity: 'month',
+    }
+
+    stats.value = await getExtendedStatistics(filters)
   }
+  catch (e) {
+    error.value = 'Erreur lors du chargement des statistiques'
+    console.error(e)
+  }
+  finally {
+    loading.value = false
+  }
+}
+
+async function loadCalls() {
+  try {
+    const response = await listCalls({ limit: 100 })
+    calls.value = response.items.map(c => ({ id: c.id, title: c.title }))
+  }
+  catch (e) {
+    console.error('Erreur chargement appels:', e)
+  }
+}
+
+// Refetch avec debounce quand les filtres changent
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+watch([dateFrom, dateTo, selectedCallId], () => {
+  if (debounceTimer) clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    loadStatistics()
+  }, 300)
 })
 
-// Liste des appels pour le filtre
-const allCalls = computed(() => getAllApplicationCalls())
+// Initialisation
+onMounted(async () => {
+  setPeriodPreset('year')
+  await Promise.all([loadCalls(), loadStatistics()])
+})
 
-// === DONNÉES ===
-const globalStats = computed<ApplicationStatistics>(() => getGlobalStatistics(filterOptions.value))
-
-const timelineData = computed<TimelineDataPoint[]>(() =>
-  getTimelineStatistics({ ...filterOptions.value, granularity: 'month' })
+// === DONNÉES COMPUTÉES ===
+const globalStats = computed(() =>
+  stats.value || {
+    total: 0,
+    pending: 0,
+    acceptance_rate: 0,
+    completion_rate: 0,
+    by_status: {
+      submitted: 0,
+      under_review: 0,
+      accepted: 0,
+      rejected: 0,
+      waitlisted: 0,
+      incomplete: 0,
+    },
+    timeline: [],
+    by_program: [],
+    by_call: [],
+  },
 )
 
-const programStats = computed<ProgramStatistics[]>(() =>
-  getStatisticsByProgram(filterOptions.value)
-)
-
-const countryStats = computed<CountryStatistics[]>(() =>
-  getStatisticsByCountry(filterOptions.value)
-)
-
-const callStats = computed<CallStatistics[]>(() =>
-  getStatisticsByCall(filterOptions.value)
-)
-
-const reviewerStats = computed(() => getReviewersStatistics())
+const timelineData = computed<TimelineDataPoint[]>(() => stats.value?.timeline || [])
+const programStats = computed<ProgramStatistics[]>(() => stats.value?.by_program || [])
+const callStats = computed<CallStatistics[]>(() => stats.value?.by_call || [])
 
 // === GRAPHIQUE DONUT (SVG) ===
 const statusColors: Record<ApplicationStatus, string> = {
@@ -193,23 +235,15 @@ const exportCSV = () => {
   // Par programme
   rows.push(['=== PAR PROGRAMME ==='])
   rows.push(['Programme', 'Total', 'Acceptées', 'Taux'])
-  programStats.value.forEach(p => {
+  programStats.value.forEach((p) => {
     rows.push([p.program_title, p.total.toString(), p.accepted.toString(), `${p.acceptance_rate}%`])
-  })
-  rows.push([])
-
-  // Par pays
-  rows.push(['=== PAR PAYS ==='])
-  rows.push(['Pays', 'Nombre'])
-  countryStats.value.forEach(c => {
-    rows.push([c.country_name, c.count.toString()])
   })
   rows.push([])
 
   // Par appel
   rows.push(['=== PAR APPEL ==='])
   rows.push(['Appel', 'Total', 'Soumises', 'En cours', 'Acceptées', 'Rejetées', 'Liste attente', 'Incomplètes'])
-  callStats.value.forEach(c => {
+  callStats.value.forEach((c) => {
     rows.push([
       c.call_title,
       c.total.toString(),
@@ -218,7 +252,7 @@ const exportCSV = () => {
       c.accepted.toString(),
       c.rejected.toString(),
       c.waitlisted.toString(),
-      c.incomplete.toString()
+      c.incomplete.toString(),
     ])
   })
 
@@ -226,7 +260,7 @@ const exportCSV = () => {
   const csv = rows.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')).join('\n')
 
   // Télécharger
-  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' })
+  const blob = new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
@@ -306,7 +340,7 @@ const resetFilters = () => {
           class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
         >
           <option value="">Tous les appels</option>
-          <option v-for="call in allCalls" :key="call.id" :value="call.id">
+          <option v-for="call in calls" :key="call.id" :value="call.id">
             {{ call.title }}
           </option>
         </select>
@@ -321,6 +355,34 @@ const resetFilters = () => {
         </button>
       </div>
     </div>
+
+    <!-- État de chargement -->
+    <div v-if="loading" class="flex items-center justify-center py-12">
+      <div class="flex items-center gap-3">
+        <svg class="h-6 w-6 animate-spin text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span class="text-gray-600 dark:text-gray-400">Chargement des statistiques...</span>
+      </div>
+    </div>
+
+    <!-- Message d'erreur -->
+    <div v-else-if="error" class="rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
+      <div class="flex items-center gap-3">
+        <font-awesome-icon icon="fa-solid fa-circle-exclamation" class="h-5 w-5 text-red-500" />
+        <p class="text-sm text-red-700 dark:text-red-400">{{ error }}</p>
+        <button
+          class="ml-auto text-sm text-red-600 hover:underline dark:text-red-400"
+          @click="loadStatistics"
+        >
+          Réessayer
+        </button>
+      </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <template v-else>
 
     <!-- KPIs -->
     <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -495,39 +557,17 @@ const resetFilters = () => {
         </div>
       </div>
 
-      <!-- Par pays -->
-      <div class="rounded-lg bg-white shadow dark:bg-gray-800">
+      <!-- Par pays - Masqué temporairement (nécessite table countries) -->
+      <!-- <div class="rounded-lg bg-white shadow dark:bg-gray-800">
         <div class="border-b border-gray-200 p-4 dark:border-gray-700">
           <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
             Par pays (nationalité)
           </h2>
         </div>
-        <div class="admin-scrollbar max-h-80 overflow-y-auto" data-lenis-prevent>
-          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="sticky top-0 bg-gray-50 dark:bg-gray-900">
-              <tr>
-                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Pays</th>
-                <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Candidatures</th>
-                <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">%</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-              <tr v-for="country in countryStats" :key="country.country_name" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ country.country_name }}</td>
-                <td class="px-4 py-3 text-right text-sm font-medium text-gray-900 dark:text-white">{{ country.count }}</td>
-                <td class="px-4 py-3 text-right text-sm text-gray-500 dark:text-gray-400">
-                  {{ globalStats.total > 0 ? Math.round((country.count / globalStats.total) * 100) : 0 }}%
-                </td>
-              </tr>
-              <tr v-if="countryStats.length === 0">
-                <td colspan="3" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-                  Aucune donnée
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <p class="p-4 text-sm text-gray-500 dark:text-gray-400">
+          Fonctionnalité à venir
+        </p>
+      </div> -->
     </div>
 
     <!-- Tableau par appel -->
@@ -602,64 +642,18 @@ const resetFilters = () => {
       </div>
     </div>
 
-    <!-- Tableau évaluateurs -->
-    <div class="rounded-lg bg-white shadow dark:bg-gray-800">
+    <!-- Tableau évaluateurs - Masqué temporairement (nécessite table reviews) -->
+    <!-- <div class="rounded-lg bg-white shadow dark:bg-gray-800">
       <div class="border-b border-gray-200 p-4 dark:border-gray-700">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
           Statistiques des évaluateurs
         </h2>
       </div>
-      <div class="admin-scrollbar overflow-x-auto" data-lenis-prevent>
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead class="bg-gray-50 dark:bg-gray-900">
-            <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Évaluateur</th>
-              <th class="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Assignés</th>
-              <th class="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Traités</th>
-              <th class="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">En attente</th>
-              <th class="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Temps moyen (jours)</th>
-              <th class="px-4 py-3 text-center text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Progression</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-            <tr v-for="reviewer in reviewerStats" :key="reviewer.reviewer.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-3">
-                  <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-600">
-                    <font-awesome-icon icon="fa-solid fa-user" class="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                  </div>
-                  <div>
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ reviewer.reviewer.name }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ reviewer.reviewer.email }}</p>
-                  </div>
-                </div>
-              </td>
-              <td class="px-4 py-3 text-center text-sm font-medium text-gray-900 dark:text-white">{{ reviewer.assigned }}</td>
-              <td class="px-4 py-3 text-center text-sm text-green-600 dark:text-green-400">{{ reviewer.reviewed }}</td>
-              <td class="px-4 py-3 text-center text-sm text-yellow-600 dark:text-yellow-400">{{ reviewer.pending }}</td>
-              <td class="px-4 py-3 text-center text-sm text-gray-600 dark:text-gray-400">{{ reviewer.avg_review_time_days }}</td>
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-2">
-                  <div class="h-2 flex-1 rounded-full bg-gray-200 dark:bg-gray-700">
-                    <div
-                      class="h-2 rounded-full bg-green-500"
-                      :style="{ width: `${reviewer.assigned > 0 ? (reviewer.reviewed / reviewer.assigned) * 100 : 0}%` }"
-                    ></div>
-                  </div>
-                  <span class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ reviewer.assigned > 0 ? Math.round((reviewer.reviewed / reviewer.assigned) * 100) : 0 }}%
-                  </span>
-                </div>
-              </td>
-            </tr>
-            <tr v-if="reviewerStats.length === 0">
-              <td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-                Aucun évaluateur assigné
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <p class="p-4 text-sm text-gray-500 dark:text-gray-400">
+        Fonctionnalité à venir
+      </p>
+    </div> -->
+
+    </template>
   </div>
 </template>
