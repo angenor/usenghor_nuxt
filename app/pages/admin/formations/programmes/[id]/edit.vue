@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProgramType, ProgramWithDetails, PublicationStatus } from '~/types/api'
+import type { ProgramType, ProgramWithDetails, PublicationStatus, ProgramSkillRead } from '~/types/api'
 
 definePageMeta({
   layout: 'admin'
@@ -14,6 +14,14 @@ const {
   programTypeLabels,
   publicationStatusLabels,
 } = useProgramsApi()
+
+const {
+  listSkills,
+  createSkill,
+  updateSkill: apiUpdateSkill,
+  deleteSkill: apiDeleteSkill,
+  reorderSkills,
+} = useProgramSkillsApi()
 
 // États
 const loading = ref(true)
@@ -35,6 +43,18 @@ const form = ref({
   required_degree: '',
   status: 'draft' as PublicationStatus,
 })
+
+// État des compétences
+const skills = ref<ProgramSkillRead[]>([])
+const loadingSkills = ref(false)
+const isSubmittingSkill = ref(false)
+const showAddSkillModal = ref(false)
+const showEditSkillModal = ref(false)
+const showDeleteSkillModal = ref(false)
+const editingSkill = ref<ProgramSkillRead | null>(null)
+const deletingSkill = ref<ProgramSkillRead | null>(null)
+const newSkill = ref({ title: '', description: '' })
+const draggedSkillIndex = ref<number | null>(null)
 
 // Chargement du programme
 async function loadProgram() {
@@ -66,6 +86,149 @@ async function loadProgram() {
 }
 
 onMounted(loadProgram)
+
+// === GESTION DES COMPÉTENCES ===
+async function loadSkills() {
+  if (!program.value) return
+  loadingSkills.value = true
+  try {
+    const response = await listSkills({ program_id: program.value.id, limit: 100 })
+    skills.value = response.items.sort((a, b) => a.display_order - b.display_order)
+  } catch (e) {
+    console.error('Erreur lors du chargement des compétences:', e)
+  } finally {
+    loadingSkills.value = false
+  }
+}
+
+// Charger les compétences après le programme
+watch(program, (newProgram) => {
+  if (newProgram) {
+    loadSkills()
+  }
+})
+
+// Modales compétences
+const openAddSkillModal = () => {
+  newSkill.value = { title: '', description: '' }
+  showAddSkillModal.value = true
+}
+
+const closeAddSkillModal = () => {
+  showAddSkillModal.value = false
+  newSkill.value = { title: '', description: '' }
+}
+
+const openEditSkillModal = (skill: ProgramSkillRead) => {
+  editingSkill.value = { ...skill }
+  showEditSkillModal.value = true
+}
+
+const closeEditSkillModal = () => {
+  showEditSkillModal.value = false
+  editingSkill.value = null
+}
+
+const openDeleteSkillModal = (skill: ProgramSkillRead) => {
+  deletingSkill.value = skill
+  showDeleteSkillModal.value = true
+}
+
+const closeDeleteSkillModal = () => {
+  showDeleteSkillModal.value = false
+  deletingSkill.value = null
+}
+
+// CRUD Compétences
+const addSkill = async () => {
+  if (!newSkill.value.title.trim() || !program.value) return
+
+  isSubmittingSkill.value = true
+  try {
+    await createSkill({
+      program_id: program.value.id,
+      title: newSkill.value.title,
+      description: newSkill.value.description || undefined,
+      display_order: skills.value.length + 1,
+    })
+    closeAddSkillModal()
+    await loadSkills()
+  } catch (e) {
+    console.error('Erreur lors de la création de la compétence:', e)
+    alert('Erreur lors de la création de la compétence')
+  } finally {
+    isSubmittingSkill.value = false
+  }
+}
+
+const updateSkillHandler = async () => {
+  if (!editingSkill.value) return
+
+  isSubmittingSkill.value = true
+  try {
+    await apiUpdateSkill(editingSkill.value.id, {
+      title: editingSkill.value.title,
+      description: editingSkill.value.description || undefined,
+    })
+    closeEditSkillModal()
+    await loadSkills()
+  } catch (e) {
+    console.error('Erreur lors de la mise à jour de la compétence:', e)
+    alert('Erreur lors de la mise à jour de la compétence')
+  } finally {
+    isSubmittingSkill.value = false
+  }
+}
+
+const deleteSkillHandler = async () => {
+  if (!deletingSkill.value) return
+
+  isSubmittingSkill.value = true
+  try {
+    await apiDeleteSkill(deletingSkill.value.id)
+    closeDeleteSkillModal()
+    await loadSkills()
+  } catch (e) {
+    console.error('Erreur lors de la suppression de la compétence:', e)
+    alert('Erreur lors de la suppression de la compétence')
+  } finally {
+    isSubmittingSkill.value = false
+  }
+}
+
+// Drag & Drop compétences
+const onSkillDragStart = (index: number) => {
+  draggedSkillIndex.value = index
+}
+
+const onSkillDragOver = (e: DragEvent) => {
+  e.preventDefault()
+}
+
+const onSkillDrop = async (e: DragEvent, targetIndex: number) => {
+  e.preventDefault()
+  if (draggedSkillIndex.value === null || draggedSkillIndex.value === targetIndex) return
+
+  const newSkills = [...skills.value]
+  const [draggedSkill] = newSkills.splice(draggedSkillIndex.value, 1)
+  newSkills.splice(targetIndex, 0, draggedSkill)
+  skills.value = newSkills
+
+  const skillIds = newSkills.map(s => s.id)
+  try {
+    await reorderSkills(skillIds)
+    await loadSkills()
+  } catch (e) {
+    console.error('Erreur lors de la réorganisation:', e)
+    await loadSkills()
+  } finally {
+    draggedSkillIndex.value = null
+  }
+}
+
+const onSkillDragEnd = () => {
+  draggedSkillIndex.value = null
+}
 
 // Génération de slug
 const generateSlug = (title: string) => {
@@ -450,6 +613,105 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
         </div>
       </div>
 
+      <!-- Compétences -->
+      <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+        <div class="mb-6 flex items-center justify-between">
+          <h2 class="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+            <font-awesome-icon icon="fa-solid fa-list-check" class="h-5 w-5 text-amber-500" />
+            Compétences visées
+            <span class="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-sm font-normal text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+              {{ skills.length }}
+            </span>
+          </h2>
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-amber-700"
+            @click="openAddSkillModal"
+          >
+            <font-awesome-icon icon="fa-solid fa-plus" class="h-3 w-3" />
+            Ajouter
+          </button>
+        </div>
+
+        <!-- Chargement -->
+        <div v-if="loadingSkills" class="flex items-center justify-center py-8">
+          <font-awesome-icon icon="fa-solid fa-spinner" class="h-6 w-6 animate-spin text-gray-400" />
+        </div>
+
+        <!-- Liste vide -->
+        <div v-else-if="skills.length === 0" class="rounded-lg border-2 border-dashed border-gray-200 p-8 text-center dark:border-gray-700">
+          <font-awesome-icon icon="fa-solid fa-list-check" class="mb-3 h-10 w-10 text-gray-300 dark:text-gray-600" />
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Aucune compétence définie pour ce programme.
+          </p>
+          <button
+            type="button"
+            class="mt-3 text-sm text-amber-600 hover:underline dark:text-amber-400"
+            @click="openAddSkillModal"
+          >
+            Ajouter la première compétence
+          </button>
+        </div>
+
+        <!-- Liste des compétences -->
+        <div v-else class="space-y-2">
+          <p class="mb-3 text-xs text-gray-500 dark:text-gray-400">
+            <font-awesome-icon icon="fa-solid fa-grip-vertical" class="mr-1 h-3 w-3" />
+            Glissez-déposez pour réorganiser
+          </p>
+
+          <div
+            v-for="(skill, index) in skills"
+            :key="skill.id"
+            class="group flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 transition-all dark:border-gray-700 dark:bg-gray-700/50"
+            :class="{ 'opacity-50': draggedSkillIndex === index }"
+            draggable="true"
+            @dragstart="onSkillDragStart(index)"
+            @dragover="onSkillDragOver"
+            @drop="(e) => onSkillDrop(e, index)"
+            @dragend="onSkillDragEnd"
+          >
+            <!-- Poignée -->
+            <div class="cursor-grab text-gray-400 active:cursor-grabbing">
+              <font-awesome-icon icon="fa-solid fa-grip-vertical" class="h-4 w-4" />
+            </div>
+
+            <!-- Numéro -->
+            <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-100 text-xs font-bold text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+              {{ index + 1 }}
+            </div>
+
+            <!-- Contenu -->
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-gray-900 dark:text-white">{{ skill.title }}</p>
+              <p v-if="skill.description" class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
+                {{ skill.description }}
+              </p>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex shrink-0 gap-1">
+              <button
+                type="button"
+                class="rounded p-1.5 text-gray-400 transition-colors hover:bg-gray-200 hover:text-blue-600 dark:hover:bg-gray-600 dark:hover:text-blue-400"
+                title="Modifier"
+                @click="openEditSkillModal(skill)"
+              >
+                <font-awesome-icon icon="fa-solid fa-pen" class="h-3 w-3" />
+              </button>
+              <button
+                type="button"
+                class="rounded p-1.5 text-gray-400 transition-colors hover:bg-gray-200 hover:text-red-600 dark:hover:bg-gray-600 dark:hover:text-red-400"
+                title="Supprimer"
+                @click="openDeleteSkillModal(skill)"
+              >
+                <font-awesome-icon icon="fa-solid fa-trash" class="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Boutons -->
       <div class="flex items-center justify-between rounded-lg bg-white p-6 shadow dark:bg-gray-800">
         <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -518,6 +780,201 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
               @click="confirmDiscard"
             >
               Quitter sans enregistrer
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Modal Ajouter compétence -->
+    <Teleport to="body">
+      <div
+        v-if="showAddSkillModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        @click.self="closeAddSkillModal"
+      >
+        <div class="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+          <div class="mb-4 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              Ajouter une compétence
+            </h3>
+            <button
+              class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
+              @click="closeAddSkillModal"
+            >
+              <font-awesome-icon icon="fa-solid fa-xmark" class="h-4 w-4" />
+            </button>
+          </div>
+
+          <form @submit.prevent="addSkill">
+            <div class="mb-4">
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Titre de la compétence *
+              </label>
+              <input
+                v-model="newSkill.title"
+                type="text"
+                required
+                placeholder="Ex: Maîtriser les outils de gestion de projet"
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+
+            <div class="mb-6">
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Description (optionnel)
+              </label>
+              <textarea
+                v-model="newSkill.description"
+                rows="3"
+                placeholder="Détail de la compétence..."
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+
+            <div class="flex justify-end gap-3">
+              <button
+                type="button"
+                class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                :disabled="isSubmittingSkill"
+                @click="closeAddSkillModal"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-700 disabled:opacity-50"
+                :disabled="isSubmittingSkill"
+              >
+                <font-awesome-icon v-if="isSubmittingSkill" icon="fa-solid fa-spinner" class="mr-2 h-4 w-4 animate-spin" />
+                {{ isSubmittingSkill ? 'Ajout...' : 'Ajouter' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Modal Modifier compétence -->
+    <Teleport to="body">
+      <div
+        v-if="showEditSkillModal && editingSkill"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        @click.self="closeEditSkillModal"
+      >
+        <div class="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+          <div class="mb-4 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              Modifier la compétence
+            </h3>
+            <button
+              class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
+              @click="closeEditSkillModal"
+            >
+              <font-awesome-icon icon="fa-solid fa-xmark" class="h-4 w-4" />
+            </button>
+          </div>
+
+          <form @submit.prevent="updateSkillHandler">
+            <div class="mb-4">
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Titre de la compétence *
+              </label>
+              <input
+                v-model="editingSkill.title"
+                type="text"
+                required
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+
+            <div class="mb-6">
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Description (optionnel)
+              </label>
+              <textarea
+                v-model="editingSkill.description"
+                rows="3"
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+
+            <div class="flex justify-end gap-3">
+              <button
+                type="button"
+                class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                :disabled="isSubmittingSkill"
+                @click="closeEditSkillModal"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-700 disabled:opacity-50"
+                :disabled="isSubmittingSkill"
+              >
+                <font-awesome-icon v-if="isSubmittingSkill" icon="fa-solid fa-spinner" class="mr-2 h-4 w-4 animate-spin" />
+                {{ isSubmittingSkill ? 'Enregistrement...' : 'Enregistrer' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Modal Supprimer compétence -->
+    <Teleport to="body">
+      <div
+        v-if="showDeleteSkillModal && deletingSkill"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        @click.self="closeDeleteSkillModal"
+      >
+        <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+          <div class="mb-4 flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+              <font-awesome-icon icon="fa-solid fa-triangle-exclamation" class="h-5 w-5 text-red-600 dark:text-red-400" />
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              Supprimer la compétence
+            </h3>
+          </div>
+
+          <p class="mb-3 text-gray-600 dark:text-gray-300">
+            Êtes-vous sûr de vouloir supprimer cette compétence ?
+          </p>
+          <p class="mb-3 rounded-lg bg-gray-100 p-3 text-sm font-medium text-gray-900 dark:bg-gray-700 dark:text-white">
+            {{ deletingSkill.title }}
+          </p>
+
+          <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
+            <div class="flex items-start gap-2">
+              <font-awesome-icon icon="fa-solid fa-info-circle" class="mt-0.5 h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <div class="text-sm text-amber-800 dark:text-amber-300">
+                <p class="font-medium">Cette compétence n'est actuellement utilisée nulle part.</p>
+                <p class="mt-1 text-amber-700 dark:text-amber-400">
+                  Cette action est irréversible.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-3">
+            <button
+              type="button"
+              class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              :disabled="isSubmittingSkill"
+              @click="closeDeleteSkillModal"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              :disabled="isSubmittingSkill"
+              @click="deleteSkillHandler"
+            >
+              <font-awesome-icon v-if="isSubmittingSkill" icon="fa-solid fa-spinner" class="mr-2 h-4 w-4 animate-spin" />
+              {{ isSubmittingSkill ? 'Suppression...' : 'Supprimer' }}
             </button>
           </div>
         </div>
