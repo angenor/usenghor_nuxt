@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProgramType, ProgramWithDetails, PublicationStatus, ProgramSkillRead } from '~/types/api'
+import type { ProgramType, ProgramWithDetails, PublicationStatus, ProgramSkillRead, ProgramCareerOpportunityRead } from '~/types/api'
 
 definePageMeta({
   layout: 'admin'
@@ -22,6 +22,14 @@ const {
   deleteSkill: apiDeleteSkill,
   reorderSkills,
 } = useProgramSkillsApi()
+
+const {
+  listCareerOpportunities,
+  createCareerOpportunity,
+  updateCareerOpportunity: apiUpdateCareerOpportunity,
+  deleteCareerOpportunity: apiDeleteCareerOpportunity,
+  reorderCareerOpportunities,
+} = useCareerOpportunitiesApi()
 
 // États
 const loading = ref(true)
@@ -55,6 +63,18 @@ const editingSkill = ref<ProgramSkillRead | null>(null)
 const deletingSkill = ref<ProgramSkillRead | null>(null)
 const newSkill = ref({ title: '', description: '' })
 const draggedSkillIndex = ref<number | null>(null)
+
+// État des débouchés
+const careerOpportunities = ref<ProgramCareerOpportunityRead[]>([])
+const loadingCareerOpportunities = ref(false)
+const isSubmittingCareerOpportunity = ref(false)
+const showAddCareerOpportunityModal = ref(false)
+const showEditCareerOpportunityModal = ref(false)
+const showDeleteCareerOpportunityModal = ref(false)
+const editingCareerOpportunity = ref<ProgramCareerOpportunityRead | null>(null)
+const deletingCareerOpportunity = ref<ProgramCareerOpportunityRead | null>(null)
+const newCareerOpportunity = ref({ title: '', description: '' })
+const draggedCareerOpportunityIndex = ref<number | null>(null)
 
 // Chargement du programme
 async function loadProgram() {
@@ -101,10 +121,11 @@ async function loadSkills() {
   }
 }
 
-// Charger les compétences après le programme
+// Charger les compétences et débouchés après le programme
 watch(program, (newProgram) => {
   if (newProgram) {
     loadSkills()
+    loadCareerOpportunities()
   }
 })
 
@@ -228,6 +249,142 @@ const onSkillDrop = async (e: DragEvent, targetIndex: number) => {
 
 const onSkillDragEnd = () => {
   draggedSkillIndex.value = null
+}
+
+// === GESTION DES DÉBOUCHÉS ===
+async function loadCareerOpportunities() {
+  if (!program.value) return
+  loadingCareerOpportunities.value = true
+  try {
+    const response = await listCareerOpportunities({ program_id: program.value.id, limit: 100 })
+    careerOpportunities.value = response.items.sort((a, b) => a.display_order - b.display_order)
+  } catch (e) {
+    console.error('Erreur lors du chargement des débouchés:', e)
+  } finally {
+    loadingCareerOpportunities.value = false
+  }
+}
+
+// Modales débouchés
+const openAddCareerOpportunityModal = () => {
+  newCareerOpportunity.value = { title: '', description: '' }
+  showAddCareerOpportunityModal.value = true
+}
+
+const closeAddCareerOpportunityModal = () => {
+  showAddCareerOpportunityModal.value = false
+  newCareerOpportunity.value = { title: '', description: '' }
+}
+
+const openEditCareerOpportunityModal = (opportunity: ProgramCareerOpportunityRead) => {
+  editingCareerOpportunity.value = { ...opportunity }
+  showEditCareerOpportunityModal.value = true
+}
+
+const closeEditCareerOpportunityModal = () => {
+  showEditCareerOpportunityModal.value = false
+  editingCareerOpportunity.value = null
+}
+
+const openDeleteCareerOpportunityModal = (opportunity: ProgramCareerOpportunityRead) => {
+  deletingCareerOpportunity.value = opportunity
+  showDeleteCareerOpportunityModal.value = true
+}
+
+const closeDeleteCareerOpportunityModal = () => {
+  showDeleteCareerOpportunityModal.value = false
+  deletingCareerOpportunity.value = null
+}
+
+// CRUD Débouchés
+const addCareerOpportunity = async () => {
+  if (!newCareerOpportunity.value.title.trim() || !program.value) return
+
+  isSubmittingCareerOpportunity.value = true
+  try {
+    await createCareerOpportunity({
+      program_id: program.value.id,
+      title: newCareerOpportunity.value.title,
+      description: newCareerOpportunity.value.description || undefined,
+      display_order: careerOpportunities.value.length + 1,
+    })
+    closeAddCareerOpportunityModal()
+    await loadCareerOpportunities()
+  } catch (e) {
+    console.error('Erreur lors de la création du débouché:', e)
+    alert('Erreur lors de la création du débouché')
+  } finally {
+    isSubmittingCareerOpportunity.value = false
+  }
+}
+
+const updateCareerOpportunityHandler = async () => {
+  if (!editingCareerOpportunity.value) return
+
+  isSubmittingCareerOpportunity.value = true
+  try {
+    await apiUpdateCareerOpportunity(editingCareerOpportunity.value.id, {
+      title: editingCareerOpportunity.value.title,
+      description: editingCareerOpportunity.value.description || undefined,
+    })
+    closeEditCareerOpportunityModal()
+    await loadCareerOpportunities()
+  } catch (e) {
+    console.error('Erreur lors de la mise à jour du débouché:', e)
+    alert('Erreur lors de la mise à jour du débouché')
+  } finally {
+    isSubmittingCareerOpportunity.value = false
+  }
+}
+
+const deleteCareerOpportunityHandler = async () => {
+  if (!deletingCareerOpportunity.value) return
+
+  isSubmittingCareerOpportunity.value = true
+  try {
+    await apiDeleteCareerOpportunity(deletingCareerOpportunity.value.id)
+    closeDeleteCareerOpportunityModal()
+    await loadCareerOpportunities()
+  } catch (e) {
+    console.error('Erreur lors de la suppression du débouché:', e)
+    alert('Erreur lors de la suppression du débouché')
+  } finally {
+    isSubmittingCareerOpportunity.value = false
+  }
+}
+
+// Drag & Drop débouchés
+const onCareerOpportunityDragStart = (index: number) => {
+  draggedCareerOpportunityIndex.value = index
+}
+
+const onCareerOpportunityDragOver = (e: DragEvent) => {
+  e.preventDefault()
+}
+
+const onCareerOpportunityDrop = async (e: DragEvent, targetIndex: number) => {
+  e.preventDefault()
+  if (draggedCareerOpportunityIndex.value === null || draggedCareerOpportunityIndex.value === targetIndex) return
+
+  const newOpportunities = [...careerOpportunities.value]
+  const [draggedOpportunity] = newOpportunities.splice(draggedCareerOpportunityIndex.value, 1)
+  newOpportunities.splice(targetIndex, 0, draggedOpportunity)
+  careerOpportunities.value = newOpportunities
+
+  const opportunityIds = newOpportunities.map(o => o.id)
+  try {
+    await reorderCareerOpportunities(opportunityIds)
+    await loadCareerOpportunities()
+  } catch (e) {
+    console.error('Erreur lors de la réorganisation:', e)
+    await loadCareerOpportunities()
+  } finally {
+    draggedCareerOpportunityIndex.value = null
+  }
+}
+
+const onCareerOpportunityDragEnd = () => {
+  draggedCareerOpportunityIndex.value = null
 }
 
 // Génération de slug
@@ -712,6 +869,105 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
         </div>
       </div>
 
+      <!-- Débouchés -->
+      <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+        <div class="mb-6 flex items-center justify-between">
+          <h2 class="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+            <font-awesome-icon icon="fa-solid fa-briefcase" class="h-5 w-5 text-green-500" />
+            Débouchés professionnels
+            <span class="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-sm font-normal text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+              {{ careerOpportunities.length }}
+            </span>
+          </h2>
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-green-700"
+            @click="openAddCareerOpportunityModal"
+          >
+            <font-awesome-icon icon="fa-solid fa-plus" class="h-3 w-3" />
+            Ajouter
+          </button>
+        </div>
+
+        <!-- Chargement -->
+        <div v-if="loadingCareerOpportunities" class="flex items-center justify-center py-8">
+          <font-awesome-icon icon="fa-solid fa-spinner" class="h-6 w-6 animate-spin text-gray-400" />
+        </div>
+
+        <!-- Liste vide -->
+        <div v-else-if="careerOpportunities.length === 0" class="rounded-lg border-2 border-dashed border-gray-200 p-8 text-center dark:border-gray-700">
+          <font-awesome-icon icon="fa-solid fa-briefcase" class="mb-3 h-10 w-10 text-gray-300 dark:text-gray-600" />
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Aucun débouché défini pour ce programme.
+          </p>
+          <button
+            type="button"
+            class="mt-3 text-sm text-green-600 hover:underline dark:text-green-400"
+            @click="openAddCareerOpportunityModal"
+          >
+            Ajouter le premier débouché
+          </button>
+        </div>
+
+        <!-- Liste des débouchés -->
+        <div v-else class="space-y-2">
+          <p class="mb-3 text-xs text-gray-500 dark:text-gray-400">
+            <font-awesome-icon icon="fa-solid fa-grip-vertical" class="mr-1 h-3 w-3" />
+            Glissez-déposez pour réorganiser
+          </p>
+
+          <div
+            v-for="(opportunity, index) in careerOpportunities"
+            :key="opportunity.id"
+            class="group flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 transition-all dark:border-gray-700 dark:bg-gray-700/50"
+            :class="{ 'opacity-50': draggedCareerOpportunityIndex === index }"
+            draggable="true"
+            @dragstart="onCareerOpportunityDragStart(index)"
+            @dragover="onCareerOpportunityDragOver"
+            @drop="(e) => onCareerOpportunityDrop(e, index)"
+            @dragend="onCareerOpportunityDragEnd"
+          >
+            <!-- Poignée -->
+            <div class="cursor-grab text-gray-400 active:cursor-grabbing">
+              <font-awesome-icon icon="fa-solid fa-grip-vertical" class="h-4 w-4" />
+            </div>
+
+            <!-- Numéro -->
+            <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-100 text-xs font-bold text-green-600 dark:bg-green-900/30 dark:text-green-400">
+              {{ index + 1 }}
+            </div>
+
+            <!-- Contenu -->
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-gray-900 dark:text-white">{{ opportunity.title }}</p>
+              <p v-if="opportunity.description" class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
+                {{ opportunity.description }}
+              </p>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex shrink-0 gap-1">
+              <button
+                type="button"
+                class="rounded p-1.5 text-gray-400 transition-colors hover:bg-gray-200 hover:text-blue-600 dark:hover:bg-gray-600 dark:hover:text-blue-400"
+                title="Modifier"
+                @click="openEditCareerOpportunityModal(opportunity)"
+              >
+                <font-awesome-icon icon="fa-solid fa-pen" class="h-3 w-3" />
+              </button>
+              <button
+                type="button"
+                class="rounded p-1.5 text-gray-400 transition-colors hover:bg-gray-200 hover:text-red-600 dark:hover:bg-gray-600 dark:hover:text-red-400"
+                title="Supprimer"
+                @click="openDeleteCareerOpportunityModal(opportunity)"
+              >
+                <font-awesome-icon icon="fa-solid fa-trash" class="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Boutons -->
       <div class="flex items-center justify-between rounded-lg bg-white p-6 shadow dark:bg-gray-800">
         <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -975,6 +1231,200 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
             >
               <font-awesome-icon v-if="isSubmittingSkill" icon="fa-solid fa-spinner" class="mr-2 h-4 w-4 animate-spin" />
               {{ isSubmittingSkill ? 'Suppression...' : 'Supprimer' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Modal Ajouter débouché -->
+    <Teleport to="body">
+      <div
+        v-if="showAddCareerOpportunityModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        @click.self="closeAddCareerOpportunityModal"
+      >
+        <div class="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+          <div class="mb-4 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              Ajouter un débouché
+            </h3>
+            <button
+              class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
+              @click="closeAddCareerOpportunityModal"
+            >
+              <font-awesome-icon icon="fa-solid fa-xmark" class="h-4 w-4" />
+            </button>
+          </div>
+
+          <form @submit.prevent="addCareerOpportunity">
+            <div class="mb-4">
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Titre du débouché *
+              </label>
+              <input
+                v-model="newCareerOpportunity.title"
+                type="text"
+                required
+                placeholder="Ex: Chef de projet en développement durable"
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+
+            <div class="mb-6">
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Description (optionnel)
+              </label>
+              <textarea
+                v-model="newCareerOpportunity.description"
+                rows="3"
+                placeholder="Détail du débouché..."
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+
+            <div class="flex justify-end gap-3">
+              <button
+                type="button"
+                class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                :disabled="isSubmittingCareerOpportunity"
+                @click="closeAddCareerOpportunityModal"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-50"
+                :disabled="isSubmittingCareerOpportunity"
+              >
+                <font-awesome-icon v-if="isSubmittingCareerOpportunity" icon="fa-solid fa-spinner" class="mr-2 h-4 w-4 animate-spin" />
+                {{ isSubmittingCareerOpportunity ? 'Ajout...' : 'Ajouter' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Modal Modifier débouché -->
+    <Teleport to="body">
+      <div
+        v-if="showEditCareerOpportunityModal && editingCareerOpportunity"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        @click.self="closeEditCareerOpportunityModal"
+      >
+        <div class="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+          <div class="mb-4 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              Modifier le débouché
+            </h3>
+            <button
+              class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
+              @click="closeEditCareerOpportunityModal"
+            >
+              <font-awesome-icon icon="fa-solid fa-xmark" class="h-4 w-4" />
+            </button>
+          </div>
+
+          <form @submit.prevent="updateCareerOpportunityHandler">
+            <div class="mb-4">
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Titre du débouché *
+              </label>
+              <input
+                v-model="editingCareerOpportunity.title"
+                type="text"
+                required
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+
+            <div class="mb-6">
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Description (optionnel)
+              </label>
+              <textarea
+                v-model="editingCareerOpportunity.description"
+                rows="3"
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+
+            <div class="flex justify-end gap-3">
+              <button
+                type="button"
+                class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                :disabled="isSubmittingCareerOpportunity"
+                @click="closeEditCareerOpportunityModal"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-50"
+                :disabled="isSubmittingCareerOpportunity"
+              >
+                <font-awesome-icon v-if="isSubmittingCareerOpportunity" icon="fa-solid fa-spinner" class="mr-2 h-4 w-4 animate-spin" />
+                {{ isSubmittingCareerOpportunity ? 'Enregistrement...' : 'Enregistrer' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Modal Supprimer débouché -->
+    <Teleport to="body">
+      <div
+        v-if="showDeleteCareerOpportunityModal && deletingCareerOpportunity"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        @click.self="closeDeleteCareerOpportunityModal"
+      >
+        <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+          <div class="mb-4 flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+              <font-awesome-icon icon="fa-solid fa-triangle-exclamation" class="h-5 w-5 text-red-600 dark:text-red-400" />
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              Supprimer le débouché
+            </h3>
+          </div>
+
+          <p class="mb-3 text-gray-600 dark:text-gray-300">
+            Êtes-vous sûr de vouloir supprimer ce débouché ?
+          </p>
+          <p class="mb-3 rounded-lg bg-gray-100 p-3 text-sm font-medium text-gray-900 dark:bg-gray-700 dark:text-white">
+            {{ deletingCareerOpportunity.title }}
+          </p>
+
+          <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
+            <div class="flex items-start gap-2">
+              <font-awesome-icon icon="fa-solid fa-info-circle" class="mt-0.5 h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <div class="text-sm text-amber-800 dark:text-amber-300">
+                <p class="mt-1 text-amber-700 dark:text-amber-400">
+                  Cette action est irréversible.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-3">
+            <button
+              type="button"
+              class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              :disabled="isSubmittingCareerOpportunity"
+              @click="closeDeleteCareerOpportunityModal"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              :disabled="isSubmittingCareerOpportunity"
+              @click="deleteCareerOpportunityHandler"
+            >
+              <font-awesome-icon v-if="isSubmittingCareerOpportunity" icon="fa-solid fa-spinner" class="mr-2 h-4 w-4 animate-spin" />
+              {{ isSubmittingCareerOpportunity ? 'Suppression...' : 'Supprimer' }}
             </button>
           </div>
         </div>
