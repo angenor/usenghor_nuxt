@@ -70,6 +70,7 @@ const form = ref({
 const isLoading = ref(true)
 const notFound = ref(false)
 const error = ref<string | null>(null)
+const formInitialized = ref(false)
 
 // Charger l'événement
 onMounted(async () => {
@@ -117,6 +118,9 @@ onMounted(async () => {
         content.value = undefined
       }
     }
+
+    // Marquer le formulaire comme initialisé (après chargement des données)
+    formInitialized.value = true
   } catch (e) {
     console.error('Error loading event:', e)
     notFound.value = true
@@ -125,9 +129,12 @@ onMounted(async () => {
   }
 })
 
-// Auto-génération du slug (seulement si modifié manuellement)
+// Auto-génération du slug (seulement après initialisation et si non modifié manuellement)
 const slugManuallyEdited = ref(false)
 watch(() => form.value.title, (newTitle) => {
+  // Ne pas auto-générer pendant le chargement initial
+  if (!formInitialized.value) return
+  // Auto-générer uniquement si non modifié manuellement
   if (newTitle && !slugManuallyEdited.value) {
     form.value.slug = slugifyEvent(newTitle)
   }

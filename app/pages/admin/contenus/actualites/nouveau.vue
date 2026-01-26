@@ -46,6 +46,7 @@ const form = reactive({
   video_url: '',
   cover_image: '',
   cover_image_alt: '',
+  cover_image_external_id: null as string | null,
   author_id: '',
   tags: [] as string[],
   campus_id: '',
@@ -142,6 +143,7 @@ function handleCoverImageUpload(event: Event) {
 function removeCoverImage() {
   form.cover_image = ''
   form.cover_image_alt = ''
+  form.cover_image_external_id = null
 }
 
 // Valide si une chaîne est un UUID valide (les mock IDs comme 'author-2' ne passent pas)
@@ -173,6 +175,7 @@ async function submitForm() {
       video_url: form.video_url || null,
       highlight_status: form.highlight_status,
       // Filtrer les IDs mock - seuls les vrais UUIDs sont envoyés
+      cover_image_external_id: toUUIDOrNull(form.cover_image_external_id),
       campus_external_id: toUUIDOrNull(form.campus_id),
       department_external_id: toUUIDOrNull(form.department_id),
       service_external_id: toUUIDOrNull(form.service_id),

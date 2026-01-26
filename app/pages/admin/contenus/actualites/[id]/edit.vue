@@ -59,6 +59,7 @@ const form = reactive({
   video_url: '',
   cover_image: '',
   cover_image_alt: '',
+  cover_image_external_id: null as string | null,
   author_id: '',
   tags: [] as string[],
   campus_id: '',
@@ -96,6 +97,7 @@ onMounted(async () => {
       form.video_url = newsData.video_url || ''
       form.cover_image = newsData.cover_image || ''
       form.cover_image_alt = newsData.cover_image_alt || ''
+      form.cover_image_external_id = newsData.cover_image_external_id || null
       form.author_id = newsData.author_external_id || ''
       form.tags = newsData.tags?.map(t => t.id) || []
       form.campus_id = newsData.campus_id || ''
@@ -129,6 +131,16 @@ onMounted(async () => {
   }
   finally {
     isLoading.value = false
+  }
+})
+
+// Auto-generate slug from title (only after form is initialized)
+watch(() => form.title, (newTitle) => {
+  // Ne pas auto-générer pendant le chargement initial
+  if (!formInitialized.value) return
+  // Auto-générer uniquement si le slug correspond au titre précédent slugifié
+  if (!form.slug || form.slug === slugify(form.title.slice(0, -1))) {
+    form.slug = slugify(newTitle)
   }
 })
 
@@ -204,6 +216,7 @@ function handleCoverImageUpload(event: Event) {
 function removeCoverImage() {
   form.cover_image = ''
   form.cover_image_alt = ''
+  form.cover_image_external_id = null
 }
 
 // Valide si une chaîne est un UUID valide (les mock IDs comme 'author-2' ne passent pas)
@@ -235,6 +248,7 @@ async function submitForm() {
       video_url: form.video_url || null,
       highlight_status: form.highlight_status,
       // Filtrer les IDs mock - seuls les vrais UUIDs sont envoyés
+      cover_image_external_id: toUUIDOrNull(form.cover_image_external_id),
       campus_external_id: toUUIDOrNull(form.campus_id),
       department_external_id: toUUIDOrNull(form.department_id),
       service_external_id: toUUIDOrNull(form.service_id),
