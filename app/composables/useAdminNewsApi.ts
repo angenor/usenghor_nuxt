@@ -414,9 +414,10 @@ export function useAdminNewsApi() {
 
   /**
    * Récupère tous les tags (sans pagination).
+   * Note: Limité à 100 tags max par contrainte backend.
    */
   async function getAllTags(): Promise<TagRead[]> {
-    const response = await listTags({ limit: 1000 })
+    const response = await listTags({ limit: 100 })
     return response.items
   }
 
