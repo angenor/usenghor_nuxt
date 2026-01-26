@@ -99,16 +99,28 @@ async function fetchSkills() {
 
 async function fetchStats() {
   try {
-    const allSkillsResponse = await listSkills({ limit: 1000 })
-    totalSkillsCount.value = allSkillsResponse.total
+    // Charger toutes les compétences avec pagination (max 100 par page)
+    const allSkills: ProgramSkillRead[] = []
+    let page = 1
+    let hasMore = true
+
+    while (hasMore) {
+      const response = await listSkills({ page, limit: 100 })
+      allSkills.push(...response.items)
+      totalSkillsCount.value = response.total
+
+      // Vérifier s'il y a plus de pages
+      hasMore = response.items.length === 100 && allSkills.length < response.total
+      page++
+    }
 
     // Calculer le nombre de programmes avec des compétences
-    const uniqueProgramIds = new Set(allSkillsResponse.items.map(s => s.program_id))
+    const uniqueProgramIds = new Set(allSkills.map(s => s.program_id))
     programsWithSkillsCount.value = uniqueProgramIds.size
 
     // Mettre à jour le cache de comptage
     const counts: Record<string, number> = {}
-    allSkillsResponse.items.forEach(skill => {
+    allSkills.forEach(skill => {
       counts[skill.program_id] = (counts[skill.program_id] || 0) + 1
     })
     skillCountCache.value = counts
@@ -339,7 +351,7 @@ onMounted(async () => {
       v-if="error"
       class="rounded-lg bg-red-50 p-4 text-red-600 dark:bg-red-900/20 dark:text-red-400"
     >
-      <i class="fa-solid fa-exclamation-circle mr-2"></i>
+      <font-awesome-icon icon="fa-solid fa-exclamation-circle" class="mr-2 h-4 w-4" />
       {{ error }}
       <button class="ml-2 underline" @click="error = null">Fermer</button>
     </div>
@@ -354,7 +366,7 @@ onMounted(async () => {
 
           <!-- Recherche -->
           <div class="relative mb-4">
-            <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <font-awesome-icon icon="fa-solid fa-search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
               v-model="searchQuery"
               type="text"
@@ -365,7 +377,7 @@ onMounted(async () => {
 
           <!-- Chargement -->
           <div v-if="loading" class="flex items-center justify-center py-8">
-            <i class="fa-solid fa-spinner fa-spin text-2xl text-gray-400"></i>
+            <font-awesome-icon icon="fa-solid fa-spinner" class="h-8 w-8 animate-spin text-gray-400" />
           </div>
 
           <!-- Liste des programmes -->
@@ -396,7 +408,7 @@ onMounted(async () => {
                 {{ program.short_description }}
               </p>
               <div class="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                <i class="fa-solid fa-list-check"></i>
+                <font-awesome-icon icon="fa-solid fa-list-check" class="h-3 w-3" />
                 <span>{{ getSkillCountForProgram(program.id) }} compétences</span>
               </div>
             </button>
@@ -431,7 +443,7 @@ onMounted(async () => {
               :disabled="isSubmitting"
               @click="openAddModal"
             >
-              <i class="fa-solid fa-plus"></i>
+              <font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4" />
               Ajouter
             </button>
           </div>
@@ -440,7 +452,7 @@ onMounted(async () => {
           <div class="admin-scrollbar max-h-[600px] overflow-y-scroll p-4 pr-2" data-lenis-prevent>
             <!-- Chargement des compétences -->
             <div v-if="loadingSkills" class="flex items-center justify-center py-12">
-              <i class="fa-solid fa-spinner fa-spin text-2xl text-gray-400"></i>
+              <font-awesome-icon icon="fa-solid fa-spinner" class="h-8 w-8 animate-spin text-gray-400" />
             </div>
 
             <!-- État vide - aucun programme sélectionné -->
@@ -449,7 +461,7 @@ onMounted(async () => {
               class="flex flex-col items-center justify-center py-12 text-center"
             >
               <div class="mb-4 rounded-full bg-gray-100 p-4 dark:bg-gray-700">
-                <i class="fa-solid fa-graduation-cap text-3xl text-gray-400"></i>
+                <font-awesome-icon icon="fa-solid fa-graduation-cap" class="h-8 w-8 text-gray-400" />
               </div>
               <h3 class="mb-2 font-medium text-gray-900 dark:text-white">
                 Sélectionnez un programme
@@ -465,7 +477,7 @@ onMounted(async () => {
               class="flex flex-col items-center justify-center py-12 text-center"
             >
               <div class="mb-4 rounded-full bg-gray-100 p-4 dark:bg-gray-700">
-                <i class="fa-solid fa-list-check text-3xl text-gray-400"></i>
+                <font-awesome-icon icon="fa-solid fa-list-check" class="h-8 w-8 text-gray-400" />
               </div>
               <h3 class="mb-2 font-medium text-gray-900 dark:text-white">
                 Aucune compétence définie
@@ -477,7 +489,7 @@ onMounted(async () => {
                 class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
                 @click="openAddModal"
               >
-                <i class="fa-solid fa-plus"></i>
+                <font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4" />
                 Ajouter la première compétence
               </button>
             </div>
@@ -485,10 +497,10 @@ onMounted(async () => {
             <!-- Liste des compétences -->
             <div v-else class="space-y-3">
               <p class="mb-4 text-xs text-gray-500 dark:text-gray-400">
-                <i class="fa-solid fa-grip-vertical mr-1"></i>
+                <font-awesome-icon icon="fa-solid fa-grip-vertical" class="mr-1 h-3 w-3" />
                 Glissez-déposez pour réorganiser l'ordre des compétences
                 <span v-if="isReordering" class="ml-2">
-                  <i class="fa-solid fa-spinner fa-spin"></i>
+                  <font-awesome-icon icon="fa-solid fa-spinner" class="h-3 w-3 animate-spin" />
                 </span>
               </p>
 
@@ -505,7 +517,7 @@ onMounted(async () => {
               >
                 <!-- Poignée de drag -->
                 <div class="cursor-grab pt-1 text-gray-400 active:cursor-grabbing">
-                  <i class="fa-solid fa-grip-vertical"></i>
+                  <font-awesome-icon icon="fa-solid fa-grip-vertical" class="h-4 w-4" />
                 </div>
 
                 <!-- Numéro -->
@@ -524,20 +536,22 @@ onMounted(async () => {
                 </div>
 
                 <!-- Actions -->
-                <div class="flex shrink-0 gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                <div class="flex shrink-0 gap-2">
                   <button
-                    class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-200 hover:text-blue-600 dark:hover:bg-gray-600 dark:hover:text-blue-400"
+                    class="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-600 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:border-blue-500 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
                     title="Modifier"
+                    :disabled="isSubmitting"
                     @click="openEditModal(skill)"
                   >
-                    <i class="fa-solid fa-pen"></i>
+                    <font-awesome-icon icon="fa-solid fa-pen" class="h-3 w-3" />
                   </button>
                   <button
-                    class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-200 hover:text-red-600 dark:hover:bg-gray-600 dark:hover:text-red-400"
+                    class="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-600 transition-colors hover:border-red-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:border-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
                     title="Supprimer"
+                    :disabled="isSubmitting"
                     @click="openDeleteModal(skill)"
                   >
-                    <i class="fa-solid fa-trash"></i>
+                    <font-awesome-icon icon="fa-solid fa-trash" class="h-3 w-3" />
                   </button>
                 </div>
               </div>
@@ -563,7 +577,7 @@ onMounted(async () => {
               class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
               @click="closeAddModal"
             >
-              <i class="fa-solid fa-xmark"></i>
+              <font-awesome-icon icon="fa-solid fa-xmark" class="h-4 w-4" />
             </button>
           </div>
 
@@ -632,7 +646,7 @@ onMounted(async () => {
               class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
               @click="closeEditModal"
             >
-              <i class="fa-solid fa-xmark"></i>
+              <font-awesome-icon icon="fa-solid fa-xmark" class="h-4 w-4" />
             </button>
           </div>
 
@@ -693,7 +707,7 @@ onMounted(async () => {
         <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
           <div class="mb-4 flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-              <i class="fa-solid fa-triangle-exclamation text-red-600 dark:text-red-400"></i>
+              <font-awesome-icon icon="fa-solid fa-triangle-exclamation" class="h-5 w-5 text-red-600 dark:text-red-400" />
             </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
               Supprimer la compétence
