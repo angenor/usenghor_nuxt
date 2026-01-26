@@ -319,12 +319,21 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
       <!-- Contenu principal -->
       <div class="space-y-6 lg:col-span-2">
         <!-- Image de couverture -->
-        <div v-if="newsItem.cover_image" class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
-          <img
-            :src="newsItem.cover_image"
-            :alt="newsItem.cover_image_alt || newsItem.title"
-            class="h-64 w-full object-cover"
-          />
+        <div class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
+          <div v-if="newsItem.cover_image" class="relative">
+            <img
+              :src="newsItem.cover_image"
+              :alt="newsItem.cover_image_alt || newsItem.title"
+              class="h-64 w-full object-cover"
+            />
+            <div v-if="newsItem.cover_image_external_id" class="absolute bottom-2 right-2 rounded bg-black/50 px-2 py-1 text-xs text-white">
+              ID: {{ newsItem.cover_image_external_id.substring(0, 8) }}...
+            </div>
+          </div>
+          <div v-else class="flex h-48 flex-col items-center justify-center bg-gray-100 dark:bg-gray-700">
+            <font-awesome-icon icon="fa-solid fa-image" class="mb-2 h-12 w-12 text-gray-400" />
+            <p class="text-sm text-gray-500 dark:text-gray-400">Aucune image de couverture</p>
+          </div>
         </div>
 
         <!-- Résumé -->
@@ -396,6 +405,14 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
             Informations
           </h2>
           <dl class="space-y-3">
+            <div>
+              <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
+                ID
+              </dt>
+              <dd class="mt-1 font-mono text-xs text-gray-900 dark:text-white">
+                {{ newsItem.id }}
+              </dd>
+            </div>
             <div v-if="newsItem.author">
               <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                 Auteur
@@ -410,6 +427,14 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
                 <span class="text-sm text-gray-900 dark:text-white">
                   {{ newsItem.author.name }}
                 </span>
+              </dd>
+            </div>
+            <div v-else-if="newsItem.author_external_id">
+              <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
+                Auteur (ID)
+              </dt>
+              <dd class="mt-1 font-mono text-xs text-gray-900 dark:text-white">
+                {{ newsItem.author_external_id }}
               </dd>
             </div>
             <div>
@@ -442,6 +467,14 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
               </dt>
               <dd class="mt-1 text-sm text-gray-900 dark:text-white">
                 {{ formatDate(newsItem.visible_from) }}
+              </dd>
+            </div>
+            <div v-if="newsItem.cover_image_external_id">
+              <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
+                Image de couverture (ID)
+              </dt>
+              <dd class="mt-1 font-mono text-xs text-gray-900 dark:text-white break-all">
+                {{ newsItem.cover_image_external_id }}
               </dd>
             </div>
           </dl>
