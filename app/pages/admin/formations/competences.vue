@@ -621,7 +621,7 @@ onMounted(async () => {
                 class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
                 :disabled="isSubmitting"
               >
-                <i v-if="isSubmitting" class="fa-solid fa-spinner fa-spin mr-2"></i>
+                <font-awesome-icon v-if="isSubmitting" icon="fa-solid fa-spinner" class="mr-2 h-4 w-4 animate-spin" />
                 {{ isSubmitting ? 'Enregistrement...' : 'Ajouter' }}
               </button>
             </div>
@@ -688,7 +688,7 @@ onMounted(async () => {
                 class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
                 :disabled="isSubmitting"
               >
-                <i v-if="isSubmitting" class="fa-solid fa-spinner fa-spin mr-2"></i>
+                <font-awesome-icon v-if="isSubmitting" icon="fa-solid fa-spinner" class="mr-2 h-4 w-4 animate-spin" />
                 {{ isSubmitting ? 'Enregistrement...' : 'Enregistrer' }}
               </button>
             </div>
@@ -714,12 +714,25 @@ onMounted(async () => {
             </h3>
           </div>
 
-          <p class="mb-2 text-gray-600 dark:text-gray-300">
+          <p class="mb-3 text-gray-600 dark:text-gray-300">
             Êtes-vous sûr de vouloir supprimer cette compétence ?
           </p>
-          <p class="mb-6 rounded-lg bg-gray-100 p-3 text-sm font-medium text-gray-900 dark:bg-gray-700 dark:text-white">
+          <p class="mb-3 rounded-lg bg-gray-100 p-3 text-sm font-medium text-gray-900 dark:bg-gray-700 dark:text-white">
             {{ deletingSkill.title }}
           </p>
+
+          <!-- Avertissement d'utilisation -->
+          <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
+            <div class="flex items-start gap-2">
+              <font-awesome-icon icon="fa-solid fa-info-circle" class="mt-0.5 h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <div class="text-sm text-amber-800 dark:text-amber-300">
+                <p class="font-medium">Cette compétence n'est actuellement utilisée nulle part.</p>
+                <p class="mt-1 text-amber-700 dark:text-amber-400">
+                  Cette action est irréversible. La compétence sera définitivement supprimée du programme.
+                </p>
+              </div>
+            </div>
+          </div>
 
           <div class="flex justify-end gap-3">
             <button
@@ -736,7 +749,7 @@ onMounted(async () => {
               :disabled="isSubmitting"
               @click="deleteSkill"
             >
-              <i v-if="isSubmitting" class="fa-solid fa-spinner fa-spin mr-2"></i>
+              <font-awesome-icon v-if="isSubmitting" icon="fa-solid fa-spinner" class="mr-2 h-4 w-4 animate-spin" />
               {{ isSubmitting ? 'Suppression...' : 'Supprimer' }}
             </button>
           </div>
