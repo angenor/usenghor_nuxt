@@ -1,23 +1,43 @@
 <script setup lang="ts">
-import type { ProgramSemesterData, ProgramCourse, Formation } from '~/composables/useMockData'
+import type {
+  ProgramRead,
+  ProgramSemesterWithCourses,
+  ProgramCourseRead,
+} from '~/types/api'
 
 definePageMeta({
   layout: 'admin'
 })
 
 const {
-  formations,
-  getSemestersByProgram,
-  getCoursesBySemester,
-  getSemesterTotalCredits,
-  getSemesterTotalHours,
-  getProgramsWithSemesters,
-  generateSemesterId,
-  generateCourseId
-} = useMockData()
+  listPrograms,
+  programTypeLabels,
+  programTypeColors,
+} = useProgramsApi()
+
+const {
+  listSemesters,
+  getSemesterById,
+  createSemester,
+  updateSemester,
+  deleteSemester,
+  createCourse,
+  updateCourse,
+  deleteCourse,
+  getSemesterDisplayName,
+  getTotalHoursForCourse,
+  calculateSemesterTotals,
+} = useSemestersApi()
 
 // === STATE ===
+const loading = ref(true)
+const loadingSemesters = ref(false)
+const isSubmitting = ref(false)
+const error = ref<string | null>(null)
+
+const programs = ref<ProgramRead[]>([])
 const selectedProgramId = ref<string | null>(null)
+const semesters = ref<ProgramSemesterWithCourses[]>([])
 const searchQuery = ref('')
 const expandedSemesters = ref<string[]>([])
 
@@ -30,10 +50,10 @@ const showEditCourseModal = ref(false)
 const showDeleteCourseModal = ref(false)
 
 // Editing state
-const editingSemester = ref<ProgramSemesterData | null>(null)
-const deletingSemester = ref<ProgramSemesterData | null>(null)
-const editingCourse = ref<ProgramCourse | null>(null)
-const deletingCourse = ref<ProgramCourse | null>(null)
+const editingSemester = ref<ProgramSemesterWithCourses | null>(null)
+const deletingSemester = ref<ProgramSemesterWithCourses | null>(null)
+const editingCourse = ref<ProgramCourseRead | null>(null)
+const deletingCourse = ref<ProgramCourseRead | null>(null)
 const targetSemesterIdForCourse = ref<string | null>(null)
 
 // Form state
@@ -54,12 +74,47 @@ const newCourse = ref({
   coefficient: 1
 })
 
+// === DATA LOADING ===
+async function loadPrograms() {
+  loading.value = true
+  error.value = null
+  try {
+    const response = await listPrograms({ limit: 100 })
+    programs.value = response.items
+  } catch (e) {
+    error.value = 'Erreur lors du chargement des programmes'
+    console.error(e)
+  } finally {
+    loading.value = false
+  }
+}
+
+async function loadSemesters(programId: string) {
+  loadingSemesters.value = true
+  try {
+    const response = await listSemesters({ program_id: programId, limit: 100 })
+    // Charger les cours pour chaque semestre
+    const semestersWithCourses: ProgramSemesterWithCourses[] = []
+    for (const sem of response.items) {
+      const full = await getSemesterById(sem.id)
+      semestersWithCourses.push(full)
+    }
+    semesters.value = semestersWithCourses.sort((a, b) => a.display_order - b.display_order)
+    expandedSemesters.value = semesters.value.map(s => s.id)
+  } catch (e) {
+    console.error('Erreur chargement semestres:', e)
+    semesters.value = []
+  } finally {
+    loadingSemesters.value = false
+  }
+}
+
 // === COMPUTED ===
 // Liste des programmes (masters et doctorats principalement)
 const availablePrograms = computed(() => {
-  return formations.value
-    .filter(f => f.formation_type === 'master' || f.formation_type === 'doctorat')
-    .sort((a, b) => a.title_fr.localeCompare(b.title_fr))
+  return programs.value
+    .filter(p => p.type === 'master' || p.type === 'doctorate')
+    .sort((a, b) => a.title.localeCompare(b.title))
 })
 
 // Programmes filtrés par recherche
@@ -67,40 +122,25 @@ const filteredPrograms = computed(() => {
   if (!searchQuery.value) return availablePrograms.value
   const query = searchQuery.value.toLowerCase()
   return availablePrograms.value.filter(p =>
-    p.title_fr.toLowerCase().includes(query) ||
-    p.title_en?.toLowerCase().includes(query)
+    p.title.toLowerCase().includes(query)
   )
 })
 
 // Programme sélectionné
 const selectedProgram = computed(() => {
   if (!selectedProgramId.value) return null
-  return formations.value.find(f => f.id === selectedProgramId.value) || null
-})
-
-// Semestres du programme sélectionné
-const semesters = computed(() => {
-  if (!selectedProgramId.value) return []
-  return getSemestersByProgram(selectedProgramId.value)
+  return programs.value.find(p => p.id === selectedProgramId.value) || null
 })
 
 // Stats
-const totalSemestersCount = computed(() => {
-  let count = 0
-  availablePrograms.value.forEach(p => {
-    count += getSemestersByProgram(p.id).length
-  })
-  return count
-})
-
-const programsWithSemestersCount = computed(() => getProgramsWithSemesters().length)
+const totalSemestersCount = computed(() => semesters.value.length)
+const programsWithSemestersCount = computed(() => availablePrograms.value.length)
 
 // === METHODS ===
-const selectProgram = (programId: string) => {
+const selectProgram = async (programId: string) => {
   selectedProgramId.value = programId
   searchQuery.value = ''
-  // Expand all semesters by default
-  expandedSemesters.value = getSemestersByProgram(programId).map(s => s.id)
+  await loadSemesters(programId)
 }
 
 const toggleSemester = (semesterId: string) => {
@@ -134,7 +174,7 @@ const closeAddSemesterModal = () => {
   showAddSemesterModal.value = false
 }
 
-const openEditSemesterModal = (semester: ProgramSemesterData) => {
+const openEditSemesterModal = (semester: ProgramSemesterWithCourses) => {
   editingSemester.value = { ...semester }
   showEditSemesterModal.value = true
 }
@@ -144,7 +184,7 @@ const closeEditSemesterModal = () => {
   editingSemester.value = null
 }
 
-const openDeleteSemesterModal = (semester: ProgramSemesterData) => {
+const openDeleteSemesterModal = (semester: ProgramSemesterWithCourses) => {
   deletingSemester.value = semester
   showDeleteSemesterModal.value = true
 }
@@ -157,7 +197,6 @@ const closeDeleteSemesterModal = () => {
 // === COURSE MODALS ===
 const openAddCourseModal = (semesterId: string) => {
   targetSemesterIdForCourse.value = semesterId
-  const existingCourses = getCoursesBySemester(semesterId)
   newCourse.value = {
     code: '',
     title: '',
@@ -176,7 +215,7 @@ const closeAddCourseModal = () => {
   targetSemesterIdForCourse.value = null
 }
 
-const openEditCourseModal = (course: ProgramCourse) => {
+const openEditCourseModal = (course: ProgramCourseRead) => {
   editingCourse.value = { ...course }
   showEditCourseModal.value = true
 }
@@ -186,7 +225,7 @@ const closeEditCourseModal = () => {
   editingCourse.value = null
 }
 
-const openDeleteCourseModal = (course: ProgramCourse) => {
+const openDeleteCourseModal = (course: ProgramCourseRead) => {
   deletingCourse.value = course
   showDeleteCourseModal.value = true
 }
@@ -197,109 +236,155 @@ const closeDeleteCourseModal = () => {
 }
 
 // === ACTIONS ===
-const addSemester = () => {
+const addSemesterAction = async () => {
   if (!selectedProgramId.value) return
-
-  // En production: POST /api/admin/programs/{program_id}/semesters
-  console.log('Adding semester:', {
-    id: generateSemesterId(selectedProgramId.value, newSemester.value.number),
-    program_id: selectedProgramId.value,
-    number: newSemester.value.number,
-    title: newSemester.value.title,
-    credits: newSemester.value.credits,
-    display_order: semesters.value.length + 1
-  })
-
-  closeAddSemesterModal()
+  isSubmitting.value = true
+  try {
+    await createSemester({
+      program_id: selectedProgramId.value,
+      number: newSemester.value.number,
+      title: newSemester.value.title || null,
+      credits: newSemester.value.credits,
+      display_order: semesters.value.length + 1,
+    })
+    closeAddSemesterModal()
+    await loadSemesters(selectedProgramId.value)
+  } catch (e: unknown) {
+    const fetchError = e as { data?: { detail?: string } }
+    alert(fetchError.data?.detail || 'Erreur lors de la création du semestre')
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
-const updateSemester = () => {
-  if (!editingSemester.value) return
-
-  // En production: PUT /api/admin/semesters/{id}
-  console.log('Updating semester:', editingSemester.value)
-
-  closeEditSemesterModal()
+const updateSemesterAction = async () => {
+  if (!editingSemester.value || !selectedProgramId.value) return
+  isSubmitting.value = true
+  try {
+    await updateSemester(editingSemester.value.id, {
+      number: editingSemester.value.number,
+      title: editingSemester.value.title || null,
+      credits: editingSemester.value.credits,
+    })
+    closeEditSemesterModal()
+    await loadSemesters(selectedProgramId.value)
+  } catch (e: unknown) {
+    const fetchError = e as { data?: { detail?: string } }
+    alert(fetchError.data?.detail || 'Erreur lors de la modification du semestre')
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
-const deleteSemester = () => {
-  if (!deletingSemester.value) return
-
-  // En production: DELETE /api/admin/semesters/{id}
-  console.log('Deleting semester:', deletingSemester.value.id)
-
-  closeDeleteSemesterModal()
+const deleteSemesterAction = async () => {
+  if (!deletingSemester.value || !selectedProgramId.value) return
+  isSubmitting.value = true
+  try {
+    await deleteSemester(deletingSemester.value.id)
+    closeDeleteSemesterModal()
+    await loadSemesters(selectedProgramId.value)
+  } catch (e: unknown) {
+    const fetchError = e as { data?: { detail?: string } }
+    alert(fetchError.data?.detail || 'Erreur lors de la suppression du semestre')
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
-const addCourse = () => {
-  if (!targetSemesterIdForCourse.value || !newCourse.value.title.trim()) return
-
-  const existingCourses = getCoursesBySemester(targetSemesterIdForCourse.value)
-
-  // En production: POST /api/admin/semesters/{semester_id}/courses
-  console.log('Adding course:', {
-    id: generateCourseId(targetSemesterIdForCourse.value, existingCourses.length + 1),
-    semester_id: targetSemesterIdForCourse.value,
-    ...newCourse.value,
-    display_order: existingCourses.length + 1
-  })
-
-  closeAddCourseModal()
+const addCourseAction = async () => {
+  if (!targetSemesterIdForCourse.value || !newCourse.value.title.trim() || !selectedProgramId.value) return
+  isSubmitting.value = true
+  try {
+    await createCourse(targetSemesterIdForCourse.value, {
+      title: newCourse.value.title,
+      code: newCourse.value.code || null,
+      description: newCourse.value.description || null,
+      credits: newCourse.value.credits,
+      lecture_hours: newCourse.value.lecture_hours,
+      tutorial_hours: newCourse.value.tutorial_hours,
+      practical_hours: newCourse.value.practical_hours,
+      coefficient: newCourse.value.coefficient,
+    })
+    closeAddCourseModal()
+    await loadSemesters(selectedProgramId.value)
+  } catch (e: unknown) {
+    const fetchError = e as { data?: { detail?: string } }
+    alert(fetchError.data?.detail || 'Erreur lors de la création du cours')
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
-const updateCourse = () => {
-  if (!editingCourse.value) return
-
-  // En production: PUT /api/admin/courses/{id}
-  console.log('Updating course:', editingCourse.value)
-
-  closeEditCourseModal()
+const updateCourseAction = async () => {
+  if (!editingCourse.value || !selectedProgramId.value) return
+  isSubmitting.value = true
+  try {
+    await updateCourse(editingCourse.value.semester_id, editingCourse.value.id, {
+      title: editingCourse.value.title,
+      code: editingCourse.value.code || null,
+      description: editingCourse.value.description || null,
+      credits: editingCourse.value.credits,
+      lecture_hours: editingCourse.value.lecture_hours,
+      tutorial_hours: editingCourse.value.tutorial_hours,
+      practical_hours: editingCourse.value.practical_hours,
+      coefficient: editingCourse.value.coefficient,
+    })
+    closeEditCourseModal()
+    await loadSemesters(selectedProgramId.value)
+  } catch (e: unknown) {
+    const fetchError = e as { data?: { detail?: string } }
+    alert(fetchError.data?.detail || 'Erreur lors de la modification du cours')
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
-const deleteCourse = () => {
-  if (!deletingCourse.value) return
-
-  // En production: DELETE /api/admin/courses/{id}
-  console.log('Deleting course:', deletingCourse.value.id)
-
-  closeDeleteCourseModal()
+const deleteCourseAction = async () => {
+  if (!deletingCourse.value || !selectedProgramId.value) return
+  isSubmitting.value = true
+  try {
+    await deleteCourse(deletingCourse.value.semester_id, deletingCourse.value.id)
+    closeDeleteCourseModal()
+    await loadSemesters(selectedProgramId.value)
+  } catch (e: unknown) {
+    const fetchError = e as { data?: { detail?: string } }
+    alert(fetchError.data?.detail || 'Erreur lors de la suppression du cours')
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
 // === HELPERS ===
-const getFormationTypeColor = (type: Formation['formation_type']) => {
-  const colors = {
-    master: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-    doctorat: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-    du: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-    certifiante: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
-  }
-  return colors[type] || colors.master
+const getFormationTypeColor = (type: ProgramRead['type']) => {
+  return programTypeColors[type] || programTypeColors.master
 }
 
-const getFormationTypeLabel = (type: Formation['formation_type']) => {
-  const labels = {
-    master: 'Master',
-    doctorat: 'Doctorat',
-    du: 'DU',
-    certifiante: 'Certificat'
-  }
-  return labels[type] || type
+const getFormationTypeLabel = (type: ProgramRead['type']) => {
+  return programTypeLabels[type] || type
 }
 
-const getSemesterDisplayName = (semester: ProgramSemesterData) => {
-  if (semester.title) {
-    return `Semestre ${semester.number} - ${semester.title}`
-  }
-  return `Semestre ${semester.number}`
+const getLocalSemesterDisplayName = (semester: ProgramSemesterWithCourses) => {
+  return getSemesterDisplayName(semester)
 }
 
-const getCoursesCountForSemester = (semesterId: string) => {
-  return getCoursesBySemester(semesterId).length
+const getCoursesCountForSemester = (semester: ProgramSemesterWithCourses) => {
+  return semester.courses?.length || 0
 }
 
-const getTotalHoursForCourse = (course: ProgramCourse) => {
-  return course.lecture_hours + course.tutorial_hours + course.practical_hours
+const getLocalTotalHoursForCourse = (course: ProgramCourseRead) => {
+  return getTotalHoursForCourse(course)
 }
+
+const getSemesterTotalCredits = (semester: ProgramSemesterWithCourses) => {
+  return calculateSemesterTotals(semester.courses || []).credits
+}
+
+const getSemesterTotalHours = (semester: ProgramSemesterWithCourses) => {
+  return calculateSemesterTotals(semester.courses || [])
+}
+
+// === LIFECYCLE ===
+onMounted(loadPrograms)
 </script>
 
 <template>
@@ -362,20 +447,16 @@ const getTotalHoursForCourse = (course: ProgramCourse) => {
             >
               <div class="flex items-start justify-between gap-2">
                 <span class="text-sm font-medium text-gray-900 dark:text-white">
-                  {{ program.title_fr }}
+                  {{ program.title }}
                 </span>
                 <span
                   class="shrink-0 rounded-full px-2 py-0.5 text-xs font-medium"
-                  :class="getFormationTypeColor(program.formation_type)"
+                  :class="getFormationTypeColor(program.type)"
                 >
-                  {{ getFormationTypeLabel(program.formation_type) }}
+                  {{ getFormationTypeLabel(program.type) }}
                 </span>
               </div>
               <div class="mt-2 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                <span class="flex items-center gap-1">
-                  <font-awesome-icon icon="fa-solid fa-calendar" class="w-3 h-3" />
-                  {{ getSemestersByProgram(program.id).length }} semestres
-                </span>
                 <span v-if="program.credits" class="flex items-center gap-1">
                   <font-awesome-icon icon="fa-solid fa-award" class="w-3 h-3" />
                   {{ program.credits }} ECTS
@@ -400,7 +481,7 @@ const getTotalHoursForCourse = (course: ProgramCourse) => {
           <div class="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
             <div>
               <h2 class="font-semibold text-gray-900 dark:text-white">
-                {{ selectedProgram ? selectedProgram.title_fr : 'Maquette pédagogique' }}
+                {{ selectedProgram ? selectedProgram.title : 'Maquette pédagogique' }}
               </h2>
               <p v-if="selectedProgram" class="text-sm text-gray-500 dark:text-gray-400">
                 {{ semesters.length }} semestre{{ semesters.length > 1 ? 's' : '' }}
@@ -482,9 +563,9 @@ const getTotalHoursForCourse = (course: ProgramCourse) => {
                         {{ getSemesterDisplayName(semester) }}
                       </h3>
                       <div class="mt-1 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                        <span>{{ getCoursesCountForSemester(semester.id) }} cours</span>
-                        <span>{{ getSemesterTotalCredits(semester.id) }} crédits</span>
-                        <span>{{ getSemesterTotalHours(semester.id).total }}h total</span>
+                        <span>{{ getCoursesCountForSemester(semester) }} cours</span>
+                        <span>{{ getSemesterTotalCredits(semester) }} crédits</span>
+                        <span>{{ getSemesterTotalHours(semester).total }}h total</span>
                       </div>
                     </div>
                   </div>
@@ -521,7 +602,7 @@ const getTotalHoursForCourse = (course: ProgramCourse) => {
                 >
                   <div class="p-4">
                     <!-- Tableau des cours -->
-                    <div v-if="getCoursesBySemester(semester.id).length > 0" class="overflow-x-auto">
+                    <div v-if="semester.courses && semester.courses.length > 0" class="overflow-x-auto">
                       <table class="w-full text-sm">
                         <thead>
                           <tr class="border-b border-gray-200 text-left dark:border-gray-700">
@@ -538,7 +619,7 @@ const getTotalHoursForCourse = (course: ProgramCourse) => {
                         </thead>
                         <tbody>
                           <tr
-                            v-for="course in getCoursesBySemester(semester.id)"
+                            v-for="course in semester.courses"
                             :key="course.id"
                             class="border-b border-gray-100 last:border-0 dark:border-gray-700/50"
                           >
@@ -564,7 +645,7 @@ const getTotalHoursForCourse = (course: ProgramCourse) => {
                               {{ course.practical_hours }}h
                             </td>
                             <td class="py-3 pr-4 text-center font-medium text-gray-900 dark:text-white">
-                              {{ getTotalHoursForCourse(course) }}h
+                              {{ getLocalTotalHoursForCourse(course) }}h
                             </td>
                             <td class="py-3 text-center text-gray-500 dark:text-gray-400">
                               {{ course.coefficient || '-' }}
@@ -593,19 +674,19 @@ const getTotalHoursForCourse = (course: ProgramCourse) => {
                           <tr class="border-t-2 border-gray-200 font-medium dark:border-gray-600">
                             <td colspan="2" class="py-3 pr-4 text-gray-700 dark:text-gray-300">Total</td>
                             <td class="py-3 pr-4 text-center text-gray-900 dark:text-white">
-                              {{ getSemesterTotalCredits(semester.id) }}
+                              {{ getSemesterTotalCredits(semester) }}
                             </td>
                             <td class="py-3 pr-4 text-center text-gray-500 dark:text-gray-400">
-                              {{ getSemesterTotalHours(semester.id).lecture }}h
+                              {{ getSemesterTotalHours(semester).lecture }}h
                             </td>
                             <td class="py-3 pr-4 text-center text-gray-500 dark:text-gray-400">
-                              {{ getSemesterTotalHours(semester.id).tutorial }}h
+                              {{ getSemesterTotalHours(semester).tutorial }}h
                             </td>
                             <td class="py-3 pr-4 text-center text-gray-500 dark:text-gray-400">
-                              {{ getSemesterTotalHours(semester.id).practical }}h
+                              {{ getSemesterTotalHours(semester).practical }}h
                             </td>
                             <td class="py-3 pr-4 text-center font-bold text-gray-900 dark:text-white">
-                              {{ getSemesterTotalHours(semester.id).total }}h
+                              {{ getSemesterTotalHours(semester).total }}h
                             </td>
                             <td colspan="2"></td>
                           </tr>
@@ -654,7 +735,7 @@ const getTotalHoursForCourse = (course: ProgramCourse) => {
             </button>
           </div>
 
-          <form @submit.prevent="addSemester">
+          <form @submit.prevent="addSemesterAction">
             <div class="grid gap-4 sm:grid-cols-2">
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -734,7 +815,7 @@ const getTotalHoursForCourse = (course: ProgramCourse) => {
             </button>
           </div>
 
-          <form @submit.prevent="updateSemester">
+          <form @submit.prevent="updateSemesterAction">
             <div class="grid gap-4 sm:grid-cols-2">
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -818,7 +899,7 @@ const getTotalHoursForCourse = (course: ProgramCourse) => {
               {{ getSemesterDisplayName(deletingSemester) }}
             </p>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              {{ getCoursesCountForSemester(deletingSemester.id) }} cours seront également supprimés
+              {{ getCoursesCountForSemester(deletingSemester) }} cours seront également supprimés
             </p>
           </div>
 
@@ -833,7 +914,7 @@ const getTotalHoursForCourse = (course: ProgramCourse) => {
             <button
               type="button"
               class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
-              @click="deleteSemester"
+              @click="deleteSemesterAction"
             >
               Supprimer
             </button>
@@ -862,7 +943,7 @@ const getTotalHoursForCourse = (course: ProgramCourse) => {
             </button>
           </div>
 
-          <form @submit.prevent="addCourse">
+          <form @submit.prevent="addCourseAction">
             <div class="grid gap-4 sm:grid-cols-2">
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -1002,7 +1083,7 @@ const getTotalHoursForCourse = (course: ProgramCourse) => {
             </button>
           </div>
 
-          <form @submit.prevent="updateCourse">
+          <form @submit.prevent="updateCourseAction">
             <div class="grid gap-4 sm:grid-cols-2">
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -1159,7 +1240,7 @@ const getTotalHoursForCourse = (course: ProgramCourse) => {
             <button
               type="button"
               class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
-              @click="deleteCourse"
+              @click="deleteCourseAction"
             >
               Supprimer
             </button>

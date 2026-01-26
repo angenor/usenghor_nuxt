@@ -2,41 +2,36 @@ import { defineStore } from 'pinia'
 import type { TokenResponse } from '~/types/api'
 
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref<string | null>(null)
-  const refreshToken = ref<string | null>(null)
+  // Utiliser useCookie pour la persistance SSR-compatible
+  const tokenCookie = useCookie<string | null>('auth_token', {
+    maxAge: 60 * 60 * 24 * 7, // 7 jours
+    sameSite: 'lax',
+  })
+  const refreshTokenCookie = useCookie<string | null>('auth_refresh_token', {
+    maxAge: 60 * 60 * 24 * 30, // 30 jours
+    sameSite: 'lax',
+  })
+
+  // Refs réactives synchronisées avec les cookies
+  const token = computed({
+    get: () => tokenCookie.value,
+    set: (val) => { tokenCookie.value = val },
+  })
+
+  const refreshToken = computed({
+    get: () => refreshTokenCookie.value,
+    set: (val) => { refreshTokenCookie.value = val },
+  })
 
   const isAuthenticated = computed(() => !!token.value)
-
-  function _loadFromStorage() {
-    if (import.meta.client) {
-      token.value = localStorage.getItem('auth_token')
-      refreshToken.value = localStorage.getItem('auth_refresh_token')
-    }
-  }
-
-  function _saveToStorage() {
-    if (import.meta.client) {
-      if (token.value) {
-        localStorage.setItem('auth_token', token.value)
-      } else {
-        localStorage.removeItem('auth_token')
-      }
-      if (refreshToken.value) {
-        localStorage.setItem('auth_refresh_token', refreshToken.value)
-      } else {
-        localStorage.removeItem('auth_refresh_token')
-      }
-    }
-  }
 
   async function login(email: string, password: string) {
     const data = await $fetch<TokenResponse>('/api/auth/login/json', {
       method: 'POST',
       body: { email, password },
     })
-    token.value = data.access_token
-    refreshToken.value = data.refresh_token
-    _saveToStorage()
+    tokenCookie.value = data.access_token
+    refreshTokenCookie.value = data.refresh_token
   }
 
   async function refreshAccessToken(): Promise<boolean> {
@@ -46,9 +41,8 @@ export const useAuthStore = defineStore('auth', () => {
         method: 'POST',
         body: { refresh_token: refreshToken.value },
       })
-      token.value = data.access_token
-      refreshToken.value = data.refresh_token
-      _saveToStorage()
+      tokenCookie.value = data.access_token
+      refreshTokenCookie.value = data.refresh_token
       return true
     } catch {
       logout()
@@ -57,13 +51,9 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function logout() {
-    token.value = null
-    refreshToken.value = null
-    _saveToStorage()
+    tokenCookie.value = null
+    refreshTokenCookie.value = null
   }
-
-  // Charger les tokens au démarrage côté client
-  _loadFromStorage()
 
   return {
     token,

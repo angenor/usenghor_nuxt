@@ -1,66 +1,128 @@
 <script setup lang="ts">
-import type { ProgramCareerOpportunity, Formation } from '~/composables/useMockData'
+import type { ProgramCareerOpportunityRead, ProgramRead, ProgramType } from '~/types/api'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: 'admin-auth',
 })
 
+// === API COMPOSABLES ===
 const {
-  formations,
-  getCareerOpportunitiesByProgram,
-  getAllCareerOpportunities,
-  getProgramsWithCareerOpportunities,
-  generateCareerOpportunityId
-} = useMockData()
+  listCareerOpportunities,
+  createCareerOpportunity,
+  updateCareerOpportunity,
+  deleteCareerOpportunity: apiDeleteCareerOpportunity,
+  reorderCareerOpportunities,
+} = useCareerOpportunitiesApi()
+
+const { listPrograms } = useProgramsApi()
 
 // === STATE ===
+const loading = ref(false)
+const loadingPrograms = ref(true)
+const submitting = ref(false)
+const error = ref<string | null>(null)
+
+const programs = ref<ProgramRead[]>([])
+const careerOpportunities = ref<ProgramCareerOpportunityRead[]>([])
+
 const selectedProgramId = ref<string | null>(null)
 const searchQuery = ref('')
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const showDeleteModal = ref(false)
-const editingCareer = ref<ProgramCareerOpportunity | null>(null)
-const deletingCareer = ref<ProgramCareerOpportunity | null>(null)
+const editingCareer = ref<ProgramCareerOpportunityRead | null>(null)
+const deletingCareer = ref<ProgramCareerOpportunityRead | null>(null)
 
 // Form state
 const newCareer = ref({
   title: '',
-  description: ''
+  description: '',
 })
+
+// === DATA FETCHING ===
+async function fetchPrograms() {
+  loadingPrograms.value = true
+  try {
+    const [masterRes, docRes] = await Promise.all([
+      listPrograms({ limit: 100, type: 'master' }),
+      listPrograms({ limit: 100, type: 'doctorate' }),
+    ])
+    programs.value = [...masterRes.items, ...docRes.items]
+      .sort((a, b) => a.title.localeCompare(b.title))
+  }
+  catch (e) {
+    console.error('Erreur lors du chargement des programmes:', e)
+    error.value = 'Erreur lors du chargement des programmes'
+  }
+  finally {
+    loadingPrograms.value = false
+  }
+}
+
+async function fetchCareerOpportunities() {
+  if (!selectedProgramId.value) {
+    careerOpportunities.value = []
+    return
+  }
+
+  loading.value = true
+  error.value = null
+
+  try {
+    const response = await listCareerOpportunities({
+      program_id: selectedProgramId.value,
+      limit: 100,
+    })
+    careerOpportunities.value = response.items.sort((a, b) => a.display_order - b.display_order)
+  }
+  catch (e) {
+    console.error('Erreur lors du chargement des débouchés:', e)
+    error.value = 'Erreur lors du chargement des débouchés'
+  }
+  finally {
+    loading.value = false
+  }
+}
+
+// Watch program selection
+watch(selectedProgramId, fetchCareerOpportunities)
+
+// Initial load
+onMounted(fetchPrograms)
 
 // === COMPUTED ===
-// Liste des programmes (masters et doctorats principalement)
-const availablePrograms = computed(() => {
-  return formations.value
-    .filter(f => f.formation_type === 'master' || f.formation_type === 'doctorat')
-    .sort((a, b) => a.title_fr.localeCompare(b.title_fr))
-})
-
 // Programmes filtrés par recherche
 const filteredPrograms = computed(() => {
-  if (!searchQuery.value) return availablePrograms.value
+  if (!searchQuery.value) return programs.value
   const query = searchQuery.value.toLowerCase()
-  return availablePrograms.value.filter(p =>
-    p.title_fr.toLowerCase().includes(query) ||
-    p.title_en?.toLowerCase().includes(query)
+  return programs.value.filter(p =>
+    p.title.toLowerCase().includes(query)
+    || p.subtitle?.toLowerCase().includes(query),
   )
 })
 
 // Programme sélectionné
 const selectedProgram = computed(() => {
   if (!selectedProgramId.value) return null
-  return formations.value.find(f => f.id === selectedProgramId.value) || null
-})
-
-// Débouchés du programme sélectionné
-const careerOpportunities = computed(() => {
-  if (!selectedProgramId.value) return []
-  return getCareerOpportunitiesByProgram(selectedProgramId.value)
+  return programs.value.find(f => f.id === selectedProgramId.value) || null
 })
 
 // Stats
-const totalCareersCount = computed(() => getAllCareerOpportunities().length)
-const programsWithCareersCount = computed(() => getProgramsWithCareerOpportunities().length)
+const totalCareersCount = ref(0)
+const programsWithCareersCount = ref(0)
+
+// Charger les stats au montage
+onMounted(async () => {
+  try {
+    const allCareers = await listCareerOpportunities({ limit: 1 })
+    totalCareersCount.value = allCareers.total
+    // On estime le nombre de programmes avec débouchés depuis le total
+  }
+  catch {
+    // Silently fail for stats
+  }
+})
 
 // === METHODS ===
 const selectProgram = (programId: string) => {
@@ -78,7 +140,7 @@ const closeAddModal = () => {
   newCareer.value = { title: '', description: '' }
 }
 
-const openEditModal = (career: ProgramCareerOpportunity) => {
+const openEditModal = (career: ProgramCareerOpportunityRead) => {
   editingCareer.value = { ...career }
   showEditModal.value = true
 }
@@ -88,7 +150,7 @@ const closeEditModal = () => {
   editingCareer.value = null
 }
 
-const openDeleteModal = (career: ProgramCareerOpportunity) => {
+const openDeleteModal = (career: ProgramCareerOpportunityRead) => {
   deletingCareer.value = career
   showDeleteModal.value = true
 }
@@ -98,85 +160,158 @@ const closeDeleteModal = () => {
   deletingCareer.value = null
 }
 
-// Actions (mock - en prod, appeler l'API)
-const addCareer = () => {
+// === CRUD ACTIONS ===
+const addCareer = async () => {
   if (!newCareer.value.title.trim() || !selectedProgramId.value) return
 
-  // En production: POST /api/admin/programs/{program_id}/career-opportunities
-  console.log('Adding career opportunity:', {
-    id: generateCareerOpportunityId(),
-    program_id: selectedProgramId.value,
-    title: newCareer.value.title,
-    description: newCareer.value.description,
-    display_order: careerOpportunities.value.length + 1
-  })
+  submitting.value = true
+  error.value = null
 
-  closeAddModal()
+  try {
+    await createCareerOpportunity({
+      program_id: selectedProgramId.value,
+      title: newCareer.value.title,
+      description: newCareer.value.description || undefined,
+      display_order: careerOpportunities.value.length,
+    })
+    await fetchCareerOpportunities()
+    closeAddModal()
+  }
+  catch (e) {
+    console.error('Erreur lors de la création:', e)
+    error.value = 'Erreur lors de la création du débouché'
+  }
+  finally {
+    submitting.value = false
+  }
 }
 
-const updateCareer = () => {
+const updateCareer = async () => {
   if (!editingCareer.value) return
 
-  // En production: PUT /api/admin/career-opportunities/{id}
-  console.log('Updating career opportunity:', editingCareer.value)
+  submitting.value = true
+  error.value = null
 
-  closeEditModal()
+  try {
+    await updateCareerOpportunity(editingCareer.value.id, {
+      title: editingCareer.value.title,
+      description: editingCareer.value.description,
+    })
+    await fetchCareerOpportunities()
+    closeEditModal()
+  }
+  catch (e) {
+    console.error('Erreur lors de la modification:', e)
+    error.value = 'Erreur lors de la modification du débouché'
+  }
+  finally {
+    submitting.value = false
+  }
 }
 
-const deleteCareer = () => {
+const deleteCareer = async () => {
   if (!deletingCareer.value) return
 
-  // En production: DELETE /api/admin/career-opportunities/{id}
-  console.log('Deleting career opportunity:', deletingCareer.value.id)
+  submitting.value = true
+  error.value = null
 
-  closeDeleteModal()
+  try {
+    await apiDeleteCareerOpportunity(deletingCareer.value.id)
+    await fetchCareerOpportunities()
+    closeDeleteModal()
+  }
+  catch (e) {
+    console.error('Erreur lors de la suppression:', e)
+    error.value = 'Erreur lors de la suppression du débouché'
+  }
+  finally {
+    submitting.value = false
+  }
 }
 
-// Drag & Drop
+// === DRAG & DROP ===
 const draggedIndex = ref<number | null>(null)
 
 const onDragStart = (index: number) => {
   draggedIndex.value = index
 }
 
-const onDragOver = (e: DragEvent, index: number) => {
+const onDragOver = (e: DragEvent) => {
   e.preventDefault()
 }
 
-const onDrop = (e: DragEvent, targetIndex: number) => {
+const onDrop = async (e: DragEvent, targetIndex: number) => {
   e.preventDefault()
   if (draggedIndex.value === null || draggedIndex.value === targetIndex) return
 
-  // En production: PUT /api/admin/programs/{program_id}/career-opportunities/reorder
-  console.log('Reordering:', { from: draggedIndex.value, to: targetIndex })
+  // Réorganisation locale (optimistic update)
+  const items = [...careerOpportunities.value]
+  const [moved] = items.splice(draggedIndex.value, 1)
+  items.splice(targetIndex, 0, moved)
+  careerOpportunities.value = items
 
   draggedIndex.value = null
+
+  // Persister via API
+  try {
+    await reorderCareerOpportunities(items.map(item => item.id))
+  }
+  catch (e) {
+    console.error('Erreur lors du réordonnancement:', e)
+    error.value = 'Erreur lors du réordonnancement'
+    // Recharger les données en cas d'erreur
+    await fetchCareerOpportunities()
+  }
 }
 
 const onDragEnd = () => {
   draggedIndex.value = null
 }
 
-// Couleurs des badges par type de formation
-const getFormationTypeColor = (type: Formation['formation_type']) => {
-  const colors = {
+// === HELPERS ===
+const getFormationTypeColor = (type: ProgramType) => {
+  const colors: Record<ProgramType, string> = {
     master: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-    doctorat: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-    du: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-    certifiante: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+    doctorate: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+    diploma: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+    certificate: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
   }
   return colors[type] || colors.master
 }
 
-const getFormationTypeLabel = (type: Formation['formation_type']) => {
-  const labels = {
+const getFormationTypeLabel = (type: ProgramType) => {
+  const labels: Record<ProgramType, string> = {
     master: 'Master',
-    doctorat: 'Doctorat',
-    du: 'DU',
-    certifiante: 'Certificat'
+    doctorate: 'Doctorat',
+    diploma: 'DU',
+    certificate: 'Certificat',
   }
   return labels[type] || type
 }
+
+// Nombre de débouchés par programme (pour l'affichage dans la sidebar)
+const careerCountByProgram = ref<Record<string, number>>({})
+
+async function fetchCareerCountForProgram(programId: string): Promise<number> {
+  if (careerCountByProgram.value[programId] !== undefined) {
+    return careerCountByProgram.value[programId]
+  }
+  try {
+    const response = await listCareerOpportunities({ program_id: programId, limit: 1 })
+    careerCountByProgram.value[programId] = response.total
+    return response.total
+  }
+  catch {
+    return 0
+  }
+}
+
+// Charger les counts pour tous les programmes au montage
+watch(programs, async (newPrograms) => {
+  for (const program of newPrograms) {
+    fetchCareerCountForProgram(program.id)
+  }
+}, { immediate: true })
 </script>
 
 <template>
@@ -195,14 +330,39 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
       <!-- Stats -->
       <div class="flex gap-4">
         <div class="rounded-lg bg-white px-4 py-2 shadow dark:bg-gray-800">
-          <p class="text-xs text-gray-500 dark:text-gray-400">Total débouchés</p>
-          <p class="text-xl font-bold text-gray-900 dark:text-white">{{ totalCareersCount }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            Total débouchés
+          </p>
+          <p class="text-xl font-bold text-gray-900 dark:text-white">
+            {{ totalCareersCount }}
+          </p>
         </div>
         <div class="rounded-lg bg-white px-4 py-2 shadow dark:bg-gray-800">
-          <p class="text-xs text-gray-500 dark:text-gray-400">Programmes</p>
-          <p class="text-xl font-bold text-gray-900 dark:text-white">{{ programsWithCareersCount }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            Programmes
+          </p>
+          <p class="text-xl font-bold text-gray-900 dark:text-white">
+            {{ programs.length }}
+          </p>
         </div>
       </div>
+    </div>
+
+    <!-- Message d'erreur global -->
+    <div
+      v-if="error"
+      class="flex items-center justify-between rounded-lg bg-red-50 p-4 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+    >
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-circle-exclamation" />
+        <span>{{ error }}</span>
+      </div>
+      <button
+        class="text-sm underline hover:no-underline"
+        @click="error = null"
+      >
+        Fermer
+      </button>
     </div>
 
     <div class="grid gap-6 lg:grid-cols-3">
@@ -215,17 +375,29 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
 
           <!-- Recherche -->
           <div class="relative mb-4">
-            <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Rechercher un programme..."
               class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-            />
+            >
+          </div>
+
+          <!-- Loading -->
+          <div
+            v-if="loadingPrograms"
+            class="flex justify-center py-8"
+          >
+            <i class="fa-solid fa-spinner fa-spin text-2xl text-gray-400" />
           </div>
 
           <!-- Liste des programmes -->
-          <div class="admin-scrollbar max-h-[500px] space-y-2 overflow-y-scroll pr-1" data-lenis-prevent>
+          <div
+            v-else
+            class="admin-scrollbar max-h-[500px] space-y-2 overflow-y-scroll pr-1"
+            data-lenis-prevent
+          >
             <button
               v-for="program in filteredPrograms"
               :key="program.id"
@@ -233,27 +405,30 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
               :class="[
                 selectedProgramId === program.id
                   ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
-                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:border-gray-600 dark:hover:bg-gray-700/50'
+                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:border-gray-600 dark:hover:bg-gray-700/50',
               ]"
               @click="selectProgram(program.id)"
             >
               <div class="flex items-start justify-between gap-2">
                 <span class="text-sm font-medium text-gray-900 dark:text-white">
-                  {{ program.title_fr }}
+                  {{ program.title }}
                 </span>
                 <span
                   class="shrink-0 rounded-full px-2 py-0.5 text-xs font-medium"
-                  :class="getFormationTypeColor(program.formation_type)"
+                  :class="getFormationTypeColor(program.type)"
                 >
-                  {{ getFormationTypeLabel(program.formation_type) }}
+                  {{ getFormationTypeLabel(program.type) }}
                 </span>
               </div>
-              <p class="mt-1 line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
-                {{ program.short_description_fr }}
+              <p
+                v-if="program.subtitle"
+                class="mt-1 line-clamp-2 text-xs text-gray-500 dark:text-gray-400"
+              >
+                {{ program.subtitle }}
               </p>
               <div class="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                <i class="fa-solid fa-briefcase"></i>
-                <span>{{ getCareerOpportunitiesByProgram(program.id).length }} débouchés</span>
+                <i class="fa-solid fa-briefcase" />
+                <span>{{ careerCountByProgram[program.id] ?? '...' }} débouchés</span>
               </div>
             </button>
 
@@ -274,32 +449,47 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
           <div class="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
             <div>
               <h2 class="font-semibold text-gray-900 dark:text-white">
-                {{ selectedProgram ? selectedProgram.title_fr : 'Débouchés' }}
+                {{ selectedProgram ? selectedProgram.title : 'Débouchés' }}
               </h2>
-              <p v-if="selectedProgram" class="text-sm text-gray-500 dark:text-gray-400">
+              <p
+                v-if="selectedProgram"
+                class="text-sm text-gray-500 dark:text-gray-400"
+              >
                 {{ careerOpportunities.length }} débouché{{ careerOpportunities.length > 1 ? 's' : '' }} défini{{ careerOpportunities.length > 1 ? 's' : '' }}
               </p>
             </div>
 
             <button
               v-if="selectedProgram"
-              class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+              class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+              :disabled="submitting"
               @click="openAddModal"
             >
-              <i class="fa-solid fa-plus"></i>
+              <i class="fa-solid fa-plus" />
               Ajouter
             </button>
           </div>
 
           <!-- Contenu -->
-          <div class="admin-scrollbar max-h-[600px] overflow-y-scroll p-4 pr-2" data-lenis-prevent>
+          <div
+            class="admin-scrollbar max-h-[600px] overflow-y-scroll p-4 pr-2"
+            data-lenis-prevent
+          >
+            <!-- Loading -->
+            <div
+              v-if="loading"
+              class="flex justify-center py-12"
+            >
+              <i class="fa-solid fa-spinner fa-spin text-2xl text-gray-400" />
+            </div>
+
             <!-- État vide - aucun programme sélectionné -->
             <div
-              v-if="!selectedProgram"
+              v-else-if="!selectedProgram"
               class="flex flex-col items-center justify-center py-12 text-center"
             >
               <div class="mb-4 rounded-full bg-gray-100 p-4 dark:bg-gray-700">
-                <i class="fa-solid fa-graduation-cap text-3xl text-gray-400"></i>
+                <i class="fa-solid fa-graduation-cap text-3xl text-gray-400" />
               </div>
               <h3 class="mb-2 font-medium text-gray-900 dark:text-white">
                 Sélectionnez un programme
@@ -315,7 +505,7 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
               class="flex flex-col items-center justify-center py-12 text-center"
             >
               <div class="mb-4 rounded-full bg-gray-100 p-4 dark:bg-gray-700">
-                <i class="fa-solid fa-briefcase text-3xl text-gray-400"></i>
+                <i class="fa-solid fa-briefcase text-3xl text-gray-400" />
               </div>
               <h3 class="mb-2 font-medium text-gray-900 dark:text-white">
                 Aucun débouché défini
@@ -327,15 +517,18 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
                 class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
                 @click="openAddModal"
               >
-                <i class="fa-solid fa-plus"></i>
+                <i class="fa-solid fa-plus" />
                 Ajouter le premier débouché
               </button>
             </div>
 
             <!-- Liste des débouchés -->
-            <div v-else class="space-y-3">
+            <div
+              v-else
+              class="space-y-3"
+            >
               <p class="mb-4 text-xs text-gray-500 dark:text-gray-400">
-                <i class="fa-solid fa-grip-vertical mr-1"></i>
+                <i class="fa-solid fa-grip-vertical mr-1" />
                 Glissez-déposez pour réorganiser l'ordre des débouchés
               </p>
 
@@ -346,13 +539,13 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
                 :class="{ 'opacity-50': draggedIndex === index }"
                 draggable="true"
                 @dragstart="onDragStart(index)"
-                @dragover="(e) => onDragOver(e, index)"
+                @dragover="onDragOver"
                 @drop="(e) => onDrop(e, index)"
                 @dragend="onDragEnd"
               >
                 <!-- Poignée de drag -->
                 <div class="cursor-grab pt-1 text-gray-400 active:cursor-grabbing">
-                  <i class="fa-solid fa-grip-vertical"></i>
+                  <i class="fa-solid fa-grip-vertical" />
                 </div>
 
                 <!-- Numéro -->
@@ -365,7 +558,10 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
                   <h3 class="font-medium text-gray-900 dark:text-white">
                     {{ career.title }}
                   </h3>
-                  <p v-if="career.description" class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  <p
+                    v-if="career.description"
+                    class="mt-1 text-sm text-gray-500 dark:text-gray-400"
+                  >
                     {{ career.description }}
                   </p>
                 </div>
@@ -377,14 +573,14 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
                     title="Modifier"
                     @click="openEditModal(career)"
                   >
-                    <i class="fa-solid fa-pen"></i>
+                    <i class="fa-solid fa-pen" />
                   </button>
                   <button
                     class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-200 hover:text-red-600 dark:hover:bg-gray-600 dark:hover:text-red-400"
                     title="Supprimer"
                     @click="openDeleteModal(career)"
                   >
-                    <i class="fa-solid fa-trash"></i>
+                    <i class="fa-solid fa-trash" />
                   </button>
                 </div>
               </div>
@@ -410,7 +606,7 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
               class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
               @click="closeAddModal"
             >
-              <i class="fa-solid fa-xmark"></i>
+              <i class="fa-solid fa-xmark" />
             </button>
           </div>
 
@@ -425,7 +621,7 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
                 required
                 placeholder="Ex: Directeur de projet"
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              />
+              >
             </div>
 
             <div class="mb-6">
@@ -453,8 +649,13 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
               </button>
               <button
                 type="submit"
-                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+                :disabled="submitting"
               >
+                <i
+                  v-if="submitting"
+                  class="fa-solid fa-spinner fa-spin"
+                />
                 Ajouter
               </button>
             </div>
@@ -479,7 +680,7 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
               class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
               @click="closeEditModal"
             >
-              <i class="fa-solid fa-xmark"></i>
+              <i class="fa-solid fa-xmark" />
             </button>
           </div>
 
@@ -493,7 +694,7 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
                 type="text"
                 required
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              />
+              >
             </div>
 
             <div class="mb-6">
@@ -517,8 +718,13 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
               </button>
               <button
                 type="submit"
-                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+                :disabled="submitting"
               >
+                <i
+                  v-if="submitting"
+                  class="fa-solid fa-spinner fa-spin"
+                />
                 Enregistrer
               </button>
             </div>
@@ -537,7 +743,7 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
         <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
           <div class="mb-4 flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-              <i class="fa-solid fa-triangle-exclamation text-red-600 dark:text-red-400"></i>
+              <i class="fa-solid fa-triangle-exclamation text-red-600 dark:text-red-400" />
             </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
               Supprimer le débouché
@@ -561,9 +767,14 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
             </button>
             <button
               type="button"
-              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+              class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              :disabled="submitting"
               @click="deleteCareer"
             >
+              <i
+                v-if="submitting"
+                class="fa-solid fa-spinner fa-spin"
+              />
               Supprimer
             </button>
           </div>

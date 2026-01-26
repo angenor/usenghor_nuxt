@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Formation } from '~/composables/useMockData'
+import type { ProgramWithDetails } from '~/types/api'
 
 definePageMeta({
   layout: 'admin'
@@ -7,108 +7,160 @@ definePageMeta({
 
 const route = useRoute()
 const router = useRouter()
+const toast = useToast()
 
 const {
-  formations,
-  getDepartmentById,
-  getSkillsByProgram,
-  getCareerOpportunitiesByProgram
-} = useMockData()
+  getProgramById,
+  deleteProgram,
+  toggleProgramStatus,
+  duplicateProgram,
+  programTypeLabels,
+  programTypeColors,
+  publicationStatusLabels,
+  formatDuration,
+  isPublished,
+} = useProgramsApi()
 
-// Récupérer le programme
-const program = computed(() => {
-  return formations.value.find(f => f.id === route.params.id)
-})
+// États
+const loading = ref(true)
+const actionLoading = ref(false)
+const program = ref<ProgramWithDetails | null>(null)
 
-// Rediriger si le programme n'existe pas
-watchEffect(() => {
-  if (!program.value && route.params.id) {
+// Chargement du programme
+async function loadProgram() {
+  loading.value = true
+  try {
+    program.value = await getProgramById(route.params.id as string)
+  } catch (e) {
+    console.error('Erreur lors du chargement du programme:', e)
+    toast.add({
+      title: 'Erreur',
+      description: 'Programme non trouvé',
+      color: 'error',
+    })
     router.replace('/admin/formations/programmes')
+  } finally {
+    loading.value = false
   }
-})
+}
 
-// Compétences et débouchés
-const skills = computed(() => program.value ? getSkillsByProgram(program.value.id) : [])
-const careerOpportunities = computed(() => program.value ? getCareerOpportunitiesByProgram(program.value.id) : [])
+onMounted(loadProgram)
+
+// Compétences et débouchés (inclus dans ProgramWithDetails)
+const skills = computed(() => program.value?.skills || [])
+const careerOpportunities = computed(() => program.value?.career_opportunities || [])
 
 // Modal suppression
 const showDeleteModal = ref(false)
 
-const confirmDelete = () => {
+async function confirmDelete() {
   if (!program.value) return
-  console.log('Deleting program:', program.value.id)
-  // En production: DELETE /api/admin/programs/{id}
-  router.push('/admin/formations/programmes')
+  actionLoading.value = true
+  try {
+    await deleteProgram(program.value.id)
+    toast.add({
+      title: 'Succès',
+      description: 'Programme supprimé avec succès',
+      color: 'success',
+    })
+    router.push('/admin/formations/programmes')
+  } catch (e) {
+    console.error('Erreur lors de la suppression:', e)
+    toast.add({
+      title: 'Erreur',
+      description: 'Impossible de supprimer le programme',
+      color: 'error',
+    })
+  } finally {
+    actionLoading.value = false
+    showDeleteModal.value = false
+  }
+}
+
+// Toggle publication
+async function togglePublished() {
+  if (!program.value) return
+  actionLoading.value = true
+  try {
+    const updated = await toggleProgramStatus(program.value.id)
+    program.value = { ...program.value, status: updated.status }
+    toast.add({
+      title: 'Succès',
+      description: isPublished(updated.status) ? 'Programme publié' : 'Programme dépublié',
+      color: 'success',
+    })
+  } catch (e) {
+    console.error('Erreur lors du changement de statut:', e)
+    toast.add({
+      title: 'Erreur',
+      description: 'Impossible de modifier le statut',
+      color: 'error',
+    })
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+// Duplication
+const showDuplicateModal = ref(false)
+const duplicateForm = ref({
+  new_code: '',
+  new_title: '',
+  new_slug: '',
+})
+
+function openDuplicateModal() {
+  if (!program.value) return
+  duplicateForm.value = {
+    new_code: `${program.value.code}-COPY`,
+    new_title: `${program.value.title} (copie)`,
+    new_slug: `${program.value.slug}-copie`,
+  }
+  showDuplicateModal.value = true
+}
+
+async function confirmDuplicate() {
+  if (!program.value) return
+  actionLoading.value = true
+  try {
+    const result = await duplicateProgram(program.value.id, duplicateForm.value)
+    toast.add({
+      title: 'Succès',
+      description: 'Programme dupliqué avec succès',
+      color: 'success',
+    })
+    router.push(`/admin/formations/programmes/${result.id}/edit`)
+  } catch (e) {
+    console.error('Erreur lors de la duplication:', e)
+    toast.add({
+      title: 'Erreur',
+      description: 'Impossible de dupliquer le programme',
+      color: 'error',
+    })
+  } finally {
+    actionLoading.value = false
+    showDuplicateModal.value = false
+  }
 }
 
 // Utilitaires
-const getTypeLabel = (type: Formation['formation_type']) => {
-  const labels = {
-    master: 'Master',
-    doctorat: 'Doctorat',
-    du: 'DU',
-    certifiante: 'Certificat'
-  }
-  return labels[type] || type
-}
-
-const getTypeColor = (type: Formation['formation_type']) => {
-  const colors = {
-    master: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-    doctorat: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-    du: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-    certifiante: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
-  }
-  return colors[type] || colors.master
-}
-
-const getCampusLabel = (campus: Formation['campus']) => {
-  const labels = {
-    alexandrie: 'Alexandrie',
-    externalise: 'Externalisé',
-    en_ligne: 'En ligne'
-  }
-  return labels[campus] || campus
-}
-
-const getCampusColor = (campus: Formation['campus']) => {
-  const colors = {
-    alexandrie: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400',
-    externalise: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400',
-    en_ligne: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400'
-  }
-  return colors[campus] || colors.alexandrie
-}
-
-// Actions rapides
-const togglePublished = () => {
-  if (!program.value) return
-  console.log('Toggle published:', program.value.id, !program.value.is_published)
-  // En production: PATCH /api/admin/programs/{id} { is_published: !current }
-}
-
-const toggleFeatured = () => {
-  if (!program.value) return
-  console.log('Toggle featured:', program.value.id, !program.value.is_featured)
-  // En production: PATCH /api/admin/programs/{id} { is_featured: !current }
-}
-
-const toggleApplicationOpen = () => {
-  if (!program.value) return
-  console.log('Toggle application_open:', program.value.id, !program.value.application_open)
-  // En production: PATCH /api/admin/programs/{id} { application_open: !current }
-}
-
-const duplicateProgram = () => {
-  if (!program.value) return
-  console.log('Duplicating program:', program.value.id)
-  // En production: POST /api/admin/programs/{id}/duplicate
-  // Puis rediriger vers la page d'édition du nouveau programme
+function getStatusColor(published: boolean) {
+  return published
+    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
 }
 </script>
 
 <template>
-  <div v-if="program" class="space-y-6">
+  <!-- État de chargement -->
+  <div v-if="loading" class="flex items-center justify-center py-12">
+    <div class="text-center">
+      <font-awesome-icon icon="fa-solid fa-spinner" class="w-8 h-8 animate-spin text-blue-600" />
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Chargement du programme...</p>
+    </div>
+  </div>
+
+  <div v-else-if="program" class="space-y-6">
     <!-- Breadcrumb & Actions -->
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex items-center gap-3">
@@ -124,26 +176,28 @@ const duplicateProgram = () => {
               Programmes
             </NuxtLink>
             <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3" />
-            <span class="text-gray-900 dark:text-white">{{ program.title_fr }}</span>
+            <span class="text-gray-900 dark:text-white">{{ program.title }}</span>
           </nav>
           <h1 class="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
-            {{ program.title_fr }}
+            {{ program.title }}
           </h1>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
         <button
-          class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+          class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 disabled:opacity-50"
           title="Dupliquer"
-          @click="duplicateProgram"
+          :disabled="actionLoading"
+          @click="openDuplicateModal"
         >
           <font-awesome-icon icon="fa-solid fa-copy" class="w-4 h-4" />
           <span class="hidden sm:inline">Dupliquer</span>
         </button>
         <button
-          class="inline-flex items-center gap-2 rounded-lg border border-red-300 bg-white px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-600 dark:bg-gray-700 dark:text-red-400 dark:hover:bg-red-900/20"
+          class="inline-flex items-center gap-2 rounded-lg border border-red-300 bg-white px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-600 dark:bg-gray-700 dark:text-red-400 dark:hover:bg-red-900/20 disabled:opacity-50"
           title="Supprimer"
+          :disabled="actionLoading"
           @click="showDeleteModal = true"
         >
           <font-awesome-icon icon="fa-solid fa-trash" class="w-4 h-4" />
@@ -165,61 +219,39 @@ const duplicateProgram = () => {
       <div class="space-y-6 lg:col-span-2">
         <!-- Image & Info -->
         <div class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
-          <div
-            v-if="program.image"
-            class="h-64 w-full bg-cover bg-center"
-            :style="{ backgroundImage: `url(${program.image})` }"
-          ></div>
-          <div v-else class="flex h-48 w-full items-center justify-center bg-gray-100 dark:bg-gray-700">
+          <div class="flex h-48 w-full items-center justify-center bg-gray-100 dark:bg-gray-700">
             <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-16 h-16 text-gray-300 dark:text-gray-500" />
           </div>
 
           <div class="p-6">
             <!-- Badges -->
             <div class="mb-4 flex flex-wrap gap-2">
-              <span :class="getTypeColor(program.formation_type)" class="rounded-full px-3 py-1 text-sm font-medium">
-                {{ getTypeLabel(program.formation_type) }}
-              </span>
-              <span :class="getCampusColor(program.campus)" class="rounded-full px-3 py-1 text-sm font-medium">
-                {{ getCampusLabel(program.campus) }}
+              <span :class="programTypeColors[program.type]" class="rounded-full px-3 py-1 text-sm font-medium">
+                {{ programTypeLabels[program.type] }}
               </span>
               <span
-                :class="program.is_published ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'"
+                :class="getStatusColor(isPublished(program.status))"
                 class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium"
               >
-                <span class="h-2 w-2 rounded-full" :class="program.is_published ? 'bg-green-500' : 'bg-yellow-500'"></span>
-                {{ program.is_published ? 'Publié' : 'Brouillon' }}
-              </span>
-              <span
-                v-if="program.is_featured"
-                class="inline-flex items-center gap-1.5 rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-              >
-                <font-awesome-icon icon="fa-solid fa-star" class="w-3 h-3" />
-                Mis en avant
-              </span>
-              <span
-                v-if="program.application_open"
-                class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400"
-              >
-                <font-awesome-icon icon="fa-solid fa-door-open" class="w-3 h-3" />
-                Candidatures ouvertes
+                <span class="h-2 w-2 rounded-full" :class="isPublished(program.status) ? 'bg-green-500' : 'bg-yellow-500'"></span>
+                {{ publicationStatusLabels[program.status] }}
               </span>
             </div>
 
-            <!-- Titre anglais -->
-            <p v-if="program.title_en" class="mb-4 text-lg italic text-gray-500 dark:text-gray-400">
-              {{ program.title_en }}
+            <!-- Sous-titre -->
+            <p v-if="program.subtitle" class="mb-4 text-lg text-gray-600 dark:text-gray-300">
+              {{ program.subtitle }}
             </p>
 
             <!-- Description -->
-            <div class="prose prose-gray max-w-none dark:prose-invert">
+            <div v-if="program.description" class="prose prose-gray max-w-none dark:prose-invert">
               <p class="text-gray-600 dark:text-gray-300">
-                {{ program.short_description_fr }}
-              </p>
-              <p v-if="program.short_description_en" class="mt-4 text-sm italic text-gray-500 dark:text-gray-400">
-                {{ program.short_description_en }}
+                {{ program.description }}
               </p>
             </div>
+            <p v-else class="text-sm italic text-gray-400 dark:text-gray-500">
+              Aucune description
+            </p>
           </div>
         </div>
 
@@ -233,12 +265,6 @@ const duplicateProgram = () => {
                 {{ skills.length }}
               </span>
             </h2>
-            <NuxtLink
-              to="/admin/formations/competences"
-              class="text-sm text-blue-600 hover:underline dark:text-blue-400"
-            >
-              Gérer les compétences
-            </NuxtLink>
           </div>
 
           <div v-if="skills.length > 0" class="space-y-3">
@@ -277,12 +303,6 @@ const duplicateProgram = () => {
                 {{ careerOpportunities.length }}
               </span>
             </h2>
-            <NuxtLink
-              to="/admin/formations/debouches"
-              class="text-sm text-blue-600 hover:underline dark:text-blue-400"
-            >
-              Gérer les débouchés
-            </NuxtLink>
           </div>
 
           <div v-if="careerOpportunities.length > 0" class="grid gap-3 sm:grid-cols-2">
@@ -303,6 +323,19 @@ const duplicateProgram = () => {
             Aucun débouché défini pour ce programme.
           </p>
         </div>
+
+        <!-- Méthodes d'enseignement -->
+        <div v-if="program.teaching_methods" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+          <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+            <font-awesome-icon icon="fa-solid fa-chalkboard-teacher" class="w-5 h-5 text-indigo-500" />
+            Méthodes d'enseignement
+          </h2>
+          <div class="prose prose-gray max-w-none dark:prose-invert">
+            <p class="text-gray-600 dark:text-gray-300">
+              {{ program.teaching_methods }}
+            </p>
+          </div>
+        </div>
       </div>
 
       <!-- Sidebar (1/3) -->
@@ -315,15 +348,15 @@ const duplicateProgram = () => {
 
           <dl class="space-y-4">
             <div>
-              <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Département</dt>
-              <dd class="mt-1 text-sm font-medium text-gray-900 dark:text-white">
-                {{ getDepartmentById(program.department_id)?.name_fr || '-' }}
+              <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Code</dt>
+              <dd class="mt-1 font-mono text-sm font-medium text-gray-900 dark:text-white">
+                {{ program.code }}
               </dd>
             </div>
             <div>
               <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Durée</dt>
               <dd class="mt-1 text-sm font-medium text-gray-900 dark:text-white">
-                {{ program.duration_fr || '-' }}
+                {{ formatDuration(program.duration_months) }}
               </dd>
             </div>
             <div>
@@ -335,7 +368,13 @@ const duplicateProgram = () => {
             <div>
               <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Diplôme délivré</dt>
               <dd class="mt-1 text-sm font-medium text-gray-900 dark:text-white">
-                {{ program.diploma_fr || '-' }}
+                {{ program.degree_awarded || '-' }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Diplôme requis</dt>
+              <dd class="mt-1 text-sm font-medium text-gray-900 dark:text-white">
+                {{ program.required_degree || '-' }}
               </dd>
             </div>
             <div>
@@ -361,50 +400,19 @@ const duplicateProgram = () => {
 
           <div class="space-y-3">
             <button
-              class="flex w-full items-center justify-between rounded-lg border px-4 py-3 text-left text-sm transition-colors"
-              :class="program.is_published
+              class="flex w-full items-center justify-between rounded-lg border px-4 py-3 text-left text-sm transition-colors disabled:opacity-50"
+              :class="isPublished(program.status)
                 ? 'border-green-200 bg-green-50 text-green-800 hover:bg-green-100 dark:border-green-800 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/30'
                 : 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-700/50 dark:text-gray-300 dark:hover:bg-gray-700'"
+              :disabled="actionLoading"
               @click="togglePublished"
             >
               <span class="flex items-center gap-2">
-                <font-awesome-icon :icon="program.is_published ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'" class="w-4 h-4" />
-                {{ program.is_published ? 'Publié' : 'Non publié' }}
+                <font-awesome-icon :icon="isPublished(program.status) ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'" class="w-4 h-4" />
+                {{ isPublished(program.status) ? 'Publié' : 'Non publié' }}
               </span>
               <span class="text-xs text-gray-500 dark:text-gray-400">
-                Cliquer pour {{ program.is_published ? 'dépublier' : 'publier' }}
-              </span>
-            </button>
-
-            <button
-              class="flex w-full items-center justify-between rounded-lg border px-4 py-3 text-left text-sm transition-colors"
-              :class="program.is_featured
-                ? 'border-yellow-200 bg-yellow-50 text-yellow-800 hover:bg-yellow-100 dark:border-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 dark:hover:bg-yellow-900/30'
-                : 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-700/50 dark:text-gray-300 dark:hover:bg-gray-700'"
-              @click="toggleFeatured"
-            >
-              <span class="flex items-center gap-2">
-                <font-awesome-icon :icon="program.is_featured ? 'fa-solid fa-star' : 'fa-regular fa-star'" class="w-4 h-4" />
-                {{ program.is_featured ? 'Mis en avant' : 'Non mis en avant' }}
-              </span>
-              <span class="text-xs text-gray-500 dark:text-gray-400">
-                Cliquer pour {{ program.is_featured ? 'retirer' : 'mettre en avant' }}
-              </span>
-            </button>
-
-            <button
-              class="flex w-full items-center justify-between rounded-lg border px-4 py-3 text-left text-sm transition-colors"
-              :class="program.application_open
-                ? 'border-green-200 bg-green-50 text-green-800 hover:bg-green-100 dark:border-green-800 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/30'
-                : 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-700/50 dark:text-gray-300 dark:hover:bg-gray-700'"
-              @click="toggleApplicationOpen"
-            >
-              <span class="flex items-center gap-2">
-                <font-awesome-icon :icon="program.application_open ? 'fa-solid fa-door-open' : 'fa-solid fa-door-closed'" class="w-4 h-4" />
-                {{ program.application_open ? 'Candidatures ouvertes' : 'Candidatures fermées' }}
-              </span>
-              <span class="text-xs text-gray-500 dark:text-gray-400">
-                Cliquer pour {{ program.application_open ? 'fermer' : 'ouvrir' }}
+                Cliquer pour {{ isPublished(program.status) ? 'dépublier' : 'publier' }}
               </span>
             </button>
           </div>
@@ -458,23 +466,99 @@ const duplicateProgram = () => {
             Êtes-vous sûr de vouloir supprimer ce programme ? Cette action est irréversible.
           </p>
           <p class="mb-6 rounded-lg bg-gray-100 p-3 text-sm font-medium text-gray-900 dark:bg-gray-700 dark:text-white">
-            {{ program.title_fr }}
+            {{ program.title }}
           </p>
 
           <div class="flex justify-end gap-3">
             <button
               type="button"
               class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              :disabled="actionLoading"
               @click="showDeleteModal = false"
             >
               Annuler
             </button>
             <button
               type="button"
-              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+              class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              :disabled="actionLoading"
               @click="confirmDelete"
             >
+              <font-awesome-icon v-if="actionLoading" icon="fa-solid fa-spinner" class="w-4 h-4 animate-spin" />
               Supprimer
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Modal Duplication -->
+    <Teleport to="body">
+      <div
+        v-if="showDuplicateModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        @click.self="showDuplicateModal = false"
+      >
+        <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+          <div class="mb-4 flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
+              <font-awesome-icon icon="fa-solid fa-copy" class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              Dupliquer le programme
+            </h3>
+          </div>
+
+          <div class="mb-6 space-y-4">
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Nouveau code
+              </label>
+              <input
+                v-model="duplicateForm.new_code"
+                type="text"
+                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Nouveau titre
+              </label>
+              <input
+                v-model="duplicateForm.new_title"
+                type="text"
+                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Nouveau slug
+              </label>
+              <input
+                v-model="duplicateForm.new_slug"
+                type="text"
+                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-3">
+            <button
+              type="button"
+              class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              :disabled="actionLoading"
+              @click="showDuplicateModal = false"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+              :disabled="actionLoading"
+              @click="confirmDuplicate"
+            >
+              <font-awesome-icon v-if="actionLoading" icon="fa-solid fa-spinner" class="w-4 h-4 animate-spin" />
+              Dupliquer
             </button>
           </div>
         </div>
@@ -482,7 +566,7 @@ const duplicateProgram = () => {
     </Teleport>
   </div>
 
-  <!-- État de chargement / non trouvé -->
+  <!-- État non trouvé -->
   <div v-else class="flex flex-col items-center justify-center py-12">
     <div class="mb-4 rounded-full bg-gray-100 p-4 dark:bg-gray-700">
       <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-8 h-8 text-gray-400" />

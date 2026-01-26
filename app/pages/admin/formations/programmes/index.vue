@@ -1,32 +1,41 @@
 <script setup lang="ts">
-import type { Formation } from '~/composables/useMockData'
+import type { ProgramCreatePayload, ProgramRead, ProgramType, PublicationStatus } from '~/types/api'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
 })
 
 const router = useRouter()
 
 const {
-  formations,
-  departments,
-  getDepartmentById
-} = useMockData()
+  listPrograms,
+  createProgram,
+  deleteProgram,
+  duplicateProgram,
+  programTypeLabels,
+  programTypeColors,
+  formatDuration,
+  isPublished,
+} = useProgramsApi()
 
 // === STATE ===
+const loading = ref(true)
+const error = ref<string | null>(null)
+const programs = ref<ProgramRead[]>([])
+const totalItems = ref(0)
+const totalPages = ref(1)
+
 // Filtres
 const searchQuery = ref('')
-const filterType = ref<Formation['formation_type'] | 'all'>('all')
-const filterStatus = ref<'all' | 'published' | 'draft'>('all')
-const filterDepartment = ref<string>('all')
-const filterCampus = ref<'all' | 'alexandrie' | 'externalise' | 'en_ligne'>('all')
+const filterType = ref<ProgramType | 'all'>('all')
+const filterStatus = ref<PublicationStatus | 'all'>('all')
 
 // Pagination
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
 
 // Tri
-const sortBy = ref<'title' | 'type' | 'department' | 'status'>('title')
+const sortBy = ref<'title' | 'type' | 'status'>('title')
 const sortOrder = ref<'asc' | 'desc'>('asc')
 
 // Sélection
@@ -36,289 +45,311 @@ const selectAll = ref(false)
 // Modals
 const showCreateModal = ref(false)
 const showDeleteModal = ref(false)
-const deletingProgram = ref<Formation | null>(null)
+const deletingProgram = ref<ProgramRead | null>(null)
+const isSubmitting = ref(false)
 
 // Form state
 const programForm = ref({
-  title_fr: '',
-  title_en: '',
+  code: '',
+  title: '',
+  subtitle: '',
   slug: '',
-  formation_type: 'master' as Formation['formation_type'],
-  short_description_fr: '',
-  short_description_en: '',
-  department_id: '',
-  campus: 'alexandrie' as Formation['campus'],
-  duration_fr: '',
+  type: 'master' as ProgramType,
+  description: '',
+  duration_months: 24,
   credits: 120,
-  diploma_fr: '',
-  is_published: false,
-  is_featured: false,
-  application_open: false
+  degree_awarded: '',
+  required_degree: '',
+  status: 'draft' as PublicationStatus,
 })
+
+// === DATA LOADING ===
+async function loadPrograms() {
+  loading.value = true
+  error.value = null
+  try {
+    const response = await listPrograms({
+      page: currentPage.value,
+      limit: itemsPerPage.value,
+      search: searchQuery.value || undefined,
+      type: filterType.value,
+      status: filterStatus.value,
+    })
+    programs.value = response.items
+    totalItems.value = response.total
+    totalPages.value = response.pages
+  }
+  catch (e) {
+    error.value = 'Erreur lors du chargement des programmes'
+    console.error(e)
+  }
+  finally {
+    loading.value = false
+  }
+}
+
+// Watch filters with debounce
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+watch([searchQuery, filterType, filterStatus], () => {
+  currentPage.value = 1 // Reset to first page on filter change
+  if (debounceTimer)
+    clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(loadPrograms, 300)
+})
+
+watch(currentPage, loadPrograms)
+
+onMounted(loadPrograms)
 
 // === COMPUTED ===
-// Toutes les formations (pas seulement publiées)
-const allFormations = computed(() => {
-  // En admin, on voit tout
-  return [...formations.value]
-})
+// Stats (calculées depuis les données chargées - approximatif car paginé)
+const stats = computed(() => ({
+  total: totalItems.value,
+  published: programs.value.filter(p => isPublished(p.status)).length,
+  draft: programs.value.filter(p => !isPublished(p.status)).length,
+  masters: programs.value.filter(p => p.type === 'master').length,
+  doctorats: programs.value.filter(p => p.type === 'doctorate').length,
+}))
 
-// Formations filtrées
-const filteredFormations = computed(() => {
-  let result = allFormations.value
-
-  // Filtre recherche
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    result = result.filter(f =>
-      f.title_fr.toLowerCase().includes(query) ||
-      f.title_en?.toLowerCase().includes(query) ||
-      f.slug.toLowerCase().includes(query)
-    )
-  }
-
-  // Filtre type
-  if (filterType.value !== 'all') {
-    result = result.filter(f => f.formation_type === filterType.value)
-  }
-
-  // Filtre statut
-  if (filterStatus.value !== 'all') {
-    result = result.filter(f =>
-      filterStatus.value === 'published' ? f.is_published : !f.is_published
-    )
-  }
-
-  // Filtre département
-  if (filterDepartment.value !== 'all') {
-    result = result.filter(f => f.department_id === filterDepartment.value)
-  }
-
-  // Filtre campus
-  if (filterCampus.value !== 'all') {
-    result = result.filter(f => f.campus === filterCampus.value)
-  }
-
-  // Tri
-  result = [...result].sort((a, b) => {
+// Programmes triés localement (pagination côté serveur)
+const sortedPrograms = computed(() => {
+  const result = [...programs.value]
+  result.sort((a, b) => {
     let comparison = 0
     switch (sortBy.value) {
       case 'title':
-        comparison = a.title_fr.localeCompare(b.title_fr)
+        comparison = a.title.localeCompare(b.title)
         break
       case 'type':
-        comparison = a.formation_type.localeCompare(b.formation_type)
-        break
-      case 'department':
-        comparison = a.department_id.localeCompare(b.department_id)
+        comparison = a.type.localeCompare(b.type)
         break
       case 'status':
-        comparison = (a.is_published ? 1 : 0) - (b.is_published ? 1 : 0)
+        comparison = a.status.localeCompare(b.status)
         break
     }
     return sortOrder.value === 'asc' ? comparison : -comparison
   })
-
   return result
 })
 
-// Pagination
-const totalPages = computed(() => Math.ceil(filteredFormations.value.length / itemsPerPage.value))
-
-const paginatedFormations = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return filteredFormations.value.slice(start, end)
-})
-
-// Stats
-const stats = computed(() => ({
-  total: allFormations.value.length,
-  published: allFormations.value.filter(f => f.is_published).length,
-  draft: allFormations.value.filter(f => !f.is_published).length,
-  masters: allFormations.value.filter(f => f.formation_type === 'master').length,
-  doctorats: allFormations.value.filter(f => f.formation_type === 'doctorat').length
-}))
-
 // === METHODS ===
-// Génération de slug
-const generateSlug = (title: string) => {
-  return title
+// Génération de slug unique (titre + suffixe)
+function generateSlug(title: string) {
+  const base = title
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\u0300-\u036F]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '')
+  // Ajouter un suffixe unique
+  const suffix = Date.now().toString(36).slice(-4)
+  return `${base}-${suffix}`
 }
 
-// Watchers pour auto-génération du slug
-watch(() => programForm.value.title_fr, (newTitle) => {
+// Génération de code unique (préfixe du titre + suffixe numérique)
+function generateCode(title: string) {
+  const prefix = title
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036F]/g, '')
+    .replace(/[^A-Z0-9]+/g, '')
+    .substring(0, 6)
+  // Ajouter un suffixe numérique unique basé sur le timestamp
+  const suffix = Date.now().toString(36).slice(-4).toUpperCase()
+  return `${prefix}-${suffix}`
+}
+
+// Watchers pour auto-génération
+watch(() => programForm.value.title, (newTitle) => {
   programForm.value.slug = generateSlug(newTitle)
+  programForm.value.code = generateCode(newTitle)
 })
 
 // Gestion de la sélection
-const toggleSelectAll = () => {
+function toggleSelectAll() {
   if (selectAll.value) {
-    selectedIds.value = paginatedFormations.value.map(f => f.id)
-  } else {
+    selectedIds.value = sortedPrograms.value.map(p => p.id)
+  }
+  else {
     selectedIds.value = []
   }
 }
 
-const toggleSelect = (id: string) => {
+function toggleSelect(id: string) {
   const index = selectedIds.value.indexOf(id)
   if (index === -1) {
     selectedIds.value.push(id)
-  } else {
+  }
+  else {
     selectedIds.value.splice(index, 1)
   }
 }
 
-const isSelected = (id: string) => selectedIds.value.includes(id)
+function isSelected(id: string) {
+  return selectedIds.value.includes(id)
+}
 
 // Tri
-const toggleSort = (column: typeof sortBy.value) => {
+function toggleSort(column: typeof sortBy.value) {
   if (sortBy.value === column) {
     sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-  } else {
+  }
+  else {
     sortBy.value = column
     sortOrder.value = 'asc'
   }
 }
 
 // Reset filtres
-const resetFilters = () => {
+function resetFilters() {
   searchQuery.value = ''
   filterType.value = 'all'
   filterStatus.value = 'all'
-  filterDepartment.value = 'all'
-  filterCampus.value = 'all'
   currentPage.value = 1
 }
 
 // Modals
-const openCreateModal = () => {
+function openCreateModal() {
   programForm.value = {
-    title_fr: '',
-    title_en: '',
+    code: '',
+    title: '',
+    subtitle: '',
     slug: '',
-    formation_type: 'master',
-    short_description_fr: '',
-    short_description_en: '',
-    department_id: departments.value[0]?.id || '',
-    campus: 'alexandrie',
-    duration_fr: '2 ans (4 semestres)',
+    type: 'master',
+    description: '',
+    duration_months: 24,
     credits: 120,
-    diploma_fr: 'Master professionnel',
-    is_published: false,
-    is_featured: false,
-    application_open: false
+    degree_awarded: 'Master professionnel',
+    required_degree: 'Bac+4 minimum',
+    status: 'draft',
   }
   showCreateModal.value = true
 }
 
-const closeCreateModal = () => {
+function closeCreateModal() {
   showCreateModal.value = false
 }
 
-const openDeleteModal = (program: Formation) => {
+function openDeleteModal(program: ProgramRead) {
   deletingProgram.value = program
   showDeleteModal.value = true
 }
 
-const closeDeleteModal = () => {
+function closeDeleteModal() {
   showDeleteModal.value = false
   deletingProgram.value = null
 }
 
-// Navigation vers les pages dédiées
-const viewProgram = (program: Formation) => {
+// Navigation
+function viewProgram(program: ProgramRead) {
   router.push(`/admin/formations/programmes/${program.id}`)
 }
 
-const editProgram = (program: Formation) => {
+function editProgram(program: ProgramRead) {
   router.push(`/admin/formations/programmes/${program.id}/edit`)
 }
 
-// Actions CRUD (mock)
-const createProgram = () => {
-  console.log('Creating program:', programForm.value)
-  // En production: POST /api/admin/programs
-  closeCreateModal()
+// Actions CRUD
+async function handleCreateProgram() {
+  isSubmitting.value = true
+  try {
+    const payload: ProgramCreatePayload = {
+      code: programForm.value.code,
+      title: programForm.value.title,
+      subtitle: programForm.value.subtitle || null,
+      slug: programForm.value.slug,
+      type: programForm.value.type,
+      description: programForm.value.description || null,
+      duration_months: programForm.value.duration_months || null,
+      credits: programForm.value.credits || null,
+      degree_awarded: programForm.value.degree_awarded || null,
+      required_degree: programForm.value.required_degree || null,
+      status: programForm.value.status,
+    }
+    const result = await createProgram(payload)
+    closeCreateModal()
+    // Rediriger vers la page d'édition du nouveau programme
+    router.push(`/admin/formations/programmes/${result.id}/edit`)
+  }
+  catch (e: unknown) {
+    console.error('Erreur création programme:', e)
+    const fetchError = e as { data?: { detail?: string } }
+    const detail = fetchError.data?.detail || 'Erreur lors de la création du programme'
+    alert(detail)
+  }
+  finally {
+    isSubmitting.value = false
+  }
 }
 
-const deleteProgram = () => {
-  if (!deletingProgram.value) return
-  console.log('Deleting program:', deletingProgram.value.id)
-  // En production: DELETE /api/admin/programs/{id}
-  closeDeleteModal()
+async function handleDeleteProgram() {
+  if (!deletingProgram.value)
+    return
+  isSubmitting.value = true
+  try {
+    await deleteProgram(deletingProgram.value.id)
+    closeDeleteModal()
+    await loadPrograms()
+  }
+  catch (e) {
+    console.error('Erreur suppression programme:', e)
+    alert('Erreur lors de la suppression du programme')
+  }
+  finally {
+    isSubmitting.value = false
+  }
 }
 
-const duplicateProgram = (program: Formation) => {
-  console.log('Duplicating program:', program.id)
-  // En production: POST /api/admin/programs/{id}/duplicate
-  // Après duplication, rediriger vers la page d'édition du nouveau programme
+async function handleDuplicateProgram(program: ProgramRead) {
+  const newCode = `${program.code}-COPY`
+  const newTitle = `${program.title} (copie)`
+  const newSlug = `${program.slug}-copie`
+
+  try {
+    const result = await duplicateProgram(program.id, {
+      new_code: newCode,
+      new_title: newTitle,
+      new_slug: newSlug,
+    })
+    // Rediriger vers la page d'édition du nouveau programme
+    router.push(`/admin/formations/programmes/${result.id}/edit`)
+  }
+  catch (e) {
+    console.error('Erreur duplication programme:', e)
+    alert('Erreur lors de la duplication du programme')
+  }
 }
 
 // Actions en masse
-const bulkPublish = () => {
+async function bulkPublish() {
+  // À implémenter si nécessaire avec un endpoint batch
   console.log('Publishing:', selectedIds.value)
-  // En production: POST /api/admin/programs/bulk-action { action: 'publish', ids: [...] }
   selectedIds.value = []
   selectAll.value = false
 }
 
-const bulkUnpublish = () => {
+async function bulkUnpublish() {
+  // À implémenter si nécessaire avec un endpoint batch
   console.log('Unpublishing:', selectedIds.value)
   selectedIds.value = []
   selectAll.value = false
 }
 
-const bulkDelete = () => {
+async function bulkDelete() {
   if (confirm(`Supprimer ${selectedIds.value.length} programme(s) ?`)) {
-    console.log('Deleting:', selectedIds.value)
+    // Supprimer un par un
+    for (const id of selectedIds.value) {
+      try {
+        await deleteProgram(id)
+      }
+      catch (e) {
+        console.error('Erreur suppression:', e)
+      }
+    }
     selectedIds.value = []
     selectAll.value = false
+    await loadPrograms()
   }
-}
-
-// Labels et couleurs
-const getTypeLabel = (type: Formation['formation_type']) => {
-  const labels = {
-    master: 'Master',
-    doctorat: 'Doctorat',
-    du: 'DU',
-    certifiante: 'Certificat'
-  }
-  return labels[type] || type
-}
-
-const getTypeColor = (type: Formation['formation_type']) => {
-  const colors = {
-    master: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-    doctorat: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-    du: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-    certifiante: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
-  }
-  return colors[type] || colors.master
-}
-
-const getCampusLabel = (campus: Formation['campus']) => {
-  const labels = {
-    alexandrie: 'Alexandrie',
-    externalise: 'Externalisé',
-    en_ligne: 'En ligne'
-  }
-  return labels[campus] || campus
-}
-
-const getCampusColor = (campus: Formation['campus']) => {
-  const colors = {
-    alexandrie: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400',
-    externalise: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400',
-    en_ligne: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400'
-  }
-  return colors[campus] || colors.alexandrie
 }
 </script>
 
@@ -339,7 +370,7 @@ const getCampusColor = (campus: Formation['campus']) => {
         class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
         @click="openCreateModal"
       >
-        <font-awesome-icon icon="fa-solid fa-plus" class="w-4 h-4" />
+        <font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4" />
         Nouveau programme
       </button>
     </div>
@@ -373,13 +404,13 @@ const getCampusColor = (campus: Formation['campus']) => {
       <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <!-- Recherche -->
         <div class="relative flex-1 lg:max-w-md">
-          <font-awesome-icon icon="fa-solid fa-search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <font-awesome-icon icon="fa-solid fa-search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input
             v-model="searchQuery"
             type="text"
             placeholder="Rechercher un programme..."
             class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          />
+          >
         </div>
 
         <!-- Filtres -->
@@ -390,9 +421,9 @@ const getCampusColor = (campus: Formation['campus']) => {
           >
             <option value="all">Tous les types</option>
             <option value="master">Master</option>
-            <option value="doctorat">Doctorat</option>
-            <option value="du">DU</option>
-            <option value="certifiante">Certificat</option>
+            <option value="doctorate">Doctorat</option>
+            <option value="university_diploma">DU</option>
+            <option value="certificate">Certificat</option>
           </select>
 
           <select
@@ -402,34 +433,15 @@ const getCampusColor = (campus: Formation['campus']) => {
             <option value="all">Tous les statuts</option>
             <option value="published">Publiés</option>
             <option value="draft">Brouillons</option>
-          </select>
-
-          <select
-            v-model="filterDepartment"
-            class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          >
-            <option value="all">Tous les départements</option>
-            <option v-for="dept in departments" :key="dept.id" :value="dept.id">
-              {{ dept.name_fr }}
-            </option>
-          </select>
-
-          <select
-            v-model="filterCampus"
-            class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          >
-            <option value="all">Tous les campus</option>
-            <option value="alexandrie">Alexandrie</option>
-            <option value="externalise">Externalisé</option>
-            <option value="en_ligne">En ligne</option>
+            <option value="archived">Archivés</option>
           </select>
 
           <button
-            v-if="searchQuery || filterType !== 'all' || filterStatus !== 'all' || filterDepartment !== 'all' || filterCampus !== 'all'"
+            v-if="searchQuery || filterType !== 'all' || filterStatus !== 'all'"
             class="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
             @click="resetFilters"
           >
-            <font-awesome-icon icon="fa-solid fa-xmark" class="w-3 h-3" />
+            <font-awesome-icon icon="fa-solid fa-xmark" class="h-3 w-3" />
             Réinitialiser
           </button>
         </div>
@@ -466,225 +478,229 @@ const getCampusColor = (campus: Formation['campus']) => {
       </div>
     </div>
 
-    <!-- Tableau -->
-    <div class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
-      <div class="admin-scrollbar overflow-x-auto" data-lenis-prevent>
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead class="bg-gray-50 dark:bg-gray-900">
-            <tr>
-              <th class="w-10 px-4 py-3">
-                <input
-                  v-model="selectAll"
-                  type="checkbox"
-                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-                  @change="toggleSelectAll"
-                />
-              </th>
-              <th
-                class="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                @click="toggleSort('title')"
-              >
-                <span class="flex items-center gap-1">
-                  Programme
-                  <font-awesome-icon v-if="sortBy === 'title'" :icon="sortOrder === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down'" class="w-3 h-3 text-blue-600" />
-                </span>
-              </th>
-              <th
-                class="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                @click="toggleSort('type')"
-              >
-                <span class="flex items-center gap-1">
-                  Type
-                  <font-awesome-icon v-if="sortBy === 'type'" :icon="sortOrder === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down'" class="w-3 h-3 text-blue-600" />
-                </span>
-              </th>
-              <th
-                class="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                @click="toggleSort('department')"
-              >
-                <span class="flex items-center gap-1">
-                  Département
-                  <font-awesome-icon v-if="sortBy === 'department'" :icon="sortOrder === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down'" class="w-3 h-3 text-blue-600" />
-                </span>
-              </th>
-              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Campus
-              </th>
-              <th
-                class="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                @click="toggleSort('status')"
-              >
-                <span class="flex items-center gap-1">
-                  Statut
-                  <font-awesome-icon v-if="sortBy === 'status'" :icon="sortOrder === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down'" class="w-3 h-3 text-blue-600" />
-                </span>
-              </th>
-              <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-            <tr
-              v-for="program in paginatedFormations"
-              :key="program.id"
-              class="cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
-              :class="{ 'bg-blue-50 dark:bg-blue-900/30': isSelected(program.id) }"
-              @click="viewProgram(program)"
-            >
-              <td class="px-4 py-3" @click.stop>
-                <input
-                  type="checkbox"
-                  :checked="isSelected(program.id)"
-                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-                  @change="toggleSelect(program.id)"
-                />
-              </td>
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-3">
-                  <div
-                    class="h-10 w-10 flex-shrink-0 rounded-lg bg-cover bg-center"
-                    :style="{ backgroundImage: program.image ? `url(${program.image})` : 'none', backgroundColor: program.image ? 'transparent' : '#e5e7eb' }"
-                  >
-                    <div v-if="!program.image" class="flex h-full w-full items-center justify-center text-gray-400">
-                      <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-5 h-5" />
-                    </div>
-                  </div>
-                  <div class="min-w-0">
-                    <p class="truncate font-medium text-gray-900 dark:text-white">
-                      {{ program.title_fr }}
-                    </p>
-                    <p class="truncate text-xs text-gray-500 dark:text-gray-400">
-                      {{ program.slug }}
-                    </p>
-                  </div>
-                </div>
-              </td>
-              <td class="px-4 py-3">
-                <span
-                  class="inline-flex rounded-full px-2 py-1 text-xs font-medium"
-                  :class="getTypeColor(program.formation_type)"
-                >
-                  {{ getTypeLabel(program.formation_type) }}
-                </span>
-              </td>
-              <td class="px-4 py-3">
-                <span class="text-sm text-gray-600 dark:text-gray-300">
-                  {{ getDepartmentById(program.department_id)?.name_fr || '-' }}
-                </span>
-              </td>
-              <td class="px-4 py-3">
-                <span
-                  class="inline-flex rounded-full px-2 py-1 text-xs font-medium"
-                  :class="getCampusColor(program.campus)"
-                >
-                  {{ getCampusLabel(program.campus) }}
-                </span>
-              </td>
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-2">
-                  <span
-                    class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium"
-                    :class="program.is_published ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'"
-                  >
-                    <span class="h-1.5 w-1.5 rounded-full" :class="program.is_published ? 'bg-green-500' : 'bg-yellow-500'"></span>
-                    {{ program.is_published ? 'Publié' : 'Brouillon' }}
-                  </span>
-                  <span
-                    v-if="program.is_featured"
-                    class="text-yellow-500"
-                    title="Mis en avant"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-star" class="w-3 h-3" />
-                  </span>
-                  <span
-                    v-if="program.application_open"
-                    class="text-green-500"
-                    title="Candidatures ouvertes"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-door-open" class="w-3 h-3" />
-                  </span>
-                </div>
-              </td>
-              <td class="px-4 py-3 text-right" @click.stop>
-                <div class="flex items-center justify-end gap-1">
-                  <button
-                    class="rounded p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
-                    title="Voir les détails"
-                    @click="viewProgram(program)"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-eye" class="w-4 h-4" />
-                  </button>
-                  <button
-                    class="rounded p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-700 dark:hover:text-blue-400"
-                    title="Modifier"
-                    @click="editProgram(program)"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-pen" class="w-4 h-4" />
-                  </button>
-                  <button
-                    class="rounded p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-purple-600 dark:hover:bg-gray-700 dark:hover:text-purple-400"
-                    title="Dupliquer"
-                    @click="duplicateProgram(program)"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-copy" class="w-4 h-4" />
-                  </button>
-                  <button
-                    class="rounded p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-700 dark:hover:text-red-400"
-                    title="Supprimer"
-                    @click="openDeleteModal(program)"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-trash" class="w-4 h-4" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Pagination -->
-      <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3 dark:border-gray-700">
-        <div class="text-sm text-gray-500 dark:text-gray-400">
-          {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, filteredFormations.length) }} sur {{ filteredFormations.length }} programmes
-        </div>
-        <div class="flex items-center gap-2">
-          <button
-            :disabled="currentPage === 1"
-            class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-            @click="currentPage--"
-          >
-            <font-awesome-icon icon="fa-solid fa-chevron-left" class="w-3 h-3" />
-          </button>
-          <span class="text-sm text-gray-600 dark:text-gray-300">
-            Page {{ currentPage }} / {{ totalPages }}
-          </span>
-          <button
-            :disabled="currentPage === totalPages"
-            class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-            @click="currentPage++"
-          >
-            <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3" />
-          </button>
-        </div>
-      </div>
-
-      <!-- État vide -->
-      <div
-        v-if="paginatedFormations.length === 0"
-        class="flex flex-col items-center justify-center py-12"
-      >
-        <div class="mb-4 rounded-full bg-gray-100 p-4 dark:bg-gray-700">
-          <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-8 h-8 text-gray-400" />
-        </div>
-        <h3 class="mb-2 font-medium text-gray-900 dark:text-white">
-          Aucun programme trouvé
-        </h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          Essayez de modifier vos filtres ou créez un nouveau programme.
-        </p>
+    <!-- État de chargement -->
+    <div v-if="loading" class="flex items-center justify-center py-12">
+      <div class="flex items-center gap-3">
+        <svg class="h-6 w-6 animate-spin text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+        </svg>
+        <span class="text-gray-600 dark:text-gray-400">Chargement des programmes...</span>
       </div>
     </div>
+
+    <!-- Message d'erreur -->
+    <div v-else-if="error" class="rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
+      <div class="flex items-center gap-3">
+        <font-awesome-icon icon="fa-solid fa-circle-exclamation" class="h-5 w-5 text-red-500" />
+        <p class="text-sm text-red-700 dark:text-red-400">{{ error }}</p>
+        <button
+          class="ml-auto text-sm text-red-600 hover:underline dark:text-red-400"
+          @click="loadPrograms"
+        >
+          Réessayer
+        </button>
+      </div>
+    </div>
+
+    <!-- Tableau -->
+    <template v-else>
+      <div class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
+        <div class="admin-scrollbar overflow-x-auto" data-lenis-prevent>
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-900">
+              <tr>
+                <th class="w-10 px-4 py-3">
+                  <input
+                    v-model="selectAll"
+                    type="checkbox"
+                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                    @change="toggleSelectAll"
+                  >
+                </th>
+                <th
+                  class="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                  @click="toggleSort('title')"
+                >
+                  <span class="flex items-center gap-1">
+                    Programme
+                    <font-awesome-icon v-if="sortBy === 'title'" :icon="sortOrder === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down'" class="h-3 w-3 text-blue-600" />
+                  </span>
+                </th>
+                <th
+                  class="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                  @click="toggleSort('type')"
+                >
+                  <span class="flex items-center gap-1">
+                    Type
+                    <font-awesome-icon v-if="sortBy === 'type'" :icon="sortOrder === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down'" class="h-3 w-3 text-blue-600" />
+                  </span>
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Durée
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Crédits
+                </th>
+                <th
+                  class="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                  @click="toggleSort('status')"
+                >
+                  <span class="flex items-center gap-1">
+                    Statut
+                    <font-awesome-icon v-if="sortBy === 'status'" :icon="sortOrder === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down'" class="h-3 w-3 text-blue-600" />
+                  </span>
+                </th>
+                <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+              <tr
+                v-for="program in sortedPrograms"
+                :key="program.id"
+                class="cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                :class="{ 'bg-blue-50 dark:bg-blue-900/30': isSelected(program.id) }"
+                @click="viewProgram(program)"
+              >
+                <td class="px-4 py-3" @click.stop>
+                  <input
+                    type="checkbox"
+                    :checked="isSelected(program.id)"
+                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                    @change="toggleSelect(program.id)"
+                  >
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700">
+                      <font-awesome-icon icon="fa-solid fa-graduation-cap" class="h-5 w-5 text-gray-400" />
+                    </div>
+                    <div class="min-w-0">
+                      <p class="truncate font-medium text-gray-900 dark:text-white">
+                        {{ program.title }}
+                      </p>
+                      <p class="truncate text-xs text-gray-500 dark:text-gray-400">
+                        {{ program.code }} · {{ program.slug }}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-4 py-3">
+                  <span
+                    class="inline-flex rounded-full px-2 py-1 text-xs font-medium"
+                    :class="programTypeColors[program.type]"
+                  >
+                    {{ programTypeLabels[program.type] }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
+                  {{ formatDuration(program.duration_months) }}
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
+                  {{ program.credits || '-' }} ECTS
+                </td>
+                <td class="px-4 py-3">
+                  <span
+                    class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium"
+                    :class="isPublished(program.status)
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                      : program.status === 'archived'
+                        ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'"
+                  >
+                    <span
+                      class="h-1.5 w-1.5 rounded-full"
+                      :class="isPublished(program.status)
+                        ? 'bg-green-500'
+                        : program.status === 'archived'
+                          ? 'bg-gray-500'
+                          : 'bg-yellow-500'"
+                    />
+                    {{ isPublished(program.status) ? 'Publié' : program.status === 'archived' ? 'Archivé' : 'Brouillon' }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-right" @click.stop>
+                  <div class="flex items-center justify-end gap-1">
+                    <button
+                      class="rounded p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                      title="Voir les détails"
+                      @click="viewProgram(program)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-eye" class="h-4 w-4" />
+                    </button>
+                    <button
+                      class="rounded p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-700 dark:hover:text-blue-400"
+                      title="Modifier"
+                      @click="editProgram(program)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-pen" class="h-4 w-4" />
+                    </button>
+                    <button
+                      class="rounded p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-purple-600 dark:hover:bg-gray-700 dark:hover:text-purple-400"
+                      title="Dupliquer"
+                      @click="handleDuplicateProgram(program)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-copy" class="h-4 w-4" />
+                    </button>
+                    <button
+                      class="rounded p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-700 dark:hover:text-red-400"
+                      title="Supprimer"
+                      @click="openDeleteModal(program)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-trash" class="h-4 w-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3 dark:border-gray-700">
+          <div class="text-sm text-gray-500 dark:text-gray-400">
+            {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} programmes
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              :disabled="currentPage === 1"
+              class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+              @click="currentPage--"
+            >
+              <font-awesome-icon icon="fa-solid fa-chevron-left" class="h-3 w-3" />
+            </button>
+            <span class="text-sm text-gray-600 dark:text-gray-300">
+              Page {{ currentPage }} / {{ totalPages || 1 }}
+            </span>
+            <button
+              :disabled="currentPage >= totalPages"
+              class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+              @click="currentPage++"
+            >
+              <font-awesome-icon icon="fa-solid fa-chevron-right" class="h-3 w-3" />
+            </button>
+          </div>
+        </div>
+
+        <!-- État vide -->
+        <div
+          v-if="sortedPrograms.length === 0 && !loading"
+          class="flex flex-col items-center justify-center py-12"
+        >
+          <div class="mb-4 rounded-full bg-gray-100 p-4 dark:bg-gray-700">
+            <font-awesome-icon icon="fa-solid fa-graduation-cap" class="h-8 w-8 text-gray-400" />
+          </div>
+          <h3 class="mb-2 font-medium text-gray-900 dark:text-white">
+            Aucun programme trouvé
+          </h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Essayez de modifier vos filtres ou créez un nouveau programme.
+          </p>
+        </div>
+      </div>
+    </template>
 
     <!-- Modal Créer -->
     <Teleport to="body">
@@ -693,7 +709,7 @@ const getCampusColor = (campus: Formation['campus']) => {
         class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4"
         @click.self="closeCreateModal"
       >
-        <div class="admin-scrollbar w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800" data-lenis-prevent>
+        <div class="admin-scrollbar max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800" data-lenis-prevent>
           <div class="mb-6 flex items-center justify-between">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
               Nouveau programme
@@ -702,35 +718,36 @@ const getCampusColor = (campus: Formation['campus']) => {
               class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
               @click="closeCreateModal"
             >
-              <font-awesome-icon icon="fa-solid fa-xmark" class="w-5 h-5" />
+              <font-awesome-icon icon="fa-solid fa-xmark" class="h-5 w-5" />
             </button>
           </div>
 
-          <form @submit.prevent="createProgram" class="space-y-4">
-            <!-- Titre -->
+          <form class="space-y-4" @submit.prevent="handleCreateProgram">
+            <!-- Titre et Code -->
             <div class="grid gap-4 sm:grid-cols-2">
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Titre (FR) *
+                  Titre *
                 </label>
                 <input
-                  v-model="programForm.title_fr"
+                  v-model="programForm.title"
                   type="text"
                   required
-                  placeholder="Master en..."
+                  placeholder="Master en Développement"
                   class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Titre (EN)
+                  Code *
                 </label>
                 <input
-                  v-model="programForm.title_en"
+                  v-model="programForm.code"
                   type="text"
-                  placeholder="Master in..."
-                  class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                  required
+                  placeholder="MDEV"
+                  class="w-full rounded-lg border border-gray-300 px-4 py-2 font-mono text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                >
               </div>
             </div>
 
@@ -743,76 +760,56 @@ const getCampusColor = (campus: Formation['campus']) => {
                 v-model="programForm.slug"
                 type="text"
                 required
-                placeholder="master-en-..."
+                placeholder="master-developpement"
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 font-mono text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              />
+              >
               <p class="mt-1 text-xs text-gray-500">Auto-généré depuis le titre</p>
             </div>
 
-            <!-- Type et Département -->
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Type *
-                </label>
-                <select
-                  v-model="programForm.formation_type"
-                  required
-                  class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                >
-                  <option value="master">Master</option>
-                  <option value="doctorat">Doctorat</option>
-                  <option value="du">Diplôme d'Université (DU)</option>
-                  <option value="certifiante">Formation certifiante</option>
-                </select>
-              </div>
-              <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Département *
-                </label>
-                <select
-                  v-model="programForm.department_id"
-                  required
-                  class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                >
-                  <option v-for="dept in departments" :key="dept.id" :value="dept.id">
-                    {{ dept.name_fr }}
-                  </option>
-                </select>
-              </div>
+            <!-- Type -->
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Type *
+              </label>
+              <select
+                v-model="programForm.type"
+                required
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              >
+                <option value="master">Master</option>
+                <option value="doctorate">Doctorat</option>
+                <option value="university_diploma">Diplôme d'Université (DU)</option>
+                <option value="certificate">Certificat</option>
+              </select>
             </div>
 
-            <!-- Campus et Durée -->
+            <!-- Sous-titre -->
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Sous-titre
+              </label>
+              <input
+                v-model="programForm.subtitle"
+                type="text"
+                placeholder="Gestion du développement durable"
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              >
+            </div>
+
+            <!-- Durée et Crédits -->
             <div class="grid gap-4 sm:grid-cols-2">
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Campus *
-                </label>
-                <select
-                  v-model="programForm.campus"
-                  required
-                  class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                >
-                  <option value="alexandrie">Alexandrie</option>
-                  <option value="externalise">Campus externalisé</option>
-                  <option value="en_ligne">En ligne</option>
-                </select>
-              </div>
-              <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Durée
+                  Durée (mois)
                 </label>
                 <input
-                  v-model="programForm.duration_fr"
-                  type="text"
-                  placeholder="2 ans (4 semestres)"
+                  v-model.number="programForm.duration_months"
+                  type="number"
+                  min="1"
+                  placeholder="24"
                   class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
-            </div>
-
-            <!-- Crédits et Diplôme -->
-            <div class="grid gap-4 sm:grid-cols-2">
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Crédits ECTS
@@ -821,62 +818,63 @@ const getCampusColor = (campus: Formation['campus']) => {
                   v-model.number="programForm.credits"
                   type="number"
                   min="0"
+                  placeholder="120"
                   class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
+            </div>
+
+            <!-- Diplôme et Prérequis -->
+            <div class="grid gap-4 sm:grid-cols-2">
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Diplôme délivré
                 </label>
                 <input
-                  v-model="programForm.diploma_fr"
+                  v-model="programForm.degree_awarded"
                   type="text"
                   placeholder="Master professionnel"
                   class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Diplôme requis
+                </label>
+                <input
+                  v-model="programForm.required_degree"
+                  type="text"
+                  placeholder="Bac+4 minimum"
+                  class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                >
               </div>
             </div>
 
             <!-- Description -->
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Description courte (FR) *
+                Description
               </label>
               <textarea
-                v-model="programForm.short_description_fr"
+                v-model="programForm.description"
                 rows="3"
-                required
                 placeholder="Décrivez brièvement la formation..."
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
 
-            <!-- Options -->
-            <div class="flex flex-wrap gap-4">
-              <label class="flex items-center gap-2">
-                <input
-                  v-model="programForm.is_published"
-                  type="checkbox"
-                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span class="text-sm text-gray-700 dark:text-gray-300">Publier immédiatement</span>
+            <!-- Statut -->
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Statut de publication
               </label>
-              <label class="flex items-center gap-2">
-                <input
-                  v-model="programForm.is_featured"
-                  type="checkbox"
-                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span class="text-sm text-gray-700 dark:text-gray-300">Mettre en avant</span>
-              </label>
-              <label class="flex items-center gap-2">
-                <input
-                  v-model="programForm.application_open"
-                  type="checkbox"
-                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span class="text-sm text-gray-700 dark:text-gray-300">Candidatures ouvertes</span>
-              </label>
+              <select
+                v-model="programForm.status"
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              >
+                <option value="draft">Brouillon</option>
+                <option value="published">Publié</option>
+              </select>
             </div>
 
             <!-- Boutons -->
@@ -890,9 +888,10 @@ const getCampusColor = (campus: Formation['campus']) => {
               </button>
               <button
                 type="submit"
-                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                :disabled="isSubmitting"
+                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
               >
-                Créer le programme
+                {{ isSubmitting ? 'Création...' : 'Créer le programme' }}
               </button>
             </div>
           </form>
@@ -910,7 +909,7 @@ const getCampusColor = (campus: Formation['campus']) => {
         <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
           <div class="mb-4 flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-              <font-awesome-icon icon="fa-solid fa-triangle-exclamation" class="w-5 h-5 text-red-600 dark:text-red-400" />
+              <font-awesome-icon icon="fa-solid fa-triangle-exclamation" class="h-5 w-5 text-red-600 dark:text-red-400" />
             </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
               Supprimer le programme
@@ -921,7 +920,7 @@ const getCampusColor = (campus: Formation['campus']) => {
             Êtes-vous sûr de vouloir supprimer ce programme ? Cette action est irréversible.
           </p>
           <p class="mb-6 rounded-lg bg-gray-100 p-3 text-sm font-medium text-gray-900 dark:bg-gray-700 dark:text-white">
-            {{ deletingProgram.title_fr }}
+            {{ deletingProgram.title }}
           </p>
 
           <div class="flex justify-end gap-3">
@@ -934,17 +933,15 @@ const getCampusColor = (campus: Formation['campus']) => {
             </button>
             <button
               type="button"
-              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
-              @click="deleteProgram"
+              :disabled="isSubmitting"
+              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              @click="handleDeleteProgram"
             >
-              Supprimer
+              {{ isSubmitting ? 'Suppression...' : 'Supprimer' }}
             </button>
           </div>
         </div>
       </div>
     </Teleport>
-
   </div>
 </template>
-
-<!-- Styles scrollbar dans base.css avec classe .admin-scrollbar -->

@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import type { Formation } from '~/composables/useMockData'
-import type { OutputData } from '@editorjs/editorjs'
-import type { EditorJSContent } from '@bank/mock-data/formations'
+import type { ProgramType, ProgramWithDetails, PublicationStatus } from '~/types/api'
 
 definePageMeta({
   layout: 'admin'
@@ -11,75 +9,63 @@ const route = useRoute()
 const router = useRouter()
 
 const {
-  formations,
-  departments,
-  getDepartmentById
-} = useMockData()
+  getProgramById,
+  updateProgram,
+  programTypeLabels,
+  publicationStatusLabels,
+} = useProgramsApi()
 
-// Récupérer le programme
-const program = computed(() => {
-  return formations.value.find(f => f.id === route.params.id)
-})
-
-// Rediriger si le programme n'existe pas
-watchEffect(() => {
-  if (!program.value && route.params.id) {
-    router.replace('/admin/formations/programmes')
-  }
-})
+// États
+const loading = ref(true)
+const isSubmitting = ref(false)
+const program = ref<ProgramWithDetails | null>(null)
 
 // État du formulaire
 const form = ref({
-  title_fr: '',
-  title_en: '',
+  code: '',
+  title: '',
+  subtitle: '',
   slug: '',
-  formation_type: 'master' as Formation['formation_type'],
-  short_description_fr: '',
-  short_description_en: '',
-  department_id: '',
-  campus: 'alexandrie' as Formation['campus'],
-  duration_fr: '',
-  duration_en: '',
-  credits: 120,
-  diploma_fr: '',
-  diploma_en: '',
-  image: '',
-  is_published: false,
-  is_featured: false,
-  application_open: false
+  description: '',
+  teaching_methods: '',
+  type: 'master' as ProgramType,
+  duration_months: null as number | null,
+  credits: null as number | null,
+  degree_awarded: '',
+  required_degree: '',
+  status: 'draft' as PublicationStatus,
 })
 
-// Contenu EditorJS (séparé du formulaire pour éviter les problèmes de réactivité)
-const contentFr = ref<OutputData | undefined>(undefined)
-const contentEn = ref<OutputData | undefined>(undefined)
-
-// Charger les données du programme dans le formulaire
-watchEffect(() => {
-  if (program.value) {
+// Chargement du programme
+async function loadProgram() {
+  loading.value = true
+  try {
+    program.value = await getProgramById(route.params.id as string)
+    // Charger les données dans le formulaire
     form.value = {
-      title_fr: program.value.title_fr,
-      title_en: program.value.title_en || '',
+      code: program.value.code,
+      title: program.value.title,
+      subtitle: program.value.subtitle || '',
       slug: program.value.slug,
-      formation_type: program.value.formation_type,
-      short_description_fr: program.value.short_description_fr,
-      short_description_en: program.value.short_description_en || '',
-      department_id: program.value.department_id,
-      campus: program.value.campus,
-      duration_fr: program.value.duration_fr,
-      duration_en: program.value.duration_en || '',
-      credits: program.value.credits || 0,
-      diploma_fr: program.value.diploma_fr || '',
-      diploma_en: program.value.diploma_en || '',
-      image: program.value.image || '',
-      is_published: program.value.is_published,
-      is_featured: program.value.is_featured,
-      application_open: program.value.application_open
+      description: program.value.description || '',
+      teaching_methods: program.value.teaching_methods || '',
+      type: program.value.type,
+      duration_months: program.value.duration_months,
+      credits: program.value.credits,
+      degree_awarded: program.value.degree_awarded || '',
+      required_degree: program.value.required_degree || '',
+      status: program.value.status,
     }
-    // Charger le contenu EditorJS
-    contentFr.value = program.value.content_fr as OutputData | undefined
-    contentEn.value = program.value.content_en as OutputData | undefined
+  } catch (e) {
+    console.error('Erreur lors du chargement du programme:', e)
+    alert('Programme non trouvé')
+    router.replace('/admin/formations/programmes')
+  } finally {
+    loading.value = false
   }
-})
+}
+
+onMounted(loadProgram)
 
 // Génération de slug
 const generateSlug = (title: string) => {
@@ -91,8 +77,7 @@ const generateSlug = (title: string) => {
     .replace(/(^-|-$)/g, '')
 }
 
-// États
-const isSubmitting = ref(false)
+// États de modification
 const hasChanges = ref(false)
 const showDiscardModal = ref(false)
 
@@ -101,32 +86,34 @@ watch(form, () => {
   hasChanges.value = true
 }, { deep: true })
 
-// Détecter les changements du contenu EditorJS
-const onContentChange = () => {
-  hasChanges.value = true
-}
-
 // Soumettre le formulaire
 const submitForm = async () => {
   if (!program.value) return
 
   isSubmitting.value = true
   try {
-    const payload = {
-      ...form.value,
-      content_fr: contentFr.value,
-      content_en: contentEn.value
-    }
-    console.log('Updating program:', program.value.id, payload)
-    // En production: PUT /api/admin/programs/{id}
-
-    // Simuler un délai
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await updateProgram(program.value.id, {
+      code: form.value.code,
+      title: form.value.title,
+      subtitle: form.value.subtitle || null,
+      slug: form.value.slug,
+      description: form.value.description || null,
+      teaching_methods: form.value.teaching_methods || null,
+      type: form.value.type,
+      duration_months: form.value.duration_months,
+      credits: form.value.credits,
+      degree_awarded: form.value.degree_awarded || null,
+      required_degree: form.value.required_degree || null,
+      status: form.value.status,
+    })
 
     hasChanges.value = false
     router.push(`/admin/formations/programmes/${program.value.id}`)
-  } catch (error) {
-    console.error('Error updating program:', error)
+  } catch (error: unknown) {
+    console.error('Erreur lors de la mise à jour:', error)
+    const fetchError = error as { data?: { detail?: string } }
+    const detail = fetchError.data?.detail || 'Impossible de mettre à jour le programme'
+    alert(detail)
   } finally {
     isSubmitting.value = false
   }
@@ -148,12 +135,34 @@ const confirmDiscard = () => {
 
 // Régénérer le slug
 const regenerateSlug = () => {
-  form.value.slug = generateSlug(form.value.title_fr)
+  form.value.slug = generateSlug(form.value.title)
 }
+
+// Options pour les selects
+const programTypes: { value: ProgramType; label: string }[] = [
+  { value: 'master', label: 'Master' },
+  { value: 'doctorate', label: 'Doctorat' },
+  { value: 'university_diploma', label: 'Diplôme d\'Université (DU)' },
+  { value: 'certificate', label: 'Formation certifiante' },
+]
+
+const publicationStatuses: { value: PublicationStatus; label: string }[] = [
+  { value: 'draft', label: 'Brouillon' },
+  { value: 'published', label: 'Publié' },
+  { value: 'archived', label: 'Archivé' },
+]
 </script>
 
 <template>
-  <div v-if="program" class="space-y-6">
+  <!-- État de chargement -->
+  <div v-if="loading" class="flex items-center justify-center py-12">
+    <div class="text-center">
+      <font-awesome-icon icon="fa-solid fa-spinner" class="w-8 h-8 animate-spin text-blue-600" />
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Chargement du programme...</p>
+    </div>
+  </div>
+
+  <div v-else-if="program" class="space-y-6">
     <!-- Header -->
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex items-center gap-3">
@@ -170,7 +179,7 @@ const regenerateSlug = () => {
             </NuxtLink>
             <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3" />
             <NuxtLink :to="`/admin/formations/programmes/${program.id}`" class="hover:text-blue-600 dark:hover:text-blue-400">
-              {{ program.title_fr }}
+              {{ program.title }}
             </NuxtLink>
             <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3" />
             <span class="text-gray-900 dark:text-white">Modifier</span>
@@ -212,33 +221,48 @@ const regenerateSlug = () => {
         </h2>
 
         <div class="space-y-6">
-          <!-- Titres -->
-          <div class="grid gap-4 sm:grid-cols-2">
+          <!-- Code et Titre -->
+          <div class="grid gap-4 sm:grid-cols-3">
             <div>
-              <label for="title_fr" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Titre (FR) <span class="text-red-500">*</span>
+              <label for="code" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Code <span class="text-red-500">*</span>
               </label>
               <input
-                id="title_fr"
-                v-model="form.title_fr"
+                id="code"
+                v-model="form.code"
+                type="text"
+                required
+                placeholder="MPAGD"
+                class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 font-mono text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+            <div class="sm:col-span-2">
+              <label for="title" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Titre <span class="text-red-500">*</span>
+              </label>
+              <input
+                id="title"
+                v-model="form.title"
                 type="text"
                 required
                 placeholder="Master en..."
                 class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
-            <div>
-              <label for="title_en" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Titre (EN)
-              </label>
-              <input
-                id="title_en"
-                v-model="form.title_en"
-                type="text"
-                placeholder="Master in..."
-                class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              />
-            </div>
+          </div>
+
+          <!-- Sous-titre -->
+          <div>
+            <label for="subtitle" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Sous-titre
+            </label>
+            <input
+              id="subtitle"
+              v-model="form.subtitle"
+              type="text"
+              placeholder="Une courte description..."
+              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            />
           </div>
 
           <!-- Slug -->
@@ -269,61 +293,26 @@ const regenerateSlug = () => {
             </p>
           </div>
 
-          <!-- Type et Département -->
-          <div class="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label for="formation_type" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Type de formation <span class="text-red-500">*</span>
-              </label>
-              <select
-                id="formation_type"
-                v-model="form.formation_type"
-                required
-                class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              >
-                <option value="master">Master</option>
-                <option value="doctorat">Doctorat</option>
-                <option value="du">Diplôme d'Université (DU)</option>
-                <option value="certifiante">Formation certifiante</option>
-              </select>
-            </div>
-            <div>
-              <label for="department_id" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Département <span class="text-red-500">*</span>
-              </label>
-              <select
-                id="department_id"
-                v-model="form.department_id"
-                required
-                class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              >
-                <option v-for="dept in departments" :key="dept.id" :value="dept.id">
-                  {{ dept.name_fr }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Campus -->
-          <div>
-            <label for="campus" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Campus <span class="text-red-500">*</span>
+          <!-- Type -->
+          <div class="sm:max-w-xs">
+            <label for="type" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Type de formation <span class="text-red-500">*</span>
             </label>
             <select
-              id="campus"
-              v-model="form.campus"
+              id="type"
+              v-model="form.type"
               required
-              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:max-w-xs"
+              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             >
-              <option value="alexandrie">Alexandrie</option>
-              <option value="externalise">Campus externalisé</option>
-              <option value="en_ligne">En ligne</option>
+              <option v-for="pt in programTypes" :key="pt.value" :value="pt.value">
+                {{ pt.label }}
+              </option>
             </select>
           </div>
         </div>
       </div>
 
-      <!-- Descriptions -->
+      <!-- Description -->
       <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
         <h2 class="mb-6 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
           <font-awesome-icon icon="fa-solid fa-align-left" class="w-5 h-5 text-green-500" />
@@ -332,50 +321,35 @@ const regenerateSlug = () => {
 
         <div class="space-y-6">
           <div>
-            <label for="short_description_fr" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Description courte (FR) <span class="text-red-500">*</span>
+            <label for="description" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Description complète
             </label>
             <textarea
-              id="short_description_fr"
-              v-model="form.short_description_fr"
-              rows="4"
-              required
-              placeholder="Décrivez brièvement la formation..."
+              id="description"
+              v-model="form.description"
+              rows="6"
+              placeholder="Décrivez le programme en détail..."
               class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              {{ form.short_description_fr.length }} caractères
+              {{ form.description.length }} caractères
             </p>
           </div>
 
           <div>
-            <label for="short_description_en" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Description courte (EN)
+            <label for="teaching_methods" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Méthodes d'enseignement
             </label>
             <textarea
-              id="short_description_en"
-              v-model="form.short_description_en"
+              id="teaching_methods"
+              v-model="form.teaching_methods"
               rows="4"
-              placeholder="Briefly describe the program..."
+              placeholder="Décrivez les méthodes pédagogiques utilisées..."
               class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
         </div>
       </div>
-
-      <!-- Contenu détaillé (EditorJS) -->
-      <AdminRichTextEditor
-        v-model="contentFr"
-        v-model:model-value-en="contentEn"
-        title="Contenu détaillé"
-        description="Rédigez le contenu complet de la formation avec l'éditeur riche (titres, listes, images, etc.)"
-        icon="fa-solid fa-file-lines"
-        icon-color="text-indigo-500"
-        placeholder="Décrivez en détail la formation, les objectifs, le programme, les débouchés..."
-        placeholder-en="Describe the program in detail, objectives, curriculum, career opportunities..."
-        :min-height="400"
-        @change="onContentChange"
-      />
 
       <!-- Détails académiques -->
       <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
@@ -385,108 +359,67 @@ const regenerateSlug = () => {
         </h2>
 
         <div class="space-y-6">
-          <!-- Durée -->
+          <!-- Durée et Crédits -->
           <div class="grid gap-4 sm:grid-cols-2">
             <div>
-              <label for="duration_fr" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Durée (FR)
+              <label for="duration_months" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Durée (en mois)
               </label>
               <input
-                id="duration_fr"
-                v-model="form.duration_fr"
-                type="text"
-                placeholder="2 ans (4 semestres)"
+                id="duration_months"
+                v-model.number="form.duration_months"
+                type="number"
+                min="1"
+                max="120"
+                placeholder="24"
                 class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Exemple: 24 mois = 2 ans
+              </p>
             </div>
             <div>
-              <label for="duration_en" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Durée (EN)
+              <label for="credits" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Crédits ECTS
               </label>
               <input
-                id="duration_en"
-                v-model="form.duration_en"
-                type="text"
-                placeholder="2 years (4 semesters)"
+                id="credits"
+                v-model.number="form.credits"
+                type="number"
+                min="0"
+                max="500"
+                placeholder="120"
                 class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
 
-          <!-- Crédits -->
-          <div class="sm:max-w-xs">
-            <label for="credits" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Crédits ECTS
-            </label>
-            <input
-              id="credits"
-              v-model.number="form.credits"
-              type="number"
-              min="0"
-              max="500"
-              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            />
-          </div>
-
-          <!-- Diplôme -->
+          <!-- Diplôme délivré et requis -->
           <div class="grid gap-4 sm:grid-cols-2">
             <div>
-              <label for="diploma_fr" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Diplôme délivré (FR)
+              <label for="degree_awarded" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Diplôme délivré
               </label>
               <input
-                id="diploma_fr"
-                v-model="form.diploma_fr"
+                id="degree_awarded"
+                v-model="form.degree_awarded"
                 type="text"
                 placeholder="Master professionnel"
                 class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
             <div>
-              <label for="diploma_en" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Diplôme délivré (EN)
+              <label for="required_degree" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Diplôme requis
               </label>
               <input
-                id="diploma_en"
-                v-model="form.diploma_en"
+                id="required_degree"
+                v-model="form.required_degree"
                 type="text"
-                placeholder="Professional Master's Degree"
+                placeholder="Licence ou équivalent Bac+3"
                 class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Image -->
-      <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
-        <h2 class="mb-6 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
-          <font-awesome-icon icon="fa-solid fa-image" class="w-5 h-5 text-cyan-500" />
-          Image
-        </h2>
-
-        <div>
-          <label for="image" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            URL de l'image
-          </label>
-          <input
-            id="image"
-            v-model="form.image"
-            type="url"
-            placeholder="https://example.com/image.jpg"
-            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          />
-          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Entrez l'URL d'une image (format recommandé : 1200x630px)
-          </p>
-
-          <!-- Preview -->
-          <div v-if="form.image" class="mt-4">
-            <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Aperçu :</p>
-            <div
-              class="h-40 w-full max-w-md rounded-lg bg-cover bg-center"
-              :style="{ backgroundImage: `url(${form.image})` }"
-            ></div>
           </div>
         </div>
       </div>
@@ -495,51 +428,25 @@ const regenerateSlug = () => {
       <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
         <h2 class="mb-6 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
           <font-awesome-icon icon="fa-solid fa-cog" class="w-5 h-5 text-gray-500" />
-          Options de publication
+          Publication
         </h2>
 
-        <div class="space-y-4">
-          <label class="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50">
-            <input
-              v-model="form.is_published"
-              type="checkbox"
-              class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-            />
-            <div>
-              <p class="font-medium text-gray-900 dark:text-white">Publié</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                Le programme sera visible sur le site public
-              </p>
-            </div>
+        <div class="sm:max-w-xs">
+          <label for="status" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Statut de publication
           </label>
-
-          <label class="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50">
-            <input
-              v-model="form.is_featured"
-              type="checkbox"
-              class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-            />
-            <div>
-              <p class="font-medium text-gray-900 dark:text-white">Mis en avant</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                Le programme apparaîtra sur la page d'accueil et en haut des listes
-              </p>
-            </div>
-          </label>
-
-          <label class="flex items-center gap-3 rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50">
-            <input
-              v-model="form.application_open"
-              type="checkbox"
-              class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-            />
-            <div>
-              <p class="font-medium text-gray-900 dark:text-white">Candidatures ouvertes</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                Les candidats pourront postuler à ce programme
-              </p>
-            </div>
-          </label>
+          <select
+            id="status"
+            v-model="form.status"
+            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          >
+            <option v-for="ps in publicationStatuses" :key="ps.value" :value="ps.value">
+              {{ ps.label }}
+            </option>
+          </select>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Seuls les programmes publiés sont visibles sur le site public.
+          </p>
         </div>
       </div>
 

@@ -1,17 +1,24 @@
 <script setup lang="ts">
-import type { ProgramSkill, Formation } from '~/composables/useMockData'
+import type { ProgramSkillRead, ProgramRead, ProgramType } from '~/types/api'
 
 definePageMeta({
   layout: 'admin'
 })
 
+// API composables
 const {
-  formations,
-  getSkillsByProgram,
-  getAllSkills,
-  getProgramsWithSkills,
-  generateSkillId
-} = useMockData()
+  listSkills,
+  createSkill: apiCreateSkill,
+  updateSkill: apiUpdateSkill,
+  deleteSkill: apiDeleteSkill,
+  reorderSkills: apiReorderSkills,
+} = useProgramSkillsApi()
+
+const {
+  listPrograms,
+  programTypeLabels,
+  programTypeColors,
+} = useProgramsApi()
 
 // === STATE ===
 const selectedProgramId = ref<string | null>(null)
@@ -19,8 +26,22 @@ const searchQuery = ref('')
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const showDeleteModal = ref(false)
-const editingSkill = ref<ProgramSkill | null>(null)
-const deletingSkill = ref<ProgramSkill | null>(null)
+const editingSkill = ref<ProgramSkillRead | null>(null)
+const deletingSkill = ref<ProgramSkillRead | null>(null)
+
+// API state
+const loading = ref(false)
+const loadingSkills = ref(false)
+const error = ref<string | null>(null)
+const isSubmitting = ref(false)
+const isReordering = ref(false)
+const programs = ref<ProgramRead[]>([])
+const skills = ref<ProgramSkillRead[]>([])
+const totalSkillsCount = ref(0)
+const programsWithSkillsCount = ref(0)
+
+// Cache pour le comptage des compétences par programme
+const skillCountCache = ref<Record<string, number>>({})
 
 // Form state
 const newSkill = ref({
@@ -28,12 +49,80 @@ const newSkill = ref({
   description: ''
 })
 
+// === DATA FETCHING ===
+async function fetchPrograms() {
+  loading.value = true
+  error.value = null
+  try {
+    // Charger les masters
+    const masterResponse = await listPrograms({
+      page: 1,
+      limit: 100,
+      type: 'master',
+    })
+    // Charger les doctorats
+    const doctorateResponse = await listPrograms({
+      page: 1,
+      limit: 100,
+      type: 'doctorate',
+    })
+    programs.value = [...masterResponse.items, ...doctorateResponse.items]
+      .sort((a, b) => a.title.localeCompare(b.title))
+  } catch (e) {
+    error.value = 'Erreur lors du chargement des programmes'
+    console.error(e)
+  } finally {
+    loading.value = false
+  }
+}
+
+async function fetchSkills() {
+  if (!selectedProgramId.value) {
+    skills.value = []
+    return
+  }
+  loadingSkills.value = true
+  error.value = null
+  try {
+    const response = await listSkills({
+      program_id: selectedProgramId.value,
+      limit: 100,
+    })
+    skills.value = response.items.sort((a, b) => a.display_order - b.display_order)
+  } catch (e) {
+    error.value = 'Erreur lors du chargement des compétences'
+    console.error(e)
+  } finally {
+    loadingSkills.value = false
+  }
+}
+
+async function fetchStats() {
+  try {
+    const allSkillsResponse = await listSkills({ limit: 1000 })
+    totalSkillsCount.value = allSkillsResponse.total
+
+    // Calculer le nombre de programmes avec des compétences
+    const uniqueProgramIds = new Set(allSkillsResponse.items.map(s => s.program_id))
+    programsWithSkillsCount.value = uniqueProgramIds.size
+
+    // Mettre à jour le cache de comptage
+    const counts: Record<string, number> = {}
+    allSkillsResponse.items.forEach(skill => {
+      counts[skill.program_id] = (counts[skill.program_id] || 0) + 1
+    })
+    skillCountCache.value = counts
+  } catch (e) {
+    console.error('Erreur lors du chargement des statistiques', e)
+  }
+}
+
 // === COMPUTED ===
-// Liste des programmes (masters et doctorats principalement)
+// Liste des programmes disponibles
 const availablePrograms = computed(() => {
-  return formations.value
-    .filter(f => f.formation_type === 'master' || f.formation_type === 'doctorat')
-    .sort((a, b) => a.title_fr.localeCompare(b.title_fr))
+  return programs.value.filter(p =>
+    p.type === 'master' || p.type === 'doctorate'
+  )
 })
 
 // Programmes filtrés par recherche
@@ -41,26 +130,20 @@ const filteredPrograms = computed(() => {
   if (!searchQuery.value) return availablePrograms.value
   const query = searchQuery.value.toLowerCase()
   return availablePrograms.value.filter(p =>
-    p.title_fr.toLowerCase().includes(query) ||
-    p.title_en?.toLowerCase().includes(query)
+    p.title.toLowerCase().includes(query)
   )
 })
 
 // Programme sélectionné
 const selectedProgram = computed(() => {
   if (!selectedProgramId.value) return null
-  return formations.value.find(f => f.id === selectedProgramId.value) || null
+  return programs.value.find(p => p.id === selectedProgramId.value) || null
 })
 
-// Compétences du programme sélectionné
-const skills = computed(() => {
-  if (!selectedProgramId.value) return []
-  return getSkillsByProgram(selectedProgramId.value)
-})
-
-// Stats
-const totalSkillsCount = computed(() => getAllSkills().length)
-const programsWithSkillsCount = computed(() => getProgramsWithSkills().length)
+// Nombre de compétences pour un programme (depuis le cache)
+const getSkillCountForProgram = (programId: string): number => {
+  return skillCountCache.value[programId] || 0
+}
 
 // === METHODS ===
 const selectProgram = (programId: string) => {
@@ -78,7 +161,7 @@ const closeAddModal = () => {
   newSkill.value = { title: '', description: '' }
 }
 
-const openEditModal = (skill: ProgramSkill) => {
+const openEditModal = (skill: ProgramSkillRead) => {
   editingSkill.value = { ...skill }
   showEditModal.value = true
 }
@@ -88,7 +171,7 @@ const closeEditModal = () => {
   editingSkill.value = null
 }
 
-const openDeleteModal = (skill: ProgramSkill) => {
+const openDeleteModal = (skill: ProgramSkillRead) => {
   deletingSkill.value = skill
   showDeleteModal.value = true
 }
@@ -98,85 +181,131 @@ const closeDeleteModal = () => {
   deletingSkill.value = null
 }
 
-// Actions (mock - en prod, appeler l'API)
-const addSkill = () => {
+// === CRUD ACTIONS ===
+const addSkill = async () => {
   if (!newSkill.value.title.trim() || !selectedProgramId.value) return
 
-  // En production: POST /api/admin/programs/{program_id}/skills
-  console.log('Adding skill:', {
-    id: generateSkillId(),
-    program_id: selectedProgramId.value,
-    title: newSkill.value.title,
-    description: newSkill.value.description,
-    display_order: skills.value.length + 1
-  })
-
-  closeAddModal()
+  isSubmitting.value = true
+  error.value = null
+  try {
+    await apiCreateSkill({
+      program_id: selectedProgramId.value,
+      title: newSkill.value.title,
+      description: newSkill.value.description || undefined,
+      display_order: skills.value.length + 1,
+    })
+    closeAddModal()
+    await fetchSkills()
+    await fetchStats()
+  } catch (e) {
+    error.value = 'Erreur lors de la création de la compétence'
+    console.error(e)
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
-const updateSkill = () => {
+const updateSkill = async () => {
   if (!editingSkill.value) return
 
-  // En production: PUT /api/admin/skills/{id}
-  console.log('Updating skill:', editingSkill.value)
-
-  closeEditModal()
+  isSubmitting.value = true
+  error.value = null
+  try {
+    await apiUpdateSkill(editingSkill.value.id, {
+      title: editingSkill.value.title,
+      description: editingSkill.value.description || undefined,
+    })
+    closeEditModal()
+    await fetchSkills()
+  } catch (e) {
+    error.value = 'Erreur lors de la mise à jour de la compétence'
+    console.error(e)
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
-const deleteSkill = () => {
+const deleteSkill = async () => {
   if (!deletingSkill.value) return
 
-  // En production: DELETE /api/admin/skills/{id}
-  console.log('Deleting skill:', deletingSkill.value.id)
-
-  closeDeleteModal()
+  isSubmitting.value = true
+  error.value = null
+  try {
+    await apiDeleteSkill(deletingSkill.value.id)
+    closeDeleteModal()
+    await fetchSkills()
+    await fetchStats()
+  } catch (e) {
+    error.value = 'Erreur lors de la suppression de la compétence'
+    console.error(e)
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
-// Drag & Drop
+// === DRAG & DROP ===
 const draggedIndex = ref<number | null>(null)
 
 const onDragStart = (index: number) => {
   draggedIndex.value = index
 }
 
-const onDragOver = (e: DragEvent, index: number) => {
+const onDragOver = (e: DragEvent, _index: number) => {
   e.preventDefault()
 }
 
-const onDrop = (e: DragEvent, targetIndex: number) => {
+const onDrop = async (e: DragEvent, targetIndex: number) => {
   e.preventDefault()
   if (draggedIndex.value === null || draggedIndex.value === targetIndex) return
 
-  // En production: PUT /api/admin/programs/{program_id}/skills/reorder
-  console.log('Reordering:', { from: draggedIndex.value, to: targetIndex })
+  // Mise à jour optimiste de l'UI
+  const newSkills = [...skills.value]
+  const [draggedSkill] = newSkills.splice(draggedIndex.value, 1)
+  newSkills.splice(targetIndex, 0, draggedSkill)
+  skills.value = newSkills
 
-  draggedIndex.value = null
+  // Obtenir la nouvelle liste ordonnée d'IDs
+  const skillIds = newSkills.map(s => s.id)
+
+  isReordering.value = true
+  error.value = null
+  try {
+    await apiReorderSkills(skillIds)
+    // Recharger pour avoir les valeurs display_order à jour
+    await fetchSkills()
+  } catch (e) {
+    error.value = 'Erreur lors de la réorganisation des compétences'
+    console.error(e)
+    // Revenir à l'état précédent en cas d'erreur
+    await fetchSkills()
+  } finally {
+    isReordering.value = false
+    draggedIndex.value = null
+  }
 }
 
 const onDragEnd = () => {
   draggedIndex.value = null
 }
 
-// Couleurs des badges par type de formation
-const getFormationTypeColor = (type: Formation['formation_type']) => {
-  const colors = {
-    master: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-    doctorat: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-    du: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-    certifiante: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
-  }
-  return colors[type] || colors.master
+// === HELPERS ===
+const getFormationTypeColor = (type: ProgramType) => {
+  return programTypeColors[type] || programTypeColors.master
 }
 
-const getFormationTypeLabel = (type: Formation['formation_type']) => {
-  const labels = {
-    master: 'Master',
-    doctorat: 'Doctorat',
-    du: 'DU',
-    certifiante: 'Certificat'
-  }
-  return labels[type] || type
+const getFormationTypeLabel = (type: ProgramType) => {
+  return programTypeLabels[type] || type
 }
+
+// === WATCHERS & LIFECYCLE ===
+watch(selectedProgramId, () => {
+  fetchSkills()
+})
+
+onMounted(async () => {
+  await fetchPrograms()
+  await fetchStats()
+})
 </script>
 
 <template>
@@ -205,6 +334,16 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
       </div>
     </div>
 
+    <!-- Erreur globale -->
+    <div
+      v-if="error"
+      class="rounded-lg bg-red-50 p-4 text-red-600 dark:bg-red-900/20 dark:text-red-400"
+    >
+      <i class="fa-solid fa-exclamation-circle mr-2"></i>
+      {{ error }}
+      <button class="ml-2 underline" @click="error = null">Fermer</button>
+    </div>
+
     <div class="grid gap-6 lg:grid-cols-3">
       <!-- Sélecteur de programme (sidebar) -->
       <div class="lg:col-span-1">
@@ -224,8 +363,13 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
             />
           </div>
 
+          <!-- Chargement -->
+          <div v-if="loading" class="flex items-center justify-center py-8">
+            <i class="fa-solid fa-spinner fa-spin text-2xl text-gray-400"></i>
+          </div>
+
           <!-- Liste des programmes -->
-          <div class="admin-scrollbar max-h-[500px] space-y-2 overflow-y-scroll pr-1" data-lenis-prevent>
+          <div v-else class="admin-scrollbar max-h-[500px] space-y-2 overflow-y-scroll pr-1" data-lenis-prevent>
             <button
               v-for="program in filteredPrograms"
               :key="program.id"
@@ -239,21 +383,21 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
             >
               <div class="flex items-start justify-between gap-2">
                 <span class="text-sm font-medium text-gray-900 dark:text-white">
-                  {{ program.title_fr }}
+                  {{ program.title }}
                 </span>
                 <span
                   class="shrink-0 rounded-full px-2 py-0.5 text-xs font-medium"
-                  :class="getFormationTypeColor(program.formation_type)"
+                  :class="getFormationTypeColor(program.type)"
                 >
-                  {{ getFormationTypeLabel(program.formation_type) }}
+                  {{ getFormationTypeLabel(program.type) }}
                 </span>
               </div>
-              <p class="mt-1 line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
-                {{ program.short_description_fr }}
+              <p v-if="program.short_description" class="mt-1 line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
+                {{ program.short_description }}
               </p>
               <div class="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                 <i class="fa-solid fa-list-check"></i>
-                <span>{{ getSkillsByProgram(program.id).length }} compétences</span>
+                <span>{{ getSkillCountForProgram(program.id) }} compétences</span>
               </div>
             </button>
 
@@ -274,7 +418,7 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
           <div class="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
             <div>
               <h2 class="font-semibold text-gray-900 dark:text-white">
-                {{ selectedProgram ? selectedProgram.title_fr : 'Compétences' }}
+                {{ selectedProgram ? selectedProgram.title : 'Compétences' }}
               </h2>
               <p v-if="selectedProgram" class="text-sm text-gray-500 dark:text-gray-400">
                 {{ skills.length }} compétence{{ skills.length > 1 ? 's' : '' }} définies
@@ -283,7 +427,8 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
 
             <button
               v-if="selectedProgram"
-              class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+              class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+              :disabled="isSubmitting"
               @click="openAddModal"
             >
               <i class="fa-solid fa-plus"></i>
@@ -293,9 +438,14 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
 
           <!-- Contenu -->
           <div class="admin-scrollbar max-h-[600px] overflow-y-scroll p-4 pr-2" data-lenis-prevent>
+            <!-- Chargement des compétences -->
+            <div v-if="loadingSkills" class="flex items-center justify-center py-12">
+              <i class="fa-solid fa-spinner fa-spin text-2xl text-gray-400"></i>
+            </div>
+
             <!-- État vide - aucun programme sélectionné -->
             <div
-              v-if="!selectedProgram"
+              v-else-if="!selectedProgram"
               class="flex flex-col items-center justify-center py-12 text-center"
             >
               <div class="mb-4 rounded-full bg-gray-100 p-4 dark:bg-gray-700">
@@ -337,6 +487,9 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
               <p class="mb-4 text-xs text-gray-500 dark:text-gray-400">
                 <i class="fa-solid fa-grip-vertical mr-1"></i>
                 Glissez-déposez pour réorganiser l'ordre des compétences
+                <span v-if="isReordering" class="ml-2">
+                  <i class="fa-solid fa-spinner fa-spin"></i>
+                </span>
               </p>
 
               <div
@@ -444,15 +597,18 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
               <button
                 type="button"
                 class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                :disabled="isSubmitting"
                 @click="closeAddModal"
               >
                 Annuler
               </button>
               <button
                 type="submit"
-                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+                :disabled="isSubmitting"
               >
-                Ajouter
+                <i v-if="isSubmitting" class="fa-solid fa-spinner fa-spin mr-2"></i>
+                {{ isSubmitting ? 'Enregistrement...' : 'Ajouter' }}
               </button>
             </div>
           </form>
@@ -508,15 +664,18 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
               <button
                 type="button"
                 class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                :disabled="isSubmitting"
                 @click="closeEditModal"
               >
                 Annuler
               </button>
               <button
                 type="submit"
-                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+                :disabled="isSubmitting"
               >
-                Enregistrer
+                <i v-if="isSubmitting" class="fa-solid fa-spinner fa-spin mr-2"></i>
+                {{ isSubmitting ? 'Enregistrement...' : 'Enregistrer' }}
               </button>
             </div>
           </form>
@@ -552,16 +711,19 @@ const getFormationTypeLabel = (type: Formation['formation_type']) => {
             <button
               type="button"
               class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              :disabled="isSubmitting"
               @click="closeDeleteModal"
             >
               Annuler
             </button>
             <button
               type="button"
-              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              :disabled="isSubmitting"
               @click="deleteSkill"
             >
-              Supprimer
+              <i v-if="isSubmitting" class="fa-solid fa-spinner fa-spin mr-2"></i>
+              {{ isSubmitting ? 'Suppression...' : 'Supprimer' }}
             </button>
           </div>
         </div>
