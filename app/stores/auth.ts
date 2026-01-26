@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { TokenResponse } from '~/types/api'
+import type { TokenResponse, UserMe } from '~/types/api'
 
 export const useAuthStore = defineStore('auth', () => {
   // Utiliser useCookie pour la persistance SSR-compatible
@@ -11,6 +11,9 @@ export const useAuthStore = defineStore('auth', () => {
     maxAge: 60 * 60 * 24 * 30, // 30 jours
     sameSite: 'lax',
   })
+
+  // Utilisateur connecté
+  const user = ref<UserMe | null>(null)
 
   // Refs réactives synchronisées avec les cookies
   const token = computed({
@@ -25,6 +28,20 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => !!token.value)
 
+  async function fetchCurrentUser() {
+    if (!token.value) return null
+    try {
+      const userData = await $fetch<UserMe>('/api/auth/me', {
+        headers: { Authorization: `Bearer ${token.value}` },
+      })
+      user.value = userData
+      return userData
+    } catch {
+      user.value = null
+      return null
+    }
+  }
+
   async function login(email: string, password: string) {
     const data = await $fetch<TokenResponse>('/api/auth/login/json', {
       method: 'POST',
@@ -32,6 +49,8 @@ export const useAuthStore = defineStore('auth', () => {
     })
     tokenCookie.value = data.access_token
     refreshTokenCookie.value = data.refresh_token
+    // Récupérer les infos de l'utilisateur après connexion
+    await fetchCurrentUser()
   }
 
   async function refreshAccessToken(): Promise<boolean> {
@@ -53,13 +72,16 @@ export const useAuthStore = defineStore('auth', () => {
   function logout() {
     tokenCookie.value = null
     refreshTokenCookie.value = null
+    user.value = null
   }
 
   return {
     token,
     refreshToken,
+    user,
     isAuthenticated,
     login,
+    fetchCurrentUser,
     refreshAccessToken,
     logout,
   }

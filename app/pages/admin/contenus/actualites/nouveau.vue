@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import type { NewsStatus, NewsHighlightStatus, TagRead } from '~/types/news'
 import type { OutputData } from '@editorjs/editorjs'
+import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({
   layout: 'admin'
 })
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 const {
   createNews: apiCreateNews,
@@ -17,14 +19,21 @@ const {
   slugify,
 } = useAdminNewsApi()
 
+// Données de référence depuis le backend
 const {
-  getAllNewsAuthors,
-  departments,
-  campusExternalises,
-  services,
-  getAllProjects,
-  getAllEvents,
-} = useMockData()
+  getCampuses,
+  getDepartments,
+  getServices,
+  getUsers,
+  getProjects,
+  getEvents,
+  campuses: allCampuses,
+  departments: allDepartments,
+  services: allServices,
+  users: allAuthors,
+  projects: allProjects,
+  events: allEvents,
+} = useReferenceData()
 
 // === STATE ===
 const isSubmitting = ref(false)
@@ -63,27 +72,40 @@ const form = reactive({
 // Tags from API
 const allTags = ref<TagRead[]>([])
 
-// Load tags on mount
+// Load data on mount + set default author
 onMounted(async () => {
   isLoadingTags.value = true
   try {
-    allTags.value = await getAllTags()
+    // Charger en parallèle les tags et les données de référence
+    const [tagsData] = await Promise.all([
+      getAllTags(),
+      getCampuses(),
+      getDepartments(),
+      getServices(),
+      getUsers(),
+      getProjects(),
+      getEvents(),
+    ])
+
+    allTags.value = tagsData
+
+    // Récupérer les infos de l'utilisateur si pas encore chargées
+    if (!authStore.user && authStore.token) {
+      await authStore.fetchCurrentUser()
+    }
+
+    // Définir l'auteur par défaut = utilisateur connecté
+    if (authStore.user?.id) {
+      form.author_id = authStore.user.id
+    }
   }
   catch (e) {
-    console.error('Erreur lors du chargement des tags:', e)
+    console.error('Erreur lors du chargement:', e)
   }
   finally {
     isLoadingTags.value = false
   }
 })
-
-// === COMPUTED ===
-const allAuthors = computed(() => getAllNewsAuthors())
-const allCampuses = computed(() => campusExternalises.value)
-const allDepartments = computed(() => departments.value)
-const allServices = computed(() => services.value)
-const allProjects = computed(() => getAllProjects())
-const allEvents = computed(() => getAllEvents())
 
 // Auto-generate slug from title
 watch(() => form.title, (newTitle) => {
@@ -135,8 +157,11 @@ function removeTag(tagId: string) {
 function handleCoverImageUpload(event: Event) {
   const input = event.target as HTMLInputElement
   if (input.files && input.files[0]) {
-    // TODO: Upload vers le serveur média
+    // Créer un aperçu local de l'image
     form.cover_image = URL.createObjectURL(input.files[0])
+    // Générer un nouvel UUID pour cette image
+    // NOTE: Dans un système complet, cet UUID serait généré par le serveur lors de l'upload
+    form.cover_image_external_id = crypto.randomUUID()
   }
 }
 
@@ -423,7 +448,7 @@ async function createTag() {
             >
               <option value="">Sélectionner un auteur</option>
               <option v-for="author in allAuthors" :key="author.id" :value="author.id">
-                {{ author.name }} - {{ author.role }}
+                {{ author.full_name }}
               </option>
             </select>
           </div>
@@ -457,7 +482,7 @@ async function createTag() {
             >
               <option value="">Aucun</option>
               <option v-for="dept in allDepartments" :key="dept.id" :value="dept.id">
-                {{ dept.title }}
+                {{ dept.name }}
               </option>
             </select>
           </div>
@@ -475,7 +500,7 @@ async function createTag() {
             >
               <option value="">Aucun</option>
               <option v-for="service in filteredServices" :key="service.id" :value="service.id">
-                {{ service.title }}
+                {{ service.name }}
               </option>
             </select>
           </div>
@@ -509,7 +534,7 @@ async function createTag() {
             >
               <option value="">Aucun</option>
               <option v-for="event in allEvents" :key="event.id" :value="event.id">
-                {{ event.title_fr }}
+                {{ event.title }}
               </option>
             </select>
           </div>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { NewsStatus, NewsHighlightStatus, NewsDisplay, TagRead } from '~/types/news'
 import type { OutputData } from '@editorjs/editorjs'
+import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({
   layout: 'admin'
@@ -8,6 +9,7 @@ definePageMeta({
 
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 
 const {
   getNewsById,
@@ -19,14 +21,21 @@ const {
   slugify,
 } = useAdminNewsApi()
 
+// Données de référence depuis le backend
 const {
-  getAllNewsAuthors,
-  departments,
-  campusExternalises,
-  services,
-  getAllProjects,
-  getAllEvents
-} = useMockData()
+  getCampuses,
+  getDepartments,
+  getServices,
+  getUsers,
+  getProjects,
+  getEvents,
+  campuses: allCampuses,
+  departments: allDepartments,
+  services: allServices,
+  users: allAuthors,
+  projects: allProjects,
+  events: allEvents,
+} = useReferenceData()
 
 // === STATE ===
 const isLoading = ref(true)
@@ -80,10 +89,21 @@ const allTags = ref<TagRead[]>([])
 onMounted(async () => {
   isLoading.value = true
   try {
-    // Charger en parallèle l'actualité et les tags
+    // Charger les infos utilisateur si pas encore disponibles
+    if (!authStore.user && authStore.token) {
+      await authStore.fetchCurrentUser()
+    }
+
+    // Charger en parallèle l'actualité, les tags et les données de référence
     const [newsData, tagsData] = await Promise.all([
       getNewsById(newsId.value),
-      getAllTags()
+      getAllTags(),
+      getCampuses(),
+      getDepartments(),
+      getServices(),
+      getUsers(),
+      getProjects(),
+      getEvents(),
     ])
 
     originalNews.value = newsData
@@ -98,7 +118,8 @@ onMounted(async () => {
       form.cover_image = newsData.cover_image || ''
       form.cover_image_alt = newsData.cover_image_alt || ''
       form.cover_image_external_id = newsData.cover_image_external_id || null
-      form.author_id = newsData.author_external_id || ''
+      // Utiliser l'auteur existant ou l'utilisateur connecté par défaut
+      form.author_id = newsData.author_external_id || authStore.user?.id || ''
       form.tags = newsData.tags?.map(t => t.id) || []
       form.campus_id = newsData.campus_id || ''
       form.department_id = newsData.department_id || ''
@@ -143,14 +164,6 @@ watch(() => form.title, (newTitle) => {
     form.slug = slugify(newTitle)
   }
 })
-
-// === COMPUTED ===
-const allAuthors = computed(() => getAllNewsAuthors())
-const allCampuses = computed(() => campusExternalises.value)
-const allDepartments = computed(() => departments.value)
-const allServices = computed(() => services.value)
-const allProjects = computed(() => getAllProjects())
-const allEvents = computed(() => getAllEvents())
 
 // Filtered services based on department
 const filteredServices = computed(() => {
@@ -209,7 +222,11 @@ function removeTag(tagId: string) {
 function handleCoverImageUpload(event: Event) {
   const input = event.target as HTMLInputElement
   if (input.files && input.files[0]) {
+    // Créer un aperçu local de l'image
     form.cover_image = URL.createObjectURL(input.files[0])
+    // Générer un nouvel UUID pour cette image
+    // NOTE: Dans un système complet, cet UUID serait généré par le serveur lors de l'upload
+    form.cover_image_external_id = crypto.randomUUID()
   }
 }
 
@@ -524,7 +541,7 @@ async function createTag() {
             >
               <option value="">Sélectionner un auteur</option>
               <option v-for="author in allAuthors" :key="author.id" :value="author.id">
-                {{ author.name }} - {{ author.role }}
+                {{ author.full_name }}
               </option>
             </select>
           </div>
@@ -558,7 +575,7 @@ async function createTag() {
             >
               <option value="">Aucun</option>
               <option v-for="dept in allDepartments" :key="dept.id" :value="dept.id">
-                {{ dept.title }}
+                {{ dept.name }}
               </option>
             </select>
           </div>
@@ -576,7 +593,7 @@ async function createTag() {
             >
               <option value="">Aucun</option>
               <option v-for="service in filteredServices" :key="service.id" :value="service.id">
-                {{ service.title }}
+                {{ service.name }}
               </option>
             </select>
           </div>
@@ -610,7 +627,7 @@ async function createTag() {
             >
               <option value="">Aucun</option>
               <option v-for="event in allEvents" :key="event.id" :value="event.id">
-                {{ event.title_fr }}
+                {{ event.title }}
               </option>
             </select>
           </div>
