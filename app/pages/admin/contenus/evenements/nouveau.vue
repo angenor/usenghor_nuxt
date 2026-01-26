@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Event, EventType, EventStatus } from '~/composables/useMockData'
+import type { EventCreatePayload, EventType, PublicationStatus } from '~/types/api'
 import type { OutputData } from '@editorjs/editorjs'
 
 definePageMeta({
@@ -9,9 +9,12 @@ definePageMeta({
 const router = useRouter()
 
 const {
-  generateEventId,
-  generateEventPartnerId,
+  createEvent,
   slugifyEvent,
+  eventTypeLabels,
+} = useEventsApi()
+
+const {
   campusExternalises,
   departments,
   getAllProjects,
@@ -26,16 +29,14 @@ const content = ref<OutputData | undefined>(undefined)
 const contentEn = ref<OutputData | undefined>(undefined)
 const contentAr = ref<OutputData | undefined>(undefined)
 
-// État du formulaire
-const form = ref<Partial<Event>>({
-  id: generateEventId(),
-  external_id: `ext-${Date.now()}`,
+// État du formulaire - aligné sur le schéma backend
+const form = ref({
   title: '',
   slug: '',
-  type: 'conference',
+  type: 'conference' as EventType,
   type_other: '',
   description: '',
-  cover_image: '',
+  cover_image_external_id: '',
   start_date: '',
   end_date: '',
   is_online: false,
@@ -43,22 +44,22 @@ const form = ref<Partial<Event>>({
   venue: '',
   address: '',
   city: '',
-  country: '',
   country_external_id: '',
-  latitude: undefined,
-  longitude: undefined,
+  latitude: undefined as number | undefined,
+  longitude: undefined as number | undefined,
   registration_required: false,
   registration_link: '',
-  max_attendees: undefined,
-  registrations_count: 0,
-  campus_id: '',
-  department_id: '',
-  project_id: '',
-  organizer_id: '',
-  album_id: '',
-  partners: [],
-  status: 'draft'
+  max_attendees: undefined as number | undefined,
+  campus_external_id: '',
+  department_external_id: '',
+  project_external_id: '',
+  organizer_external_id: '',
+  album_external_id: '',
+  status: 'draft' as PublicationStatus
 })
+
+// Erreur
+const error = ref<string | null>(null)
 
 // Auto-génération du slug
 watch(() => form.value.title, (newTitle) => {
@@ -70,36 +71,6 @@ watch(() => form.value.title, (newTitle) => {
 // Navigation
 const goBack = () => {
   router.push('/admin/contenus/evenements')
-}
-
-// === GESTION DES PARTENAIRES ===
-const newPartnerId = ref('')
-
-const availablePartners = computed(() => {
-  const usedIds = form.value.partners?.map(p => p.partner_id) || []
-  return partenaires.value.filter(p => !usedIds.includes(p.id))
-})
-
-const addPartner = () => {
-  if (!newPartnerId.value) return
-  const partner = partenaires.value.find(p => p.id === newPartnerId.value)
-  if (!partner) return
-
-  const partners = form.value.partners || []
-  partners.push({
-    id: generateEventPartnerId(),
-    event_id: form.value.id || '',
-    partner_id: partner.id,
-    partner_name: partner.name_fr,
-    partner_logo: partner.logo_url,
-    display_order: partners.length + 1
-  })
-  form.value.partners = partners
-  newPartnerId.value = ''
-}
-
-const removePartner = (index: number) => {
-  form.value.partners?.splice(index, 1)
 }
 
 // === LISTES DE RÉFÉRENCE ===
@@ -119,24 +90,60 @@ const projectList = computed(() =>
 // === SAUVEGARDE ===
 const isSaving = ref(false)
 
+// Vérifie si une chaîne est un UUID valide
+const isValidUuid = (value: string | null | undefined): boolean => {
+  if (!value) return false
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return uuidRegex.test(value)
+}
+
+// Retourne la valeur si c'est un UUID valide, sinon null
+const toUuidOrNull = (value: string | null | undefined): string | null => {
+  return isValidUuid(value) ? value! : null
+}
+
 const saveForm = async () => {
   isSaving.value = true
+  error.value = null
+
   try {
-    // Ajout des métadonnées et du contenu EditorJS
-    const now = new Date().toISOString()
-    const eventData = {
-      ...form.value,
-      content: content.value,
-      content_en: contentEn.value,
-      content_ar: contentAr.value,
-      created_at: now,
-      updated_at: now
+    // Préparer les données pour l'API
+    // Note: Les champs *_external_id doivent être des UUIDs valides ou null
+    const eventData: EventCreatePayload = {
+      title: form.value.title,
+      slug: form.value.slug,
+      description: form.value.description || null,
+      content: content.value ? JSON.stringify(content.value) : null,
+      type: form.value.type,
+      type_other: form.value.type === 'other' ? form.value.type_other : null,
+      start_date: form.value.start_date ? new Date(form.value.start_date).toISOString() : '',
+      end_date: form.value.end_date ? new Date(form.value.end_date).toISOString() : null,
+      is_online: form.value.is_online,
+      video_conference_link: form.value.video_conference_link || null,
+      venue: form.value.venue || null,
+      address: form.value.address || null,
+      city: form.value.city || null,
+      latitude: form.value.latitude ?? null,
+      longitude: form.value.longitude ?? null,
+      registration_required: form.value.registration_required,
+      registration_link: form.value.registration_link || null,
+      max_attendees: form.value.max_attendees ?? null,
+      // Les champs external_id doivent être des UUIDs valides ou null
+      cover_image_external_id: toUuidOrNull(form.value.cover_image_external_id),
+      country_external_id: toUuidOrNull(form.value.country_external_id),
+      campus_external_id: toUuidOrNull(form.value.campus_external_id),
+      department_external_id: toUuidOrNull(form.value.department_external_id),
+      project_external_id: toUuidOrNull(form.value.project_external_id),
+      organizer_external_id: toUuidOrNull(form.value.organizer_external_id),
+      album_external_id: toUuidOrNull(form.value.album_external_id),
+      status: form.value.status,
     }
 
-    console.log('Creating event:', eventData)
-    // En production: POST /api/admin/events
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await createEvent(eventData)
     router.push('/admin/contenus/evenements')
+  } catch (e) {
+    console.error('Error creating event:', e)
+    error.value = 'Erreur lors de la création de l\'événement'
   } finally {
     isSaving.value = false
   }
@@ -202,6 +209,17 @@ const tabs = [
           <font-awesome-icon v-else icon="fa-solid fa-globe" class="h-4 w-4" />
           Publier
         </button>
+      </div>
+    </div>
+
+    <!-- Message d'erreur -->
+    <div
+      v-if="error"
+      class="rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+    >
+      <div class="flex items-center gap-2">
+        <font-awesome-icon icon="fa-solid fa-circle-exclamation" class="h-4 w-4" />
+        {{ error }}
       </div>
     </div>
 
@@ -299,15 +317,15 @@ const tabs = [
 
           <div class="sm:col-span-2">
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Image de couverture
+              Image de couverture (ID)
             </label>
             <input
-              v-model="form.cover_image"
-              type="url"
-              placeholder="https://..."
+              v-model="form.cover_image_external_id"
+              type="text"
+              placeholder="ID de l'image dans la médiathèque"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
-            <p class="mt-1 text-xs text-gray-500">URL de l'image (en production: upload via médiathèque)</p>
+            <p class="mt-1 text-xs text-gray-500">En production: sélection via la médiathèque</p>
           </div>
         </div>
       </div>
@@ -407,12 +425,12 @@ const tabs = [
 
           <div>
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Pays
+              Pays (ID)
             </label>
             <input
-              v-model="form.country"
+              v-model="form.country_external_id"
               type="text"
-              placeholder="Ex: Égypte"
+              placeholder="ID du pays"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
@@ -498,7 +516,7 @@ const tabs = [
               Campus
             </label>
             <select
-              v-model="form.campus_id"
+              v-model="form.campus_external_id"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             >
               <option value="">Aucun campus</option>
@@ -513,7 +531,7 @@ const tabs = [
               Département
             </label>
             <select
-              v-model="form.department_id"
+              v-model="form.department_external_id"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             >
               <option value="">Aucun département</option>
@@ -528,7 +546,7 @@ const tabs = [
               Projet lié
             </label>
             <select
-              v-model="form.project_id"
+              v-model="form.project_external_id"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             >
               <option value="">Aucun projet</option>
@@ -540,66 +558,15 @@ const tabs = [
 
           <div>
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Organisateur
+              Organisateur (ID)
             </label>
             <input
-              v-model="form.organizer_id"
+              v-model="form.organizer_external_id"
               type="text"
               placeholder="ID de l'organisateur"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
             <p class="mt-1 text-xs text-gray-500">En production: sélecteur d'utilisateur</p>
-          </div>
-
-          <!-- Partenaires -->
-          <div class="sm:col-span-2">
-            <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">
-              Partenaires
-            </h3>
-
-            <div v-if="form.partners && form.partners.length > 0" class="mb-4 space-y-2">
-              <div
-                v-for="(partner, index) in form.partners"
-                :key="partner.id"
-                class="flex items-center gap-3 rounded-lg border border-gray-200 p-3 dark:border-gray-700"
-              >
-                <div v-if="partner.partner_logo" class="h-8 w-8 flex-shrink-0 overflow-hidden rounded">
-                  <img :src="partner.partner_logo" :alt="partner.partner_name" class="h-full w-full object-contain" />
-                </div>
-                <div v-else class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded bg-gray-100 dark:bg-gray-700">
-                  <font-awesome-icon icon="fa-solid fa-building" class="h-4 w-4 text-gray-400" />
-                </div>
-                <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">{{ partner.partner_name }}</span>
-                <button class="text-red-500 hover:text-red-700" @click="removePartner(index)">
-                  <font-awesome-icon icon="fa-solid fa-trash" class="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-
-            <div class="rounded-lg border border-dashed border-gray-300 p-4 dark:border-gray-600">
-              <div class="flex items-end gap-3">
-                <div class="flex-1">
-                  <label class="mb-1 block text-sm text-gray-500">Ajouter un partenaire</label>
-                  <select
-                    v-model="newPartnerId"
-                    class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  >
-                    <option value="">Sélectionner un partenaire</option>
-                    <option v-for="partner in availablePartners" :key="partner.id" :value="partner.id">
-                      {{ partner.name_fr }}
-                    </option>
-                  </select>
-                </div>
-                <button
-                  :disabled="!newPartnerId"
-                  class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
-                  @click="addPartner"
-                >
-                  <font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4" />
-                  Ajouter
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -623,15 +590,15 @@ const tabs = [
 
           <div>
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Album photos
+              Album photos (ID)
             </label>
             <input
-              v-model="form.album_id"
+              v-model="form.album_external_id"
               type="text"
               placeholder="ID de l'album"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
-            <p class="mt-1 text-xs text-gray-500">En production: sélecteur d'album ou création</p>
+            <p class="mt-1 text-xs text-gray-500">En production: sélecteur d'album</p>
           </div>
         </div>
       </div>

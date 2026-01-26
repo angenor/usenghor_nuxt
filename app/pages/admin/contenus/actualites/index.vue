@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { News, NewsStatus, HighlightStatus } from '~/composables/useMockData'
+import type { NewsDisplay, NewsHighlightStatus, NewsStatus, TagRead } from '~/types/news'
 
 definePageMeta({
   layout: 'admin'
@@ -8,26 +8,30 @@ definePageMeta({
 const router = useRouter()
 
 const {
-  getAllAdminNews,
-  getAdminNewsStats,
-  getAdminFilteredNews,
-  getAllNewsTags,
-  getAllNewsAuthors,
+  listNews,
+  getNewsStats,
+  getAllTags,
+  deleteNews: apiDeleteNews,
+  duplicateNews: apiDuplicateNews,
+  publishNews: apiPublishNews,
+  unpublishNews: apiUnpublishNews,
+  updateNews: apiUpdateNews,
   newsStatusLabels,
   newsStatusColors,
   highlightStatusLabels,
   highlightStatusColors,
-  departments,
-  campusExternalises
-} = useMockData()
+  formatNewsDate,
+  slugify,
+} = useAdminNewsApi()
+
+const { departments, campusExternalises } = useMockData()
 
 // === STATE ===
 // Filtres
 const searchQuery = ref('')
 const filterStatus = ref<NewsStatus | 'all'>('all')
-const filterHighlight = ref<HighlightStatus | 'all'>('all')
+const filterHighlight = ref<NewsHighlightStatus | 'all'>('all')
 const filterTagId = ref<string>('')
-const filterAuthorId = ref<string>('')
 const filterCampusId = ref<string>('')
 const filterDepartmentId = ref<string>('')
 const dateFrom = ref('')
@@ -47,65 +51,117 @@ const selectAll = ref(false)
 
 // Modals
 const showDeleteModal = ref(false)
-const deletingNews = ref<News | null>(null)
+const deletingNews = ref<NewsDisplay | null>(null)
 
-// === COMPUTED ===
-const allNews = computed(() => getAllAdminNews())
-const allTags = computed(() => getAllNewsTags())
-const allAuthors = computed(() => getAllNewsAuthors())
-const allCampuses = computed(() => campusExternalises.value)
-const allDepartments = computed(() => departments.value)
+// Loading states
+const isLoading = ref(false)
+const isLoadingStats = ref(false)
+const isActionLoading = ref(false)
+
+// Error handling
+const error = ref<string | null>(null)
+
+// === DATA FETCHING ===
+
+// Données des actualités
+const newsItems = ref<NewsDisplay[]>([])
+const totalItems = ref(0)
+const totalPages = ref(0)
+
+// Tags
+const allTags = ref<TagRead[]>([])
 
 // Stats
-const stats = computed(() => getAdminNewsStats())
-
-// Filtrage
-const filteredNews = computed(() => {
-  let result = getAdminFilteredNews({
-    search: searchQuery.value || undefined,
-    status: filterStatus.value !== 'all' ? filterStatus.value : undefined,
-    highlight_status: filterHighlight.value !== 'all' ? filterHighlight.value : undefined,
-    tag_id: filterTagId.value || undefined,
-    author_id: filterAuthorId.value || undefined,
-    campus_id: filterCampusId.value || undefined,
-    department_id: filterDepartmentId.value || undefined,
-    date_from: dateFrom.value || undefined,
-    date_to: dateTo.value || undefined
-  })
-
-  // Tri
-  result = [...result].sort((a, b) => {
-    let comparison = 0
-    switch (sortBy.value) {
-      case 'title':
-        comparison = a.title.localeCompare(b.title)
-        break
-      case 'status':
-        comparison = a.status.localeCompare(b.status)
-        break
-      case 'published_at':
-        const dateA = a.published_at ? new Date(a.published_at).getTime() : 0
-        const dateB = b.published_at ? new Date(b.published_at).getTime() : 0
-        comparison = dateA - dateB
-        break
-      case 'updated_at':
-        comparison = new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime()
-        break
-    }
-    return sortOrder.value === 'asc' ? comparison : -comparison
-  })
-
-  return result
+const stats = ref({
+  total: 0,
+  published: 0,
+  draft: 0,
+  archived: 0,
+  headline: 0,
+  featured: 0
 })
 
-// Pagination
-const totalPages = computed(() => Math.ceil(filteredNews.value.length / itemsPerPage.value))
+// Charger les tags au montage
+const loadTags = async () => {
+  try {
+    allTags.value = await getAllTags()
+  }
+  catch (e) {
+    console.error('Erreur lors du chargement des tags:', e)
+  }
+}
 
-const paginatedNews = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return filteredNews.value.slice(start, end)
+// Charger les stats
+const loadStats = async () => {
+  isLoadingStats.value = true
+  try {
+    stats.value = await getNewsStats()
+  }
+  catch (e) {
+    console.error('Erreur lors du chargement des stats:', e)
+  }
+  finally {
+    isLoadingStats.value = false
+  }
+}
+
+// Charger les actualités
+const loadNews = async () => {
+  isLoading.value = true
+  error.value = null
+
+  try {
+    const response = await listNews({
+      page: currentPage.value,
+      limit: itemsPerPage.value,
+      search: searchQuery.value || undefined,
+      status: filterStatus.value !== 'all' ? filterStatus.value : undefined,
+      highlight_status: filterHighlight.value !== 'all' ? filterHighlight.value : undefined,
+      tag_id: filterTagId.value || undefined,
+      campus_id: filterCampusId.value || undefined,
+      from_date: dateFrom.value || undefined,
+      to_date: dateTo.value || undefined,
+      sort_by: sortBy.value,
+      sort_order: sortOrder.value,
+    })
+
+    newsItems.value = response.items
+    totalItems.value = response.total
+    totalPages.value = response.pages
+  }
+  catch (e: unknown) {
+    const fetchError = e as { data?: { detail?: string } }
+    error.value = fetchError.data?.detail || 'Erreur lors du chargement des actualités'
+    console.error('Erreur:', e)
+  }
+  finally {
+    isLoading.value = false
+  }
+}
+
+// Charger au montage
+onMounted(async () => {
+  await Promise.all([loadTags(), loadStats(), loadNews()])
 })
+
+// Recharger quand les filtres changent
+watch(
+  [searchQuery, filterStatus, filterHighlight, filterTagId, filterCampusId, filterDepartmentId, dateFrom, dateTo, sortBy, sortOrder],
+  () => {
+    currentPage.value = 1
+    loadNews()
+  },
+  { debounce: 300 } as any
+)
+
+// Recharger quand la page change
+watch(currentPage, () => {
+  loadNews()
+})
+
+// === COMPUTED ===
+const allCampuses = computed(() => campusExternalises.value)
+const allDepartments = computed(() => departments.value)
 
 // Vérifier si filtres actifs
 const hasActiveFilters = computed(() => {
@@ -113,7 +169,6 @@ const hasActiveFilters = computed(() => {
     filterStatus.value !== 'all' ||
     filterHighlight.value !== 'all' ||
     filterTagId.value ||
-    filterAuthorId.value ||
     filterCampusId.value ||
     filterDepartmentId.value ||
     dateFrom.value ||
@@ -124,8 +179,9 @@ const hasActiveFilters = computed(() => {
 // Gestion de la sélection
 const toggleSelectAll = () => {
   if (selectAll.value) {
-    selectedIds.value = paginatedNews.value.map(n => n.id)
-  } else {
+    selectedIds.value = newsItems.value.map(n => n.id)
+  }
+  else {
     selectedIds.value = []
   }
 }
@@ -134,7 +190,8 @@ const toggleSelect = (id: string) => {
   const index = selectedIds.value.indexOf(id)
   if (index === -1) {
     selectedIds.value.push(id)
-  } else {
+  }
+  else {
     selectedIds.value.splice(index, 1)
   }
 }
@@ -145,7 +202,8 @@ const isSelected = (id: string) => selectedIds.value.includes(id)
 const toggleSort = (column: typeof sortBy.value) => {
   if (sortBy.value === column) {
     sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-  } else {
+  }
+  else {
     sortBy.value = column
     sortOrder.value = 'asc'
   }
@@ -157,7 +215,6 @@ const resetFilters = () => {
   filterStatus.value = 'all'
   filterHighlight.value = 'all'
   filterTagId.value = ''
-  filterAuthorId.value = ''
   filterCampusId.value = ''
   filterDepartmentId.value = ''
   dateFrom.value = ''
@@ -166,11 +223,11 @@ const resetFilters = () => {
 }
 
 // Navigation
-const viewNews = (news: News) => {
+const viewNews = (news: NewsDisplay) => {
   router.push(`/admin/contenus/actualites/${news.id}`)
 }
 
-const editNews = (news: News) => {
+const editNews = (news: NewsDisplay) => {
   router.push(`/admin/contenus/actualites/${news.id}/edit`)
 }
 
@@ -179,7 +236,7 @@ const createNews = () => {
 }
 
 // Modals
-const openDeleteModal = (news: News) => {
+const openDeleteModal = (news: NewsDisplay) => {
   deletingNews.value = news
   showDeleteModal.value = true
 }
@@ -189,69 +246,118 @@ const closeDeleteModal = () => {
   deletingNews.value = null
 }
 
-// Actions CRUD (mock)
-const deleteNews = () => {
+// Actions CRUD
+const deleteNewsItem = async () => {
   if (!deletingNews.value) return
-  console.log('Deleting news:', deletingNews.value.id)
-  // En production: DELETE /api/admin/news/{id}
-  closeDeleteModal()
+
+  isActionLoading.value = true
+  try {
+    await apiDeleteNews(deletingNews.value.id)
+    closeDeleteModal()
+    await Promise.all([loadNews(), loadStats()])
+  }
+  catch (e) {
+    console.error('Erreur lors de la suppression:', e)
+  }
+  finally {
+    isActionLoading.value = false
+  }
 }
 
-const duplicateNews = (news: News) => {
-  console.log('Duplicating news:', news.id)
-  // En production: POST /api/admin/news/{id}/duplicate
+const duplicateNewsItem = async (news: NewsDisplay) => {
+  isActionLoading.value = true
+  try {
+    const newSlug = `${news.slug}-copie-${Date.now()}`
+    await apiDuplicateNews(news.id, newSlug)
+    await Promise.all([loadNews(), loadStats()])
+  }
+  catch (e) {
+    console.error('Erreur lors de la duplication:', e)
+  }
+  finally {
+    isActionLoading.value = false
+  }
 }
 
 // Actions en masse
-const bulkPublish = () => {
-  console.log('Publishing:', selectedIds.value)
-  selectedIds.value = []
-  selectAll.value = false
+const bulkPublish = async () => {
+  isActionLoading.value = true
+  try {
+    await Promise.all(selectedIds.value.map(id => apiPublishNews(id)))
+    selectedIds.value = []
+    selectAll.value = false
+    await Promise.all([loadNews(), loadStats()])
+  }
+  catch (e) {
+    console.error('Erreur lors de la publication:', e)
+  }
+  finally {
+    isActionLoading.value = false
+  }
 }
 
-const bulkUnpublish = () => {
-  console.log('Unpublishing:', selectedIds.value)
-  selectedIds.value = []
-  selectAll.value = false
+const bulkUnpublish = async () => {
+  isActionLoading.value = true
+  try {
+    await Promise.all(selectedIds.value.map(id => apiUnpublishNews(id)))
+    selectedIds.value = []
+    selectAll.value = false
+    await Promise.all([loadNews(), loadStats()])
+  }
+  catch (e) {
+    console.error('Erreur lors de la dépublication:', e)
+  }
+  finally {
+    isActionLoading.value = false
+  }
 }
 
-const bulkArchive = () => {
-  console.log('Archiving:', selectedIds.value)
-  selectedIds.value = []
-  selectAll.value = false
+const bulkArchive = async () => {
+  isActionLoading.value = true
+  try {
+    await Promise.all(selectedIds.value.map(id => apiUpdateNews(id, { status: 'archived' })))
+    selectedIds.value = []
+    selectAll.value = false
+    await Promise.all([loadNews(), loadStats()])
+  }
+  catch (e) {
+    console.error('Erreur lors de l\'archivage:', e)
+  }
+  finally {
+    isActionLoading.value = false
+  }
 }
 
-const bulkDelete = () => {
-  console.log('Deleting:', selectedIds.value)
-  selectedIds.value = []
-  selectAll.value = false
+const bulkDelete = async () => {
+  isActionLoading.value = true
+  try {
+    await Promise.all(selectedIds.value.map(id => apiDeleteNews(id)))
+    selectedIds.value = []
+    selectAll.value = false
+    await Promise.all([loadNews(), loadStats()])
+  }
+  catch (e) {
+    console.error('Erreur lors de la suppression:', e)
+  }
+  finally {
+    isActionLoading.value = false
+  }
 }
 
 // Changer le highlight status rapidement
-const setHighlightStatus = (news: News, status: HighlightStatus) => {
-  console.log('Setting highlight status:', news.id, status)
-  // En production: POST /api/admin/news/{id}/highlight
+const setHighlightStatus = async (news: NewsDisplay, status: NewsHighlightStatus) => {
+  try {
+    await apiUpdateNews(news.id, { highlight_status: status })
+    await Promise.all([loadNews(), loadStats()])
+  }
+  catch (e) {
+    console.error('Erreur lors de la mise à jour:', e)
+  }
 }
 
 // Formatage
-const formatDate = (dateString?: string) => {
-  if (!dateString) return '-'
-  return new Date(dateString).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  })
-}
-
-const formatDateTime = (dateString?: string) => {
-  if (!dateString) return '-'
-  return new Date(dateString).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+const formatDate = (dateString?: string | null) => {
+  return formatNewsDate(dateString)
 }
 
 // Truncate text
@@ -287,27 +393,45 @@ const truncate = (text: string, length: number) => {
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
       <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
         <p class="text-xs text-gray-500 dark:text-gray-400">Total</p>
-        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</p>
+        <p class="text-2xl font-bold text-gray-900 dark:text-white">
+          <span v-if="isLoadingStats" class="animate-pulse">...</span>
+          <span v-else>{{ stats.total }}</span>
+        </p>
       </div>
       <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
         <p class="text-xs text-gray-500 dark:text-gray-400">Publiées</p>
-        <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ stats.published }}</p>
+        <p class="text-2xl font-bold text-green-600 dark:text-green-400">
+          <span v-if="isLoadingStats" class="animate-pulse">...</span>
+          <span v-else>{{ stats.published }}</span>
+        </p>
       </div>
       <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
         <p class="text-xs text-gray-500 dark:text-gray-400">Brouillons</p>
-        <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ stats.draft }}</p>
+        <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+          <span v-if="isLoadingStats" class="animate-pulse">...</span>
+          <span v-else>{{ stats.draft }}</span>
+        </p>
       </div>
       <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
         <p class="text-xs text-gray-500 dark:text-gray-400">Archivées</p>
-        <p class="text-2xl font-bold text-gray-600 dark:text-gray-400">{{ stats.archived }}</p>
+        <p class="text-2xl font-bold text-gray-600 dark:text-gray-400">
+          <span v-if="isLoadingStats" class="animate-pulse">...</span>
+          <span v-else>{{ stats.archived }}</span>
+        </p>
       </div>
       <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
         <p class="text-xs text-gray-500 dark:text-gray-400">À la une</p>
-        <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ stats.headline }}</p>
+        <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">
+          <span v-if="isLoadingStats" class="animate-pulse">...</span>
+          <span v-else>{{ stats.headline }}</span>
+        </p>
       </div>
       <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
         <p class="text-xs text-gray-500 dark:text-gray-400">Mises en avant</p>
-        <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ stats.featured }}</p>
+        <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">
+          <span v-if="isLoadingStats" class="animate-pulse">...</span>
+          <span v-else>{{ stats.featured }}</span>
+        </p>
       </div>
     </div>
 
@@ -364,16 +488,6 @@ const truncate = (text: string, length: number) => {
         <!-- Ligne 2: Filtres secondaires -->
         <div class="flex flex-wrap items-center gap-2">
           <select
-            v-model="filterAuthorId"
-            class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          >
-            <option value="">Tous les auteurs</option>
-            <option v-for="author in allAuthors" :key="author.id" :value="author.id">
-              {{ author.name }}
-            </option>
-          </select>
-
-          <select
             v-model="filterCampusId"
             class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           >
@@ -429,25 +543,29 @@ const truncate = (text: string, length: number) => {
         </span>
         <div class="flex gap-2">
           <button
-            class="rounded bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-700"
+            :disabled="isActionLoading"
+            class="rounded bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50"
             @click="bulkPublish"
           >
             Publier
           </button>
           <button
-            class="rounded bg-yellow-600 px-3 py-1 text-xs font-medium text-white hover:bg-yellow-700"
+            :disabled="isActionLoading"
+            class="rounded bg-yellow-600 px-3 py-1 text-xs font-medium text-white hover:bg-yellow-700 disabled:opacity-50"
             @click="bulkUnpublish"
           >
             Dépublier
           </button>
           <button
-            class="rounded bg-gray-600 px-3 py-1 text-xs font-medium text-white hover:bg-gray-700"
+            :disabled="isActionLoading"
+            class="rounded bg-gray-600 px-3 py-1 text-xs font-medium text-white hover:bg-gray-700 disabled:opacity-50"
             @click="bulkArchive"
           >
             Archiver
           </button>
           <button
-            class="rounded bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700"
+            :disabled="isActionLoading"
+            class="rounded bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
             @click="bulkDelete"
           >
             Supprimer
@@ -456,9 +574,28 @@ const truncate = (text: string, length: number) => {
       </div>
     </div>
 
+    <!-- Error message -->
+    <div
+      v-if="error"
+      class="rounded-lg bg-red-50 p-4 text-red-800 dark:bg-red-900/20 dark:text-red-400"
+    >
+      <div class="flex items-center gap-2">
+        <font-awesome-icon icon="fa-solid fa-circle-exclamation" class="h-5 w-5" />
+        <span>{{ error }}</span>
+      </div>
+    </div>
+
     <!-- Tableau -->
     <div class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
-      <div class="admin-scrollbar overflow-x-auto" data-lenis-prevent>
+      <!-- Loading overlay -->
+      <div v-if="isLoading" class="flex items-center justify-center py-12">
+        <div class="flex flex-col items-center gap-4">
+          <div class="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+          <span class="text-sm text-gray-500 dark:text-gray-400">Chargement des actualités...</span>
+        </div>
+      </div>
+
+      <div v-else class="admin-scrollbar overflow-x-auto" data-lenis-prevent>
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-900">
             <tr>
@@ -516,7 +653,7 @@ const truncate = (text: string, length: number) => {
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
             <tr
-              v-for="newsItem in paginatedNews"
+              v-for="newsItem in newsItems"
               :key="newsItem.id"
               class="cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
               :class="{ 'bg-blue-50 dark:bg-blue-900/30': isSelected(newsItem.id) }"
@@ -554,7 +691,7 @@ const truncate = (text: string, length: number) => {
                 </div>
               </td>
               <td class="px-4 py-3">
-                <div class="flex items-center gap-2">
+                <div v-if="newsItem.author" class="flex items-center gap-2">
                   <img
                     v-if="newsItem.author.avatar"
                     :src="newsItem.author.avatar"
@@ -565,6 +702,7 @@ const truncate = (text: string, length: number) => {
                     {{ newsItem.author.name }}
                   </span>
                 </div>
+                <span v-else class="text-sm text-gray-400">-</span>
               </td>
               <td class="px-4 py-3">
                 <div class="flex flex-wrap gap-1">
@@ -596,7 +734,7 @@ const truncate = (text: string, length: number) => {
                   <select
                     :value="newsItem.highlight_status"
                     class="rounded-lg border border-gray-300 bg-white px-2 py-1 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    @change="setHighlightStatus(newsItem, ($event.target as HTMLSelectElement).value as HighlightStatus)"
+                    @change="setHighlightStatus(newsItem, ($event.target as HTMLSelectElement).value as NewsHighlightStatus)"
                   >
                     <option value="standard">Standard</option>
                     <option value="featured">Mise en avant</option>
@@ -628,7 +766,7 @@ const truncate = (text: string, length: number) => {
                   <button
                     class="rounded p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-purple-600 dark:hover:bg-gray-700 dark:hover:text-purple-400"
                     title="Dupliquer"
-                    @click="duplicateNews(newsItem)"
+                    @click="duplicateNewsItem(newsItem)"
                   >
                     <font-awesome-icon icon="fa-solid fa-copy" class="h-4 w-4" />
                   </button>
@@ -649,7 +787,7 @@ const truncate = (text: string, length: number) => {
       <!-- Pagination -->
       <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3 dark:border-gray-700">
         <div class="text-sm text-gray-500 dark:text-gray-400">
-          {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, filteredNews.length) }} sur {{ filteredNews.length }} actualités
+          {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} actualités
         </div>
         <div class="flex items-center gap-2">
           <button
@@ -674,7 +812,7 @@ const truncate = (text: string, length: number) => {
 
       <!-- État vide -->
       <div
-        v-if="paginatedNews.length === 0"
+        v-if="!isLoading && newsItems.length === 0"
         class="flex flex-col items-center justify-center py-12"
       >
         <div class="mb-4 rounded-full bg-gray-100 p-4 dark:bg-gray-700">
@@ -723,10 +861,12 @@ const truncate = (text: string, length: number) => {
             </button>
             <button
               type="button"
-              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
-              @click="deleteNews"
+              :disabled="isActionLoading"
+              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              @click="deleteNewsItem"
             >
-              Supprimer
+              <span v-if="isActionLoading">Suppression...</span>
+              <span v-else>Supprimer</span>
             </button>
           </div>
         </div>

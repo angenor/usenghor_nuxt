@@ -1,77 +1,143 @@
 <script setup lang="ts">
-import type { EventRegistration, RegistrationStatus, RegistrationFilters } from '~/composables/useMockData'
+import type {
+  EventRegistrationRead,
+  EventRegistrationCreate,
+  EventRegistrationUpdate,
+  EventRead,
+  RegistrationStatus,
+} from '~/types/api'
 
 definePageMeta({
   layout: 'admin'
 })
 
+// Composables API
 const {
-  getAllRegistrations,
-  getRegistrationById,
-  getRegistrationsByEventId,
-  getRegistrationStats,
-  getEventRegistrationStatsById,
-  getAdminFilteredRegistrations,
-  getEventsForRegistrationFilter,
-  getAdminEventById,
+  listRegistrations,
+  createRegistration,
+  updateRegistration: apiUpdateRegistration,
+  deleteRegistration: apiDeleteRegistration,
+  confirmRegistration,
+  cancelRegistration,
+  bulkAction,
+  computeStats,
   registrationStatusLabels,
   registrationStatusColors,
-  generateRegistrationId
-} = useMockData()
+} = useEventRegistrationsApi()
+
+const { listEvents } = useEventsApi()
+
+// === TYPE ENRICHI ===
+interface EnrichedRegistration extends EventRegistrationRead {
+  event_title: string
+  event_start_date: string
+}
 
 // === STATE ===
+const registrations = ref<EnrichedRegistration[]>([])
+const events = ref<EventRead[]>([])
+const eventsMap = ref<Map<string, EventRead>>(new Map())
+const isLoading = ref(false)
+const error = ref<string | null>(null)
+
+// Filtres
 const searchQuery = ref('')
 const selectedEventId = ref('')
 const selectedStatus = ref<RegistrationStatus | ''>('')
 const dateFrom = ref('')
 const dateTo = ref('')
 const selectedRegistrations = ref<string[]>([])
+
+// Modales
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const showDeleteModal = ref(false)
-const showAttendanceModal = ref(false)
-const editingRegistration = ref<EventRegistration | null>(null)
-const deletingRegistration = ref<EventRegistration | null>(null)
+const editingRegistration = ref<EnrichedRegistration | null>(null)
+const deletingRegistration = ref<EnrichedRegistration | null>(null)
+const isSaving = ref(false)
 
 // Form state for new registration
-const newRegistration = ref({
+const newRegistration = ref<{
+  event_id: string
+  first_name: string
+  last_name: string
+  email: string
+  phone: string
+  organization: string
+}>({
   event_id: '',
   first_name: '',
   last_name: '',
   email: '',
   phone: '',
   organization: '',
-  status: 'registered' as RegistrationStatus
 })
 
 // === COMPUTED ===
-const eventsForFilter = computed(() => getEventsForRegistrationFilter())
-const globalStats = computed(() => getRegistrationStats())
+const eventsForFilter = computed(() => {
+  // Retourne les événements qui ont des inscriptions ou tous si aucune inscription
+  const eventIdsWithRegistrations = new Set(registrations.value.map(r => r.event_id))
+  if (eventIdsWithRegistrations.size === 0) return events.value
+  return events.value.filter(e => eventIdsWithRegistrations.has(e.id))
+})
 
 // Selected event info
 const selectedEvent = computed(() => {
   if (!selectedEventId.value) return null
-  return getAdminEventById(selectedEventId.value)
+  return eventsMap.value.get(selectedEventId.value) || null
 })
 
-// Stats for selected event
+// Stats globales calculées à partir des inscriptions
+const globalStats = computed(() => computeStats(registrations.value))
+
+// Stats pour l'événement sélectionné
 const selectedEventStats = computed(() => {
   if (!selectedEventId.value) return null
+  const eventRegistrations = registrations.value.filter(r => r.event_id === selectedEventId.value)
   const event = selectedEvent.value
-  return getEventRegistrationStatsById(selectedEventId.value, event?.max_attendees)
+  return computeStats(eventRegistrations, event?.max_attendees || undefined)
 })
 
-// Filters
-const filters = computed<RegistrationFilters>(() => ({
-  event_id: selectedEventId.value || undefined,
-  status: selectedStatus.value || undefined,
-  date_from: dateFrom.value || undefined,
-  date_to: dateTo.value || undefined,
-  search: searchQuery.value || undefined
-}))
+// Filtrage côté client (recherche, dates)
+const filteredRegistrations = computed(() => {
+  let result = [...registrations.value]
 
-// Filtered registrations
-const filteredRegistrations = computed(() => getAdminFilteredRegistrations(filters.value))
+  // Filtre par événement
+  if (selectedEventId.value) {
+    result = result.filter(r => r.event_id === selectedEventId.value)
+  }
+
+  // Filtre par statut
+  if (selectedStatus.value) {
+    result = result.filter(r => r.status === selectedStatus.value)
+  }
+
+  // Filtre par date début
+  if (dateFrom.value) {
+    const from = new Date(dateFrom.value)
+    result = result.filter(r => new Date(r.registered_at) >= from)
+  }
+
+  // Filtre par date fin
+  if (dateTo.value) {
+    const to = new Date(dateTo.value)
+    to.setHours(23, 59, 59, 999)
+    result = result.filter(r => new Date(r.registered_at) <= to)
+  }
+
+  // Filtre par recherche (nom, email, organisation)
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    result = result.filter(r =>
+      (r.first_name?.toLowerCase().includes(query)) ||
+      (r.last_name?.toLowerCase().includes(query)) ||
+      r.email.toLowerCase().includes(query) ||
+      (r.organization?.toLowerCase().includes(query))
+    )
+  }
+
+  return result
+})
 
 // Pagination
 const currentPage = ref(1)
@@ -88,7 +154,65 @@ const allSelected = computed(() =>
   paginatedRegistrations.value.every(r => selectedRegistrations.value.includes(r.id))
 )
 
+// Get fill percentage for capacity gauge
+const getFillPercentage = computed(() => {
+  if (!selectedEventStats.value?.capacity) return 0
+  const active = selectedEventStats.value.total - selectedEventStats.value.cancelled
+  return Math.min(100, (active / selectedEventStats.value.capacity) * 100)
+})
+
 // === METHODS ===
+
+// Charger les données
+async function loadData() {
+  isLoading.value = true
+  error.value = null
+
+  try {
+    // Charger les événements d'abord
+    const eventsResponse = await listEvents({ limit: 100, status: 'published' })
+    events.value = eventsResponse.items
+
+    // Créer la map des événements pour accès rapide
+    eventsMap.value = new Map(events.value.map(e => [e.id, e]))
+
+    // Charger toutes les inscriptions
+    const rawRegistrations = await listRegistrations({})
+
+    // Enrichir les inscriptions avec les infos d'événements
+    registrations.value = rawRegistrations.map(r => {
+      const event = eventsMap.value.get(r.event_id)
+      return {
+        ...r,
+        event_title: event?.title || 'Événement inconnu',
+        event_start_date: event?.start_date || '',
+      }
+    })
+  } catch (e) {
+    console.error('Erreur lors du chargement:', e)
+    error.value = 'Erreur lors du chargement des données'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Recharger uniquement les inscriptions
+async function reloadRegistrations() {
+  try {
+    const rawRegistrations = await listRegistrations({})
+    registrations.value = rawRegistrations.map(r => {
+      const event = eventsMap.value.get(r.event_id)
+      return {
+        ...r,
+        event_title: event?.title || 'Événement inconnu',
+        event_start_date: event?.start_date || '',
+      }
+    })
+  } catch (e) {
+    console.error('Erreur lors du rechargement:', e)
+  }
+}
+
 const resetFilters = () => {
   searchQuery.value = ''
   selectedEventId.value = ''
@@ -117,6 +241,7 @@ const toggleSelection = (id: string) => {
 
 // Format date
 const formatDate = (dateStr: string) => {
+  if (!dateStr) return '-'
   return new Date(dateStr).toLocaleDateString('fr-FR', {
     day: '2-digit',
     month: 'short',
@@ -125,6 +250,7 @@ const formatDate = (dateStr: string) => {
 }
 
 const formatDateTime = (dateStr: string) => {
+  if (!dateStr) return '-'
   return new Date(dateStr).toLocaleDateString('fr-FR', {
     day: '2-digit',
     month: 'short',
@@ -143,7 +269,6 @@ const openAddModal = () => {
     email: '',
     phone: '',
     organization: '',
-    status: 'registered'
   }
   showAddModal.value = true
 }
@@ -152,7 +277,7 @@ const closeAddModal = () => {
   showAddModal.value = false
 }
 
-const openEditModal = (registration: EventRegistration) => {
+const openEditModal = (registration: EnrichedRegistration) => {
   editingRegistration.value = { ...registration }
   showEditModal.value = true
 }
@@ -162,7 +287,7 @@ const closeEditModal = () => {
   editingRegistration.value = null
 }
 
-const openDeleteModal = (registration: EventRegistration) => {
+const openDeleteModal = (registration: EnrichedRegistration) => {
   deletingRegistration.value = registration
   showDeleteModal.value = true
 }
@@ -172,88 +297,130 @@ const closeDeleteModal = () => {
   deletingRegistration.value = null
 }
 
-const openAttendanceModal = () => {
-  showAttendanceModal.value = true
-}
-
-const closeAttendanceModal = () => {
-  showAttendanceModal.value = false
-}
-
-// Actions (mock - en prod, appeler l'API)
-const addRegistration = () => {
+// Actions CRUD
+async function addRegistration() {
   if (!newRegistration.value.event_id || !newRegistration.value.email) return
 
-  console.log('Adding registration:', {
-    id: generateRegistrationId(),
-    ...newRegistration.value,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  })
+  isSaving.value = true
+  try {
+    const payload: EventRegistrationCreate = {
+      email: newRegistration.value.email,
+      first_name: newRegistration.value.first_name || null,
+      last_name: newRegistration.value.last_name || null,
+      phone: newRegistration.value.phone || null,
+      organization: newRegistration.value.organization || null,
+    }
 
-  closeAddModal()
+    await createRegistration(newRegistration.value.event_id, payload)
+    await reloadRegistrations()
+    closeAddModal()
+  } catch (e) {
+    console.error('Erreur lors de la création:', e)
+    alert('Erreur lors de la création de l\'inscription')
+  } finally {
+    isSaving.value = false
+  }
 }
 
-const updateRegistration = () => {
+async function updateRegistration() {
   if (!editingRegistration.value) return
 
-  console.log('Updating registration:', editingRegistration.value)
+  isSaving.value = true
+  try {
+    const payload: EventRegistrationUpdate = {
+      first_name: editingRegistration.value.first_name,
+      last_name: editingRegistration.value.last_name,
+      phone: editingRegistration.value.phone,
+      organization: editingRegistration.value.organization,
+      status: editingRegistration.value.status,
+    }
 
-  closeEditModal()
+    await apiUpdateRegistration(editingRegistration.value.id, payload)
+    await reloadRegistrations()
+    closeEditModal()
+  } catch (e) {
+    console.error('Erreur lors de la mise à jour:', e)
+    alert('Erreur lors de la mise à jour de l\'inscription')
+  } finally {
+    isSaving.value = false
+  }
 }
 
-const deleteRegistration = () => {
+async function deleteRegistration() {
   if (!deletingRegistration.value) return
 
-  console.log('Deleting registration:', deletingRegistration.value.id)
-
-  closeDeleteModal()
+  isSaving.value = true
+  try {
+    await apiDeleteRegistration(deletingRegistration.value.id)
+    await reloadRegistrations()
+    closeDeleteModal()
+  } catch (e) {
+    console.error('Erreur lors de la suppression:', e)
+    alert('Erreur lors de la suppression de l\'inscription')
+  } finally {
+    isSaving.value = false
+  }
 }
 
 // Bulk actions
-const bulkChangeStatus = (status: RegistrationStatus) => {
+async function bulkChangeStatus(action: 'confirm' | 'cancel') {
   if (selectedRegistrations.value.length === 0) return
 
-  console.log('Bulk status change:', {
-    ids: selectedRegistrations.value,
-    status
-  })
-
-  selectedRegistrations.value = []
+  isSaving.value = true
+  try {
+    await bulkAction({
+      registration_ids: selectedRegistrations.value,
+      action,
+    })
+    await reloadRegistrations()
+    selectedRegistrations.value = []
+  } catch (e) {
+    console.error('Erreur lors de l\'action en masse:', e)
+    alert('Erreur lors de l\'action en masse')
+  } finally {
+    isSaving.value = false
+  }
 }
 
-const bulkMarkAttendance = (attended: boolean) => {
-  if (selectedRegistrations.value.length === 0) return
-
-  console.log('Bulk attendance:', {
-    ids: selectedRegistrations.value,
-    attended
-  })
-
-  selectedRegistrations.value = []
+async function markAsAttended(registrationId: string) {
+  isSaving.value = true
+  try {
+    await apiUpdateRegistration(registrationId, { status: 'attended' })
+    await reloadRegistrations()
+  } catch (e) {
+    console.error('Erreur:', e)
+    alert('Erreur lors de la mise à jour')
+  } finally {
+    isSaving.value = false
+  }
 }
 
-// Export
+// Export (mock pour l'instant)
 const exportRegistrations = (format: 'csv' | 'xlsx') => {
   console.log('Exporting registrations:', {
     format,
     event_id: selectedEventId.value || 'all',
     count: filteredRegistrations.value.length
   })
+  alert(`Export ${format.toUpperCase()} - Fonctionnalité à venir`)
 }
 
 // Can mark attendance (event date has passed or is today)
-const canMarkAttendance = (registration: EventRegistration) => {
+const canMarkAttendance = (registration: EnrichedRegistration) => {
+  if (!registration.event_start_date) return false
   const eventDate = new Date(registration.event_start_date)
   const now = new Date()
   return eventDate <= now
 }
 
-// Get fill percentage for capacity gauge
-const getFillPercentage = computed(() => {
-  if (!selectedEventStats.value?.capacity) return 0
-  const active = selectedEventStats.value.total - selectedEventStats.value.cancelled
-  return Math.min(100, (active / selectedEventStats.value.capacity) * 100)
+// Reset page when filters change
+watch([selectedEventId, selectedStatus, dateFrom, dateTo, searchQuery], () => {
+  currentPage.value = 1
+})
+
+// Charger les données au montage
+onMounted(() => {
+  loadData()
 })
 </script>
 
@@ -288,411 +455,430 @@ const getFillPercentage = computed(() => {
       </div>
     </div>
 
-    <!-- Global Stats (when no event selected) -->
-    <div v-if="!selectedEventId" class="grid gap-4 sm:grid-cols-4">
-      <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
-        <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
-            <font-awesome-icon icon="fa-solid fa-users" class="text-blue-600 dark:text-blue-400" />
-          </div>
-          <div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Total inscriptions</p>
-            <p class="text-xl font-bold text-gray-900 dark:text-white">{{ globalStats.total }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
-        <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30">
-            <font-awesome-icon icon="fa-solid fa-check-circle" class="text-green-600 dark:text-green-400" />
-          </div>
-          <div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Confirmés</p>
-            <p class="text-xl font-bold text-gray-900 dark:text-white">{{ globalStats.confirmed }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
-        <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30">
-            <font-awesome-icon icon="fa-solid fa-user-check" class="text-purple-600 dark:text-purple-400" />
-          </div>
-          <div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Présents</p>
-            <p class="text-xl font-bold text-gray-900 dark:text-white">{{ globalStats.attended }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
-        <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
-            <font-awesome-icon icon="fa-solid fa-ban" class="text-red-600 dark:text-red-400" />
-          </div>
-          <div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Annulés</p>
-            <p class="text-xl font-bold text-gray-900 dark:text-white">{{ globalStats.cancelled }}</p>
-          </div>
-        </div>
+    <!-- Loading state -->
+    <div v-if="isLoading" class="flex items-center justify-center py-12">
+      <div class="text-center">
+        <font-awesome-icon icon="fa-solid fa-spinner" class="mb-4 text-4xl text-blue-600 animate-spin" />
+        <p class="text-gray-500 dark:text-gray-400">Chargement des inscriptions...</p>
       </div>
     </div>
 
-    <!-- Event Stats (when event selected) -->
-    <div v-if="selectedEvent && selectedEventStats" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
-      <div class="mb-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-            {{ selectedEvent.title }}
-          </h2>
-          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            <font-awesome-icon icon="fa-solid fa-calendar" class="mr-1" />
-            {{ formatDateTime(selectedEvent.start_date) }}
-            <span v-if="selectedEvent.venue" class="ml-3">
-              <font-awesome-icon icon="fa-solid fa-location-dot" class="mr-1" />
-              {{ selectedEvent.venue }}, {{ selectedEvent.city }}
-            </span>
-          </p>
-        </div>
-
-        <!-- Capacity gauge -->
-        <div v-if="selectedEventStats.capacity" class="w-full lg:w-64">
-          <div class="mb-1 flex justify-between text-sm">
-            <span class="text-gray-500 dark:text-gray-400">Remplissage</span>
-            <span class="font-medium text-gray-900 dark:text-white">
-              {{ selectedEventStats.total - selectedEventStats.cancelled }} / {{ selectedEventStats.capacity }}
-            </span>
-          </div>
-          <div class="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-            <div
-              class="h-full rounded-full transition-all"
-              :class="getFillPercentage >= 90 ? 'bg-red-500' : getFillPercentage >= 70 ? 'bg-yellow-500' : 'bg-green-500'"
-              :style="{ width: `${getFillPercentage}%` }"
-            />
-          </div>
-          <p v-if="selectedEventStats.available_spots !== undefined" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {{ selectedEventStats.available_spots }} place{{ selectedEventStats.available_spots > 1 ? 's' : '' }} disponible{{ selectedEventStats.available_spots > 1 ? 's' : '' }}
-          </p>
-        </div>
-      </div>
-
-      <!-- Event stats -->
-      <div class="grid gap-4 sm:grid-cols-4">
-        <div class="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
-          <p class="text-sm text-blue-600 dark:text-blue-400">Inscrits</p>
-          <p class="text-2xl font-bold text-blue-800 dark:text-blue-300">{{ selectedEventStats.registered }}</p>
-        </div>
-        <div class="rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
-          <p class="text-sm text-green-600 dark:text-green-400">Confirmés</p>
-          <p class="text-2xl font-bold text-green-800 dark:text-green-300">{{ selectedEventStats.confirmed }}</p>
-        </div>
-        <div class="rounded-lg bg-purple-50 p-3 dark:bg-purple-900/20">
-          <p class="text-sm text-purple-600 dark:text-purple-400">Présents</p>
-          <p class="text-2xl font-bold text-purple-800 dark:text-purple-300">{{ selectedEventStats.attended }}</p>
-        </div>
-        <div class="rounded-lg bg-red-50 p-3 dark:bg-red-900/20">
-          <p class="text-sm text-red-600 dark:text-red-400">Annulés</p>
-          <p class="text-2xl font-bold text-red-800 dark:text-red-300">{{ selectedEventStats.cancelled }}</p>
-        </div>
-      </div>
+    <!-- Error state -->
+    <div v-else-if="error" class="rounded-lg bg-red-50 p-6 text-center dark:bg-red-900/20">
+      <font-awesome-icon icon="fa-solid fa-exclamation-triangle" class="mb-4 text-4xl text-red-600 dark:text-red-400" />
+      <p class="text-red-800 dark:text-red-200">{{ error }}</p>
+      <button
+        class="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+        @click="loadData"
+      >
+        Réessayer
+      </button>
     </div>
 
-    <!-- Filters -->
-    <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <!-- Event select -->
-        <div>
-          <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Événement
-          </label>
-          <select
-            v-model="selectedEventId"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          >
-            <option value="">Tous les événements</option>
-            <option v-for="event in eventsForFilter" :key="event.id" :value="event.id">
-              {{ event.title }}
-            </option>
-          </select>
+    <template v-else>
+      <!-- Global Stats (when no event selected) -->
+      <div v-if="!selectedEventId" class="grid gap-4 sm:grid-cols-4">
+        <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
+              <font-awesome-icon icon="fa-solid fa-users" class="text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Total inscriptions</p>
+              <p class="text-xl font-bold text-gray-900 dark:text-white">{{ globalStats.total }}</p>
+            </div>
+          </div>
         </div>
 
-        <!-- Status select -->
-        <div>
-          <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Statut
-          </label>
-          <select
-            v-model="selectedStatus"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          >
-            <option value="">Tous les statuts</option>
-            <option value="registered">Inscrit</option>
-            <option value="confirmed">Confirmé</option>
-            <option value="cancelled">Annulé</option>
-            <option value="attended">Présent</option>
-          </select>
+        <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30">
+              <font-awesome-icon icon="fa-solid fa-check-circle" class="text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Confirmés</p>
+              <p class="text-xl font-bold text-gray-900 dark:text-white">{{ globalStats.confirmed }}</p>
+            </div>
+          </div>
         </div>
 
-        <!-- Date from -->
-        <div>
-          <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Date début
-          </label>
-          <input
-            v-model="dateFrom"
-            type="date"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          />
+        <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30">
+              <font-awesome-icon icon="fa-solid fa-user-check" class="text-purple-600 dark:text-purple-400" />
+            </div>
+            <div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Présents</p>
+              <p class="text-xl font-bold text-gray-900 dark:text-white">{{ globalStats.attended }}</p>
+            </div>
+          </div>
         </div>
 
-        <!-- Date to -->
-        <div>
-          <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Date fin
-          </label>
-          <input
-            v-model="dateTo"
-            type="date"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          />
-        </div>
-
-        <!-- Search -->
-        <div>
-          <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Recherche
-          </label>
-          <div class="relative">
-            <font-awesome-icon icon="fa-solid fa-search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Nom, email, organisation..."
-              class="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-            />
+        <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
+              <font-awesome-icon icon="fa-solid fa-ban" class="text-red-600 dark:text-red-400" />
+            </div>
+            <div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Annulés</p>
+              <p class="text-xl font-bold text-gray-900 dark:text-white">{{ globalStats.cancelled }}</p>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Reset filters -->
-      <div class="mt-4 flex items-center justify-between">
-        <button
-          class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-          @click="resetFilters"
-        >
-          <font-awesome-icon icon="fa-solid fa-rotate-left" class="mr-1" />
-          Réinitialiser les filtres
-        </button>
+      <!-- Event Stats (when event selected) -->
+      <div v-if="selectedEvent && selectedEventStats" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+        <div class="mb-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+              {{ selectedEvent.title }}
+            </h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              <font-awesome-icon icon="fa-solid fa-calendar" class="mr-1" />
+              {{ formatDateTime(selectedEvent.start_date) }}
+              <span v-if="selectedEvent.venue" class="ml-3">
+                <font-awesome-icon icon="fa-solid fa-location-dot" class="mr-1" />
+                {{ selectedEvent.venue }}<span v-if="selectedEvent.city">, {{ selectedEvent.city }}</span>
+              </span>
+            </p>
+          </div>
 
-        <span class="text-sm text-gray-500 dark:text-gray-400">
-          {{ filteredRegistrations.length }} inscription{{ filteredRegistrations.length > 1 ? 's' : '' }}
-        </span>
-      </div>
-    </div>
-
-    <!-- Bulk actions -->
-    <div v-if="selectedRegistrations.length > 0" class="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
-      <div class="flex flex-wrap items-center gap-4">
-        <span class="text-sm font-medium text-blue-800 dark:text-blue-300">
-          {{ selectedRegistrations.length }} sélectionné{{ selectedRegistrations.length > 1 ? 's' : '' }}
-        </span>
-
-        <div class="flex flex-wrap gap-2">
-          <button
-            class="inline-flex items-center gap-1 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700"
-            @click="bulkChangeStatus('confirmed')"
-          >
-            <font-awesome-icon icon="fa-solid fa-check" />
-            Confirmer
-          </button>
-          <button
-            class="inline-flex items-center gap-1 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-700"
-            @click="bulkMarkAttendance(true)"
-          >
-            <font-awesome-icon icon="fa-solid fa-user-check" />
-            Marquer présent
-          </button>
-          <button
-            class="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
-            @click="bulkChangeStatus('cancelled')"
-          >
-            <font-awesome-icon icon="fa-solid fa-ban" />
-            Annuler
-          </button>
+          <!-- Capacity gauge -->
+          <div v-if="selectedEventStats.capacity" class="w-full lg:w-64">
+            <div class="mb-1 flex justify-between text-sm">
+              <span class="text-gray-500 dark:text-gray-400">Remplissage</span>
+              <span class="font-medium text-gray-900 dark:text-white">
+                {{ selectedEventStats.total - selectedEventStats.cancelled }} / {{ selectedEventStats.capacity }}
+              </span>
+            </div>
+            <div class="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+              <div
+                class="h-full rounded-full transition-all"
+                :class="getFillPercentage >= 90 ? 'bg-red-500' : getFillPercentage >= 70 ? 'bg-yellow-500' : 'bg-green-500'"
+                :style="{ width: `${getFillPercentage}%` }"
+              />
+            </div>
+            <p v-if="selectedEventStats.available_spots !== undefined" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {{ selectedEventStats.available_spots }} place{{ selectedEventStats.available_spots > 1 ? 's' : '' }} disponible{{ selectedEventStats.available_spots > 1 ? 's' : '' }}
+            </p>
+          </div>
         </div>
 
-        <button
-          class="ml-auto text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
-          @click="selectedRegistrations = []"
-        >
-          Désélectionner tout
-        </button>
+        <!-- Event stats -->
+        <div class="grid gap-4 sm:grid-cols-4">
+          <div class="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
+            <p class="text-sm text-blue-600 dark:text-blue-400">Inscrits</p>
+            <p class="text-2xl font-bold text-blue-800 dark:text-blue-300">{{ selectedEventStats.registered }}</p>
+          </div>
+          <div class="rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
+            <p class="text-sm text-green-600 dark:text-green-400">Confirmés</p>
+            <p class="text-2xl font-bold text-green-800 dark:text-green-300">{{ selectedEventStats.confirmed }}</p>
+          </div>
+          <div class="rounded-lg bg-purple-50 p-3 dark:bg-purple-900/20">
+            <p class="text-sm text-purple-600 dark:text-purple-400">Présents</p>
+            <p class="text-2xl font-bold text-purple-800 dark:text-purple-300">{{ selectedEventStats.attended }}</p>
+          </div>
+          <div class="rounded-lg bg-red-50 p-3 dark:bg-red-900/20">
+            <p class="text-sm text-red-600 dark:text-red-400">Annulés</p>
+            <p class="text-2xl font-bold text-red-800 dark:text-red-300">{{ selectedEventStats.cancelled }}</p>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- Table -->
-    <div class="rounded-lg bg-white shadow dark:bg-gray-800">
-      <div class="admin-scrollbar overflow-x-auto" data-lenis-prevent>
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead class="bg-gray-50 dark:bg-gray-900">
-            <tr>
-              <th class="w-12 px-4 py-3">
-                <input
-                  type="checkbox"
-                  :checked="allSelected"
-                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-                  @change="toggleSelectAll"
-                />
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Participant
-              </th>
-              <th v-if="!selectedEventId" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Événement
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Organisation
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Statut
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Date inscription
-              </th>
-              <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-            <tr
-              v-for="registration in paginatedRegistrations"
-              :key="registration.id"
-              class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
+      <!-- Filters -->
+      <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <!-- Event select -->
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Événement
+            </label>
+            <select
+              v-model="selectedEventId"
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             >
-              <td class="w-12 px-4 py-4">
-                <input
-                  type="checkbox"
-                  :checked="selectedRegistrations.includes(registration.id)"
-                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-                  @change="toggleSelection(registration.id)"
-                />
-              </td>
-              <td class="whitespace-nowrap px-6 py-4">
-                <div>
-                  <p class="font-medium text-gray-900 dark:text-white">
-                    {{ registration.first_name }} {{ registration.last_name }}
-                  </p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ registration.email }}
-                  </p>
-                  <p v-if="registration.phone" class="text-xs text-gray-400 dark:text-gray-500">
-                    {{ registration.phone }}
-                  </p>
-                </div>
-              </td>
-              <td v-if="!selectedEventId" class="px-6 py-4">
-                <p class="max-w-xs truncate text-sm text-gray-900 dark:text-white" :title="registration.event_title">
-                  {{ registration.event_title }}
-                </p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ formatDate(registration.event_start_date) }}
-                </p>
-              </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                {{ registration.organization || '-' }}
-              </td>
-              <td class="whitespace-nowrap px-6 py-4">
-                <span
-                  class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium"
-                  :class="registrationStatusColors[registration.status]"
-                >
-                  {{ registrationStatusLabels[registration.status] }}
-                </span>
-              </td>
-              <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                {{ formatDate(registration.created_at) }}
-              </td>
-              <td class="whitespace-nowrap px-6 py-4 text-right">
-                <div class="flex items-center justify-end gap-2">
-                  <button
-                    v-if="canMarkAttendance(registration) && registration.status !== 'attended' && registration.status !== 'cancelled'"
-                    class="rounded p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-purple-600 dark:hover:bg-gray-700 dark:hover:text-purple-400"
-                    title="Marquer présent"
-                    @click="bulkMarkAttendance(true); selectedRegistrations = [registration.id]"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-user-check" class="h-4 w-4" />
-                  </button>
-                  <button
-                    class="rounded p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-700 dark:hover:text-blue-400"
-                    title="Modifier"
-                    @click="openEditModal(registration)"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-pen" class="h-4 w-4" />
-                  </button>
-                  <button
-                    class="rounded p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-700 dark:hover:text-red-400"
-                    title="Supprimer"
-                    @click="openDeleteModal(registration)"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-trash" class="h-4 w-4" />
-                  </button>
-                </div>
-              </td>
-            </tr>
+              <option value="">Tous les événements</option>
+              <option v-for="event in eventsForFilter" :key="event.id" :value="event.id">
+                {{ event.title }}
+              </option>
+            </select>
+          </div>
 
-            <!-- Empty state -->
-            <tr v-if="paginatedRegistrations.length === 0">
-              <td :colspan="selectedEventId ? 6 : 7" class="px-6 py-12 text-center">
-                <div class="flex flex-col items-center">
-                  <div class="mb-4 rounded-full bg-gray-100 p-4 dark:bg-gray-700">
-                    <font-awesome-icon icon="fa-solid fa-users" class="text-3xl text-gray-400" />
+          <!-- Status select -->
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Statut
+            </label>
+            <select
+              v-model="selectedStatus"
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">Tous les statuts</option>
+              <option value="registered">Inscrit</option>
+              <option value="confirmed">Confirmé</option>
+              <option value="cancelled">Annulé</option>
+              <option value="attended">Présent</option>
+            </select>
+          </div>
+
+          <!-- Date from -->
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Date début
+            </label>
+            <input
+              v-model="dateFrom"
+              type="date"
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+
+          <!-- Date to -->
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Date fin
+            </label>
+            <input
+              v-model="dateTo"
+              type="date"
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+
+          <!-- Search -->
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Recherche
+            </label>
+            <div class="relative">
+              <font-awesome-icon icon="fa-solid fa-search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Nom, email, organisation..."
+                class="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Reset filters -->
+        <div class="mt-4 flex items-center justify-between">
+          <button
+            class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            @click="resetFilters"
+          >
+            <font-awesome-icon icon="fa-solid fa-rotate-left" class="mr-1" />
+            Réinitialiser les filtres
+          </button>
+
+          <span class="text-sm text-gray-500 dark:text-gray-400">
+            {{ filteredRegistrations.length }} inscription{{ filteredRegistrations.length > 1 ? 's' : '' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Bulk actions -->
+      <div v-if="selectedRegistrations.length > 0" class="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+        <div class="flex flex-wrap items-center gap-4">
+          <span class="text-sm font-medium text-blue-800 dark:text-blue-300">
+            {{ selectedRegistrations.length }} sélectionné{{ selectedRegistrations.length > 1 ? 's' : '' }}
+          </span>
+
+          <div class="flex flex-wrap gap-2">
+            <button
+              class="inline-flex items-center gap-1 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50"
+              :disabled="isSaving"
+              @click="bulkChangeStatus('confirm')"
+            >
+              <font-awesome-icon icon="fa-solid fa-check" />
+              Confirmer
+            </button>
+            <button
+              class="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              :disabled="isSaving"
+              @click="bulkChangeStatus('cancel')"
+            >
+              <font-awesome-icon icon="fa-solid fa-ban" />
+              Annuler
+            </button>
+          </div>
+
+          <button
+            class="ml-auto text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
+            @click="selectedRegistrations = []"
+          >
+            Désélectionner tout
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="rounded-lg bg-white shadow dark:bg-gray-800">
+        <div class="admin-scrollbar overflow-x-auto" data-lenis-prevent>
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-900">
+              <tr>
+                <th class="w-12 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    :checked="allSelected"
+                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                    @change="toggleSelectAll"
+                  />
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Participant
+                </th>
+                <th v-if="!selectedEventId" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Événement
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Organisation
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Statut
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Date inscription
+                </th>
+                <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+              <tr
+                v-for="registration in paginatedRegistrations"
+                :key="registration.id"
+                class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
+              >
+                <td class="w-12 px-4 py-4">
+                  <input
+                    type="checkbox"
+                    :checked="selectedRegistrations.includes(registration.id)"
+                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                    @change="toggleSelection(registration.id)"
+                  />
+                </td>
+                <td class="whitespace-nowrap px-6 py-4">
+                  <div>
+                    <p class="font-medium text-gray-900 dark:text-white">
+                      {{ registration.first_name || '' }} {{ registration.last_name || '' }}
+                      <span v-if="!registration.first_name && !registration.last_name" class="text-gray-400">-</span>
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      {{ registration.email }}
+                    </p>
+                    <p v-if="registration.phone" class="text-xs text-gray-400 dark:text-gray-500">
+                      {{ registration.phone }}
+                    </p>
                   </div>
-                  <h3 class="mb-2 font-medium text-gray-900 dark:text-white">
-                    Aucune inscription trouvée
-                  </h3>
-                  <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
-                    {{ searchQuery || selectedStatus || selectedEventId ? 'Essayez avec d\'autres filtres' : 'Ajoutez une première inscription' }}
+                </td>
+                <td v-if="!selectedEventId" class="px-6 py-4">
+                  <p class="max-w-xs truncate text-sm text-gray-900 dark:text-white" :title="registration.event_title">
+                    {{ registration.event_title }}
                   </p>
-                  <button
-                    v-if="!searchQuery && !selectedStatus"
-                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-                    @click="openAddModal"
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ formatDate(registration.event_start_date) }}
+                  </p>
+                </td>
+                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                  {{ registration.organization || '-' }}
+                </td>
+                <td class="whitespace-nowrap px-6 py-4">
+                  <span
+                    class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium"
+                    :class="registrationStatusColors[registration.status]"
                   >
-                    <font-awesome-icon icon="fa-solid fa-plus" />
-                    Nouvelle inscription
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                    {{ registrationStatusLabels[registration.status] }}
+                  </span>
+                </td>
+                <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                  {{ formatDate(registration.registered_at) }}
+                </td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <button
+                      v-if="canMarkAttendance(registration) && registration.status !== 'attended' && registration.status !== 'cancelled'"
+                      class="rounded p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-purple-600 dark:hover:bg-gray-700 dark:hover:text-purple-400"
+                      title="Marquer présent"
+                      :disabled="isSaving"
+                      @click="markAsAttended(registration.id)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-user-check" class="h-4 w-4" />
+                    </button>
+                    <button
+                      class="rounded p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-700 dark:hover:text-blue-400"
+                      title="Modifier"
+                      @click="openEditModal(registration)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-pen" class="h-4 w-4" />
+                    </button>
+                    <button
+                      class="rounded p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-700 dark:hover:text-red-400"
+                      title="Supprimer"
+                      @click="openDeleteModal(registration)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-trash" class="h-4 w-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
 
-      <!-- Pagination -->
-      <div v-if="totalPages > 1" class="flex items-center justify-between border-t border-gray-200 px-4 py-3 dark:border-gray-700">
-        <div class="text-sm text-gray-500 dark:text-gray-400">
-          Page {{ currentPage }} sur {{ totalPages }}
+              <!-- Empty state -->
+              <tr v-if="paginatedRegistrations.length === 0">
+                <td :colspan="selectedEventId ? 6 : 7" class="px-6 py-12 text-center">
+                  <div class="flex flex-col items-center">
+                    <div class="mb-4 rounded-full bg-gray-100 p-4 dark:bg-gray-700">
+                      <font-awesome-icon icon="fa-solid fa-users" class="text-3xl text-gray-400" />
+                    </div>
+                    <h3 class="mb-2 font-medium text-gray-900 dark:text-white">
+                      Aucune inscription trouvée
+                    </h3>
+                    <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+                      {{ searchQuery || selectedStatus || selectedEventId ? 'Essayez avec d\'autres filtres' : 'Ajoutez une première inscription' }}
+                    </p>
+                    <button
+                      v-if="!searchQuery && !selectedStatus"
+                      class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                      @click="openAddModal"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-plus" />
+                      Nouvelle inscription
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <div class="flex gap-2">
-          <button
-            :disabled="currentPage === 1"
-            class="rounded-lg border border-gray-300 px-3 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600"
-            @click="currentPage--"
-          >
-            Précédent
-          </button>
-          <button
-            :disabled="currentPage === totalPages"
-            class="rounded-lg border border-gray-300 px-3 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600"
-            @click="currentPage++"
-          >
-            Suivant
-          </button>
+
+        <!-- Pagination -->
+        <div v-if="totalPages > 1" class="flex items-center justify-between border-t border-gray-200 px-4 py-3 dark:border-gray-700">
+          <div class="text-sm text-gray-500 dark:text-gray-400">
+            Page {{ currentPage }} sur {{ totalPages }}
+          </div>
+          <div class="flex gap-2">
+            <button
+              :disabled="currentPage === 1"
+              class="rounded-lg border border-gray-300 px-3 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600"
+              @click="currentPage--"
+            >
+              Précédent
+            </button>
+            <button
+              :disabled="currentPage === totalPages"
+              class="rounded-lg border border-gray-300 px-3 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600"
+              @click="currentPage++"
+            >
+              Suivant
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </template>
 
     <!-- Modal Ajouter -->
     <Teleport to="body">
@@ -725,7 +911,7 @@ const getFillPercentage = computed(() => {
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               >
                 <option value="">Sélectionner un événement</option>
-                <option v-for="event in eventsForFilter" :key="event.id" :value="event.id">
+                <option v-for="event in events" :key="event.id" :value="event.id">
                   {{ event.title }}
                 </option>
               </select>
@@ -734,23 +920,21 @@ const getFillPercentage = computed(() => {
             <div class="mb-4 grid gap-4 sm:grid-cols-2">
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Prénom *
+                  Prénom
                 </label>
                 <input
                   v-model="newRegistration.first_name"
                   type="text"
-                  required
                   class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
               </div>
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Nom *
+                  Nom
                 </label>
                 <input
                   v-model="newRegistration.last_name"
                   type="text"
-                  required
                   class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -768,7 +952,7 @@ const getFillPercentage = computed(() => {
               />
             </div>
 
-            <div class="mb-4 grid gap-4 sm:grid-cols-2">
+            <div class="mb-6 grid gap-4 sm:grid-cols-2">
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Téléphone
@@ -791,19 +975,6 @@ const getFillPercentage = computed(() => {
               </div>
             </div>
 
-            <div class="mb-6">
-              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Statut initial
-              </label>
-              <select
-                v-model="newRegistration.status"
-                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              >
-                <option value="registered">Inscrit</option>
-                <option value="confirmed">Confirmé</option>
-              </select>
-            </div>
-
             <div class="flex justify-end gap-3">
               <button
                 type="button"
@@ -814,8 +985,10 @@ const getFillPercentage = computed(() => {
               </button>
               <button
                 type="submit"
-                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                :disabled="isSaving"
+                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
               >
+                <font-awesome-icon v-if="isSaving" icon="fa-solid fa-spinner" class="mr-2 animate-spin" />
                 Inscrire
               </button>
             </div>
@@ -875,11 +1048,12 @@ const getFillPercentage = computed(() => {
                 Email
               </label>
               <input
-                v-model="editingRegistration.email"
+                :value="editingRegistration.email"
                 type="email"
-                :disabled="!!editingRegistration.user_external_id"
+                disabled
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:disabled:bg-gray-600"
               />
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">L'email ne peut pas être modifié</p>
             </div>
 
             <div v-if="editingRegistration.user_external_id" class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-900 dark:bg-blue-900/20">
@@ -937,8 +1111,10 @@ const getFillPercentage = computed(() => {
               </button>
               <button
                 type="submit"
-                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                :disabled="isSaving"
+                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
               >
+                <font-awesome-icon v-if="isSaving" icon="fa-solid fa-spinner" class="mr-2 animate-spin" />
                 Enregistrer
               </button>
             </div>
@@ -965,7 +1141,8 @@ const getFillPercentage = computed(() => {
           </div>
 
           <p class="mb-4 text-gray-600 dark:text-gray-300">
-            Êtes-vous sûr de vouloir supprimer l'inscription de <strong>{{ deletingRegistration.first_name }} {{ deletingRegistration.last_name }}</strong> ?
+            Êtes-vous sûr de vouloir supprimer l'inscription de
+            <strong>{{ deletingRegistration.first_name || '' }} {{ deletingRegistration.last_name || deletingRegistration.email }}</strong> ?
           </p>
 
           <div class="mb-4 rounded-lg bg-gray-100 p-3 dark:bg-gray-700">
@@ -987,9 +1164,11 @@ const getFillPercentage = computed(() => {
             </button>
             <button
               type="button"
-              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+              :disabled="isSaving"
+              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
               @click="deleteRegistration"
             >
+              <font-awesome-icon v-if="isSaving" icon="fa-solid fa-spinner" class="mr-2 animate-spin" />
               Supprimer
             </button>
           </div>

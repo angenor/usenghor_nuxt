@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { NewsStatus, HighlightStatus, NewsTag } from '~/composables/useMockData'
+import type { NewsStatus, NewsHighlightStatus, TagRead } from '~/types/news'
 import type { OutputData } from '@editorjs/editorjs'
 
 definePageMeta({
@@ -9,22 +9,29 @@ definePageMeta({
 const router = useRouter()
 
 const {
-  getAllNewsTags,
-  getAllNewsAuthors,
+  createNews: apiCreateNews,
+  getAllTags,
+  createTag: apiCreateTag,
   newsStatusLabels,
   highlightStatusLabels,
+  slugify,
+} = useAdminNewsApi()
+
+const {
+  getAllNewsAuthors,
   departments,
   campusExternalises,
   services,
   getAllProjects,
   getAllEvents,
-  generateNewsId
 } = useMockData()
 
 // === STATE ===
 const isSubmitting = ref(false)
+const isLoadingTags = ref(false)
 const showTagModal = ref(false)
 const newTagName = ref('')
+const error = ref<string | null>(null)
 
 // Contenu EditorJS (séparé du formulaire pour éviter les problèmes de réactivité)
 const content = ref<OutputData | undefined>(undefined)
@@ -47,13 +54,29 @@ const form = reactive({
   event_id: '',
   project_id: '',
   status: 'draft' as NewsStatus,
-  highlight_status: 'standard' as HighlightStatus,
+  highlight_status: 'standard' as NewsHighlightStatus,
   published_at: '',
   visible_from: ''
 })
 
+// Tags from API
+const allTags = ref<TagRead[]>([])
+
+// Load tags on mount
+onMounted(async () => {
+  isLoadingTags.value = true
+  try {
+    allTags.value = await getAllTags()
+  }
+  catch (e) {
+    console.error('Erreur lors du chargement des tags:', e)
+  }
+  finally {
+    isLoadingTags.value = false
+  }
+})
+
 // === COMPUTED ===
-const allTags = computed(() => getAllNewsTags())
 const allAuthors = computed(() => getAllNewsAuthors())
 const allCampuses = computed(() => campusExternalises.value)
 const allDepartments = computed(() => departments.value)
@@ -87,25 +110,16 @@ const hasContent = computed(() => {
 const isValid = computed(() => {
   return form.title.trim() !== '' &&
     form.slug.trim() !== '' &&
-    hasContent.value &&
-    form.author_id !== ''
+    hasContent.value
 })
 
 // === METHODS ===
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-}
-
 function toggleTag(tagId: string) {
   const index = form.tags.indexOf(tagId)
   if (index === -1) {
     form.tags.push(tagId)
-  } else {
+  }
+  else {
     form.tags.splice(index, 1)
   }
 }
@@ -120,8 +134,7 @@ function removeTag(tagId: string) {
 function handleCoverImageUpload(event: Event) {
   const input = event.target as HTMLInputElement
   if (input.files && input.files[0]) {
-    // En production: upload vers le serveur
-    // Pour le mock: on simule avec une URL
+    // TODO: Upload vers le serveur média
     form.cover_image = URL.createObjectURL(input.files[0])
   }
 }
@@ -131,32 +144,55 @@ function removeCoverImage() {
   form.cover_image_alt = ''
 }
 
+// Valide si une chaîne est un UUID valide (les mock IDs comme 'author-2' ne passent pas)
+function isValidUUID(str: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return uuidRegex.test(str)
+}
+
+// Retourne la valeur si c'est un UUID valide, sinon null
+function toUUIDOrNull(value: string | null | undefined): string | null {
+  if (!value) return null
+  return isValidUUID(value) ? value : null
+}
+
 async function submitForm() {
   if (!isValid.value || isSubmitting.value) return
 
   isSubmitting.value = true
+  error.value = null
 
   try {
-    const newsData = {
-      id: generateNewsId(),
-      ...form,
-      content: content.value,
-      content_en: contentEn.value,
-      content_ar: contentAr.value,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
-
-    console.log('Creating news:', newsData)
-    // En production: POST /api/admin/news
-
-    // Simuler un délai
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await apiCreateNews({
+      title: form.title,
+      slug: form.slug,
+      summary: form.summary || null,
+      content: content.value || null,
+      content_en: contentEn.value || null,
+      content_ar: contentAr.value || null,
+      video_url: form.video_url || null,
+      highlight_status: form.highlight_status,
+      // Filtrer les IDs mock - seuls les vrais UUIDs sont envoyés
+      campus_external_id: toUUIDOrNull(form.campus_id),
+      department_external_id: toUUIDOrNull(form.department_id),
+      service_external_id: toUUIDOrNull(form.service_id),
+      event_external_id: toUUIDOrNull(form.event_id),
+      project_external_id: toUUIDOrNull(form.project_id),
+      author_external_id: toUUIDOrNull(form.author_id),
+      status: form.status,
+      published_at: form.published_at || null,
+      visible_from: form.visible_from || null,
+      tag_ids: form.tags,
+    })
 
     router.push('/admin/contenus/actualites')
-  } catch (error) {
-    console.error('Error creating news:', error)
-  } finally {
+  }
+  catch (e: unknown) {
+    const fetchError = e as { data?: { detail?: string } }
+    error.value = fetchError.data?.detail || 'Erreur lors de la création de l\'actualité'
+    console.error('Error creating news:', e)
+  }
+  finally {
     isSubmitting.value = false
   }
 }
@@ -165,21 +201,24 @@ function cancel() {
   router.push('/admin/contenus/actualites')
 }
 
-function createTag() {
+async function createTag() {
   if (!newTagName.value.trim()) return
 
-  const newTag: NewsTag = {
-    id: `tag-${Date.now()}`,
-    name: newTagName.value.trim(),
-    slug: slugify(newTagName.value.trim())
+  try {
+    const result = await apiCreateTag({
+      name: newTagName.value.trim(),
+      slug: slugify(newTagName.value.trim()),
+    })
+
+    // Recharger les tags et sélectionner le nouveau
+    allTags.value = await getAllTags()
+    form.tags.push(result.id)
+    newTagName.value = ''
+    showTagModal.value = false
   }
-
-  console.log('Creating tag:', newTag)
-  // En production: POST /api/admin/tags
-
-  form.tags.push(newTag.id)
-  newTagName.value = ''
-  showTagModal.value = false
+  catch (e) {
+    console.error('Error creating tag:', e)
+  }
 }
 </script>
 

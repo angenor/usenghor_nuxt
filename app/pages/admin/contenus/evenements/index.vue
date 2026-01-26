@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Event, EventType, EventStatus } from '~/composables/useMockData'
+import type { EventRead, EventType, PublicationStatus } from '~/types/api'
 
 definePageMeta({
   layout: 'admin'
@@ -8,29 +8,45 @@ definePageMeta({
 const router = useRouter()
 
 const {
-  getAllAdminEvents,
-  getAdminEventStats,
+  listEvents,
+  deleteEvent: deleteEventApi,
+  publishEvent: publishEventApi,
+  cancelEvent: cancelEventApi,
+  duplicateEvent: duplicateEventApi,
   eventTypeLabels,
   eventTypeColors,
   eventStatusLabels,
   eventStatusColors,
-  campusExternalises
-} = useMockData()
+  isEventPast,
+  isEventSoon,
+  slugifyEvent,
+} = useEventsApi()
+
+const { campusExternalises } = useMockData()
 
 // === STATE ===
+// Données
+const events = ref<EventRead[]>([])
+const isLoading = ref(true)
+const error = ref<string | null>(null)
+
+// Pagination serveur
+const pagination = ref({
+  total: 0,
+  page: 1,
+  limit: 10,
+  pages: 1
+})
+
 // Filtres
 const searchQuery = ref('')
 const filterType = ref<EventType | 'all'>('all')
-const filterStatus = ref<EventStatus | 'all'>('all')
+const filterStatus = ref<PublicationStatus | 'all'>('all')
 const filterPeriod = ref<'upcoming' | 'past' | 'all'>('all')
 const filterCampus = ref<string | 'all'>('all')
 
-// Pagination
-const currentPage = ref(1)
-const itemsPerPage = ref(10)
-
 // Tri
-const sortBy = ref<'title' | 'type' | 'start_date' | 'registrations'>('start_date')
+const sortBy = ref<string>('start_date')
 const sortOrder = ref<'asc' | 'desc'>('desc')
 
 // Sélection
@@ -39,13 +55,24 @@ const selectAll = ref(false)
 
 // Modals
 const showDeleteModal = ref(false)
-const deletingEvent = ref<Event | null>(null)
+const deletingEvent = ref<EventRead | null>(null)
+const isDeleting = ref(false)
 
 // === COMPUTED ===
-const allEvents = computed(() => getAllAdminEvents())
-
-// Stats
-const stats = computed(() => getAdminEventStats())
+// Stats calculés à partir des données chargées
+const stats = computed(() => {
+  const now = new Date()
+  return {
+    total: pagination.value.total,
+    published: events.value.filter(e => e.status === 'published').length,
+    draft: events.value.filter(e => e.status === 'draft').length,
+    archived: events.value.filter(e => e.status === 'archived').length,
+    upcoming: events.value.filter(e => new Date(e.start_date) > now).length,
+    past: events.value.filter(e => new Date(e.start_date) <= now).length,
+    online: events.value.filter(e => e.is_online).length,
+    registrations_total: 0 // Sera calculé quand on aura les stats serveur
+  }
+})
 
 // Liste des campus
 const campusList = computed(() => [
@@ -53,82 +80,67 @@ const campusList = computed(() => [
   ...campusExternalises.value.map(c => ({ id: c.id, name: c.name_fr }))
 ])
 
-// Filtrage
-const filteredEvents = computed(() => {
-  let result = allEvents.value
-  const now = new Date()
-
-  // Recherche
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    result = result.filter(e =>
-      e.title.toLowerCase().includes(query) ||
-      e.slug.toLowerCase().includes(query) ||
-      e.description?.toLowerCase().includes(query) ||
-      e.venue?.toLowerCase().includes(query) ||
-      e.city?.toLowerCase().includes(query)
-    )
-  }
-
-  // Filtre type
-  if (filterType.value !== 'all') {
-    result = result.filter(e => e.type === filterType.value)
-  }
-
-  // Filtre statut
-  if (filterStatus.value !== 'all') {
-    result = result.filter(e => e.status === filterStatus.value)
-  }
-
-  // Filtre période
-  if (filterPeriod.value === 'upcoming') {
-    result = result.filter(e => new Date(e.start_date) > now)
-  } else if (filterPeriod.value === 'past') {
-    result = result.filter(e => new Date(e.start_date) <= now)
-  }
-
-  // Filtre campus
-  if (filterCampus.value !== 'all') {
-    result = result.filter(e => e.campus_id === filterCampus.value)
-  }
-
-  // Tri
-  result = [...result].sort((a, b) => {
-    let comparison = 0
-    switch (sortBy.value) {
-      case 'title':
-        comparison = a.title.localeCompare(b.title)
-        break
-      case 'type':
-        comparison = a.type.localeCompare(b.type)
-        break
-      case 'start_date':
-        comparison = new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
-        break
-      case 'registrations':
-        comparison = a.registrations_count - b.registrations_count
-        break
-    }
-    return sortOrder.value === 'asc' ? comparison : -comparison
-  })
-
-  return result
-})
-
 // Pagination
-const totalPages = computed(() => Math.ceil(filteredEvents.value.length / itemsPerPage.value))
-
-const paginatedEvents = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return filteredEvents.value.slice(start, end)
+const currentPage = computed({
+  get: () => pagination.value.page,
+  set: (val) => {
+    pagination.value.page = val
+    fetchEvents()
+  }
 })
+
+const totalPages = computed(() => pagination.value.pages)
 
 // === METHODS ===
+// Chargement des données
+async function fetchEvents() {
+  isLoading.value = true
+  error.value = null
+
+  try {
+    // Calculer les dates selon le filtre de période
+    let fromDate: string | undefined
+    let toDate: string | undefined
+    const now = new Date()
+
+    if (filterPeriod.value === 'upcoming') {
+      fromDate = now.toISOString()
+    } else if (filterPeriod.value === 'past') {
+      toDate = now.toISOString()
+    }
+
+    const response = await listEvents({
+      page: pagination.value.page,
+      limit: pagination.value.limit,
+      search: searchQuery.value || undefined,
+      status: filterStatus.value !== 'all' ? filterStatus.value : undefined,
+      event_type: filterType.value !== 'all' ? filterType.value : undefined,
+      from_date: fromDate,
+      to_date: toDate,
+      campus_id: filterCampus.value !== 'all' ? filterCampus.value : undefined,
+      sort_by: sortBy.value,
+      sort_order: sortOrder.value,
+    })
+
+    events.value = response.items
+    pagination.value = {
+      total: response.total,
+      page: response.page,
+      limit: response.limit,
+      pages: response.pages
+    }
+  } catch (e) {
+    console.error('Error fetching events:', e)
+    error.value = 'Erreur lors du chargement des événements'
+  } finally {
+    isLoading.value = false
+  }
+}
+
 // Gestion de la sélection
 const toggleSelectAll = () => {
   if (selectAll.value) {
-    selectedIds.value = paginatedEvents.value.map(e => e.id)
+    selectedIds.value = events.value.map(e => e.id)
   } else {
     selectedIds.value = []
   }
@@ -146,13 +158,14 @@ const toggleSelect = (id: string) => {
 const isSelected = (id: string) => selectedIds.value.includes(id)
 
 // Tri
-const toggleSort = (column: typeof sortBy.value) => {
+const toggleSort = (column: string) => {
   if (sortBy.value === column) {
     sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
   } else {
     sortBy.value = column
     sortOrder.value = 'asc'
   }
+  fetchEvents()
 }
 
 // Reset filtres
@@ -162,15 +175,16 @@ const resetFilters = () => {
   filterStatus.value = 'all'
   filterPeriod.value = 'all'
   filterCampus.value = 'all'
-  currentPage.value = 1
+  pagination.value.page = 1
+  fetchEvents()
 }
 
 // Navigation
-const viewEvent = (event: Event) => {
+const viewEvent = (event: EventRead) => {
   router.push(`/admin/contenus/evenements/${event.id}`)
 }
 
-const editEvent = (event: Event) => {
+const editEvent = (event: EventRead) => {
   router.push(`/admin/contenus/evenements/${event.id}/edit`)
 }
 
@@ -179,7 +193,7 @@ const createEvent = () => {
 }
 
 // Modals
-const openDeleteModal = (event: Event) => {
+const openDeleteModal = (event: EventRead) => {
   deletingEvent.value = event
   showDeleteModal.value = true
 }
@@ -189,37 +203,69 @@ const closeDeleteModal = () => {
   deletingEvent.value = null
 }
 
-// Actions CRUD (mock)
-const deleteEvent = () => {
+// Actions CRUD
+const deleteEvent = async () => {
   if (!deletingEvent.value) return
-  console.log('Deleting event:', deletingEvent.value.id)
-  // En production: DELETE /api/admin/events/{id}
-  closeDeleteModal()
+
+  isDeleting.value = true
+  try {
+    await deleteEventApi(deletingEvent.value.id)
+    closeDeleteModal()
+    await fetchEvents()
+  } catch (e) {
+    console.error('Error deleting event:', e)
+    error.value = 'Erreur lors de la suppression'
+  } finally {
+    isDeleting.value = false
+  }
 }
 
-const duplicateEvent = (event: Event) => {
-  console.log('Duplicating event:', event.id)
-  // En production: POST /api/admin/events/{id}/duplicate
-  router.push('/admin/contenus/evenements/nouveau')
+const duplicateEvent = async (event: EventRead) => {
+  try {
+    const newSlug = `${event.slug}-copie-${Date.now()}`
+    const response = await duplicateEventApi(event.id, newSlug)
+    router.push(`/admin/contenus/evenements/${response.id}/edit`)
+  } catch (e) {
+    console.error('Error duplicating event:', e)
+    error.value = 'Erreur lors de la duplication'
+  }
 }
 
 // Actions en masse
-const bulkPublish = () => {
-  console.log('Publishing:', selectedIds.value)
-  selectedIds.value = []
-  selectAll.value = false
+const bulkPublish = async () => {
+  try {
+    await Promise.all(selectedIds.value.map(id => publishEventApi(id)))
+    selectedIds.value = []
+    selectAll.value = false
+    await fetchEvents()
+  } catch (e) {
+    console.error('Error publishing events:', e)
+    error.value = 'Erreur lors de la publication'
+  }
 }
 
-const bulkUnpublish = () => {
-  console.log('Unpublishing:', selectedIds.value)
-  selectedIds.value = []
-  selectAll.value = false
+const bulkUnpublish = async () => {
+  try {
+    await Promise.all(selectedIds.value.map(id => cancelEventApi(id)))
+    selectedIds.value = []
+    selectAll.value = false
+    await fetchEvents()
+  } catch (e) {
+    console.error('Error unpublishing events:', e)
+    error.value = 'Erreur lors de la dépublication'
+  }
 }
 
-const bulkDelete = () => {
-  console.log('Deleting:', selectedIds.value)
-  selectedIds.value = []
-  selectAll.value = false
+const bulkDelete = async () => {
+  try {
+    await Promise.all(selectedIds.value.map(id => deleteEventApi(id)))
+    selectedIds.value = []
+    selectAll.value = false
+    await fetchEvents()
+  } catch (e) {
+    console.error('Error deleting events:', e)
+    error.value = 'Erreur lors de la suppression'
+  }
 }
 
 // Formatage
@@ -231,32 +277,32 @@ const formatDate = (dateString: string) => {
   })
 }
 
-const formatDateTime = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-const isEventPast = (startDate: string) => {
-  return new Date(startDate) < new Date()
-}
-
-const isEventSoon = (startDate: string) => {
-  const eventDate = new Date(startDate)
-  const now = new Date()
-  const diff = eventDate.getTime() - now.getTime()
-  const daysRemaining = diff / (1000 * 60 * 60 * 24)
-  return daysRemaining > 0 && daysRemaining <= 7
-}
-
-const getRegistrationProgress = (event: Event) => {
+const getRegistrationProgress = (event: EventRead) => {
   if (!event.max_attendees) return 0
-  return Math.min(100, (event.registrations_count / event.max_attendees) * 100)
+  // Note: registrations_count n'est pas dans EventRead basique, sera ajouté plus tard
+  return 0
 }
+
+// Watch pour filtres avec debounce
+let searchTimeout: ReturnType<typeof setTimeout> | null = null
+
+watch(searchQuery, () => {
+  if (searchTimeout) clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    pagination.value.page = 1
+    fetchEvents()
+  }, 300)
+})
+
+watch([filterType, filterStatus, filterPeriod, filterCampus], () => {
+  pagination.value.page = 1
+  fetchEvents()
+})
+
+// Chargement initial
+onMounted(() => {
+  fetchEvents()
+})
 </script>
 
 <template>
@@ -279,6 +325,17 @@ const getRegistrationProgress = (event: Event) => {
         <font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4" />
         Nouvel événement
       </button>
+    </div>
+
+    <!-- Message d'erreur -->
+    <div
+      v-if="error"
+      class="rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+    >
+      <div class="flex items-center gap-2">
+        <font-awesome-icon icon="fa-solid fa-circle-exclamation" class="h-4 w-4" />
+        {{ error }}
+      </div>
     </div>
 
     <!-- Stats -->
@@ -417,8 +474,16 @@ const getRegistrationProgress = (event: Event) => {
       </div>
     </div>
 
+    <!-- Loading -->
+    <div v-if="isLoading" class="flex items-center justify-center py-12">
+      <div class="flex items-center gap-3 text-gray-500 dark:text-gray-400">
+        <font-awesome-icon icon="fa-solid fa-spinner" class="h-5 w-5 animate-spin" />
+        Chargement des événements...
+      </div>
+    </div>
+
     <!-- Tableau -->
-    <div class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
+    <div v-else class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
       <div class="admin-scrollbar overflow-x-auto" data-lenis-prevent>
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-900">
@@ -464,14 +529,8 @@ const getRegistrationProgress = (event: Event) => {
               <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Lieu
               </th>
-              <th
-                class="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                @click="toggleSort('registrations')"
-              >
-                <span class="flex items-center gap-1">
-                  Inscrits
-                  <font-awesome-icon v-if="sortBy === 'registrations'" :icon="sortOrder === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down'" class="h-3 w-3 text-blue-600" />
-                </span>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Inscrits
               </th>
               <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Statut
@@ -483,7 +542,7 @@ const getRegistrationProgress = (event: Event) => {
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
             <tr
-              v-for="event in paginatedEvents"
+              v-for="event in events"
               :key="event.id"
               class="cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
               :class="{ 'bg-blue-50 dark:bg-blue-900/30': isSelected(event.id) }"
@@ -499,13 +558,7 @@ const getRegistrationProgress = (event: Event) => {
               </td>
               <td class="px-4 py-3">
                 <div class="h-10 w-16 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700">
-                  <img
-                    v-if="event.cover_image"
-                    :src="event.cover_image"
-                    :alt="event.title"
-                    class="h-full w-full object-cover"
-                  />
-                  <div v-else class="flex h-full w-full items-center justify-center">
+                  <div class="flex h-full w-full items-center justify-center">
                     <font-awesome-icon icon="fa-solid fa-calendar-days" class="h-4 w-4 text-gray-400" />
                   </div>
                 </div>
@@ -553,26 +606,13 @@ const getRegistrationProgress = (event: Event) => {
                   <span v-else class="text-gray-400">-</span>
                 </div>
                 <div v-if="event.city" class="truncate text-xs text-gray-500 dark:text-gray-400">
-                  {{ event.city }}{{ event.country ? `, ${event.country}` : '' }}
+                  {{ event.city }}
                 </div>
               </td>
               <td class="px-4 py-3">
                 <div v-if="event.registration_required" class="flex items-center gap-2">
-                  <div class="w-16">
-                    <div class="h-1.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-                      <div
-                        class="h-1.5 rounded-full transition-all"
-                        :class="{
-                          'bg-green-500': getRegistrationProgress(event) < 80,
-                          'bg-yellow-500': getRegistrationProgress(event) >= 80 && getRegistrationProgress(event) < 100,
-                          'bg-red-500': getRegistrationProgress(event) >= 100
-                        }"
-                        :style="{ width: `${getRegistrationProgress(event)}%` }"
-                      ></div>
-                    </div>
-                  </div>
                   <span class="text-sm font-medium text-gray-900 dark:text-white">
-                    {{ event.registrations_count }}<span v-if="event.max_attendees" class="text-gray-400">/{{ event.max_attendees }}</span>
+                    -<span v-if="event.max_attendees" class="text-gray-400">/{{ event.max_attendees }}</span>
                   </span>
                 </div>
                 <span v-else class="text-xs text-gray-400">Libre</span>
@@ -633,7 +673,7 @@ const getRegistrationProgress = (event: Event) => {
       <!-- Pagination -->
       <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3 dark:border-gray-700">
         <div class="text-sm text-gray-500 dark:text-gray-400">
-          {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, filteredEvents.length) }} sur {{ filteredEvents.length }} événements
+          {{ (currentPage - 1) * pagination.limit + 1 }} - {{ Math.min(currentPage * pagination.limit, pagination.total) }} sur {{ pagination.total }} événements
         </div>
         <div class="flex items-center gap-2">
           <button
@@ -658,7 +698,7 @@ const getRegistrationProgress = (event: Event) => {
 
       <!-- État vide -->
       <div
-        v-if="paginatedEvents.length === 0"
+        v-if="events.length === 0 && !isLoading"
         class="flex flex-col items-center justify-center py-12"
       >
         <div class="mb-4 rounded-full bg-gray-100 p-4 dark:bg-gray-700">
@@ -693,12 +733,6 @@ const getRegistrationProgress = (event: Event) => {
           <p class="mb-2 text-gray-600 dark:text-gray-300">
             Êtes-vous sûr de vouloir supprimer cet événement ?
           </p>
-          <p
-            v-if="deletingEvent.registrations_count > 0"
-            class="mb-2 text-sm text-red-600 dark:text-red-400"
-          >
-            Attention : cet événement compte {{ deletingEvent.registrations_count }} inscription(s).
-          </p>
           <p class="mb-6 rounded-lg bg-gray-100 p-3 text-sm font-medium text-gray-900 dark:bg-gray-700 dark:text-white">
             {{ deletingEvent.title }}
           </p>
@@ -707,15 +741,18 @@ const getRegistrationProgress = (event: Event) => {
             <button
               type="button"
               class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              :disabled="isDeleting"
               @click="closeDeleteModal"
             >
               Annuler
             </button>
             <button
               type="button"
-              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+              class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              :disabled="isDeleting"
               @click="deleteEvent"
             >
+              <font-awesome-icon v-if="isDeleting" icon="fa-solid fa-spinner" class="h-4 w-4 animate-spin" />
               Supprimer
             </button>
           </div>

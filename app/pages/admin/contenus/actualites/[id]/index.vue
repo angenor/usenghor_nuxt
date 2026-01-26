@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { News, HighlightStatus, EditorJSContent, EditorJSBlock } from '~/composables/useMockData'
+import type { NewsDisplay, NewsHighlightStatus, EditorJSContent, EditorJSBlock } from '~/types/news'
 
 definePageMeta({
   layout: 'admin'
@@ -9,82 +9,141 @@ const route = useRoute()
 const router = useRouter()
 
 const {
-  getAdminNewsItemById,
+  getNewsById,
+  deleteNews: apiDeleteNews,
+  duplicateNews: apiDuplicateNews,
+  publishNews: apiPublishNews,
+  unpublishNews: apiUnpublishNews,
+  updateNews: apiUpdateNews,
   newsStatusLabels,
   newsStatusColors,
   highlightStatusLabels,
-  highlightStatusColors
-} = useMockData()
+  highlightStatusColors,
+  formatNewsDateTime,
+  slugify,
+} = useAdminNewsApi()
 
 // === STATE ===
 const showDeleteModal = ref(false)
+const isLoading = ref(true)
+const isActionLoading = ref(false)
+const error = ref<string | null>(null)
+const newsItem = ref<NewsDisplay | null>(null)
 
-// Get news item
+// Get news ID from route
 const newsId = computed(() => route.params.id as string)
-const newsItem = computed(() => getAdminNewsItemById(newsId.value))
 
-// 404 handling
-if (!newsItem.value) {
-  throw createError({
-    statusCode: 404,
-    statusMessage: 'Actualité non trouvée'
-  })
+// Load news item
+const loadNews = async () => {
+  isLoading.value = true
+  error.value = null
+
+  try {
+    newsItem.value = await getNewsById(newsId.value)
+  }
+  catch (e: unknown) {
+    const fetchError = e as { status?: number; data?: { detail?: string } }
+    if (fetchError.status === 404) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Actualité non trouvée'
+      })
+    }
+    error.value = fetchError.data?.detail || 'Erreur lors du chargement de l\'actualité'
+    console.error('Erreur:', e)
+  }
+  finally {
+    isLoading.value = false
+  }
 }
+
+// Load on mount
+onMounted(() => {
+  loadNews()
+})
 
 // === METHODS ===
 function editNews() {
   router.push(`/admin/contenus/actualites/${newsId.value}/edit`)
 }
 
-function duplicateNews() {
-  console.log('Duplicating news:', newsId.value)
-  // En production: POST /api/admin/news/{id}/duplicate
+async function duplicateNews() {
+  if (!newsItem.value) return
+
+  isActionLoading.value = true
+  try {
+    const newSlug = `${newsItem.value.slug}-copie-${Date.now()}`
+    const result = await apiDuplicateNews(newsId.value, newSlug)
+    router.push(`/admin/contenus/actualites/${result.id}`)
+  }
+  catch (e) {
+    console.error('Erreur lors de la duplication:', e)
+  }
+  finally {
+    isActionLoading.value = false
+  }
 }
 
-function deleteNews() {
-  console.log('Deleting news:', newsId.value)
-  // En production: DELETE /api/admin/news/{id}
-  showDeleteModal.value = false
-  router.push('/admin/contenus/actualites')
+async function deleteNews() {
+  isActionLoading.value = true
+  try {
+    await apiDeleteNews(newsId.value)
+    showDeleteModal.value = false
+    router.push('/admin/contenus/actualites')
+  }
+  catch (e) {
+    console.error('Erreur lors de la suppression:', e)
+  }
+  finally {
+    isActionLoading.value = false
+  }
 }
 
-function setHighlightStatus(status: HighlightStatus) {
-  console.log('Setting highlight status:', newsId.value, status)
-  // En production: POST /api/admin/news/{id}/highlight
+async function setHighlightStatus(status: NewsHighlightStatus) {
+  isActionLoading.value = true
+  try {
+    newsItem.value = await apiUpdateNews(newsId.value, { highlight_status: status })
+  }
+  catch (e) {
+    console.error('Erreur lors de la mise à jour:', e)
+  }
+  finally {
+    isActionLoading.value = false
+  }
 }
 
-function publishNews() {
-  console.log('Publishing news:', newsId.value)
-  // En production: POST /api/admin/news/{id}/publish
+async function publishNews() {
+  isActionLoading.value = true
+  try {
+    newsItem.value = await apiPublishNews(newsId.value)
+  }
+  catch (e) {
+    console.error('Erreur lors de la publication:', e)
+  }
+  finally {
+    isActionLoading.value = false
+  }
 }
 
-function unpublishNews() {
-  console.log('Unpublishing news:', newsId.value)
-  // En production: POST /api/admin/news/{id}/unpublish
+async function unpublishNews() {
+  isActionLoading.value = true
+  try {
+    newsItem.value = await apiUnpublishNews(newsId.value)
+  }
+  catch (e) {
+    console.error('Erreur lors de la dépublication:', e)
+  }
+  finally {
+    isActionLoading.value = false
+  }
 }
 
-function formatDate(dateString?: string) {
-  if (!dateString) return '-'
-  return new Date(dateString).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  })
-}
-
-function formatDateTime(dateString?: string) {
-  if (!dateString) return '-'
-  return new Date(dateString).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+function formatDate(dateString?: string | null) {
+  return formatNewsDateTime(dateString)
 }
 
 // Convertir le contenu EditorJS en HTML
-function editorJsToHtml(content: EditorJSContent | undefined): string {
+function editorJsToHtml(content: EditorJSContent | null | undefined): string {
   if (!content || !content.blocks || content.blocks.length === 0) {
     return '<p class="text-gray-500 italic">Aucun contenu</p>'
   }
@@ -139,7 +198,29 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
 </script>
 
 <template>
-  <div v-if="newsItem" class="space-y-6">
+  <!-- Loading -->
+  <div v-if="isLoading" class="flex items-center justify-center py-12">
+    <div class="flex flex-col items-center gap-4">
+      <div class="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+      <span class="text-sm text-gray-500 dark:text-gray-400">Chargement de l'actualité...</span>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div v-else-if="error" class="rounded-lg bg-red-50 p-6 text-center dark:bg-red-900/20">
+    <font-awesome-icon icon="fa-solid fa-circle-exclamation" class="mb-4 h-12 w-12 text-red-500" />
+    <h2 class="mb-2 text-lg font-semibold text-red-800 dark:text-red-400">Erreur</h2>
+    <p class="text-red-600 dark:text-red-300">{{ error }}</p>
+    <button
+      class="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+      @click="loadNews"
+    >
+      Réessayer
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div v-else-if="newsItem" class="space-y-6">
     <!-- Header -->
     <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
       <div class="flex items-start gap-4">
@@ -178,7 +259,8 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
         <div class="flex items-center gap-2">
           <button
             v-if="newsItem.status !== 'published'"
-            class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700"
+            :disabled="isActionLoading"
+            class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-50"
             @click="publishNews"
           >
             <font-awesome-icon icon="fa-solid fa-globe" class="h-4 w-4" />
@@ -186,7 +268,8 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
           </button>
           <button
             v-else
-            class="inline-flex items-center gap-2 rounded-lg border border-yellow-500 px-4 py-2 text-sm font-medium text-yellow-600 transition-colors hover:bg-yellow-50 dark:text-yellow-400 dark:hover:bg-yellow-900/20"
+            :disabled="isActionLoading"
+            class="inline-flex items-center gap-2 rounded-lg border border-yellow-500 px-4 py-2 text-sm font-medium text-yellow-600 transition-colors hover:bg-yellow-50 disabled:opacity-50 dark:text-yellow-400 dark:hover:bg-yellow-900/20"
             @click="unpublishNews"
           >
             <font-awesome-icon icon="fa-solid fa-eye-slash" class="h-4 w-4" />
@@ -197,8 +280,9 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
         <!-- Dropdown mise en avant -->
         <select
           :value="newsItem.highlight_status"
-          class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          @change="setHighlightStatus(($event.target as HTMLSelectElement).value as HighlightStatus)"
+          :disabled="isActionLoading"
+          class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          @change="setHighlightStatus(($event.target as HTMLSelectElement).value as NewsHighlightStatus)"
         >
           <option value="standard">Standard</option>
           <option value="featured">Mise en avant</option>
@@ -214,7 +298,8 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
           Modifier
         </button>
         <button
-          class="rounded-lg border border-gray-300 p-2 text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+          :disabled="isActionLoading"
+          class="rounded-lg border border-gray-300 p-2 text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
           title="Dupliquer"
           @click="duplicateNews"
         >
@@ -260,7 +345,7 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
           <div
             class="prose prose-sm max-w-none dark:prose-invert"
             v-html="contentHtml"
-          ></div>
+          />
         </div>
 
         <!-- Vidéo -->
@@ -311,7 +396,7 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
             Informations
           </h2>
           <dl class="space-y-3">
-            <div>
+            <div v-if="newsItem.author">
               <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                 Auteur
               </dt>
@@ -332,7 +417,7 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
                 Créé le
               </dt>
               <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                {{ formatDateTime(newsItem.created_at) }}
+                {{ formatDate(newsItem.created_at) }}
               </dd>
             </div>
             <div>
@@ -340,7 +425,7 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
                 Modifié le
               </dt>
               <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                {{ formatDateTime(newsItem.updated_at) }}
+                {{ formatDate(newsItem.updated_at) }}
               </dd>
             </div>
             <div v-if="newsItem.published_at">
@@ -348,7 +433,7 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
                 Publié le
               </dt>
               <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                {{ formatDateTime(newsItem.published_at) }}
+                {{ formatDate(newsItem.published_at) }}
               </dd>
             </div>
             <div v-if="newsItem.visible_from">
@@ -356,7 +441,7 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
                 Visible à partir de
               </dt>
               <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                {{ formatDateTime(newsItem.visible_from) }}
+                {{ formatDate(newsItem.visible_from) }}
               </dd>
             </div>
           </dl>
@@ -384,47 +469,47 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
             Associations
           </h2>
           <dl class="space-y-3">
-            <div v-if="newsItem.campus_name">
+            <div v-if="newsItem.campus_name || newsItem.campus_id">
               <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                 Campus
               </dt>
               <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                {{ newsItem.campus_name }}
+                {{ newsItem.campus_name || newsItem.campus_id }}
               </dd>
             </div>
-            <div v-if="newsItem.department_name">
+            <div v-if="newsItem.department_name || newsItem.department_id">
               <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                 Département
               </dt>
               <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                {{ newsItem.department_name }}
+                {{ newsItem.department_name || newsItem.department_id }}
               </dd>
             </div>
-            <div v-if="newsItem.service_name">
+            <div v-if="newsItem.service_name || newsItem.service_id">
               <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                 Service
               </dt>
               <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                {{ newsItem.service_name }}
+                {{ newsItem.service_name || newsItem.service_id }}
               </dd>
             </div>
-            <div v-if="newsItem.project_name">
+            <div v-if="newsItem.project_name || newsItem.project_id">
               <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                 Projet
               </dt>
               <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                {{ newsItem.project_name }}
+                {{ newsItem.project_name || newsItem.project_id }}
               </dd>
             </div>
-            <div v-if="newsItem.event_name">
+            <div v-if="newsItem.event_name || newsItem.event_id">
               <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                 Événement
               </dt>
               <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                {{ newsItem.event_name }}
+                {{ newsItem.event_name || newsItem.event_id }}
               </dd>
             </div>
-            <div v-if="!newsItem.campus_name && !newsItem.department_name && !newsItem.service_name && !newsItem.project_name && !newsItem.event_name">
+            <div v-if="!newsItem.campus_id && !newsItem.department_id && !newsItem.service_id && !newsItem.project_id && !newsItem.event_id">
               <p class="text-sm italic text-gray-500 dark:text-gray-400">
                 Aucune association
               </p>
@@ -447,7 +532,8 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
               Prévisualiser sur le site
             </a>
             <button
-              class="flex w-full items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              :disabled="isActionLoading"
+              class="flex w-full items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
               @click="duplicateNews"
             >
               <font-awesome-icon icon="fa-solid fa-copy" class="h-4 w-4" />
@@ -492,10 +578,12 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
             </button>
             <button
               type="button"
-              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+              :disabled="isActionLoading"
+              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
               @click="deleteNews"
             >
-              Supprimer
+              <span v-if="isActionLoading">Suppression...</span>
+              <span v-else>Supprimer</span>
             </button>
           </div>
         </div>

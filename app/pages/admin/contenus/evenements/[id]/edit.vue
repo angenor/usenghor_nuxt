@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Event, EventType, EventStatus } from '~/composables/useMockData'
+import type { EventType, EventUpdatePayload, PublicationStatus } from '~/types/api'
 import type { OutputData } from '@editorjs/editorjs'
 
 definePageMeta({
@@ -12,13 +12,18 @@ const router = useRouter()
 const eventId = computed(() => route.params.id as string)
 
 const {
-  getAdminEventById,
-  generateEventPartnerId,
+  getEventById,
+  updateEvent,
   slugifyEvent,
+  toDatetimeLocal,
+  eventTypeLabels,
+  eventStatusLabels,
+} = useEventsApi()
+
+const {
   campusExternalises,
   departments,
   getAllProjects,
-  partenaires
 } = useMockData()
 
 // Contenu EditorJS (séparé du formulaire pour éviter les problèmes de réactivité)
@@ -29,32 +34,95 @@ const contentAr = ref<OutputData | undefined>(undefined)
 // Onglet actif
 const activeTab = ref<'general' | 'datetime' | 'location' | 'registration' | 'associations' | 'options'>('general')
 
-// État du formulaire
-const form = ref<Partial<Event>>({})
+// État du formulaire - aligné sur le schéma backend
+const form = ref({
+  id: '',
+  title: '',
+  slug: '',
+  type: 'conference' as EventType,
+  type_other: '',
+  description: '',
+  cover_image_external_id: '',
+  start_date: '',
+  end_date: '',
+  is_online: false,
+  video_conference_link: '',
+  venue: '',
+  address: '',
+  city: '',
+  country_external_id: '',
+  latitude: undefined as number | undefined,
+  longitude: undefined as number | undefined,
+  registration_required: false,
+  registration_link: '',
+  max_attendees: undefined as number | undefined,
+  registrations_count: 0,
+  campus_external_id: '',
+  department_external_id: '',
+  project_external_id: '',
+  organizer_external_id: '',
+  album_external_id: '',
+  status: 'draft' as PublicationStatus,
+  created_at: '',
+  updated_at: ''
+})
+
 const isLoading = ref(true)
 const notFound = ref(false)
+const error = ref<string | null>(null)
 
 // Charger l'événement
-onMounted(() => {
-  const event = getAdminEventById(eventId.value)
-  if (event) {
-    // Créer une copie pour éviter de modifier les données mock
-    form.value = JSON.parse(JSON.stringify(event))
-    // Convertir les dates pour le format datetime-local
-    if (form.value.start_date) {
-      form.value.start_date = form.value.start_date.slice(0, 16)
+onMounted(async () => {
+  try {
+    const event = await getEventById(eventId.value)
+
+    // Mapper les données backend vers le formulaire
+    form.value = {
+      id: event.id,
+      title: event.title,
+      slug: event.slug,
+      type: event.type,
+      type_other: event.type_other || '',
+      description: event.description || '',
+      cover_image_external_id: event.cover_image_external_id || '',
+      start_date: toDatetimeLocal(event.start_date),
+      end_date: toDatetimeLocal(event.end_date),
+      is_online: event.is_online,
+      video_conference_link: event.video_conference_link || '',
+      venue: event.venue || '',
+      address: event.address || '',
+      city: event.city || '',
+      country_external_id: event.country_external_id || '',
+      latitude: event.latitude ?? undefined,
+      longitude: event.longitude ?? undefined,
+      registration_required: event.registration_required,
+      registration_link: event.registration_link || '',
+      max_attendees: event.max_attendees ?? undefined,
+      registrations_count: event.registrations_count || 0,
+      campus_external_id: event.campus_external_id || '',
+      department_external_id: event.department_external_id || '',
+      project_external_id: event.project_external_id || '',
+      organizer_external_id: event.organizer_external_id || '',
+      album_external_id: event.album_external_id || '',
+      status: event.status,
+      created_at: event.created_at,
+      updated_at: event.updated_at
     }
-    if (form.value.end_date) {
-      form.value.end_date = form.value.end_date.slice(0, 16)
+
+    // Parser le contenu EditorJS depuis JSON string
+    if (event.content) {
+      try {
+        content.value = JSON.parse(event.content)
+      } catch {
+        content.value = undefined
+      }
     }
-    // Charger le contenu EditorJS
-    content.value = event.content as OutputData | undefined
-    contentEn.value = event.content_en as OutputData | undefined
-    contentAr.value = event.content_ar as OutputData | undefined
-  } else {
+  } catch (e) {
+    console.error('Error loading event:', e)
     notFound.value = true
+  } finally {
+    isLoading.value = false
   }
-  isLoading.value = false
 })
 
 // Auto-génération du slug (seulement si modifié manuellement)
@@ -68,36 +136,6 @@ watch(() => form.value.title, (newTitle) => {
 // Navigation
 const goBack = () => {
   router.push('/admin/contenus/evenements')
-}
-
-// === GESTION DES PARTENAIRES ===
-const newPartnerId = ref('')
-
-const availablePartners = computed(() => {
-  const usedIds = form.value.partners?.map(p => p.partner_id) || []
-  return partenaires.value.filter(p => !usedIds.includes(p.id))
-})
-
-const addPartner = () => {
-  if (!newPartnerId.value) return
-  const partner = partenaires.value.find(p => p.id === newPartnerId.value)
-  if (!partner) return
-
-  const partners = form.value.partners || []
-  partners.push({
-    id: generateEventPartnerId(),
-    event_id: form.value.id || '',
-    partner_id: partner.id,
-    partner_name: partner.name_fr,
-    partner_logo: partner.logo_url,
-    display_order: partners.length + 1
-  })
-  form.value.partners = partners
-  newPartnerId.value = ''
-}
-
-const removePartner = (index: number) => {
-  form.value.partners?.splice(index, 1)
 }
 
 // === LISTES DE RÉFÉRENCE ===
@@ -117,22 +155,60 @@ const projectList = computed(() =>
 // === SAUVEGARDE ===
 const isSaving = ref(false)
 
+// Vérifie si une chaîne est un UUID valide
+const isValidUuid = (value: string | null | undefined): boolean => {
+  if (!value) return false
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return uuidRegex.test(value)
+}
+
+// Retourne la valeur si c'est un UUID valide, sinon null
+const toUuidOrNull = (value: string | null | undefined): string | null => {
+  return isValidUuid(value) ? value! : null
+}
+
 const saveForm = async () => {
   isSaving.value = true
+  error.value = null
+
   try {
-    // Mise à jour des métadonnées et du contenu EditorJS
-    const eventData = {
-      ...form.value,
-      content: content.value,
-      content_en: contentEn.value,
-      content_ar: contentAr.value,
-      updated_at: new Date().toISOString()
+    // Préparer les données pour l'API
+    // Note: Les champs *_external_id doivent être des UUIDs valides ou null
+    const eventData: EventUpdatePayload = {
+      title: form.value.title,
+      slug: form.value.slug,
+      description: form.value.description || null,
+      content: content.value ? JSON.stringify(content.value) : null,
+      type: form.value.type,
+      type_other: form.value.type === 'other' ? form.value.type_other : null,
+      start_date: form.value.start_date ? new Date(form.value.start_date).toISOString() : undefined,
+      end_date: form.value.end_date ? new Date(form.value.end_date).toISOString() : null,
+      is_online: form.value.is_online,
+      video_conference_link: form.value.video_conference_link || null,
+      venue: form.value.venue || null,
+      address: form.value.address || null,
+      city: form.value.city || null,
+      latitude: form.value.latitude ?? null,
+      longitude: form.value.longitude ?? null,
+      registration_required: form.value.registration_required,
+      registration_link: form.value.registration_link || null,
+      max_attendees: form.value.max_attendees ?? null,
+      // Les champs external_id doivent être des UUIDs valides ou null
+      cover_image_external_id: toUuidOrNull(form.value.cover_image_external_id),
+      country_external_id: toUuidOrNull(form.value.country_external_id),
+      campus_external_id: toUuidOrNull(form.value.campus_external_id),
+      department_external_id: toUuidOrNull(form.value.department_external_id),
+      project_external_id: toUuidOrNull(form.value.project_external_id),
+      organizer_external_id: toUuidOrNull(form.value.organizer_external_id),
+      album_external_id: toUuidOrNull(form.value.album_external_id),
+      status: form.value.status,
     }
 
-    console.log('Updating event:', eventData)
-    // En production: PUT /api/admin/events/{id}
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await updateEvent(eventId.value, eventData)
     router.push('/admin/contenus/evenements')
+  } catch (e) {
+    console.error('Error updating event:', e)
+    error.value = 'Erreur lors de la mise à jour de l\'événement'
   } finally {
     isSaving.value = false
   }
@@ -221,6 +297,17 @@ const tabs = [
             <font-awesome-icon v-else icon="fa-solid fa-globe" class="h-4 w-4" />
             Publier
           </button>
+        </div>
+      </div>
+
+      <!-- Message d'erreur -->
+      <div
+        v-if="error"
+        class="rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+      >
+        <div class="flex items-center gap-2">
+          <font-awesome-icon icon="fa-solid fa-circle-exclamation" class="h-4 w-4" />
+          {{ error }}
         </div>
       </div>
 
@@ -334,21 +421,17 @@ const tabs = [
               />
             </div>
 
-
             <div class="sm:col-span-2">
               <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Image de couverture
+                Image de couverture (ID)
               </label>
-              <div v-if="form.cover_image" class="mb-2">
-                <img :src="form.cover_image" alt="Couverture" class="h-32 w-auto rounded-lg object-cover" />
-              </div>
               <input
-                v-model="form.cover_image"
-                type="url"
-                placeholder="https://..."
+                v-model="form.cover_image_external_id"
+                type="text"
+                placeholder="ID de l'image dans la médiathèque"
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
-              <p class="mt-1 text-xs text-gray-500">URL de l'image (en production: upload via médiathèque)</p>
+              <p class="mt-1 text-xs text-gray-500">En production: sélection via la médiathèque</p>
             </div>
           </div>
         </div>
@@ -448,12 +531,12 @@ const tabs = [
 
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Pays
+                Pays (ID)
               </label>
               <input
-                v-model="form.country"
+                v-model="form.country_external_id"
                 type="text"
-                placeholder="Ex: Égypte"
+                placeholder="ID du pays"
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
@@ -560,7 +643,7 @@ const tabs = [
                 Campus
               </label>
               <select
-                v-model="form.campus_id"
+                v-model="form.campus_external_id"
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               >
                 <option value="">Aucun campus</option>
@@ -575,7 +658,7 @@ const tabs = [
                 Département
               </label>
               <select
-                v-model="form.department_id"
+                v-model="form.department_external_id"
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               >
                 <option value="">Aucun département</option>
@@ -590,7 +673,7 @@ const tabs = [
                 Projet lié
               </label>
               <select
-                v-model="form.project_id"
+                v-model="form.project_external_id"
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               >
                 <option value="">Aucun projet</option>
@@ -602,66 +685,15 @@ const tabs = [
 
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Organisateur
+                Organisateur (ID)
               </label>
               <input
-                v-model="form.organizer_id"
+                v-model="form.organizer_external_id"
                 type="text"
                 placeholder="ID de l'organisateur"
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
               <p class="mt-1 text-xs text-gray-500">En production: sélecteur d'utilisateur</p>
-            </div>
-
-            <!-- Partenaires -->
-            <div class="sm:col-span-2">
-              <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">
-                Partenaires
-              </h3>
-
-              <div v-if="form.partners && form.partners.length > 0" class="mb-4 space-y-2">
-                <div
-                  v-for="(partner, index) in form.partners"
-                  :key="partner.id"
-                  class="flex items-center gap-3 rounded-lg border border-gray-200 p-3 dark:border-gray-700"
-                >
-                  <div v-if="partner.partner_logo" class="h-8 w-8 flex-shrink-0 overflow-hidden rounded">
-                    <img :src="partner.partner_logo" :alt="partner.partner_name" class="h-full w-full object-contain" />
-                  </div>
-                  <div v-else class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded bg-gray-100 dark:bg-gray-700">
-                    <font-awesome-icon icon="fa-solid fa-building" class="h-4 w-4 text-gray-400" />
-                  </div>
-                  <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">{{ partner.partner_name }}</span>
-                  <button class="text-red-500 hover:text-red-700" @click="removePartner(index)">
-                    <font-awesome-icon icon="fa-solid fa-trash" class="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div class="rounded-lg border border-dashed border-gray-300 p-4 dark:border-gray-600">
-                <div class="flex items-end gap-3">
-                  <div class="flex-1">
-                    <label class="mb-1 block text-sm text-gray-500">Ajouter un partenaire</label>
-                    <select
-                      v-model="newPartnerId"
-                      class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    >
-                      <option value="">Sélectionner un partenaire</option>
-                      <option v-for="partner in availablePartners" :key="partner.id" :value="partner.id">
-                        {{ partner.name_fr }}
-                      </option>
-                    </select>
-                  </div>
-                  <button
-                    :disabled="!newPartnerId"
-                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
-                    @click="addPartner"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4" />
-                    Ajouter
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -685,15 +717,15 @@ const tabs = [
 
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Album photos
+                Album photos (ID)
               </label>
               <input
-                v-model="form.album_id"
+                v-model="form.album_external_id"
                 type="text"
                 placeholder="ID de l'album"
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
-              <p class="mt-1 text-xs text-gray-500">En production: sélecteur d'album ou création</p>
+              <p class="mt-1 text-xs text-gray-500">En production: sélecteur d'album</p>
             </div>
 
             <!-- Métadonnées -->
@@ -703,9 +735,6 @@ const tabs = [
                 <div class="grid gap-2 text-sm text-gray-600 dark:text-gray-300 sm:grid-cols-2">
                   <div>
                     <span class="text-gray-500">ID:</span> {{ form.id }}
-                  </div>
-                  <div>
-                    <span class="text-gray-500">ID externe:</span> {{ form.external_id }}
                   </div>
                   <div v-if="form.created_at">
                     <span class="text-gray-500">Créé le:</span> {{ new Date(form.created_at).toLocaleString('fr-FR') }}

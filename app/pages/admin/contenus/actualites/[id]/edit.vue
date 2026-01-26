@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { NewsStatus, HighlightStatus, NewsTag } from '~/composables/useMockData'
+import type { NewsStatus, NewsHighlightStatus, NewsDisplay, TagRead } from '~/types/news'
 import type { OutputData } from '@editorjs/editorjs'
 
 definePageMeta({
@@ -10,11 +10,17 @@ const route = useRoute()
 const router = useRouter()
 
 const {
-  getAdminNewsItemById,
-  getAllNewsTags,
-  getAllNewsAuthors,
+  getNewsById,
+  updateNews: apiUpdateNews,
+  getAllTags,
+  createTag: apiCreateTag,
   newsStatusLabels,
   highlightStatusLabels,
+  slugify,
+} = useAdminNewsApi()
+
+const {
+  getAllNewsAuthors,
   departments,
   campusExternalises,
   services,
@@ -23,13 +29,15 @@ const {
 } = useMockData()
 
 // === STATE ===
+const isLoading = ref(true)
 const isSubmitting = ref(false)
 const showTagModal = ref(false)
 const newTagName = ref('')
+const error = ref<string | null>(null)
 
 // Get news item
 const newsId = computed(() => route.params.id as string)
-const originalNews = computed(() => getAdminNewsItemById(newsId.value))
+const originalNews = ref<NewsDisplay | null>(null)
 
 // Contenu EditorJS (séparé du formulaire pour éviter les problèmes de réactivité)
 const content = ref<OutputData | undefined>(undefined)
@@ -59,43 +67,72 @@ const form = reactive({
   event_id: '',
   project_id: '',
   status: 'draft' as NewsStatus,
-  highlight_status: 'standard' as HighlightStatus,
+  highlight_status: 'standard' as NewsHighlightStatus,
   published_at: '',
   visible_from: ''
 })
 
-// Initialiser le formulaire une seule fois quand les données sont disponibles
-watch(originalNews, (news) => {
-  if (news && !formInitialized.value) {
-    form.title = news.title || ''
-    form.slug = news.slug || ''
-    form.summary = news.summary || ''
-    form.video_url = news.video_url || ''
-    form.cover_image = news.cover_image || ''
-    form.cover_image_alt = news.cover_image_alt || ''
-    form.author_id = news.author?.id || ''
-    form.tags = news.tags?.map(t => t.id) || []
-    form.campus_id = news.campus_id || ''
-    form.department_id = news.department_id || ''
-    form.service_id = news.service_id || ''
-    form.event_id = news.event_id || ''
-    form.project_id = news.project_id || ''
-    form.status = news.status || 'draft'
-    form.highlight_status = news.highlight_status || 'standard'
-    form.published_at = news.published_at ? news.published_at.slice(0, 16) : ''
-    form.visible_from = news.visible_from ? news.visible_from.slice(0, 16) : ''
+// Tags from API
+const allTags = ref<TagRead[]>([])
 
-    // Charger le contenu EditorJS
-    content.value = news.content as OutputData | undefined
-    contentEn.value = (news as any).content_en as OutputData | undefined
-    contentAr.value = (news as any).content_ar as OutputData | undefined
+// Load data on mount
+onMounted(async () => {
+  isLoading.value = true
+  try {
+    // Charger en parallèle l'actualité et les tags
+    const [newsData, tagsData] = await Promise.all([
+      getNewsById(newsId.value),
+      getAllTags()
+    ])
 
-    formInitialized.value = true
+    originalNews.value = newsData
+    allTags.value = tagsData
+
+    // Initialiser le formulaire
+    if (newsData) {
+      form.title = newsData.title || ''
+      form.slug = newsData.slug || ''
+      form.summary = newsData.summary || ''
+      form.video_url = newsData.video_url || ''
+      form.cover_image = newsData.cover_image || ''
+      form.cover_image_alt = newsData.cover_image_alt || ''
+      form.author_id = newsData.author_external_id || ''
+      form.tags = newsData.tags?.map(t => t.id) || []
+      form.campus_id = newsData.campus_id || ''
+      form.department_id = newsData.department_id || ''
+      form.service_id = newsData.service_id || ''
+      form.event_id = newsData.event_id || ''
+      form.project_id = newsData.project_id || ''
+      form.status = newsData.status || 'draft'
+      form.highlight_status = newsData.highlight_status || 'standard'
+      form.published_at = newsData.published_at ? newsData.published_at.slice(0, 16) : ''
+      form.visible_from = newsData.visible_from ? newsData.visible_from.slice(0, 16) : ''
+
+      // Charger le contenu EditorJS
+      content.value = newsData.content as OutputData | undefined
+      contentEn.value = newsData.content_en as OutputData | undefined
+      contentAr.value = newsData.content_ar as OutputData | undefined
+
+      formInitialized.value = true
+    }
   }
-}, { immediate: true })
+  catch (e: unknown) {
+    const fetchError = e as { status?: number; data?: { detail?: string } }
+    if (fetchError.status === 404) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Actualité non trouvée'
+      })
+    }
+    error.value = fetchError.data?.detail || 'Erreur lors du chargement'
+    console.error('Error:', e)
+  }
+  finally {
+    isLoading.value = false
+  }
+})
 
 // === COMPUTED ===
-const allTags = computed(() => getAllNewsTags())
 const allAuthors = computed(() => getAllNewsAuthors())
 const allCampuses = computed(() => campusExternalises.value)
 const allDepartments = computed(() => departments.value)
@@ -122,8 +159,7 @@ const hasContent = computed(() => {
 const isValid = computed(() => {
   return form.title.trim() !== '' &&
     form.slug.trim() !== '' &&
-    hasContent.value &&
-    form.author_id !== ''
+    hasContent.value
 })
 
 // Check if form has changes
@@ -141,20 +177,12 @@ const hasChanges = computed(() => {
 })
 
 // === METHODS ===
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-}
-
 function toggleTag(tagId: string) {
   const index = form.tags.indexOf(tagId)
   if (index === -1) {
     form.tags.push(tagId)
-  } else {
+  }
+  else {
     form.tags.splice(index, 1)
   }
 }
@@ -178,31 +206,56 @@ function removeCoverImage() {
   form.cover_image_alt = ''
 }
 
+// Valide si une chaîne est un UUID valide (les mock IDs comme 'author-2' ne passent pas)
+function isValidUUID(str: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return uuidRegex.test(str)
+}
+
+// Retourne la valeur si c'est un UUID valide, sinon null
+function toUUIDOrNull(value: string | null | undefined): string | null {
+  if (!value) return null
+  return isValidUUID(value) ? value : null
+}
+
 async function submitForm() {
   if (!isValid.value || isSubmitting.value) return
 
   isSubmitting.value = true
+  error.value = null
 
   try {
-    const newsData = {
-      id: newsId.value,
-      ...form,
-      content: content.value,
-      content_en: contentEn.value,
-      content_ar: contentAr.value,
-      updated_at: new Date().toISOString()
-    }
-
-    console.log('Updating news:', newsData)
-    // En production: PUT /api/admin/news/{id}
-
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await apiUpdateNews(newsId.value, {
+      title: form.title,
+      slug: form.slug,
+      summary: form.summary || null,
+      content: content.value || null,
+      content_en: contentEn.value || null,
+      content_ar: contentAr.value || null,
+      video_url: form.video_url || null,
+      highlight_status: form.highlight_status,
+      // Filtrer les IDs mock - seuls les vrais UUIDs sont envoyés
+      campus_external_id: toUUIDOrNull(form.campus_id),
+      department_external_id: toUUIDOrNull(form.department_id),
+      service_external_id: toUUIDOrNull(form.service_id),
+      event_external_id: toUUIDOrNull(form.event_id),
+      project_external_id: toUUIDOrNull(form.project_id),
+      author_external_id: toUUIDOrNull(form.author_id),
+      status: form.status,
+      published_at: form.published_at || null,
+      visible_from: form.visible_from || null,
+      tag_ids: form.tags,
+    })
 
     contentChanged.value = false
     router.push(`/admin/contenus/actualites/${newsId.value}`)
-  } catch (error) {
-    console.error('Error updating news:', error)
-  } finally {
+  }
+  catch (e: unknown) {
+    const fetchError = e as { data?: { detail?: string } }
+    error.value = fetchError.data?.detail || 'Erreur lors de la mise à jour'
+    console.error('Error updating news:', e)
+  }
+  finally {
     isSubmitting.value = false
   }
 }
@@ -211,24 +264,55 @@ function cancel() {
   router.push(`/admin/contenus/actualites/${newsId.value}`)
 }
 
-function createTag() {
+async function createTag() {
   if (!newTagName.value.trim()) return
 
-  const newTag: NewsTag = {
-    id: `tag-${Date.now()}`,
-    name: newTagName.value.trim(),
-    slug: slugify(newTagName.value.trim())
-  }
+  try {
+    const result = await apiCreateTag({
+      name: newTagName.value.trim(),
+      slug: slugify(newTagName.value.trim()),
+    })
 
-  console.log('Creating tag:', newTag)
-  form.tags.push(newTag.id)
-  newTagName.value = ''
-  showTagModal.value = false
+    // Recharger les tags et sélectionner le nouveau
+    allTags.value = await getAllTags()
+    form.tags.push(result.id)
+    newTagName.value = ''
+    showTagModal.value = false
+  }
+  catch (e) {
+    console.error('Error creating tag:', e)
+  }
 }
 </script>
 
 <template>
-  <div v-if="originalNews" class="mx-auto max-w-4xl space-y-6">
+  <!-- Loading -->
+  <div v-if="isLoading" class="flex items-center justify-center py-12">
+    <div class="flex flex-col items-center gap-4">
+      <div class="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+      <span class="text-sm text-gray-500 dark:text-gray-400">Chargement de l'actualité...</span>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div v-else-if="error && !originalNews" class="rounded-lg bg-red-50 p-6 text-center dark:bg-red-900/20">
+    <font-awesome-icon icon="fa-solid fa-circle-exclamation" class="mb-4 h-12 w-12 text-red-500" />
+    <h2 class="mb-2 text-lg font-semibold text-red-800 dark:text-red-400">Erreur</h2>
+    <p class="text-red-600 dark:text-red-300">{{ error }}</p>
+  </div>
+
+  <!-- Content -->
+  <div v-else-if="originalNews" class="mx-auto max-w-4xl space-y-6">
+    <!-- Error message -->
+    <div
+      v-if="error"
+      class="rounded-lg bg-red-50 p-4 text-red-800 dark:bg-red-900/20 dark:text-red-400"
+    >
+      <div class="flex items-center gap-2">
+        <font-awesome-icon icon="fa-solid fa-circle-exclamation" class="h-5 w-5" />
+        <span>{{ error }}</span>
+      </div>
+    </div>
     <!-- Header -->
     <div class="flex items-center gap-4">
       <button
