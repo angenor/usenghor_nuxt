@@ -332,10 +332,11 @@ export function useEditorialApi() {
           const parsed = JSON.parse(value)
           // Si c'est un objet avec title/name
           if (parsed.title) {
-            return parsed.title
+            // Nettoyer les balises HTML du titre
+            return parsed.title.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
           }
           if (parsed.name) {
-            return parsed.name
+            return parsed.name.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
           }
           // Si c'est un format EditorJS (avec blocks)
           if (parsed.blocks && Array.isArray(parsed.blocks)) {
@@ -343,6 +344,14 @@ export function useEditorialApi() {
               .map((b: { data?: { text?: string } }) => b.data?.text || '')
               .filter((t: string) => t)
               .join(' ')
+              // Nettoyer les balises HTML du contenu extrait
+              .replace(/<[^>]*>/g, '')
+              .replace(/&nbsp;/g, ' ')
+              .replace(/&amp;/g, '&')
+              .replace(/&lt;/g, '<')
+              .replace(/&gt;/g, '>')
+              .replace(/&quot;/g, '"')
+              .trim()
             if (textContent) {
               return textContent.length > maxLength ? `${textContent.substring(0, maxLength)}...` : textContent
             }
@@ -352,19 +361,54 @@ export function useEditorialApi() {
           return '[Objet JSON]'
         }
         catch {
-          return value.length > maxLength ? `${value.substring(0, maxLength)}...` : value
+          // Nettoyer les balises si c'est du texte brut avec HTML
+          const cleaned = value.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
+          return cleaned.length > maxLength ? `${cleaned.substring(0, maxLength)}...` : cleaned
         }
       }
-      case 'html':
+      case 'html': {
+        // Supprimer les balises HTML et tronquer
+        const textOnly = value.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
+        if (textOnly.length > maxLength) {
+          return `${textOnly.substring(0, maxLength)}...`
+        }
+        return textOnly || '[Contenu HTML]'
+      }
       case 'markdown': {
-        // Tronquer le contenu HTML/Markdown
-        if (value.length > maxLength) {
-          return `${value.substring(0, maxLength)}...`
+        // Supprimer la syntaxe Markdown basique, les balises HTML et tronquer
+        const cleanMarkdown = value
+          .replace(/#{1,6}\s/g, '') // Titres
+          .replace(/\*\*([^*]+)\*\*/g, '$1') // Gras
+          .replace(/\*([^*]+)\*/g, '$1') // Italique
+          .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Liens
+          .replace(/`([^`]+)`/g, '$1') // Code inline
+          .replace(/<[^>]*>/g, '') // Balises HTML
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .trim()
+        if (cleanMarkdown.length > maxLength) {
+          return `${cleanMarkdown.substring(0, maxLength)}...`
         }
-        return value
+        return cleanMarkdown || '[Contenu Markdown]'
       }
-      default:
-        return value
+      default: {
+        // Pour text et autres types, nettoyer les balises HTML potentielles
+        const cleanText = value
+          .replace(/<[^>]*>/g, '')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .trim()
+        if (cleanText.length > maxLength) {
+          return `${cleanText.substring(0, maxLength)}...`
+        }
+        return cleanText || value
+      }
     }
   }
 
