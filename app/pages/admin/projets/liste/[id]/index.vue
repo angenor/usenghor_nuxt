@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { OutputData } from '@editorjs/editorjs'
 import type { ProjectDisplay } from '~/composables/useProjectsApi'
 
 definePageMeta({
@@ -106,6 +107,18 @@ const togglePublish = async () => {
     isProcessing.value = false
   }
 }
+
+// Parser la description EditorJS
+const parsedDescription = computed<OutputData | null>(() => {
+  if (!project.value?.description) return null
+  try {
+    return JSON.parse(project.value.description) as OutputData
+  }
+  catch {
+    // Si ce n'est pas du JSON valide, retourner null (affichage en texte brut)
+    return null
+  }
+})
 </script>
 
 <template>
@@ -193,7 +206,10 @@ const togglePublish = async () => {
             <font-awesome-icon :icon="['fas', 'file-lines']" class="h-5 w-5 text-indigo-500" />
             Description détaillée
           </h2>
-          <div class="prose prose-sm max-w-none text-gray-600 dark:prose-invert dark:text-gray-300" v-html="project.description" />
+          <!-- Affichage EditorJS si JSON valide -->
+          <EditorJSRenderer v-if="parsedDescription" :data="parsedDescription" />
+          <!-- Fallback texte brut si pas du JSON -->
+          <p v-else class="whitespace-pre-wrap text-gray-600 dark:text-gray-300">{{ project.description }}</p>
         </div>
 
         <!-- Bénéficiaires -->

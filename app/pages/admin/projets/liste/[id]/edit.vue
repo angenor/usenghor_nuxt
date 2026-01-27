@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { OutputData } from '@editorjs/editorjs'
 import type { ProjectCategoryRead, ProjectStatus, PublicationStatus } from '~/types/api'
 
 definePageMeta({
@@ -31,7 +32,7 @@ const form = reactive({
   title: '',
   slug: '',
   summary: '',
-  description: '',
+  description: undefined as OutputData | undefined,
   cover_image_external_id: null as string | null,
   department_external_id: null as string | null,
   manager_external_id: null as string | null,
@@ -66,7 +67,23 @@ onMounted(async () => {
     form.title = project.title
     form.slug = project.slug
     form.summary = project.summary || ''
-    form.description = project.description || ''
+    // Parser la description JSON en OutputData pour l'éditeur
+    if (project.description) {
+      try {
+        form.description = JSON.parse(project.description) as OutputData
+      }
+      catch {
+        // Si ce n'est pas du JSON valide, créer un bloc paragraphe
+        form.description = {
+          time: Date.now(),
+          blocks: [{ type: 'paragraph', data: { text: project.description } }],
+          version: '2.28.2',
+        }
+      }
+    }
+    else {
+      form.description = undefined
+    }
     form.cover_image_external_id = project.cover_image_external_id
     form.department_external_id = project.department_external_id
     form.manager_external_id = project.manager_external_id
@@ -115,11 +132,14 @@ const saveForm = async () => {
   error.value = null
 
   try {
+    // Sérialiser la description EditorJS en JSON
+    const descriptionJson = form.description ? JSON.stringify(form.description) : null
+
     await updateProject(projectId.value, {
       title: form.title,
       slug: form.slug,
       summary: form.summary || null,
-      description: form.description || null,
+      description: descriptionJson,
       cover_image_external_id: form.cover_image_external_id,
       department_external_id: form.department_external_id,
       manager_external_id: form.manager_external_id,
@@ -308,14 +328,12 @@ const tabs = [
 
           <!-- Description -->
           <div class="sm:col-span-2">
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Description détaillée
-            </label>
-            <textarea
+            <AdminRichTextEditor
               v-model="form.description"
-              rows="6"
-              placeholder="Description complète du projet..."
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              label="Description détaillée"
+              placeholder="Description complète du projet : contexte, objectifs, méthodologie..."
+              :show-card="false"
+              :min-height="250"
             />
           </div>
 

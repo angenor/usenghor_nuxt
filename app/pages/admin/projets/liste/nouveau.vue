@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { OutputData } from '@editorjs/editorjs'
 import type { ProjectCategoryRead, ProjectStatus, PublicationStatus } from '~/types/api'
 
 definePageMeta({
@@ -32,7 +33,7 @@ const form = reactive({
   title: '',
   slug: '',
   summary: '',
-  description: '',
+  description: undefined as OutputData | undefined,
   cover_image_external_id: null as string | null,
   department_external_id: null as string | null,
   manager_external_id: null as string | null,
@@ -85,11 +86,14 @@ const saveForm = async () => {
   error.value = null
 
   try {
+    // Sérialiser la description EditorJS en JSON
+    const descriptionJson = form.description ? JSON.stringify(form.description) : null
+
     await createProject({
       title: form.title,
       slug: form.slug,
       summary: form.summary || null,
-      description: form.description || null,
+      description: descriptionJson,
       cover_image_external_id: form.cover_image_external_id,
       department_external_id: form.department_external_id,
       manager_external_id: form.manager_external_id,
@@ -255,16 +259,14 @@ const tabs = [
             />
           </div>
 
-          <!-- Description -->
+          <!-- Description (Rich Text Editor) -->
           <div class="sm:col-span-2">
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Description détaillée
-            </label>
-            <textarea
+            <AdminRichTextEditor
               v-model="form.description"
-              rows="6"
+              label="Description détaillée"
               placeholder="Description complète du projet : contexte, objectifs, méthodologie..."
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              :show-card="false"
+              :min-height="250"
             />
           </div>
 
