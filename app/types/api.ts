@@ -1317,3 +1317,135 @@ export interface EditorialValuesStats {
   active_core_values: number
   last_updated: string | null
 }
+
+// ============================================================================
+// Social Media (Réseaux sociaux)
+// ============================================================================
+
+export type SocialMediaPlatform =
+  | 'facebook'
+  | 'twitter'
+  | 'linkedin'
+  | 'instagram'
+  | 'youtube'
+  | 'tiktok'
+  | 'whatsapp'
+  | 'telegram'
+  | 'other'
+
+// Données JSON stockées dans editorial_contents.value
+export interface SocialMediaData {
+  platform: SocialMediaPlatform
+  url: string
+  active: boolean
+  display_order: number
+  custom_label?: string
+}
+
+// Structure complète d'un réseau social (avec métadonnées)
+export interface SocialMediaLink extends SocialMediaData {
+  id: string
+  created_at: string
+  updated_at: string
+}
+
+// Payload de création
+export interface SocialMediaCreatePayload {
+  platform: SocialMediaPlatform
+  url: string
+  active?: boolean
+  display_order?: number
+  custom_label?: string
+}
+
+// Payload de mise à jour
+export interface SocialMediaUpdatePayload {
+  platform?: SocialMediaPlatform
+  url?: string
+  active?: boolean
+  display_order?: number
+  custom_label?: string
+}
+
+// Statistiques des réseaux sociaux
+export interface SocialMediaStats {
+  total_count: number
+  active_count: number
+  inactive_count: number
+  platforms_used: SocialMediaPlatform[]
+  last_updated: string | null
+}
+
+// ============================================================================
+// Audit Logs (correspond à app/schemas/identity.py)
+// ============================================================================
+
+export type AuditAction = 'create' | 'update' | 'delete' | 'login' | 'logout'
+
+// Log d'audit en lecture
+export interface AuditLogRead {
+  id: string
+  user_id: string | null
+  action: AuditAction
+  table_name: string | null
+  record_id: string | null
+  old_values: Record<string, unknown> | null
+  new_values: Record<string, unknown> | null
+  ip_address: string | null
+  user_agent: string | null
+  created_at: string
+}
+
+// Log d'audit avec infos utilisateur (enrichi côté frontend)
+export interface AuditLogWithUser extends AuditLogRead {
+  user?: {
+    id: string
+    name: string
+    email: string
+  }
+  summary?: string
+}
+
+// Détail d'un log d'audit avec les changements
+export interface AuditLogDetail extends AuditLogWithUser {
+  changes: AuditChange[]
+}
+
+// Changement individuel pour l'affichage diff
+export interface AuditChange {
+  field: string
+  old: unknown
+  new: unknown
+}
+
+// Filtres pour la liste des logs
+export interface AuditLogFilters {
+  user_id?: string
+  action?: AuditAction
+  table_name?: string
+  date_from?: string
+  date_to?: string
+  ip_address?: string
+  search?: string
+}
+
+// Statistiques des logs d'audit
+export interface AuditLogStatistics {
+  total: number
+  by_action: Record<AuditAction, number>
+  by_table: Record<string, number>
+}
+
+// Statistiques enrichies pour l'affichage UI
+export interface AuditLogStatsUI {
+  total_events: number
+  by_action: Record<AuditAction, number>
+  by_table: { table: string; count: number }[]
+  by_user: { user_id: string; user_name: string; count: number }[]
+  by_day: { date: string; count: number }[]
+}
+
+// Requête de purge des logs
+export interface AuditLogPurgePayload {
+  before_date: string
+}

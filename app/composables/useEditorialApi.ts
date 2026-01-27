@@ -330,21 +330,25 @@ export function useEditorialApi() {
         // Pour les JSON, essayer d'extraire un titre ou résumer
         try {
           const parsed = JSON.parse(value)
-          // Si c'est un objet avec title/name
-          if (parsed.title) {
-            // Nettoyer les balises HTML du titre
-            return parsed.title.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
+
+          // Si c'est un objet avec title (core value, etc.)
+          if ('title' in parsed && typeof parsed.title === 'string') {
+            const title = parsed.title.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
+            if (title) return title.length > maxLength ? `${title.substring(0, maxLength)}...` : title
           }
-          if (parsed.name) {
-            return parsed.name.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
+
+          // Si c'est un objet avec name
+          if ('name' in parsed && typeof parsed.name === 'string') {
+            const name = parsed.name.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
+            if (name) return name.length > maxLength ? `${name.substring(0, maxLength)}...` : name
           }
+
           // Si c'est un format EditorJS (avec blocks)
           if (parsed.blocks && Array.isArray(parsed.blocks)) {
             const textContent = parsed.blocks
               .map((b: { data?: { text?: string } }) => b.data?.text || '')
               .filter((t: string) => t)
               .join(' ')
-              // Nettoyer les balises HTML du contenu extrait
               .replace(/<[^>]*>/g, '')
               .replace(/&nbsp;/g, ' ')
               .replace(/&amp;/g, '&')
@@ -357,8 +361,34 @@ export function useEditorialApi() {
             }
             return '[Contenu riche]'
           }
-          // Sinon, afficher "[Objet JSON]"
-          return '[Objet JSON]'
+
+          // Pour les objets simples, afficher un résumé des clés/valeurs
+          if (typeof parsed === 'object' && !Array.isArray(parsed)) {
+            const keys = Object.keys(parsed)
+            if (keys.length === 0) return '[Objet vide]'
+
+            // Essayer d'afficher la première valeur string non vide
+            for (const key of keys) {
+              const val = parsed[key]
+              if (typeof val === 'string' && val.trim()) {
+                const cleanVal = val.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
+                if (cleanVal) {
+                  return cleanVal.length > maxLength ? `${cleanVal.substring(0, maxLength)}...` : cleanVal
+                }
+              }
+            }
+
+            // Sinon afficher les clés
+            const keysStr = keys.slice(0, 3).join(', ')
+            return keys.length > 3 ? `{${keysStr}, ...}` : `{${keysStr}}`
+          }
+
+          // Pour les arrays
+          if (Array.isArray(parsed)) {
+            return `[${parsed.length} élément${parsed.length > 1 ? 's' : ''}]`
+          }
+
+          return String(parsed)
         }
         catch {
           // Nettoyer les balises si c'est du texte brut avec HTML

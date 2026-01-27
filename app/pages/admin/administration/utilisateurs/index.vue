@@ -1,63 +1,78 @@
 <script setup lang="ts">
-import type { UserWithRelations, UserFilters, UserSalutation } from '~/composables/useMockData'
+import type {
+  UserWithRoles,
+  UserRead,
+  UserSalutation,
+  UserCreatePayload,
+  UserUpdatePayload,
+  RoleRead,
+} from '~/composables/useUsersApi'
+import { useDebounceFn } from '@vueuse/core'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
 })
 
 const {
-  getAllUsersAdmin,
-  getUserByIdAdmin,
-  getUserStatsAdmin,
-  getRolesForUserSelect,
-  getCampusesForUserSelect,
-  getCountriesForUserSelectAdmin,
+  listUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  deleteUser: deleteUserApi,
+  toggleUserActive: toggleUserActiveApi,
+  updateUserRoles,
+  resetUserPassword,
+  verifyUserEmail,
+  bulkAction,
+  getFullName,
+  formatLastLogin,
+  getRoleColor,
+  validateEmail,
+  validatePassword,
   canDeleteUser,
   canDeactivateUser,
-  getUserActivityHistory,
-  userSalutationLabels,
+  computeStats,
+  salutationLabels,
   salutationOptions,
   userStatusColors,
   verificationColors,
-  roleColors,
-  generateUserId,
-  formatLastLogin,
-  getRoleColor,
-  validateUserEmail,
-  validatePassword
-} = useMockData()
+} = useUsersApi()
+
+const {
+  getRolesForSelect,
+} = useRolesApi()
 
 // === STATE ===
 const isLoading = ref(true)
-const users = ref<UserWithRelations[]>([])
-const selectedUser = ref<UserWithRelations | null>(null)
+const users = ref<UserWithRoles[]>([])
+const roles = ref<RoleRead[]>([])
+const selectedUser = ref<UserWithRoles | null>(null)
 const showDetailModal = ref(false)
 const showCreateModal = ref(false)
 const showFilters = ref(false)
 const showStatistics = ref(false)
 const showDeleteConfirm = ref(false)
-const userToDelete = ref<UserWithRelations | null>(null)
+const userToDelete = ref<UserWithRoles | null>(null)
+const showPasswordModal = ref(false)
+const temporaryPassword = ref('')
 
-// Pagination
+// Pagination (serveur)
 const currentPage = ref(1)
 const itemsPerPage = ref(20)
+const totalItems = ref(0)
+const totalPages = ref(1)
 
 // Filters
-const filters = ref<UserFilters>({
-  search: undefined,
-  role_id: undefined,
-  campus_id: undefined,
-  active: undefined,
-  email_verified: undefined,
-  nationality_id: undefined,
-  sort_by: 'last_name',
-  sort_order: 'asc'
+const filters = ref({
+  search: '' as string,
+  role_id: '' as string,
+  active: undefined as boolean | undefined,
+  sort_by: 'last_name' as string,
+  sort_order: 'asc' as string,
 })
 
-// Filter options
-const roleOptions = computed(() => getRolesForUserSelect())
-const campusOptions = computed(() => getCampusesForUserSelect())
-const countryOptions = computed(() => getCountriesForUserSelectAdmin())
+// Role options (loaded from API)
+const roleOptions = ref<Array<{ id: string; code: string; name_fr: string }>>([])
 
 // Form for create/edit
 const isEditing = ref(false)
@@ -74,60 +89,31 @@ const defaultFormData = {
   phone: '',
   phone_whatsapp: '',
   linkedin: '',
-  nationality_external_id: '',
-  residence_country_external_id: '',
   city: '',
   address: '',
   role_ids: [] as string[],
-  campus_external_id: '',
   active: true,
-  send_welcome_email: true
 }
 
 const formData = ref({ ...defaultFormData })
+const editingUserId = ref<string | null>(null)
 
 // Selected items for bulk actions
 const selectedUserIds = ref<string[]>([])
-const showBulkActions = ref(false)
 
 // === COMPUTED ===
-const filteredUsers = computed(() => {
-  const cleanFilters: UserFilters = {}
-  if (filters.value.search) cleanFilters.search = filters.value.search
-  if (filters.value.role_id) cleanFilters.role_id = filters.value.role_id
-  if (filters.value.campus_id) cleanFilters.campus_id = filters.value.campus_id
-  if (filters.value.active !== undefined) cleanFilters.active = filters.value.active
-  if (filters.value.email_verified !== undefined) cleanFilters.email_verified = filters.value.email_verified
-  if (filters.value.nationality_id) cleanFilters.nationality_id = filters.value.nationality_id
-  cleanFilters.sort_by = filters.value.sort_by
-  cleanFilters.sort_order = filters.value.sort_order
-
-  return getAllUsersAdmin(Object.keys(cleanFilters).length > 0 ? cleanFilters : undefined)
-})
-
-const paginatedUsers = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return filteredUsers.value.slice(start, end)
-})
-
-const totalPages = computed(() => Math.ceil(filteredUsers.value.length / itemsPerPage.value))
-
-const statistics = computed(() => getUserStatsAdmin())
+const statistics = computed(() => computeStats(users.value, roles.value))
 
 const hasActiveFilters = computed(() => {
   return !!(
-    filters.value.search ||
-    filters.value.role_id ||
-    filters.value.campus_id ||
-    filters.value.active !== undefined ||
-    filters.value.email_verified !== undefined ||
-    filters.value.nationality_id
+    filters.value.search
+    || filters.value.role_id
+    || filters.value.active !== undefined
   )
 })
 
 const allSelected = computed(() => {
-  return paginatedUsers.value.length > 0 && paginatedUsers.value.every(u => selectedUserIds.value.includes(u.id))
+  return users.value.length > 0 && users.value.every(u => selectedUserIds.value.includes(u.id))
 })
 
 const someSelected = computed(() => {
@@ -138,27 +124,67 @@ const someSelected = computed(() => {
 const loadData = async () => {
   isLoading.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 300))
-    users.value = getAllUsersAdmin()
-  } finally {
+    // Charger les rôles pour le filtre
+    const rolesData = await getRolesForSelect()
+    roleOptions.value = rolesData.map(r => ({ id: r.id, code: r.code, name_fr: r.name_fr }))
+    roles.value = rolesData as unknown as RoleRead[]
+
+    // Charger les utilisateurs avec pagination serveur
+    const response = await listUsers({
+      page: currentPage.value,
+      limit: itemsPerPage.value,
+      search: filters.value.search || undefined,
+      active: filters.value.active,
+      role_id: filters.value.role_id || undefined,
+    })
+
+    // Récupérer les détails avec rôles pour chaque utilisateur
+    const usersWithRoles: UserWithRoles[] = []
+    for (const user of response.items) {
+      try {
+        const userWithRoles = await getUserById(user.id)
+        usersWithRoles.push(userWithRoles)
+      }
+      catch {
+        // Si erreur, utiliser les données de base
+        usersWithRoles.push({ ...user, roles: [] } as UserWithRoles)
+      }
+    }
+
+    users.value = usersWithRoles
+    totalItems.value = response.total
+    totalPages.value = response.pages
+  }
+  catch (error) {
+    console.error('Erreur lors du chargement des données:', error)
+  }
+  finally {
     isLoading.value = false
   }
 }
 
-const viewUserDetail = (user: UserWithRelations) => {
-  selectedUser.value = user
-  showDetailModal.value = true
+const viewUserDetail = async (user: UserWithRoles) => {
+  try {
+    selectedUser.value = await getUserById(user.id)
+    showDetailModal.value = true
+  }
+  catch {
+    selectedUser.value = user
+    showDetailModal.value = true
+  }
 }
 
 const openCreateModal = () => {
   isEditing.value = false
+  editingUserId.value = null
   formData.value = { ...defaultFormData }
   formErrors.value = {}
   showCreateModal.value = true
 }
 
-const openEditModal = (user: UserWithRelations) => {
+const openEditModal = (user: UserWithRoles) => {
   isEditing.value = true
+  editingUserId.value = user.id
   formData.value = {
     email: user.email,
     password: '',
@@ -169,14 +195,10 @@ const openEditModal = (user: UserWithRelations) => {
     phone: user.phone || '',
     phone_whatsapp: user.phone_whatsapp || '',
     linkedin: user.linkedin || '',
-    nationality_external_id: user.nationality_external_id || '',
-    residence_country_external_id: user.residence_country_external_id || '',
     city: user.city || '',
     address: user.address || '',
     role_ids: user.roles.map(r => r.id),
-    campus_external_id: user.roles.find(r => r.campus)?.campus?.id || '',
     active: user.active,
-    send_welcome_email: false
   }
   selectedUser.value = user
   formErrors.value = {}
@@ -188,13 +210,15 @@ const validateForm = (): boolean => {
 
   if (!formData.value.email) {
     formErrors.value.email = 'L\'email est requis'
-  } else if (!validateUserEmail(formData.value.email)) {
+  }
+  else if (!validateEmail(formData.value.email)) {
     formErrors.value.email = 'Format d\'email invalide'
   }
 
   if (!isEditing.value && !formData.value.password) {
     formErrors.value.password = 'Le mot de passe est requis'
-  } else if (formData.value.password) {
+  }
+  else if (formData.value.password) {
     const passwordValidation = validatePassword(formData.value.password)
     if (!passwordValidation.valid) {
       formErrors.value.password = passwordValidation.errors[0]
@@ -221,24 +245,63 @@ const saveUser = async () => {
 
   isSaving.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 500))
+    if (isEditing.value && editingUserId.value) {
+      // Mise à jour
+      const updateData: UserUpdatePayload = {
+        email: formData.value.email,
+        last_name: formData.value.last_name,
+        first_name: formData.value.first_name,
+        salutation: formData.value.salutation,
+        birth_date: formData.value.birth_date || null,
+        phone: formData.value.phone || null,
+        phone_whatsapp: formData.value.phone_whatsapp || null,
+        linkedin: formData.value.linkedin || null,
+        city: formData.value.city || null,
+        address: formData.value.address || null,
+        active: formData.value.active,
+      }
+      await updateUser(editingUserId.value, updateData)
 
-    if (isEditing.value) {
-      console.log('Modification utilisateur:', formData.value)
-    } else {
-      const newId = generateUserId()
-      console.log('Création utilisateur:', { id: newId, ...formData.value })
+      // Mettre à jour les rôles
+      await updateUserRoles(editingUserId.value, formData.value.role_ids)
+    }
+    else {
+      // Création
+      const createData: UserCreatePayload = {
+        email: formData.value.email,
+        password: formData.value.password,
+        last_name: formData.value.last_name,
+        first_name: formData.value.first_name,
+        salutation: formData.value.salutation,
+        birth_date: formData.value.birth_date || null,
+        phone: formData.value.phone || null,
+        phone_whatsapp: formData.value.phone_whatsapp || null,
+        linkedin: formData.value.linkedin || null,
+        city: formData.value.city || null,
+        address: formData.value.address || null,
+      }
+      const result = await createUser(createData)
+
+      // Assigner les rôles
+      if (formData.value.role_ids.length > 0) {
+        await updateUserRoles(result.id, formData.value.role_ids)
+      }
     }
 
     showCreateModal.value = false
     loadData()
-  } finally {
+  }
+  catch (error) {
+    console.error('Erreur lors de la sauvegarde:', error)
+    formErrors.value.general = 'Une erreur est survenue lors de la sauvegarde'
+  }
+  finally {
     isSaving.value = false
   }
 }
 
-const confirmDelete = (user: UserWithRelations) => {
-  const canDelete = canDeleteUser(user.id)
+const confirmDelete = (user: UserWithRoles) => {
+  const canDelete = canDeleteUser(user)
   if (!canDelete.canDelete) {
     alert(canDelete.reason)
     return
@@ -247,62 +310,110 @@ const confirmDelete = (user: UserWithRelations) => {
   showDeleteConfirm.value = true
 }
 
-const deleteUser = async () => {
+const handleDeleteUser = async () => {
   if (!userToDelete.value) return
 
   isSaving.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 500))
-    console.log('Suppression utilisateur:', userToDelete.value.id)
+    await deleteUserApi(userToDelete.value.id)
     showDeleteConfirm.value = false
     userToDelete.value = null
     loadData()
-  } finally {
+  }
+  catch (error) {
+    console.error('Erreur lors de la suppression:', error)
+  }
+  finally {
     isSaving.value = false
   }
 }
 
-const toggleUserActive = async (user: UserWithRelations) => {
-  if (!user.active) {
-    // Activer
-    console.log('Activation utilisateur:', user.id)
-  } else {
-    // Désactiver
-    const canDeactivate = canDeactivateUser(user.id)
+const toggleUserActive = async (user: UserWithRoles) => {
+  if (user.active) {
+    const canDeactivate = canDeactivateUser(user)
     if (!canDeactivate.canDeactivate) {
       alert(canDeactivate.reason)
       return
     }
-    console.log('Désactivation utilisateur:', user.id)
   }
-  loadData()
+
+  try {
+    await toggleUserActiveApi(user.id)
+    loadData()
+  }
+  catch (error) {
+    console.error('Erreur lors du changement de statut:', error)
+  }
+}
+
+const handleResetPassword = async (user: UserWithRoles) => {
+  try {
+    const result = await resetUserPassword(user.id)
+    temporaryPassword.value = result.temporary_password
+    showPasswordModal.value = true
+  }
+  catch (error) {
+    console.error('Erreur lors de la réinitialisation du mot de passe:', error)
+  }
+}
+
+const handleVerifyEmail = async (user: UserWithRoles) => {
+  try {
+    await verifyUserEmail(user.id)
+    loadData()
+  }
+  catch (error) {
+    console.error('Erreur lors de la vérification de l\'email:', error)
+  }
+}
+
+const handleBulkAction = async (action: 'activate' | 'deactivate' | 'delete') => {
+  if (selectedUserIds.value.length === 0) return
+
+  const confirmMessage = action === 'delete'
+    ? `Êtes-vous sûr de vouloir supprimer ${selectedUserIds.value.length} utilisateur(s) ?`
+    : `Êtes-vous sûr de vouloir ${action === 'activate' ? 'activer' : 'désactiver'} ${selectedUserIds.value.length} utilisateur(s) ?`
+
+  if (!confirm(confirmMessage)) return
+
+  try {
+    await bulkAction({
+      user_ids: selectedUserIds.value,
+      action,
+    })
+    selectedUserIds.value = []
+    loadData()
+  }
+  catch (error) {
+    console.error('Erreur lors de l\'action en masse:', error)
+  }
 }
 
 const clearFilters = () => {
   filters.value = {
-    search: undefined,
-    role_id: undefined,
-    campus_id: undefined,
+    search: '',
+    role_id: '',
     active: undefined,
-    email_verified: undefined,
-    nationality_id: undefined,
     sort_by: 'last_name',
-    sort_order: 'asc'
+    sort_order: 'asc',
   }
   currentPage.value = 1
+  loadData()
 }
 
 const goToPage = (page: number) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page
+    loadData()
   }
 }
 
 const toggleSelectAll = () => {
   if (allSelected.value) {
     selectedUserIds.value = []
-  } else {
-    selectedUserIds.value = paginatedUsers.value.map(u => u.id)
+  }
+  else {
+    selectedUserIds.value = users.value.map(u => u.id)
   }
 }
 
@@ -310,7 +421,8 @@ const toggleUserSelection = (userId: string) => {
   const index = selectedUserIds.value.indexOf(userId)
   if (index === -1) {
     selectedUserIds.value.push(userId)
-  } else {
+  }
+  else {
     selectedUserIds.value.splice(index, 1)
   }
 }
@@ -320,7 +432,7 @@ const formatDate = (dateString: string | null) => {
   return new Date(dateString).toLocaleDateString('fr-FR', {
     day: 'numeric',
     month: 'short',
-    year: 'numeric'
+    year: 'numeric',
   })
 }
 
@@ -331,14 +443,28 @@ const formatDateTime = (dateString: string | null) => {
     month: '2-digit',
     year: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   })
 }
 
-// Watch filters to reset pagination
-watch(filters, () => {
+const copyPassword = () => {
+  navigator.clipboard.writeText(temporaryPassword.value)
+}
+
+// Watch filters to reload (avec debounce pour la recherche)
+const debouncedSearch = useDebounceFn(() => {
   currentPage.value = 1
-}, { deep: true })
+  loadData()
+}, 300)
+
+watch(() => filters.value.search, () => {
+  debouncedSearch()
+})
+
+watch([() => filters.value.role_id, () => filters.value.active], () => {
+  currentPage.value = 1
+  loadData()
+})
 
 // Load data on mount
 onMounted(() => {
@@ -351,7 +477,9 @@ onMounted(() => {
     <!-- Header -->
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Utilisateurs</h1>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+          Utilisateurs
+        </h1>
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Gestion des comptes utilisateurs et de leurs accès
         </p>
@@ -406,72 +534,81 @@ onMounted(() => {
         leave-to-class="opacity-0 -translate-y-2"
       >
         <div v-if="showStatistics" class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-          <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Statistiques</h3>
+          <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+            Statistiques
+          </h3>
 
           <!-- Stats Cards -->
           <div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
             <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
-              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.total }}</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Total</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                {{ statistics.total }}
+              </p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Total
+              </p>
             </div>
             <div class="rounded-lg bg-green-50 p-4 dark:bg-green-900/20">
-              <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ statistics.active }}</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Actifs</p>
+              <p class="text-2xl font-bold text-green-600 dark:text-green-400">
+                {{ statistics.active }}
+              </p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Actifs
+              </p>
             </div>
             <div class="rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
-              <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ statistics.inactive }}</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Inactifs</p>
+              <p class="text-2xl font-bold text-red-600 dark:text-red-400">
+                {{ statistics.inactive }}
+              </p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Inactifs
+              </p>
             </div>
             <div class="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
-              <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ statistics.email_verified }}</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Emails vérifiés</p>
+              <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                {{ statistics.email_verified }}
+              </p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Emails vérifiés
+              </p>
             </div>
             <div class="rounded-lg bg-purple-50 p-4 dark:bg-purple-900/20">
-              <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ statistics.last_registrations }}</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Inscrits (30j)</p>
+              <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                {{ statistics.last_registrations }}
+              </p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Inscrits (30j)
+              </p>
             </div>
             <div class="rounded-lg bg-teal-50 p-4 dark:bg-teal-900/20">
-              <p class="text-2xl font-bold text-teal-600 dark:text-teal-400">{{ statistics.last_logins }}</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Connectés (7j)</p>
+              <p class="text-2xl font-bold text-teal-600 dark:text-teal-400">
+                {{ statistics.last_logins }}
+              </p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Connectés (7j)
+              </p>
             </div>
           </div>
 
-          <!-- By Role and Nationality -->
-          <div class="grid gap-6 lg:grid-cols-2">
-            <!-- By Role -->
-            <div>
-              <h4 class="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">Par rôle</h4>
-              <div class="space-y-2">
-                <div
-                  v-for="item in statistics.by_role"
-                  :key="item.role_id"
-                  class="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-700/50"
-                >
-                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ item.role_name }}</span>
-                  <span class="text-sm font-medium text-gray-900 dark:text-white">{{ item.count }}</span>
-                </div>
-                <p v-if="statistics.by_role.length === 0" class="text-sm text-gray-500 dark:text-gray-400">
-                  Aucune donnée
-                </p>
+          <!-- By Role -->
+          <div>
+            <h4 class="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Par rôle
+            </h4>
+            <div class="flex flex-wrap gap-2">
+              <div
+                v-for="item in statistics.by_role"
+                :key="item.role_id"
+                class="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-700/50"
+              >
+                <span class="text-sm text-gray-700 dark:text-gray-300">{{ item.role_name }}</span>
+                <span class="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-900 dark:bg-gray-600 dark:text-white">
+                  {{ item.count }}
+                </span>
               </div>
-            </div>
-
-            <!-- By Nationality -->
-            <div>
-              <h4 class="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">Par nationalité (Top 10)</h4>
-              <div class="space-y-2">
-                <div
-                  v-for="item in statistics.by_nationality"
-                  :key="item.country_id"
-                  class="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-700/50"
-                >
-                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ item.country_name }}</span>
-                  <span class="text-sm font-medium text-gray-900 dark:text-white">{{ item.count }}</span>
-                </div>
-                <p v-if="statistics.by_nationality.length === 0" class="text-sm text-gray-500 dark:text-gray-400">
-                  Aucune donnée
-                </p>
-              </div>
+              <p v-if="statistics.by_role.length === 0" class="text-sm text-gray-500 dark:text-gray-400">
+                Aucune donnée
+              </p>
             </div>
           </div>
         </div>
@@ -488,7 +625,9 @@ onMounted(() => {
       >
         <div v-if="showFilters" class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
           <div class="mb-4 flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Filtres</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              Filtres
+            </h3>
             <button
               v-if="hasActiveFilters"
               type="button"
@@ -518,23 +657,11 @@ onMounted(() => {
                 v-model="filters.role_id"
                 class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               >
-                <option :value="undefined">Tous les rôles</option>
-                <option v-for="role in roleOptions" :key="role.id" :value="role.id">
-                  {{ role.name }}
+                <option value="">
+                  Tous les rôles
                 </option>
-              </select>
-            </div>
-
-            <!-- Campus -->
-            <div>
-              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Campus</label>
-              <select
-                v-model="filters.campus_id"
-                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              >
-                <option :value="undefined">Tous les campus</option>
-                <option v-for="campus in campusOptions" :key="campus.id" :value="campus.id">
-                  {{ campus.name }}
+                <option v-for="role in roleOptions" :key="role.id" :value="role.id">
+                  {{ role.name_fr }}
                 </option>
               </select>
             </div>
@@ -546,62 +673,15 @@ onMounted(() => {
                 v-model="filters.active"
                 class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               >
-                <option :value="undefined">Tous</option>
-                <option :value="true">Actifs</option>
-                <option :value="false">Inactifs</option>
-              </select>
-            </div>
-
-            <!-- Email verified -->
-            <div>
-              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Email vérifié</label>
-              <select
-                v-model="filters.email_verified"
-                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              >
-                <option :value="undefined">Tous</option>
-                <option :value="true">Vérifiés</option>
-                <option :value="false">Non vérifiés</option>
-              </select>
-            </div>
-
-            <!-- Nationality -->
-            <div>
-              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nationalité</label>
-              <select
-                v-model="filters.nationality_id"
-                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              >
-                <option :value="undefined">Toutes</option>
-                <option v-for="country in countryOptions" :key="country.id" :value="country.id">
-                  {{ country.name }}
+                <option :value="undefined">
+                  Tous
                 </option>
-              </select>
-            </div>
-
-            <!-- Sort by -->
-            <div>
-              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Trier par</label>
-              <select
-                v-model="filters.sort_by"
-                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              >
-                <option value="last_name">Nom</option>
-                <option value="email">Email</option>
-                <option value="created_at">Date de création</option>
-                <option value="last_login_at">Dernière connexion</option>
-              </select>
-            </div>
-
-            <!-- Sort order -->
-            <div>
-              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Ordre</label>
-              <select
-                v-model="filters.sort_order"
-                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              >
-                <option value="asc">Croissant</option>
-                <option value="desc">Décroissant</option>
+                <option :value="true">
+                  Actifs
+                </option>
+                <option :value="false">
+                  Inactifs
+                </option>
               </select>
             </div>
           </div>
@@ -611,12 +691,36 @@ onMounted(() => {
       <!-- Results count & bulk actions -->
       <div class="flex items-center justify-between">
         <p class="text-sm text-gray-500 dark:text-gray-400">
-          {{ filteredUsers.length }} utilisateur{{ filteredUsers.length > 1 ? 's' : '' }}
+          {{ totalItems }} utilisateur{{ totalItems > 1 ? 's' : '' }}
           <span v-if="selectedUserIds.length > 0" class="ml-2 font-medium text-primary-600 dark:text-primary-400">
             ({{ selectedUserIds.length }} sélectionné{{ selectedUserIds.length > 1 ? 's' : '' }})
           </span>
         </p>
         <div v-if="selectedUserIds.length > 0" class="flex gap-2">
+          <button
+            type="button"
+            class="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+            @click="handleBulkAction('activate')"
+          >
+            <font-awesome-icon :icon="['fas', 'check']" class="h-3 w-3" />
+            Activer
+          </button>
+          <button
+            type="button"
+            class="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+            @click="handleBulkAction('deactivate')"
+          >
+            <font-awesome-icon :icon="['fas', 'ban']" class="h-3 w-3" />
+            Désactiver
+          </button>
+          <button
+            type="button"
+            class="inline-flex items-center gap-1 rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50 dark:border-red-600 dark:bg-gray-700 dark:text-red-400 dark:hover:bg-red-900/20"
+            @click="handleBulkAction('delete')"
+          >
+            <font-awesome-icon :icon="['fas', 'trash']" class="h-3 w-3" />
+            Supprimer
+          </button>
           <button
             type="button"
             class="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
@@ -661,7 +765,7 @@ onMounted(() => {
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
               <tr
-                v-for="user in paginatedUsers"
+                v-for="user in users"
                 :key="user.id"
                 class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
                 :class="{ 'bg-primary-50 dark:bg-primary-900/10': selectedUserIds.includes(user.id) }"
@@ -677,14 +781,7 @@ onMounted(() => {
                 <td class="px-4 py-3">
                   <div class="flex items-center gap-3">
                     <div class="relative h-10 w-10 flex-shrink-0">
-                      <img
-                        v-if="user.photo_url"
-                        :src="user.photo_url"
-                        :alt="user.full_name"
-                        class="h-10 w-10 rounded-full object-cover"
-                      />
                       <div
-                        v-else
                         class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
                       >
                         <font-awesome-icon :icon="['fas', 'user']" class="h-5 w-5" />
@@ -693,11 +790,15 @@ onMounted(() => {
                       <span
                         v-if="user.active && user.last_login_at && new Date(user.last_login_at) > new Date(Date.now() - 15 * 60 * 1000)"
                         class="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-400 dark:border-gray-800"
-                      ></span>
+                      />
                     </div>
                     <div>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ user.full_name }}</p>
-                      <p class="text-sm text-gray-500 dark:text-gray-400">{{ user.email }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">
+                        {{ getFullName(user) }}
+                      </p>
+                      <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ user.email }}
+                      </p>
                     </div>
                   </div>
                 </td>
@@ -710,7 +811,12 @@ onMounted(() => {
                       :class="getRoleColor(role.code)"
                     >
                       {{ role.name_fr }}
-                      <span v-if="role.campus" class="ml-1 opacity-70">({{ role.campus.name }})</span>
+                    </span>
+                    <span
+                      v-if="user.roles.length === 0"
+                      class="text-sm text-gray-400 dark:text-gray-500"
+                    >
+                      Aucun rôle
                     </span>
                   </div>
                 </td>
@@ -764,6 +870,23 @@ onMounted(() => {
                       <font-awesome-icon :icon="['fas', user.active ? 'toggle-on' : 'toggle-off']" class="h-4 w-4" />
                     </button>
                     <button
+                      v-if="!user.email_verified"
+                      type="button"
+                      class="rounded-lg p-2 text-blue-500 hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-900/20"
+                      title="Marquer email vérifié"
+                      @click="handleVerifyEmail(user)"
+                    >
+                      <font-awesome-icon :icon="['fas', 'envelope-circle-check']" class="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      class="rounded-lg p-2 text-orange-500 hover:bg-orange-100 hover:text-orange-700 dark:hover:bg-orange-900/20"
+                      title="Réinitialiser mot de passe"
+                      @click="handleResetPassword(user)"
+                    >
+                      <font-awesome-icon :icon="['fas', 'key']" class="h-4 w-4" />
+                    </button>
+                    <button
                       type="button"
                       class="rounded-lg p-2 text-red-500 hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900/20"
                       title="Supprimer"
@@ -774,7 +897,7 @@ onMounted(() => {
                   </div>
                 </td>
               </tr>
-              <tr v-if="paginatedUsers.length === 0">
+              <tr v-if="users.length === 0">
                 <td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                   <font-awesome-icon :icon="['fas', 'users']" class="mb-2 h-8 w-8" />
                   <p>Aucun utilisateur trouvé</p>
@@ -844,14 +967,7 @@ onMounted(() => {
           <div class="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
             <div class="flex items-center gap-3">
               <div class="relative h-12 w-12">
-                <img
-                  v-if="selectedUser.photo_url"
-                  :src="selectedUser.photo_url"
-                  :alt="selectedUser.full_name"
-                  class="h-12 w-12 rounded-full object-cover"
-                />
                 <div
-                  v-else
                   class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
                 >
                   <font-awesome-icon :icon="['fas', 'user']" class="h-6 w-6" />
@@ -859,7 +975,7 @@ onMounted(() => {
               </div>
               <div>
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                  {{ selectedUser.full_name }}
+                  {{ getFullName(selectedUser) }}
                 </h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                   {{ selectedUser.email }}
@@ -899,7 +1015,9 @@ onMounted(() => {
 
             <!-- Roles -->
             <div class="mb-6">
-              <h4 class="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">Rôles</h4>
+              <h4 class="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+                Rôles
+              </h4>
               <div class="flex flex-wrap gap-2">
                 <span
                   v-for="role in selectedUser.roles"
@@ -908,7 +1026,12 @@ onMounted(() => {
                   :class="getRoleColor(role.code)"
                 >
                   {{ role.name_fr }}
-                  <span v-if="role.campus" class="ml-1 opacity-70">({{ role.campus.name }})</span>
+                </span>
+                <span
+                  v-if="selectedUser.roles.length === 0"
+                  class="text-sm text-gray-400 dark:text-gray-500"
+                >
+                  Aucun rôle assigné
                 </span>
               </div>
             </div>
@@ -916,31 +1039,41 @@ onMounted(() => {
             <!-- Info Grid -->
             <div class="mb-6 grid gap-4 sm:grid-cols-2">
               <div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Téléphone</p>
-                <p class="text-gray-900 dark:text-white">{{ selectedUser.phone || '-' }}</p>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Téléphone
+                </p>
+                <p class="text-gray-900 dark:text-white">
+                  {{ selectedUser.phone || '-' }}
+                </p>
               </div>
               <div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">WhatsApp</p>
-                <p class="text-gray-900 dark:text-white">{{ selectedUser.phone_whatsapp || '-' }}</p>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  WhatsApp
+                </p>
+                <p class="text-gray-900 dark:text-white">
+                  {{ selectedUser.phone_whatsapp || '-' }}
+                </p>
               </div>
               <div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Nationalité</p>
-                <p class="text-gray-900 dark:text-white">{{ selectedUser.nationality?.name_fr || '-' }}</p>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Ville
+                </p>
+                <p class="text-gray-900 dark:text-white">
+                  {{ selectedUser.city || '-' }}
+                </p>
               </div>
               <div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pays de résidence</p>
-                <p class="text-gray-900 dark:text-white">{{ selectedUser.residence_country?.name_fr || '-' }}</p>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Date de naissance
+                </p>
+                <p class="text-gray-900 dark:text-white">
+                  {{ formatDate(selectedUser.birth_date) }}
+                </p>
               </div>
               <div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Ville</p>
-                <p class="text-gray-900 dark:text-white">{{ selectedUser.city || '-' }}</p>
-              </div>
-              <div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Date de naissance</p>
-                <p class="text-gray-900 dark:text-white">{{ formatDate(selectedUser.birth_date) }}</p>
-              </div>
-              <div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">LinkedIn</p>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  LinkedIn
+                </p>
                 <p class="text-gray-900 dark:text-white">
                   <a
                     v-if="selectedUser.linkedin"
@@ -954,21 +1087,43 @@ onMounted(() => {
                 </p>
               </div>
               <div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Dernière connexion</p>
-                <p class="text-gray-900 dark:text-white">{{ formatLastLogin(selectedUser.last_login_at) }}</p>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Dernière connexion
+                </p>
+                <p class="text-gray-900 dark:text-white">
+                  {{ formatLastLogin(selectedUser.last_login_at) }}
+                </p>
               </div>
+            </div>
+
+            <!-- Address -->
+            <div v-if="selectedUser.address" class="mb-6">
+              <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                Adresse
+              </p>
+              <p class="text-gray-900 dark:text-white">
+                {{ selectedUser.address }}
+              </p>
             </div>
 
             <!-- Dates -->
             <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
               <div class="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Créé le</p>
-                  <p class="text-gray-900 dark:text-white">{{ formatDateTime(selectedUser.created_at) }}</p>
+                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Créé le
+                  </p>
+                  <p class="text-gray-900 dark:text-white">
+                    {{ formatDateTime(selectedUser.created_at) }}
+                  </p>
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Modifié le</p>
-                  <p class="text-gray-900 dark:text-white">{{ formatDateTime(selectedUser.updated_at) }}</p>
+                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Modifié le
+                  </p>
+                  <p class="text-gray-900 dark:text-white">
+                    {{ formatDateTime(selectedUser.updated_at) }}
+                  </p>
                 </div>
               </div>
             </div>
@@ -1019,6 +1174,11 @@ onMounted(() => {
 
           <!-- Body -->
           <form class="max-h-[60vh] overflow-y-auto p-4" @submit.prevent="saveUser">
+            <!-- General error -->
+            <div v-if="formErrors.general" class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+              {{ formErrors.general }}
+            </div>
+
             <!-- Identification -->
             <div class="mb-6">
               <h4 class="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
@@ -1035,7 +1195,9 @@ onMounted(() => {
                     class="w-full rounded-lg border px-3 py-2 text-sm focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                     :class="formErrors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
                   />
-                  <p v-if="formErrors.email" class="mt-1 text-sm text-red-500">{{ formErrors.email }}</p>
+                  <p v-if="formErrors.email" class="mt-1 text-sm text-red-500">
+                    {{ formErrors.email }}
+                  </p>
                 </div>
                 <div :class="isEditing ? 'sm:col-span-2' : ''">
                   <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -1048,7 +1210,9 @@ onMounted(() => {
                     class="w-full rounded-lg border px-3 py-2 text-sm focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                     :class="formErrors.password ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
                   />
-                  <p v-if="formErrors.password" class="mt-1 text-sm text-red-500">{{ formErrors.password }}</p>
+                  <p v-if="formErrors.password" class="mt-1 text-sm text-red-500">
+                    {{ formErrors.password }}
+                  </p>
                 </div>
               </div>
             </div>
@@ -1065,7 +1229,9 @@ onMounted(() => {
                     v-model="formData.salutation"
                     class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                   >
-                    <option :value="null">-</option>
+                    <option :value="null">
+                      -
+                    </option>
                     <option v-for="option in salutationOptions" :key="option.value" :value="option.value">
                       {{ option.label }}
                     </option>
@@ -1081,7 +1247,9 @@ onMounted(() => {
                     class="w-full rounded-lg border px-3 py-2 text-sm focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                     :class="formErrors.last_name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
                   />
-                  <p v-if="formErrors.last_name" class="mt-1 text-sm text-red-500">{{ formErrors.last_name }}</p>
+                  <p v-if="formErrors.last_name" class="mt-1 text-sm text-red-500">
+                    {{ formErrors.last_name }}
+                  </p>
                 </div>
                 <div>
                   <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -1093,7 +1261,9 @@ onMounted(() => {
                     class="w-full rounded-lg border px-3 py-2 text-sm focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                     :class="formErrors.first_name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
                   />
-                  <p v-if="formErrors.first_name" class="mt-1 text-sm text-red-500">{{ formErrors.first_name }}</p>
+                  <p v-if="formErrors.first_name" class="mt-1 text-sm text-red-500">
+                    {{ formErrors.first_name }}
+                  </p>
                 </div>
                 <div>
                   <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Date de naissance</label>
@@ -1102,30 +1272,6 @@ onMounted(() => {
                     type="date"
                     class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                   />
-                </div>
-                <div>
-                  <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nationalité</label>
-                  <select
-                    v-model="formData.nationality_external_id"
-                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  >
-                    <option value="">-</option>
-                    <option v-for="country in countryOptions" :key="country.id" :value="country.id">
-                      {{ country.name }}
-                    </option>
-                  </select>
-                </div>
-                <div>
-                  <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Pays de résidence</label>
-                  <select
-                    v-model="formData.residence_country_external_id"
-                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  >
-                    <option value="">-</option>
-                    <option v-for="country in countryOptions" :key="country.id" :value="country.id">
-                      {{ country.name }}
-                    </option>
-                  </select>
                 </div>
               </div>
             </div>
@@ -1175,7 +1321,7 @@ onMounted(() => {
                     v-model="formData.address"
                     rows="2"
                     class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  ></textarea>
+                  />
                 </div>
               </div>
             </div>
@@ -1185,66 +1331,46 @@ onMounted(() => {
               <h4 class="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Rôles et accès
               </h4>
-              <div class="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Rôles <span class="text-red-500">*</span>
-                  </label>
-                  <div class="space-y-2 rounded-lg border border-gray-300 p-3 dark:border-gray-600">
-                    <label
-                      v-for="role in roleOptions"
-                      :key="role.id"
-                      class="flex items-center gap-2"
-                    >
-                      <input
-                        v-model="formData.role_ids"
-                        type="checkbox"
-                        :value="role.id"
-                        class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700"
-                      />
-                      <span class="text-sm text-gray-700 dark:text-gray-300">{{ role.name }}</span>
-                    </label>
-                  </div>
-                  <p v-if="formErrors.role_ids" class="mt-1 text-sm text-red-500">{{ formErrors.role_ids }}</p>
-                </div>
-                <div>
-                  <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Campus (si applicable)</label>
-                  <select
-                    v-model="formData.campus_external_id"
-                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Rôles <span class="text-red-500">*</span>
+                </label>
+                <div class="space-y-2 rounded-lg border p-3" :class="formErrors.role_ids ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'">
+                  <label
+                    v-for="role in roleOptions"
+                    :key="role.id"
+                    class="flex items-center gap-2"
                   >
-                    <option value="">Aucun</option>
-                    <option v-for="campus in campusOptions" :key="campus.id" :value="campus.id">
-                      {{ campus.name }}
-                    </option>
-                  </select>
-                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Pour les rôles limités à un campus spécifique
-                  </p>
+                    <input
+                      v-model="formData.role_ids"
+                      type="checkbox"
+                      :value="role.id"
+                      class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700"
+                    />
+                    <span
+                      class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+                      :class="getRoleColor(role.code)"
+                    >
+                      {{ role.name_fr }}
+                    </span>
+                  </label>
                 </div>
+                <p v-if="formErrors.role_ids" class="mt-1 text-sm text-red-500">
+                  {{ formErrors.role_ids }}
+                </p>
               </div>
             </div>
 
             <!-- Options -->
             <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
-              <div class="space-y-3">
-                <label class="flex items-center gap-2">
-                  <input
-                    v-model="formData.active"
-                    type="checkbox"
-                    class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700"
-                  />
-                  <span class="text-sm text-gray-700 dark:text-gray-300">Compte actif</span>
-                </label>
-                <label v-if="!isEditing" class="flex items-center gap-2">
-                  <input
-                    v-model="formData.send_welcome_email"
-                    type="checkbox"
-                    class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700"
-                  />
-                  <span class="text-sm text-gray-700 dark:text-gray-300">Envoyer un email de bienvenue</span>
-                </label>
-              </div>
+              <label class="flex items-center gap-2">
+                <input
+                  v-model="formData.active"
+                  type="checkbox"
+                  class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300">Compte actif</span>
+              </label>
             </div>
           </form>
 
@@ -1287,7 +1413,7 @@ onMounted(() => {
               Supprimer l'utilisateur
             </h3>
             <p class="text-gray-500 dark:text-gray-400">
-              Êtes-vous sûr de vouloir supprimer <strong class="text-gray-900 dark:text-white">{{ userToDelete.full_name }}</strong> ?
+              Êtes-vous sûr de vouloir supprimer <strong class="text-gray-900 dark:text-white">{{ getFullName(userToDelete) }}</strong> ?
               Cette action est irréversible.
             </p>
           </div>
@@ -1303,10 +1429,57 @@ onMounted(() => {
               type="button"
               class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
               :disabled="isSaving"
-              @click="deleteUser"
+              @click="handleDeleteUser"
             >
               <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
               Supprimer
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Password Reset Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showPasswordModal"
+        class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4"
+        @click.self="showPasswordModal = false"
+      >
+        <div class="w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-gray-800">
+          <div class="p-6">
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+              <font-awesome-icon :icon="['fas', 'key']" class="h-6 w-6 text-green-600 dark:text-green-400" />
+            </div>
+            <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+              Mot de passe réinitialisé
+            </h3>
+            <p class="mb-4 text-gray-500 dark:text-gray-400">
+              Le nouveau mot de passe temporaire est :
+            </p>
+            <div class="flex items-center gap-2 rounded-lg bg-gray-100 p-3 dark:bg-gray-700">
+              <code class="flex-1 font-mono text-lg text-gray-900 dark:text-white">{{ temporaryPassword }}</code>
+              <button
+                type="button"
+                class="rounded-lg p-2 text-gray-500 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-600"
+                title="Copier"
+                @click="copyPassword"
+              >
+                <font-awesome-icon :icon="['fas', 'copy']" class="h-4 w-4" />
+              </button>
+            </div>
+            <p class="mt-4 text-sm text-amber-600 dark:text-amber-400">
+              <font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="mr-1" />
+              L'utilisateur devra changer ce mot de passe à sa prochaine connexion.
+            </p>
+          </div>
+          <div class="flex justify-end border-t border-gray-200 p-4 dark:border-gray-700">
+            <button
+              type="button"
+              class="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+              @click="showPasswordModal = false"
+            >
+              Fermer
             </button>
           </div>
         </div>

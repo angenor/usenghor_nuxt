@@ -1,16 +1,20 @@
 <script setup lang="ts">
-import type { SocialMediaLink, SocialMediaPlatform } from '~/composables/useMockData'
+import type { SocialMediaLink, SocialMediaPlatform, SocialMediaStats } from '~/types/api'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
 })
 
 const {
   getAllSocialMedia,
-  getSocialMediaById,
+  getSocialMediaCategory,
+  createSocialMedia,
+  updateSocialMedia,
+  deleteSocialMedia,
+  toggleSocialMediaActive,
   isPlatformUsed,
   validateSocialMediaUrl,
-  getNextSocialMediaDisplayOrder,
+  getNextDisplayOrder,
   getSocialMediaStats,
   getAvailablePlatforms,
   formatSocialMediaUrl,
@@ -19,12 +23,14 @@ const {
   platformColors,
   platformBadgeColors,
   platformUrlExamples,
-  generateSocialMediaId
-} = useMockData()
+} = useSocialNetworksApi()
 
 // === STATE ===
 const isLoading = ref(true)
+const isSaving = ref(false)
+const error = ref<string | null>(null)
 const socialMediaLinks = ref<SocialMediaLink[]>([])
+const categoryId = ref<string | null>(null)
 
 // Modals
 const showAddModal = ref(false)
@@ -39,23 +45,22 @@ const formData = ref({
   platform: '' as SocialMediaPlatform | '',
   url: '',
   active: true,
-  custom_label: ''
+  custom_label: '',
 })
 const formErrors = ref<Record<string, string>>({})
 
-// === COMPUTED ===
-
-// Statistiques
-const stats = computed(() => getSocialMediaStats())
-
-// Plateformes disponibles pour l'ajout
-const availablePlatformsForAdd = computed(() => getAvailablePlatforms())
-
-// Plateformes disponibles pour l'édition
-const availablePlatformsForEdit = computed(() => {
-  if (!selectedLink.value) return []
-  return getAvailablePlatforms(selectedLink.value.id)
+// Stats
+const stats = ref<SocialMediaStats>({
+  total_count: 0,
+  active_count: 0,
+  inactive_count: 0,
+  platforms_used: [],
+  last_updated: null,
 })
+
+// Plateformes disponibles
+const availablePlatformsForAdd = ref<SocialMediaPlatform[]>([])
+const availablePlatformsForEdit = ref<SocialMediaPlatform[]>([])
 
 // Exemple d'URL selon la plateforme sélectionnée
 const urlExample = computed(() => {
@@ -66,9 +71,50 @@ const urlExample = computed(() => {
 // === METHODS ===
 
 // Charger les données
-const loadData = () => {
-  socialMediaLinks.value = getAllSocialMedia()
-  isLoading.value = false
+async function loadData() {
+  isLoading.value = true
+  error.value = null
+
+  try {
+    // Charger la catégorie pour obtenir son ID
+    const category = await getSocialMediaCategory()
+    if (category) {
+      categoryId.value = category.id
+    }
+
+    // Charger les données en parallèle
+    const [linksData, statsData, platformsData] = await Promise.all([
+      getAllSocialMedia(),
+      getSocialMediaStats(),
+      getAvailablePlatforms(),
+    ])
+
+    socialMediaLinks.value = linksData
+    stats.value = statsData
+    availablePlatformsForAdd.value = platformsData
+  }
+  catch (err) {
+    console.error('Erreur chargement des données:', err)
+    error.value = 'Erreur lors du chargement des données'
+  }
+  finally {
+    isLoading.value = false
+  }
+}
+
+// Rafraîchir les stats et plateformes disponibles
+async function refreshStatsAndPlatforms() {
+  try {
+    const [statsData, platformsData] = await Promise.all([
+      getSocialMediaStats(),
+      getAvailablePlatforms(),
+    ])
+    stats.value = statsData
+    availablePlatformsForAdd.value = platformsData
+  }
+  catch (err) {
+    console.error('Erreur rafraîchissement:', err)
+  }
 }
 
 // Initialisation
@@ -77,27 +123,27 @@ onMounted(() => {
 })
 
 // Format date
-const formatDate = (dateString: string) => {
+function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString('fr-FR', {
     day: 'numeric',
     month: 'short',
-    year: 'numeric'
+    year: 'numeric',
   })
 }
 
 // Réinitialiser le formulaire
-const resetForm = () => {
+function resetForm() {
   formData.value = {
     platform: '',
     url: '',
     active: true,
-    custom_label: ''
+    custom_label: '',
   }
   formErrors.value = {}
 }
 
 // Valider le formulaire
-const validateForm = (): boolean => {
+function validateForm(): boolean {
   formErrors.value = {}
 
   if (!formData.value.platform) {
@@ -106,7 +152,8 @@ const validateForm = (): boolean => {
 
   if (!formData.value.url.trim()) {
     formErrors.value.url = 'L\'URL est requise'
-  } else if (formData.value.platform && !validateSocialMediaUrl(formData.value.url, formData.value.platform)) {
+  }
+  else if (formData.value.platform && !validateSocialMediaUrl(formData.value.url, formData.value.platform)) {
     formErrors.value.url = 'L\'URL n\'est pas valide pour cette plateforme'
   }
 
@@ -118,132 +165,221 @@ const validateForm = (): boolean => {
 }
 
 // Ouvrir modal d'ajout
-const openAddModal = () => {
+async function openAddModal() {
   resetForm()
+  availablePlatformsForAdd.value = await getAvailablePlatforms()
   showAddModal.value = true
 }
 
 // Ouvrir modal d'édition
-const openEditModal = (link: SocialMediaLink) => {
+async function openEditModal(link: SocialMediaLink) {
   selectedLink.value = link
   formData.value = {
     platform: link.platform,
     url: link.url,
     active: link.active,
-    custom_label: link.custom_label || ''
+    custom_label: link.custom_label || '',
   }
   formErrors.value = {}
+  availablePlatformsForEdit.value = await getAvailablePlatforms(link.id)
   showEditModal.value = true
 }
 
 // Ouvrir modal de suppression
-const openDeleteModal = (link: SocialMediaLink) => {
+function openDeleteModal(link: SocialMediaLink) {
   linkToDelete.value = link
   showDeleteModal.value = true
 }
 
 // Enregistrer (ajout)
-const handleAdd = () => {
+async function handleAdd() {
   if (!validateForm()) return
-
-  const newLink: SocialMediaLink = {
-    id: generateSocialMediaId(),
-    platform: formData.value.platform as SocialMediaPlatform,
-    url: formData.value.url,
-    active: formData.value.active,
-    display_order: getNextSocialMediaDisplayOrder(),
-    custom_label: formData.value.platform === 'other' ? formData.value.custom_label : undefined,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+  if (!categoryId.value) {
+    error.value = 'Catégorie non trouvée'
+    return
   }
 
-  // Simulation (en mode réel, appel API)
-  console.log('Ajout du réseau social:', newLink)
-  socialMediaLinks.value.push(newLink)
-  socialMediaLinks.value.sort((a, b) => a.display_order - b.display_order)
+  isSaving.value = true
+  error.value = null
 
-  showAddModal.value = false
-  resetForm()
+  try {
+    const newLink = await createSocialMedia(
+      {
+        platform: formData.value.platform as SocialMediaPlatform,
+        url: formData.value.url,
+        active: formData.value.active,
+        custom_label: formData.value.platform === 'other' ? formData.value.custom_label : undefined,
+      },
+      categoryId.value,
+    )
+
+    socialMediaLinks.value.push(newLink)
+    socialMediaLinks.value.sort((a, b) => a.display_order - b.display_order)
+
+    await refreshStatsAndPlatforms()
+
+    showAddModal.value = false
+    resetForm()
+  }
+  catch (err) {
+    console.error('Erreur ajout:', err)
+    error.value = 'Erreur lors de l\'ajout du réseau social'
+  }
+  finally {
+    isSaving.value = false
+  }
 }
 
 // Enregistrer (modification)
-const handleEdit = () => {
+async function handleEdit() {
   if (!validateForm() || !selectedLink.value) return
 
-  // Simulation de la modification
-  const index = socialMediaLinks.value.findIndex(l => l.id === selectedLink.value!.id)
-  if (index !== -1) {
-    socialMediaLinks.value[index] = {
-      ...socialMediaLinks.value[index],
+  isSaving.value = true
+  error.value = null
+
+  try {
+    const updated = await updateSocialMedia(selectedLink.value.id, {
       platform: formData.value.platform as SocialMediaPlatform,
       url: formData.value.url,
       active: formData.value.active,
       custom_label: formData.value.platform === 'other' ? formData.value.custom_label : undefined,
-      updated_at: new Date().toISOString()
+    })
+
+    // Mettre à jour le state local
+    const index = socialMediaLinks.value.findIndex(l => l.id === selectedLink.value!.id)
+    if (index !== -1) {
+      socialMediaLinks.value[index] = updated
     }
+
+    await refreshStatsAndPlatforms()
+
+    showEditModal.value = false
+    selectedLink.value = null
+    resetForm()
   }
-
-  console.log('Modification du réseau social:', socialMediaLinks.value[index])
-
-  showEditModal.value = false
-  selectedLink.value = null
-  resetForm()
+  catch (err) {
+    console.error('Erreur modification:', err)
+    error.value = 'Erreur lors de la modification du réseau social'
+  }
+  finally {
+    isSaving.value = false
+  }
 }
 
 // Supprimer
-const handleDelete = () => {
+async function handleDelete() {
   if (!linkToDelete.value) return
 
-  // Simulation de la suppression
-  console.log('Suppression du réseau social:', linkToDelete.value.id)
-  socialMediaLinks.value = socialMediaLinks.value.filter(l => l.id !== linkToDelete.value!.id)
+  isSaving.value = true
+  error.value = null
 
-  showDeleteModal.value = false
-  linkToDelete.value = null
+  try {
+    await deleteSocialMedia(linkToDelete.value.id)
+
+    // Mettre à jour le state local
+    socialMediaLinks.value = socialMediaLinks.value.filter(l => l.id !== linkToDelete.value!.id)
+
+    await refreshStatsAndPlatforms()
+
+    showDeleteModal.value = false
+    linkToDelete.value = null
+  }
+  catch (err) {
+    console.error('Erreur suppression:', err)
+    error.value = 'Erreur lors de la suppression du réseau social'
+  }
+  finally {
+    isSaving.value = false
+  }
 }
 
 // Toggle actif/inactif
-const toggleActive = (link: SocialMediaLink) => {
-  const index = socialMediaLinks.value.findIndex(l => l.id === link.id)
-  if (index !== -1) {
-    socialMediaLinks.value[index].active = !socialMediaLinks.value[index].active
-    socialMediaLinks.value[index].updated_at = new Date().toISOString()
-    console.log('Toggle active:', link.id, socialMediaLinks.value[index].active)
+async function toggleActive(link: SocialMediaLink) {
+  try {
+    const updated = await toggleSocialMediaActive(link.id)
+
+    // Mettre à jour le state local
+    const index = socialMediaLinks.value.findIndex(l => l.id === link.id)
+    if (index !== -1) {
+      socialMediaLinks.value[index] = updated
+    }
+
+    await refreshStatsAndPlatforms()
+  }
+  catch (err) {
+    console.error('Erreur toggle active:', err)
+    error.value = 'Erreur lors de la modification du statut'
   }
 }
 
 // Déplacer vers le haut
-const moveUp = (link: SocialMediaLink) => {
+async function moveUp(link: SocialMediaLink) {
   const index = socialMediaLinks.value.findIndex(l => l.id === link.id)
-  if (index > 0) {
+  if (index <= 0) return
+
+  try {
+    const prevLink = socialMediaLinks.value[index - 1]
+    const currentLink = socialMediaLinks.value[index]
+
     // Échanger les ordres
-    const prevOrder = socialMediaLinks.value[index - 1].display_order
-    socialMediaLinks.value[index - 1].display_order = socialMediaLinks.value[index].display_order
+    const prevOrder = prevLink.display_order
+    const currentOrder = currentLink.display_order
+
+    // Mettre à jour sur le serveur
+    await Promise.all([
+      updateSocialMedia(prevLink.id, { display_order: currentOrder }),
+      updateSocialMedia(currentLink.id, { display_order: prevOrder }),
+    ])
+
+    // Mettre à jour localement
+    socialMediaLinks.value[index - 1].display_order = currentOrder
     socialMediaLinks.value[index].display_order = prevOrder
 
     // Réordonner
     socialMediaLinks.value.sort((a, b) => a.display_order - b.display_order)
-    console.log('Reorder:', socialMediaLinks.value.map(l => ({ id: l.id, order: l.display_order })))
+  }
+  catch (err) {
+    console.error('Erreur réordonnement:', err)
+    // En cas d'erreur, recharger les données
+    await loadData()
   }
 }
 
 // Déplacer vers le bas
-const moveDown = (link: SocialMediaLink) => {
+async function moveDown(link: SocialMediaLink) {
   const index = socialMediaLinks.value.findIndex(l => l.id === link.id)
-  if (index < socialMediaLinks.value.length - 1) {
+  if (index >= socialMediaLinks.value.length - 1) return
+
+  try {
+    const nextLink = socialMediaLinks.value[index + 1]
+    const currentLink = socialMediaLinks.value[index]
+
     // Échanger les ordres
-    const nextOrder = socialMediaLinks.value[index + 1].display_order
-    socialMediaLinks.value[index + 1].display_order = socialMediaLinks.value[index].display_order
+    const nextOrder = nextLink.display_order
+    const currentOrder = currentLink.display_order
+
+    // Mettre à jour sur le serveur
+    await Promise.all([
+      updateSocialMedia(nextLink.id, { display_order: currentOrder }),
+      updateSocialMedia(currentLink.id, { display_order: nextOrder }),
+    ])
+
+    // Mettre à jour localement
+    socialMediaLinks.value[index + 1].display_order = currentOrder
     socialMediaLinks.value[index].display_order = nextOrder
 
     // Réordonner
     socialMediaLinks.value.sort((a, b) => a.display_order - b.display_order)
-    console.log('Reorder:', socialMediaLinks.value.map(l => ({ id: l.id, order: l.display_order })))
+  }
+  catch (err) {
+    console.error('Erreur réordonnement:', err)
+    // En cas d'erreur, recharger les données
+    await loadData()
   }
 }
 
 // Fermer les modales
-const closeModals = () => {
+function closeModals() {
   showAddModal.value = false
   showEditModal.value = false
   showDeleteModal.value = false
@@ -253,7 +389,7 @@ const closeModals = () => {
 }
 
 // Obtenir le label de la plateforme
-const getPlatformLabel = (link: SocialMediaLink) => {
+function getPlatformLabel(link: SocialMediaLink) {
   if (link.platform === 'other' && link.custom_label) {
     return link.custom_label
   }
@@ -280,6 +416,20 @@ const getPlatformLabel = (link: SocialMediaLink) => {
         <font-awesome-icon :icon="['fas', 'plus']" class="h-4 w-4" />
         Ajouter un réseau
       </button>
+    </div>
+
+    <!-- Error -->
+    <div v-if="error" class="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
+      <div class="flex items-center gap-3">
+        <font-awesome-icon :icon="['fas', 'exclamation-circle']" class="h-5 w-5 text-red-600 dark:text-red-400" />
+        <p class="text-sm text-red-700 dark:text-red-300">{{ error }}</p>
+        <button
+          class="ml-auto text-sm font-medium text-red-600 hover:text-red-500 dark:text-red-400"
+          @click="loadData"
+        >
+          Réessayer
+        </button>
+      </div>
     </div>
 
     <!-- Statistiques -->
@@ -569,14 +719,17 @@ const getPlatformLabel = (link: SocialMediaLink) => {
               <button
                 type="button"
                 class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                :disabled="isSaving"
                 @click="closeModals"
               >
                 Annuler
               </button>
               <button
                 type="submit"
-                class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
+                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
+                :disabled="isSaving"
               >
+                <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
                 Ajouter
               </button>
             </div>
@@ -671,14 +824,17 @@ const getPlatformLabel = (link: SocialMediaLink) => {
               <button
                 type="button"
                 class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                :disabled="isSaving"
                 @click="closeModals"
               >
                 Annuler
               </button>
               <button
                 type="submit"
-                class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
+                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
+                :disabled="isSaving"
               >
+                <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
                 Enregistrer
               </button>
             </div>
@@ -710,14 +866,17 @@ const getPlatformLabel = (link: SocialMediaLink) => {
             <div class="flex justify-center gap-3">
               <button
                 class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                :disabled="isSaving"
                 @click="closeModals"
               >
                 Annuler
               </button>
               <button
-                class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                :disabled="isSaving"
                 @click="handleDelete"
               >
+                <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
                 Supprimer
               </button>
             </div>

@@ -1,26 +1,35 @@
 <script setup lang="ts">
-import type { LegalPage, LegalPageKey, LegalPageHistory } from '~/composables/useMockData'
+import type { LegalPage, LegalPageKey, LegalPageHistory } from '~/composables/useLegalApi'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
 })
 
 const {
   getAllLegalPages,
-  getLegalPageByKey,
   getLegalPageHistory,
   getLegalPagesStats,
+  updateLegalPage,
+  restoreVersion,
   canEditLegalPage,
-  generateLegalHistoryId,
+  formatDate,
+  formatDateShort,
   legalPageLabels,
   legalPageDescriptions,
   legalPageIcons,
   legalPageColors,
-  legalPageKeys
-} = useMockData()
+  invalidateCache,
+} = useLegalApi()
 
 // === STATE ===
 const isLoading = ref(true)
+const legalPages = ref<LegalPage[]>([])
+const stats = ref({
+  total_pages: 0,
+  last_updated: null as string | null,
+  last_updated_page: null as LegalPageKey | null,
+  history_count: 0,
+})
 
 // Modals
 const showEditModal = ref(false)
@@ -33,51 +42,41 @@ const pageHistory = ref<LegalPageHistory[]>([])
 // Formulaire
 const formData = ref({
   title: '',
-  content: ''
+  content: '',
 })
 const formErrors = ref<Record<string, string>>({})
 const isSaving = ref(false)
 
-// === COMPUTED ===
-
-// Statistiques globales
-const stats = computed(() => getLegalPagesStats())
-
-// Liste des pages légales
-const legalPages = computed(() => getAllLegalPages())
-
 // === METHODS ===
+
+// Charger les données
+async function loadData() {
+  isLoading.value = true
+  try {
+    // Charger les pages légales
+    legalPages.value = await getAllLegalPages()
+
+    // Charger les statistiques
+    stats.value = await getLegalPagesStats()
+  }
+  catch (error) {
+    console.error('Erreur lors du chargement des pages légales:', error)
+  }
+  finally {
+    isLoading.value = false
+  }
+}
 
 // Initialisation
 onMounted(() => {
-  isLoading.value = false
+  loadData()
 })
-
-// Format date
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-// Format date courte
-const formatDateShort = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  })
-}
 
 // Réinitialiser le formulaire
 const resetForm = () => {
   formData.value = {
     title: '',
-    content: ''
+    content: '',
   }
   formErrors.value = {}
 }
@@ -102,16 +101,16 @@ const openEditModal = (page: LegalPage) => {
   selectedPage.value = page
   formData.value = {
     title: page.title,
-    content: page.content
+    content: page.content,
   }
   formErrors.value = {}
   showEditModal.value = true
 }
 
 // Ouvrir modal d'historique
-const openHistoryModal = (page: LegalPage) => {
+const openHistoryModal = async (page: LegalPage) => {
   selectedPage.value = page
-  pageHistory.value = getLegalPageHistory(page.id)
+  pageHistory.value = await getLegalPageHistory(page.id)
   showHistoryModal.value = true
 }
 
@@ -127,47 +126,46 @@ const handleSave = async () => {
 
   isSaving.value = true
 
-  // Simulation de la sauvegarde (en mode réel, appel API)
-  await new Promise(resolve => setTimeout(resolve, 500))
+  try {
+    await updateLegalPage(selectedPage.value.key, {
+      title: formData.value.title,
+      content: formData.value.content,
+    })
 
-  console.log('Modification de la page légale:', {
-    id: selectedPage.value.id,
-    key: selectedPage.value.key,
-    title: formData.value.title,
-    content: formData.value.content,
-    updated_at: new Date().toISOString()
-  })
+    // Recharger les données
+    invalidateCache()
+    await loadData()
 
-  // Créer une entrée dans l'historique
-  console.log('Nouvelle entrée historique:', {
-    id: generateLegalHistoryId(),
-    content_id: selectedPage.value.id,
-    old_value: selectedPage.value.content,
-    new_value: formData.value.content,
-    modified_by_external_id: 'current_user_id',
-    modified_by_name: 'Admin',
-    modified_at: new Date().toISOString()
-  })
-
-  isSaving.value = false
-  showEditModal.value = false
-  selectedPage.value = null
-  resetForm()
+    showEditModal.value = false
+    selectedPage.value = null
+    resetForm()
+  }
+  catch (error) {
+    console.error('Erreur lors de la sauvegarde:', error)
+  }
+  finally {
+    isSaving.value = false
+  }
 }
 
 // Restaurer une version
-const restoreVersion = (historyEntry: LegalPageHistory) => {
+const handleRestoreVersion = async (historyEntry: LegalPageHistory) => {
   if (!selectedPage.value) return
 
-  // En mode réel, appel API pour restaurer
-  console.log('Restauration de la version:', {
-    content_id: historyEntry.content_id,
-    restored_from: historyEntry.id,
-    content: historyEntry.new_value
-  })
+  try {
+    const success = await restoreVersion(historyEntry)
+    if (success) {
+      // Recharger les données
+      invalidateCache()
+      await loadData()
 
-  showHistoryModal.value = false
-  selectedPage.value = null
+      showHistoryModal.value = false
+      selectedPage.value = null
+    }
+  }
+  catch (error) {
+    console.error('Erreur lors de la restauration:', error)
+  }
 }
 
 // Fermer les modales
@@ -268,6 +266,13 @@ const closeModals = () => {
     <!-- Liste des pages -->
     <div v-if="isLoading" class="flex justify-center py-12">
       <font-awesome-icon :icon="['fas', 'spinner']" class="h-8 w-8 animate-spin text-primary-600" />
+    </div>
+
+    <div v-else-if="legalPages.length === 0" class="text-center py-12">
+      <font-awesome-icon :icon="['fas', 'file-alt']" class="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+      <p class="text-gray-500 dark:text-gray-400">
+        Aucune page légale trouvée. Exécutez le script de seed pour créer les pages.
+      </p>
     </div>
 
     <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -525,7 +530,7 @@ const closeModals = () => {
                     </div>
                     <button
                       class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors"
-                      @click="restoreVersion(entry)"
+                      @click="handleRestoreVersion(entry)"
                     >
                       <font-awesome-icon :icon="['fas', 'undo']" class="h-3 w-3" />
                       Restaurer
@@ -538,9 +543,7 @@ const closeModals = () => {
                       Voir le contenu de cette version
                     </summary>
                     <div class="mt-3 p-3 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-600 max-h-48 overflow-y-auto">
-                      <p class="text-xs text-gray-500 dark:text-gray-400 italic">
-                        Contenu enregistré (aperçu non disponible en mode mock)
-                      </p>
+                      <div class="prose prose-sm dark:prose-invert max-w-none text-xs" v-html="entry.new_value || 'Contenu non disponible'" />
                     </div>
                   </details>
                 </div>
