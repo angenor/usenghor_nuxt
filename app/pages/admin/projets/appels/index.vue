@@ -271,6 +271,26 @@ const getProjectName = (projectId: string) => {
   return project?.title || '-'
 }
 
+// Helper pour extraire le texte brut du JSON EditorJS pour l'aperçu
+const getDescriptionPreview = (description: string | null | undefined): string | null => {
+  if (!description) return null
+  try {
+    const parsed = JSON.parse(description)
+    if (parsed.blocks && Array.isArray(parsed.blocks)) {
+      // Extraire le texte du premier bloc
+      const firstBlock = parsed.blocks[0]
+      if (firstBlock?.data?.text) {
+        return firstBlock.data.text
+      }
+    }
+    return null
+  }
+  catch {
+    // Si ce n'est pas du JSON, retourner tel quel
+    return description
+  }
+}
+
 // Couleurs par type
 const projectCallTypeColors: Record<ProjectCallType, string> = {
   application: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
@@ -513,8 +533,8 @@ const projectCallTypeColors: Record<ProjectCallType, string> = {
                   >
                     {{ call.title }}
                   </NuxtLink>
-                  <div v-if="call.description" class="mt-1 max-w-xs truncate text-sm text-gray-500 dark:text-gray-400">
-                    {{ call.description }}
+                  <div v-if="getDescriptionPreview(call.description)" class="mt-1 max-w-xs truncate text-sm text-gray-500 dark:text-gray-400">
+                    {{ getDescriptionPreview(call.description) }}
                   </div>
                 </div>
               </td>
