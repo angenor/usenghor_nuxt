@@ -1121,3 +1121,55 @@ export interface DepartmentUpdate {
 export interface DepartmentReorder {
   department_ids: string[]
 }
+
+// ============================================================================
+// Partners
+// ============================================================================
+
+export type PartnerType = 'charter_operator' | 'campus_partner' | 'program_partner' | 'project_partner' | 'other'
+
+export interface PartnerRead {
+  id: string
+  name: string
+  description: string | null
+  logo_external_id: string | null
+  country_external_id: string | null
+  website: string | null
+  type: PartnerType
+  email: string | null
+  phone: string | null
+  display_order: number
+  active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface PartnerCreate {
+  name: string
+  description?: string | null
+  logo_external_id?: string | null
+  country_external_id?: string | null
+  website?: string | null
+  type: PartnerType
+  email?: string | null
+  phone?: string | null
+  display_order?: number
+  active?: boolean
+}
+
+export interface PartnerUpdate {
+  name?: string
+  description?: string | null
+  logo_external_id?: string | null
+  country_external_id?: string | null
+  website?: string | null
+  type?: PartnerType
+  email?: string | null
+  phone?: string | null
+  display_order?: number
+  active?: boolean
+}
+
+export interface PartnerReorder {
+  partner_ids: string[]
+}

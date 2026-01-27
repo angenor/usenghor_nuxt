@@ -12,6 +12,24 @@ import type {
   PaginatedResponse,
 } from '~/types/api'
 
+// Types pour les statistiques et utilisation
+export interface MediaStatistics {
+  total: number
+  by_type: Record<string, number>
+  total_size_bytes: number
+}
+
+export interface MediaUsageItem {
+  type: string
+  id: string
+  title: string
+}
+
+export interface MediaUsage {
+  is_used: boolean
+  usage: MediaUsageItem[]
+}
+
 export function useMediaApi() {
   const { apiFetch } = useApi()
 
@@ -77,6 +95,10 @@ export function useMediaApi() {
     limit?: number
     type?: MediaType | null
     search?: string | null
+    date_from?: string | null
+    date_to?: string | null
+    sort_by?: 'created_at' | 'name' | 'size_bytes'
+    sort_order?: 'asc' | 'desc'
   } = {}): Promise<PaginatedResponse<MediaRead>> {
     return apiFetch<PaginatedResponse<MediaRead>>('/api/admin/media', {
       query: {
@@ -84,6 +106,10 @@ export function useMediaApi() {
         limit: params.limit ?? 20,
         type: params.type,
         search: params.search,
+        date_from: params.date_from,
+        date_to: params.date_to,
+        sort_by: params.sort_by ?? 'created_at',
+        sort_order: params.sort_order ?? 'desc',
       },
     })
   }
@@ -203,12 +229,82 @@ export function useMediaApi() {
   /**
    * Formate la taille d'un fichier en texte lisible
    */
-  function formatFileSize(bytes: number): string {
-    if (bytes === 0) return '0 o'
+  function formatFileSize(bytes: number | null | undefined): string {
+    if (!bytes || bytes === 0) return '0 o'
     const k = 1024
     const sizes = ['o', 'Ko', 'Mo', 'Go']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+  }
+
+  /**
+   * Formate une durée en secondes en HH:MM:SS ou MM:SS
+   */
+  function formatDuration(seconds: number | null | undefined): string {
+    if (!seconds || seconds === 0) return '0:00'
+    const h = Math.floor(seconds / 3600)
+    const m = Math.floor((seconds % 3600) / 60)
+    const s = seconds % 60
+    if (h > 0) {
+      return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+    }
+    return `${m}:${s.toString().padStart(2, '0')}`
+  }
+
+  /**
+   * Récupère les statistiques des médias
+   */
+  async function getMediaStatistics(): Promise<MediaStatistics> {
+    return apiFetch<MediaStatistics>('/api/admin/media/statistics')
+  }
+
+  /**
+   * Vérifie où un média est utilisé
+   */
+  async function getMediaUsage(mediaId: string): Promise<MediaUsage> {
+    return apiFetch<MediaUsage>(`/api/admin/media/${mediaId}/usage`)
+  }
+
+  /**
+   * Supprime plusieurs médias en une fois
+   */
+  async function bulkDeleteMedia(mediaIds: string[]): Promise<MessageResponse> {
+    return apiFetch<MessageResponse>('/api/admin/media/bulk-delete', {
+      method: 'POST',
+      body: { media_ids: mediaIds },
+    })
+  }
+
+  /**
+   * Télécharge plusieurs médias dans un fichier ZIP
+   */
+  async function downloadMediaZip(mediaIds: string[]): Promise<Blob> {
+    const config = useRuntimeConfig()
+    const baseUrl = config.public.apiBase || 'http://localhost:8000'
+    const authStore = useAuthStore()
+
+    const response = await fetch(`${baseUrl}/api/admin/media/download-zip`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authStore.accessToken}`,
+      },
+      body: JSON.stringify({ ids: mediaIds }),
+    })
+
+    if (!response.ok) {
+      throw new Error('Erreur lors du téléchargement')
+    }
+    return response.blob()
+  }
+
+  /**
+   * Retourne l'URL de téléchargement direct d'un média
+   */
+  function getDownloadUrl(mediaId: string): string {
+    const config = useRuntimeConfig()
+    const baseUrl = config.public.apiBase || 'http://localhost:8000'
+    return `${baseUrl}/api/admin/media/${mediaId}/download`
   }
 
   return {
@@ -223,5 +319,11 @@ export function useMediaApi() {
     validateFile,
     getMediaTypeFromMime,
     formatFileSize,
+    formatDuration,
+    getMediaStatistics,
+    getMediaUsage,
+    bulkDeleteMedia,
+    downloadMediaZip,
+    getDownloadUrl,
   }
 }

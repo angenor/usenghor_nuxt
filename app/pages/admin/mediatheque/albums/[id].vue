@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { AlbumAdmin, MediaAdmin } from '@bank/mock-data/albums-admin'
+import type { MediaRead, PublicationStatus } from '~/types/api'
+import type { AlbumWithMedia } from '~/composables/useAlbumsApi'
 
 definePageMeta({
   layout: 'admin'
@@ -9,29 +10,64 @@ const route = useRoute()
 const albumId = computed(() => route.params.id as string)
 
 const {
-  getAlbumByIdAdmin,
-  getAlbumMediaAdmin,
-  getAvailableMediaForAlbum,
-  albumStatusLabels,
-  albumStatusColors,
-  mediaTypeLabels,
-  mediaTypeIcons,
-  mediaTypeColors,
+  getAlbumById,
+  updateAlbum: apiUpdateAlbum,
+  addMediaToAlbum,
+  removeMediaFromAlbum,
+  reorderAlbumMedia
+} = useAlbumsApi()
+
+const {
+  listMedia,
+  getMediaUrl,
   formatFileSize,
   formatDuration
-} = useMockData()
+} = useMediaApi()
+
+// Constantes locales (anciennement dans useMockData)
+const albumStatusLabels: Record<string, string> = {
+  draft: 'Brouillon',
+  published: 'Publié'
+}
+
+const albumStatusColors: Record<string, string> = {
+  draft: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+  published: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+}
+
+const mediaTypeLabels: Record<string, string> = {
+  image: 'Image',
+  video: 'Vidéo',
+  audio: 'Audio',
+  document: 'Document'
+}
+
+const mediaTypeIcons: Record<string, string> = {
+  image: 'fa-image',
+  video: 'fa-video',
+  audio: 'fa-music',
+  document: 'fa-file-pdf'
+}
+
+const mediaTypeColors: Record<string, string> = {
+  image: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+  video: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+  audio: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400',
+  document: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+}
 
 // === STATE ===
-const album = ref<AlbumAdmin | null>(null)
-const albumMedia = ref<MediaAdmin[]>([])
-const availableMedia = ref<MediaAdmin[]>([])
+const album = ref<AlbumWithMedia | null>(null)
+const albumMedia = computed(() => album.value?.media_items || [])
+const availableMedia = ref<MediaRead[]>([])
 const isLoading = ref(true)
+const isSaving = ref(false)
 
 // Modals
 const showAddMediaModal = ref(false)
 const showRemoveMediaModal = ref(false)
 const showEditInfoModal = ref(false)
-const selectedMediaToRemove = ref<MediaAdmin | null>(null)
+const selectedMediaToRemove = ref<MediaRead | null>(null)
 
 // Sélection pour ajout
 const selectedMediaIds = ref<string[]>([])
@@ -44,19 +80,31 @@ const addMediaType = ref<'all' | 'image' | 'video' | 'audio' | 'document'>('all'
 const editForm = ref({
   title: '',
   description: '',
-  status: 'draft' as 'draft' | 'published'
+  status: 'draft' as PublicationStatus
 })
 
 // === LOAD DATA ===
-const loadAlbum = () => {
+async function loadAlbum() {
   isLoading.value = true
-  const foundAlbum = getAlbumByIdAdmin(albumId.value)
-  if (foundAlbum) {
+  try {
+    const foundAlbum = await getAlbumById(albumId.value)
     album.value = foundAlbum
-    albumMedia.value = getAlbumMediaAdmin(albumId.value)
-    availableMedia.value = getAvailableMediaForAlbum(albumId.value)
+  } catch (error) {
+    console.error('Erreur chargement album:', error)
+    album.value = null
+  } finally {
+    isLoading.value = false
   }
-  isLoading.value = false
+}
+
+async function loadAvailableMedia() {
+  try {
+    const allMedia = await listMedia({ limit: 1000 })
+    const albumMediaIds = album.value?.media_items.map(m => m.id) || []
+    availableMedia.value = allMedia.items.filter(m => !albumMediaIds.includes(m.id))
+  } catch (error) {
+    console.error('Erreur chargement médias disponibles:', error)
+  }
 }
 
 onMounted(loadAlbum)
@@ -95,19 +143,20 @@ const formatDate = (dateString: string) => {
   })
 }
 
-const getStatusLabel = (status: 'draft' | 'published') => {
-  return albumStatusLabels[status]
+const getStatusLabel = (status: string) => {
+  return albumStatusLabels[status] || status
 }
 
-const getStatusColor = (status: 'draft' | 'published') => {
-  return albumStatusColors[status]
+const getStatusColor = (status: string) => {
+  return albumStatusColors[status] || 'bg-gray-100 text-gray-800'
 }
 
 // Add media modal
-const openAddMediaModal = () => {
+const openAddMediaModal = async () => {
   selectedMediaIds.value = []
   addMediaSearch.value = ''
   addMediaType.value = 'all'
+  await loadAvailableMedia()
   showAddMediaModal.value = true
 }
 
@@ -125,22 +174,21 @@ const toggleMediaSelection = (id: string) => {
   }
 }
 
-const addSelectedMedia = () => {
-  console.log('Adding media to album:', selectedMediaIds.value)
-  // En production: POST /api/admin/albums/{id}/media
-  // Simuler l'ajout
-  selectedMediaIds.value.forEach(mediaId => {
-    const media = availableMedia.value.find(m => m.id === mediaId)
-    if (media) {
-      albumMedia.value.push(media)
-    }
-  })
-  availableMedia.value = availableMedia.value.filter(m => !selectedMediaIds.value.includes(m.id))
-  closeAddMediaModal()
+const handleAddMedia = async () => {
+  if (selectedMediaIds.value.length === 0) return
+  isSaving.value = true
+  try {
+    album.value = await addMediaToAlbum(albumId.value, selectedMediaIds.value)
+    closeAddMediaModal()
+  } catch (error) {
+    console.error('Erreur ajout médias:', error)
+  } finally {
+    isSaving.value = false
+  }
 }
 
 // Remove media
-const openRemoveMediaModal = (media: MediaAdmin) => {
+const openRemoveMediaModal = (media: MediaRead) => {
   selectedMediaToRemove.value = media
   showRemoveMediaModal.value = true
 }
@@ -150,28 +198,32 @@ const closeRemoveMediaModal = () => {
   selectedMediaToRemove.value = null
 }
 
-const removeMedia = () => {
+const handleRemoveMedia = async () => {
   if (!selectedMediaToRemove.value) return
-  console.log('Removing media from album:', selectedMediaToRemove.value.id)
-  // En production: DELETE /api/admin/albums/{id}/media/{mediaId}
-  // Simuler le retrait
-  const media = selectedMediaToRemove.value
-  albumMedia.value = albumMedia.value.filter(m => m.id !== media.id)
-  availableMedia.value.push(media)
-  closeRemoveMediaModal()
+  isSaving.value = true
+  try {
+    album.value = await removeMediaFromAlbum(albumId.value, selectedMediaToRemove.value.id)
+    closeRemoveMediaModal()
+  } catch (error) {
+    console.error('Erreur retrait média:', error)
+  } finally {
+    isSaving.value = false
+  }
 }
 
-// Set cover
-const setCoverImage = (media: MediaAdmin) => {
+// Couverture = premier média de l'album (le backend ne supporte pas cover_media_id)
+const setCoverImage = async (media: MediaRead) => {
   if (!album.value || media.type !== 'image') return
-  console.log('Setting cover image:', media.id)
-  // En production: POST /api/admin/albums/{id}/cover
-  album.value.cover_media = media
-  album.value.cover_media_id = media.id
+  // Déplacer l'image en première position pour en faire la couverture
+  const index = album.value.media_items.findIndex(m => m.id === media.id)
+  if (index > 0) {
+    await moveToFirstPosition(index)
+  }
 }
 
-const isCoverImage = (media: MediaAdmin) => {
-  return album.value?.cover_media_id === media.id
+const isCoverImage = (media: MediaRead) => {
+  // Le premier média image est considéré comme la couverture
+  return album.value?.media_items[0]?.id === media.id
 }
 
 // Edit info modal
@@ -189,45 +241,69 @@ const closeEditInfoModal = () => {
   showEditInfoModal.value = false
 }
 
-const saveAlbumInfo = () => {
+const handleSaveAlbumInfo = async () => {
   if (!album.value) return
-  console.log('Updating album info:', editForm.value)
-  // En production: PUT /api/admin/albums/{id}
-  album.value.title = editForm.value.title
-  album.value.description = editForm.value.description
-  album.value.status = editForm.value.status
-  closeEditInfoModal()
+  isSaving.value = true
+  try {
+    await apiUpdateAlbum(albumId.value, {
+      title: editForm.value.title,
+      description: editForm.value.description || null,
+      status: editForm.value.status
+    })
+    await loadAlbum()
+    closeEditInfoModal()
+  } catch (error) {
+    console.error('Erreur mise à jour album:', error)
+  } finally {
+    isSaving.value = false
+  }
 }
 
-// Reorder (simple up/down)
-const moveUp = (index: number) => {
-  if (index === 0) return
-  const temp = albumMedia.value[index]
-  albumMedia.value[index] = albumMedia.value[index - 1]
-  albumMedia.value[index - 1] = temp
-  // En production: PUT /api/admin/albums/{id}/media/reorder
+// Reorder (avec appel API)
+async function saveReorder(newOrder: MediaRead[]) {
+  try {
+    album.value = await reorderAlbumMedia(albumId.value, newOrder.map(m => m.id))
+  } catch (error) {
+    console.error('Erreur réordonnancement:', error)
+    // Recharger pour revenir à l'état précédent
+    await loadAlbum()
+  }
 }
 
-const moveDown = (index: number) => {
-  if (index === albumMedia.value.length - 1) return
-  const temp = albumMedia.value[index]
-  albumMedia.value[index] = albumMedia.value[index + 1]
-  albumMedia.value[index + 1] = temp
-  // En production: PUT /api/admin/albums/{id}/media/reorder
+const moveUp = async (index: number) => {
+  if (index === 0 || !album.value) return
+  const items = [...album.value.media_items]
+  ;[items[index], items[index - 1]] = [items[index - 1], items[index]]
+  album.value.media_items = items
+  await saveReorder(items)
 }
 
-const moveToFirst = (index: number) => {
-  if (index === 0) return
-  const [item] = albumMedia.value.splice(index, 1)
-  albumMedia.value.unshift(item)
-  // En production: PUT /api/admin/albums/{id}/media/reorder
+const moveDown = async (index: number) => {
+  if (!album.value || index === album.value.media_items.length - 1) return
+  const items = [...album.value.media_items]
+  ;[items[index], items[index + 1]] = [items[index + 1], items[index]]
+  album.value.media_items = items
+  await saveReorder(items)
 }
 
-const moveToLast = (index: number) => {
-  if (index === albumMedia.value.length - 1) return
-  const [item] = albumMedia.value.splice(index, 1)
-  albumMedia.value.push(item)
-  // En production: PUT /api/admin/albums/{id}/media/reorder
+const moveToFirstPosition = async (index: number) => {
+  if (index === 0 || !album.value) return
+  const items = [...album.value.media_items]
+  const [item] = items.splice(index, 1)
+  items.unshift(item)
+  album.value.media_items = items
+  await saveReorder(items)
+}
+
+const moveToFirst = moveToFirstPosition
+
+const moveToLast = async (index: number) => {
+  if (!album.value || index === album.value.media_items.length - 1) return
+  const items = [...album.value.media_items]
+  const [item] = items.splice(index, 1)
+  items.push(item)
+  album.value.media_items = items
+  await saveReorder(items)
 }
 </script>
 
@@ -370,7 +446,7 @@ const moveToLast = (index: number) => {
             <div class="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700">
               <img
                 v-if="media.type === 'image'"
-                :src="media.thumbnail || media.url"
+                :src="getMediaUrl(media) || ''"
                 :alt="media.alt_text || media.name"
                 class="h-full w-full object-cover"
               />
@@ -532,7 +608,7 @@ const moveToLast = (index: number) => {
                 <div class="aspect-square overflow-hidden">
                   <img
                     v-if="media.type === 'image'"
-                    :src="media.thumbnail || media.url"
+                    :src="getMediaUrl(media) || ''"
                     :alt="media.alt_text || media.name"
                     class="h-full w-full object-cover"
                   />
@@ -588,9 +664,10 @@ const moveToLast = (index: number) => {
             </button>
             <button
               class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-              :disabled="selectedMediaIds.length === 0"
-              @click="addSelectedMedia"
+              :disabled="selectedMediaIds.length === 0 || isSaving"
+              @click="handleAddMedia"
             >
+              <font-awesome-icon v-if="isSaving" icon="fa-solid fa-spinner" class="mr-2 h-4 w-4 animate-spin" />
               Ajouter {{ selectedMediaIds.length }} média{{ selectedMediaIds.length > 1 ? 's' : '' }}
             </button>
           </div>
@@ -633,9 +710,11 @@ const moveToLast = (index: number) => {
               Annuler
             </button>
             <button
-              class="rounded-lg bg-yellow-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-yellow-700"
-              @click="removeMedia"
+              class="rounded-lg bg-yellow-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-yellow-700 disabled:opacity-50"
+              :disabled="isSaving"
+              @click="handleRemoveMedia"
             >
+              <font-awesome-icon v-if="isSaving" icon="fa-solid fa-spinner" class="mr-2 h-4 w-4 animate-spin" />
               Retirer
             </button>
           </div>
@@ -661,7 +740,7 @@ const moveToLast = (index: number) => {
             </button>
           </div>
 
-          <form class="p-6" @submit.prevent="saveAlbumInfo">
+          <form class="p-6" @submit.prevent="handleSaveAlbumInfo">
             <div class="space-y-4">
               <!-- Titre -->
               <div>
@@ -713,8 +792,10 @@ const moveToLast = (index: number) => {
               </button>
               <button
                 type="submit"
-                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+                :disabled="isSaving"
               >
+                <font-awesome-icon v-if="isSaving" icon="fa-solid fa-spinner" class="mr-2 h-4 w-4 animate-spin" />
                 Enregistrer
               </button>
             </div>

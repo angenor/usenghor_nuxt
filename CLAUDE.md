@@ -62,14 +62,6 @@ firebase deploy   # Deploy to Firebase (requires firebase-tools)
 - GSAP + Lenis for smooth scrolling and advanced animations
 - Leaflet for interactive maps
 
-## Data Model
-
-The site uses a comprehensive data model defined in `bank/modele_de_donnee/schema.sql` (PostgreSQL). Key entities:
-- **Organization**: departments, services, staff, conseil_administration, pays_bailleurs
-- **Academic**: formations (master, doctorat, DU, certifiante), campus_externalises
-- **Content**: actualites, appels, evenements, projets, alumni
-- **Infrastructure**: campus_facilities, documents, medias
-
 All fields are trilingual (`*_fr`, `*_en`, `*_ar`).
 
 ## Mock Data
@@ -82,8 +74,6 @@ const {
   getCampusBySlug, getFormationBySlug, getAllNews, getFeaturedEvents
 } = useMockData()
 ```
-
-Mock data files in `bank/mock-data/` export typed data matching the PostgreSQL schema. Types are re-exported from `useMockData.ts`.
 
 ## EditorJS Integration
 

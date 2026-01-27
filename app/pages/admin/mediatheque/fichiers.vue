@@ -1,22 +1,46 @@
 <script setup lang="ts">
-import type { MediaAdmin, MediaFilters } from '@bank/mock-data/albums-admin'
+import type { MediaRead, MediaType } from '~/types/api'
+import { useDebounceFn } from '@vueuse/core'
 
 definePageMeta({
   layout: 'admin'
 })
 
 const {
-  getAllMediaAdmin,
-  getFilteredMediaAdmin,
-  getMediaStatsAdmin,
-  getMediaByIdAdmin,
+  listMedia,
+  getMediaStatistics,
   getMediaUsage,
-  mediaTypeLabels,
-  mediaTypeIcons,
-  mediaTypeColors,
+  deleteMedia: apiDeleteMedia,
+  bulkDeleteMedia,
+  downloadMediaZip,
+  getDownloadUrl,
+  updateMedia,
+  getMediaUrl,
   formatFileSize,
   formatDuration
-} = useMockData()
+} = useMediaApi()
+
+// Constantes locales (anciennement dans useMockData)
+const mediaTypeLabels: Record<string, string> = {
+  image: 'Image',
+  video: 'Vidéo',
+  audio: 'Audio',
+  document: 'Document'
+}
+
+const mediaTypeIcons: Record<string, string> = {
+  image: 'fa-image',
+  video: 'fa-video',
+  audio: 'fa-music',
+  document: 'fa-file-pdf'
+}
+
+const mediaTypeColors: Record<string, string> = {
+  image: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+  video: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+  audio: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400',
+  document: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+}
 
 // === STATE ===
 // Vue
@@ -35,6 +59,8 @@ const sortOrder = ref<'asc' | 'desc'>('desc')
 // Pagination
 const currentPage = ref(1)
 const itemsPerPage = ref(24)
+const totalItems = ref(0)
+const totalPages = ref(1)
 
 // Sélection
 const selectedIds = ref<string[]>([])
@@ -44,37 +70,113 @@ const selectAll = ref(false)
 const showDetailModal = ref(false)
 const showDeleteModal = ref(false)
 const showUploadModal = ref(false)
-const selectedMedia = ref<MediaAdmin | null>(null)
-const deletingMedia = ref<MediaAdmin | null>(null)
+const selectedMedia = ref<MediaRead | null>(null)
+const deletingMedia = ref<MediaRead | null>(null)
+
+// État de chargement
+const isLoading = ref(true)
+const isSaving = ref(false)
+
+// Données de l'API
+const mediaList = ref<MediaRead[]>([])
+const stats = ref({
+  total: 0,
+  images: 0,
+  videos: 0,
+  documents: 0,
+  audio: 0,
+  totalSize: 0
+})
+
+// Formulaire d'édition
+const editForm = reactive({
+  name: '',
+  description: '',
+  alt_text: '',
+  credits: ''
+})
+
+// === API CALLS ===
+async function loadMedia() {
+  isLoading.value = true
+  try {
+    const response = await listMedia({
+      page: currentPage.value,
+      limit: itemsPerPage.value,
+      type: filterType.value !== 'all' ? filterType.value as MediaType : null,
+      search: searchQuery.value || null,
+      date_from: dateFrom.value || null,
+      date_to: dateTo.value || null,
+      sort_by: sortBy.value,
+      sort_order: sortOrder.value
+    })
+    mediaList.value = response?.items || []
+    totalItems.value = response?.total || 0
+    totalPages.value = response?.pages || 1
+  } catch (error) {
+    console.error('Erreur chargement médias:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+async function loadStats() {
+  try {
+    const response = await getMediaStatistics()
+    const byType = response?.by_type || {}
+    stats.value = {
+      total: response?.total || 0,
+      images: byType.image || 0,
+      videos: byType.video || 0,
+      documents: byType.document || 0,
+      audio: byType.audio || 0,
+      totalSize: response?.total_size_bytes || 0
+    }
+  } catch (error) {
+    console.error('Erreur chargement stats:', error)
+  }
+}
+
+// Utilisation d'un média (async)
+const mediaUsageCache = ref<Map<string, { is_used: boolean; usage: Array<{ type: string; id: string; title: string }> }>>(new Map())
+
+async function loadMediaUsage(mediaId: string) {
+  if (mediaUsageCache.value.has(mediaId)) return
+  try {
+    const usage = await getMediaUsage(mediaId)
+    mediaUsageCache.value.set(mediaId, usage)
+  } catch {
+    mediaUsageCache.value.set(mediaId, { is_used: false, usage: [] })
+  }
+}
 
 // === COMPUTED ===
-const stats = computed(() => getMediaStatsAdmin())
-
-const filteredMedia = computed(() => {
-  const filters: MediaFilters = {
-    search: searchQuery.value || undefined,
-    type: filterType.value !== 'all' ? filterType.value : undefined,
-    date_from: dateFrom.value || undefined,
-    date_to: dateTo.value || undefined,
-    sort_by: sortBy.value,
-    sort_order: sortOrder.value
-  }
-  return getFilteredMediaAdmin(filters)
-})
-
-const totalPages = computed(() => Math.ceil(filteredMedia.value.length / itemsPerPage.value))
-
-const paginatedMedia = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return filteredMedia.value.slice(start, end)
-})
+const paginatedMedia = computed(() => mediaList.value)
 
 const hasActiveFilters = computed(() => {
   return searchQuery.value ||
     filterType.value !== 'all' ||
     dateFrom.value ||
     dateTo.value
+})
+
+// === WATCHERS ===
+watch(searchQuery, useDebounceFn(() => {
+  currentPage.value = 1
+  loadMedia()
+}, 300))
+
+watch([filterType, dateFrom, dateTo, sortBy, sortOrder], () => {
+  currentPage.value = 1
+  loadMedia()
+})
+
+watch(currentPage, loadMedia)
+
+// === LIFECYCLE ===
+onMounted(() => {
+  loadMedia()
+  loadStats()
 })
 
 // === METHODS ===
@@ -119,8 +221,15 @@ const resetFilters = () => {
 }
 
 // Actions
-const openDetailModal = (media: MediaAdmin) => {
+const openDetailModal = async (media: MediaRead) => {
   selectedMedia.value = media
+  // Pré-remplir le formulaire d'édition
+  editForm.name = media.name
+  editForm.description = media.description || ''
+  editForm.alt_text = media.alt_text || ''
+  editForm.credits = media.credits || ''
+  // Charger l'utilisation
+  await loadMediaUsage(media.id)
   showDetailModal.value = true
 }
 
@@ -129,8 +238,9 @@ const closeDetailModal = () => {
   selectedMedia.value = null
 }
 
-const openDeleteModal = (media: MediaAdmin) => {
+const openDeleteModal = async (media: MediaRead) => {
   deletingMedia.value = media
+  await loadMediaUsage(media.id)
   showDeleteModal.value = true
 }
 
@@ -139,37 +249,80 @@ const closeDeleteModal = () => {
   deletingMedia.value = null
 }
 
-const deleteMedia = () => {
+const handleDeleteMedia = async () => {
   if (!deletingMedia.value) return
-  console.log('Deleting media:', deletingMedia.value.id)
-  // En production: DELETE /api/admin/media/{id}
-  closeDeleteModal()
-}
-
-const bulkDelete = () => {
-  console.log('Deleting:', selectedIds.value)
-  // En production: POST /api/admin/media/bulk-delete
-  selectedIds.value = []
-  selectAll.value = false
-}
-
-const downloadMedia = (media: MediaAdmin) => {
-  if (media.is_external_url) {
-    window.open(media.url, '_blank')
-  } else {
-    // En production: GET /api/admin/media/{id}/download
-    console.log('Downloading:', media.id)
+  try {
+    await apiDeleteMedia(deletingMedia.value.id)
+    closeDeleteModal()
+    await loadMedia()
+    await loadStats()
+  } catch (error) {
+    console.error('Erreur suppression:', error)
   }
 }
 
-const bulkDownload = () => {
-  console.log('Downloading ZIP:', selectedIds.value)
-  // En production: POST /api/admin/media/download-zip
+const handleBulkDelete = async () => {
+  if (selectedIds.value.length === 0) return
+  try {
+    await bulkDeleteMedia(selectedIds.value)
+    selectedIds.value = []
+    selectAll.value = false
+    await loadMedia()
+    await loadStats()
+  } catch (error) {
+    console.error('Erreur suppression en masse:', error)
+  }
 }
 
-const copyUrl = (media: MediaAdmin) => {
-  navigator.clipboard.writeText(media.url)
-  // TODO: Afficher toast de confirmation
+const downloadMedia = (media: MediaRead) => {
+  if (media.is_external_url) {
+    window.open(media.url, '_blank')
+  } else {
+    window.open(getDownloadUrl(media.id), '_blank')
+  }
+}
+
+const handleBulkDownload = async () => {
+  if (selectedIds.value.length === 0) return
+  try {
+    const blob = await downloadMediaZip(selectedIds.value)
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `media-${Date.now()}.zip`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('Erreur téléchargement ZIP:', error)
+  }
+}
+
+const copyUrl = (media: MediaRead) => {
+  const url = getMediaUrl(media)
+  if (url) {
+    navigator.clipboard.writeText(url)
+  }
+}
+
+const handleSaveMedia = async () => {
+  if (!selectedMedia.value) return
+  isSaving.value = true
+  try {
+    await updateMedia(selectedMedia.value.id, {
+      name: editForm.name,
+      description: editForm.description || null,
+      alt_text: editForm.alt_text || null,
+      credits: editForm.credits || null
+    })
+    closeDetailModal()
+    await loadMedia()
+  } catch (error) {
+    console.error('Erreur mise à jour:', error)
+  } finally {
+    isSaving.value = false
+  }
 }
 
 // Formatage
@@ -193,9 +346,9 @@ const getMediaTypeColor = (type: string) => {
   return mediaTypeColors[type as keyof typeof mediaTypeColors] || 'bg-gray-100 text-gray-800'
 }
 
-// Vérifier utilisation
+// Vérifier utilisation (depuis le cache)
 const getMediaUsageInfo = (mediaId: string) => {
-  return getMediaUsage(mediaId)
+  return mediaUsageCache.value.get(mediaId) || { is_used: false, usage: [] }
 }
 </script>
 
@@ -353,13 +506,13 @@ const getMediaUsageInfo = (mediaId: string) => {
         <div class="flex gap-2">
           <button
             class="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700"
-            @click="bulkDownload"
+            @click="handleBulkDownload"
           >
             Télécharger (ZIP)
           </button>
           <button
             class="rounded bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700"
-            @click="bulkDelete"
+            @click="handleBulkDelete"
           >
             Supprimer
           </button>
@@ -367,8 +520,13 @@ const getMediaUsageInfo = (mediaId: string) => {
       </div>
     </div>
 
+    <!-- Loading state -->
+    <div v-if="isLoading" class="flex items-center justify-center py-12">
+      <font-awesome-icon icon="fa-solid fa-spinner" class="h-8 w-8 animate-spin text-blue-600" />
+    </div>
+
     <!-- Vue Grille -->
-    <div v-if="viewMode === 'grid'" class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+    <div v-else-if="viewMode === 'grid'" class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
       <div
         v-for="media in paginatedMedia"
         :key="media.id"
@@ -390,7 +548,7 @@ const getMediaUsageInfo = (mediaId: string) => {
         <div class="aspect-square bg-gray-100 dark:bg-gray-700">
           <img
             v-if="media.type === 'image'"
-            :src="media.thumbnail || media.url"
+            :src="getMediaUrl(media) || ''"
             :alt="media.alt_text || media.name"
             class="h-full w-full object-cover"
           />
@@ -451,7 +609,7 @@ const getMediaUsageInfo = (mediaId: string) => {
     </div>
 
     <!-- Vue Liste -->
-    <div v-else class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
+    <div v-else-if="viewMode === 'list' && !isLoading" class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
       <div class="admin-scrollbar overflow-x-auto" data-lenis-prevent>
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-900">
@@ -522,7 +680,7 @@ const getMediaUsageInfo = (mediaId: string) => {
                 <div class="h-12 w-12 overflow-hidden rounded bg-gray-100 dark:bg-gray-700">
                   <img
                     v-if="media.type === 'image'"
-                    :src="media.thumbnail || media.url"
+                    :src="getMediaUrl(media) || ''"
                     :alt="media.alt_text || media.name"
                     class="h-full w-full object-cover"
                   />
@@ -594,9 +752,9 @@ const getMediaUsageInfo = (mediaId: string) => {
     </div>
 
     <!-- Pagination -->
-    <div class="flex items-center justify-between rounded-lg bg-white px-4 py-3 shadow dark:bg-gray-800">
+    <div v-if="totalItems > 0" class="flex items-center justify-between rounded-lg bg-white px-4 py-3 shadow dark:bg-gray-800">
       <div class="text-sm text-gray-500 dark:text-gray-400">
-        {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, filteredMedia.length) }} sur {{ filteredMedia.length }} fichiers
+        {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} fichiers
       </div>
       <div class="flex items-center gap-2">
         <button
@@ -621,7 +779,7 @@ const getMediaUsageInfo = (mediaId: string) => {
 
     <!-- État vide -->
     <div
-      v-if="paginatedMedia.length === 0"
+      v-if="!isLoading && paginatedMedia.length === 0"
       class="flex flex-col items-center justify-center rounded-lg bg-white py-12 shadow dark:bg-gray-800"
     >
       <div class="mb-4 rounded-full bg-gray-100 p-4 dark:bg-gray-700">
@@ -661,13 +819,13 @@ const getMediaUsageInfo = (mediaId: string) => {
               <div class="aspect-video overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700">
                 <img
                   v-if="selectedMedia.type === 'image'"
-                  :src="selectedMedia.url"
+                  :src="getMediaUrl(selectedMedia) || ''"
                   :alt="selectedMedia.alt_text || selectedMedia.name"
                   class="h-full w-full object-contain"
                 />
                 <video
                   v-else-if="selectedMedia.type === 'video'"
-                  :src="selectedMedia.url"
+                  :src="getMediaUrl(selectedMedia) || ''"
                   controls
                   class="h-full w-full"
                 />
@@ -706,7 +864,7 @@ const getMediaUsageInfo = (mediaId: string) => {
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nom</label>
                 <input
-                  :value="selectedMedia.name"
+                  v-model="editForm.name"
                   type="text"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
@@ -715,7 +873,7 @@ const getMediaUsageInfo = (mediaId: string) => {
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                 <textarea
-                  :value="selectedMedia.description"
+                  v-model="editForm.description"
                   rows="2"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
@@ -724,7 +882,7 @@ const getMediaUsageInfo = (mediaId: string) => {
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Texte alternatif</label>
                 <input
-                  :value="selectedMedia.alt_text"
+                  v-model="editForm.alt_text"
                   type="text"
                   placeholder="Description pour l'accessibilité"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
@@ -734,7 +892,7 @@ const getMediaUsageInfo = (mediaId: string) => {
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Crédits</label>
                 <input
-                  :value="selectedMedia.credits"
+                  v-model="editForm.credits"
                   type="text"
                   placeholder="Photographe, source..."
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
@@ -784,7 +942,7 @@ const getMediaUsageInfo = (mediaId: string) => {
           <div class="flex justify-between border-t border-gray-200 p-4 dark:border-gray-700">
             <button
               class="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-600 dark:text-red-400 dark:hover:bg-red-900/20"
-              @click="openDeleteModal(selectedMedia); closeDetailModal()"
+              @click="openDeleteModal(selectedMedia!); closeDetailModal()"
             >
               <font-awesome-icon icon="fa-solid fa-trash" class="mr-2 h-4 w-4" />
               Supprimer
@@ -799,8 +957,11 @@ const getMediaUsageInfo = (mediaId: string) => {
               </button>
               <button
                 type="button"
-                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+                :disabled="isSaving"
+                @click="handleSaveMedia"
               >
+                <font-awesome-icon v-if="isSaving" icon="fa-solid fa-spinner" class="mr-2 h-4 w-4 animate-spin" />
                 Enregistrer
               </button>
             </div>
@@ -918,7 +1079,7 @@ const getMediaUsageInfo = (mediaId: string) => {
             <button
               type="button"
               class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
-              @click="deleteMedia"
+              @click="handleDeleteMedia"
             >
               Supprimer
             </button>

@@ -1,26 +1,56 @@
 <script setup lang="ts">
-import type { AlbumAdmin, AlbumFilters, MediaAdmin } from '@bank/mock-data/albums-admin'
+import type { MediaRead, PublicationStatus } from '~/types/api'
+import type { AlbumRead, AlbumWithMedia } from '~/composables/useAlbumsApi'
+import { useDebounceFn } from '@vueuse/core'
 
 definePageMeta({
   layout: 'admin'
 })
 
 const {
-  getAllAlbumsAdmin,
-  getFilteredAlbumsAdmin,
-  getAlbumStatsAdmin,
-  getAlbumByIdAdmin,
-  getAlbumUsage,
-  getAlbumMediaAdmin,
-  getAvailableMediaForAlbum,
-  albumStatusLabels,
-  albumStatusColors,
-  mediaTypeLabels,
-  mediaTypeIcons,
-  generateAlbumId
-} = useMockData()
+  listAlbums,
+  getAlbumById,
+  createAlbum: apiCreateAlbum,
+  updateAlbum: apiUpdateAlbum,
+  deleteAlbum: apiDeleteAlbum
+} = useAlbumsApi()
+
+const { getMediaUrl } = useMediaApi()
+
+// Constantes locales (anciennement dans useMockData)
+const albumStatusLabels: Record<string, string> = {
+  draft: 'Brouillon',
+  published: 'Publié'
+}
+
+const albumStatusColors: Record<string, string> = {
+  draft: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+  published: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+}
+
+const mediaTypeLabels: Record<string, string> = {
+  image: 'Image',
+  video: 'Vidéo',
+  audio: 'Audio',
+  document: 'Document'
+}
+
+const mediaTypeIcons: Record<string, string> = {
+  image: 'fa-image',
+  video: 'fa-video',
+  audio: 'fa-music',
+  document: 'fa-file-pdf'
+}
 
 // === STATE ===
+// Loading
+const isLoading = ref(true)
+const isSaving = ref(false)
+
+// Données
+const albumsList = ref<AlbumRead[]>([])
+const albumsWithMedia = ref<Map<string, AlbumWithMedia>>(new Map())
+
 // Filtres
 const searchQuery = ref('')
 const filterStatus = ref<'all' | 'draft' | 'published'>('all')
@@ -34,25 +64,62 @@ const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const showDeleteModal = ref(false)
 const showViewModal = ref(false)
-const selectedAlbum = ref<AlbumAdmin | null>(null)
+const selectedAlbum = ref<AlbumRead | null>(null)
+const selectedAlbumDetails = ref<AlbumWithMedia | null>(null)
 
 // Formulaire création/édition
 const albumForm = ref({
   title: '',
   description: '',
-  status: 'draft' as 'draft' | 'published'
+  status: 'draft' as PublicationStatus
 })
 
+// === API CALLS ===
+async function loadAlbums() {
+  isLoading.value = true
+  try {
+    const response = await listAlbums({
+      search: searchQuery.value || null,
+      status: filterStatus.value !== 'all' ? filterStatus.value as PublicationStatus : null
+    })
+    albumsList.value = response.items
+
+    // Charger les détails pour les couvertures (max 20 premiers)
+    albumsWithMedia.value.clear()
+    const albumsToLoad = response.items.slice(0, 20)
+    await Promise.all(
+      albumsToLoad.map(async (album) => {
+        try {
+          const details = await getAlbumById(album.id)
+          albumsWithMedia.value.set(album.id, details)
+        } catch {
+          // Ignorer les erreurs individuelles
+        }
+      })
+    )
+  } catch (error) {
+    console.error('Erreur chargement albums:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
 // === COMPUTED ===
-const stats = computed(() => getAlbumStatsAdmin())
+const stats = computed(() => {
+  const total = albumsList.value.length
+  const published = albumsList.value.filter(a => a.status === 'published').length
+  const draft = albumsList.value.filter(a => a.status === 'draft').length
+  let totalMedia = 0
+  albumsWithMedia.value.forEach(album => {
+    totalMedia += album.media_items.length
+  })
+  return { total, published, draft, totalMedia }
+})
 
 const filteredAlbums = computed(() => {
-  let albums = getFilteredAlbumsAdmin({
-    search: searchQuery.value || undefined,
-    status: filterStatus.value !== 'all' ? filterStatus.value : undefined
-  } as AlbumFilters)
+  let albums = [...albumsList.value]
 
-  // Tri
+  // Tri côté client (le backend ne supporte pas encore le tri)
   albums.sort((a, b) => {
     let comparison = 0
     if (sortBy.value === 'title') {
@@ -71,13 +138,34 @@ const hasActiveFilters = computed(() => {
 })
 
 const selectedAlbumMedia = computed(() => {
-  if (!selectedAlbum.value) return []
-  return getAlbumMediaAdmin(selectedAlbum.value.id)
+  if (!selectedAlbumDetails.value) return []
+  return selectedAlbumDetails.value.media_items
 })
 
-const selectedAlbumUsage = computed(() => {
-  if (!selectedAlbum.value) return null
-  return getAlbumUsage(selectedAlbum.value.id)
+// Helper functions
+function getAlbumCover(albumId: string): MediaRead | null {
+  const details = albumsWithMedia.value.get(albumId)
+  if (!details || details.media_items.length === 0) return null
+  // Retourner la première image, sinon le premier média
+  return details.media_items.find(m => m.type === 'image') || details.media_items[0]
+}
+
+function getAlbumMediaCount(albumId: string): number {
+  return albumsWithMedia.value.get(albumId)?.media_items.length || 0
+}
+
+// === WATCHERS ===
+watch(searchQuery, useDebounceFn(() => {
+  loadAlbums()
+}, 300))
+
+watch(filterStatus, () => {
+  loadAlbums()
+})
+
+// === LIFECYCLE ===
+onMounted(() => {
+  loadAlbums()
 })
 
 // === METHODS ===
@@ -93,6 +181,7 @@ const toggleSort = (column: typeof sortBy.value) => {
 const resetFilters = () => {
   searchQuery.value = ''
   filterStatus.value = 'all'
+  loadAlbums()
 }
 
 const formatDate = (dateString: string) => {
@@ -103,12 +192,12 @@ const formatDate = (dateString: string) => {
   })
 }
 
-const getStatusLabel = (status: 'draft' | 'published') => {
-  return albumStatusLabels[status]
+const getStatusLabel = (status: string) => {
+  return albumStatusLabels[status] || status
 }
 
-const getStatusColor = (status: 'draft' | 'published') => {
-  return albumStatusColors[status]
+const getStatusColor = (status: string) => {
+  return albumStatusColors[status] || 'bg-gray-100 text-gray-800'
 }
 
 // Modals actions
@@ -126,13 +215,24 @@ const closeCreateModal = () => {
   albumForm.value = { title: '', description: '', status: 'draft' }
 }
 
-const createAlbum = () => {
-  console.log('Creating album:', albumForm.value)
-  // En production: POST /api/admin/albums
-  closeCreateModal()
+const handleCreateAlbum = async () => {
+  isSaving.value = true
+  try {
+    await apiCreateAlbum({
+      title: albumForm.value.title,
+      description: albumForm.value.description || null,
+      status: albumForm.value.status
+    })
+    closeCreateModal()
+    await loadAlbums()
+  } catch (error) {
+    console.error('Erreur création album:', error)
+  } finally {
+    isSaving.value = false
+  }
 }
 
-const openEditModal = (album: AlbumAdmin) => {
+const openEditModal = (album: AlbumRead) => {
   selectedAlbum.value = album
   albumForm.value = {
     title: album.title,
@@ -148,14 +248,25 @@ const closeEditModal = () => {
   albumForm.value = { title: '', description: '', status: 'draft' }
 }
 
-const updateAlbum = () => {
+const handleUpdateAlbum = async () => {
   if (!selectedAlbum.value) return
-  console.log('Updating album:', selectedAlbum.value.id, albumForm.value)
-  // En production: PUT /api/admin/albums/{id}
-  closeEditModal()
+  isSaving.value = true
+  try {
+    await apiUpdateAlbum(selectedAlbum.value.id, {
+      title: albumForm.value.title,
+      description: albumForm.value.description || null,
+      status: albumForm.value.status
+    })
+    closeEditModal()
+    await loadAlbums()
+  } catch (error) {
+    console.error('Erreur mise à jour album:', error)
+  } finally {
+    isSaving.value = false
+  }
 }
 
-const openDeleteModal = (album: AlbumAdmin) => {
+const openDeleteModal = (album: AlbumRead) => {
   selectedAlbum.value = album
   showDeleteModal.value = true
 }
@@ -165,38 +276,61 @@ const closeDeleteModal = () => {
   selectedAlbum.value = null
 }
 
-const deleteAlbum = () => {
+const handleDeleteAlbum = async () => {
   if (!selectedAlbum.value) return
-  console.log('Deleting album:', selectedAlbum.value.id)
-  // En production: DELETE /api/admin/albums/{id}
-  closeDeleteModal()
+  isSaving.value = true
+  try {
+    await apiDeleteAlbum(selectedAlbum.value.id)
+    closeDeleteModal()
+    await loadAlbums()
+  } catch (error) {
+    console.error('Erreur suppression album:', error)
+  } finally {
+    isSaving.value = false
+  }
 }
 
-const openViewModal = (album: AlbumAdmin) => {
+const openViewModal = async (album: AlbumRead) => {
   selectedAlbum.value = album
+  try {
+    selectedAlbumDetails.value = await getAlbumById(album.id)
+  } catch (error) {
+    console.error('Erreur chargement détails album:', error)
+    selectedAlbumDetails.value = null
+  }
   showViewModal.value = true
 }
 
 const closeViewModal = () => {
   showViewModal.value = false
   selectedAlbum.value = null
+  selectedAlbumDetails.value = null
 }
 
-const toggleStatus = (album: AlbumAdmin) => {
-  const newStatus = album.status === 'draft' ? 'published' : 'draft'
-  console.log('Changing status:', album.id, newStatus)
-  // En production: POST /api/admin/albums/{id}/status
+const handleToggleStatus = async (album: AlbumRead) => {
+  const newStatus: PublicationStatus = album.status === 'draft' ? 'published' : 'draft'
+  try {
+    await apiUpdateAlbum(album.id, { status: newStatus })
+    await loadAlbums()
+  } catch (error) {
+    console.error('Erreur changement statut:', error)
+  }
 }
 
-const duplicateAlbum = (album: AlbumAdmin) => {
-  console.log('Duplicating album:', album.id)
-  // En production: POST /api/admin/albums/{id}/duplicate
-}
-
-const getUsageTotal = () => {
-  if (!selectedAlbumUsage.value) return 0
-  const usage = selectedAlbumUsage.value
-  return usage.events + usage.services + usage.campus + usage.projects
+const duplicateAlbum = async (album: AlbumRead) => {
+  // Créer un nouvel album avec le même titre + " (copie)"
+  try {
+    const details = await getAlbumById(album.id)
+    await apiCreateAlbum({
+      title: `${album.title} (copie)`,
+      description: album.description,
+      status: 'draft'
+    })
+    // Note: La duplication des médias nécessiterait d'ajouter les médias au nouvel album
+    await loadAlbums()
+  } catch (error) {
+    console.error('Erreur duplication album:', error)
+  }
 }
 </script>
 
@@ -300,8 +434,13 @@ const getUsageTotal = () => {
       </div>
     </div>
 
+    <!-- Loading state -->
+    <div v-if="isLoading" class="flex items-center justify-center py-12">
+      <font-awesome-icon icon="fa-solid fa-spinner" class="h-8 w-8 animate-spin text-blue-600" />
+    </div>
+
     <!-- Liste des albums (cartes) -->
-    <div v-if="filteredAlbums.length > 0" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div v-else-if="filteredAlbums.length > 0" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       <div
         v-for="album in filteredAlbums"
         :key="album.id"
@@ -310,8 +449,8 @@ const getUsageTotal = () => {
         <!-- Image de couverture -->
         <div class="relative aspect-video overflow-hidden bg-gray-100 dark:bg-gray-700">
           <img
-            v-if="album.cover_media?.url"
-            :src="album.cover_media.thumbnail || album.cover_media.url"
+            v-if="getAlbumCover(album.id)"
+            :src="getMediaUrl(getAlbumCover(album.id)!) || ''"
             :alt="album.title"
             class="h-full w-full object-cover transition-transform group-hover:scale-105"
           />
@@ -331,7 +470,7 @@ const getUsageTotal = () => {
 
           <!-- Badge nombre de médias -->
           <span class="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-xs font-medium text-white">
-            {{ album.media_count }} média{{ album.media_count > 1 ? 's' : '' }}
+            {{ getAlbumMediaCount(album.id) }} média{{ getAlbumMediaCount(album.id) > 1 ? 's' : '' }}
           </span>
 
           <!-- Overlay actions au hover -->
@@ -378,7 +517,7 @@ const getUsageTotal = () => {
               <button
                 class="rounded p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
                 :title="album.status === 'draft' ? 'Publier' : 'Repasser en brouillon'"
-                @click="toggleStatus(album)"
+                @click="handleToggleStatus(album)"
               >
                 <font-awesome-icon
                   :icon="album.status === 'draft' ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"
@@ -452,7 +591,7 @@ const getUsageTotal = () => {
             </button>
           </div>
 
-          <form class="p-6" @submit.prevent="createAlbum">
+          <form class="p-6" @submit.prevent="handleCreateAlbum">
             <div class="space-y-4">
               <!-- Titre -->
               <div>
@@ -506,8 +645,10 @@ const getUsageTotal = () => {
               </button>
               <button
                 type="submit"
-                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+                :disabled="isSaving"
               >
+                <font-awesome-icon v-if="isSaving" icon="fa-solid fa-spinner" class="mr-2 h-4 w-4 animate-spin" />
                 Créer l'album
               </button>
             </div>
@@ -534,7 +675,7 @@ const getUsageTotal = () => {
             </button>
           </div>
 
-          <form class="p-6" @submit.prevent="updateAlbum">
+          <form class="p-6" @submit.prevent="handleUpdateAlbum">
             <div class="space-y-4">
               <!-- Titre -->
               <div>
@@ -586,8 +727,10 @@ const getUsageTotal = () => {
               </button>
               <button
                 type="submit"
-                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+                :disabled="isSaving"
               >
+                <font-awesome-icon v-if="isSaving" icon="fa-solid fa-spinner" class="mr-2 h-4 w-4 animate-spin" />
                 Enregistrer
               </button>
             </div>
@@ -618,25 +761,6 @@ const getUsageTotal = () => {
               Cette action est irréversible.
             </p>
 
-            <!-- Avertissement utilisation -->
-            <div
-              v-if="getUsageTotal() > 0"
-              class="mb-4 rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900/20"
-            >
-              <div class="flex items-start gap-2">
-                <font-awesome-icon icon="fa-solid fa-exclamation-triangle" class="mt-0.5 h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                <div class="text-sm text-yellow-800 dark:text-yellow-300">
-                  <p class="font-medium">Cet album est utilisé dans :</p>
-                  <ul class="mt-1 list-inside list-disc">
-                    <li v-if="selectedAlbumUsage?.events">{{ selectedAlbumUsage.events }} événement(s)</li>
-                    <li v-if="selectedAlbumUsage?.services">{{ selectedAlbumUsage.services }} service(s)</li>
-                    <li v-if="selectedAlbumUsage?.campus">{{ selectedAlbumUsage.campus }} campus</li>
-                    <li v-if="selectedAlbumUsage?.projects">{{ selectedAlbumUsage.projects }} projet(s)</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
             <p class="text-sm text-gray-500 dark:text-gray-400">
               <font-awesome-icon icon="fa-solid fa-info-circle" class="mr-1" />
               Les médias ne seront pas supprimés, seulement les associations avec cet album.
@@ -651,9 +775,11 @@ const getUsageTotal = () => {
               Annuler
             </button>
             <button
-              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
-              @click="deleteAlbum"
+              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+              :disabled="isSaving"
+              @click="handleDeleteAlbum"
             >
+              <font-awesome-icon v-if="isSaving" icon="fa-solid fa-spinner" class="mr-2 h-4 w-4 animate-spin" />
               Supprimer
             </button>
           </div>
@@ -674,7 +800,7 @@ const getUsageTotal = () => {
             <div>
               <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ selectedAlbum.title }}</h2>
               <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ selectedAlbum.media_count }} média{{ selectedAlbum.media_count > 1 ? 's' : '' }}
+                {{ selectedAlbumMedia.length }} média{{ selectedAlbumMedia.length > 1 ? 's' : '' }}
               </p>
             </div>
             <div class="flex items-center gap-2">
@@ -709,7 +835,7 @@ const getUsageTotal = () => {
               >
                 <img
                   v-if="media.type === 'image'"
-                  :src="media.thumbnail || media.url"
+                  :src="getMediaUrl(media) || ''"
                   :alt="media.alt_text || media.name"
                   class="h-full w-full object-cover"
                 />
