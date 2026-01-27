@@ -17,11 +17,23 @@ const {
 
 const { getAllCountries, getFlagEmoji } = useCountriesApi()
 const { getMediaUrl } = useMediaApi()
+const { apiFetch } = useApi()
 
 // États
 const loading = ref(true)
 const campus = ref<CampusWithTeam | null>(null)
 const countries = ref<CountryRead[]>([])
+
+// Info du responsable (head)
+interface HeadInfo {
+  id: string
+  first_name: string
+  last_name: string
+  salutation: string | null
+  email: string
+  photo_external_id: string | null
+}
+const headInfo = ref<HeadInfo | null>(null)
 
 // Données
 const campusId = computed(() => route.params.id as string)
@@ -44,6 +56,10 @@ async function loadCampus() {
   loading.value = true
   try {
     campus.value = await getCampusById(campusId.value)
+    // Charger les infos du responsable si défini
+    if (campus.value?.head_external_id) {
+      await loadHeadInfo(campus.value.head_external_id)
+    }
   } catch (e) {
     console.error('Erreur chargement campus:', e)
     campus.value = null
@@ -59,6 +75,25 @@ async function loadCountries() {
     console.error('Erreur chargement pays:', e)
   }
 }
+
+async function loadHeadInfo(userId: string) {
+  try {
+    headInfo.value = await apiFetch<HeadInfo>(`/api/admin/users/${userId}`)
+  } catch (e) {
+    console.error('Erreur chargement info responsable:', e)
+    headInfo.value = null
+  }
+}
+
+// Computed pour le nom complet du responsable
+const headFullName = computed(() => {
+  if (!headInfo.value) return null
+  const parts = []
+  if (headInfo.value.salutation) parts.push(headInfo.value.salutation)
+  parts.push(headInfo.value.first_name)
+  parts.push(headInfo.value.last_name)
+  return parts.join(' ')
+})
 
 // Navigation
 const goBack = () => router.push('/admin/campus/liste')
@@ -258,18 +293,36 @@ const toggleActive = async () => {
           </div>
         </div>
 
-        <!-- Responsable (TODO: enrichir avec les données utilisateur) -->
+        <!-- Responsable -->
         <div v-if="campus.head_external_id" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
           <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
             <font-awesome-icon :icon="['fas', 'user-tie']" class="h-5 w-5 text-indigo-500" />
             Responsable
           </h2>
           <div class="flex items-center gap-4">
-            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700">
+            <img
+              v-if="headInfo?.photo_external_id"
+              :src="getMediaUrl(headInfo.photo_external_id) ?? undefined"
+              :alt="headFullName ?? 'Responsable'"
+              class="h-16 w-16 rounded-full object-cover"
+              @error="($event.target as HTMLImageElement).style.display = 'none'"
+            />
+            <div
+              v-else
+              class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700"
+            >
               <font-awesome-icon :icon="['fas', 'user']" class="text-2xl text-gray-400" />
             </div>
             <div>
-              <div class="text-sm text-gray-500">Responsable assigné</div>
+              <div v-if="headFullName" class="font-medium text-gray-900 dark:text-white">
+                {{ headFullName }}
+              </div>
+              <div v-if="headInfo?.email" class="text-sm text-gray-500">
+                {{ headInfo.email }}
+              </div>
+              <div v-if="!headInfo" class="text-sm text-gray-400 italic">
+                Chargement...
+              </div>
             </div>
           </div>
         </div>
