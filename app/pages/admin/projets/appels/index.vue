@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProjectCall, ProjectCallType, ProjectCallStatus, ProjectCallFilters } from '~/composables/useMockData'
+import type { ProjectCallRead, ProjectCallType, ProjectCallStatus } from '~/types/api'
 
 definePageMeta({
   layout: 'admin'
@@ -8,58 +8,138 @@ definePageMeta({
 const router = useRouter()
 
 const {
-  getAllProjectCalls,
-  getFilteredProjectCallsAdmin,
-  getProjectCallsStats,
-  getProjectsForCallSelect,
+  listAllCalls,
+  listProjects,
+  deleteCall: deleteCallApi,
+  updateCall,
   projectCallTypeLabels,
-  projectCallTypeColors,
   projectCallStatusLabels,
-  projectCallStatusColors
-} = useMockData()
+  projectCallStatusColors,
+  formatDateShort,
+} = useProjectsApi()
 
-// === DONNÉES ===
-const calls = ref<ProjectCall[]>([])
-const stats = ref(getProjectCallsStats())
-const projectsForSelect = ref(getProjectsForCallSelect())
+// === ÉTAT ===
+const calls = ref<ProjectCallRead[]>([])
+const isLoading = ref(true)
+const error = ref<string | null>(null)
+const isProcessing = ref(false)
+
+// Projets pour le filtre
+const projectsForSelect = ref<{ id: string; title: string }[]>([])
 
 // === FILTRES ===
-const filters = ref<ProjectCallFilters>({
+interface CallFilters {
+  project_id?: string
+  type?: ProjectCallType
+  status?: ProjectCallStatus
+  search: string
+}
+
+const filters = ref<CallFilters>({
   project_id: undefined,
   type: undefined,
   status: undefined,
   search: ''
 })
 
-// Charger les données
-const loadData = () => {
-  calls.value = getFilteredProjectCallsAdmin(filters.value)
-  stats.value = getProjectCallsStats()
+// === PAGINATION ===
+const currentPage = ref(1)
+const itemsPerPage = ref(10)
+const totalItems = ref(0)
+const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value))
+
+// === CHARGEMENT ===
+const loadData = async () => {
+  isLoading.value = true
+  error.value = null
+
+  try {
+    const response = await listAllCalls({
+      page: currentPage.value,
+      limit: itemsPerPage.value,
+      status: filters.value.status,
+    })
+    calls.value = response.items
+    totalItems.value = response.total
+  }
+  catch (err: any) {
+    console.error('Erreur chargement appels:', err)
+    error.value = err.message || 'Erreur lors du chargement des appels'
+  }
+  finally {
+    isLoading.value = false
+  }
+}
+
+const loadProjects = async () => {
+  try {
+    const response = await listProjects({ limit: 100 })
+    projectsForSelect.value = response.items.map(p => ({ id: p.id, title: p.title }))
+  }
+  catch (err) {
+    console.error('Erreur chargement projets:', err)
+  }
 }
 
 // Charger au montage
-onMounted(loadData)
+onMounted(() => {
+  loadData()
+  loadProjects()
+})
 
-// Recharger quand les filtres changent
-watch(filters, loadData, { deep: true })
+// Recharger quand les filtres changent (avec debounce pour la recherche)
+let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
-// === TRI ===
+watch([() => filters.value.status, () => filters.value.project_id, () => filters.value.type], () => {
+  currentPage.value = 1
+  loadData()
+})
+
+watch(() => filters.value.search, () => {
+  if (searchTimeout) clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    currentPage.value = 1
+    loadData()
+  }, 300)
+})
+
+watch(currentPage, () => {
+  loadData()
+})
+
+// === TRI (client-side sur la page courante) ===
 const sortBy = ref<'title' | 'project' | 'type' | 'deadline'>('deadline')
 const sortOrder = ref<'asc' | 'desc'>('desc')
 
 const sortedCalls = computed(() => {
-  const sorted = [...calls.value]
-  sorted.sort((a, b) => {
+  let filtered = [...calls.value]
+
+  // Filtrage local pour la recherche et le projet
+  if (filters.value.search) {
+    const search = filters.value.search.toLowerCase()
+    filtered = filtered.filter(c =>
+      c.title.toLowerCase().includes(search)
+      || c.description?.toLowerCase().includes(search)
+    )
+  }
+
+  if (filters.value.project_id) {
+    filtered = filtered.filter(c => c.project_id === filters.value.project_id)
+  }
+
+  if (filters.value.type) {
+    filtered = filtered.filter(c => c.type === filters.value.type)
+  }
+
+  // Tri
+  filtered.sort((a, b) => {
     let comparison = 0
     switch (sortBy.value) {
       case 'title':
         comparison = a.title.localeCompare(b.title)
         break
-      case 'project':
-        comparison = (a.project_title || '').localeCompare(b.project_title || '')
-        break
       case 'type':
-        comparison = a.type.localeCompare(b.type)
+        comparison = (a.type || '').localeCompare(b.type || '')
         break
       case 'deadline':
         const dateA = a.deadline ? new Date(a.deadline).getTime() : 0
@@ -69,62 +149,99 @@ const sortedCalls = computed(() => {
     }
     return sortOrder.value === 'asc' ? comparison : -comparison
   })
-  return sorted
+
+  return filtered
 })
 
 const toggleSort = (column: typeof sortBy.value) => {
   if (sortBy.value === column) {
     sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-  } else {
+  }
+  else {
     sortBy.value = column
     sortOrder.value = 'asc'
   }
 }
 
-// === PAGINATION ===
-const currentPage = ref(1)
-const itemsPerPage = ref(10)
-
-const paginatedCalls = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  return sortedCalls.value.slice(start, start + itemsPerPage.value)
+// === STATISTIQUES ===
+const stats = computed(() => {
+  const all = calls.value
+  return {
+    total: totalItems.value,
+    upcoming: all.filter(c => c.status === 'upcoming').length,
+    ongoing: all.filter(c => c.status === 'ongoing').length,
+    closed: all.filter(c => c.status === 'closed').length,
+    byType: {
+      project: all.filter(c => c.type === 'project').length,
+      training: all.filter(c => c.type === 'training').length,
+    }
+  }
 })
-
-const totalPages = computed(() => Math.ceil(sortedCalls.value.length / itemsPerPage.value))
 
 // === SÉLECTION ===
 const selectedIds = ref<string[]>([])
 const selectAll = ref(false)
 
 watch(selectAll, (value) => {
-  selectedIds.value = value ? paginatedCalls.value.map(c => c.id) : []
+  selectedIds.value = value ? sortedCalls.value.map(c => c.id) : []
 })
 
 // === ACTIONS ===
-const changeStatus = (id: string, newStatus: ProjectCallStatus) => {
-  console.log(`Changing status of ${id} to ${newStatus}`)
-  // En production: POST /api/admin/project-calls/{id}/status
-}
-
-const deleteCall = (id: string) => {
-  if (confirm('Êtes-vous sûr de vouloir supprimer cet appel ?')) {
-    console.log('Deleting call:', id)
-    // En production: DELETE /api/admin/project-calls/{id}
-    loadData()
+const changeStatus = async (id: string, newStatus: ProjectCallStatus) => {
+  isProcessing.value = true
+  try {
+    await updateCall(id, { status: newStatus })
+    await loadData()
+  }
+  catch (err: any) {
+    console.error('Erreur changement statut:', err)
+    alert('Erreur lors du changement de statut')
+  }
+  finally {
+    isProcessing.value = false
   }
 }
 
-const bulkDelete = () => {
+const deleteCall = async (id: string) => {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer cet appel ?')) return
+
+  isProcessing.value = true
+  try {
+    await deleteCallApi(id)
+    await loadData()
+  }
+  catch (err: any) {
+    console.error('Erreur suppression:', err)
+    alert('Erreur lors de la suppression')
+  }
+  finally {
+    isProcessing.value = false
+  }
+}
+
+const bulkDelete = async () => {
   if (selectedIds.value.length === 0) return
-  if (confirm(`Êtes-vous sûr de vouloir supprimer ${selectedIds.value.length} appel(s) ?`)) {
-    console.log('Bulk deleting:', selectedIds.value)
+  if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedIds.value.length} appel(s) ?`)) return
+
+  isProcessing.value = true
+  try {
+    for (const id of selectedIds.value) {
+      await deleteCallApi(id)
+    }
     selectedIds.value = []
-    loadData()
+    await loadData()
+  }
+  catch (err: any) {
+    console.error('Erreur suppression groupée:', err)
+    alert('Erreur lors de la suppression')
+  }
+  finally {
+    isProcessing.value = false
   }
 }
 
 // === FORMATAGE ===
-const formatDate = (date: string | undefined) => {
+const formatDate = (date: string | null | undefined) => {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('fr-FR', {
     day: '2-digit',
@@ -135,17 +252,32 @@ const formatDate = (date: string | undefined) => {
   })
 }
 
-const isDeadlinePassed = (deadline: string | undefined) => {
+const isDeadlinePassed = (deadline: string | null | undefined) => {
   if (!deadline) return false
   return new Date(deadline) < new Date()
 }
 
-const getDaysUntilDeadline = (deadline: string | undefined) => {
+const getDaysUntilDeadline = (deadline: string | null | undefined) => {
   if (!deadline) return null
   const now = new Date()
   const deadlineDate = new Date(deadline)
   const diff = deadlineDate.getTime() - now.getTime()
   return Math.ceil(diff / (1000 * 60 * 60 * 24))
+}
+
+// Helper pour obtenir le nom du projet
+const getProjectName = (projectId: string) => {
+  const project = projectsForSelect.value.find(p => p.id === projectId)
+  return project?.title || '-'
+}
+
+// Couleurs par type
+const projectCallTypeColors: Record<ProjectCallType, string> = {
+  application: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+  scholarship: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+  project: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+  recruitment: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
+  training: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400',
 }
 </script>
 
@@ -168,6 +300,12 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
         <font-awesome-icon :icon="['fas', 'plus']" />
         Nouvel appel
       </NuxtLink>
+    </div>
+
+    <!-- Erreur -->
+    <div v-if="error" class="rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
+      <font-awesome-icon :icon="['fas', 'exclamation-circle']" class="mr-2" />
+      {{ error }}
     </div>
 
     <!-- Statistiques -->
@@ -214,7 +352,7 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
             <input
               v-model="filters.search"
               type="text"
-              placeholder="Titre, projet..."
+              placeholder="Titre, description..."
               class="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
@@ -276,7 +414,8 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
         {{ selectedIds.length }} sélectionné(s)
       </span>
       <button
-        class="text-sm text-red-600 hover:text-red-700 dark:text-red-400"
+        :disabled="isProcessing"
+        class="text-sm text-red-600 hover:text-red-700 disabled:opacity-50 dark:text-red-400"
         @click="bulkDelete"
       >
         <font-awesome-icon :icon="['fas', 'trash']" class="mr-1" />
@@ -284,8 +423,13 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
       </button>
     </div>
 
+    <!-- Chargement -->
+    <div v-if="isLoading" class="flex items-center justify-center py-12">
+      <font-awesome-icon :icon="['fas', 'spinner']" class="h-8 w-8 animate-spin text-blue-500" />
+    </div>
+
     <!-- Tableau -->
-    <div class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
+    <div v-else class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-900">
@@ -310,18 +454,8 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
                   />
                 </div>
               </th>
-              <th
-                class="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                @click="toggleSort('project')"
-              >
-                <div class="flex items-center gap-1">
-                  Projet parent
-                  <font-awesome-icon
-                    v-if="sortBy === 'project'"
-                    :icon="['fas', sortOrder === 'asc' ? 'sort-up' : 'sort-down']"
-                    class="text-blue-500"
-                  />
-                </div>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Projet parent
               </th>
               <th
                 class="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
@@ -359,7 +493,7 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
             <tr
-              v-for="call in paginatedCalls"
+              v-for="call in sortedCalls"
               :key="call.id"
               class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
@@ -386,13 +520,14 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
               </td>
               <td class="px-4 py-3">
                 <span class="text-sm text-gray-600 dark:text-gray-300">
-                  {{ call.project_title || '-' }}
+                  {{ getProjectName(call.project_id) }}
                 </span>
               </td>
               <td class="px-4 py-3">
-                <span :class="['inline-flex rounded-full px-2 py-1 text-xs font-medium', projectCallTypeColors[call.type]]">
+                <span v-if="call.type" :class="['inline-flex rounded-full px-2 py-1 text-xs font-medium', projectCallTypeColors[call.type]]">
                   {{ projectCallTypeLabels[call.type] }}
                 </span>
+                <span v-else class="text-sm text-gray-400">-</span>
               </td>
               <td class="px-4 py-3">
                 <span :class="['inline-flex rounded-full px-2 py-1 text-xs font-medium', projectCallStatusColors[call.status]]">
@@ -418,7 +553,8 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
                   <div class="relative">
                     <select
                       :value="call.status"
-                      class="rounded border border-gray-300 bg-white px-2 py-1 text-xs focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                      :disabled="isProcessing"
+                      class="rounded border border-gray-300 bg-white px-2 py-1 text-xs focus:border-blue-500 focus:outline-none disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                       @change="changeStatus(call.id, ($event.target as HTMLSelectElement).value as ProjectCallStatus)"
                     >
                       <option value="upcoming">À venir</option>
@@ -442,7 +578,8 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
                     <font-awesome-icon :icon="['fas', 'edit']" />
                   </NuxtLink>
                   <button
-                    class="rounded p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-700"
+                    :disabled="isProcessing"
+                    class="rounded p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600 disabled:opacity-50 dark:hover:bg-gray-700"
                     title="Supprimer"
                     @click="deleteCall(call.id)"
                   >
@@ -451,7 +588,7 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
                 </div>
               </td>
             </tr>
-            <tr v-if="paginatedCalls.length === 0">
+            <tr v-if="sortedCalls.length === 0">
               <td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                 <font-awesome-icon :icon="['fas', 'folder-open']" class="mb-2 text-4xl" />
                 <p>Aucun appel trouvé</p>
@@ -464,7 +601,7 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
       <!-- Pagination -->
       <div v-if="totalPages > 1" class="flex items-center justify-between border-t border-gray-200 px-4 py-3 dark:border-gray-700">
         <div class="text-sm text-gray-500 dark:text-gray-400">
-          Page {{ currentPage }} sur {{ totalPages }} ({{ sortedCalls.length }} résultats)
+          Page {{ currentPage }} sur {{ totalPages }} ({{ totalItems }} résultats)
         </div>
         <div class="flex gap-2">
           <button

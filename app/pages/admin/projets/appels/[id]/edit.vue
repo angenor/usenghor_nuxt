@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { ProjectCall, ProjectCallType, ProjectCallStatus } from '~/composables/useMockData'
 import type { OutputData } from '@editorjs/editorjs'
+import type { ProjectCallRead, ProjectCallType, ProjectCallStatus } from '~/types/api'
 
 definePageMeta({
   layout: 'admin'
@@ -10,60 +10,93 @@ const route = useRoute()
 const router = useRouter()
 
 const {
-  getProjectCallById,
-  getAllProjects,
+  getCallById,
+  listProjects,
+  updateCall,
   projectCallTypeLabels,
   projectCallStatusLabels,
-  projectCallStatusColors
-} = useMockData()
+  projectCallStatusColors,
+} = useProjectsApi()
 
 // Projets disponibles pour le select
-const projects = computed(() => getAllProjects())
+const projects = ref<{ id: string; title: string }[]>([])
 
 // Contenu EditorJS (séparé du formulaire pour éviter les problèmes de réactivité)
 const description = ref<OutputData | undefined>(undefined)
-const descriptionEn = ref<OutputData | undefined>(undefined)
-const descriptionAr = ref<OutputData | undefined>(undefined)
 const conditions = ref<OutputData | undefined>(undefined)
-const conditionsEn = ref<OutputData | undefined>(undefined)
-const conditionsAr = ref<OutputData | undefined>(undefined)
 
 // État du formulaire
-const form = ref<Partial<ProjectCall>>({})
-const isLoading = ref(true)
-const notFound = ref(false)
-
-// Charger les données
-onMounted(() => {
-  const callId = route.params.id as string
-  const call = getProjectCallById(callId)
-
-  if (call) {
-    form.value = JSON.parse(JSON.stringify(call))
-    // Convertir la deadline pour le format datetime-local
-    if (form.value.deadline) {
-      form.value.deadline = form.value.deadline.slice(0, 16)
-    }
-    // Charger le contenu EditorJS
-    description.value = call.description_rich as OutputData | undefined
-    descriptionEn.value = (call as any).description_rich_en as OutputData | undefined
-    descriptionAr.value = (call as any).description_rich_ar as OutputData | undefined
-    conditions.value = call.conditions as OutputData | undefined
-    conditionsEn.value = (call as any).conditions_en as OutputData | undefined
-    conditionsAr.value = (call as any).conditions_ar as OutputData | undefined
-  } else {
-    notFound.value = true
-  }
-  isLoading.value = false
+const form = reactive({
+  project_id: '',
+  title: '',
+  type: 'project' as ProjectCallType,
+  status: 'upcoming' as ProjectCallStatus,
+  deadline: '',
 })
 
-// Mise à jour du titre du projet quand on change de projet
-watch(() => form.value.project_id, (projectId) => {
-  if (projectId) {
-    const project = projects.value.find(p => p.id === projectId)
-    if (project) {
-      form.value.project_title = project.title_fr
+const originalCall = ref<ProjectCallRead | null>(null)
+const isLoading = ref(true)
+const error = ref<string | null>(null)
+
+// Charger les données
+const callId = computed(() => route.params.id as string)
+
+onMounted(async () => {
+  try {
+    // Charger en parallèle
+    const [call, projectsResponse] = await Promise.all([
+      getCallById(callId.value),
+      listProjects({ limit: 100 }),
+    ])
+
+    originalCall.value = call
+    projects.value = projectsResponse.items.map(p => ({ id: p.id, title: p.title }))
+
+    // Remplir le formulaire
+    form.project_id = call.project_id
+    form.title = call.title
+    form.type = call.type || 'project'
+    form.status = call.status
+
+    // Convertir la deadline pour le format datetime-local
+    if (call.deadline) {
+      form.deadline = call.deadline.slice(0, 16)
     }
+
+    // Parser le contenu EditorJS
+    if (call.description) {
+      try {
+        description.value = JSON.parse(call.description) as OutputData
+      }
+      catch {
+        // Si ce n'est pas du JSON valide, créer un bloc paragraphe
+        description.value = {
+          time: Date.now(),
+          blocks: [{ type: 'paragraph', data: { text: call.description } }],
+          version: '2.28.2',
+        }
+      }
+    }
+
+    if (call.conditions) {
+      try {
+        conditions.value = JSON.parse(call.conditions) as OutputData
+      }
+      catch {
+        conditions.value = {
+          time: Date.now(),
+          blocks: [{ type: 'paragraph', data: { text: call.conditions } }],
+          version: '2.28.2',
+        }
+      }
+    }
+  }
+  catch (err: any) {
+    console.error('Erreur chargement appel:', err)
+    error.value = err.message || 'Appel non trouvé'
+  }
+  finally {
+    isLoading.value = false
   }
 })
 
@@ -72,33 +105,39 @@ const isSaving = ref(false)
 
 const saveForm = async () => {
   // Validation basique
-  if (!form.value.project_id) {
+  if (!form.project_id) {
     alert('Veuillez sélectionner un projet parent')
     return
   }
-  if (!form.value.title?.trim()) {
+  if (!form.title.trim()) {
     alert('Veuillez saisir un titre')
     return
   }
 
   isSaving.value = true
-  try {
-    const callData = {
-      ...form.value,
-      description_rich: description.value,
-      description_rich_en: descriptionEn.value,
-      description_rich_ar: descriptionAr.value,
-      conditions: conditions.value,
-      conditions_en: conditionsEn.value,
-      conditions_ar: conditionsAr.value,
-      updated_at: new Date().toISOString()
-    }
+  error.value = null
 
-    console.log('Updating project call:', callData)
-    // En production: PUT /api/admin/project-calls/{id}
-    await new Promise(resolve => setTimeout(resolve, 1000))
+  try {
+    // Sérialiser le contenu EditorJS en JSON
+    const descriptionJson = description.value ? JSON.stringify(description.value) : null
+    const conditionsJson = conditions.value ? JSON.stringify(conditions.value) : null
+
+    await updateCall(callId.value, {
+      title: form.title,
+      description: descriptionJson,
+      conditions: conditionsJson,
+      type: form.type,
+      status: form.status,
+      deadline: form.deadline ? new Date(form.deadline).toISOString() : null,
+    })
+
     router.push('/admin/projets/appels')
-  } finally {
+  }
+  catch (err: any) {
+    console.error('Erreur mise à jour appel:', err)
+    error.value = err.message || 'Erreur lors de la mise à jour de l\'appel'
+  }
+  finally {
     isSaving.value = false
   }
 }
@@ -127,14 +166,14 @@ const formatDate = (date: string | undefined) => {
       <font-awesome-icon :icon="['fas', 'spinner']" class="h-8 w-8 animate-spin text-blue-500" />
     </div>
 
-    <!-- Non trouvé -->
-    <div v-else-if="notFound" class="rounded-lg bg-white p-8 text-center shadow dark:bg-gray-800">
+    <!-- Erreur / Non trouvé -->
+    <div v-else-if="error && !originalCall" class="rounded-lg bg-white p-8 text-center shadow dark:bg-gray-800">
       <font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="mb-4 text-5xl text-yellow-500" />
       <h2 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">
         Appel non trouvé
       </h2>
       <p class="mb-4 text-gray-500 dark:text-gray-400">
-        L'appel demandé n'existe pas ou a été supprimé.
+        {{ error || "L'appel demandé n'existe pas ou a été supprimé." }}
       </p>
       <NuxtLink
         to="/admin/projets/appels"
@@ -166,8 +205,8 @@ const formatDate = (date: string | undefined) => {
           </div>
         </div>
         <div class="flex items-center gap-3">
-          <span :class="['inline-flex rounded-full px-3 py-1 text-sm font-medium', projectCallStatusColors[form.status as ProjectCallStatus]]">
-            {{ projectCallStatusLabels[form.status as ProjectCallStatus] }}
+          <span :class="['inline-flex rounded-full px-3 py-1 text-sm font-medium', projectCallStatusColors[form.status]]">
+            {{ projectCallStatusLabels[form.status] }}
           </span>
           <button
             class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
@@ -187,20 +226,26 @@ const formatDate = (date: string | undefined) => {
         </div>
       </div>
 
+      <!-- Erreur de sauvegarde -->
+      <div v-if="error" class="rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
+        <font-awesome-icon :icon="['fas', 'exclamation-circle']" class="mr-2" />
+        {{ error }}
+      </div>
+
       <!-- Métadonnées -->
-      <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-900">
+      <div v-if="originalCall" class="rounded-lg bg-gray-50 p-4 dark:bg-gray-900">
         <div class="flex flex-wrap gap-6 text-sm">
           <div>
             <span class="text-gray-500 dark:text-gray-400">ID :</span>
-            <span class="ml-1 font-mono text-gray-700 dark:text-gray-300">{{ form.id }}</span>
+            <span class="ml-1 font-mono text-gray-700 dark:text-gray-300">{{ originalCall.id }}</span>
           </div>
           <div>
             <span class="text-gray-500 dark:text-gray-400">Créé le :</span>
-            <span class="ml-1 text-gray-700 dark:text-gray-300">{{ formatDate(form.created_at) }}</span>
+            <span class="ml-1 text-gray-700 dark:text-gray-300">{{ formatDate(originalCall.created_at) }}</span>
           </div>
           <div>
             <span class="text-gray-500 dark:text-gray-400">Modifié le :</span>
-            <span class="ml-1 text-gray-700 dark:text-gray-300">{{ formatDate(form.updated_at) }}</span>
+            <span class="ml-1 text-gray-700 dark:text-gray-300">{{ formatDate(originalCall.updated_at) }}</span>
           </div>
         </div>
       </div>
@@ -234,7 +279,7 @@ const formatDate = (date: string | undefined) => {
             >
               <option value="">Sélectionnez un projet</option>
               <option v-for="project in projects" :key="project.id" :value="project.id">
-                {{ project.title_fr }}
+                {{ project.title }}
               </option>
             </select>
           </div>
@@ -298,49 +343,28 @@ const formatDate = (date: string | undefined) => {
             />
             <p class="mt-1 text-xs text-gray-500">Laissez vide si pas de date limite</p>
           </div>
-
-          <!-- Description courte -->
-          <div class="sm:col-span-2">
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Description courte
-            </label>
-            <textarea
-              v-model="form.description"
-              rows="2"
-              placeholder="Brève description de l'appel (affichée dans les listes)"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            />
-          </div>
         </div>
       </div>
 
       <!-- Description détaillée -->
       <AdminRichTextEditor
         v-model="description"
-        v-model:model-value-en="descriptionEn"
-        v-model:model-value-ar="descriptionAr"
         title="Description détaillée"
         description="Décrivez l'appel en détail : contexte, objectifs, profils recherchés..."
         icon="fa-solid fa-file-lines"
         icon-color="text-blue-500"
         placeholder="Rédigez la description complète de l'appel..."
-        placeholder-en="Write a detailed description of the call..."
-        placeholder-ar="اكتب وصفاً تفصيلياً للدعوة..."
         :min-height="300"
       />
 
       <!-- Conditions de participation -->
       <AdminRichTextEditor
         v-model="conditions"
-        v-model:model-value-en="conditionsEn"
-        v-model:model-value-ar="conditionsAr"
         title="Conditions de participation"
         description="Précisez les critères d'éligibilité et les conditions de participation"
         icon="fa-solid fa-clipboard-check"
         icon-color="text-green-500"
         placeholder="Listez les conditions de participation..."
-        placeholder-en="List the participation conditions..."
-        placeholder-ar="قم بإدراج شروط المشاركة..."
         :min-height="250"
       />
 

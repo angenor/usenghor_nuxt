@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { ProjectCall, ProjectCallType, ProjectCallStatus } from '~/composables/useMockData'
 import type { OutputData } from '@editorjs/editorjs'
+import type { ProjectCallType, ProjectCallStatus } from '~/types/api'
 
 definePageMeta({
   layout: 'admin'
@@ -9,79 +9,83 @@ definePageMeta({
 const router = useRouter()
 
 const {
-  getAllProjects,
+  listProjects,
+  createProjectCall,
   projectCallTypeLabels,
   projectCallStatusLabels,
-  generateProjectCallId
-} = useMockData()
+} = useProjectsApi()
 
 // Projets disponibles pour le select
-const projects = computed(() => getAllProjects())
+const projects = ref<{ id: string; title: string }[]>([])
+const isLoadingProjects = ref(true)
 
 // Contenu EditorJS (séparé du formulaire pour éviter les problèmes de réactivité)
 const description = ref<OutputData | undefined>(undefined)
-const descriptionEn = ref<OutputData | undefined>(undefined)
-const descriptionAr = ref<OutputData | undefined>(undefined)
 const conditions = ref<OutputData | undefined>(undefined)
-const conditionsEn = ref<OutputData | undefined>(undefined)
-const conditionsAr = ref<OutputData | undefined>(undefined)
 
 // État du formulaire
-const form = ref<Partial<ProjectCall>>({
-  id: generateProjectCallId(),
+const form = reactive({
   project_id: '',
-  project_title: '',
   title: '',
-  description: '',
-  type: 'project',
-  status: 'upcoming',
-  deadline: ''
+  short_description: '',
+  type: 'project' as ProjectCallType,
+  status: 'upcoming' as ProjectCallStatus,
+  deadline: '',
 })
 
-// Mise à jour du titre du projet quand on sélectionne un projet
-watch(() => form.value.project_id, (projectId) => {
-  if (projectId) {
-    const project = projects.value.find(p => p.id === projectId)
-    if (project) {
-      form.value.project_title = project.title_fr
-    }
+// Charger les projets
+onMounted(async () => {
+  try {
+    const response = await listProjects({ limit: 100 })
+    projects.value = response.items.map(p => ({ id: p.id, title: p.title }))
+  }
+  catch (err) {
+    console.error('Erreur chargement projets:', err)
+  }
+  finally {
+    isLoadingProjects.value = false
   }
 })
 
 // === SAUVEGARDE ===
 const isSaving = ref(false)
+const error = ref<string | null>(null)
 
 const saveForm = async () => {
   // Validation basique
-  if (!form.value.project_id) {
+  if (!form.project_id) {
     alert('Veuillez sélectionner un projet parent')
     return
   }
-  if (!form.value.title?.trim()) {
+  if (!form.title.trim()) {
     alert('Veuillez saisir un titre')
     return
   }
 
   isSaving.value = true
-  try {
-    const now = new Date().toISOString()
-    const callData = {
-      ...form.value,
-      description_rich: description.value,
-      description_rich_en: descriptionEn.value,
-      description_rich_ar: descriptionAr.value,
-      conditions: conditions.value,
-      conditions_en: conditionsEn.value,
-      conditions_ar: conditionsAr.value,
-      created_at: now,
-      updated_at: now
-    }
+  error.value = null
 
-    console.log('Creating project call:', callData)
-    // En production: POST /api/admin/project-calls
-    await new Promise(resolve => setTimeout(resolve, 1000))
+  try {
+    // Sérialiser le contenu EditorJS en JSON
+    const descriptionJson = description.value ? JSON.stringify(description.value) : null
+    const conditionsJson = conditions.value ? JSON.stringify(conditions.value) : null
+
+    await createProjectCall(form.project_id, {
+      title: form.title,
+      description: descriptionJson,
+      conditions: conditionsJson,
+      type: form.type,
+      status: form.status,
+      deadline: form.deadline ? new Date(form.deadline).toISOString() : null,
+    })
+
     router.push('/admin/projets/appels')
-  } finally {
+  }
+  catch (err: any) {
+    console.error('Erreur création appel:', err)
+    error.value = err.message || 'Erreur lors de la création de l\'appel'
+  }
+  finally {
     isSaving.value = false
   }
 }
@@ -130,6 +134,12 @@ const goBack = () => {
       </div>
     </div>
 
+    <!-- Erreur -->
+    <div v-if="error" class="rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
+      <font-awesome-icon :icon="['fas', 'exclamation-circle']" class="mr-2" />
+      {{ error }}
+    </div>
+
     <!-- Formulaire -->
     <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
       <div class="mb-6 flex items-center gap-3">
@@ -154,12 +164,15 @@ const goBack = () => {
           </label>
           <select
             v-model="form.project_id"
-            class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            :disabled="isLoadingProjects"
+            class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             required
           >
-            <option value="">Sélectionnez un projet</option>
+            <option value="">
+              {{ isLoadingProjects ? 'Chargement...' : 'Sélectionnez un projet' }}
+            </option>
             <option v-for="project in projects" :key="project.id" :value="project.id">
-              {{ project.title_fr }}
+              {{ project.title }}
             </option>
           </select>
         </div>
@@ -220,49 +233,28 @@ const goBack = () => {
           />
           <p class="mt-1 text-xs text-gray-500">Laissez vide si pas de date limite</p>
         </div>
-
-        <!-- Description courte -->
-        <div class="sm:col-span-2">
-          <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Description courte
-          </label>
-          <textarea
-            v-model="form.description"
-            rows="2"
-            placeholder="Brève description de l'appel (affichée dans les listes)"
-            class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          />
-        </div>
       </div>
     </div>
 
     <!-- Description détaillée -->
     <AdminRichTextEditor
       v-model="description"
-      v-model:model-value-en="descriptionEn"
-      v-model:model-value-ar="descriptionAr"
       title="Description détaillée"
       description="Décrivez l'appel en détail : contexte, objectifs, profils recherchés..."
       icon="fa-solid fa-file-lines"
       icon-color="text-blue-500"
       placeholder="Rédigez la description complète de l'appel..."
-      placeholder-en="Write a detailed description of the call..."
-      placeholder-ar="اكتب وصفاً تفصيلياً للدعوة..."
       :min-height="300"
     />
 
     <!-- Conditions de participation -->
     <AdminRichTextEditor
       v-model="conditions"
-      v-model:model-value-en="conditionsEn"
-      v-model:model-value-ar="conditionsAr"
       title="Conditions de participation"
       description="Précisez les critères d'éligibilité et les conditions de participation"
       icon="fa-solid fa-clipboard-check"
       icon-color="text-green-500"
       placeholder="Listez les conditions de participation..."
-      placeholder-en="List the participation conditions..."
-      placeholder-ar="قم بإدراج شروط المشاركة..."
       :min-height="250"
     />
 

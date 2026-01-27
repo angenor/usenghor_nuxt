@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { ProjectCall, ProjectCallStatus } from '~/composables/useMockData'
+import type { OutputData } from '@editorjs/editorjs'
+import type { ProjectCallRead, ProjectCallStatus } from '~/types/api'
 
 definePageMeta({
   layout: 'admin'
@@ -9,44 +10,81 @@ const route = useRoute()
 const router = useRouter()
 
 const {
-  getProjectCallById,
+  getCallById,
+  getProjectById,
+  deleteCall: deleteCallApi,
+  updateCall,
   projectCallTypeLabels,
-  projectCallTypeColors,
   projectCallStatusLabels,
-  projectCallStatusColors
-} = useMockData()
+  projectCallStatusColors,
+} = useProjectsApi()
 
 // État
-const call = ref<ProjectCall | null>(null)
+const call = ref<ProjectCallRead | null>(null)
+const projectName = ref<string | null>(null)
 const isLoading = ref(true)
-const notFound = ref(false)
+const error = ref<string | null>(null)
+const isProcessing = ref(false)
 
 // Charger les données
-onMounted(() => {
-  const callId = route.params.id as string
-  const foundCall = getProjectCallById(callId)
+const callId = computed(() => route.params.id as string)
 
-  if (foundCall) {
-    call.value = foundCall
-  } else {
-    notFound.value = true
+onMounted(async () => {
+  try {
+    call.value = await getCallById(callId.value)
+
+    // Charger le nom du projet parent
+    if (call.value.project_id) {
+      try {
+        const project = await getProjectById(call.value.project_id)
+        projectName.value = project.title
+      }
+      catch {
+        projectName.value = null
+      }
+    }
   }
-  isLoading.value = false
+  catch (err: any) {
+    console.error('Erreur chargement appel:', err)
+    error.value = err.message || 'Appel non trouvé'
+  }
+  finally {
+    isLoading.value = false
+  }
 })
 
 // === ACTIONS ===
-const changeStatus = (newStatus: ProjectCallStatus) => {
-  if (call.value) {
-    console.log(`Changing status to ${newStatus}`)
-    // En production: POST /api/admin/project-calls/{id}/status
+const changeStatus = async (newStatus: ProjectCallStatus) => {
+  if (!call.value) return
+
+  isProcessing.value = true
+  try {
+    call.value = await updateCall(call.value.id, { status: newStatus })
+  }
+  catch (err: any) {
+    console.error('Erreur changement statut:', err)
+    alert('Erreur lors du changement de statut')
+  }
+  finally {
+    isProcessing.value = false
   }
 }
 
-const deleteCall = () => {
-  if (confirm('Êtes-vous sûr de vouloir supprimer cet appel ?')) {
-    console.log('Deleting call:', call.value?.id)
-    // En production: DELETE /api/admin/project-calls/{id}
+const deleteCall = async () => {
+  if (!call.value) return
+  if (!confirm('Êtes-vous sûr de vouloir supprimer cet appel ?')) return
+
+  isProcessing.value = true
+  try {
+    await deleteCallApi(call.value.id)
     router.push('/admin/projets/appels')
+  }
+  catch (err: any) {
+    console.error('Erreur suppression:', err)
+    alert('Erreur lors de la suppression')
+  }
+  finally {
+    isProcessing.value = false
   }
 }
 
@@ -55,7 +93,7 @@ const goBack = () => {
 }
 
 // === FORMATAGE ===
-const formatDate = (date: string | undefined) => {
+const formatDate = (date: string | null | undefined) => {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('fr-FR', {
     day: '2-digit',
@@ -66,7 +104,7 @@ const formatDate = (date: string | undefined) => {
   })
 }
 
-const formatShortDate = (date: string | undefined) => {
+const formatShortDate = (date: string | null | undefined) => {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('fr-FR', {
     day: '2-digit',
@@ -75,17 +113,47 @@ const formatShortDate = (date: string | undefined) => {
   })
 }
 
-const isDeadlinePassed = (deadline: string | undefined) => {
+const isDeadlinePassed = (deadline: string | null | undefined) => {
   if (!deadline) return false
   return new Date(deadline) < new Date()
 }
 
-const getDaysUntilDeadline = (deadline: string | undefined) => {
+const getDaysUntilDeadline = (deadline: string | null | undefined) => {
   if (!deadline) return null
   const now = new Date()
   const deadlineDate = new Date(deadline)
   const diff = deadlineDate.getTime() - now.getTime()
   return Math.ceil(diff / (1000 * 60 * 60 * 24))
+}
+
+// Parser le contenu JSON en OutputData pour l'éditeur
+const parsedDescription = computed<OutputData | null>(() => {
+  if (!call.value?.description) return null
+  try {
+    return JSON.parse(call.value.description) as OutputData
+  }
+  catch {
+    return null
+  }
+})
+
+const parsedConditions = computed<OutputData | null>(() => {
+  if (!call.value?.conditions) return null
+  try {
+    return JSON.parse(call.value.conditions) as OutputData
+  }
+  catch {
+    return null
+  }
+})
+
+// Couleurs par type
+const projectCallTypeColors: Record<string, string> = {
+  application: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+  scholarship: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+  project: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+  recruitment: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
+  training: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400',
 }
 </script>
 
@@ -96,14 +164,14 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
       <font-awesome-icon :icon="['fas', 'spinner']" class="h-8 w-8 animate-spin text-blue-500" />
     </div>
 
-    <!-- Non trouvé -->
-    <div v-else-if="notFound" class="rounded-lg bg-white p-8 text-center shadow dark:bg-gray-800">
+    <!-- Erreur / Non trouvé -->
+    <div v-else-if="error || !call" class="rounded-lg bg-white p-8 text-center shadow dark:bg-gray-800">
       <font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="mb-4 text-5xl text-yellow-500" />
       <h2 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">
         Appel non trouvé
       </h2>
       <p class="mb-4 text-gray-500 dark:text-gray-400">
-        L'appel demandé n'existe pas ou a été supprimé.
+        {{ error || "L'appel demandé n'existe pas ou a été supprimé." }}
       </p>
       <NuxtLink
         to="/admin/projets/appels"
@@ -115,7 +183,7 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
     </div>
 
     <!-- Contenu -->
-    <template v-else-if="call">
+    <template v-else>
       <!-- En-tête -->
       <div class="flex items-start justify-between gap-4">
         <div class="flex items-start gap-4">
@@ -127,7 +195,7 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
           </button>
           <div>
             <div class="mb-2 flex flex-wrap items-center gap-2">
-              <span :class="['inline-flex rounded-full px-2 py-1 text-xs font-medium', projectCallTypeColors[call.type]]">
+              <span v-if="call.type" :class="['inline-flex rounded-full px-2 py-1 text-xs font-medium', projectCallTypeColors[call.type]]">
                 {{ projectCallTypeLabels[call.type] }}
               </span>
               <span :class="['inline-flex rounded-full px-2 py-1 text-xs font-medium', projectCallStatusColors[call.status]]">
@@ -137,9 +205,9 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
               {{ call.title }}
             </h1>
-            <p v-if="call.project_title" class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <p v-if="projectName" class="mt-1 text-sm text-gray-500 dark:text-gray-400">
               <font-awesome-icon :icon="['fas', 'folder']" class="mr-1" />
-              Projet : {{ call.project_title }}
+              Projet : {{ projectName }}
             </p>
           </div>
         </div>
@@ -152,7 +220,8 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
             Modifier
           </NuxtLink>
           <button
-            class="inline-flex items-center gap-2 rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
+            :disabled="isProcessing"
+            class="inline-flex items-center gap-2 rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
             @click="deleteCall"
           >
             <font-awesome-icon :icon="['fas', 'trash']" />
@@ -194,7 +263,8 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
               <div class="text-sm text-gray-500 dark:text-gray-400">Statut</div>
               <select
                 :value="call.status"
-                class="mt-1 w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                :disabled="isProcessing"
+                class="mt-1 w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm focus:border-blue-500 focus:outline-none disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 @change="changeStatus(($event.target as HTMLSelectElement).value as ProjectCallStatus)"
               >
                 <option value="upcoming">À venir</option>
@@ -236,37 +306,46 @@ const getDaysUntilDeadline = (deadline: string | undefined) => {
         </div>
       </div>
 
-      <!-- Description courte -->
-      <div v-if="call.description" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
-        <h2 class="mb-3 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
-          <font-awesome-icon :icon="['fas', 'align-left']" class="text-gray-400" />
-          Description
-        </h2>
-        <p class="text-gray-600 dark:text-gray-300">
-          {{ call.description }}
-        </p>
-      </div>
-
       <!-- Description détaillée (EditorJS) -->
-      <div v-if="call.description_rich" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+      <div v-if="parsedDescription" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
         <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
           <font-awesome-icon :icon="['fas', 'file-lines']" class="text-blue-500" />
           Description détaillée
         </h2>
         <div class="prose prose-sm max-w-none dark:prose-invert">
-          <EditorJSRenderer :data="call.description_rich" />
+          <EditorJSRenderer :data="parsedDescription" />
         </div>
+      </div>
+      <!-- Fallback texte brut si description n'est pas du JSON -->
+      <div v-else-if="call.description" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+        <h2 class="mb-3 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+          <font-awesome-icon :icon="['fas', 'align-left']" class="text-gray-400" />
+          Description
+        </h2>
+        <p class="whitespace-pre-wrap text-gray-600 dark:text-gray-300">
+          {{ call.description }}
+        </p>
       </div>
 
       <!-- Conditions de participation (EditorJS) -->
-      <div v-if="call.conditions" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+      <div v-if="parsedConditions" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
         <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
           <font-awesome-icon :icon="['fas', 'clipboard-check']" class="text-green-500" />
           Conditions de participation
         </h2>
         <div class="prose prose-sm max-w-none dark:prose-invert">
-          <EditorJSRenderer :data="call.conditions" />
+          <EditorJSRenderer :data="parsedConditions" />
         </div>
+      </div>
+      <!-- Fallback texte brut si conditions n'est pas du JSON -->
+      <div v-else-if="call.conditions" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+        <h2 class="mb-3 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+          <font-awesome-icon :icon="['fas', 'clipboard-check']" class="text-green-500" />
+          Conditions de participation
+        </h2>
+        <p class="whitespace-pre-wrap text-gray-600 dark:text-gray-300">
+          {{ call.conditions }}
+        </p>
       </div>
 
       <!-- Métadonnées techniques -->
