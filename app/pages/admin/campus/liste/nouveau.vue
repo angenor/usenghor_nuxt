@@ -1,34 +1,53 @@
 <script setup lang="ts">
+import type { CountryRead } from '~/composables/useCountriesApi'
+import type { UserForSelect } from '~/composables/useUsersApi'
+
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
 })
 
 const router = useRouter()
 
-const {
-  getCampusCountries,
-  getCampusHeadCandidates,
-  generateCampusId,
-  generateCampusCode,
-  getFlagEmoji
-} = useMockData()
+// APIs
+const { createCampus } = useCampusApi()
+const { getAllCountries, getFlagEmoji } = useCountriesApi()
+const { getUsersForSelect } = useUsersApi()
 
 // Données de référence
-const countries = computed(() => getCampusCountries())
-const headCandidates = computed(() => getCampusHeadCandidates())
+const countries = ref<CountryRead[]>([])
+const headCandidates = ref<UserForSelect[]>([])
+const isLoadingData = ref(true)
+
+// Charger les données au montage
+onMounted(async () => {
+  try {
+    const [countriesData, usersData] = await Promise.all([
+      getAllCountries(),
+      getUsersForSelect(),
+    ])
+    countries.value = countriesData
+    headCandidates.value = usersData
+  }
+  catch (error) {
+    console.error('Erreur chargement données:', error)
+  }
+  finally {
+    isLoadingData.value = false
+  }
+})
 
 // État du formulaire
 const isSubmitting = ref(false)
+const submitError = ref<string | null>(null)
 const activeTab = ref<'general' | 'location' | 'contact' | 'settings'>('general')
 
-// Données du formulaire
+// Données du formulaire (alignées sur le schéma backend)
 const form = reactive({
   code: '',
   name: '',
   description: '',
-  cover_image: '',
-  cover_image_alt: '',
-  country_id: '',
+  cover_image_external_id: null as string | null,
+  country_external_id: '',
   city: '',
   address: '',
   postal_code: '',
@@ -36,17 +55,17 @@ const form = reactive({
   longitude: undefined as number | undefined,
   email: '',
   phone: '',
-  head_id: '',
+  head_external_id: '',
   is_headquarters: false,
-  is_active: true
+  active: true,
 })
 
 // Validation
 const errors = reactive({
   code: '',
   name: '',
-  country_id: '',
-  city: ''
+  country_external_id: '',
+  city: '',
 })
 
 const validateForm = (): boolean => {
@@ -55,13 +74,14 @@ const validateForm = (): boolean => {
   // Reset errors
   errors.code = ''
   errors.name = ''
-  errors.country_id = ''
+  errors.country_external_id = ''
   errors.city = ''
 
   if (!form.code.trim()) {
     errors.code = 'Le code est requis'
     isValid = false
-  } else if (form.code.length > 20) {
+  }
+  else if (form.code.length > 20) {
     errors.code = 'Le code ne doit pas dépasser 20 caractères'
     isValid = false
   }
@@ -71,8 +91,8 @@ const validateForm = (): boolean => {
     isValid = false
   }
 
-  if (!form.country_id) {
-    errors.country_id = 'Le pays est requis'
+  if (!form.country_external_id) {
+    errors.country_external_id = 'Le pays est requis'
     isValid = false
   }
 
@@ -87,7 +107,11 @@ const validateForm = (): boolean => {
 // Auto-générer le code à partir du nom
 const autoGenerateCode = () => {
   if (!form.code && form.name) {
-    form.code = generateCampusCode(form.name)
+    // Prendre les 3 premières lettres significatives
+    const words = form.name.replace(/Campus (de |d')?/i, '').trim().split(/\s+/)
+    if (words.length > 0) {
+      form.code = words[0].substring(0, 3).toUpperCase()
+    }
   }
 }
 
@@ -100,29 +124,43 @@ const submitForm = async () => {
     // Aller à l'onglet avec erreurs
     if (errors.code || errors.name) {
       activeTab.value = 'general'
-    } else if (errors.country_id || errors.city) {
+    }
+    else if (errors.country_external_id || errors.city) {
       activeTab.value = 'location'
     }
     return
   }
 
   isSubmitting.value = true
+  submitError.value = null
 
   try {
     const campusData = {
-      id: generateCampusId(),
-      ...form,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      code: form.code.trim(),
+      name: form.name.trim(),
+      description: form.description.trim() || undefined,
+      cover_image_external_id: form.cover_image_external_id || undefined,
+      country_external_id: form.country_external_id || undefined,
+      head_external_id: form.head_external_id || undefined,
+      city: form.city.trim() || undefined,
+      address: form.address.trim() || undefined,
+      postal_code: form.postal_code.trim() || undefined,
+      latitude: form.latitude,
+      longitude: form.longitude,
+      email: form.email.trim() || undefined,
+      phone: form.phone.trim() || undefined,
+      is_headquarters: form.is_headquarters,
+      active: form.active,
     }
 
-    console.log('Creating campus:', campusData)
-    // En production: POST /api/admin/campuses
-
+    await createCampus(campusData)
     router.push('/admin/campus/liste')
-  } catch (error) {
+  }
+  catch (error: unknown) {
     console.error('Error creating campus:', error)
-  } finally {
+    submitError.value = error instanceof Error ? error.message : 'Erreur lors de la création du campus'
+  }
+  finally {
     isSubmitting.value = false
   }
 }
@@ -132,7 +170,7 @@ const tabs = [
   { id: 'general', label: 'Informations générales', icon: 'info-circle' },
   { id: 'location', label: 'Localisation', icon: 'map-marker-alt' },
   { id: 'contact', label: 'Contact', icon: 'address-card' },
-  { id: 'settings', label: 'Paramètres', icon: 'cog' }
+  { id: 'settings', label: 'Paramètres', icon: 'cog' },
 ]
 </script>
 
@@ -177,335 +215,344 @@ const tabs = [
       </div>
     </div>
 
-    <!-- Onglets -->
-    <div class="border-b border-gray-200 dark:border-gray-700">
-      <nav class="-mb-px flex gap-4">
-        <button
-          v-for="tab in tabs"
-          :key="tab.id"
-          :class="[
-            'flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-            activeTab === tab.id
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-          ]"
-          @click="activeTab = tab.id as typeof activeTab"
-        >
-          <font-awesome-icon :icon="['fas', tab.icon]" class="h-4 w-4" />
-          {{ tab.label }}
-        </button>
-      </nav>
+    <!-- Message d'erreur -->
+    <div v-if="submitError" class="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
+      <div class="flex items-center gap-2 text-red-700 dark:text-red-400">
+        <font-awesome-icon :icon="['fas', 'exclamation-circle']" />
+        <span>{{ submitError }}</span>
+      </div>
     </div>
 
-    <!-- Contenu des onglets -->
-    <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
-      <!-- Tab: Informations générales -->
-      <div v-show="activeTab === 'general'" class="space-y-6">
-        <div class="grid gap-6 md:grid-cols-2">
-          <!-- Code -->
-          <div>
-            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Code <span class="text-red-500">*</span>
-            </label>
-            <input
-              v-model="form.code"
-              type="text"
-              maxlength="20"
-              placeholder="ex: ALX, DKR"
-              :class="[
-                'w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-1',
-                errors.code
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                  : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700'
-              ]"
-            />
-            <p v-if="errors.code" class="mt-1 text-sm text-red-500">{{ errors.code }}</p>
-            <p class="mt-1 text-xs text-gray-500">Code unique pour identifier le campus (max 20 caractères)</p>
-          </div>
+    <!-- Loading -->
+    <div v-if="isLoadingData" class="flex items-center justify-center py-12">
+      <font-awesome-icon :icon="['fas', 'spinner']" class="h-8 w-8 animate-spin text-blue-600" />
+    </div>
 
-          <!-- Nom -->
-          <div>
-            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Nom <span class="text-red-500">*</span>
-            </label>
-            <input
-              v-model="form.name"
-              type="text"
-              placeholder="Campus de..."
-              :class="[
-                'w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-1',
-                errors.name
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                  : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700'
-              ]"
-              @blur="autoGenerateCode"
-            />
-            <p v-if="errors.name" class="mt-1 text-sm text-red-500">{{ errors.name }}</p>
-          </div>
-        </div>
-
-        <!-- Description -->
-        <div>
-          <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Description
-          </label>
-          <textarea
-            v-model="form.description"
-            rows="4"
-            placeholder="Description du campus..."
-            class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-          />
-        </div>
-
-        <!-- Image de couverture -->
-        <div class="grid gap-6 md:grid-cols-2">
-          <div>
-            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Image de couverture (URL)
-            </label>
-            <input
-              v-model="form.cover_image"
-              type="url"
-              placeholder="https://..."
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-            />
-          </div>
-          <div>
-            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Texte alternatif de l'image
-            </label>
-            <input
-              v-model="form.cover_image_alt"
-              type="text"
-              placeholder="Description de l'image"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-            />
-          </div>
-        </div>
-
-        <!-- Aperçu de l'image -->
-        <div v-if="form.cover_image" class="mt-4">
-          <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Aperçu</p>
-          <img
-            :src="form.cover_image"
-            :alt="form.cover_image_alt || 'Aperçu'"
-            class="h-48 w-full rounded-lg object-cover"
-            @error="form.cover_image = ''"
-          />
-        </div>
+    <template v-else>
+      <!-- Onglets -->
+      <div class="border-b border-gray-200 dark:border-gray-700">
+        <nav class="-mb-px flex gap-4">
+          <button
+            v-for="tab in tabs"
+            :key="tab.id"
+            :class="[
+              'flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
+              activeTab === tab.id
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
+            ]"
+            @click="activeTab = tab.id as typeof activeTab"
+          >
+            <font-awesome-icon :icon="['fas', tab.icon]" class="h-4 w-4" />
+            {{ tab.label }}
+          </button>
+        </nav>
       </div>
 
-      <!-- Tab: Localisation -->
-      <div v-show="activeTab === 'location'" class="space-y-6">
-        <div class="grid gap-6 md:grid-cols-2">
-          <!-- Pays -->
+      <!-- Contenu des onglets -->
+      <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+        <!-- Tab: Informations générales -->
+        <div v-show="activeTab === 'general'" class="space-y-6">
+          <div class="grid gap-6 md:grid-cols-2">
+            <!-- Code -->
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Code <span class="text-red-500">*</span>
+              </label>
+              <input
+                v-model="form.code"
+                type="text"
+                maxlength="20"
+                placeholder="ex: ALX, DKR"
+                :class="[
+                  'w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-1',
+                  errors.code
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700',
+                ]"
+              />
+              <p v-if="errors.code" class="mt-1 text-sm text-red-500">
+                {{ errors.code }}
+              </p>
+              <p class="mt-1 text-xs text-gray-500">
+                Code unique pour identifier le campus (max 20 caractères)
+              </p>
+            </div>
+
+            <!-- Nom -->
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Nom <span class="text-red-500">*</span>
+              </label>
+              <input
+                v-model="form.name"
+                type="text"
+                placeholder="Campus de..."
+                :class="[
+                  'w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-1',
+                  errors.name
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700',
+                ]"
+                @blur="autoGenerateCode"
+              />
+              <p v-if="errors.name" class="mt-1 text-sm text-red-500">
+                {{ errors.name }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Description -->
           <div>
             <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Pays <span class="text-red-500">*</span>
+              Description
+            </label>
+            <textarea
+              v-model="form.description"
+              rows="4"
+              placeholder="Description du campus..."
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+            />
+          </div>
+
+          <!-- Image de couverture -->
+          <div>
+            <FormsImageUpload
+              v-model="form.cover_image_external_id"
+              label="Image de couverture"
+              hint="Image principale affichée sur la page du campus"
+              folder="campuses"
+              aspect-ratio="16/9"
+            />
+          </div>
+        </div>
+
+        <!-- Tab: Localisation -->
+        <div v-show="activeTab === 'location'" class="space-y-6">
+          <div class="grid gap-6 md:grid-cols-2">
+            <!-- Pays -->
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Pays <span class="text-red-500">*</span>
+              </label>
+              <select
+                v-model="form.country_external_id"
+                :class="[
+                  'w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-1',
+                  errors.country_external_id
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700',
+                ]"
+              >
+                <option value="">
+                  Sélectionner un pays
+                </option>
+                <option v-for="country in countries" :key="country.id" :value="country.id">
+                  {{ getFlagEmoji(country.iso_code) }} {{ country.name_fr }}
+                </option>
+              </select>
+              <p v-if="errors.country_external_id" class="mt-1 text-sm text-red-500">
+                {{ errors.country_external_id }}
+              </p>
+            </div>
+
+            <!-- Ville -->
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Ville <span class="text-red-500">*</span>
+              </label>
+              <input
+                v-model="form.city"
+                type="text"
+                placeholder="Nom de la ville"
+                :class="[
+                  'w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-1',
+                  errors.city
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700',
+                ]"
+              />
+              <p v-if="errors.city" class="mt-1 text-sm text-red-500">
+                {{ errors.city }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Adresse -->
+          <div class="grid gap-6 md:grid-cols-2">
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Adresse
+              </label>
+              <input
+                v-model="form.address"
+                type="text"
+                placeholder="Adresse complète"
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+              />
+            </div>
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Code postal
+              </label>
+              <input
+                v-model="form.postal_code"
+                type="text"
+                placeholder="Code postal"
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+              />
+            </div>
+          </div>
+
+          <!-- Coordonnées GPS -->
+          <div class="grid gap-6 md:grid-cols-2">
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Latitude
+              </label>
+              <input
+                v-model.number="form.latitude"
+                type="number"
+                step="0.0001"
+                placeholder="ex: 31.0183"
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+              />
+            </div>
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Longitude
+              </label>
+              <input
+                v-model.number="form.longitude"
+                type="number"
+                step="0.0001"
+                placeholder="ex: 29.7614"
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+              />
+            </div>
+          </div>
+
+          <p class="text-sm text-gray-500">
+            Les coordonnées GPS permettent d'afficher le campus sur une carte.
+          </p>
+        </div>
+
+        <!-- Tab: Contact -->
+        <div v-show="activeTab === 'contact'" class="space-y-6">
+          <div class="grid gap-6 md:grid-cols-2">
+            <!-- Email -->
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Email
+              </label>
+              <input
+                v-model="form.email"
+                type="email"
+                placeholder="campus@usenghor.org"
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+              />
+            </div>
+
+            <!-- Téléphone -->
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Téléphone
+              </label>
+              <input
+                v-model="form.phone"
+                type="tel"
+                placeholder="+XX X XXX XXXX"
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+              />
+            </div>
+          </div>
+
+          <!-- Responsable -->
+          <div>
+            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Responsable / Directeur
             </label>
             <select
-              v-model="form.country_id"
-              :class="[
-                'w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-1',
-                errors.country_id
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                  : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700'
-              ]"
+              v-model="form.head_external_id"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
             >
-              <option value="">Sélectionner un pays</option>
-              <option v-for="country in countries" :key="country.id" :value="country.id">
-                {{ getFlagEmoji(country.code) }} {{ country.name }}
+              <option value="">
+                Aucun responsable assigné
+              </option>
+              <option v-for="candidate in headCandidates" :key="candidate.id" :value="candidate.id">
+                {{ candidate.full_name }} ({{ candidate.email }})
               </option>
             </select>
-            <p v-if="errors.country_id" class="mt-1 text-sm text-red-500">{{ errors.country_id }}</p>
-          </div>
-
-          <!-- Ville -->
-          <div>
-            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Ville <span class="text-red-500">*</span>
-            </label>
-            <input
-              v-model="form.city"
-              type="text"
-              placeholder="Nom de la ville"
-              :class="[
-                'w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-1',
-                errors.city
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                  : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700'
-              ]"
-            />
-            <p v-if="errors.city" class="mt-1 text-sm text-red-500">{{ errors.city }}</p>
-          </div>
-        </div>
-
-        <!-- Adresse -->
-        <div class="grid gap-6 md:grid-cols-2">
-          <div>
-            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Adresse
-            </label>
-            <input
-              v-model="form.address"
-              type="text"
-              placeholder="Adresse complète"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-            />
-          </div>
-          <div>
-            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Code postal
-            </label>
-            <input
-              v-model="form.postal_code"
-              type="text"
-              placeholder="Code postal"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-            />
-          </div>
-        </div>
-
-        <!-- Coordonnées GPS -->
-        <div class="grid gap-6 md:grid-cols-2">
-          <div>
-            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Latitude
-            </label>
-            <input
-              v-model.number="form.latitude"
-              type="number"
-              step="0.0001"
-              placeholder="ex: 31.0183"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-            />
-          </div>
-          <div>
-            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Longitude
-            </label>
-            <input
-              v-model.number="form.longitude"
-              type="number"
-              step="0.0001"
-              placeholder="ex: 29.7614"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-            />
-          </div>
-        </div>
-
-        <p class="text-sm text-gray-500">
-          Les coordonnées GPS permettent d'afficher le campus sur une carte.
-        </p>
-      </div>
-
-      <!-- Tab: Contact -->
-      <div v-show="activeTab === 'contact'" class="space-y-6">
-        <div class="grid gap-6 md:grid-cols-2">
-          <!-- Email -->
-          <div>
-            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Email
-            </label>
-            <input
-              v-model="form.email"
-              type="email"
-              placeholder="campus@usenghor.org"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-            />
-          </div>
-
-          <!-- Téléphone -->
-          <div>
-            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Téléphone
-            </label>
-            <input
-              v-model="form.phone"
-              type="tel"
-              placeholder="+XX X XXX XXXX"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-            />
-          </div>
-        </div>
-
-        <!-- Responsable -->
-        <div>
-          <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Responsable / Directeur
-          </label>
-          <select
-            v-model="form.head_id"
-            class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-          >
-            <option value="">Aucun responsable assigné</option>
-            <option v-for="candidate in headCandidates" :key="candidate.id" :value="candidate.id">
-              {{ candidate.name }}
-            </option>
-          </select>
-          <p class="mt-1 text-xs text-gray-500">Le responsable sera affiché sur la page du campus.</p>
-        </div>
-      </div>
-
-      <!-- Tab: Paramètres -->
-      <div v-show="activeTab === 'settings'" class="space-y-6">
-        <!-- Siège -->
-        <div class="flex items-start gap-4">
-          <input
-            id="is_headquarters"
-            v-model="form.is_headquarters"
-            type="checkbox"
-            class="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-          <div>
-            <label for="is_headquarters" class="block font-medium text-gray-700 dark:text-gray-300">
-              Campus siège
-            </label>
-            <p class="text-sm text-gray-500">
-              Cochez si ce campus est le siège principal de l'université. Un seul campus peut être marqué comme siège.
+            <p class="mt-1 text-xs text-gray-500">
+              Le responsable sera affiché sur la page du campus.
+            </p>
+            <p v-if="headCandidates.length === 0 && !isLoadingData" class="mt-2 text-xs text-amber-600 dark:text-amber-400">
+              <font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="mr-1" />
+              Aucun utilisateur actif trouvé. Créez d'abord des utilisateurs.
             </p>
           </div>
         </div>
 
-        <!-- Actif -->
-        <div class="flex items-start gap-4">
-          <input
-            id="is_active"
-            v-model="form.is_active"
-            type="checkbox"
-            class="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-          <div>
-            <label for="is_active" class="block font-medium text-gray-700 dark:text-gray-300">
-              Campus actif
-            </label>
-            <p class="text-sm text-gray-500">
-              Les campus inactifs ne sont pas affichés sur le site public.
-            </p>
+        <!-- Tab: Paramètres -->
+        <div v-show="activeTab === 'settings'" class="space-y-6">
+          <!-- Siège -->
+          <div class="flex items-start gap-4">
+            <input
+              id="is_headquarters"
+              v-model="form.is_headquarters"
+              type="checkbox"
+              class="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <div>
+              <label for="is_headquarters" class="block font-medium text-gray-700 dark:text-gray-300">
+                Campus siège
+              </label>
+              <p class="text-sm text-gray-500">
+                Cochez si ce campus est le siège principal de l'université. Un seul campus peut être marqué comme siège.
+              </p>
+            </div>
+          </div>
+
+          <!-- Actif -->
+          <div class="flex items-start gap-4">
+            <input
+              id="active"
+              v-model="form.active"
+              type="checkbox"
+              class="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <div>
+              <label for="active" class="block font-medium text-gray-700 dark:text-gray-300">
+                Campus actif
+              </label>
+              <p class="text-sm text-gray-500">
+                Les campus inactifs ne sont pas affichés sur le site public.
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Actions -->
-    <div class="flex justify-end gap-2">
-      <button
-        type="button"
-        class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-        @click="goBack"
-      >
-        Annuler
-      </button>
-      <button
-        type="button"
-        :disabled="isSubmitting"
-        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
-        @click="submitForm"
-      >
-        <font-awesome-icon v-if="isSubmitting" :icon="['fas', 'spinner']" class="animate-spin" />
-        <font-awesome-icon v-else :icon="['fas', 'save']" />
-        Créer le campus
-      </button>
-    </div>
+      <!-- Actions -->
+      <div class="flex justify-end gap-2">
+        <button
+          type="button"
+          class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+          @click="goBack"
+        >
+          Annuler
+        </button>
+        <button
+          type="button"
+          :disabled="isSubmitting"
+          class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+          @click="submitForm"
+        >
+          <font-awesome-icon v-if="isSubmitting" :icon="['fas', 'spinner']" class="animate-spin" />
+          <font-awesome-icon v-else :icon="['fas', 'save']" />
+          Créer le campus
+        </button>
+      </div>
+    </template>
   </div>
 </template>
