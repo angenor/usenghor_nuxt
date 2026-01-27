@@ -316,16 +316,14 @@ const tabs = [
           </div>
 
           <div class="sm:col-span-2">
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Image de couverture (ID)
-            </label>
-            <input
+            <FormsImageUpload
               v-model="form.cover_image_external_id"
-              type="text"
-              placeholder="ID de l'image dans la médiathèque"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              label="Image de couverture"
+              hint="Cette image sera affichée sur la page de l'événement"
+              folder="events"
+              :max-size-mb="5"
+              aspect-ratio="16/9"
             />
-            <p class="mt-1 text-xs text-gray-500">En production: sélection via la médiathèque</p>
           </div>
         </div>
       </div>
