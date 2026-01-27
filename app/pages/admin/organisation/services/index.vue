@@ -24,6 +24,8 @@ const {
   generateServiceId
 } = useServicesApi()
 
+const { apiFetch } = useApi()
+
 // === STATE ===
 const isLoading = ref(true)
 const isSaving = ref(false)
@@ -57,6 +59,13 @@ const stats = ref<ServiceStats>({
 })
 const departments = ref<Array<{ id: string; name: string; code: string }>>([])
 
+// Candidats responsables (utilisateurs)
+interface HeadCandidate {
+  id: string
+  name: string
+}
+const headCandidates = ref<HeadCandidate[]>([])
+
 // Form state
 const newService = ref({
   name: '',
@@ -70,12 +79,35 @@ const newService = ref({
 })
 
 // === CHARGEMENT DES DONNÉES ===
+async function loadHeadCandidates() {
+  try {
+    const response = await apiFetch<{
+      items: Array<{
+        id: string
+        first_name: string
+        last_name: string
+        salutation: string | null
+      }>
+    }>('/api/admin/users', {
+      query: { limit: 100, active: true },
+    })
+    headCandidates.value = response.items.map(user => ({
+      id: user.id,
+      name: user.salutation
+        ? `${user.salutation} ${user.first_name} ${user.last_name}`
+        : `${user.first_name} ${user.last_name}`,
+    }))
+  }
+  catch (err) {
+    console.error('Erreur chargement des candidats responsables:', err)
+  }
+}
+
 async function loadData() {
   isLoading.value = true
   try {
-    // Charger les départements en premier pour le debug
+    // Charger les départements en premier
     const deptsData = await getDepartmentsForSelect()
-    console.log('Départements chargés:', deptsData)
     departments.value = deptsData
 
     const [servicesData, groupedData, statsData] = await Promise.all([
@@ -95,9 +127,56 @@ async function loadData() {
   }
 }
 
+// Enrichir les services avec les infos des responsables
+function enrichServicesWithHeads() {
+  if (headCandidates.value.length === 0) return
+
+  // Enrichir la liste plate
+  allServices.value = allServices.value.map((service) => {
+    if (service.head_external_id) {
+      const candidate = headCandidates.value.find(c => c.id === service.head_external_id)
+      if (candidate) {
+        return {
+          ...service,
+          head: {
+            id: candidate.id,
+            name: candidate.name,
+            title: null,
+            photo: null,
+          },
+        }
+      }
+    }
+    return { ...service, head: null }
+  })
+
+  // Enrichir la liste groupée
+  servicesGrouped.value = servicesGrouped.value.map(group => ({
+    ...group,
+    services: group.services.map((service) => {
+      if (service.head_external_id) {
+        const candidate = headCandidates.value.find(c => c.id === service.head_external_id)
+        if (candidate) {
+          return {
+            ...service,
+            head: {
+              id: candidate.id,
+              name: candidate.name,
+              title: null,
+              photo: null,
+            },
+          }
+        }
+      }
+      return { ...service, head: null }
+    }),
+  }))
+}
+
 // Charger les données au montage
 onMounted(async () => {
-  await loadData()
+  await Promise.all([loadData(), loadHeadCandidates()])
+  enrichServicesWithHeads()
   if (filterDepartment.value) {
     expandedDepartments.value.add(filterDepartment.value)
   }
@@ -274,6 +353,7 @@ const saveService = async () => {
 
     closeModals()
     await loadData()
+    enrichServicesWithHeads()
   }
   catch (error) {
     console.error('Erreur lors de la sauvegarde:', error)
@@ -291,6 +371,7 @@ const deleteServiceAction = async () => {
     await apiDeleteService(deletingService.value.id)
     closeModals()
     await loadData()
+    enrichServicesWithHeads()
   }
   catch (error) {
     console.error('Erreur lors de la suppression:', error)
@@ -304,6 +385,7 @@ const toggleServiceActive = async (service: ServiceDisplay) => {
   try {
     await apiToggleServiceActive(service.id)
     await loadData()
+    enrichServicesWithHeads()
   }
   catch (error) {
     console.error('Erreur lors du basculement:', error)
@@ -950,19 +1032,22 @@ const clearDepartmentFilter = () => {
               />
             </div>
 
-            <!-- Responsable (TODO: connecter à l'API staff) -->
+            <!-- Responsable -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                ID du responsable
+                Responsable
               </label>
-              <input
+              <select
                 v-model="newService.head_external_id"
-                type="text"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent"
-                placeholder="UUID du responsable (optionnel)"
-              />
+              >
+                <option value="">Aucun responsable</option>
+                <option v-for="candidate in headCandidates" :key="candidate.id" :value="candidate.id">
+                  {{ candidate.name }}
+                </option>
+              </select>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Laissez vide si pas de responsable assigné
+                Le responsable sera chargé depuis le service Identité
               </p>
             </div>
 

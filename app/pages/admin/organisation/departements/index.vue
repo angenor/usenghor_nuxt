@@ -103,10 +103,33 @@ async function loadHeadCandidates() {
   }
 }
 
+// Enrichir les départements avec les infos des responsables
+function enrichDepartmentsWithHeads() {
+  if (headCandidates.value.length === 0) return
+
+  allDepartments.value = allDepartments.value.map((dept) => {
+    if (dept.head_external_id) {
+      const candidate = headCandidates.value.find(c => c.id === dept.head_external_id)
+      if (candidate) {
+        return {
+          ...dept,
+          head: {
+            id: candidate.id,
+            name: candidate.name,
+            title: null,
+            photo: null,
+          },
+        }
+      }
+    }
+    return { ...dept, head: null }
+  })
+}
+
 // Chargement initial
-onMounted(() => {
-  loadDepartments()
-  loadHeadCandidates()
+onMounted(async () => {
+  await Promise.all([loadDepartments(), loadHeadCandidates()])
+  enrichDepartmentsWithHeads()
 })
 
 // Départements filtrés et triés
@@ -221,30 +244,26 @@ const saveDepartment = async () => {
   error.value = null
 
   try {
+    const payload = {
+      code: newDepartment.value.code,
+      name: newDepartment.value.name,
+      description: newDepartment.value.description || null,
+      mission: newDepartment.value.mission || null,
+      head_external_id: newDepartment.value.head_id || null,
+      active: newDepartment.value.active,
+    }
+
     if (editingDepartment.value) {
       // Mise à jour
-      await updateDepartment(editingDepartment.value.id, {
-        code: newDepartment.value.code,
-        name: newDepartment.value.name,
-        description: newDepartment.value.description || null,
-        mission: newDepartment.value.mission || null,
-        head_external_id: newDepartment.value.head_id || null,
-        active: newDepartment.value.active,
-      })
+      await updateDepartment(editingDepartment.value.id, payload)
     }
     else {
       // Création
-      await createDepartment({
-        code: newDepartment.value.code,
-        name: newDepartment.value.name,
-        description: newDepartment.value.description || null,
-        mission: newDepartment.value.mission || null,
-        head_external_id: newDepartment.value.head_id || null,
-        active: newDepartment.value.active,
-      })
+      await createDepartment(payload)
     }
     closeModals()
     await loadDepartments()
+    enrichDepartmentsWithHeads()
   }
   catch (err: any) {
     console.error('Erreur sauvegarde département:', err)
