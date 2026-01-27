@@ -1,24 +1,29 @@
 <script setup lang="ts">
-import type { CampusTeamMember } from '~/composables/useMockData'
+import type { CampusForSelect, CampusTeamMemberDisplay, CampusTeamUpdate } from '~/composables/useCampusTeamApi'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
 })
 
 const router = useRouter()
 const route = useRoute()
 
 const {
-  campusExternalises,
-  getCampusTeamMemberById,
-  commonPositions
-} = useMockData()
+  getTeamMemberById,
+  getCampusesForSelect,
+  updateTeamMember,
+  commonPositions,
+  formatDate,
+  getFlagEmoji,
+  getFullName,
+} = useCampusTeamApi()
 
 // === STATE ===
 const isLoading = ref(true)
 const isSaving = ref(false)
 const notFound = ref(false)
-const member = ref<CampusTeamMember | null>(null)
+const member = ref<CampusTeamMemberDisplay | null>(null)
+const campuses = ref<CampusForSelect[]>([])
 const showPositionDropdown = ref(false)
 
 // Form state
@@ -28,43 +33,47 @@ const form = ref({
   display_order: 1,
   start_date: '',
   end_date: '',
-  active: true
+  active: true,
 })
 
 // Charger les données
-onMounted(() => {
+onMounted(async () => {
   const memberId = route.params.id as string
-  const foundMember = getCampusTeamMemberById(memberId)
 
-  if (foundMember) {
-    member.value = foundMember
-    form.value = {
-      campus_id: foundMember.campus_id,
-      position: foundMember.position,
-      display_order: foundMember.display_order,
-      start_date: foundMember.start_date || '',
-      end_date: foundMember.end_date || '',
-      active: foundMember.active
+  try {
+    // Charger les campus et le membre en parallèle
+    const [loadedCampuses, loadedMember] = await Promise.all([
+      getCampusesForSelect(),
+      getTeamMemberById(memberId),
+    ])
+
+    campuses.value = loadedCampuses
+
+    if (loadedMember) {
+      member.value = loadedMember
+      form.value = {
+        campus_id: loadedMember.campus_id,
+        position: loadedMember.position,
+        display_order: loadedMember.display_order,
+        start_date: loadedMember.start_date || '',
+        end_date: loadedMember.end_date || '',
+        active: loadedMember.active,
+      }
     }
-  } else {
+    else {
+      notFound.value = true
+    }
+  }
+  catch (error) {
+    console.error('Erreur lors du chargement du membre:', error)
     notFound.value = true
   }
-
-  isLoading.value = false
+  finally {
+    isLoading.value = false
+  }
 })
 
 // === COMPUTED ===
-
-// Liste des campus avec le siège
-const allCampuses = computed(() => {
-  const siege = {
-    id: 'siege',
-    name_fr: 'Siège - Alexandrie',
-    country_fr: 'Égypte',
-    country: 'EG'
-  }
-  return [siege, ...campusExternalises.value]
-})
 
 // Filtrer les positions suggestions
 const filteredPositions = computed(() => {
@@ -75,23 +84,15 @@ const filteredPositions = computed(() => {
 
 // Validation du formulaire
 const isFormValid = computed(() => {
-  return form.value.campus_id &&
-    form.value.position.trim() &&
-    form.value.start_date
+  return form.value.campus_id
+    && form.value.position.trim()
+    && form.value.start_date
 })
 
 // Nom complet du membre
 const fullName = computed(() => {
   if (!member.value) return ''
-  return `${member.value.user.first_name} ${member.value.user.last_name}`
-})
-
-// Campus actuel
-const currentCampusName = computed(() => {
-  if (!member.value) return ''
-  if (member.value.campus_id === 'siege') return 'Siège - Alexandrie'
-  const campus = campusExternalises.value.find(c => c.id === member.value?.campus_id)
-  return campus?.name_fr || ''
+  return getFullName(member.value.user)
 })
 
 // === METHODS ===
@@ -108,18 +109,21 @@ const saveForm = async () => {
 
   isSaving.value = true
   try {
-    const updatedMember = {
-      ...member.value,
-      ...form.value,
-      end_date: form.value.end_date || null
+    const updateData: CampusTeamUpdate = {
+      position: form.value.position,
+      display_order: form.value.display_order,
+      start_date: form.value.start_date || null,
+      end_date: form.value.end_date || null,
+      active: form.value.active,
     }
 
-    console.log('Mise à jour du membre:', updatedMember)
-    // En production: PUT /api/admin/campus-team/{id}
-
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await updateTeamMember(member.value.id, updateData)
     router.push({ path: '/admin/campus/equipes', query: { campus: form.value.campus_id } })
-  } finally {
+  }
+  catch (error) {
+    console.error('Erreur lors de la mise à jour:', error)
+  }
+  finally {
     isSaving.value = false
   }
 }
@@ -127,25 +131,6 @@ const saveForm = async () => {
 // Annuler
 const goBack = () => {
   router.back()
-}
-
-// Flag emoji helper
-const getFlagEmoji = (countryCode: string): string => {
-  if (!countryCode || countryCode.length !== 2) return ''
-  const codePoints = countryCode
-    .toUpperCase()
-    .split('')
-    .map(char => 127397 + char.charCodeAt(0))
-  return String.fromCodePoint(...codePoints)
-}
-
-// Format date
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  })
 }
 
 // Fermer les dropdowns quand on clique ailleurs
@@ -175,8 +160,12 @@ onUnmounted(() => {
     <!-- Not found -->
     <div v-else-if="notFound" class="py-12 text-center">
       <font-awesome-icon :icon="['fas', 'user-slash']" class="mb-4 h-12 w-12 text-gray-300 dark:text-gray-600" />
-      <h2 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">Membre non trouvé</h2>
-      <p class="mb-4 text-gray-500 dark:text-gray-400">Ce membre d'équipe n'existe pas ou a été supprimé.</p>
+      <h2 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">
+        Membre non trouvé
+      </h2>
+      <p class="mb-4 text-gray-500 dark:text-gray-400">
+        Ce membre d'équipe n'existe pas ou a été supprimé.
+      </p>
       <button
         class="inline-flex items-center gap-2 rounded-lg bg-brand-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-red-700"
         @click="router.push('/admin/campus/equipes')"
@@ -217,7 +206,7 @@ onUnmounted(() => {
               :src="member.user.photo_url"
               :alt="fullName"
               class="h-full w-full object-cover"
-            />
+            >
             <font-awesome-icon v-else :icon="['fas', 'user']" class="h-8 w-8 text-gray-400" />
           </div>
           <div>
@@ -227,8 +216,8 @@ onUnmounted(() => {
             <p class="text-sm text-gray-500 dark:text-gray-400">
               {{ member.user.email }}
             </p>
-            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
-              Membre depuis le {{ formatDate(member.created_at) }}
+            <p v-if="member.campus_name" class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+              Campus actuel : {{ member.campus_name }}
             </p>
           </div>
         </div>
@@ -246,9 +235,12 @@ onUnmounted(() => {
             class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             required
           >
-            <option value="" disabled>Sélectionner un campus</option>
-            <option v-for="campus in allCampuses" :key="campus.id" :value="campus.id">
-              {{ getFlagEmoji(campus.country) }} {{ campus.name_fr }}
+            <option value="" disabled>
+              Sélectionner un campus
+            </option>
+            <option v-for="campus in campuses" :key="campus.id" :value="campus.id">
+              {{ getFlagEmoji(campus.country_code || '') }} {{ campus.name }}
+              {{ campus.is_headquarters ? '(Siège)' : '' }}
             </option>
           </select>
           <p v-if="form.campus_id !== member.campus_id" class="mt-1 text-xs text-amber-600 dark:text-amber-400">
@@ -268,7 +260,7 @@ onUnmounted(() => {
             class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             required
             @focus="showPositionDropdown = true"
-          />
+          >
 
           <!-- Suggestions de postes -->
           <div
@@ -299,7 +291,7 @@ onUnmounted(() => {
               type="date"
               class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               required
-            />
+            >
           </div>
           <div>
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -309,7 +301,7 @@ onUnmounted(() => {
               v-model="form.end_date"
               type="date"
               class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            />
+            >
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Optionnel - pour les départs prévus
             </p>
@@ -326,7 +318,7 @@ onUnmounted(() => {
             type="number"
             min="1"
             class="w-32 rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          />
+          >
           <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
             Détermine l'ordre d'affichage sur le site public
           </p>
@@ -339,7 +331,7 @@ onUnmounted(() => {
             v-model="form.active"
             type="checkbox"
             class="h-4 w-4 rounded border-gray-300 bg-white text-brand-red-600 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700"
-          />
+          >
           <label for="active" class="text-sm text-gray-700 dark:text-gray-300">
             Membre actif (visible sur le site public)
           </label>
@@ -364,9 +356,9 @@ onUnmounted(() => {
             <span class="text-gray-500 dark:text-gray-400">ID:</span>
             <code class="ml-2 rounded bg-gray-200 px-1 text-xs dark:bg-gray-700">{{ member.id }}</code>
           </div>
-          <div>
-            <span class="text-gray-500 dark:text-gray-400">Créé le:</span>
-            <span class="ml-2 text-gray-900 dark:text-white">{{ formatDate(member.created_at) }}</span>
+          <div v-if="member.start_date">
+            <span class="text-gray-500 dark:text-gray-400">En poste depuis:</span>
+            <span class="ml-2 text-gray-900 dark:text-white">{{ formatDate(member.start_date) }}</span>
           </div>
         </div>
       </div>
