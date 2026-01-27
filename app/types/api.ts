@@ -1173,3 +1173,147 @@ export interface PartnerUpdate {
 export interface PartnerReorder {
   partner_ids: string[]
 }
+
+// ============================================================================
+// Editorial (Categories & Contents)
+// ============================================================================
+
+export type EditorialValueType = 'text' | 'number' | 'json' | 'html' | 'markdown'
+
+// --- Categories ---
+
+export interface EditorialCategoryRead {
+  id: string
+  code: string
+  name: string
+  description: string | null
+  created_at: string
+}
+
+export interface EditorialCategoryWithCount extends EditorialCategoryRead {
+  contents_count: number
+}
+
+export interface EditorialCategoryCreate {
+  code: string
+  name: string
+  description?: string | null
+}
+
+export interface EditorialCategoryUpdate {
+  name?: string
+  description?: string | null
+}
+
+// --- Contents ---
+
+export interface EditorialContentRead {
+  id: string
+  key: string
+  value: string | null
+  value_type: EditorialValueType
+  category_id: string | null
+  year: number | null
+  description: string | null
+  admin_editable: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface EditorialContentWithCategory extends EditorialContentRead {
+  category: EditorialCategoryRead | null
+}
+
+export interface EditorialContentCreate {
+  key: string
+  value?: string | null
+  value_type?: EditorialValueType
+  category_id?: string | null
+  year?: number | null
+  description?: string | null
+  admin_editable?: boolean
+}
+
+export interface EditorialContentUpdate {
+  value?: string | null
+  value_type?: EditorialValueType
+  category_id?: string | null
+  year?: number | null
+  description?: string | null
+  admin_editable?: boolean
+}
+
+// --- History ---
+
+export interface EditorialHistoryRead {
+  id: string
+  content_id: string
+  old_value: string | null
+  new_value: string | null
+  modified_by_external_id: string | null
+  modified_at: string
+}
+
+export interface EditorialContentWithHistory extends EditorialContentRead {
+  history: EditorialHistoryRead[]
+}
+
+// --- Bulk Operations ---
+
+export interface EditorialBulkContentUpdate {
+  key: string
+  value: string
+}
+
+export interface EditorialBulkUpdateRequest {
+  updates: EditorialBulkContentUpdate[]
+}
+
+export interface EditorialBulkUpdateResult {
+  total: number
+  updated: number
+  errors: number
+  not_found: number
+}
+
+// --- Value Sections (Frontend-specific types) ---
+
+export type ValueSectionKey = 'mission' | 'vision' | 'history' | 'rector_message'
+
+export interface ValueSection {
+  id: string
+  key: ValueSectionKey
+  title: string
+  content: string
+  value_type: EditorialValueType
+  category_id: string | null
+  display_order: number
+  admin_editable: boolean
+  created_at: string
+  updated_at: string
+}
+
+// --- Core Values (Frontend-specific types, stored as JSON in backend) ---
+
+export interface CoreValueData {
+  title: string
+  description: string
+  icon: string
+  display_order: number
+  is_active: boolean
+}
+
+export interface CoreValue extends CoreValueData {
+  id: string
+  created_at: string
+  updated_at: string
+}
+
+// --- Statistics ---
+
+export interface EditorialValuesStats {
+  sections_count: number
+  core_values_count: number
+  active_core_values: number
+  last_updated: string | null
+}

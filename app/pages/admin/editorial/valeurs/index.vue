@@ -1,50 +1,73 @@
 <script setup lang="ts">
+import type { OutputData } from '@editorjs/editorjs'
 import type {
-  ValueSectionKey,
-  ValueSection,
   CoreValue,
-  ValueHistory,
-  ValuesGlobalStats
-} from '~/composables/useMockData'
+  EditorialHistoryRead,
+  EditorialValuesStats,
+  ValueSection,
+  ValueSectionKey,
+} from '~/types/api'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
 })
 
 const {
-  getAllValueSections,
-  getValueSectionById,
-  getValueSectionByKey,
-  getAllCoreValues,
-  getCoreValueById,
-  isCoreValueTitleTaken,
-  getValueHistory,
-  getAllValueHistory,
-  getNextCoreValueOrder,
-  getValuesGlobalStats,
-  canEditValueSection,
+  getValueSections,
+  getCoreValues,
+  updateValueSection: apiUpdateSection,
+  createCoreValue: apiCreateCoreValue,
+  updateCoreValue: apiUpdateCoreValue,
+  deleteCoreValue: apiDeleteCoreValue,
+  getValuesCategory,
+  getValuesStats,
+  getValueHistory: apiGetValueHistory,
+  isCoreValueTitleTaken: apiIsCoreValueTitleTaken,
   validateCoreValueTitle,
   validateCoreValueDescription,
+  canEditValueSection,
+  getNextCoreValueOrder,
   valueSectionLabels,
   valueSectionDescriptions,
   valueSectionIcons,
   valueSectionColors,
+  sectionKeys,
   coreValueAvailableIcons,
-  generateCoreValueId
-} = useMockData()
+} = useEditorialValuesApi()
 
 // === STATE ===
 const isLoading = ref(true)
 const isSaving = ref(false)
+const error = ref<string | null>(null)
 const activeTab = ref<'sections' | 'values'>('sections')
 
 // Sections state
 const sections = ref<ValueSection[]>([])
 const editingSection = ref<ValueSectionKey | null>(null)
-const sectionForm = ref({
+const sectionForm = ref<{
+  title: string
+  content: OutputData | null
+}>({
   title: '',
-  content: ''
+  content: null,
 })
+
+// Helper pour parser le contenu EditorJS depuis le backend
+function parseEditorJSContent(content: string): OutputData | null {
+  if (!content) return null
+  try {
+    return JSON.parse(content) as OutputData
+  }
+  catch {
+    console.error('Erreur parsing EditorJS content')
+    return null
+  }
+}
+
+// Helper pour obtenir le contenu parsé d'une section
+function getSectionParsedContent(section: ValueSection): OutputData | null {
+  return parseEditorJSContent(section.content)
+}
 
 // Core values state
 const coreValues = ref<CoreValue[]>([])
@@ -56,20 +79,26 @@ const valueForm = ref({
   title: '',
   description: '',
   icon: 'star',
-  is_active: true
+  is_active: true,
 })
 const valueFormErrors = ref<Record<string, string>>({})
 
 // History state
 const showHistoryModal = ref(false)
-const selectedHistoryItem = ref<{ id: string; type: 'section' | 'value'; name: string } | null>(null)
-const historyItems = ref<ValueHistory[]>([])
+const selectedHistoryItem = ref<{ id: string, type: 'section' | 'value', name: string } | null>(null)
+const historyItems = ref<EditorialHistoryRead[]>([])
+const isLoadingHistory = ref(false)
 
-// === COMPUTED ===
+// Category ID (nécessaire pour créer des valeurs)
+const categoryId = ref<string | null>(null)
 
-const globalStats = computed<ValuesGlobalStats>(() => getValuesGlobalStats())
-
-const sectionKeys: ValueSectionKey[] = ['mission', 'vision', 'history', 'rector_message']
+// Statistics
+const globalStats = ref<EditorialValuesStats>({
+  sections_count: 0,
+  core_values_count: 0,
+  active_core_values: 0,
+  last_updated: null,
+})
 
 // === METHODS ===
 
@@ -78,10 +107,35 @@ onMounted(() => {
   loadData()
 })
 
-const loadData = () => {
-  sections.value = getAllValueSections()
-  coreValues.value = getAllCoreValues(true)
-  isLoading.value = false
+async function loadData() {
+  isLoading.value = true
+  error.value = null
+
+  try {
+    // Charger la catégorie pour obtenir son ID
+    const category = await getValuesCategory()
+    if (category) {
+      categoryId.value = category.id
+    }
+
+    // Charger les données en parallèle
+    const [sectionsData, valuesData, statsData] = await Promise.all([
+      getValueSections(),
+      getCoreValues(true),
+      getValuesStats(),
+    ])
+
+    sections.value = sectionsData
+    coreValues.value = valuesData
+    globalStats.value = statsData
+  }
+  catch (err) {
+    console.error('Erreur chargement des données:', err)
+    error.value = 'Erreur lors du chargement des données'
+  }
+  finally {
+    isLoading.value = false
+  }
 }
 
 // Format date
@@ -115,43 +169,49 @@ const startEditingSection = (key: ValueSectionKey) => {
     editingSection.value = key
     sectionForm.value = {
       title: section.title,
-      content: section.content
+      content: parseEditorJSContent(section.content),
     }
   }
 }
 
 const cancelEditingSection = () => {
   editingSection.value = null
-  sectionForm.value = { title: '', content: '' }
+  sectionForm.value = { title: '', content: null }
 }
 
-const saveSection = async () => {
+async function saveSection() {
   if (!editingSection.value) return
 
-  isSaving.value = true
-  try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500))
+  const section = getSection(editingSection.value)
+  if (!section) return
 
-    console.log('Sauvegarde de la section:', {
-      key: editingSection.value,
-      ...sectionForm.value
+  isSaving.value = true
+  error.value = null
+
+  try {
+    // Le composable gère la sérialisation JSON de l'OutputData
+    const updated = await apiUpdateSection(section.id, {
+      title: sectionForm.value.title,
+      content: sectionForm.value.content || undefined,
     })
 
-    // Update local state
+    // Mettre à jour le state local
     const index = sections.value.findIndex(s => s.key === editingSection.value)
     if (index !== -1) {
-      sections.value[index] = {
-        ...sections.value[index],
-        title: sectionForm.value.title,
-        content: sectionForm.value.content,
-        updated_at: new Date().toISOString()
-      }
+      sections.value[index] = updated
     }
 
+    // Rafraîchir les stats
+    globalStats.value = await getValuesStats()
+
     editingSection.value = null
-    sectionForm.value = { title: '', content: '' }
-  } finally {
+    sectionForm.value = { title: '', content: null }
+  }
+  catch (err) {
+    console.error('Erreur sauvegarde section:', err)
+    error.value = 'Erreur lors de la sauvegarde'
+  }
+  finally {
     isSaving.value = false
   }
 }
@@ -168,20 +228,27 @@ const resetValueForm = () => {
   valueFormErrors.value = {}
 }
 
-const validateValueForm = (): boolean => {
+async function validateValueForm(): Promise<boolean> {
   valueFormErrors.value = {}
 
   if (!valueForm.value.title.trim()) {
     valueFormErrors.value.title = 'Le titre est requis'
-  } else if (!validateCoreValueTitle(valueForm.value.title)) {
+  }
+  else if (!validateCoreValueTitle(valueForm.value.title)) {
     valueFormErrors.value.title = 'Le titre doit contenir entre 2 et 50 caractères'
-  } else if (isCoreValueTitleTaken(valueForm.value.title, editingValue.value?.id)) {
-    valueFormErrors.value.title = 'Ce titre est déjà utilisé'
+  }
+  else {
+    // Vérifier si le titre est déjà utilisé (async)
+    const isTaken = await apiIsCoreValueTitleTaken(valueForm.value.title, editingValue.value?.id)
+    if (isTaken) {
+      valueFormErrors.value.title = 'Ce titre est déjà utilisé'
+    }
   }
 
   if (!valueForm.value.description.trim()) {
     valueFormErrors.value.description = 'La description est requise'
-  } else if (!validateCoreValueDescription(valueForm.value.description)) {
+  }
+  else if (!validateCoreValueDescription(valueForm.value.description)) {
     valueFormErrors.value.description = 'La description doit contenir entre 10 et 500 caractères'
   }
 
@@ -211,110 +278,179 @@ const openDeleteValueModal = (value: CoreValue) => {
   showDeleteModal.value = true
 }
 
-const saveValue = async () => {
-  if (!validateValueForm()) return
+async function saveValue() {
+  const isValid = await validateValueForm()
+  if (!isValid) return
 
   isSaving.value = true
-  try {
-    await new Promise(resolve => setTimeout(resolve, 500))
+  error.value = null
 
+  try {
     if (editingValue.value) {
-      // Update existing
-      console.log('Modification de la valeur:', {
-        id: editingValue.value.id,
-        ...valueForm.value
+      // Mise à jour d'une valeur existante
+      const updated = await apiUpdateCoreValue(editingValue.value.id, {
+        title: valueForm.value.title,
+        description: valueForm.value.description,
+        icon: valueForm.value.icon,
+        is_active: valueForm.value.is_active,
       })
 
+      // Mettre à jour le state local
       const index = coreValues.value.findIndex(v => v.id === editingValue.value?.id)
       if (index !== -1) {
-        coreValues.value[index] = {
-          ...coreValues.value[index],
-          ...valueForm.value,
-          updated_at: new Date().toISOString()
-        }
+        coreValues.value[index] = updated
       }
-    } else {
-      // Create new
-      const newValue: CoreValue = {
-        id: generateCoreValueId(),
-        ...valueForm.value,
-        display_order: getNextCoreValueOrder(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-      console.log('Création de la valeur:', newValue)
-      coreValues.value.push(newValue)
     }
+    else {
+      // Création d'une nouvelle valeur
+      if (!categoryId.value) {
+        error.value = 'Catégorie non trouvée'
+        return
+      }
+
+      const nextOrder = await getNextCoreValueOrder()
+      const newValue = await apiCreateCoreValue(
+        {
+          title: valueForm.value.title,
+          description: valueForm.value.description,
+          icon: valueForm.value.icon,
+          display_order: nextOrder,
+          is_active: valueForm.value.is_active,
+        },
+        categoryId.value,
+      )
+
+      coreValues.value.push(newValue)
+      // Trier par display_order
+      coreValues.value.sort((a, b) => a.display_order - b.display_order)
+    }
+
+    // Rafraîchir les stats
+    globalStats.value = await getValuesStats()
 
     showValueModal.value = false
     editingValue.value = null
     resetValueForm()
-  } finally {
+  }
+  catch (err) {
+    console.error('Erreur sauvegarde valeur:', err)
+    error.value = 'Erreur lors de la sauvegarde'
+  }
+  finally {
     isSaving.value = false
   }
 }
 
-const deleteValue = async () => {
+async function deleteValue() {
   if (!valueToDelete.value) return
 
   isSaving.value = true
-  try {
-    await new Promise(resolve => setTimeout(resolve, 500))
+  error.value = null
 
-    console.log('Suppression de la valeur:', valueToDelete.value.id)
+  try {
+    await apiDeleteCoreValue(valueToDelete.value.id)
+
+    // Mettre à jour le state local
     coreValues.value = coreValues.value.filter(v => v.id !== valueToDelete.value?.id)
+
+    // Rafraîchir les stats
+    globalStats.value = await getValuesStats()
 
     showDeleteModal.value = false
     valueToDelete.value = null
-  } finally {
+  }
+  catch (err) {
+    console.error('Erreur suppression valeur:', err)
+    error.value = 'Erreur lors de la suppression'
+  }
+  finally {
     isSaving.value = false
   }
 }
 
 // Reorder values
-const moveValue = (index: number, direction: 'up' | 'down') => {
+async function moveValue(index: number, direction: 'up' | 'down') {
   const newIndex = direction === 'up' ? index - 1 : index + 1
-  if (newIndex >= 0 && newIndex < coreValues.value.length) {
-    const items = [...coreValues.value]
-    ;[items[index], items[newIndex]] = [items[newIndex], items[index]]
-    // Update display_order
-    items.forEach((item, i) => {
-      item.display_order = i + 1
-    })
-    coreValues.value = items
+  if (newIndex < 0 || newIndex >= coreValues.value.length) return
+
+  const items = [...coreValues.value]
+  ;[items[index], items[newIndex]] = [items[newIndex], items[index]]
+
+  // Mettre à jour display_order localement
+  items.forEach((item, i) => {
+    item.display_order = i + 1
+  })
+  coreValues.value = items
+
+  // Sauvegarder les nouveaux ordres sur le serveur
+  try {
+    const valueToMove = coreValues.value[newIndex]
+    const swappedValue = coreValues.value[index]
+
+    await Promise.all([
+      apiUpdateCoreValue(valueToMove.id, { display_order: valueToMove.display_order }),
+      apiUpdateCoreValue(swappedValue.id, { display_order: swappedValue.display_order }),
+    ])
+  }
+  catch (err) {
+    console.error('Erreur réorganisation:', err)
+    // En cas d'erreur, recharger les données
+    await loadData()
   }
 }
 
 // === HISTORY METHODS ===
 
-const openSectionHistory = (section: ValueSection) => {
+async function openSectionHistory(section: ValueSection) {
   selectedHistoryItem.value = {
     id: section.id,
     type: 'section',
-    name: section.title
+    name: section.title,
   }
-  historyItems.value = getValueHistory(section.id)
   showHistoryModal.value = true
+  isLoadingHistory.value = true
+
+  try {
+    historyItems.value = await apiGetValueHistory(section.id)
+  }
+  catch (err) {
+    console.error('Erreur chargement historique:', err)
+    historyItems.value = []
+  }
+  finally {
+    isLoadingHistory.value = false
+  }
 }
 
-const openValueHistory = (value: CoreValue) => {
+async function openValueHistory(value: CoreValue) {
   selectedHistoryItem.value = {
     id: value.id,
     type: 'value',
-    name: value.title
+    name: value.title,
   }
-  historyItems.value = getValueHistory(value.id)
   showHistoryModal.value = true
+  isLoadingHistory.value = true
+
+  try {
+    historyItems.value = await apiGetValueHistory(value.id)
+  }
+  catch (err) {
+    console.error('Erreur chargement historique:', err)
+    historyItems.value = []
+  }
+  finally {
+    isLoadingHistory.value = false
+  }
 }
 
-const closeHistoryModal = () => {
+function closeHistoryModal() {
   showHistoryModal.value = false
   selectedHistoryItem.value = null
   historyItems.value = []
 }
 
 // Close modals
-const closeModals = () => {
+function closeModals() {
   showValueModal.value = false
   showDeleteModal.value = false
   showHistoryModal.value = false
@@ -322,6 +458,13 @@ const closeModals = () => {
   valueToDelete.value = null
   selectedHistoryItem.value = null
   resetValueForm()
+}
+
+// Truncate text helper
+function truncateText(text: string | null, maxLength: number): string {
+  if (!text) return ''
+  if (text.length <= maxLength) return text
+  return text.substring(0, maxLength) + '...'
 }
 </script>
 
@@ -342,6 +485,20 @@ const closeModals = () => {
     <!-- Loading -->
     <div v-if="isLoading" class="flex items-center justify-center py-12">
       <font-awesome-icon :icon="['fas', 'spinner']" class="h-8 w-8 animate-spin text-gray-400" />
+    </div>
+
+    <!-- Error -->
+    <div v-else-if="error" class="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
+      <div class="flex items-center gap-3">
+        <font-awesome-icon :icon="['fas', 'exclamation-circle']" class="h-5 w-5 text-red-600 dark:text-red-400" />
+        <p class="text-sm text-red-700 dark:text-red-300">{{ error }}</p>
+        <button
+          class="ml-auto text-sm font-medium text-red-600 hover:text-red-500 dark:text-red-400"
+          @click="loadData"
+        >
+          Réessayer
+        </button>
+      </div>
     </div>
 
     <template v-else>
@@ -491,17 +648,17 @@ const closeModals = () => {
                 </div>
                 <div>
                   <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Contenu (HTML)
+                    Contenu
                   </label>
-                  <textarea
+                  <EditorJS
+                    v-if="sectionForm.content"
                     v-model="sectionForm.content"
-                    rows="12"
-                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-mono text-sm text-gray-900 placeholder-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    placeholder="<p>Contenu HTML de la section...</p>"
+                    :min-height="300"
+                    placeholder="Commencez à rédiger le contenu..."
                   />
-                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Utilisez les balises HTML : &lt;p&gt;, &lt;ul&gt;, &lt;li&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;h3&gt;
-                  </p>
+                  <div v-else class="rounded-lg border border-gray-300 bg-gray-50 p-8 text-center dark:border-gray-600 dark:bg-gray-700">
+                    <p class="text-gray-500 dark:text-gray-400">Chargement de l'éditeur...</p>
+                  </div>
                 </div>
                 <div class="flex items-center justify-end gap-3">
                   <button
@@ -526,8 +683,14 @@ const closeModals = () => {
               </div>
             </template>
             <template v-else-if="getSection(key)">
-              <!-- Preview -->
-              <div class="prose prose-sm max-w-none dark:prose-invert" v-html="getSection(key)!.content" />
+              <!-- Preview avec EditorJSRenderer -->
+              <EditorJSRenderer
+                v-if="getSectionParsedContent(getSection(key)!)"
+                :data="getSectionParsedContent(getSection(key)!)!"
+              />
+              <p v-else class="text-gray-500 dark:text-gray-400">
+                Aucun contenu pour cette section.
+              </p>
               <div class="mt-4 border-t border-gray-100 pt-4 dark:border-gray-700">
                 <p class="text-xs text-gray-500 dark:text-gray-400">
                   Dernière modification : {{ formatDate(getSection(key)!.updated_at) }}
@@ -842,7 +1005,12 @@ const closeModals = () => {
           </div>
 
           <div class="flex-1 overflow-y-auto p-6">
-            <div v-if="historyItems.length === 0" class="py-8 text-center">
+            <!-- Loading history -->
+            <div v-if="isLoadingHistory" class="flex items-center justify-center py-8">
+              <font-awesome-icon :icon="['fas', 'spinner']" class="h-6 w-6 animate-spin text-gray-400" />
+            </div>
+
+            <div v-else-if="historyItems.length === 0" class="py-8 text-center">
               <font-awesome-icon :icon="['fas', 'history']" class="mx-auto mb-3 h-8 w-8 text-gray-300 dark:text-gray-600" />
               <p class="text-gray-500 dark:text-gray-400">
                 Aucune modification enregistrée
@@ -862,20 +1030,23 @@ const closeModals = () => {
                     <span class="text-sm text-gray-500 dark:text-gray-400">
                       {{ formatDate(entry.modified_at) }}
                     </span>
-                    <span class="text-xs text-gray-400 dark:text-gray-500">
-                      par {{ entry.modified_by_name || 'Inconnu' }}
+                    <span v-if="entry.modified_by_external_id" class="text-xs text-gray-400 dark:text-gray-500">
+                      ID: {{ entry.modified_by_external_id.substring(0, 8) }}...
                     </span>
                   </div>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                    Champ modifié : <span class="font-medium">{{ entry.field_changed }}</span>
-                  </p>
                   <div class="text-sm">
-                    <p class="text-gray-500 dark:text-gray-400 line-clamp-2">
-                      {{ entry.old_value.substring(0, 100) }}{{ entry.old_value.length > 100 ? '...' : '' }}
+                    <p v-if="entry.old_value" class="text-gray-500 dark:text-gray-400 line-clamp-2">
+                      {{ truncateText(entry.old_value, 100) }}
+                    </p>
+                    <p v-else class="text-gray-400 dark:text-gray-500 italic">
+                      (vide)
                     </p>
                     <font-awesome-icon :icon="['fas', 'arrow-down']" class="my-1 h-3 w-3 text-gray-400" />
-                    <p class="font-medium text-gray-900 dark:text-white line-clamp-2">
-                      {{ entry.new_value.substring(0, 100) }}{{ entry.new_value.length > 100 ? '...' : '' }}
+                    <p v-if="entry.new_value" class="font-medium text-gray-900 dark:text-white line-clamp-2">
+                      {{ truncateText(entry.new_value, 100) }}
+                    </p>
+                    <p v-else class="text-gray-400 dark:text-gray-500 italic">
+                      (vide)
                     </p>
                   </div>
                 </div>

@@ -1,36 +1,54 @@
 <script setup lang="ts">
-import type { EditorialStatistic, EditorialCategory, EditorialStatisticHistory, StatisticFilters, EditorialValueType } from '~/composables/useMockData'
+import type {
+  ContentRead,
+  CategoryRead,
+  HistoryRead,
+  EditorialValueType,
+  ContentFilters
+} from '~/composables/useEditorialApi'
+import type { OutputData } from '@editorjs/editorjs'
+import { useDebounceFn } from '@vueuse/core'
 
 definePageMeta({
   layout: 'admin'
 })
 
 const {
-  getAllStatistics,
-  getStatisticById,
-  getStatisticByKey,
-  isStatisticKeyTaken,
-  getStatisticHistory,
-  getAllEditorialCategories,
-  getEditorialCategoryById,
-  getStatisticAvailableYears,
-  getEditorialGlobalStats,
-  formatStatisticValue,
-  canEditStatistic,
-  canDeleteStatistic,
+  listContents,
+  listCategoriesWithCount,
+  createContent,
+  updateContent,
+  deleteContent,
+  getContentHistory,
+  formatValue,
+  canEditContent,
+  canDeleteContent,
+  getAvailableYears,
+  computeGlobalStats,
   valueTypeLabels,
-  valueTypeColors,
-  generateStatisticId,
-  generateHistoryId
-} = useMockData()
+  valueTypeColors
+} = useEditorialApi()
 
 // === STATE ===
 const isLoading = ref(true)
+const isSaving = ref(false)
+
+// Données
+const contents = ref<ContentRead[]>([])
+const categories = ref<CategoryRead[]>([])
+const totalItems = ref(0)
+const totalPages = ref(1)
+
+// Pagination
+const currentPage = ref(1)
+const itemsPerPage = ref(50)
+
+// Filtres
 const searchQuery = ref('')
 const categoryFilter = ref<string | 'all'>('all')
 const yearFilter = ref<number | 'all'>('all')
-const sortBy = ref<StatisticFilters['sort_by']>('updated_at')
-const sortOrder = ref<StatisticFilters['sort_order']>('desc')
+const sortBy = ref<'key' | 'updated_at' | 'year'>('updated_at')
+const sortOrder = ref<'asc' | 'desc'>('desc')
 
 // Modals
 const showAddModal = ref(false)
@@ -38,9 +56,9 @@ const showEditModal = ref(false)
 const showDeleteModal = ref(false)
 const showHistoryModal = ref(false)
 
-const selectedStatistic = ref<EditorialStatistic | null>(null)
-const statisticToDelete = ref<EditorialStatistic | null>(null)
-const statisticHistory = ref<EditorialStatisticHistory[]>([])
+const selectedContent = ref<ContentRead | null>(null)
+const contentToDelete = ref<ContentRead | null>(null)
+const contentHistory = ref<HistoryRead[]>([])
 
 // Formulaire
 const formData = ref({
@@ -53,38 +71,78 @@ const formData = ref({
 })
 const formErrors = ref<Record<string, string>>({})
 
+// EditorJS content (pour types json/html)
+const editorContent = ref<OutputData | undefined>(undefined)
+
 // === COMPUTED ===
 
 // Statistiques globales
-const globalStats = computed(() => getEditorialGlobalStats())
-
-// Catégories disponibles
-const categories = computed(() => getAllEditorialCategories())
+const globalStats = computed(() => computeGlobalStats(contents.value, categories.value))
 
 // Années disponibles
-const availableYears = computed(() => getStatisticAvailableYears())
-
-// Filtres appliqués
-const filters = computed<StatisticFilters>(() => ({
-  search: searchQuery.value || undefined,
-  category: categoryFilter.value === 'all' ? undefined : categoryFilter.value,
-  year: yearFilter.value === 'all' ? undefined : yearFilter.value,
-  sort_by: sortBy.value,
-  sort_order: sortOrder.value
-}))
-
-// Liste filtrée
-const filteredStatistics = computed(() => getAllStatistics(filters.value))
+const availableYears = computed(() => getAvailableYears(contents.value))
 
 // Types de valeurs disponibles
 const valueTypes: EditorialValueType[] = ['number', 'text', 'html', 'markdown', 'json']
 
-// === METHODS ===
+// Détermine si on doit utiliser EditorJS pour ce type
+const useRichEditor = computed(() => ['json', 'html'].includes(formData.value.value_type))
 
-// Initialisation
-onMounted(() => {
-  isLoading.value = false
+// === API CALLS ===
+async function loadContents() {
+  isLoading.value = true
+  try {
+    const params: ContentFilters = {
+      page: currentPage.value,
+      limit: itemsPerPage.value,
+      search: searchQuery.value || null,
+      category_id: categoryFilter.value !== 'all' ? categoryFilter.value : null,
+      year: yearFilter.value !== 'all' ? yearFilter.value : null,
+      sort_by: sortBy.value,
+      sort_order: sortOrder.value
+    }
+
+    const response = await listContents(params)
+    contents.value = response.items
+    totalItems.value = response.total
+    totalPages.value = response.pages
+  } catch (error) {
+    console.error('Erreur chargement contenus:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+async function loadCategories() {
+  try {
+    const response = await listCategoriesWithCount()
+    categories.value = response
+  } catch (error) {
+    console.error('Erreur chargement catégories:', error)
+  }
+}
+
+// === WATCHERS ===
+watch(searchQuery, useDebounceFn(() => {
+  currentPage.value = 1
+  loadContents()
+}, 300))
+
+watch([categoryFilter, yearFilter, sortBy, sortOrder], () => {
+  currentPage.value = 1
+  loadContents()
 })
+
+watch(currentPage, () => {
+  loadContents()
+})
+
+// === LIFECYCLE ===
+onMounted(async () => {
+  await Promise.all([loadContents(), loadCategories()])
+})
+
+// === METHODS ===
 
 // Réinitialiser les filtres
 const resetFilters = () => {
@@ -94,7 +152,7 @@ const resetFilters = () => {
 }
 
 // Trier par colonne
-const toggleSort = (column: StatisticFilters['sort_by']) => {
+const toggleSort = (column: 'key' | 'updated_at' | 'year') => {
   if (sortBy.value === column) {
     sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
   } else {
@@ -126,7 +184,7 @@ const formatDateShort = (dateString: string) => {
 // Obtenir le nom de la catégorie
 const getCategoryName = (categoryId: string | null) => {
   if (!categoryId) return 'Sans catégorie'
-  const category = getEditorialCategoryById(categoryId)
+  const category = categories.value.find(c => c.id === categoryId)
   return category?.name || 'Inconnue'
 }
 
@@ -141,7 +199,60 @@ const resetForm = () => {
     description: ''
   }
   formErrors.value = {}
+  editorContent.value = undefined
 }
+
+// Convertir une chaîne JSON en OutputData pour EditorJS
+const parseEditorContent = (value: string | null): OutputData | undefined => {
+  if (!value) return undefined
+  try {
+    const parsed = JSON.parse(value)
+    // Vérifier si c'est un format EditorJS valide
+    if (parsed.blocks && Array.isArray(parsed.blocks)) {
+      return parsed as OutputData
+    }
+    // Sinon, créer un bloc paragraphe avec le contenu
+    return {
+      time: Date.now(),
+      blocks: [{ type: 'paragraph', data: { text: typeof parsed === 'string' ? parsed : JSON.stringify(parsed) } }],
+      version: '2.28.0'
+    }
+  }
+  catch {
+    // Si ce n'est pas du JSON, créer un bloc paragraphe
+    return {
+      time: Date.now(),
+      blocks: [{ type: 'paragraph', data: { text: value } }],
+      version: '2.28.0'
+    }
+  }
+}
+
+// Sérialiser le contenu EditorJS en chaîne JSON
+const serializeEditorContent = (): string => {
+  if (!editorContent.value) return ''
+  return JSON.stringify(editorContent.value)
+}
+
+// Réinitialiser le contenu EditorJS quand le type change
+watch(() => formData.value.value_type, (newType, oldType) => {
+  if (['json', 'html'].includes(newType) && !['json', 'html'].includes(oldType)) {
+    // Passage vers un type riche : essayer de parser la valeur existante
+    editorContent.value = parseEditorContent(formData.value.value)
+  }
+  else if (!['json', 'html'].includes(newType) && ['json', 'html'].includes(oldType)) {
+    // Passage vers un type simple : convertir le contenu EditorJS en texte
+    if (editorContent.value?.blocks?.length) {
+      // Extraire le texte des blocs
+      const textContent = editorContent.value.blocks
+        .map(b => b.data?.text || '')
+        .filter(t => t)
+        .join('\n')
+      formData.value.value = textContent
+    }
+    editorContent.value = undefined
+  }
+})
 
 // Valider le formulaire
 const validateForm = (): boolean => {
@@ -149,20 +260,28 @@ const validateForm = (): boolean => {
 
   if (!formData.value.key.trim()) {
     formErrors.value.key = 'La clé est requise'
-  } else if (!/^[a-z][a-z0-9_]*$/.test(formData.value.key)) {
+  }
+  else if (!/^[a-z][a-z0-9_]*$/.test(formData.value.key)) {
     formErrors.value.key = 'La clé doit commencer par une lettre et ne contenir que des lettres minuscules, chiffres et underscores'
-  } else if (isStatisticKeyTaken(formData.value.key, selectedStatistic.value?.id)) {
-    formErrors.value.key = 'Cette clé est déjà utilisée'
   }
 
-  if (!formData.value.value.trim()) {
-    formErrors.value.value = 'La valeur est requise'
+  // Validation de la valeur selon le type
+  if (useRichEditor.value) {
+    // Pour EditorJS, vérifier qu'il y a du contenu
+    if (!editorContent.value || !editorContent.value.blocks || editorContent.value.blocks.length === 0) {
+      formErrors.value.value = 'Le contenu est requis'
+    }
   }
+  else {
+    if (!formData.value.value.trim()) {
+      formErrors.value.value = 'La valeur est requise'
+    }
 
-  if (formData.value.value_type === 'number') {
-    const num = parseFloat(formData.value.value)
-    if (isNaN(num)) {
-      formErrors.value.value = 'La valeur doit être un nombre valide'
+    if (formData.value.value_type === 'number') {
+      const num = parseFloat(formData.value.value)
+      if (isNaN(num)) {
+        formErrors.value.value = 'La valeur doit être un nombre valide'
+      }
     }
   }
 
@@ -176,77 +295,127 @@ const openAddModal = () => {
 }
 
 // Ouvrir modal d'édition
-const openEditModal = (stat: EditorialStatistic) => {
-  selectedStatistic.value = stat
+const openEditModal = (content: ContentRead) => {
+  selectedContent.value = content
   formData.value = {
-    key: stat.key,
-    value: stat.value,
-    value_type: stat.value_type,
-    category_id: stat.category_id || '',
-    year: stat.year,
-    description: stat.description || ''
+    key: content.key,
+    value: content.value || '',
+    value_type: content.value_type,
+    category_id: content.category_id || '',
+    year: content.year,
+    description: content.description || ''
   }
   formErrors.value = {}
+
+  // Parser le contenu pour EditorJS si type json/html
+  if (['json', 'html'].includes(content.value_type)) {
+    editorContent.value = parseEditorContent(content.value)
+  }
+  else {
+    editorContent.value = undefined
+  }
+
   showEditModal.value = true
 }
 
 // Ouvrir modal de suppression
-const openDeleteModal = (stat: EditorialStatistic) => {
-  statisticToDelete.value = stat
+const openDeleteModal = (content: ContentRead) => {
+  contentToDelete.value = content
   showDeleteModal.value = true
 }
 
 // Ouvrir modal d'historique
-const openHistoryModal = (stat: EditorialStatistic) => {
-  selectedStatistic.value = stat
-  statisticHistory.value = getStatisticHistory(stat.id)
+const openHistoryModal = async (content: ContentRead) => {
+  selectedContent.value = content
+  try {
+    contentHistory.value = await getContentHistory(content.id)
+  } catch (error) {
+    console.error('Erreur chargement historique:', error)
+    contentHistory.value = []
+  }
   showHistoryModal.value = true
 }
 
 // Enregistrer (ajout)
-const handleAdd = () => {
+const handleAdd = async () => {
   if (!validateForm()) return
 
-  // Simulation de l'ajout (en mode réel, appel API)
-  console.log('Ajout du chiffre clé:', {
-    id: generateStatisticId(),
-    ...formData.value,
-    category_id: formData.value.category_id || null,
-    admin_editable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  })
+  isSaving.value = true
+  try {
+    // Utiliser le contenu EditorJS ou la valeur simple selon le type
+    const valueToSave = useRichEditor.value ? serializeEditorContent() : formData.value.value
 
-  showAddModal.value = false
-  resetForm()
+    await createContent({
+      key: formData.value.key,
+      value: valueToSave,
+      value_type: formData.value.value_type,
+      category_id: formData.value.category_id || null,
+      year: formData.value.year,
+      description: formData.value.description || null,
+      admin_editable: true
+    })
+    showAddModal.value = false
+    resetForm()
+    await loadContents()
+  }
+  catch (error: unknown) {
+    const err = error as { data?: { detail?: string } }
+    if (err.data?.detail?.includes('existe déjà')) {
+      formErrors.value.key = 'Cette clé est déjà utilisée'
+    }
+    else {
+      console.error('Erreur création contenu:', error)
+    }
+  }
+  finally {
+    isSaving.value = false
+  }
 }
 
 // Enregistrer (modification)
-const handleEdit = () => {
-  if (!validateForm() || !selectedStatistic.value) return
+const handleEdit = async () => {
+  if (!validateForm() || !selectedContent.value) return
 
-  // Simulation de la modification (en mode réel, appel API)
-  console.log('Modification du chiffre clé:', {
-    id: selectedStatistic.value.id,
-    ...formData.value,
-    category_id: formData.value.category_id || null,
-    updated_at: new Date().toISOString()
-  })
+  isSaving.value = true
+  try {
+    // Utiliser le contenu EditorJS ou la valeur simple selon le type
+    const valueToSave = useRichEditor.value ? serializeEditorContent() : formData.value.value
 
-  showEditModal.value = false
-  selectedStatistic.value = null
-  resetForm()
+    await updateContent(selectedContent.value.id, {
+      value: valueToSave,
+      value_type: formData.value.value_type,
+      category_id: formData.value.category_id || null,
+      year: formData.value.year,
+      description: formData.value.description || null
+    })
+    showEditModal.value = false
+    selectedContent.value = null
+    resetForm()
+    await loadContents()
+  }
+  catch (error) {
+    console.error('Erreur modification contenu:', error)
+  }
+  finally {
+    isSaving.value = false
+  }
 }
 
 // Supprimer
-const handleDelete = () => {
-  if (!statisticToDelete.value) return
+const handleDelete = async () => {
+  if (!contentToDelete.value) return
 
-  // Simulation de la suppression (en mode réel, appel API)
-  console.log('Suppression du chiffre clé:', statisticToDelete.value.id)
-
-  showDeleteModal.value = false
-  statisticToDelete.value = null
+  isSaving.value = true
+  try {
+    await deleteContent(contentToDelete.value.id)
+    showDeleteModal.value = false
+    contentToDelete.value = null
+    await loadContents()
+  } catch (error) {
+    console.error('Erreur suppression contenu:', error)
+  } finally {
+    isSaving.value = false
+  }
 }
 
 // Fermer les modales
@@ -255,8 +424,8 @@ const closeModals = () => {
   showEditModal.value = false
   showDeleteModal.value = false
   showHistoryModal.value = false
-  selectedStatistic.value = null
-  statisticToDelete.value = null
+  selectedContent.value = null
+  contentToDelete.value = null
   resetForm()
 }
 </script>
@@ -292,7 +461,7 @@ const closeModals = () => {
           </div>
           <div>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">
-              {{ globalStats.total_count }}
+              {{ totalItems }}
             </p>
             <p class="text-sm text-gray-500 dark:text-gray-400">
               Chiffres clés
@@ -413,7 +582,7 @@ const closeModals = () => {
       <font-awesome-icon :icon="['fas', 'spinner']" class="h-8 w-8 animate-spin text-primary-600" />
     </div>
 
-    <div v-else-if="filteredStatistics.length === 0" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
+    <div v-else-if="contents.length === 0" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
       <font-awesome-icon :icon="['fas', 'hashtag']" class="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
       <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
         Aucun chiffre clé trouvé
@@ -492,18 +661,18 @@ const closeModals = () => {
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
             <tr
-              v-for="stat in filteredStatistics"
-              :key="stat.id"
+              v-for="content in contents"
+              :key="content.id"
               class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
             >
               <!-- Clé -->
               <td class="px-4 py-3">
                 <div>
                   <code class="text-sm font-mono text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">
-                    {{ stat.key }}
+                    {{ content.key }}
                   </code>
-                  <p v-if="stat.description" class="mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
-                    {{ stat.description }}
+                  <p v-if="content.description" class="mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
+                    {{ content.description }}
                   </p>
                 </div>
               </td>
@@ -511,7 +680,7 @@ const closeModals = () => {
               <!-- Valeur -->
               <td class="px-4 py-3">
                 <span class="text-lg font-semibold text-gray-900 dark:text-white">
-                  {{ formatStatisticValue(stat.value, stat.value_type) }}
+                  {{ formatValue(content.value, content.value_type) }}
                 </span>
               </td>
 
@@ -519,25 +688,25 @@ const closeModals = () => {
               <td class="px-4 py-3">
                 <span
                   class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-                  :class="valueTypeColors[stat.value_type]"
+                  :class="valueTypeColors[content.value_type]"
                 >
-                  {{ valueTypeLabels[stat.value_type] }}
+                  {{ valueTypeLabels[content.value_type] }}
                 </span>
               </td>
 
               <!-- Catégorie -->
               <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                {{ getCategoryName(stat.category_id) }}
+                {{ getCategoryName(content.category_id) }}
               </td>
 
               <!-- Année -->
               <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                {{ stat.year || '-' }}
+                {{ content.year || '-' }}
               </td>
 
               <!-- Modifié le -->
               <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                {{ formatDateShort(stat.updated_at) }}
+                {{ formatDateShort(content.updated_at) }}
               </td>
 
               <!-- Actions -->
@@ -547,34 +716,34 @@ const closeModals = () => {
                   <button
                     class="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                     title="Voir l'historique"
-                    @click="openHistoryModal(stat)"
+                    @click="openHistoryModal(content)"
                   >
                     <font-awesome-icon :icon="['fas', 'history']" class="h-4 w-4" />
                   </button>
 
                   <!-- Modifier -->
                   <button
-                    v-if="canEditStatistic(stat)"
+                    v-if="canEditContent(content)"
                     class="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                     title="Modifier"
-                    @click="openEditModal(stat)"
+                    @click="openEditModal(content)"
                   >
                     <font-awesome-icon :icon="['fas', 'edit']" class="h-4 w-4" />
                   </button>
 
                   <!-- Supprimer -->
                   <button
-                    v-if="canDeleteStatistic(stat)"
+                    v-if="canDeleteContent(content)"
                     class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                     title="Supprimer"
-                    @click="openDeleteModal(stat)"
+                    @click="openDeleteModal(content)"
                   >
                     <font-awesome-icon :icon="['fas', 'trash']" class="h-4 w-4" />
                   </button>
 
                   <!-- Non modifiable -->
                   <span
-                    v-if="!canEditStatistic(stat)"
+                    v-if="!canEditContent(content)"
                     class="px-2 py-1 text-xs text-gray-400 dark:text-gray-500"
                     title="Ce chiffre n'est pas modifiable"
                   >
@@ -587,11 +756,31 @@ const closeModals = () => {
         </table>
       </div>
 
-      <!-- Footer -->
-      <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+      <!-- Footer avec pagination -->
+      <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 flex items-center justify-between">
         <p class="text-sm text-gray-500 dark:text-gray-400">
-          {{ filteredStatistics.length }} chiffre{{ filteredStatistics.length > 1 ? 's' : '' }} clé{{ filteredStatistics.length > 1 ? 's' : '' }}
+          {{ totalItems }} chiffre{{ totalItems > 1 ? 's' : '' }} clé{{ totalItems > 1 ? 's' : '' }}
         </p>
+
+        <div v-if="totalPages > 1" class="flex items-center gap-2">
+          <button
+            :disabled="currentPage === 1"
+            class="px-3 py-1 text-sm rounded border border-gray-300 dark:border-gray-600 disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-600"
+            @click="currentPage = currentPage - 1"
+          >
+            Précédent
+          </button>
+          <span class="text-sm text-gray-500 dark:text-gray-400">
+            Page {{ currentPage }} / {{ totalPages }}
+          </span>
+          <button
+            :disabled="currentPage >= totalPages"
+            class="px-3 py-1 text-sm rounded border border-gray-300 dark:border-gray-600 disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-600"
+            @click="currentPage = currentPage + 1"
+          >
+            Suivant
+          </button>
+        </div>
       </div>
     </div>
 
@@ -602,7 +791,10 @@ const closeModals = () => {
         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
         @click.self="closeModals"
       >
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg">
+        <div
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-h-[90vh] overflow-y-auto"
+          :class="useRichEditor ? 'max-w-3xl' : 'max-w-lg'"
+        >
           <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
               Ajouter un chiffre clé
@@ -632,22 +824,7 @@ const closeModals = () => {
               <p v-else class="mt-1 text-xs text-gray-500 dark:text-gray-400">Lettres minuscules, chiffres et underscores uniquement</p>
             </div>
 
-            <!-- Valeur -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Valeur *
-              </label>
-              <input
-                v-model="formData.value"
-                type="text"
-                placeholder="ex: 5200"
-                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-                :class="{ 'border-red-500': formErrors.value }"
-              >
-              <p v-if="formErrors.value" class="mt-1 text-sm text-red-500">{{ formErrors.value }}</p>
-            </div>
-
-            <!-- Type de valeur -->
+            <!-- Type de valeur (avant la valeur pour conditionner l'affichage) -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Type de valeur
@@ -660,6 +837,50 @@ const closeModals = () => {
                   {{ valueTypeLabels[vt] }}
                 </option>
               </select>
+            </div>
+
+            <!-- Valeur -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Valeur *
+              </label>
+
+              <!-- Éditeur riche pour JSON/HTML -->
+              <template v-if="useRichEditor">
+                <ClientOnly>
+                  <EditorJS
+                    v-model="editorContent"
+                    placeholder="Commencez à écrire..."
+                    :min-height="200"
+                  />
+                  <template #fallback>
+                    <div class="flex items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800 h-[200px]">
+                      <font-awesome-icon icon="fa-solid fa-spinner" class="h-6 w-6 animate-spin text-gray-400" />
+                    </div>
+                  </template>
+                </ClientOnly>
+              </template>
+
+              <!-- Textarea pour Markdown -->
+              <textarea
+                v-else-if="formData.value_type === 'markdown'"
+                v-model="formData.value"
+                rows="6"
+                placeholder="Contenu en Markdown..."
+                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 font-mono"
+                :class="{ 'border-red-500': formErrors.value }"
+              />
+
+              <!-- Input simple pour Number/Text -->
+              <input
+                v-else
+                v-model="formData.value"
+                type="text"
+                placeholder="ex: 5200"
+                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                :class="{ 'border-red-500': formErrors.value }"
+              >
+              <p v-if="formErrors.value" class="mt-1 text-sm text-red-500">{{ formErrors.value }}</p>
             </div>
 
             <!-- Catégorie et Année -->
@@ -717,8 +938,10 @@ const closeModals = () => {
               </button>
               <button
                 type="submit"
-                class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
+                class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+                :disabled="isSaving"
               >
+                <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="mr-2 h-4 w-4 animate-spin" />
                 Ajouter
               </button>
             </div>
@@ -730,11 +953,14 @@ const closeModals = () => {
     <!-- Modal Modifier -->
     <Teleport to="body">
       <div
-        v-if="showEditModal && selectedStatistic"
+        v-if="showEditModal && selectedContent"
         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
         @click.self="closeModals"
       >
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg">
+        <div
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-h-[90vh] overflow-y-auto"
+          :class="useRichEditor ? 'max-w-3xl' : 'max-w-lg'"
+        >
           <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
               Modifier le chiffre clé
@@ -762,22 +988,7 @@ const closeModals = () => {
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">La clé ne peut pas être modifiée</p>
             </div>
 
-            <!-- Valeur -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Valeur *
-              </label>
-              <input
-                v-model="formData.value"
-                type="text"
-                placeholder="ex: 5200"
-                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-                :class="{ 'border-red-500': formErrors.value }"
-              >
-              <p v-if="formErrors.value" class="mt-1 text-sm text-red-500">{{ formErrors.value }}</p>
-            </div>
-
-            <!-- Type de valeur -->
+            <!-- Type de valeur (avant la valeur pour conditionner l'affichage) -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Type de valeur
@@ -790,6 +1001,50 @@ const closeModals = () => {
                   {{ valueTypeLabels[vt] }}
                 </option>
               </select>
+            </div>
+
+            <!-- Valeur -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Valeur *
+              </label>
+
+              <!-- Éditeur riche pour JSON/HTML -->
+              <template v-if="useRichEditor">
+                <ClientOnly>
+                  <EditorJS
+                    v-model="editorContent"
+                    placeholder="Commencez à écrire..."
+                    :min-height="200"
+                  />
+                  <template #fallback>
+                    <div class="flex items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800 h-[200px]">
+                      <font-awesome-icon icon="fa-solid fa-spinner" class="h-6 w-6 animate-spin text-gray-400" />
+                    </div>
+                  </template>
+                </ClientOnly>
+              </template>
+
+              <!-- Textarea pour Markdown -->
+              <textarea
+                v-else-if="formData.value_type === 'markdown'"
+                v-model="formData.value"
+                rows="6"
+                placeholder="Contenu en Markdown..."
+                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 font-mono"
+                :class="{ 'border-red-500': formErrors.value }"
+              />
+
+              <!-- Input simple pour Number/Text -->
+              <input
+                v-else
+                v-model="formData.value"
+                type="text"
+                placeholder="ex: 5200"
+                class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                :class="{ 'border-red-500': formErrors.value }"
+              >
+              <p v-if="formErrors.value" class="mt-1 text-sm text-red-500">{{ formErrors.value }}</p>
             </div>
 
             <!-- Catégorie et Année -->
@@ -847,8 +1102,10 @@ const closeModals = () => {
               </button>
               <button
                 type="submit"
-                class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
+                class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+                :disabled="isSaving"
               >
+                <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="mr-2 h-4 w-4 animate-spin" />
                 Enregistrer
               </button>
             </div>
@@ -860,7 +1117,7 @@ const closeModals = () => {
     <!-- Modal Supprimer -->
     <Teleport to="body">
       <div
-        v-if="showDeleteModal && statisticToDelete"
+        v-if="showDeleteModal && contentToDelete"
         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
         @click.self="closeModals"
       >
@@ -874,7 +1131,7 @@ const closeModals = () => {
             </h3>
             <p class="text-gray-500 dark:text-gray-400 mb-6">
               Vous êtes sur le point de supprimer le chiffre clé
-              <code class="font-mono bg-gray-100 dark:bg-gray-700 px-1 rounded">{{ statisticToDelete.key }}</code>.
+              <code class="font-mono bg-gray-100 dark:bg-gray-700 px-1 rounded">{{ contentToDelete.key }}</code>.
               Cette action est irréversible.
             </p>
             <div class="flex justify-center gap-3">
@@ -885,9 +1142,11 @@ const closeModals = () => {
                 Annuler
               </button>
               <button
-                class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+                class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                :disabled="isSaving"
                 @click="handleDelete"
               >
+                <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="mr-2 h-4 w-4 animate-spin" />
                 Supprimer
               </button>
             </div>
@@ -899,7 +1158,7 @@ const closeModals = () => {
     <!-- Modal Historique -->
     <Teleport to="body">
       <div
-        v-if="showHistoryModal && selectedStatistic"
+        v-if="showHistoryModal && selectedContent"
         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
         @click.self="closeModals"
       >
@@ -910,7 +1169,7 @@ const closeModals = () => {
                 Historique des modifications
               </h3>
               <p class="text-sm text-gray-500 dark:text-gray-400">
-                <code class="font-mono">{{ selectedStatistic.key }}</code>
+                <code class="font-mono">{{ selectedContent.key }}</code>
               </p>
             </div>
             <button
@@ -922,7 +1181,7 @@ const closeModals = () => {
           </div>
 
           <div class="flex-1 overflow-y-auto p-6">
-            <div v-if="statisticHistory.length === 0" class="text-center py-8">
+            <div v-if="contentHistory.length === 0" class="text-center py-8">
               <font-awesome-icon :icon="['fas', 'history']" class="h-8 w-8 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
               <p class="text-gray-500 dark:text-gray-400">
                 Aucune modification enregistrée
@@ -937,16 +1196,16 @@ const closeModals = () => {
                   <span class="text-sm font-medium">Valeur actuelle</span>
                 </div>
                 <p class="text-lg font-semibold text-green-800 dark:text-green-300">
-                  {{ formatStatisticValue(selectedStatistic.value, selectedStatistic.value_type) }}
+                  {{ formatValue(selectedContent.value, selectedContent.value_type) }}
                 </p>
               </div>
 
               <!-- Historique -->
               <div
-                v-for="(entry, index) in statisticHistory"
+                v-for="(entry, index) in contentHistory"
                 :key="entry.id"
                 class="relative pl-6 pb-4"
-                :class="{ 'border-l-2 border-gray-200 dark:border-gray-700': index < statisticHistory.length - 1 }"
+                :class="{ 'border-l-2 border-gray-200 dark:border-gray-700': index < contentHistory.length - 1 }"
               >
                 <div class="absolute left-0 top-0 -translate-x-1/2 h-3 w-3 rounded-full bg-gray-300 dark:bg-gray-600" />
                 <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
@@ -954,14 +1213,11 @@ const closeModals = () => {
                     <span class="text-sm text-gray-500 dark:text-gray-400">
                       {{ formatDate(entry.modified_at) }}
                     </span>
-                    <span class="text-xs text-gray-400 dark:text-gray-500">
-                      par {{ entry.modified_by_name || 'Inconnu' }}
-                    </span>
                   </div>
                   <div class="flex items-center gap-2 text-sm">
-                    <span class="text-gray-500 dark:text-gray-400">{{ entry.old_value }}</span>
+                    <span class="text-gray-500 dark:text-gray-400">{{ entry.old_value || '(vide)' }}</span>
                     <font-awesome-icon :icon="['fas', 'arrow-right']" class="h-3 w-3 text-gray-400" />
-                    <span class="font-medium text-gray-900 dark:text-white">{{ entry.new_value }}</span>
+                    <span class="font-medium text-gray-900 dark:text-white">{{ entry.new_value || '(vide)' }}</span>
                   </div>
                 </div>
               </div>

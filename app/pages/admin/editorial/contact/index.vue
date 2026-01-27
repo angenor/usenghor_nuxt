@@ -5,29 +5,31 @@ import type {
   ContactEmails,
   ContactHours,
   ContactFormConfig,
-  DepartmentContact
-} from '~/composables/useMockData'
+  DepartmentContact,
+  ContactStats,
+  ContactHistory,
+} from '~/composables/useContactApi'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
 })
 
 const {
+  loadContents,
   getContactInfo,
-  getContactStats,
-  getContactHistory,
   getDepartmentContacts,
+  getContactHistory,
+  getContactStats,
+  saveSection,
+  saveDepartmentContacts,
   validateContactEmail,
   validatePhoneNumber,
   validateCoordinates,
-  getGoogleMapsUrl,
   getGoogleMapsUrlWithCoords,
-  getMailtoLink,
-  getTelLink,
+  generateDepartmentContactId,
+  formatDate,
   contactSectionLabels,
-  contactSectionIcons,
-  generateDepartmentContactId
-} = useMockData()
+} = useContactApi()
 
 // === STATE ===
 const isLoading = ref(true)
@@ -44,43 +46,53 @@ const addressForm = ref<ContactAddress>({
   city: '',
   country: '',
   latitude: 0,
-  longitude: 0
+  longitude: 0,
 })
 
 const phonesForm = ref<ContactPhones>({
   main: '',
   secondary: null,
-  fax: null
+  fax: null,
 })
 
 const emailsForm = ref<ContactEmails>({
   general: '',
   admissions: '',
   partnerships: '',
-  press: null
+  press: null,
 })
 
 const hoursForm = ref<ContactHours>({
   days: '',
   hours: '',
   timezone: '',
-  closures: ''
+  closures: '',
 })
 
 const formConfigForm = ref<ContactFormConfig>({
   default_recipients: [],
   subjects: [],
-  confirmation_message: ''
+  confirmation_message: '',
 })
 
 const departmentContacts = ref<DepartmentContact[]>([])
+
+// Statistics and history
+const stats = ref<ContactStats>({
+  sections_count: 0,
+  department_contacts_count: 0,
+  social_media_count: 0,
+  last_updated: new Date().toISOString(),
+  form_subjects_count: 0,
+})
+const history = ref<ContactHistory[]>([])
 
 // Department contact form
 const departmentForm = ref({
   department_name: '',
   email: '',
   phone: '',
-  responsible_name: ''
+  responsible_name: '',
 })
 
 // New recipient/subject inputs
@@ -88,44 +100,47 @@ const newRecipient = ref('')
 const newSubject = ref('')
 
 // === COMPUTED ===
-const stats = computed(() => getContactStats())
-const history = computed(() => getContactHistory())
-
 // Validation
 const isAddressValid = computed(() => {
-  return addressForm.value.street.trim() &&
-    addressForm.value.city.trim() &&
-    addressForm.value.country.trim() &&
-    validateCoordinates(addressForm.value.latitude, addressForm.value.longitude)
+  return (
+    addressForm.value.street.trim()
+    && addressForm.value.city.trim()
+    && addressForm.value.country.trim()
+    && validateCoordinates(addressForm.value.latitude, addressForm.value.longitude)
+  )
 })
 
 const isPhonesValid = computed(() => {
-  return phonesForm.value.main.trim() &&
-    validatePhoneNumber(phonesForm.value.main)
+  return phonesForm.value.main.trim() && validatePhoneNumber(phonesForm.value.main)
 })
 
 const isEmailsValid = computed(() => {
-  return emailsForm.value.general.trim() &&
-    validateContactEmail(emailsForm.value.general) &&
-    validateContactEmail(emailsForm.value.admissions) &&
-    validateContactEmail(emailsForm.value.partnerships)
+  return (
+    emailsForm.value.general.trim()
+    && validateContactEmail(emailsForm.value.general)
+    && validateContactEmail(emailsForm.value.admissions)
+    && validateContactEmail(emailsForm.value.partnerships)
+  )
 })
 
 const isHoursValid = computed(() => {
-  return hoursForm.value.days.trim() &&
-    hoursForm.value.hours.trim()
+  return hoursForm.value.days.trim() && hoursForm.value.hours.trim()
 })
 
 const isFormConfigValid = computed(() => {
-  return formConfigForm.value.default_recipients.length > 0 &&
-    formConfigForm.value.subjects.length > 0 &&
-    formConfigForm.value.confirmation_message.trim()
+  return (
+    formConfigForm.value.default_recipients.length > 0
+    && formConfigForm.value.subjects.length > 0
+    && formConfigForm.value.confirmation_message.trim()
+  )
 })
 
 const isDepartmentFormValid = computed(() => {
-  return departmentForm.value.department_name.trim() &&
-    departmentForm.value.email.trim() &&
-    validateContactEmail(departmentForm.value.email)
+  return (
+    departmentForm.value.department_name.trim()
+    && departmentForm.value.email.trim()
+    && validateContactEmail(departmentForm.value.email)
+  )
 })
 
 // === LIFECYCLE ===
@@ -134,10 +149,13 @@ onMounted(() => {
 })
 
 // === METHODS ===
-const loadData = () => {
+const loadData = async () => {
   isLoading.value = true
   try {
-    const info = getContactInfo()
+    // Charger les contenus depuis l'API
+    await loadContents()
+
+    const info = await getContactInfo()
 
     // Load all sections
     addressForm.value = { ...info.address }
@@ -147,10 +165,18 @@ const loadData = () => {
     formConfigForm.value = {
       ...info.contact_form,
       default_recipients: [...info.contact_form.default_recipients],
-      subjects: [...info.contact_form.subjects]
+      subjects: [...info.contact_form.subjects],
     }
-    departmentContacts.value = getDepartmentContacts()
-  } finally {
+    departmentContacts.value = await getDepartmentContacts()
+
+    // Load stats and history
+    stats.value = await getContactStats()
+    history.value = await getContactHistory()
+  }
+  catch (error) {
+    console.error('Erreur lors du chargement des données:', error)
+  }
+  finally {
     isLoading.value = false
   }
 }
@@ -159,28 +185,39 @@ const loadData = () => {
 const toggleSection = (section: string) => {
   if (activeSection.value === section) {
     activeSection.value = null
-  } else {
+  }
+  else {
     activeSection.value = section
   }
 }
 
 // Save section
-const saveSection = async (section: string) => {
+const saveSectionData = async (section: string) => {
   isSaving.value = true
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500))
-
-    console.log(`Sauvegarde de la section ${section}:`, {
+    const sectionData: Record<string, unknown> = {
       address: addressForm.value,
       phones: phonesForm.value,
       emails: emailsForm.value,
       hours: hoursForm.value,
-      contact_form: formConfigForm.value
-    }[section])
+      contact_form: formConfigForm.value,
+    }
+
+    await saveSection(
+      section as 'address' | 'phones' | 'emails' | 'hours' | 'contact_form',
+      sectionData[section] as ContactAddress | ContactPhones | ContactEmails | ContactHours | ContactFormConfig,
+    )
 
     activeSection.value = null
-  } finally {
+
+    // Recharger les stats et l'historique
+    stats.value = await getContactStats()
+    history.value = await getContactHistory()
+  }
+  catch (error) {
+    console.error(`Erreur lors de la sauvegarde de ${section}:`, error)
+  }
+  finally {
     isSaving.value = false
   }
 }
@@ -194,7 +231,11 @@ const cancelSection = () => {
 // Recipients management
 const addRecipient = () => {
   const email = newRecipient.value.trim()
-  if (email && validateContactEmail(email) && !formConfigForm.value.default_recipients.includes(email)) {
+  if (
+    email
+    && validateContactEmail(email)
+    && !formConfigForm.value.default_recipients.includes(email)
+  ) {
     formConfigForm.value.default_recipients.push(email)
     newRecipient.value = ''
   }
@@ -233,15 +274,16 @@ const openDepartmentModal = (contact?: DepartmentContact) => {
       department_name: contact.department_name,
       email: contact.email,
       phone: contact.phone || '',
-      responsible_name: contact.responsible_name || ''
+      responsible_name: contact.responsible_name || '',
     }
-  } else {
+  }
+  else {
     editingDepartmentContact.value = null
     departmentForm.value = {
       department_name: '',
       email: '',
       phone: '',
-      responsible_name: ''
+      responsible_name: '',
     }
   }
   showDepartmentModal.value = true
@@ -252,21 +294,22 @@ const saveDepartmentContact = async () => {
 
   isSaving.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 300))
-
     if (editingDepartmentContact.value) {
       // Update existing
-      const index = departmentContacts.value.findIndex(d => d.id === editingDepartmentContact.value!.id)
+      const index = departmentContacts.value.findIndex(
+        d => d.id === editingDepartmentContact.value!.id,
+      )
       if (index !== -1) {
         departmentContacts.value[index] = {
           ...editingDepartmentContact.value,
           department_name: departmentForm.value.department_name.trim(),
           email: departmentForm.value.email.trim(),
           phone: departmentForm.value.phone.trim() || null,
-          responsible_name: departmentForm.value.responsible_name.trim() || null
+          responsible_name: departmentForm.value.responsible_name.trim() || null,
         }
       }
-    } else {
+    }
+    else {
       // Create new
       const newContact: DepartmentContact = {
         id: generateDepartmentContactId(),
@@ -274,13 +317,23 @@ const saveDepartmentContact = async () => {
         email: departmentForm.value.email.trim(),
         phone: departmentForm.value.phone.trim() || null,
         responsible_name: departmentForm.value.responsible_name.trim() || null,
-        order: departmentContacts.value.length + 1
+        order: departmentContacts.value.length + 1,
       }
       departmentContacts.value.push(newContact)
     }
 
+    // Sauvegarder via l'API
+    await saveDepartmentContacts(departmentContacts.value)
+
     showDepartmentModal.value = false
-  } finally {
+
+    // Recharger les stats
+    stats.value = await getContactStats()
+  }
+  catch (error) {
+    console.error('Erreur lors de la sauvegarde du contact:', error)
+  }
+  finally {
     isSaving.value = false
   }
 }
@@ -290,14 +343,28 @@ const deleteDepartmentContact = async (contact: DepartmentContact) => {
 
   isSaving.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 300))
     departmentContacts.value = departmentContacts.value.filter(d => d.id !== contact.id)
-  } finally {
+
+    // Réindexer l'ordre
+    departmentContacts.value.forEach((c, i) => {
+      c.order = i + 1
+    })
+
+    // Sauvegarder via l'API
+    await saveDepartmentContacts(departmentContacts.value)
+
+    // Recharger les stats
+    stats.value = await getContactStats()
+  }
+  catch (error) {
+    console.error('Erreur lors de la suppression:', error)
+  }
+  finally {
     isSaving.value = false
   }
 }
 
-const moveDepartmentContact = (index: number, direction: 'up' | 'down') => {
+const moveDepartmentContact = async (index: number, direction: 'up' | 'down') => {
   const newIndex = direction === 'up' ? index - 1 : index + 1
   if (newIndex >= 0 && newIndex < departmentContacts.value.length) {
     const items = departmentContacts.value
@@ -306,18 +373,15 @@ const moveDepartmentContact = (index: number, direction: 'up' | 'down') => {
     items.forEach((item, i) => {
       item.order = i + 1
     })
-  }
-}
 
-// Format date
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+    // Sauvegarder via l'API
+    try {
+      await saveDepartmentContacts(departmentContacts.value)
+    }
+    catch (error) {
+      console.error('Erreur lors du réordonnancement:', error)
+    }
+  }
 }
 </script>
 
@@ -347,8 +411,12 @@ const formatDate = (dateString: string) => {
               <font-awesome-icon :icon="['fas', 'th-large']" class="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.sections_count }}</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Sections</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                {{ stats.sections_count }}
+              </p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Sections
+              </p>
             </div>
           </div>
         </div>
@@ -359,8 +427,12 @@ const formatDate = (dateString: string) => {
               <font-awesome-icon :icon="['fas', 'users']" class="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.department_contacts_count }}</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Contacts services</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                {{ stats.department_contacts_count }}
+              </p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Contacts services
+              </p>
             </div>
           </div>
         </div>
@@ -371,8 +443,12 @@ const formatDate = (dateString: string) => {
               <font-awesome-icon :icon="['fas', 'list']" class="h-5 w-5 text-orange-600 dark:text-orange-400" />
             </div>
             <div>
-              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.form_subjects_count }}</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Sujets formulaire</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                {{ stats.form_subjects_count }}
+              </p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Sujets formulaire
+              </p>
             </div>
           </div>
         </div>
@@ -413,8 +489,8 @@ const formatDate = (dateString: string) => {
               <p class="text-sm font-medium text-gray-900 dark:text-white">
                 {{ item.section }}
               </p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ item.old_value }} &rarr; {{ item.new_value }}
+              <p class="truncate text-sm text-gray-500 dark:text-gray-400">
+                Valeur mise à jour
               </p>
               <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
                 Par {{ item.modified_by_name }} le {{ formatDate(item.modified_at) }}
@@ -437,7 +513,9 @@ const formatDate = (dateString: string) => {
                 <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="h-5 w-5 text-red-600 dark:text-red-400" />
               </div>
               <div>
-                <h3 class="font-medium text-gray-900 dark:text-white">{{ contactSectionLabels.address }}</h3>
+                <h3 class="font-medium text-gray-900 dark:text-white">
+                  {{ contactSectionLabels.address }}
+                </h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                   {{ addressForm.street }}, {{ addressForm.city }}
                 </p>
@@ -460,7 +538,7 @@ const formatDate = (dateString: string) => {
                   v-model="addressForm.street"
                   type="text"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -470,7 +548,7 @@ const formatDate = (dateString: string) => {
                   v-model="addressForm.postal_code"
                   type="text"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -480,7 +558,7 @@ const formatDate = (dateString: string) => {
                   v-model="addressForm.city"
                   type="text"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -490,7 +568,7 @@ const formatDate = (dateString: string) => {
                   v-model="addressForm.country"
                   type="text"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -501,7 +579,7 @@ const formatDate = (dateString: string) => {
                   type="number"
                   step="0.0001"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -512,7 +590,7 @@ const formatDate = (dateString: string) => {
                   type="number"
                   step="0.0001"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
             </div>
 
@@ -541,7 +619,7 @@ const formatDate = (dateString: string) => {
                 type="button"
                 class="inline-flex items-center gap-2 rounded-lg bg-brand-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-red-700 disabled:opacity-50"
                 :disabled="!isAddressValid || isSaving"
-                @click="saveSection('address')"
+                @click="saveSectionData('address')"
               >
                 <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
                 Enregistrer
@@ -561,7 +639,9 @@ const formatDate = (dateString: string) => {
                 <font-awesome-icon :icon="['fas', 'phone']" class="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <h3 class="font-medium text-gray-900 dark:text-white">{{ contactSectionLabels.phones }}</h3>
+                <h3 class="font-medium text-gray-900 dark:text-white">
+                  {{ contactSectionLabels.phones }}
+                </h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                   {{ phonesForm.main }}
                 </p>
@@ -585,7 +665,7 @@ const formatDate = (dateString: string) => {
                   type="tel"
                   placeholder="+20 3 484 3562"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -596,7 +676,7 @@ const formatDate = (dateString: string) => {
                   type="tel"
                   placeholder="+20 3 484 3563"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -607,7 +687,7 @@ const formatDate = (dateString: string) => {
                   type="tel"
                   placeholder="+20 3 484 3564"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
             </div>
 
@@ -623,7 +703,7 @@ const formatDate = (dateString: string) => {
                 type="button"
                 class="inline-flex items-center gap-2 rounded-lg bg-brand-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-red-700 disabled:opacity-50"
                 :disabled="!isPhonesValid || isSaving"
-                @click="saveSection('phones')"
+                @click="saveSectionData('phones')"
               >
                 <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
                 Enregistrer
@@ -643,7 +723,9 @@ const formatDate = (dateString: string) => {
                 <font-awesome-icon :icon="['fas', 'envelope']" class="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <h3 class="font-medium text-gray-900 dark:text-white">{{ contactSectionLabels.emails }}</h3>
+                <h3 class="font-medium text-gray-900 dark:text-white">
+                  {{ contactSectionLabels.emails }}
+                </h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                   {{ emailsForm.general }}
                 </p>
@@ -666,7 +748,7 @@ const formatDate = (dateString: string) => {
                   v-model="emailsForm.general"
                   type="email"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -676,7 +758,7 @@ const formatDate = (dateString: string) => {
                   v-model="emailsForm.admissions"
                   type="email"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -686,7 +768,7 @@ const formatDate = (dateString: string) => {
                   v-model="emailsForm.partnerships"
                   type="email"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -696,7 +778,7 @@ const formatDate = (dateString: string) => {
                   v-model="emailsForm.press"
                   type="email"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
             </div>
 
@@ -712,7 +794,7 @@ const formatDate = (dateString: string) => {
                 type="button"
                 class="inline-flex items-center gap-2 rounded-lg bg-brand-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-red-700 disabled:opacity-50"
                 :disabled="!isEmailsValid || isSaving"
-                @click="saveSection('emails')"
+                @click="saveSectionData('emails')"
               >
                 <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
                 Enregistrer
@@ -732,7 +814,9 @@ const formatDate = (dateString: string) => {
                 <font-awesome-icon :icon="['fas', 'clock']" class="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
               </div>
               <div>
-                <h3 class="font-medium text-gray-900 dark:text-white">{{ contactSectionLabels.hours }}</h3>
+                <h3 class="font-medium text-gray-900 dark:text-white">
+                  {{ contactSectionLabels.hours }}
+                </h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                   {{ hoursForm.days }}, {{ hoursForm.hours }}
                 </p>
@@ -756,7 +840,7 @@ const formatDate = (dateString: string) => {
                   type="text"
                   placeholder="Dimanche - Jeudi"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -767,7 +851,7 @@ const formatDate = (dateString: string) => {
                   type="text"
                   placeholder="08h00 - 16h00"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -778,7 +862,7 @@ const formatDate = (dateString: string) => {
                   type="text"
                   placeholder="EET (UTC+2)"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -789,7 +873,7 @@ const formatDate = (dateString: string) => {
                   type="text"
                   placeholder="Jours fériés égyptiens"
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
               </div>
             </div>
 
@@ -805,7 +889,7 @@ const formatDate = (dateString: string) => {
                 type="button"
                 class="inline-flex items-center gap-2 rounded-lg bg-brand-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-red-700 disabled:opacity-50"
                 :disabled="!isHoursValid || isSaving"
-                @click="saveSection('hours')"
+                @click="saveSectionData('hours')"
               >
                 <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
                 Enregistrer
@@ -825,7 +909,9 @@ const formatDate = (dateString: string) => {
                 <font-awesome-icon :icon="['fas', 'paper-plane']" class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
-                <h3 class="font-medium text-gray-900 dark:text-white">{{ contactSectionLabels.contact_form }}</h3>
+                <h3 class="font-medium text-gray-900 dark:text-white">
+                  {{ contactSectionLabels.contact_form }}
+                </h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                   {{ formConfigForm.subjects.length }} sujets, {{ formConfigForm.default_recipients.length }} destinataire(s)
                 </p>
@@ -867,7 +953,7 @@ const formatDate = (dateString: string) => {
                   placeholder="nouveau@email.com"
                   class="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                   @keyup.enter="addRecipient"
-                />
+                >
                 <button
                   type="button"
                   class="rounded-lg bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
@@ -922,7 +1008,7 @@ const formatDate = (dateString: string) => {
                   placeholder="Nouveau sujet"
                   class="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                   @keyup.enter="addSubject"
-                />
+                >
                 <button
                   type="button"
                   class="rounded-lg bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
@@ -957,7 +1043,7 @@ const formatDate = (dateString: string) => {
                 type="button"
                 class="inline-flex items-center gap-2 rounded-lg bg-brand-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-red-700 disabled:opacity-50"
                 :disabled="!isFormConfigValid || isSaving"
-                @click="saveSection('contact_form')"
+                @click="saveSectionData('contact_form')"
               >
                 <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
                 Enregistrer
@@ -977,7 +1063,9 @@ const formatDate = (dateString: string) => {
                 <font-awesome-icon :icon="['fas', 'users']" class="h-5 w-5 text-teal-600 dark:text-teal-400" />
               </div>
               <div>
-                <h3 class="font-medium text-gray-900 dark:text-white">{{ contactSectionLabels.department_contacts }}</h3>
+                <h3 class="font-medium text-gray-900 dark:text-white">
+                  {{ contactSectionLabels.department_contacts }}
+                </h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                   {{ departmentContacts.length }} contact(s) configuré(s)
                 </p>
@@ -1032,7 +1120,9 @@ const formatDate = (dateString: string) => {
                   </button>
                 </div>
                 <div class="min-w-0 flex-1">
-                  <p class="font-medium text-gray-900 dark:text-white">{{ contact.department_name }}</p>
+                  <p class="font-medium text-gray-900 dark:text-white">
+                    {{ contact.department_name }}
+                  </p>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ contact.email }}
                     <span v-if="contact.phone"> | {{ contact.phone }}</span>
@@ -1061,7 +1151,6 @@ const formatDate = (dateString: string) => {
             </div>
           </div>
         </div>
-
       </div>
 
       <!-- Last updated info -->
@@ -1092,7 +1181,7 @@ const formatDate = (dateString: string) => {
                 type="text"
                 placeholder="Service des admissions"
                 class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              />
+              >
             </div>
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -1103,7 +1192,7 @@ const formatDate = (dateString: string) => {
                 type="email"
                 placeholder="service@usenghor.org"
                 class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              />
+              >
             </div>
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -1114,7 +1203,7 @@ const formatDate = (dateString: string) => {
                 type="tel"
                 placeholder="+20 3 484 3565"
                 class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              />
+              >
             </div>
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -1125,7 +1214,7 @@ const formatDate = (dateString: string) => {
                 type="text"
                 placeholder="Dr. Jean Dupont"
                 class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              />
+              >
             </div>
           </div>
 
