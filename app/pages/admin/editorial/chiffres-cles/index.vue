@@ -13,6 +13,25 @@ definePageMeta({
   layout: 'admin'
 })
 
+// === TYPES JSON STRUCTURÉS ===
+
+// Type pour les "core values" (valeurs fondamentales)
+interface CoreValueData {
+  title: string
+  description: string
+  icon: string
+  display_order: number
+  is_active: boolean
+}
+
+// Type pour les objets JSON simples (clé-valeur)
+interface SimpleJsonData {
+  [key: string]: string | number | boolean
+}
+
+// Mode d'édition JSON
+type JsonEditMode = 'form' | 'rich' | 'raw'
+
 const {
   listContents,
   listCategoriesWithCount,
@@ -71,8 +90,36 @@ const formData = ref({
 })
 const formErrors = ref<Record<string, string>>({})
 
-// EditorJS content (pour types json/html)
+// EditorJS content (pour types html uniquement)
 const editorContent = ref<OutputData | undefined>(undefined)
+
+// JSON form data (pour type json - formulaire dynamique)
+const jsonEditMode = ref<JsonEditMode>('form')
+const coreValueForm = ref<CoreValueData>({
+  title: '',
+  description: '',
+  icon: 'fa-star',
+  display_order: 0,
+  is_active: true
+})
+const simpleJsonForm = ref<SimpleJsonData>({})
+const rawJsonValue = ref('')
+
+// Liste d'icônes courantes pour le sélecteur
+const commonIcons = [
+  { value: 'fa-star', label: 'Étoile' },
+  { value: 'fa-heart', label: 'Cœur' },
+  { value: 'fa-lightbulb', label: 'Ampoule' },
+  { value: 'fa-users', label: 'Utilisateurs' },
+  { value: 'fa-graduation-cap', label: 'Diplôme' },
+  { value: 'fa-globe', label: 'Globe' },
+  { value: 'fa-book', label: 'Livre' },
+  { value: 'fa-handshake', label: 'Poignée de main' },
+  { value: 'fa-shield', label: 'Bouclier' },
+  { value: 'fa-award', label: 'Récompense' },
+  { value: 'fa-check-circle', label: 'Validé' },
+  { value: 'fa-flag', label: 'Drapeau' },
+]
 
 // === COMPUTED ===
 
@@ -85,8 +132,38 @@ const availableYears = computed(() => getAvailableYears(contents.value))
 // Types de valeurs disponibles
 const valueTypes: EditorialValueType[] = ['number', 'text', 'html', 'markdown', 'json']
 
-// Détermine si on doit utiliser EditorJS pour ce type
-const useRichEditor = computed(() => ['json', 'html'].includes(formData.value.value_type))
+// Détermine si on doit utiliser EditorJS pour ce type (uniquement HTML maintenant)
+const useRichEditor = computed(() => formData.value.value_type === 'html')
+
+// Détermine si c'est un champ JSON
+const isJsonType = computed(() => formData.value.value_type === 'json')
+
+// Détecte si la valeur JSON est un "core value" (valeur fondamentale)
+const isCoreValueJson = computed(() => {
+  if (!isJsonType.value) return false
+  // Détecter par la clé (convention: core_value_*)
+  if (formData.value.key.startsWith('core_value_')) return true
+  // Ou détecter par la structure existante
+  try {
+    const parsed = JSON.parse(formData.value.value || '{}')
+    return 'title' in parsed && 'description' in parsed && 'icon' in parsed
+  }
+  catch {
+    return false
+  }
+})
+
+// Détecte si c'est du contenu EditorJS (pour l'affichage uniquement, pas l'édition)
+const isEditorJsContent = computed(() => {
+  if (!isJsonType.value) return false
+  try {
+    const parsed = JSON.parse(formData.value.value || '{}')
+    return parsed.blocks && Array.isArray(parsed.blocks)
+  }
+  catch {
+    return false
+  }
+})
 
 // === API CALLS ===
 async function loadContents() {
@@ -200,9 +277,20 @@ const resetForm = () => {
   }
   formErrors.value = {}
   editorContent.value = undefined
+  // Reset JSON forms
+  jsonEditMode.value = 'form'
+  coreValueForm.value = {
+    title: '',
+    description: '',
+    icon: 'fa-star',
+    display_order: 0,
+    is_active: true
+  }
+  simpleJsonForm.value = {}
+  rawJsonValue.value = ''
 }
 
-// Convertir une chaîne JSON en OutputData pour EditorJS
+// Convertir une chaîne JSON en OutputData pour EditorJS (uniquement pour HTML)
 const parseEditorContent = (value: string | null): OutputData | undefined => {
   if (!value) return undefined
   try {
@@ -234,21 +322,128 @@ const serializeEditorContent = (): string => {
   return JSON.stringify(editorContent.value)
 }
 
-// Réinitialiser le contenu EditorJS quand le type change
+// Parser une valeur JSON en formulaire core value
+const parseCoreValueJson = (value: string | null): void => {
+  if (!value) {
+    coreValueForm.value = {
+      title: '',
+      description: '',
+      icon: 'fa-star',
+      display_order: 0,
+      is_active: true
+    }
+    return
+  }
+  try {
+    const parsed = JSON.parse(value)
+    coreValueForm.value = {
+      title: parsed.title || '',
+      description: parsed.description || '',
+      icon: parsed.icon || 'fa-star',
+      display_order: parsed.display_order ?? 0,
+      is_active: parsed.is_active ?? true
+    }
+  }
+  catch {
+    coreValueForm.value = {
+      title: '',
+      description: '',
+      icon: 'fa-star',
+      display_order: 0,
+      is_active: true
+    }
+  }
+}
+
+// Sérialiser le formulaire core value en JSON
+const serializeCoreValueJson = (): string => {
+  return JSON.stringify(coreValueForm.value)
+}
+
+// Parser une valeur JSON en formulaire simple (clé-valeur)
+const parseSimpleJson = (value: string | null): void => {
+  if (!value) {
+    simpleJsonForm.value = {}
+    rawJsonValue.value = '{}'
+    return
+  }
+  try {
+    const parsed = JSON.parse(value)
+    // Vérifier si c'est un objet simple (pas un array, pas EditorJS)
+    if (typeof parsed === 'object' && !Array.isArray(parsed) && !parsed.blocks) {
+      simpleJsonForm.value = parsed
+      rawJsonValue.value = JSON.stringify(parsed, null, 2)
+    }
+    else {
+      simpleJsonForm.value = {}
+      rawJsonValue.value = JSON.stringify(parsed, null, 2)
+    }
+  }
+  catch {
+    simpleJsonForm.value = {}
+    rawJsonValue.value = value || '{}'
+  }
+}
+
+// Sérialiser le formulaire JSON simple
+const serializeSimpleJson = (): string => {
+  if (jsonEditMode.value === 'raw') {
+    return rawJsonValue.value
+  }
+  return JSON.stringify(simpleJsonForm.value)
+}
+
+// Ajouter un champ au formulaire JSON simple
+const addJsonField = () => {
+  const newKey = `champ_${Object.keys(simpleJsonForm.value).length + 1}`
+  simpleJsonForm.value[newKey] = ''
+}
+
+// Supprimer un champ du formulaire JSON simple
+const removeJsonField = (key: string) => {
+  delete simpleJsonForm.value[key]
+}
+
+// Renommer un champ JSON
+const renameJsonField = (oldKey: string, newKey: string) => {
+  if (oldKey === newKey || !newKey.trim()) return
+  const value = simpleJsonForm.value[oldKey] ?? ''
+  delete simpleJsonForm.value[oldKey]
+  simpleJsonForm.value[newKey] = value
+}
+
+// Réinitialiser le contenu quand le type change
 watch(() => formData.value.value_type, (newType, oldType) => {
-  if (['json', 'html'].includes(newType) && !['json', 'html'].includes(oldType)) {
-    // Passage vers un type riche : essayer de parser la valeur existante
+  if (newType === 'html' && oldType !== 'html') {
+    // Passage vers HTML : utiliser EditorJS
     editorContent.value = parseEditorContent(formData.value.value)
   }
-  else if (!['json', 'html'].includes(newType) && ['json', 'html'].includes(oldType)) {
-    // Passage vers un type simple : convertir le contenu EditorJS en texte
-    if (editorContent.value?.blocks?.length) {
-      // Extraire le texte des blocs
+  else if (newType === 'json' && oldType !== 'json') {
+    // Passage vers JSON : parser selon le format
+    if (isCoreValueJson.value || formData.value.key.startsWith('core_value_')) {
+      parseCoreValueJson(formData.value.value)
+      jsonEditMode.value = 'form'
+    }
+    else {
+      parseSimpleJson(formData.value.value)
+      jsonEditMode.value = 'form'
+    }
+  }
+  else if (newType !== 'html' && newType !== 'json') {
+    // Passage vers un type simple
+    if (oldType === 'html' && editorContent.value?.blocks?.length) {
+      // Extraire le texte des blocs EditorJS
       const textContent = editorContent.value.blocks
         .map(b => b.data?.text || '')
         .filter(t => t)
         .join('\n')
       formData.value.value = textContent
+    }
+    else if (oldType === 'json') {
+      // Convertir le JSON en texte lisible
+      if (isCoreValueJson.value) {
+        formData.value.value = coreValueForm.value.title || ''
+      }
     }
     editorContent.value = undefined
   }
@@ -267,9 +462,25 @@ const validateForm = (): boolean => {
 
   // Validation de la valeur selon le type
   if (useRichEditor.value) {
-    // Pour EditorJS, vérifier qu'il y a du contenu
+    // Pour EditorJS (HTML), vérifier qu'il y a du contenu
     if (!editorContent.value || !editorContent.value.blocks || editorContent.value.blocks.length === 0) {
       formErrors.value.value = 'Le contenu est requis'
+    }
+  }
+  else if (isJsonType.value) {
+    // Pour JSON, valider selon le mode
+    if (isCoreValueJson.value || formData.value.key.startsWith('core_value_')) {
+      if (!coreValueForm.value.title.trim()) {
+        formErrors.value.value = 'Le titre est requis'
+      }
+    }
+    else if (jsonEditMode.value === 'raw') {
+      try {
+        JSON.parse(rawJsonValue.value)
+      }
+      catch {
+        formErrors.value.value = 'Le JSON n\'est pas valide'
+      }
     }
   }
   else {
@@ -307,9 +518,36 @@ const openEditModal = (content: ContentRead) => {
   }
   formErrors.value = {}
 
-  // Parser le contenu pour EditorJS si type json/html
-  if (['json', 'html'].includes(content.value_type)) {
+  // Parser le contenu selon le type
+  if (content.value_type === 'html') {
     editorContent.value = parseEditorContent(content.value)
+  }
+  else if (content.value_type === 'json') {
+    // Détecter si c'est un core value
+    if (content.key.startsWith('core_value_')) {
+      parseCoreValueJson(content.value)
+      jsonEditMode.value = 'form'
+    }
+    else {
+      // Essayer de détecter le format
+      try {
+        const parsed = JSON.parse(content.value || '{}')
+        if ('title' in parsed && 'description' in parsed && 'icon' in parsed) {
+          // C'est un core value
+          parseCoreValueJson(content.value)
+          jsonEditMode.value = 'form'
+        }
+        else {
+          // C'est un JSON simple
+          parseSimpleJson(content.value)
+          jsonEditMode.value = 'form'
+        }
+      }
+      catch {
+        parseSimpleJson(content.value)
+        jsonEditMode.value = 'raw'
+      }
+    }
   }
   else {
     editorContent.value = undefined
@@ -336,14 +574,27 @@ const openHistoryModal = async (content: ContentRead) => {
   showHistoryModal.value = true
 }
 
+// Obtenir la valeur à sauvegarder selon le type
+const getValueToSave = (): string => {
+  if (useRichEditor.value) {
+    return serializeEditorContent()
+  }
+  if (isJsonType.value) {
+    if (isCoreValueJson.value || formData.value.key.startsWith('core_value_')) {
+      return serializeCoreValueJson()
+    }
+    return serializeSimpleJson()
+  }
+  return formData.value.value
+}
+
 // Enregistrer (ajout)
 const handleAdd = async () => {
   if (!validateForm()) return
 
   isSaving.value = true
   try {
-    // Utiliser le contenu EditorJS ou la valeur simple selon le type
-    const valueToSave = useRichEditor.value ? serializeEditorContent() : formData.value.value
+    const valueToSave = getValueToSave()
 
     await createContent({
       key: formData.value.key,
@@ -378,8 +629,7 @@ const handleEdit = async () => {
 
   isSaving.value = true
   try {
-    // Utiliser le contenu EditorJS ou la valeur simple selon le type
-    const valueToSave = useRichEditor.value ? serializeEditorContent() : formData.value.value
+    const valueToSave = getValueToSave()
 
     await updateContent(selectedContent.value.id, {
       value: valueToSave,
@@ -793,7 +1043,7 @@ const closeModals = () => {
       >
         <div
           class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-h-[90vh] overflow-y-auto"
-          :class="useRichEditor ? 'max-w-3xl' : 'max-w-lg'"
+          :class="useRichEditor || isJsonType ? 'max-w-3xl' : 'max-w-lg'"
         >
           <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -845,7 +1095,7 @@ const closeModals = () => {
                 Valeur *
               </label>
 
-              <!-- Éditeur riche pour JSON/HTML -->
+              <!-- Éditeur riche pour HTML -->
               <template v-if="useRichEditor">
                 <ClientOnly>
                   <EditorJS
@@ -859,6 +1109,129 @@ const closeModals = () => {
                     </div>
                   </template>
                 </ClientOnly>
+              </template>
+
+              <!-- Formulaire JSON dynamique -->
+              <template v-else-if="isJsonType">
+                <!-- Core Value Form (titre, description, icône) -->
+                <div v-if="isCoreValueJson || formData.key.startsWith('core_value_')" class="space-y-3 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Titre</label>
+                    <input
+                      v-model="coreValueForm.title"
+                      type="text"
+                      placeholder="Ex: Excellence"
+                      class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                    >
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Description</label>
+                    <textarea
+                      v-model="coreValueForm.description"
+                      rows="3"
+                      placeholder="Description de cette valeur..."
+                      class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                    />
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Icône</label>
+                      <select
+                        v-model="coreValueForm.icon"
+                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                      >
+                        <option v-for="icon in commonIcons" :key="icon.value" :value="icon.value">
+                          {{ icon.label }}
+                        </option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Ordre d'affichage</label>
+                      <input
+                        v-model.number="coreValueForm.display_order"
+                        type="number"
+                        min="0"
+                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                      >
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <input
+                      id="is_active_add"
+                      v-model="coreValueForm.is_active"
+                      type="checkbox"
+                      class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    >
+                    <label for="is_active_add" class="text-sm text-gray-700 dark:text-gray-300">Actif</label>
+                  </div>
+                </div>
+
+                <!-- JSON Simple (clé-valeur dynamique) -->
+                <div v-else class="space-y-3">
+                  <!-- Toggle mode -->
+                  <div class="flex gap-2 mb-2">
+                    <button
+                      type="button"
+                      class="px-3 py-1 text-xs rounded-lg transition-colors"
+                      :class="jsonEditMode === 'form' ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'"
+                      @click="jsonEditMode = 'form'"
+                    >
+                      Formulaire
+                    </button>
+                    <button
+                      type="button"
+                      class="px-3 py-1 text-xs rounded-lg transition-colors"
+                      :class="jsonEditMode === 'raw' ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'"
+                      @click="jsonEditMode = 'raw'; rawJsonValue = JSON.stringify(simpleJsonForm, null, 2)"
+                    >
+                      JSON brut
+                    </button>
+                  </div>
+
+                  <!-- Mode formulaire -->
+                  <div v-if="jsonEditMode === 'form'" class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 space-y-2">
+                    <div v-for="(_, key) in simpleJsonForm" :key="key" class="flex items-center gap-2">
+                      <input
+                        :value="key"
+                        type="text"
+                        placeholder="Nom du champ"
+                        class="w-1/3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-1.5 px-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                        @change="(e) => renameJsonField(key as string, (e.target as HTMLInputElement).value)"
+                      >
+                      <input
+                        v-model="simpleJsonForm[key as string]"
+                        type="text"
+                        placeholder="Valeur"
+                        class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-1.5 px-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                      >
+                      <button
+                        type="button"
+                        class="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                        @click="removeJsonField(key as string)"
+                      >
+                        <font-awesome-icon :icon="['fas', 'times']" class="h-3 w-3" />
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      class="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                      @click="addJsonField"
+                    >
+                      <font-awesome-icon :icon="['fas', 'plus']" class="h-3 w-3" />
+                      Ajouter un champ
+                    </button>
+                  </div>
+
+                  <!-- Mode JSON brut -->
+                  <textarea
+                    v-else
+                    v-model="rawJsonValue"
+                    rows="8"
+                    placeholder='{"clé": "valeur"}'
+                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 font-mono"
+                    :class="{ 'border-red-500': formErrors.value }"
+                  />
+                </div>
               </template>
 
               <!-- Textarea pour Markdown -->
@@ -959,7 +1332,7 @@ const closeModals = () => {
       >
         <div
           class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-h-[90vh] overflow-y-auto"
-          :class="useRichEditor ? 'max-w-3xl' : 'max-w-lg'"
+          :class="useRichEditor || isJsonType ? 'max-w-3xl' : 'max-w-lg'"
         >
           <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -1009,7 +1382,7 @@ const closeModals = () => {
                 Valeur *
               </label>
 
-              <!-- Éditeur riche pour JSON/HTML -->
+              <!-- Éditeur riche pour HTML -->
               <template v-if="useRichEditor">
                 <ClientOnly>
                   <EditorJS
@@ -1023,6 +1396,129 @@ const closeModals = () => {
                     </div>
                   </template>
                 </ClientOnly>
+              </template>
+
+              <!-- Formulaire JSON dynamique -->
+              <template v-else-if="isJsonType">
+                <!-- Core Value Form (titre, description, icône) -->
+                <div v-if="isCoreValueJson || formData.key.startsWith('core_value_')" class="space-y-3 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Titre</label>
+                    <input
+                      v-model="coreValueForm.title"
+                      type="text"
+                      placeholder="Ex: Excellence"
+                      class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                    >
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Description</label>
+                    <textarea
+                      v-model="coreValueForm.description"
+                      rows="3"
+                      placeholder="Description de cette valeur..."
+                      class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                    />
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Icône</label>
+                      <select
+                        v-model="coreValueForm.icon"
+                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                      >
+                        <option v-for="icon in commonIcons" :key="icon.value" :value="icon.value">
+                          {{ icon.label }}
+                        </option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Ordre d'affichage</label>
+                      <input
+                        v-model.number="coreValueForm.display_order"
+                        type="number"
+                        min="0"
+                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                      >
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <input
+                      id="is_active_edit"
+                      v-model="coreValueForm.is_active"
+                      type="checkbox"
+                      class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    >
+                    <label for="is_active_edit" class="text-sm text-gray-700 dark:text-gray-300">Actif</label>
+                  </div>
+                </div>
+
+                <!-- JSON Simple (clé-valeur dynamique) -->
+                <div v-else class="space-y-3">
+                  <!-- Toggle mode -->
+                  <div class="flex gap-2 mb-2">
+                    <button
+                      type="button"
+                      class="px-3 py-1 text-xs rounded-lg transition-colors"
+                      :class="jsonEditMode === 'form' ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'"
+                      @click="jsonEditMode = 'form'"
+                    >
+                      Formulaire
+                    </button>
+                    <button
+                      type="button"
+                      class="px-3 py-1 text-xs rounded-lg transition-colors"
+                      :class="jsonEditMode === 'raw' ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'"
+                      @click="jsonEditMode = 'raw'; rawJsonValue = JSON.stringify(simpleJsonForm, null, 2)"
+                    >
+                      JSON brut
+                    </button>
+                  </div>
+
+                  <!-- Mode formulaire -->
+                  <div v-if="jsonEditMode === 'form'" class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 space-y-2">
+                    <div v-for="(_, key) in simpleJsonForm" :key="key" class="flex items-center gap-2">
+                      <input
+                        :value="key"
+                        type="text"
+                        placeholder="Nom du champ"
+                        class="w-1/3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-1.5 px-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                        @change="(e) => renameJsonField(key as string, (e.target as HTMLInputElement).value)"
+                      >
+                      <input
+                        v-model="simpleJsonForm[key as string]"
+                        type="text"
+                        placeholder="Valeur"
+                        class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-1.5 px-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                      >
+                      <button
+                        type="button"
+                        class="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                        @click="removeJsonField(key as string)"
+                      >
+                        <font-awesome-icon :icon="['fas', 'times']" class="h-3 w-3" />
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      class="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                      @click="addJsonField"
+                    >
+                      <font-awesome-icon :icon="['fas', 'plus']" class="h-3 w-3" />
+                      Ajouter un champ
+                    </button>
+                  </div>
+
+                  <!-- Mode JSON brut -->
+                  <textarea
+                    v-else
+                    v-model="rawJsonValue"
+                    rows="8"
+                    placeholder='{"clé": "valeur"}'
+                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 px-3 text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 font-mono"
+                    :class="{ 'border-red-500': formErrors.value }"
+                  />
+                </div>
               </template>
 
               <!-- Textarea pour Markdown -->
