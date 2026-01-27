@@ -17,7 +17,7 @@ const {
   eventStatusLabels,
 } = useEventsApi()
 
-const { getMediaUrlById } = useMediaApi()
+const { getMediaById, getMediaUrl } = useMediaApi()
 
 // État
 const event = ref<EventRead | null>(null)
@@ -34,7 +34,13 @@ onMounted(async () => {
 
     // Charger l'image de couverture si elle existe
     if (event.value.cover_image_external_id) {
-      coverImageUrl.value = await getMediaUrlById(event.value.cover_image_external_id)
+      try {
+        const media = await getMediaById(event.value.cover_image_external_id)
+        coverImageUrl.value = getMediaUrl(media)
+      } catch (mediaError) {
+        console.error('Error loading cover image:', mediaError)
+        // L'image n'existe pas ou n'est plus accessible
+      }
     }
   } catch (e) {
     console.error('Error loading event:', e)
