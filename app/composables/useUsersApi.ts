@@ -86,16 +86,19 @@ export function useUsersApi() {
     }
 
     try {
+      // Ne pas filtrer par active pour récupérer tous les utilisateurs
+      // puis filtrer côté client (le filtre backend peut ne pas fonctionner)
       const response = await listUsers({
-        active: true,
-        limit: 500, // Récupérer tous les utilisateurs actifs
+        limit: 500,
       })
       usersCache.value = response.items
-      return response.items
+      // Filtrer côté client pour ne garder que les actifs
+      return response.items.filter(u => u.active)
     }
     catch (error) {
       console.error('Erreur lors du chargement des utilisateurs:', error)
-      return []
+      // Propager l'erreur pour que l'appelant puisse la gérer
+      throw error
     }
   }
 

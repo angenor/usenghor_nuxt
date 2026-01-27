@@ -117,13 +117,13 @@ export function useMediaApi() {
     const config = useRuntimeConfig()
     const baseUrl = config.public.apiBase || 'http://localhost:8000'
 
-    // Si c'est un ID (string), on ne peut pas construire l'URL directement
-    // car on ne connaît pas le chemin du fichier
-    // Dans ce cas, on utilise l'endpoint API pour récupérer le média
+    // Si c'est un ID (string UUID), utiliser l'endpoint public de download
     if (typeof mediaOrId === 'string') {
-      // C'est un ID - retourner l'URL de l'endpoint qui redirige vers le fichier
-      // Note: Le backend devrait avoir un endpoint GET /api/admin/media/{id}/file
-      // Pour l'instant, on retourne null et on chargera le média async si besoin
+      // Vérifier que c'est un UUID valide (éviter les chemins relatifs)
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      if (uuidRegex.test(mediaOrId)) {
+        return `${baseUrl}/api/public/media/${mediaOrId}/download`
+      }
       return null
     }
 
@@ -132,7 +132,7 @@ export function useMediaApi() {
       return mediaOrId.url
     }
 
-    // Sinon, construire l'URL avec le backend
+    // Sinon, construire l'URL avec le backend (accès direct au fichier statique)
     return `${baseUrl}${mediaOrId.url}`
   }
 

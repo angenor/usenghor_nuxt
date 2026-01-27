@@ -6,8 +6,6 @@ definePageMeta({
   layout: 'admin'
 })
 
-const config = useRuntimeConfig()
-
 const {
   getAllCampuses,
   toggleCampusActive,
@@ -19,12 +17,7 @@ const {
   getFlagEmoji,
 } = useCountriesApi()
 
-// Helper pour construire l'URL de téléchargement d'un média
-const getMediaDownloadUrl = (mediaId: string | null): string | null => {
-  if (!mediaId) return null
-  const baseUrl = config.public.apiBase || 'http://localhost:8000'
-  return `${baseUrl}/api/admin/media/${mediaId}/download`
-}
+const { getMediaUrl } = useMediaApi()
 
 // === ÉTAT ===
 const loading = ref(false)
@@ -309,7 +302,7 @@ const deleteCampus = async (campus: CampusRead) => {
           <div class="relative h-48">
             <img
               v-if="campus.cover_image_external_id"
-              :src="getMediaDownloadUrl(campus.cover_image_external_id) ?? undefined"
+              :src="getMediaUrl(campus.cover_image_external_id) ?? undefined"
               :alt="campus.name"
               class="h-full w-full object-cover"
               @error="($event.target as HTMLImageElement).style.display = 'none'"
@@ -446,7 +439,7 @@ const deleteCampus = async (campus: CampusRead) => {
                   <div class="flex items-center gap-3">
                     <img
                       v-if="campus.cover_image_external_id"
-                      :src="getMediaDownloadUrl(campus.cover_image_external_id) ?? undefined"
+                      :src="getMediaUrl(campus.cover_image_external_id) ?? undefined"
                       :alt="campus.name"
                       class="h-10 w-16 rounded object-cover"
                       @error="($event.target as HTMLImageElement).style.display = 'none'"

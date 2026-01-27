@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { CountryRead } from '~/composables/useCountriesApi'
-import type { UserForSelect } from '~/composables/useUsersApi'
 
 definePageMeta({
   layout: 'admin',
@@ -11,29 +10,55 @@ const router = useRouter()
 // APIs
 const { createCampus } = useCampusApi()
 const { getAllCountries, getFlagEmoji } = useCountriesApi()
-const { getUsersForSelect } = useUsersApi()
+const { apiFetch } = useApi()
 
 // Données de référence
 const countries = ref<CountryRead[]>([])
-const headCandidates = ref<UserForSelect[]>([])
 const isLoadingData = ref(true)
+const usersLoadError = ref<string | null>(null)
+
+// Candidats responsables (utilisateurs) - même pattern que departements
+interface HeadCandidate {
+  id: string
+  name: string
+  email: string
+}
+const headCandidates = ref<HeadCandidate[]>([])
+
+async function loadHeadCandidates() {
+  try {
+    const response = await apiFetch<{
+      items: Array<{
+        id: string
+        email: string
+        first_name: string
+        last_name: string
+        salutation: string | null
+      }>
+    }>('/api/admin/users', {
+      query: { limit: 100, active: true },
+    })
+    headCandidates.value = response.items.map(user => ({
+      id: user.id,
+      email: user.email,
+      name: user.salutation
+        ? `${user.salutation} ${user.first_name} ${user.last_name}`
+        : `${user.first_name} ${user.last_name}`,
+    }))
+  }
+  catch (err) {
+    console.error('Erreur chargement des candidats responsables:', err)
+    usersLoadError.value = 'Erreur lors du chargement des utilisateurs'
+  }
+}
 
 // Charger les données au montage
 onMounted(async () => {
-  try {
-    const [countriesData, usersData] = await Promise.all([
-      getAllCountries(),
-      getUsersForSelect(),
-    ])
-    countries.value = countriesData
-    headCandidates.value = usersData
-  }
-  catch (error) {
-    console.error('Erreur chargement données:', error)
-  }
-  finally {
-    isLoadingData.value = false
-  }
+  await Promise.all([
+    getAllCountries().then(data => countries.value = data).catch(console.error),
+    loadHeadCandidates(),
+  ])
+  isLoadingData.value = false
 })
 
 // État du formulaire
@@ -480,13 +505,17 @@ const tabs = [
                 Aucun responsable assigné
               </option>
               <option v-for="candidate in headCandidates" :key="candidate.id" :value="candidate.id">
-                {{ candidate.full_name }} ({{ candidate.email }})
+                {{ candidate.name }} ({{ candidate.email }})
               </option>
             </select>
             <p class="mt-1 text-xs text-gray-500">
               Le responsable sera affiché sur la page du campus.
             </p>
-            <p v-if="headCandidates.length === 0 && !isLoadingData" class="mt-2 text-xs text-amber-600 dark:text-amber-400">
+            <p v-if="usersLoadError" class="mt-2 text-xs text-red-600 dark:text-red-400">
+              <font-awesome-icon :icon="['fas', 'exclamation-circle']" class="mr-1" />
+              Erreur : {{ usersLoadError }}
+            </p>
+            <p v-else-if="headCandidates.length === 0 && !isLoadingData" class="mt-2 text-xs text-amber-600 dark:text-amber-400">
               <font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="mr-1" />
               Aucun utilisateur actif trouvé. Créez d'abord des utilisateurs.
             </p>

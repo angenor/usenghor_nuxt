@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import type { CampusWithTeam } from '~/composables/useCampusApi'
+import type { CountryRead } from '~/composables/useCountriesApi'
+
 definePageMeta({
   layout: 'admin'
 })
@@ -7,32 +10,71 @@ const route = useRoute()
 const router = useRouter()
 
 const {
-  getCampusByIdAdmin,
-  getCampusCountries,
-  getCampusHeadCandidates,
-  getFlagEmoji
-} = useMockData()
+  getCampusById,
+  updateCampus: apiUpdateCampus,
+} = useCampusApi()
+
+const { getAllCountries, getFlagEmoji } = useCountriesApi()
+const { apiFetch } = useApi()
+const { getMediaUrl } = useMediaApi()
 
 // Données de référence
-const countries = computed(() => getCampusCountries())
-const headCandidates = computed(() => getCampusHeadCandidates())
+const countries = ref<CountryRead[]>([])
+const isLoadingData = ref(true)
+const usersLoadError = ref<string | null>(null)
+
+// Candidats responsables (utilisateurs)
+interface HeadCandidate {
+  id: string
+  name: string
+  email: string
+}
+const headCandidates = ref<HeadCandidate[]>([])
+
+async function loadHeadCandidates() {
+  try {
+    const response = await apiFetch<{
+      items: Array<{
+        id: string
+        email: string
+        first_name: string
+        last_name: string
+        salutation: string | null
+      }>
+    }>('/api/admin/users', {
+      query: { limit: 100, active: true },
+    })
+    headCandidates.value = response.items.map(user => ({
+      id: user.id,
+      email: user.email,
+      name: user.salutation
+        ? `${user.salutation} ${user.first_name} ${user.last_name}`
+        : `${user.first_name} ${user.last_name}`,
+    }))
+  }
+  catch (err) {
+    console.error('Erreur chargement des candidats responsables:', err)
+    usersLoadError.value = 'Erreur lors du chargement des utilisateurs'
+  }
+}
 
 // Campus à éditer
 const campusId = computed(() => route.params.id as string)
-const originalCampus = computed(() => getCampusByIdAdmin(campusId.value))
+const originalCampus = ref<CampusWithTeam | null>(null)
+const loading = ref(true)
 
 // État du formulaire
 const isSubmitting = ref(false)
+const submitError = ref<string | null>(null)
 const activeTab = ref<'general' | 'location' | 'contact' | 'settings'>('general')
 
-// Données du formulaire
+// Données du formulaire (alignées sur le schéma backend)
 const form = reactive({
   code: '',
   name: '',
   description: '',
-  cover_image: '',
-  cover_image_alt: '',
-  country_id: '',
+  cover_image_external_id: '' as string | null,
+  country_external_id: '' as string | null,
   city: '',
   address: '',
   postal_code: '',
@@ -40,9 +82,9 @@ const form = reactive({
   longitude: undefined as number | undefined,
   email: '',
   phone: '',
-  head_id: '',
+  head_external_id: '' as string | null,
   is_headquarters: false,
-  is_active: true
+  active: true
 })
 
 // Charger les données du campus
@@ -51,37 +93,54 @@ const loadCampusData = () => {
     form.code = originalCampus.value.code
     form.name = originalCampus.value.name
     form.description = originalCampus.value.description || ''
-    form.cover_image = originalCampus.value.cover_image || ''
-    form.cover_image_alt = originalCampus.value.cover_image_alt || ''
-    form.country_id = originalCampus.value.country_id
-    form.city = originalCampus.value.city
+    form.cover_image_external_id = originalCampus.value.cover_image_external_id || ''
+    form.country_external_id = originalCampus.value.country_external_id || ''
+    form.city = originalCampus.value.city || ''
     form.address = originalCampus.value.address || ''
     form.postal_code = originalCampus.value.postal_code || ''
-    form.latitude = originalCampus.value.latitude
-    form.longitude = originalCampus.value.longitude
+    form.latitude = originalCampus.value.latitude ?? undefined
+    form.longitude = originalCampus.value.longitude ?? undefined
     form.email = originalCampus.value.email || ''
     form.phone = originalCampus.value.phone || ''
-    form.head_id = originalCampus.value.head_id || ''
+    form.head_external_id = originalCampus.value.head_external_id || ''
     form.is_headquarters = originalCampus.value.is_headquarters
-    form.is_active = originalCampus.value.is_active
+    form.active = originalCampus.value.active
   }
 }
 
 // Charger les données au montage
-onMounted(() => {
-  loadCampusData()
+onMounted(async () => {
+  await Promise.all([
+    loadCampus(),
+    getAllCountries().then(data => countries.value = data).catch(console.error),
+    loadHeadCandidates(),
+  ])
+  isLoadingData.value = false
 })
 
+async function loadCampus() {
+  loading.value = true
+  try {
+    originalCampus.value = await getCampusById(campusId.value)
+    loadCampusData()
+  } catch (e) {
+    console.error('Erreur chargement campus:', e)
+    originalCampus.value = null
+  } finally {
+    loading.value = false
+  }
+}
+
 // Recharger si l'ID change
-watch(campusId, () => {
-  loadCampusData()
+watch(campusId, async () => {
+  await loadCampus()
 })
 
 // Validation
 const errors = reactive({
   code: '',
   name: '',
-  country_id: '',
+  country_external_id: '',
   city: ''
 })
 
@@ -91,7 +150,7 @@ const validateForm = (): boolean => {
   // Reset errors
   errors.code = ''
   errors.name = ''
-  errors.country_id = ''
+  errors.country_external_id = ''
   errors.city = ''
 
   if (!form.code.trim()) {
@@ -107,8 +166,8 @@ const validateForm = (): boolean => {
     isValid = false
   }
 
-  if (!form.country_id) {
-    errors.country_id = 'Le pays est requis'
+  if (!form.country_external_id) {
+    errors.country_external_id = 'Le pays est requis'
     isValid = false
   }
 
@@ -129,27 +188,39 @@ const submitForm = async () => {
     // Aller à l'onglet avec erreurs
     if (errors.code || errors.name) {
       activeTab.value = 'general'
-    } else if (errors.country_id || errors.city) {
+    } else if (errors.country_external_id || errors.city) {
       activeTab.value = 'location'
     }
     return
   }
 
   isSubmitting.value = true
+  submitError.value = null
 
   try {
     const campusData = {
-      id: campusId.value,
-      ...form,
-      updated_at: new Date().toISOString()
+      code: form.code,
+      name: form.name,
+      description: form.description || null,
+      cover_image_external_id: form.cover_image_external_id || null,
+      country_external_id: form.country_external_id || null,
+      city: form.city || null,
+      address: form.address || null,
+      postal_code: form.postal_code || null,
+      latitude: form.latitude ?? null,
+      longitude: form.longitude ?? null,
+      email: form.email || null,
+      phone: form.phone || null,
+      head_external_id: form.head_external_id || null,
+      is_headquarters: form.is_headquarters,
+      active: form.active
     }
 
-    console.log('Updating campus:', campusData)
-    // En production: PUT /api/admin/campuses/{id}
-
+    await apiUpdateCampus(campusId.value, campusData)
     router.push(`/admin/campus/liste/${campusId.value}`)
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating campus:', error)
+    submitError.value = error instanceof Error ? error.message : 'Erreur lors de la mise à jour du campus'
   } finally {
     isSubmitting.value = false
   }
@@ -173,10 +244,24 @@ const tabs = [
   { id: 'contact', label: 'Contact', icon: 'address-card' },
   { id: 'settings', label: 'Paramètres', icon: 'cog' }
 ]
+
+// Gestion de l'upload d'image
+const handleImageUpload = (mediaId: string) => {
+  form.cover_image_external_id = mediaId
+}
+
+const handleImageRemove = () => {
+  form.cover_image_external_id = null
+}
 </script>
 
 <template>
-  <div v-if="originalCampus" class="space-y-6">
+  <!-- Loading -->
+  <div v-if="loading" class="flex items-center justify-center py-16">
+    <font-awesome-icon :icon="['fas', 'spinner']" class="h-8 w-8 animate-spin text-blue-600" />
+  </div>
+
+  <div v-else-if="originalCampus" class="space-y-6">
     <!-- En-tête -->
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-4">
@@ -310,39 +395,16 @@ const tabs = [
         </div>
 
         <!-- Image de couverture -->
-        <div class="grid gap-6 md:grid-cols-2">
-          <div>
-            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Image de couverture (URL)
-            </label>
-            <input
-              v-model="form.cover_image"
-              type="url"
-              placeholder="https://..."
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-            />
-          </div>
-          <div>
-            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Texte alternatif de l'image
-            </label>
-            <input
-              v-model="form.cover_image_alt"
-              type="text"
-              placeholder="Description de l'image"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-            />
-          </div>
-        </div>
-
-        <!-- Aperçu de l'image -->
-        <div v-if="form.cover_image" class="mt-4">
-          <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Aperçu</p>
-          <img
-            :src="form.cover_image"
-            :alt="form.cover_image_alt || 'Aperçu'"
-            class="h-48 w-full rounded-lg object-cover"
-            @error="form.cover_image = ''"
+        <div>
+          <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Image de couverture
+          </label>
+          <FormsImageUpload
+            :model-value="form.cover_image_external_id || undefined"
+            label="Image de couverture"
+            :preview-url="form.cover_image_external_id ? getMediaUrl(form.cover_image_external_id) ?? undefined : undefined"
+            @update:model-value="handleImageUpload"
+            @remove="handleImageRemove"
           />
         </div>
       </div>
@@ -356,20 +418,20 @@ const tabs = [
               Pays <span class="text-red-500">*</span>
             </label>
             <select
-              v-model="form.country_id"
+              v-model="form.country_external_id"
               :class="[
                 'w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-1',
-                errors.country_id
+                errors.country_external_id
                   ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
                   : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700'
               ]"
             >
               <option value="">Sélectionner un pays</option>
               <option v-for="country in countries" :key="country.id" :value="country.id">
-                {{ getFlagEmoji(country.code) }} {{ country.name }}
+                {{ getFlagEmoji(country.iso_code) }} {{ country.name_fr }}
               </option>
             </select>
-            <p v-if="errors.country_id" class="mt-1 text-sm text-red-500">{{ errors.country_id }}</p>
+            <p v-if="errors.country_external_id" class="mt-1 text-sm text-red-500">{{ errors.country_external_id }}</p>
           </div>
 
           <!-- Ville -->
@@ -487,15 +549,23 @@ const tabs = [
             Responsable / Directeur
           </label>
           <select
-            v-model="form.head_id"
+            v-model="form.head_external_id"
             class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
           >
             <option value="">Aucun responsable assigné</option>
             <option v-for="candidate in headCandidates" :key="candidate.id" :value="candidate.id">
-              {{ candidate.name }}
+              {{ candidate.name }} ({{ candidate.email }})
             </option>
           </select>
           <p class="mt-1 text-xs text-gray-500">Le responsable sera affiché sur la page du campus.</p>
+          <p v-if="usersLoadError" class="mt-2 text-xs text-red-600 dark:text-red-400">
+            <font-awesome-icon :icon="['fas', 'exclamation-circle']" class="mr-1" />
+            Erreur : {{ usersLoadError }}
+          </p>
+          <p v-else-if="headCandidates.length === 0 && !isLoadingData" class="mt-2 text-xs text-amber-600 dark:text-amber-400">
+            <font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="mr-1" />
+            Aucun utilisateur actif trouvé.
+          </p>
         </div>
       </div>
 
@@ -522,13 +592,13 @@ const tabs = [
         <!-- Actif -->
         <div class="flex items-start gap-4">
           <input
-            id="is_active"
-            v-model="form.is_active"
+            id="active"
+            v-model="form.active"
             type="checkbox"
             class="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           />
           <div>
-            <label for="is_active" class="block font-medium text-gray-700 dark:text-gray-300">
+            <label for="active" class="block font-medium text-gray-700 dark:text-gray-300">
               Campus actif
             </label>
             <p class="text-sm text-gray-500">
@@ -536,6 +606,12 @@ const tabs = [
             </p>
           </div>
         </div>
+      </div>
+
+      <!-- Erreur de soumission -->
+      <div v-if="submitError" class="mt-4 rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+        <font-awesome-icon :icon="['fas', 'exclamation-circle']" class="mr-2" />
+        {{ submitError }}
       </div>
     </div>
 
