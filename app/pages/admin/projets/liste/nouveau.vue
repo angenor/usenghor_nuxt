@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { Project, ProjectStatus, PublicationStatus, ProjectPartner, ProjectCountry } from '~/bank/mock-data/projets'
-import type { OutputData } from '@editorjs/editorjs'
+import type { ProjectCategoryRead, ProjectStatus, PublicationStatus } from '~/types/api'
 
 definePageMeta({
   layout: 'admin'
@@ -9,187 +8,119 @@ definePageMeta({
 const router = useRouter()
 
 const {
-  generateProjectId,
-  generateProjectPartnerId,
-  generateProjectCountryId,
-  slugifyProject,
-  getAllProjectCategories,
-  departments,
+  createProject,
+  getAllCategories,
+  slugify,
   projectStatusLabels,
-  projectPublicationStatusLabels,
-  partenaires,
-  countries
-} = useMockData()
+  publicationStatusLabels,
+} = useProjectsApi()
+
+const { departments } = useReferenceData()
 
 // Données de référence
-const categories = computed(() => getAllProjectCategories())
+const categories = ref<ProjectCategoryRead[]>([])
+
+onMounted(async () => {
+  categories.value = await getAllCategories()
+})
 
 // Onglet actif
-const activeTab = ref<'general' | 'classification' | 'dates' | 'scope' | 'partners' | 'publication'>('general')
+const activeTab = ref<'general' | 'classification' | 'dates' | 'publication'>('general')
 
-// Contenu EditorJS (séparé du formulaire)
-const descriptionFr = ref<OutputData | undefined>(undefined)
-const descriptionEn = ref<OutputData | undefined>(undefined)
-const descriptionAr = ref<OutputData | undefined>(undefined)
-
-// État du formulaire
-const form = ref<Partial<Project>>({
-  id: generateProjectId(),
+// État du formulaire (aligné sur le schéma backend)
+const form = reactive({
+  title: '',
   slug: '',
-  title_fr: '',
-  title_en: '',
-  title_ar: '',
-  summary_fr: '',
-  summary_en: '',
-  summary_ar: '',
-  cover_image: '',
-  category_ids: [],
-  department_id: '',
-  manager_id: '',
+  summary: '',
+  description: '',
+  cover_image_external_id: null as string | null,
+  department_external_id: null as string | null,
+  manager_external_id: null as string | null,
   start_date: '',
   end_date: '',
-  budget: undefined,
+  budget: null as number | null,
   currency: 'EUR',
   beneficiaries: '',
-  countries: [],
-  partners: [],
-  status: 'planned',
-  publication_status: 'draft',
-  featured: false,
-  website: ''
+  category_ids: [] as string[],
+  status: 'planned' as ProjectStatus,
+  publication_status: 'draft' as PublicationStatus,
 })
 
 // Auto-génération du slug
 const slugManuallyEdited = ref(false)
 
-watch(() => form.value.title_fr, (title) => {
+watch(() => form.title, (title) => {
   if (!slugManuallyEdited.value && title) {
-    form.value.slug = slugifyProject(title)
+    form.slug = slugify(title)
   }
 })
-
-// === GESTION DES PAYS ===
-const selectedCountryCode = ref('')
-
-const availableCountries = computed(() => {
-  const usedCodes = form.value.countries?.map(c => c.code) || []
-  return countries.filter(c => !usedCodes.includes(c.code))
-})
-
-const addCountry = () => {
-  if (!selectedCountryCode.value) return
-  const country = countries.find(c => c.code === selectedCountryCode.value)
-  if (country && form.value.countries) {
-    form.value.countries.push({
-      id: generateProjectCountryId(),
-      name: country.name,
-      code: country.code
-    })
-    selectedCountryCode.value = ''
-  }
-}
-
-const removeCountry = (code: string) => {
-  if (form.value.countries) {
-    form.value.countries = form.value.countries.filter(c => c.code !== code)
-  }
-}
-
-// === GESTION DES PARTENAIRES ===
-const selectedPartnerId = ref('')
-const newPartnerRole = ref('')
-
-const availablePartners = computed(() => {
-  const usedIds = form.value.partners?.map(p => p.partner_id) || []
-  return partenaires.filter(p => !usedIds.includes(p.id))
-})
-
-const addPartner = () => {
-  if (!selectedPartnerId.value) return
-  const partner = partenaires.find(p => p.id === selectedPartnerId.value)
-  if (partner && form.value.partners) {
-    form.value.partners.push({
-      id: generateProjectPartnerId(),
-      partner_id: partner.id,
-      name: partner.name,
-      logo: partner.logo,
-      website: partner.website,
-      role: newPartnerRole.value
-    })
-    selectedPartnerId.value = ''
-    newPartnerRole.value = ''
-  }
-}
-
-const removePartner = (partnerId: string) => {
-  if (form.value.partners) {
-    form.value.partners = form.value.partners.filter(p => p.partner_id !== partnerId)
-  }
-}
-
-const updatePartnerRole = (partnerId: string, role: string) => {
-  const partner = form.value.partners?.find(p => p.partner_id === partnerId)
-  if (partner) {
-    partner.role = role
-  }
-}
 
 // === GESTION DES CATÉGORIES ===
 const toggleCategory = (categoryId: string) => {
-  if (!form.value.category_ids) {
-    form.value.category_ids = []
-  }
-  const index = form.value.category_ids.indexOf(categoryId)
+  const index = form.category_ids.indexOf(categoryId)
   if (index === -1) {
-    form.value.category_ids.push(categoryId)
-  } else {
-    form.value.category_ids.splice(index, 1)
+    form.category_ids.push(categoryId)
+  }
+  else {
+    form.category_ids.splice(index, 1)
   }
 }
 
 // === SAUVEGARDE ===
 const isSaving = ref(false)
+const error = ref<string | null>(null)
 
 const saveForm = async () => {
   // Validation basique
-  if (!form.value.title_fr?.trim()) {
+  if (!form.title.trim()) {
     alert('Veuillez saisir un titre')
     return
   }
-  if (!form.value.slug?.trim()) {
+  if (!form.slug.trim()) {
     alert('Veuillez saisir un slug')
     return
   }
 
   isSaving.value = true
-  try {
-    const now = new Date().toISOString()
-    const projectData = {
-      ...form.value,
-      description_fr: descriptionFr.value,
-      description_en: descriptionEn.value,
-      description_ar: descriptionAr.value,
-      created_at: now,
-      updated_at: now,
-      published_at: form.value.publication_status === 'published' ? now : undefined
-    }
+  error.value = null
 
-    console.log('Creating project:', projectData)
-    // En production: POST /api/admin/projects
-    await new Promise(resolve => setTimeout(resolve, 1000))
+  try {
+    await createProject({
+      title: form.title,
+      slug: form.slug,
+      summary: form.summary || null,
+      description: form.description || null,
+      cover_image_external_id: form.cover_image_external_id,
+      department_external_id: form.department_external_id,
+      manager_external_id: form.manager_external_id,
+      start_date: form.start_date || null,
+      end_date: form.end_date || null,
+      budget: form.budget,
+      currency: form.currency,
+      beneficiaries: form.beneficiaries || null,
+      category_ids: form.category_ids.length > 0 ? form.category_ids : null,
+      status: form.status,
+      publication_status: form.publication_status,
+    })
+
     router.push('/admin/projets/liste')
-  } finally {
+  }
+  catch (err: any) {
+    console.error('Erreur création:', err)
+    error.value = err.message || 'Erreur lors de la création'
+  }
+  finally {
     isSaving.value = false
   }
 }
 
 const saveDraft = async () => {
-  form.value.publication_status = 'draft'
+  form.publication_status = 'draft'
   await saveForm()
 }
 
 const saveAndPublish = async () => {
-  form.value.publication_status = 'published'
+  form.publication_status = 'published'
   await saveForm()
 }
 
@@ -202,9 +133,7 @@ const tabs = [
   { id: 'general', label: 'Général', icon: 'fa-solid fa-info-circle' },
   { id: 'classification', label: 'Classification', icon: 'fa-solid fa-tags' },
   { id: 'dates', label: 'Dates & Budget', icon: 'fa-solid fa-calendar' },
-  { id: 'scope', label: 'Portée', icon: 'fa-solid fa-globe' },
-  { id: 'partners', label: 'Partenaires', icon: 'fa-solid fa-handshake' },
-  { id: 'publication', label: 'Publication', icon: 'fa-solid fa-eye' }
+  { id: 'publication', label: 'Publication', icon: 'fa-solid fa-eye' },
 ]
 </script>
 
@@ -254,6 +183,11 @@ const tabs = [
       </div>
     </div>
 
+    <!-- Erreur -->
+    <div v-if="error" class="rounded-lg bg-red-50 p-4 text-red-600 dark:bg-red-900/20 dark:text-red-400">
+      {{ error }}
+    </div>
+
     <!-- Onglets -->
     <div class="border-b border-gray-200 dark:border-gray-700">
       <nav class="-mb-px flex space-x-4 overflow-x-auto">
@@ -279,44 +213,17 @@ const tabs = [
       <!-- Onglet Général -->
       <div v-show="activeTab === 'general'" class="space-y-6">
         <div class="grid gap-6 sm:grid-cols-2">
-          <!-- Titre FR -->
+          <!-- Titre -->
           <div class="sm:col-span-2">
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Titre (FR) <span class="text-red-500">*</span>
+              Titre <span class="text-red-500">*</span>
             </label>
             <input
-              v-model="form.title_fr"
+              v-model="form.title"
               type="text"
-              placeholder="Titre du projet en français"
+              placeholder="Titre du projet"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               required
-            />
-          </div>
-
-          <!-- Titre EN -->
-          <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Titre (EN)
-            </label>
-            <input
-              v-model="form.title_en"
-              type="text"
-              placeholder="Project title in English"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            />
-          </div>
-
-          <!-- Titre AR -->
-          <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Titre (AR)
-            </label>
-            <input
-              v-model="form.title_ar"
-              type="text"
-              dir="rtl"
-              placeholder="عنوان المشروع بالعربية"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
 
@@ -335,71 +242,41 @@ const tabs = [
             <p class="mt-1 text-xs text-gray-500">Auto-généré à partir du titre. URL: /projets/{{ form.slug || 'slug' }}</p>
           </div>
 
-          <!-- Résumé FR -->
+          <!-- Résumé -->
           <div class="sm:col-span-2">
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Résumé (FR)
+              Résumé
             </label>
             <textarea
-              v-model="form.summary_fr"
+              v-model="form.summary"
               rows="3"
-              placeholder="Brève description du projet en français..."
+              placeholder="Brève description du projet..."
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
 
-          <!-- Résumé EN -->
-          <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Résumé (EN)
-            </label>
-            <textarea
-              v-model="form.summary_en"
-              rows="2"
-              placeholder="Brief description in English..."
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            />
-          </div>
-
-          <!-- Résumé AR -->
-          <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Résumé (AR)
-            </label>
-            <textarea
-              v-model="form.summary_ar"
-              rows="2"
-              dir="rtl"
-              placeholder="وصف مختصر بالعربية..."
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            />
-          </div>
-
-          <!-- Image de couverture -->
+          <!-- Description -->
           <div class="sm:col-span-2">
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Image de couverture
+              Description détaillée
             </label>
-            <input
-              v-model="form.cover_image"
-              type="url"
-              placeholder="https://example.com/image.jpg"
+            <textarea
+              v-model="form.description"
+              rows="6"
+              placeholder="Description complète du projet : contexte, objectifs, méthodologie..."
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
-            <div v-if="form.cover_image" class="mt-2">
-              <img :src="form.cover_image" alt="Aperçu" class="h-32 w-auto rounded-lg object-cover" />
-            </div>
           </div>
 
-          <!-- Site web -->
+          <!-- Bénéficiaires -->
           <div class="sm:col-span-2">
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Site web du projet
+              Bénéficiaires
             </label>
-            <input
-              v-model="form.website"
-              type="url"
-              placeholder="https://projet.example.com"
+            <textarea
+              v-model="form.beneficiaries"
+              rows="2"
+              placeholder="Décrivez les bénéficiaires du projet..."
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
           </div>
@@ -418,15 +295,15 @@ const tabs = [
               v-for="category in categories"
               :key="category.id"
               class="flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors"
-              :class="form.category_ids?.includes(category.id) ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'"
+              :class="form.category_ids.includes(category.id) ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600'"
             >
               <input
                 type="checkbox"
-                :checked="form.category_ids?.includes(category.id)"
+                :checked="form.category_ids.includes(category.id)"
                 class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 @change="toggleCategory(category.id)"
               />
-              <font-awesome-icon v-if="category.icon" :icon="['fas', category.icon]" class="text-gray-500" />
+              <font-awesome-icon v-if="category.icon" :icon="['fas', category.icon.replace('fa-', '')]" class="text-gray-500" />
               <span class="text-sm text-gray-700 dark:text-gray-300">{{ category.name }}</span>
             </label>
           </div>
@@ -438,10 +315,10 @@ const tabs = [
             Département porteur
           </label>
           <select
-            v-model="form.department_id"
+            v-model="form.department_external_id"
             class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           >
-            <option value="">Sélectionnez un département</option>
+            <option :value="null">Sélectionnez un département</option>
             <option v-for="dept in departments" :key="dept.id" :value="dept.id">
               {{ dept.name }}
             </option>
@@ -509,143 +386,6 @@ const tabs = [
         </div>
       </div>
 
-      <!-- Onglet Portée -->
-      <div v-show="activeTab === 'scope'" class="space-y-6">
-        <!-- Bénéficiaires -->
-        <div>
-          <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Bénéficiaires
-          </label>
-          <textarea
-            v-model="form.beneficiaries"
-            rows="3"
-            placeholder="Décrivez les bénéficiaires du projet..."
-            class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          />
-        </div>
-
-        <!-- Pays concernés -->
-        <div>
-          <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Pays concernés
-          </label>
-
-          <!-- Liste des pays ajoutés -->
-          <div v-if="form.countries && form.countries.length > 0" class="mb-3 flex flex-wrap gap-2">
-            <span
-              v-for="country in form.countries"
-              :key="country.code"
-              class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-            >
-              {{ getFlagEmoji(country.code) }} {{ country.name }}
-              <button
-                type="button"
-                class="ml-1 text-blue-600 hover:text-blue-800 dark:text-blue-400"
-                @click="removeCountry(country.code)"
-              >
-                <font-awesome-icon :icon="['fas', 'times']" class="h-3 w-3" />
-              </button>
-            </span>
-          </div>
-
-          <!-- Ajouter un pays -->
-          <div class="flex gap-2">
-            <select
-              v-model="selectedCountryCode"
-              class="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            >
-              <option value="">Sélectionnez un pays</option>
-              <option v-for="country in availableCountries" :key="country.code" :value="country.code">
-                {{ getFlagEmoji(country.code) }} {{ country.name }}
-              </option>
-            </select>
-            <button
-              type="button"
-              :disabled="!selectedCountryCode"
-              class="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
-              @click="addCountry"
-            >
-              <font-awesome-icon :icon="['fas', 'plus']" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Onglet Partenaires -->
-      <div v-show="activeTab === 'partners'" class="space-y-6">
-        <div>
-          <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Partenaires du projet
-          </label>
-
-          <!-- Liste des partenaires -->
-          <div v-if="form.partners && form.partners.length > 0" class="mb-4 space-y-3">
-            <div
-              v-for="partner in form.partners"
-              :key="partner.partner_id"
-              class="flex items-center gap-4 rounded-lg border border-gray-200 p-3 dark:border-gray-700"
-            >
-              <img
-                v-if="partner.logo"
-                :src="partner.logo"
-                :alt="partner.name"
-                class="h-10 w-10 rounded object-contain"
-              />
-              <div
-                v-else
-                class="flex h-10 w-10 items-center justify-center rounded bg-gray-200 dark:bg-gray-700"
-              >
-                <font-awesome-icon :icon="['fas', 'building']" class="text-gray-400" />
-              </div>
-              <div class="flex-1">
-                <div class="font-medium text-gray-900 dark:text-white">{{ partner.name }}</div>
-                <input
-                  :value="partner.role"
-                  type="text"
-                  placeholder="Rôle du partenaire..."
-                  class="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  @input="updatePartnerRole(partner.partner_id, ($event.target as HTMLInputElement).value)"
-                />
-              </div>
-              <button
-                type="button"
-                class="text-red-500 hover:text-red-700"
-                @click="removePartner(partner.partner_id)"
-              >
-                <font-awesome-icon :icon="['fas', 'trash']" />
-              </button>
-            </div>
-          </div>
-
-          <!-- Ajouter un partenaire -->
-          <div class="flex gap-2">
-            <select
-              v-model="selectedPartnerId"
-              class="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            >
-              <option value="">Sélectionnez un partenaire</option>
-              <option v-for="partner in availablePartners" :key="partner.id" :value="partner.id">
-                {{ partner.name }}
-              </option>
-            </select>
-            <input
-              v-model="newPartnerRole"
-              type="text"
-              placeholder="Rôle"
-              class="w-40 rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            />
-            <button
-              type="button"
-              :disabled="!selectedPartnerId"
-              class="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
-              @click="addPartner"
-            >
-              <font-awesome-icon :icon="['fas', 'plus']" />
-            </button>
-          </div>
-        </div>
-      </div>
-
       <!-- Onglet Publication -->
       <div v-show="activeTab === 'publication'" class="space-y-6">
         <div class="grid gap-6 sm:grid-cols-2">
@@ -673,45 +413,14 @@ const tabs = [
               v-model="form.publication_status"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             >
-              <option v-for="(label, key) in projectPublicationStatusLabels" :key="key" :value="key">
+              <option v-for="(label, key) in publicationStatusLabels" :key="key" :value="key">
                 {{ label }}
               </option>
             </select>
           </div>
-
-          <!-- Featured -->
-          <div class="sm:col-span-2">
-            <label class="flex cursor-pointer items-center gap-3">
-              <input
-                v-model="form.featured"
-                type="checkbox"
-                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                <font-awesome-icon :icon="['fas', 'star']" class="mr-1 text-yellow-500" />
-                Mettre à la une
-              </span>
-            </label>
-            <p class="ml-6 text-xs text-gray-500">Le projet sera mis en avant sur la page d'accueil</p>
-          </div>
         </div>
       </div>
     </div>
-
-    <!-- Description détaillée -->
-    <AdminRichTextEditor
-      v-model="descriptionFr"
-      v-model:model-value-en="descriptionEn"
-      v-model:model-value-ar="descriptionAr"
-      title="Description détaillée"
-      description="Décrivez le projet en détail : contexte, objectifs, méthodologie, résultats attendus..."
-      icon="fa-solid fa-file-lines"
-      icon-color="text-blue-500"
-      placeholder="Rédigez la description complète du projet..."
-      placeholder-en="Write a detailed description of the project..."
-      placeholder-ar="اكتب وصفاً تفصيلياً للمشروع..."
-      :min-height="350"
-    />
 
     <!-- Footer actions -->
     <div class="sticky bottom-0 -mx-4 -mb-4 border-t border-gray-200 bg-gray-50 px-4 py-4 dark:border-gray-700 dark:bg-gray-900 sm:-mx-6 sm:px-6">

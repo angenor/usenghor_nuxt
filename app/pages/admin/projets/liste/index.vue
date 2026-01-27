@@ -1,28 +1,40 @@
 <script setup lang="ts">
-import type { Project, ProjectStatus, PublicationStatus } from '~/bank/mock-data/projets'
+import type { ProjectCategoryRead, ProjectStatus, PublicationStatus } from '~/types/api'
+import type { ProjectDisplay } from '~/composables/useProjectsApi'
 
 definePageMeta({
   layout: 'admin'
 })
 
-const router = useRouter()
-
 const {
-  getAllProjectsAdmin,
-  getProjectStatsAdmin,
+  listProjects,
+  getAllCategories,
+  getProjectStats,
+  deleteProject: deleteProjectApi,
+  publishProject,
+  unpublishProject,
   projectStatusLabels,
   projectStatusColors,
-  projectPublicationStatusLabels,
-  projectPublicationStatusColors,
-  getAllProjectCategories,
-  departments,
-  getFlagEmoji
-} = useMockData()
+  publicationStatusLabels,
+  publicationStatusColors,
+  formatDateShort,
+  formatBudget,
+} = useProjectsApi()
 
-// === DONNÉES ===
-const allProjects = computed(() => getAllProjectsAdmin())
-const stats = computed(() => getProjectStatsAdmin())
-const categories = computed(() => getAllProjectCategories())
+const { departments } = useReferenceData()
+
+// === ÉTAT ===
+const isLoading = ref(true)
+const error = ref<string | null>(null)
+const projects = ref<ProjectDisplay[]>([])
+const categories = ref<ProjectCategoryRead[]>([])
+const totalProjects = ref(0)
+const stats = ref({
+  total: 0,
+  byStatus: { planned: 0, ongoing: 0, completed: 0, suspended: 0 },
+  byPublicationStatus: { draft: 0, published: 0, archived: 0 },
+  totalBudget: 0,
+})
 
 // === FILTRES ===
 const searchQuery = ref('')
@@ -30,112 +42,92 @@ const filterStatus = ref<ProjectStatus | 'all'>('all')
 const filterPublicationStatus = ref<PublicationStatus | 'all'>('all')
 const filterCategory = ref<string | 'all'>('all')
 const filterDepartment = ref<string | 'all'>('all')
-const filterFeatured = ref<'all' | 'yes' | 'no'>('all')
 
 // === PAGINATION ===
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
-
-// === TRI ===
-const sortBy = ref<'title' | 'start_date' | 'budget' | 'updated_at'>('updated_at')
-const sortOrder = ref<'asc' | 'desc'>('desc')
+const totalPages = computed(() => Math.ceil(totalProjects.value / itemsPerPage.value))
 
 // === SÉLECTION ===
 const selectedIds = ref<string[]>([])
 const selectAll = ref(false)
 
-// === FILTRAGE ===
-const filteredProjects = computed(() => {
-  let result = [...allProjects.value]
+// === CHARGEMENT DES DONNÉES ===
+async function loadProjects() {
+  isLoading.value = true
+  error.value = null
 
-  // Recherche textuelle
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    result = result.filter(p =>
-      p.title_fr.toLowerCase().includes(query) ||
-      p.title_en.toLowerCase().includes(query) ||
-      p.slug.toLowerCase().includes(query) ||
-      p.summary_fr?.toLowerCase().includes(query) ||
-      p.department_name?.toLowerCase().includes(query)
-    )
+  try {
+    const response = await listProjects({
+      page: currentPage.value,
+      limit: itemsPerPage.value,
+      search: searchQuery.value || undefined,
+      status: filterStatus.value,
+      publication_status: filterPublicationStatus.value,
+      category_id: filterCategory.value,
+      department_external_id: filterDepartment.value,
+    })
+
+    projects.value = response.items
+    totalProjects.value = response.total
   }
-
-  // Filtre statut projet
-  if (filterStatus.value !== 'all') {
-    result = result.filter(p => p.status === filterStatus.value)
+  catch (err: any) {
+    console.error('Erreur chargement projets:', err)
+    error.value = err.message || 'Erreur lors du chargement des projets'
   }
-
-  // Filtre statut publication
-  if (filterPublicationStatus.value !== 'all') {
-    result = result.filter(p => p.publication_status === filterPublicationStatus.value)
+  finally {
+    isLoading.value = false
   }
+}
 
-  // Filtre catégorie
-  if (filterCategory.value !== 'all') {
-    result = result.filter(p => p.category_ids.includes(filterCategory.value as string))
+async function loadCategories() {
+  try {
+    categories.value = await getAllCategories()
   }
-
-  // Filtre département
-  if (filterDepartment.value !== 'all') {
-    result = result.filter(p => p.department_id === filterDepartment.value)
+  catch (err: any) {
+    console.error('Erreur chargement catégories:', err)
   }
+}
 
-  // Filtre featured
-  if (filterFeatured.value !== 'all') {
-    result = result.filter(p => filterFeatured.value === 'yes' ? p.featured : !p.featured)
+async function loadStats() {
+  try {
+    stats.value = await getProjectStats()
   }
+  catch (err: any) {
+    console.error('Erreur chargement statistiques:', err)
+  }
+}
 
-  return result
+// Chargement initial
+onMounted(async () => {
+  await Promise.all([
+    loadProjects(),
+    loadCategories(),
+    loadStats(),
+  ])
 })
 
-// === TRI ===
-const sortedProjects = computed(() => {
-  const result = [...filteredProjects.value]
-
-  result.sort((a, b) => {
-    let comparison = 0
-
-    switch (sortBy.value) {
-      case 'title':
-        comparison = a.title_fr.localeCompare(b.title_fr)
-        break
-      case 'start_date':
-        comparison = new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
-        break
-      case 'budget':
-        comparison = (a.budget || 0) - (b.budget || 0)
-        break
-      case 'updated_at':
-        comparison = new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime()
-        break
-    }
-
-    return sortOrder.value === 'asc' ? comparison : -comparison
-  })
-
-  return result
-})
-
-// === PAGINATION ===
-const totalPages = computed(() => Math.ceil(sortedProjects.value.length / itemsPerPage.value))
-
-const paginatedProjects = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  return sortedProjects.value.slice(start, start + itemsPerPage.value)
-})
-
-// Reset page quand les filtres changent
-watch([searchQuery, filterStatus, filterPublicationStatus, filterCategory, filterDepartment, filterFeatured], () => {
+// Recharger quand les filtres changent
+watch([searchQuery, filterStatus, filterPublicationStatus, filterCategory, filterDepartment], () => {
   currentPage.value = 1
   selectedIds.value = []
   selectAll.value = false
+  loadProjects()
+})
+
+// Recharger quand la page change
+watch(currentPage, () => {
+  selectedIds.value = []
+  selectAll.value = false
+  loadProjects()
 })
 
 // === SÉLECTION ===
 const toggleSelectAll = () => {
   if (selectAll.value) {
-    selectedIds.value = paginatedProjects.value.map(p => p.id)
-  } else {
+    selectedIds.value = projects.value.map(p => p.id)
+  }
+  else {
     selectedIds.value = []
   }
 }
@@ -144,20 +136,11 @@ const toggleSelect = (id: string) => {
   const index = selectedIds.value.indexOf(id)
   if (index === -1) {
     selectedIds.value.push(id)
-  } else {
+  }
+  else {
     selectedIds.value.splice(index, 1)
   }
-  selectAll.value = selectedIds.value.length === paginatedProjects.value.length
-}
-
-// === TRI ===
-const toggleSort = (column: typeof sortBy.value) => {
-  if (sortBy.value === column) {
-    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    sortBy.value = column
-    sortOrder.value = 'desc'
-  }
+  selectAll.value = selectedIds.value.length === projects.value.length
 }
 
 // === ACTIONS ===
@@ -167,63 +150,85 @@ const resetFilters = () => {
   filterPublicationStatus.value = 'all'
   filterCategory.value = 'all'
   filterDepartment.value = 'all'
-  filterFeatured.value = 'all'
 }
 
-const deleteProject = (project: Project) => {
-  if (confirm(`Êtes-vous sûr de vouloir supprimer "${project.title_fr}" ?`)) {
-    console.log('Deleting project:', project.id)
-    // En production: DELETE /api/admin/projects/{id}
+const handleDelete = async (project: ProjectDisplay) => {
+  if (!confirm(`Êtes-vous sûr de vouloir supprimer "${project.title}" ?`)) {
+    return
+  }
+
+  try {
+    await deleteProjectApi(project.id)
+    await loadProjects()
+    await loadStats()
+  }
+  catch (err: any) {
+    console.error('Erreur suppression:', err)
+    alert('Erreur lors de la suppression')
   }
 }
 
-const bulkPublish = () => {
-  console.log('Publishing projects:', selectedIds.value)
-  // En production: POST /api/admin/projects/bulk-publish
-  selectedIds.value = []
-  selectAll.value = false
-}
-
-const bulkUnpublish = () => {
-  console.log('Unpublishing projects:', selectedIds.value)
-  // En production: POST /api/admin/projects/bulk-unpublish
-  selectedIds.value = []
-  selectAll.value = false
-}
-
-const bulkDelete = () => {
-  if (confirm(`Êtes-vous sûr de vouloir supprimer ${selectedIds.value.length} projet(s) ?`)) {
-    console.log('Deleting projects:', selectedIds.value)
-    // En production: DELETE /api/admin/projects/bulk
+const bulkPublish = async () => {
+  try {
+    await Promise.all(selectedIds.value.map(id => publishProject(id)))
     selectedIds.value = []
     selectAll.value = false
+    await loadProjects()
+    await loadStats()
+  }
+  catch (err: any) {
+    console.error('Erreur publication:', err)
+    alert('Erreur lors de la publication')
   }
 }
 
-// === FORMATAGE ===
-const formatDate = (date: string | undefined) => {
-  if (!date) return '-'
-  return new Date(date).toLocaleDateString('fr-FR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric'
-  })
+const bulkUnpublish = async () => {
+  try {
+    await Promise.all(selectedIds.value.map(id => unpublishProject(id)))
+    selectedIds.value = []
+    selectAll.value = false
+    await loadProjects()
+    await loadStats()
+  }
+  catch (err: any) {
+    console.error('Erreur dépublication:', err)
+    alert('Erreur lors de la dépublication')
+  }
 }
 
-const formatBudget = (budget: number | undefined, currency: string = 'EUR') => {
-  if (!budget) return '-'
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0
-  }).format(budget)
+const bulkDelete = async () => {
+  if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedIds.value.length} projet(s) ?`)) {
+    return
+  }
+
+  try {
+    await Promise.all(selectedIds.value.map(id => deleteProjectApi(id)))
+    selectedIds.value = []
+    selectAll.value = false
+    await loadProjects()
+    await loadStats()
+  }
+  catch (err: any) {
+    console.error('Erreur suppression en masse:', err)
+    alert('Erreur lors de la suppression')
+  }
 }
 
-const getCategoryNames = (categoryIds: string[]) => {
-  return categoryIds
-    .map(id => categories.value.find(c => c.id === id)?.name)
-    .filter(Boolean)
-    .slice(0, 2)
+// === HELPERS ===
+const getCategoryNames = (project: ProjectDisplay) => {
+  if (!project.categories || project.categories.length === 0) return []
+  return project.categories.slice(0, 2).map(c => c.name)
+}
+
+const getExtraCategoriesCount = (project: ProjectDisplay) => {
+  if (!project.categories || project.categories.length <= 2) return 0
+  return project.categories.length - 2
+}
+
+const getDepartmentName = (deptId: string | null) => {
+  if (!deptId) return '-'
+  const dept = departments.value?.find((d: any) => d.id === deptId)
+  return dept?.name || '-'
 }
 </script>
 
@@ -249,7 +254,7 @@ const getCategoryNames = (categoryIds: string[]) => {
     </div>
 
     <!-- Statistiques -->
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
       <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
         <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</div>
         <div class="text-sm text-gray-500 dark:text-gray-400">Total projets</div>
@@ -265,10 +270,6 @@ const getCategoryNames = (categoryIds: string[]) => {
       <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
         <div class="text-2xl font-bold text-blue-600">{{ stats.byStatus.completed }}</div>
         <div class="text-sm text-gray-500 dark:text-gray-400">Terminés</div>
-      </div>
-      <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
-        <div class="text-2xl font-bold text-purple-600">{{ stats.featured }}</div>
-        <div class="text-sm text-gray-500 dark:text-gray-400">À la une</div>
       </div>
       <div class="rounded-lg bg-white p-4 shadow dark:bg-gray-800">
         <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatBudget(stats.totalBudget) }}</div>
@@ -312,7 +313,7 @@ const getCategoryNames = (categoryIds: string[]) => {
           class="rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
         >
           <option value="all">Toutes publications</option>
-          <option v-for="(label, key) in projectPublicationStatusLabels" :key="key" :value="key">
+          <option v-for="(label, key) in publicationStatusLabels" :key="key" :value="key">
             {{ label }}
           </option>
         </select>
@@ -337,16 +338,6 @@ const getCategoryNames = (categoryIds: string[]) => {
           <option v-for="dept in departments" :key="dept.id" :value="dept.id">
             {{ dept.name }}
           </option>
-        </select>
-
-        <!-- Featured -->
-        <select
-          v-model="filterFeatured"
-          class="rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-        >
-          <option value="all">Tous</option>
-          <option value="yes">À la une</option>
-          <option value="no">Standard</option>
         </select>
 
         <!-- Reset -->
@@ -389,8 +380,25 @@ const getCategoryNames = (categoryIds: string[]) => {
       </div>
     </div>
 
+    <!-- État de chargement -->
+    <div v-if="isLoading" class="flex items-center justify-center py-12">
+      <font-awesome-icon :icon="['fas', 'spinner']" class="animate-spin text-4xl text-blue-600" />
+    </div>
+
+    <!-- Erreur -->
+    <div v-else-if="error" class="rounded-lg bg-red-50 p-6 text-center dark:bg-red-900/20">
+      <font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="mb-2 text-4xl text-red-500" />
+      <p class="text-red-600 dark:text-red-400">{{ error }}</p>
+      <button
+        class="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+        @click="loadProjects"
+      >
+        Réessayer
+      </button>
+    </div>
+
     <!-- Tableau -->
-    <div class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
+    <div v-else class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-900">
@@ -404,18 +412,8 @@ const getCategoryNames = (categoryIds: string[]) => {
                 />
               </th>
               <th class="w-16 px-4 py-3" />
-              <th
-                class="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                @click="toggleSort('title')"
-              >
-                <div class="flex items-center gap-1">
-                  Titre
-                  <font-awesome-icon
-                    v-if="sortBy === 'title'"
-                    :icon="['fas', sortOrder === 'asc' ? 'sort-up' : 'sort-down']"
-                    class="text-blue-500"
-                  />
-                </div>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Titre
               </th>
               <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Catégories
@@ -426,31 +424,11 @@ const getCategoryNames = (categoryIds: string[]) => {
               <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Statut
               </th>
-              <th
-                class="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                @click="toggleSort('start_date')"
-              >
-                <div class="flex items-center gap-1">
-                  Dates
-                  <font-awesome-icon
-                    v-if="sortBy === 'start_date'"
-                    :icon="['fas', sortOrder === 'asc' ? 'sort-up' : 'sort-down']"
-                    class="text-blue-500"
-                  />
-                </div>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Dates
               </th>
-              <th
-                class="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                @click="toggleSort('budget')"
-              >
-                <div class="flex items-center gap-1">
-                  Budget
-                  <font-awesome-icon
-                    v-if="sortBy === 'budget'"
-                    :icon="['fas', sortOrder === 'asc' ? 'sort-up' : 'sort-down']"
-                    class="text-blue-500"
-                  />
-                </div>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Budget
               </th>
               <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Actions
@@ -459,7 +437,7 @@ const getCategoryNames = (categoryIds: string[]) => {
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
             <tr
-              v-for="project in paginatedProjects"
+              v-for="project in projects"
               :key="project.id"
               class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
@@ -475,7 +453,7 @@ const getCategoryNames = (categoryIds: string[]) => {
                 <img
                   v-if="project.cover_image"
                   :src="project.cover_image"
-                  :alt="project.title_fr"
+                  :alt="project.title"
                   class="h-10 w-16 rounded object-cover"
                 />
                 <div
@@ -491,39 +469,33 @@ const getCategoryNames = (categoryIds: string[]) => {
                     :to="`/admin/projets/liste/${project.id}`"
                     class="font-medium text-gray-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
                   >
-                    {{ project.title_fr }}
-                    <font-awesome-icon
-                      v-if="project.featured"
-                      :icon="['fas', 'star']"
-                      class="ml-1 text-yellow-500"
-                      title="À la une"
-                    />
+                    {{ project.title }}
                   </NuxtLink>
-                  <div v-if="project.summary_fr" class="mt-1 max-w-xs truncate text-sm text-gray-500 dark:text-gray-400">
-                    {{ project.summary_fr }}
+                  <div v-if="project.summary" class="mt-1 max-w-xs truncate text-sm text-gray-500 dark:text-gray-400">
+                    {{ project.summary }}
                   </div>
                 </div>
               </td>
               <td class="px-4 py-3">
                 <div class="flex flex-wrap gap-1">
                   <span
-                    v-for="catName in getCategoryNames(project.category_ids)"
+                    v-for="catName in getCategoryNames(project)"
                     :key="catName"
                     class="inline-flex rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-300"
                   >
                     {{ catName }}
                   </span>
                   <span
-                    v-if="project.category_ids.length > 2"
+                    v-if="getExtraCategoriesCount(project) > 0"
                     class="text-xs text-gray-500"
                   >
-                    +{{ project.category_ids.length - 2 }}
+                    +{{ getExtraCategoriesCount(project) }}
                   </span>
                 </div>
               </td>
               <td class="px-4 py-3">
                 <span class="text-sm text-gray-600 dark:text-gray-300">
-                  {{ project.department_name || '-' }}
+                  {{ getDepartmentName(project.department_external_id) }}
                 </span>
               </td>
               <td class="px-4 py-3">
@@ -531,16 +503,16 @@ const getCategoryNames = (categoryIds: string[]) => {
                   <span :class="['inline-flex w-fit rounded-full px-2 py-0.5 text-xs font-medium', projectStatusColors[project.status]]">
                     {{ projectStatusLabels[project.status] }}
                   </span>
-                  <span :class="['inline-flex w-fit rounded-full px-2 py-0.5 text-xs font-medium', projectPublicationStatusColors[project.publication_status]]">
-                    {{ projectPublicationStatusLabels[project.publication_status] }}
+                  <span :class="['inline-flex w-fit rounded-full px-2 py-0.5 text-xs font-medium', publicationStatusColors[project.publication_status]]">
+                    {{ publicationStatusLabels[project.publication_status] }}
                   </span>
                 </div>
               </td>
               <td class="px-4 py-3">
                 <div class="text-sm text-gray-600 dark:text-gray-300">
-                  {{ formatDate(project.start_date) }}
+                  {{ formatDateShort(project.start_date) }}
                   <span v-if="project.end_date" class="text-gray-400">
-                    → {{ formatDate(project.end_date) }}
+                    → {{ formatDateShort(project.end_date) }}
                   </span>
                 </div>
               </td>
@@ -568,7 +540,7 @@ const getCategoryNames = (categoryIds: string[]) => {
                   <button
                     class="rounded p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-700"
                     title="Supprimer"
-                    @click="deleteProject(project)"
+                    @click="handleDelete(project)"
                   >
                     <font-awesome-icon :icon="['fas', 'trash']" />
                   </button>
@@ -581,7 +553,7 @@ const getCategoryNames = (categoryIds: string[]) => {
 
       <!-- État vide -->
       <div
-        v-if="paginatedProjects.length === 0"
+        v-if="projects.length === 0 && !isLoading"
         class="py-12 text-center"
       >
         <font-awesome-icon :icon="['fas', 'folder-open']" class="mb-4 text-5xl text-gray-300" />
@@ -601,7 +573,7 @@ const getCategoryNames = (categoryIds: string[]) => {
         class="flex items-center justify-between border-t border-gray-200 px-4 py-3 dark:border-gray-700"
       >
         <div class="text-sm text-gray-500 dark:text-gray-400">
-          {{ sortedProjects.length }} projet(s) - Page {{ currentPage }} sur {{ totalPages }}
+          {{ totalProjects }} projet(s) - Page {{ currentPage }} sur {{ totalPages }}
         </div>
         <div class="flex gap-2">
           <button

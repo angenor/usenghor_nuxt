@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Project } from '~/composables/useMockData'
+import type { ProjectDisplay } from '~/composables/useProjectsApi'
 
 definePageMeta({
   layout: 'admin'
@@ -9,38 +9,51 @@ const route = useRoute()
 const router = useRouter()
 
 const {
-  getProjectByIdAdmin,
-  getAllProjectCategories,
+  getProjectById,
+  deleteProject: deleteProjectApi,
+  publishProject,
+  unpublishProject,
   projectStatusLabels,
   projectStatusColors,
-  projectPublicationStatusLabels,
-  projectPublicationStatusColors,
-  getFlagEmoji
-} = useMockData()
+  publicationStatusLabels,
+  publicationStatusColors,
+  formatDate,
+  formatBudget,
+} = useProjectsApi()
 
-// Données
+const { departments } = useReferenceData()
+
+// État
+const project = ref<ProjectDisplay | null>(null)
+const isLoading = ref(true)
+const error = ref<string | null>(null)
+const isProcessing = ref(false)
+
+// Chargement
 const projectId = computed(() => route.params.id as string)
-const project = computed(() => getProjectByIdAdmin(projectId.value))
-const categories = computed(() => getAllProjectCategories())
+
+onMounted(async () => {
+  try {
+    project.value = await getProjectById(projectId.value)
+  }
+  catch (err: any) {
+    console.error('Erreur chargement projet:', err)
+    error.value = err.message || 'Projet non trouvé'
+  }
+  finally {
+    isLoading.value = false
+  }
+})
 
 // Navigation
 const goBack = () => router.push('/admin/projets/liste')
 const goToEdit = () => router.push(`/admin/projets/liste/${projectId.value}/edit`)
 
 // Helpers
-const getCategoryNames = (categoryIds: string[]) => {
-  return categoryIds
-    .map(id => categories.value.find(c => c.id === id)?.name)
-    .filter(Boolean)
-}
-
-const formatDate = (date: string | undefined) => {
-  if (!date) return '-'
-  return new Date(date).toLocaleDateString('fr-FR', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric'
-  })
+const getDepartmentName = (deptId: string | null) => {
+  if (!deptId) return null
+  const dept = departments.value?.find((d: any) => d.id === deptId)
+  return dept?.name || null
 }
 
 const formatDateTime = (date: string | undefined) => {
@@ -50,37 +63,59 @@ const formatDateTime = (date: string | undefined) => {
     month: 'long',
     year: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   })
 }
 
-const formatBudget = (budget: number | undefined, currency: string) => {
-  if (!budget) return '-'
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: currency || 'EUR',
-    maximumFractionDigits: 0
-  }).format(budget)
-}
-
 // Actions
-const deleteProject = async () => {
+const handleDelete = async () => {
   if (!project.value) return
-  if (confirm(`Êtes-vous sûr de vouloir supprimer le projet "${project.value.title_fr}" ?`)) {
-    console.log('Deleting project:', project.value.id)
+  if (!confirm(`Êtes-vous sûr de vouloir supprimer le projet "${project.value.title}" ?`)) return
+
+  isProcessing.value = true
+  try {
+    await deleteProjectApi(project.value.id)
     router.push('/admin/projets/liste')
+  }
+  catch (err: any) {
+    console.error('Erreur suppression:', err)
+    alert('Erreur lors de la suppression')
+  }
+  finally {
+    isProcessing.value = false
   }
 }
 
 const togglePublish = async () => {
   if (!project.value) return
-  const newStatus = project.value.publication_status === 'published' ? 'draft' : 'published'
-  console.log('Changing publication status to:', newStatus)
+
+  isProcessing.value = true
+  try {
+    if (project.value.publication_status === 'published') {
+      project.value = await unpublishProject(project.value.id)
+    }
+    else {
+      project.value = await publishProject(project.value.id)
+    }
+  }
+  catch (err: any) {
+    console.error('Erreur publication:', err)
+    alert('Erreur lors du changement de statut')
+  }
+  finally {
+    isProcessing.value = false
+  }
 }
 </script>
 
 <template>
-  <div v-if="project" class="space-y-6">
+  <!-- Chargement -->
+  <div v-if="isLoading" class="flex items-center justify-center py-16">
+    <font-awesome-icon :icon="['fas', 'spinner']" class="animate-spin text-4xl text-blue-600" />
+  </div>
+
+  <!-- Contenu -->
+  <div v-else-if="project" class="space-y-6">
     <!-- En-tête -->
     <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div class="flex items-start gap-4">
@@ -91,27 +126,23 @@ const togglePublish = async () => {
           <font-awesome-icon :icon="['fas', 'arrow-left']" class="h-5 w-5" />
         </button>
         <div>
-          <div class="flex items-center gap-3">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-              {{ project.title_fr }}
-            </h1>
-            <span v-if="project.featured" class="text-yellow-500" title="Mis en avant">
-              <font-awesome-icon :icon="['fas', 'star']" class="h-5 w-5" />
-            </span>
-          </div>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+            {{ project.title }}
+          </h1>
           <div class="mt-2 flex flex-wrap items-center gap-2">
             <span :class="['inline-flex rounded-full px-3 py-1 text-sm font-medium', projectStatusColors[project.status]]">
               {{ projectStatusLabels[project.status] }}
             </span>
-            <span :class="['inline-flex rounded-full px-3 py-1 text-sm font-medium', projectPublicationStatusColors[project.publication_status]]">
-              {{ projectPublicationStatusLabels[project.publication_status] }}
+            <span :class="['inline-flex rounded-full px-3 py-1 text-sm font-medium', publicationStatusColors[project.publication_status]]">
+              {{ publicationStatusLabels[project.publication_status] }}
             </span>
           </div>
         </div>
       </div>
       <div class="flex gap-2">
         <button
-          class="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+          :disabled="isProcessing"
+          class="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:opacity-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
           @click="togglePublish"
         >
           <font-awesome-icon :icon="['fas', project.publication_status === 'published' ? 'eye-slash' : 'eye']" />
@@ -125,8 +156,9 @@ const togglePublish = async () => {
           Modifier
         </button>
         <button
-          class="inline-flex items-center gap-2 rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
-          @click="deleteProject"
+          :disabled="isProcessing"
+          class="inline-flex items-center gap-2 rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
+          @click="handleDelete"
         >
           <font-awesome-icon :icon="['fas', 'trash']" />
           Supprimer
@@ -141,106 +173,36 @@ const togglePublish = async () => {
         <div v-if="project.cover_image" class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
           <img
             :src="project.cover_image"
-            :alt="project.cover_image_alt || project.title_fr"
+            :alt="project.title"
             class="h-64 w-full object-cover"
           />
         </div>
 
         <!-- Résumé -->
-        <div v-if="project.summary_fr" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+        <div v-if="project.summary" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
           <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
             <font-awesome-icon :icon="['fas', 'align-left']" class="h-5 w-5 text-gray-400" />
             Résumé
           </h2>
-          <p class="text-gray-600 dark:text-gray-300">{{ project.summary_fr }}</p>
-          <div v-if="project.summary_en" class="mt-4 border-t border-gray-200 pt-4 dark:border-gray-700">
-            <p class="text-sm text-gray-500">
-              <span class="font-medium">EN:</span> {{ project.summary_en }}
-            </p>
-          </div>
+          <p class="text-gray-600 dark:text-gray-300">{{ project.summary }}</p>
         </div>
 
         <!-- Description détaillée -->
-        <div v-if="project.description_fr" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+        <div v-if="project.description" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
           <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
             <font-awesome-icon :icon="['fas', 'file-lines']" class="h-5 w-5 text-indigo-500" />
             Description détaillée
           </h2>
-          <EditorJSRenderer :data="project.description_fr" />
+          <div class="prose prose-sm max-w-none text-gray-600 dark:prose-invert dark:text-gray-300" v-html="project.description" />
         </div>
 
-        <!-- Partenaires -->
-        <div v-if="project.partners.length > 0" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+        <!-- Bénéficiaires -->
+        <div v-if="project.beneficiaries" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
           <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
-            <font-awesome-icon :icon="['fas', 'handshake']" class="h-5 w-5 text-purple-500" />
-            Partenaires ({{ project.partners.length }})
+            <font-awesome-icon :icon="['fas', 'users']" class="h-5 w-5 text-teal-500" />
+            Bénéficiaires
           </h2>
-          <div class="space-y-4">
-            <div
-              v-for="partner in project.partners"
-              :key="partner.id"
-              class="flex items-center gap-4 rounded-lg border border-gray-200 p-4 dark:border-gray-700"
-            >
-              <img
-                v-if="partner.logo"
-                :src="partner.logo"
-                :alt="partner.name"
-                class="h-12 w-12 rounded object-contain"
-              />
-              <div v-else class="flex h-12 w-12 items-center justify-center rounded bg-gray-100 dark:bg-gray-700">
-                <font-awesome-icon :icon="['fas', 'building']" class="text-gray-400" />
-              </div>
-              <div class="flex-1">
-                <div class="font-medium text-gray-900 dark:text-white">{{ partner.name }}</div>
-                <div v-if="partner.role" class="text-sm text-gray-500">{{ partner.role }}</div>
-              </div>
-              <a
-                v-if="partner.website"
-                :href="partner.website"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-blue-600 hover:text-blue-700"
-              >
-                <font-awesome-icon :icon="['fas', 'external-link']" />
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Pays concernés -->
-        <div v-if="project.countries.length > 0" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
-          <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
-            <font-awesome-icon :icon="['fas', 'globe']" class="h-5 w-5 text-teal-500" />
-            Pays concernés ({{ project.countries.length }})
-          </h2>
-          <div class="flex flex-wrap gap-2">
-            <span
-              v-for="country in project.countries"
-              :key="country.id"
-              class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-sm dark:bg-gray-700"
-            >
-              <span v-if="country.code !== 'UN'">{{ getFlagEmoji(country.code) }}</span>
-              <font-awesome-icon v-else :icon="['fas', 'globe']" class="h-3 w-3 text-gray-400" />
-              {{ country.name }}
-            </span>
-          </div>
-        </div>
-
-        <!-- Galerie -->
-        <div v-if="project.gallery && project.gallery.length > 0" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
-          <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
-            <font-awesome-icon :icon="['fas', 'images']" class="h-5 w-5 text-pink-500" />
-            Galerie ({{ project.gallery.length }})
-          </h2>
-          <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
-            <img
-              v-for="(image, index) in project.gallery"
-              :key="index"
-              :src="image"
-              :alt="`Image ${index + 1}`"
-              class="h-32 w-full rounded-lg object-cover"
-            />
-          </div>
+          <p class="text-gray-600 dark:text-gray-300">{{ project.beneficiaries }}</p>
         </div>
       </div>
 
@@ -259,19 +221,6 @@ const togglePublish = async () => {
                 <code class="rounded bg-gray-100 px-2 py-1 dark:bg-gray-700">{{ project.slug }}</code>
               </dd>
             </div>
-            <div v-if="project.website">
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Site web</dt>
-              <dd class="mt-1">
-                <a
-                  :href="project.website"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-sm text-blue-600 hover:underline"
-                >
-                  {{ project.website }}
-                </a>
-              </dd>
-            </div>
           </dl>
         </div>
 
@@ -282,25 +231,23 @@ const togglePublish = async () => {
             Classification
           </h2>
           <dl class="space-y-4">
-            <div>
+            <div v-if="project.categories && project.categories.length > 0">
               <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Catégories</dt>
               <dd class="mt-2 flex flex-wrap gap-1">
                 <span
-                  v-for="catName in getCategoryNames(project.category_ids)"
-                  :key="catName"
+                  v-for="cat in project.categories"
+                  :key="cat.id"
                   class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
                 >
-                  {{ catName }}
+                  {{ cat.name }}
                 </span>
               </dd>
             </div>
-            <div v-if="project.department_name">
+            <div v-if="getDepartmentName(project.department_external_id)">
               <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Département</dt>
-              <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ project.department_name }}</dd>
-            </div>
-            <div v-if="project.manager_name">
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Chef de projet</dt>
-              <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ project.manager_name }}</dd>
+              <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+                {{ getDepartmentName(project.department_external_id) }}
+              </dd>
             </div>
           </dl>
         </div>
@@ -326,10 +273,6 @@ const togglePublish = async () => {
                 {{ formatBudget(project.budget, project.currency) }}
               </dd>
             </div>
-            <div v-if="project.beneficiaries">
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Bénéficiaires</dt>
-              <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ project.beneficiaries }}</dd>
-            </div>
           </dl>
         </div>
 
@@ -348,10 +291,6 @@ const togglePublish = async () => {
               <dt class="font-medium text-gray-500 dark:text-gray-400">Modifié le</dt>
               <dd class="mt-1 text-gray-900 dark:text-white">{{ formatDateTime(project.updated_at) }}</dd>
             </div>
-            <div v-if="project.published_at">
-              <dt class="font-medium text-gray-500 dark:text-gray-400">Publié le</dt>
-              <dd class="mt-1 text-gray-900 dark:text-white">{{ formatDateTime(project.published_at) }}</dd>
-            </div>
           </dl>
         </div>
       </div>
@@ -363,7 +302,7 @@ const togglePublish = async () => {
     <font-awesome-icon :icon="['fas', 'folder-open']" class="h-16 w-16 text-gray-300 dark:text-gray-600" />
     <h1 class="mt-6 text-2xl font-bold text-gray-900 dark:text-white">Projet non trouvé</h1>
     <p class="mt-2 text-gray-500 dark:text-gray-400">
-      Le projet demandé n'existe pas ou a été supprimé.
+      {{ error || "Le projet demandé n'existe pas ou a été supprimé." }}
     </p>
     <NuxtLink
       to="/admin/projets/liste"
