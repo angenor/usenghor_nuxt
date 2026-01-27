@@ -28,6 +28,16 @@ const {
   projectStatusColors,
 } = useServicesApi()
 
+const { getMediaUrl } = useMediaApi()
+
+// Helper pour construire l'URL de téléchargement d'un média
+const config = useRuntimeConfig()
+const getMediaDownloadUrl = (mediaId: string | null): string | null => {
+  if (!mediaId) return null
+  const baseUrl = config.public.apiBase || 'http://localhost:8000'
+  return `${baseUrl}/api/admin/media/${mediaId}/download`
+}
+
 // Types de réalisations (libre-texte côté backend, mais liste prédéfinie côté UI)
 const achievementTypes = [
   'Innovation', 'Digital', 'Événement', 'Digitalisation',
@@ -68,7 +78,7 @@ const achievementForm = ref({
   title: '',
   description: '',
   type: '',
-  cover_image_url: '',
+  cover_image_external_id: null as string | null,
   achievement_date: ''
 })
 
@@ -268,7 +278,7 @@ const openAchievementModal = (achievement?: ServiceAchievementRead) => {
       title: achievement.title,
       description: achievement.description || '',
       type: achievement.type || '',
-      cover_image_url: achievement.cover_image_external_id || '',
+      cover_image_external_id: achievement.cover_image_external_id || null,
       achievement_date: achievement.achievement_date || ''
     }
   } else {
@@ -277,7 +287,7 @@ const openAchievementModal = (achievement?: ServiceAchievementRead) => {
       title: '',
       description: '',
       type: '',
-      cover_image_url: '',
+      cover_image_external_id: null,
       achievement_date: new Date().toISOString().split('T')[0]
     }
   }
@@ -296,7 +306,7 @@ const saveAchievement = async () => {
           title: achievementForm.value.title,
           description: achievementForm.value.description || null,
           type: achievementForm.value.type || null,
-          cover_image_external_id: achievementForm.value.cover_image_url || null,
+          cover_image_external_id: achievementForm.value.cover_image_external_id || null,
           achievement_date: achievementForm.value.achievement_date || null,
         }
       )
@@ -305,7 +315,7 @@ const saveAchievement = async () => {
         title: achievementForm.value.title,
         description: achievementForm.value.description || null,
         type: achievementForm.value.type || null,
-        cover_image_external_id: achievementForm.value.cover_image_url || null,
+        cover_image_external_id: achievementForm.value.cover_image_external_id || null,
         achievement_date: achievementForm.value.achievement_date || null,
       })
     }
@@ -826,7 +836,7 @@ const handleDrop = (event: DragEvent, targetIndex: number) => {
             <!-- Image de couverture -->
             <div v-if="achievement.cover_image_external_id" class="aspect-video w-full overflow-hidden bg-gray-100 dark:bg-gray-700">
               <img
-                :src="achievement.cover_image_external_id"
+                :src="getMediaDownloadUrl(achievement.cover_image_external_id) ?? undefined"
                 :alt="achievement.title"
                 class="h-full w-full object-cover"
                 @error="($event.target as HTMLImageElement).parentElement!.style.display = 'none'"
@@ -1078,25 +1088,14 @@ const handleDrop = (event: DragEvent, targetIndex: number) => {
                 />
               </div>
             </div>
-            <div>
-              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Image de couverture (URL)</label>
-              <input
-                v-model="achievementForm.cover_image_url"
-                type="url"
-                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                placeholder="https://exemple.com/image.jpg"
-              />
-              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">URL de l'image à afficher comme couverture</p>
-              <!-- Aperçu de l'image -->
-              <div v-if="achievementForm.cover_image_url" class="mt-2">
-                <img
-                  :src="achievementForm.cover_image_url"
-                  alt="Aperçu"
-                  class="h-32 w-full rounded-lg object-cover"
-                  @error="($event.target as HTMLImageElement).style.display = 'none'"
-                />
-              </div>
-            </div>
+            <FormsImageUpload
+              v-model="achievementForm.cover_image_external_id"
+              label="Image de couverture"
+              hint="Cette image sera affichée sur la carte de la réalisation"
+              folder="achievements"
+              :max-size-mb="5"
+              aspect-ratio="16/9"
+            />
           </div>
           <div class="flex items-center justify-end gap-3 border-t border-gray-200 p-4 dark:border-gray-700">
             <button
