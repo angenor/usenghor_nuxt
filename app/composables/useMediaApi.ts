@@ -109,19 +109,45 @@ export function useMediaApi() {
 
   /**
    * Construit l'URL complète d'un média
+   * Accepte soit un objet MediaRead/MediaUploadResponse, soit un ID string
    */
-  function getMediaUrl(media: MediaRead | MediaUploadResponse | null): string | null {
-    if (!media) return null
+  function getMediaUrl(mediaOrId: MediaRead | MediaUploadResponse | string | null): string | null {
+    if (!mediaOrId) return null
+
+    const config = useRuntimeConfig()
+    const baseUrl = config.public.apiBase || 'http://localhost:8000'
+
+    // Si c'est un ID (string), on ne peut pas construire l'URL directement
+    // car on ne connaît pas le chemin du fichier
+    // Dans ce cas, on utilise l'endpoint API pour récupérer le média
+    if (typeof mediaOrId === 'string') {
+      // C'est un ID - retourner l'URL de l'endpoint qui redirige vers le fichier
+      // Note: Le backend devrait avoir un endpoint GET /api/admin/media/{id}/file
+      // Pour l'instant, on retourne null et on chargera le média async si besoin
+      return null
+    }
 
     // Si c'est déjà une URL complète
-    if (media.url.startsWith('http://') || media.url.startsWith('https://')) {
-      return media.url
+    if (mediaOrId.url.startsWith('http://') || mediaOrId.url.startsWith('https://')) {
+      return mediaOrId.url
     }
 
     // Sinon, construire l'URL avec le backend
-    const config = useRuntimeConfig()
-    const baseUrl = config.public.apiBase || 'http://localhost:8000'
-    return `${baseUrl}${media.url}`
+    return `${baseUrl}${mediaOrId.url}`
+  }
+
+  /**
+   * Récupère l'URL d'un média depuis son ID (async)
+   */
+  async function getMediaUrlById(id: string | null): Promise<string | null> {
+    if (!id) return null
+
+    try {
+      const media = await getMediaById(id)
+      return getMediaUrl(media)
+    } catch {
+      return null
+    }
   }
 
   /**
@@ -193,6 +219,7 @@ export function useMediaApi() {
     updateMedia,
     deleteMedia,
     getMediaUrl,
+    getMediaUrlById,
     validateFile,
     getMediaTypeFromMime,
     formatFileSize,
