@@ -29,6 +29,7 @@ const conditions = ref<OutputData | undefined>(undefined)
 const form = reactive({
   project_id: '',
   title: '',
+  cover_image_external_id: null as string | null,
   type: 'project' as ProjectCallType,
   status: 'upcoming' as ProjectCallStatus,
   deadline: '',
@@ -55,6 +56,7 @@ onMounted(async () => {
     // Remplir le formulaire
     form.project_id = call.project_id
     form.title = call.title
+    form.cover_image_external_id = call.cover_image_external_id
     form.type = call.type || 'project'
     form.status = call.status
 
@@ -125,6 +127,7 @@ const saveForm = async () => {
     await updateCall(callId.value, {
       title: form.title,
       description: descriptionJson,
+      cover_image_external_id: form.cover_image_external_id,
       conditions: conditionsJson,
       type: form.type,
       status: form.status,
@@ -342,6 +345,18 @@ const formatDate = (date: string | undefined) => {
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
             <p class="mt-1 text-xs text-gray-500">Laissez vide si pas de date limite</p>
+          </div>
+
+          <!-- Image de couverture -->
+          <div class="sm:col-span-2">
+            <FormsImageUpload
+              v-model="form.cover_image_external_id"
+              label="Image de couverture"
+              hint="Cette image sera affichée sur la page de l'appel"
+              folder="project-calls"
+              :max-size-mb="5"
+              aspect-ratio="16/9"
+            />
           </div>
         </div>
       </div>

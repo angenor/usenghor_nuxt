@@ -28,6 +28,7 @@ const form = reactive({
   project_id: '',
   title: '',
   short_description: '',
+  cover_image_external_id: null as string | null,
   type: 'project' as ProjectCallType,
   status: 'upcoming' as ProjectCallStatus,
   deadline: '',
@@ -73,6 +74,7 @@ const saveForm = async () => {
     await createProjectCall(form.project_id, {
       title: form.title,
       description: descriptionJson,
+      cover_image_external_id: form.cover_image_external_id,
       conditions: conditionsJson,
       type: form.type,
       status: form.status,
@@ -232,6 +234,18 @@ const goBack = () => {
             class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           />
           <p class="mt-1 text-xs text-gray-500">Laissez vide si pas de date limite</p>
+        </div>
+
+        <!-- Image de couverture -->
+        <div class="sm:col-span-2">
+          <FormsImageUpload
+            v-model="form.cover_image_external_id"
+            label="Image de couverture"
+            hint="Cette image sera affichée sur la page de l'appel"
+            folder="project-calls"
+            :max-size-mb="5"
+            aspect-ratio="16/9"
+          />
         </div>
       </div>
     </div>

@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import type { ServiceAdmin, ServiceFilters, ServiceUsage, ServicesByDepartment } from '~/composables/useMockData'
+import type {
+  ServiceDisplay,
+  ServiceUsage,
+  ServiceStats,
+  ServicesByDepartment,
+} from '~/composables/useServicesApi'
 
 definePageMeta({
   layout: 'admin'
@@ -7,17 +12,21 @@ definePageMeta({
 
 const route = useRoute()
 const {
-  getAllServicesAdmin,
-  getServicesGroupedByDepartmentAdmin,
+  getAllServices,
+  getServicesGroupedByDepartment,
   getServicesStats,
-  getServiceUsage,
-  getServiceHeadCandidates,
-  getDepartmentsForServiceSelect,
-  serviceCategoryLabels,
+  getServiceUsage: fetchServiceUsage,
+  getDepartmentsForSelect,
+  createService: apiCreateService,
+  updateService: apiUpdateService,
+  deleteService: apiDeleteService,
+  toggleServiceActive: apiToggleServiceActive,
   generateServiceId
-} = useMockData()
+} = useServicesApi()
 
 // === STATE ===
+const isLoading = ref(true)
+const isSaving = ref(false)
 const searchQuery = ref('')
 const filterDepartment = ref<string | undefined>(route.query.department as string || undefined)
 const filterActive = ref<boolean | undefined>(undefined)
@@ -27,10 +36,26 @@ const viewMode = ref<'table' | 'grouped'>('table')
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const showDeleteModal = ref(false)
-const editingService = ref<ServiceAdmin | null>(null)
-const deletingService = ref<ServiceAdmin | null>(null)
+const editingService = ref<ServiceDisplay | null>(null)
+const deletingService = ref<ServiceDisplay | null>(null)
 const serviceUsage = ref<ServiceUsage | null>(null)
 const expandedDepartments = ref<Set<string>>(new Set())
+
+// Données chargées depuis l'API
+const allServices = ref<ServiceDisplay[]>([])
+const servicesGrouped = ref<ServicesByDepartment[]>([])
+const stats = ref<ServiceStats>({
+  total: 0,
+  active: 0,
+  inactive: 0,
+  withHead: 0,
+  withoutHead: 0,
+  byDepartment: [],
+  totalObjectives: 0,
+  totalAchievements: 0,
+  totalProjects: 0
+})
+const departments = ref<Array<{ id: string; name: string; code: string }>>([])
 
 // Form state
 const newService = ref({
@@ -38,22 +63,42 @@ const newService = ref({
   department_id: '',
   description: '',
   mission: '',
-  head_id: '',
+  head_external_id: '',
   email: '',
   phone: '',
   active: true
 })
 
-// === COMPUTED ===
-const allServices = computed(() => getAllServicesAdmin())
+// === CHARGEMENT DES DONNÉES ===
+async function loadData() {
+  isLoading.value = true
+  try {
+    const [servicesData, groupedData, statsData, deptsData] = await Promise.all([
+      getAllServices(),
+      getServicesGroupedByDepartment(),
+      getServicesStats(),
+      getDepartmentsForSelect()
+    ])
+    allServices.value = servicesData
+    servicesGrouped.value = groupedData
+    stats.value = statsData
+    departments.value = deptsData
+  }
+  catch (error) {
+    console.error('Erreur lors du chargement des services:', error)
+  }
+  finally {
+    isLoading.value = false
+  }
+}
 
-const stats = computed(() => getServicesStats())
-
-const headCandidates = computed(() => getServiceHeadCandidates())
-
-const departments = computed(() => getDepartmentsForServiceSelect())
-
-const servicesGrouped = computed(() => getServicesGroupedByDepartmentAdmin())
+// Charger les données au montage
+onMounted(async () => {
+  await loadData()
+  if (filterDepartment.value) {
+    expandedDepartments.value.add(filterDepartment.value)
+  }
+})
 
 // Services filtrés et triés
 const filteredServices = computed(() => {
@@ -75,8 +120,8 @@ const filteredServices = computed(() => {
     result = result.filter(s =>
       s.name.toLowerCase().includes(query) ||
       s.description?.toLowerCase().includes(query) ||
-      s.department?.name.toLowerCase().includes(query) ||
-      s.head?.name.toLowerCase().includes(query) ||
+      s.department?.name?.toLowerCase().includes(query) ||
+      s.head?.name?.toLowerCase().includes(query) ||
       s.email?.toLowerCase().includes(query)
     )
   }
@@ -165,7 +210,7 @@ const openAddModal = () => {
     department_id: filterDepartment.value || '',
     description: '',
     mission: '',
-    head_id: '',
+    head_external_id: '',
     email: '',
     phone: '',
     active: true
@@ -173,14 +218,14 @@ const openAddModal = () => {
   showAddModal.value = true
 }
 
-const openEditModal = (service: ServiceAdmin) => {
+const openEditModal = (service: ServiceDisplay) => {
   editingService.value = service
   newService.value = {
     name: service.name,
     department_id: service.department_id || '',
     description: service.description || '',
     mission: service.mission || '',
-    head_id: service.head_id || '',
+    head_external_id: service.head_external_id || '',
     email: service.email || '',
     phone: service.phone || '',
     active: service.active
@@ -188,9 +233,9 @@ const openEditModal = (service: ServiceAdmin) => {
   showEditModal.value = true
 }
 
-const openDeleteModal = async (service: ServiceAdmin) => {
+const openDeleteModal = async (service: ServiceDisplay) => {
   deletingService.value = service
-  serviceUsage.value = getServiceUsage(service.id)
+  serviceUsage.value = await fetchServiceUsage(service.id)
   showDeleteModal.value = true
 }
 
@@ -203,26 +248,63 @@ const closeModals = () => {
   serviceUsage.value = null
 }
 
-// CRUD operations (simulation)
-const saveService = () => {
-  if (editingService.value) {
-    console.log('Mise à jour du service:', { id: editingService.value.id, ...newService.value })
-  } else {
-    const id = generateServiceId()
-    console.log('Création du service:', { id, ...newService.value })
+// CRUD operations
+const saveService = async () => {
+  isSaving.value = true
+  try {
+    const serviceData = {
+      name: newService.value.name,
+      department_id: newService.value.department_id || null,
+      description: newService.value.description || null,
+      mission: newService.value.mission || null,
+      head_external_id: newService.value.head_external_id || null,
+      email: newService.value.email || null,
+      phone: newService.value.phone || null,
+      active: newService.value.active
+    }
+
+    if (editingService.value) {
+      await apiUpdateService(editingService.value.id, serviceData)
+    } else {
+      await apiCreateService(serviceData)
+    }
+
+    closeModals()
+    await loadData()
   }
-  closeModals()
+  catch (error) {
+    console.error('Erreur lors de la sauvegarde:', error)
+  }
+  finally {
+    isSaving.value = false
+  }
 }
 
-const deleteService = () => {
-  if (deletingService.value) {
-    console.log('Suppression du service:', deletingService.value.id)
+const deleteServiceAction = async () => {
+  if (!deletingService.value) return
+
+  isSaving.value = true
+  try {
+    await apiDeleteService(deletingService.value.id)
+    closeModals()
+    await loadData()
   }
-  closeModals()
+  catch (error) {
+    console.error('Erreur lors de la suppression:', error)
+  }
+  finally {
+    isSaving.value = false
+  }
 }
 
-const toggleServiceActive = (service: ServiceAdmin) => {
-  console.log('Basculer l\'état actif:', service.id, !service.active)
+const toggleServiceActive = async (service: ServiceDisplay) => {
+  try {
+    await apiToggleServiceActive(service.id)
+    await loadData()
+  }
+  catch (error) {
+    console.error('Erreur lors du basculement:', error)
+  }
 }
 
 // Accès aux détails du service
@@ -244,17 +326,22 @@ const clearDepartmentFilter = () => {
   filterDepartment.value = undefined
   navigateTo('/admin/organisation/services')
 }
-
-// Expand all on mount if coming from department page
-onMounted(() => {
-  if (filterDepartment.value) {
-    expandedDepartments.value.add(filterDepartment.value)
-  }
-})
 </script>
 
 <template>
   <div class="p-6">
+    <!-- Loading Overlay -->
+    <div
+      v-if="isLoading"
+      class="flex items-center justify-center min-h-[400px]"
+    >
+      <div class="text-center">
+        <font-awesome-icon :icon="['fas', 'spinner']" class="w-8 h-8 text-brand-red-600 animate-spin mb-4" />
+        <p class="text-gray-500 dark:text-gray-400">Chargement des services...</p>
+      </div>
+    </div>
+
+    <template v-else>
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
       <div>
@@ -860,20 +947,20 @@ onMounted(() => {
               />
             </div>
 
-            <!-- Responsable -->
+            <!-- Responsable (TODO: connecter à l'API staff) -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Responsable
+                ID du responsable
               </label>
-              <select
-                v-model="newService.head_id"
+              <input
+                v-model="newService.head_external_id"
+                type="text"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent"
-              >
-                <option value="">Aucun responsable</option>
-                <option v-for="candidate in headCandidates" :key="candidate.id" :value="candidate.id">
-                  {{ candidate.name }}{{ candidate.title ? ` - ${candidate.title}` : '' }}
-                </option>
-              </select>
+                placeholder="UUID du responsable (optionnel)"
+              />
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Laissez vide si pas de responsable assigné
+              </p>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
@@ -921,16 +1008,18 @@ onMounted(() => {
           <div class="flex items-center justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700">
             <button
               class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              :disabled="isSaving"
               @click="closeModals"
             >
               Annuler
             </button>
             <button
               class="px-4 py-2 text-sm font-medium text-white bg-brand-red-600 hover:bg-brand-red-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              :disabled="!newService.name || !newService.department_id"
+              :disabled="!newService.name || !newService.department_id || isSaving"
               @click="saveService"
             >
-              {{ editingService ? 'Enregistrer' : 'Créer' }}
+              <span v-if="isSaving">Enregistrement...</span>
+              <span v-else>{{ editingService ? 'Enregistrer' : 'Créer' }}</span>
             </button>
           </div>
         </div>
@@ -985,20 +1074,23 @@ onMounted(() => {
           <div class="flex items-center justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700">
             <button
               class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              :disabled="isSaving"
               @click="closeModals"
             >
               Annuler
             </button>
             <button
               class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              :disabled="serviceUsage && !serviceUsage.can_delete"
-              @click="deleteService"
+              :disabled="(serviceUsage && !serviceUsage.can_delete) || isSaving"
+              @click="deleteServiceAction"
             >
-              Supprimer
+              <span v-if="isSaving">Suppression...</span>
+              <span v-else>Supprimer</span>
             </button>
           </div>
         </div>
       </div>
     </Teleport>
+    </template>
   </div>
 </template>

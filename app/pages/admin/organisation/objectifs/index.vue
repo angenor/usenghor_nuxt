@@ -1,34 +1,48 @@
 <script setup lang="ts">
 import type {
-  ServiceObjective,
-  ServiceAchievement,
-  ServiceProject,
-  ServiceProjectStatus,
-  ServiceWithData
-} from '~/composables/useMockData'
+  ProjectStatus,
+  ServiceDisplay,
+  ServiceWithDetails,
+  ServiceObjectiveRead,
+  ServiceAchievementRead,
+  ServiceProjectRead,
+} from '~/composables/useServicesApi'
 
 definePageMeta({
   layout: 'admin'
 })
 
 const {
-  services,
-  getServicesWithData,
-  getServicesGroupedByCategory,
-  getServiceObjectives,
-  getServiceAchievements,
-  getServiceProjects,
-  getServiceOverview,
-  getServiceObjectivesStats,
-  serviceProjectStatusLabels,
-  serviceProjectStatusColors,
-  achievementTypes,
-  generateServiceObjectiveId,
-  generateServiceAchievementId,
-  generateServiceProjectId
-} = useMockData()
+  getAllServices,
+  getServiceById,
+  createServiceObjective,
+  updateServiceObjective,
+  deleteServiceObjective,
+  createServiceAchievement,
+  updateServiceAchievement,
+  deleteServiceAchievement,
+  createServiceProject,
+  updateServiceProject,
+  deleteServiceProject,
+  projectStatusLabels,
+  projectStatusColors,
+} = useServicesApi()
+
+// Types de réalisations (libre-texte côté backend, mais liste prédéfinie côté UI)
+const achievementTypes = [
+  'Innovation', 'Digital', 'Événement', 'Digitalisation',
+  'Certification', 'Partenariat', 'Infrastructure', 'Formation', 'Stratégie'
+]
 
 // === STATE ===
+const loading = ref(false)
+const loadingDetails = ref(false)
+const saving = ref(false)
+const error = ref<string | null>(null)
+
+const servicesData = ref<ServiceDisplay[]>([])
+const selectedServiceDetails = ref<ServiceWithDetails | null>(null)
+
 const selectedServiceId = ref<string | null>(null)
 const activeTab = ref<'overview' | 'objectives' | 'achievements' | 'projects'>('overview')
 
@@ -38,9 +52,9 @@ const showAchievementModal = ref(false)
 const showProjectModal = ref(false)
 const showDeleteModal = ref(false)
 
-const editingObjective = ref<ServiceObjective | null>(null)
-const editingAchievement = ref<ServiceAchievement | null>(null)
-const editingProject = ref<ServiceProject | null>(null)
+const editingObjective = ref<ServiceObjectiveRead | null>(null)
+const editingAchievement = ref<ServiceAchievementRead | null>(null)
+const editingProject = ref<ServiceProjectRead | null>(null)
 const deletingItem = ref<{ type: 'objective' | 'achievement' | 'project'; item: any } | null>(null)
 
 // Form states
@@ -54,51 +68,113 @@ const achievementForm = ref({
   title: '',
   description: '',
   type: '',
-  cover_image: '',
   achievement_date: ''
 })
 
 const projectForm = ref({
   title: '',
   description: '',
-  cover_image: '',
   progress: 0,
-  status: 'planned' as ServiceProjectStatus,
+  status: 'planned' as ProjectStatus,
   start_date: '',
   expected_end_date: ''
 })
 
+// === DATA LOADING ===
+async function loadServices() {
+  loading.value = true
+  error.value = null
+  try {
+    servicesData.value = await getAllServices()
+  } catch (e) {
+    error.value = 'Erreur lors du chargement des services'
+    console.error(e)
+  } finally {
+    loading.value = false
+  }
+}
+
+async function loadServiceDetails(serviceId: string) {
+  loadingDetails.value = true
+  try {
+    selectedServiceDetails.value = await getServiceById(serviceId)
+  } catch (e) {
+    console.error('Erreur chargement service:', e)
+  } finally {
+    loadingDetails.value = false
+  }
+}
+
+// Charger les données au montage
+onMounted(async () => {
+  await loadServices()
+})
+
+// Charger les détails quand on sélectionne un service
+watch(selectedServiceId, async (id) => {
+  if (id) {
+    await loadServiceDetails(id)
+  } else {
+    selectedServiceDetails.value = null
+  }
+})
+
 // === COMPUTED ===
-const globalStats = computed(() => getServiceObjectivesStats())
+const globalStats = computed(() => {
+  return {
+    totalServices: servicesData.value.length,
+    totalObjectives: servicesData.value.reduce((sum, s) => sum + s.objectives_count, 0),
+    totalAchievements: servicesData.value.reduce((sum, s) => sum + s.achievements_count, 0),
+    totalProjects: servicesData.value.reduce((sum, s) => sum + s.projects_count, 0),
+  }
+})
 
-const servicesGrouped = computed(() => getServicesGroupedByCategory())
-
-const servicesWithData = computed(() => getServicesWithData())
+const servicesGrouped = computed(() => {
+  const grouped: Record<string, ServiceDisplay[]> = {}
+  for (const service of servicesData.value) {
+    const key = service.department?.name || 'Sans département'
+    if (!grouped[key]) grouped[key] = []
+    grouped[key].push(service)
+  }
+  return grouped
+})
 
 const selectedService = computed(() => {
   if (!selectedServiceId.value) return null
-  return servicesWithData.value.find(s => s.id === selectedServiceId.value)
+  return servicesData.value.find(s => s.id === selectedServiceId.value)
 })
 
 const serviceOverview = computed(() => {
-  if (!selectedServiceId.value) return null
-  return getServiceOverview(selectedServiceId.value)
+  if (!selectedServiceDetails.value) return null
+  const details = selectedServiceDetails.value
+  return {
+    objectives_count: details.objectives?.length || 0,
+    achievements_count: details.achievements?.length || 0,
+    projects: {
+      total: details.projects?.length || 0,
+      planned: details.projects?.filter(p => p.status === 'planned').length || 0,
+      ongoing: details.projects?.filter(p => p.status === 'ongoing').length || 0,
+      completed: details.projects?.filter(p => p.status === 'completed').length || 0,
+      suspended: details.projects?.filter(p => p.status === 'suspended').length || 0,
+    }
+  }
 })
 
 const serviceObjectives = computed(() => {
-  if (!selectedServiceId.value) return []
-  return getServiceObjectives(selectedServiceId.value)
+  return selectedServiceDetails.value?.objectives || []
 })
 
 const serviceAchievements = computed(() => {
-  if (!selectedServiceId.value) return []
-  return getServiceAchievements(selectedServiceId.value)
+  return selectedServiceDetails.value?.achievements || []
 })
 
 const serviceProjects = computed(() => {
-  if (!selectedServiceId.value) return []
-  return getServiceProjects(selectedServiceId.value)
+  return selectedServiceDetails.value?.projects || []
 })
+
+// Labels pour les statuts de projet (alias pour compatibilité template)
+const serviceProjectStatusLabels = projectStatusLabels
+const serviceProjectStatusColors = projectStatusColors
 
 // === METHODS ===
 const selectService = (serviceId: string) => {
@@ -112,7 +188,8 @@ const clearSelection = () => {
 }
 
 // Format dates
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: string | null | undefined) => {
+  if (!dateString) return '-'
   return new Date(dateString).toLocaleDateString('fr-FR', {
     day: 'numeric',
     month: 'long',
@@ -120,7 +197,8 @@ const formatDate = (dateString: string) => {
   })
 }
 
-const formatDateTime = (dateString: string) => {
+const formatDateTime = (dateString: string | null | undefined) => {
+  if (!dateString) return '-'
   return new Date(dateString).toLocaleDateString('fr-FR', {
     day: 'numeric',
     month: 'short',
@@ -131,7 +209,7 @@ const formatDateTime = (dateString: string) => {
 }
 
 // === OBJECTIFS ===
-const openObjectiveModal = (objective?: ServiceObjective) => {
+const openObjectiveModal = (objective?: ServiceObjectiveRead) => {
   if (objective) {
     editingObjective.value = objective
     objectiveForm.value = {
@@ -150,26 +228,46 @@ const openObjectiveModal = (objective?: ServiceObjective) => {
   showObjectiveModal.value = true
 }
 
-const saveObjective = () => {
-  if (editingObjective.value) {
-    console.log('Mise à jour objectif:', { id: editingObjective.value.id, ...objectiveForm.value })
-  } else {
-    const id = generateServiceObjectiveId()
-    console.log('Création objectif:', { id, service_id: selectedServiceId.value, ...objectiveForm.value })
+const saveObjective = async () => {
+  if (!selectedServiceId.value) return
+  saving.value = true
+  try {
+    if (editingObjective.value) {
+      await updateServiceObjective(
+        selectedServiceId.value,
+        editingObjective.value.id,
+        {
+          title: objectiveForm.value.title,
+          description: objectiveForm.value.description || null,
+          display_order: objectiveForm.value.display_order,
+        }
+      )
+    } else {
+      await createServiceObjective(selectedServiceId.value, {
+        title: objectiveForm.value.title,
+        description: objectiveForm.value.description || null,
+        display_order: objectiveForm.value.display_order,
+      })
+    }
+    await loadServiceDetails(selectedServiceId.value)
+    await loadServices() // Rafraîchir les compteurs
+    closeModals()
+  } catch (e) {
+    console.error('Erreur sauvegarde objectif:', e)
+  } finally {
+    saving.value = false
   }
-  closeModals()
 }
 
 // === RÉALISATIONS ===
-const openAchievementModal = (achievement?: ServiceAchievement) => {
+const openAchievementModal = (achievement?: ServiceAchievementRead) => {
   if (achievement) {
     editingAchievement.value = achievement
     achievementForm.value = {
       title: achievement.title,
       description: achievement.description || '',
       type: achievement.type || '',
-      cover_image: achievement.cover_image || '',
-      achievement_date: achievement.achievement_date
+      achievement_date: achievement.achievement_date || ''
     }
   } else {
     editingAchievement.value = null
@@ -177,31 +275,52 @@ const openAchievementModal = (achievement?: ServiceAchievement) => {
       title: '',
       description: '',
       type: '',
-      cover_image: '',
       achievement_date: new Date().toISOString().split('T')[0]
     }
   }
   showAchievementModal.value = true
 }
 
-const saveAchievement = () => {
-  if (editingAchievement.value) {
-    console.log('Mise à jour réalisation:', { id: editingAchievement.value.id, ...achievementForm.value })
-  } else {
-    const id = generateServiceAchievementId()
-    console.log('Création réalisation:', { id, service_id: selectedServiceId.value, ...achievementForm.value })
+const saveAchievement = async () => {
+  if (!selectedServiceId.value) return
+  saving.value = true
+  try {
+    if (editingAchievement.value) {
+      await updateServiceAchievement(
+        selectedServiceId.value,
+        editingAchievement.value.id,
+        {
+          title: achievementForm.value.title,
+          description: achievementForm.value.description || null,
+          type: achievementForm.value.type || null,
+          achievement_date: achievementForm.value.achievement_date || null,
+        }
+      )
+    } else {
+      await createServiceAchievement(selectedServiceId.value, {
+        title: achievementForm.value.title,
+        description: achievementForm.value.description || null,
+        type: achievementForm.value.type || null,
+        achievement_date: achievementForm.value.achievement_date || null,
+      })
+    }
+    await loadServiceDetails(selectedServiceId.value)
+    await loadServices() // Rafraîchir les compteurs
+    closeModals()
+  } catch (e) {
+    console.error('Erreur sauvegarde réalisation:', e)
+  } finally {
+    saving.value = false
   }
-  closeModals()
 }
 
 // === PROJETS ===
-const openProjectModal = (project?: ServiceProject) => {
+const openProjectModal = (project?: ServiceProjectRead) => {
   if (project) {
     editingProject.value = project
     projectForm.value = {
       title: project.title,
       description: project.description || '',
-      cover_image: project.cover_image || '',
       progress: project.progress,
       status: project.status,
       start_date: project.start_date || '',
@@ -212,7 +331,6 @@ const openProjectModal = (project?: ServiceProject) => {
     projectForm.value = {
       title: '',
       description: '',
-      cover_image: '',
       progress: 0,
       status: 'planned',
       start_date: '',
@@ -222,14 +340,41 @@ const openProjectModal = (project?: ServiceProject) => {
   showProjectModal.value = true
 }
 
-const saveProject = () => {
-  if (editingProject.value) {
-    console.log('Mise à jour projet:', { id: editingProject.value.id, ...projectForm.value })
-  } else {
-    const id = generateServiceProjectId()
-    console.log('Création projet:', { id, service_id: selectedServiceId.value, ...projectForm.value })
+const saveProject = async () => {
+  if (!selectedServiceId.value) return
+  saving.value = true
+  try {
+    if (editingProject.value) {
+      await updateServiceProject(
+        selectedServiceId.value,
+        editingProject.value.id,
+        {
+          title: projectForm.value.title,
+          description: projectForm.value.description || null,
+          progress: projectForm.value.progress,
+          status: projectForm.value.status,
+          start_date: projectForm.value.start_date || null,
+          expected_end_date: projectForm.value.expected_end_date || null,
+        }
+      )
+    } else {
+      await createServiceProject(selectedServiceId.value, {
+        title: projectForm.value.title,
+        description: projectForm.value.description || null,
+        progress: projectForm.value.progress,
+        status: projectForm.value.status,
+        start_date: projectForm.value.start_date || null,
+        expected_end_date: projectForm.value.expected_end_date || null,
+      })
+    }
+    await loadServiceDetails(selectedServiceId.value)
+    await loadServices() // Rafraîchir les compteurs
+    closeModals()
+  } catch (e) {
+    console.error('Erreur sauvegarde projet:', e)
+  } finally {
+    saving.value = false
   }
-  closeModals()
 }
 
 // === SUPPRESSION ===
@@ -238,11 +383,25 @@ const openDeleteModal = (type: 'objective' | 'achievement' | 'project', item: an
   showDeleteModal.value = true
 }
 
-const confirmDelete = () => {
-  if (deletingItem.value) {
-    console.log('Suppression:', deletingItem.value.type, deletingItem.value.item.id)
+const confirmDelete = async () => {
+  if (!deletingItem.value || !selectedServiceId.value) return
+  saving.value = true
+  try {
+    if (deletingItem.value.type === 'objective') {
+      await deleteServiceObjective(selectedServiceId.value, deletingItem.value.item.id)
+    } else if (deletingItem.value.type === 'achievement') {
+      await deleteServiceAchievement(selectedServiceId.value, deletingItem.value.item.id)
+    } else if (deletingItem.value.type === 'project') {
+      await deleteServiceProject(selectedServiceId.value, deletingItem.value.item.id)
+    }
+    await loadServiceDetails(selectedServiceId.value)
+    await loadServices() // Rafraîchir les compteurs
+    closeModals()
+  } catch (e) {
+    console.error('Erreur suppression:', e)
+  } finally {
+    saving.value = false
   }
-  closeModals()
 }
 
 const closeModals = () => {
@@ -270,6 +429,7 @@ const handleDrop = (event: DragEvent, targetIndex: number) => {
   const sourceIndex = parseInt(event.dataTransfer?.getData('text/plain') || '0')
   if (sourceIndex !== targetIndex) {
     console.log('Réordonnement objectifs:', sourceIndex, '->', targetIndex)
+    // TODO: Implémenter la mise à jour de l'ordre via API
   }
 }
 </script>
@@ -286,8 +446,25 @@ const handleDrop = (event: DragEvent, targetIndex: number) => {
       </p>
     </div>
 
+    <!-- Loading state -->
+    <div v-if="loading" class="flex items-center justify-center py-12">
+      <div class="flex items-center gap-3 text-gray-500 dark:text-gray-400">
+        <font-awesome-icon :icon="['fas', 'spinner']" class="h-5 w-5 animate-spin" />
+        <span>Chargement des services...</span>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div v-else-if="error" class="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-900/20">
+      <div class="flex items-center gap-3 text-red-700 dark:text-red-400">
+        <font-awesome-icon :icon="['fas', 'exclamation-circle']" class="h-5 w-5" />
+        <span>{{ error }}</span>
+        <button class="ml-auto text-sm underline" @click="loadServices">Réessayer</button>
+      </div>
+    </div>
+
     <!-- Stats globales (quand aucun service sélectionné) -->
-    <div v-if="!selectedServiceId" class="space-y-6">
+    <div v-else-if="!selectedServiceId" class="space-y-6">
       <!-- Statistiques -->
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
@@ -336,15 +513,15 @@ const handleDrop = (event: DragEvent, targetIndex: number) => {
         </div>
       </div>
 
-      <!-- Liste des services par catégorie -->
+      <!-- Liste des services par département -->
       <div class="space-y-6">
-        <div v-for="(categoryServices, category) in servicesGrouped" :key="category">
+        <div v-for="(departmentServices, departmentName) in servicesGrouped" :key="departmentName">
           <h2 class="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-            {{ category === 'rectorat' ? 'Rectorat' : category === 'academique' ? 'Services académiques' : 'Services administratifs' }}
+            {{ departmentName }}
           </h2>
           <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <button
-              v-for="service in categoryServices"
+              v-for="service in departmentServices"
               :key="service.id"
               class="rounded-lg border border-gray-200 bg-white p-4 text-left transition-all hover:border-brand-red-300 hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:hover:border-brand-red-600"
               @click="selectService(service.id)"
@@ -352,54 +529,25 @@ const handleDrop = (event: DragEvent, targetIndex: number) => {
               <div class="flex items-start justify-between">
                 <div>
                   <h3 class="font-medium text-gray-900 dark:text-white">{{ service.name }}</h3>
-                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ service.categoryLabel }}</p>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ service.department?.name || 'Sans département' }}</p>
                 </div>
                 <font-awesome-icon :icon="['fas', 'chevron-right']" class="h-4 w-4 text-gray-400" />
               </div>
               <div class="mt-3 flex items-center gap-4 text-sm">
                 <span class="flex items-center gap-1 text-green-600 dark:text-green-400">
                   <font-awesome-icon :icon="['fas', 'bullseye']" class="h-3 w-3" />
-                  {{ service.objectivesCount }}
+                  {{ service.objectives_count }}
                 </span>
                 <span class="flex items-center gap-1 text-purple-600 dark:text-purple-400">
                   <font-awesome-icon :icon="['fas', 'trophy']" class="h-3 w-3" />
-                  {{ service.achievementsCount }}
+                  {{ service.achievements_count }}
                 </span>
                 <span class="flex items-center gap-1 text-orange-600 dark:text-orange-400">
                   <font-awesome-icon :icon="['fas', 'tasks']" class="h-3 w-3" />
-                  {{ service.projectsCount }}
+                  {{ service.projects_count }}
                 </span>
               </div>
             </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Réalisations récentes -->
-      <div v-if="globalStats.recentAchievements.length > 0" class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-        <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
-          <font-awesome-icon :icon="['fas', 'clock']" class="h-5 w-5 text-gray-400" />
-          Réalisations récentes
-        </h2>
-        <div class="space-y-3">
-          <div
-            v-for="achievement in globalStats.recentAchievements"
-            :key="achievement.id"
-            class="flex items-center gap-4 rounded-lg border border-gray-100 p-3 dark:border-gray-700"
-          >
-            <div v-if="achievement.cover_image" class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
-              <img :src="achievement.cover_image" :alt="achievement.title" class="h-full w-full object-cover" />
-            </div>
-            <div v-else class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30">
-              <font-awesome-icon :icon="['fas', 'trophy']" class="h-5 w-5 text-purple-600 dark:text-purple-400" />
-            </div>
-            <div class="min-w-0 flex-1">
-              <p class="truncate font-medium text-gray-900 dark:text-white">{{ achievement.title }}</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(achievement.achievement_date) }}</p>
-            </div>
-            <span v-if="achievement.type" class="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-              {{ achievement.type }}
-            </span>
           </div>
         </div>
       </div>
@@ -421,9 +569,13 @@ const handleDrop = (event: DragEvent, targetIndex: number) => {
               {{ selectedService?.name }}
             </h2>
             <p class="text-sm text-gray-500 dark:text-gray-400">
-              {{ selectedService?.categoryLabel }}
+              {{ selectedService?.department?.name || 'Sans département' }}
             </p>
           </div>
+        </div>
+        <div v-if="loadingDetails" class="flex items-center gap-2 text-sm text-gray-500">
+          <font-awesome-icon :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
+          <span>Chargement...</span>
         </div>
       </div>
 
@@ -666,9 +818,6 @@ const handleDrop = (event: DragEvent, targetIndex: number) => {
             :key="achievement.id"
             class="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
           >
-            <div v-if="achievement.cover_image" class="h-40 overflow-hidden">
-              <img :src="achievement.cover_image" :alt="achievement.title" class="h-full w-full object-cover" />
-            </div>
             <div class="p-4">
               <div class="mb-2 flex items-center justify-between">
                 <span v-if="achievement.type" class="rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
@@ -733,66 +882,59 @@ const handleDrop = (event: DragEvent, targetIndex: number) => {
           <div
             v-for="project in serviceProjects"
             :key="project.id"
-            class="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+            class="overflow-hidden rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
           >
-            <div class="flex">
-              <div v-if="project.cover_image" class="hidden h-32 w-40 flex-shrink-0 sm:block">
-                <img :src="project.cover_image" :alt="project.title" class="h-full w-full object-cover" />
-              </div>
-              <div class="flex-1 p-4">
-                <div class="flex items-start justify-between">
-                  <div>
-                    <div class="flex items-center gap-2">
-                      <h4 class="font-medium text-gray-900 dark:text-white">{{ project.title }}</h4>
-                      <span :class="['rounded-full px-2 py-0.5 text-xs font-medium', serviceProjectStatusColors[project.status]]">
-                        {{ serviceProjectStatusLabels[project.status] }}
-                      </span>
-                    </div>
-                    <p v-if="project.description" class="mt-1 text-sm text-gray-500 line-clamp-2 dark:text-gray-400">
-                      {{ project.description }}
-                    </p>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <button
-                      class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-700 dark:hover:text-blue-400"
-                      title="Modifier"
-                      @click="openProjectModal(project)"
-                    >
-                      <font-awesome-icon :icon="['fas', 'edit']" class="h-4 w-4" />
-                    </button>
-                    <button
-                      class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-700 dark:hover:text-red-400"
-                      title="Supprimer"
-                      @click="openDeleteModal('project', project)"
-                    >
-                      <font-awesome-icon :icon="['fas', 'trash']" class="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-                <div class="mt-3">
-                  <div class="flex items-center justify-between text-sm">
-                    <span class="text-gray-500 dark:text-gray-400">Progression</span>
-                    <span class="font-medium text-gray-900 dark:text-white">{{ project.progress }}%</span>
-                  </div>
-                  <div class="mt-1 h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-                    <div
-                      class="h-full rounded-full transition-all"
-                      :class="project.status === 'completed' ? 'bg-green-500' : project.status === 'suspended' ? 'bg-gray-400' : 'bg-brand-red-500'"
-                      :style="{ width: `${project.progress}%` }"
-                    />
-                  </div>
-                </div>
-                <div class="mt-2 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                  <span v-if="project.start_date">
-                    <font-awesome-icon :icon="['fas', 'calendar-alt']" class="mr-1" />
-                    Début : {{ formatDate(project.start_date) }}
-                  </span>
-                  <span v-if="project.expected_end_date">
-                    <font-awesome-icon :icon="['fas', 'flag-checkered']" class="mr-1" />
-                    Fin prévue : {{ formatDate(project.expected_end_date) }}
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-medium text-gray-900 dark:text-white">{{ project.title }}</h4>
+                  <span :class="['rounded-full px-2 py-0.5 text-xs font-medium', serviceProjectStatusColors[project.status]]">
+                    {{ serviceProjectStatusLabels[project.status] }}
                   </span>
                 </div>
+                <p v-if="project.description" class="mt-1 text-sm text-gray-500 line-clamp-2 dark:text-gray-400">
+                  {{ project.description }}
+                </p>
               </div>
+              <div class="flex items-center gap-2">
+                <button
+                  class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-700 dark:hover:text-blue-400"
+                  title="Modifier"
+                  @click="openProjectModal(project)"
+                >
+                  <font-awesome-icon :icon="['fas', 'edit']" class="h-4 w-4" />
+                </button>
+                <button
+                  class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-700 dark:hover:text-red-400"
+                  title="Supprimer"
+                  @click="openDeleteModal('project', project)"
+                >
+                  <font-awesome-icon :icon="['fas', 'trash']" class="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            <div class="mt-3">
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-500 dark:text-gray-400">Progression</span>
+                <span class="font-medium text-gray-900 dark:text-white">{{ project.progress }}%</span>
+              </div>
+              <div class="mt-1 h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                <div
+                  class="h-full rounded-full transition-all"
+                  :class="project.status === 'completed' ? 'bg-green-500' : project.status === 'suspended' ? 'bg-gray-400' : 'bg-brand-red-500'"
+                  :style="{ width: `${project.progress}%` }"
+                />
+              </div>
+            </div>
+            <div class="mt-2 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+              <span v-if="project.start_date">
+                <font-awesome-icon :icon="['fas', 'calendar-alt']" class="mr-1" />
+                Début : {{ formatDate(project.start_date) }}
+              </span>
+              <span v-if="project.expected_end_date">
+                <font-awesome-icon :icon="['fas', 'flag-checkered']" class="mr-1" />
+                Fin prévue : {{ formatDate(project.expected_end_date) }}
+              </span>
             </div>
           </div>
         </div>
@@ -853,10 +995,14 @@ const handleDrop = (event: DragEvent, targetIndex: number) => {
             </button>
             <button
               class="rounded-lg bg-brand-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-              :disabled="!objectiveForm.title"
+              :disabled="!objectiveForm.title || saving"
               @click="saveObjective"
             >
-              {{ editingObjective ? 'Enregistrer' : 'Créer' }}
+              <span v-if="saving" class="flex items-center gap-2">
+                <font-awesome-icon :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
+                Enregistrement...
+              </span>
+              <span v-else>{{ editingObjective ? 'Enregistrer' : 'Créer' }}</span>
             </button>
           </div>
         </div>
@@ -918,15 +1064,6 @@ const handleDrop = (event: DragEvent, targetIndex: number) => {
                 />
               </div>
             </div>
-            <div>
-              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Image de couverture (URL)</label>
-              <input
-                v-model="achievementForm.cover_image"
-                type="url"
-                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                placeholder="https://..."
-              />
-            </div>
           </div>
           <div class="flex items-center justify-end gap-3 border-t border-gray-200 p-4 dark:border-gray-700">
             <button
@@ -937,10 +1074,14 @@ const handleDrop = (event: DragEvent, targetIndex: number) => {
             </button>
             <button
               class="rounded-lg bg-brand-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-              :disabled="!achievementForm.title || !achievementForm.achievement_date"
+              :disabled="!achievementForm.title || !achievementForm.achievement_date || saving"
               @click="saveAchievement"
             >
-              {{ editingAchievement ? 'Enregistrer' : 'Créer' }}
+              <span v-if="saving" class="flex items-center gap-2">
+                <font-awesome-icon :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
+                Enregistrement...
+              </span>
+              <span v-else>{{ editingAchievement ? 'Enregistrer' : 'Créer' }}</span>
             </button>
           </div>
         </div>
@@ -1024,15 +1165,6 @@ const handleDrop = (event: DragEvent, targetIndex: number) => {
                 />
               </div>
             </div>
-            <div>
-              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Image de couverture (URL)</label>
-              <input
-                v-model="projectForm.cover_image"
-                type="url"
-                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                placeholder="https://..."
-              />
-            </div>
           </div>
           <div class="flex items-center justify-end gap-3 border-t border-gray-200 p-4 dark:border-gray-700">
             <button
@@ -1043,10 +1175,14 @@ const handleDrop = (event: DragEvent, targetIndex: number) => {
             </button>
             <button
               class="rounded-lg bg-brand-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-              :disabled="!projectForm.title"
+              :disabled="!projectForm.title || saving"
               @click="saveProject"
             >
-              {{ editingProject ? 'Enregistrer' : 'Créer' }}
+              <span v-if="saving" class="flex items-center gap-2">
+                <font-awesome-icon :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
+                Enregistrement...
+              </span>
+              <span v-else>{{ editingProject ? 'Enregistrer' : 'Créer' }}</span>
             </button>
           </div>
         </div>
@@ -1077,15 +1213,21 @@ const handleDrop = (event: DragEvent, targetIndex: number) => {
           <div class="flex items-center justify-end gap-3 border-t border-gray-200 p-4 dark:border-gray-700">
             <button
               class="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+              :disabled="saving"
               @click="closeModals"
             >
               Annuler
             </button>
             <button
-              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+              class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+              :disabled="saving"
               @click="confirmDelete"
             >
-              Supprimer
+              <span v-if="saving" class="flex items-center gap-2">
+                <font-awesome-icon :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
+                Suppression...
+              </span>
+              <span v-else>Supprimer</span>
             </button>
           </div>
         </div>

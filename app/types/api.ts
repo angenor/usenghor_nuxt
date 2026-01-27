@@ -1021,6 +1021,7 @@ export interface ProjectCallRead {
   project_id: string
   title: string
   description: string | null
+  cover_image_external_id: string | null
   conditions: string | null
   type: ProjectCallType | null
   deadline: string | null
@@ -1032,6 +1033,7 @@ export interface ProjectCallRead {
 export interface ProjectCallCreate {
   title: string
   description?: string | null
+  cover_image_external_id?: string | null
   conditions?: string | null
   type?: ProjectCallType | null
   deadline?: string | null
@@ -1041,6 +1043,7 @@ export interface ProjectCallCreate {
 export interface ProjectCallUpdate {
   title?: string
   description?: string | null
+  cover_image_external_id?: string | null
   conditions?: string | null
   type?: ProjectCallType | null
   deadline?: string | null
@@ -1050,4 +1053,71 @@ export interface ProjectCallUpdate {
 export interface ProjectMediaRead {
   project_id: string
   album_external_id: string
+}
+
+// ============================================================================
+// Organization - Departments
+// ============================================================================
+
+export interface DepartmentRead {
+  id: string
+  code: string
+  name: string
+  description: string | null
+  mission: string | null
+  icon_external_id: string | null
+  cover_image_external_id: string | null
+  head_external_id: string | null
+  display_order: number
+  active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ServiceRead {
+  id: string
+  name: string
+  description: string | null
+  mission: string | null
+  email: string | null
+  phone: string | null
+  department_id: string | null
+  head_external_id: string | null
+  album_external_id: string | null
+  display_order: number
+  active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface DepartmentWithServices extends DepartmentRead {
+  services: ServiceRead[]
+}
+
+export interface DepartmentCreate {
+  code: string
+  name: string
+  description?: string | null
+  mission?: string | null
+  icon_external_id?: string | null
+  cover_image_external_id?: string | null
+  head_external_id?: string | null
+  display_order?: number
+  active?: boolean
+}
+
+export interface DepartmentUpdate {
+  code?: string
+  name?: string
+  description?: string | null
+  mission?: string | null
+  icon_external_id?: string | null
+  cover_image_external_id?: string | null
+  head_external_id?: string | null
+  display_order?: number
+  active?: boolean
+}
+
+export interface DepartmentReorder {
+  department_ids: string[]
 }

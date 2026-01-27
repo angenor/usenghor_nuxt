@@ -1,20 +1,21 @@
 <script setup lang="ts">
-import type { DepartmentAdmin, DepartmentFilters, DepartmentUsage } from '~/composables/useMockData'
+import type { DepartmentDisplay, DepartmentUsage } from '~/composables/useDepartmentsApi'
 
 definePageMeta({
   layout: 'admin'
 })
 
 const {
-  getAllDepartmentsAdmin,
-  getDepartmentByIdAdmin,
+  getAllDepartments,
   getDepartmentsStats,
   getDepartmentUsage,
-  getDepartmentHeadCandidates,
-  departmentIcons,
-  generateDepartmentId,
-  generateDepartmentCode
-} = useMockData()
+  createDepartment,
+  updateDepartment,
+  deleteDepartment: apiDeleteDepartment,
+  toggleDepartmentActive: apiToggleDepartmentActive,
+  reorderDepartments,
+  generateDepartmentCode,
+} = useDepartmentsApi()
 
 // === STATE ===
 const searchQuery = ref('')
@@ -24,28 +25,58 @@ const sortOrder = ref<'asc' | 'desc'>('asc')
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const showDeleteModal = ref(false)
-const editingDepartment = ref<DepartmentAdmin | null>(null)
-const deletingDepartment = ref<DepartmentAdmin | null>(null)
+const editingDepartment = ref<DepartmentDisplay | null>(null)
+const deletingDepartment = ref<DepartmentDisplay | null>(null)
 const departmentUsage = ref<DepartmentUsage | null>(null)
 const isDragging = ref(false)
 
+// Données chargées depuis l'API
+const allDepartments = ref<DepartmentDisplay[]>([])
+const stats = ref({ total: 0, active: 0, totalServices: 0, withHead: 0 })
+const isLoading = ref(true)
+const isSaving = ref(false)
+const error = ref<string | null>(null)
+
 // Form state
+// Note: icon_external_id et cover_image_external_id sont des UUID pour le service MEDIA
+// La sélection d'icônes FontAwesome n'est pas disponible dans ce schéma
 const newDepartment = ref({
   name: '',
   code: '',
   description: '',
   mission: '',
-  icon: '',
   head_id: '',
   active: true
 })
 
-// === COMPUTED ===
-const allDepartments = computed(() => getAllDepartmentsAdmin())
+// === CHARGEMENT DES DONNÉES ===
+async function loadDepartments() {
+  isLoading.value = true
+  error.value = null
+  try {
+    const [departments, departmentsStats] = await Promise.all([
+      getAllDepartments(),
+      getDepartmentsStats(),
+    ])
+    allDepartments.value = departments
+    stats.value = departmentsStats
+  }
+  catch (err: any) {
+    console.error('Erreur chargement départements:', err)
+    error.value = err.message || 'Erreur lors du chargement des départements'
+  }
+  finally {
+    isLoading.value = false
+  }
+}
 
-const stats = computed(() => getDepartmentsStats())
+// Chargement initial
+onMounted(() => {
+  loadDepartments()
+})
 
-const headCandidates = computed(() => getDepartmentHeadCandidates())
+// TODO: Les candidats responsables seront chargés depuis une autre API (identité)
+const headCandidates = computed(() => [])
 
 // Départements filtrés et triés
 const filteredDepartments = computed(() => {
@@ -63,7 +94,7 @@ const filteredDepartments = computed(() => {
       d.name.toLowerCase().includes(query) ||
       d.code.toLowerCase().includes(query) ||
       d.description?.toLowerCase().includes(query) ||
-      d.head?.name.toLowerCase().includes(query)
+      d.head?.name?.toLowerCase().includes(query)
     )
   }
 
@@ -72,11 +103,14 @@ const filteredDepartments = computed(() => {
     let comparison = 0
     if (sortBy.value === 'name') {
       comparison = a.name.localeCompare(b.name)
-    } else if (sortBy.value === 'code') {
+    }
+    else if (sortBy.value === 'code') {
       comparison = a.code.localeCompare(b.code)
-    } else if (sortBy.value === 'services_count') {
+    }
+    else if (sortBy.value === 'services_count') {
       comparison = a.services_count - b.services_count
-    } else if (sortBy.value === 'display_order') {
+    }
+    else if (sortBy.value === 'display_order') {
       comparison = a.display_order - b.display_order
     }
     return sortOrder.value === 'asc' ? comparison : -comparison
@@ -114,30 +148,28 @@ const openAddModal = () => {
     code: '',
     description: '',
     mission: '',
-    icon: '',
     head_id: '',
     active: true
   }
   showAddModal.value = true
 }
 
-const openEditModal = (department: DepartmentAdmin) => {
+const openEditModal = (department: DepartmentDisplay) => {
   editingDepartment.value = department
   newDepartment.value = {
     name: department.name,
     code: department.code,
     description: department.description || '',
     mission: department.mission || '',
-    icon: department.icon || '',
-    head_id: department.head_id || '',
+    head_id: department.head_external_id || '',
     active: department.active
   }
   showEditModal.value = true
 }
 
-const openDeleteModal = async (department: DepartmentAdmin) => {
+const openDeleteModal = async (department: DepartmentDisplay) => {
   deletingDepartment.value = department
-  departmentUsage.value = getDepartmentUsage(department.id)
+  departmentUsage.value = await getDepartmentUsage(department.id)
   showDeleteModal.value = true
 }
 
@@ -150,26 +182,77 @@ const closeModals = () => {
   departmentUsage.value = null
 }
 
-// CRUD operations (simulation)
-const saveDepartment = () => {
-  if (editingDepartment.value) {
-    console.log('Mise à jour du département:', { id: editingDepartment.value.id, ...newDepartment.value })
-  } else {
-    const id = generateDepartmentId()
-    console.log('Création du département:', { id, ...newDepartment.value })
+// CRUD operations
+const saveDepartment = async () => {
+  if (!newDepartment.value.name || !newDepartment.value.code) return
+
+  isSaving.value = true
+  error.value = null
+
+  try {
+    if (editingDepartment.value) {
+      // Mise à jour
+      await updateDepartment(editingDepartment.value.id, {
+        code: newDepartment.value.code,
+        name: newDepartment.value.name,
+        description: newDepartment.value.description || null,
+        mission: newDepartment.value.mission || null,
+        head_external_id: newDepartment.value.head_id || null,
+        active: newDepartment.value.active,
+      })
+    }
+    else {
+      // Création
+      await createDepartment({
+        code: newDepartment.value.code,
+        name: newDepartment.value.name,
+        description: newDepartment.value.description || null,
+        mission: newDepartment.value.mission || null,
+        head_external_id: newDepartment.value.head_id || null,
+        active: newDepartment.value.active,
+      })
+    }
+    closeModals()
+    await loadDepartments()
   }
-  closeModals()
+  catch (err: any) {
+    console.error('Erreur sauvegarde département:', err)
+    error.value = err.message || 'Erreur lors de la sauvegarde du département'
+  }
+  finally {
+    isSaving.value = false
+  }
 }
 
-const deleteDepartment = () => {
-  if (deletingDepartment.value) {
-    console.log('Suppression du département:', deletingDepartment.value.id)
+const deleteDepartment = async () => {
+  if (!deletingDepartment.value) return
+
+  isSaving.value = true
+  error.value = null
+
+  try {
+    await apiDeleteDepartment(deletingDepartment.value.id)
+    closeModals()
+    await loadDepartments()
   }
-  closeModals()
+  catch (err: any) {
+    console.error('Erreur suppression département:', err)
+    error.value = err.message || 'Erreur lors de la suppression du département'
+  }
+  finally {
+    isSaving.value = false
+  }
 }
 
-const toggleDepartmentActive = (department: DepartmentAdmin) => {
-  console.log('Basculer l\'état actif:', department.id, !department.active)
+const toggleDepartmentActive = async (department: DepartmentDisplay) => {
+  try {
+    await apiToggleDepartmentActive(department.id)
+    await loadDepartments()
+  }
+  catch (err: any) {
+    console.error('Erreur basculement état actif:', err)
+    error.value = err.message || 'Erreur lors du changement de statut'
+  }
 }
 
 // Drag and drop
@@ -183,12 +266,31 @@ const handleDragOver = (event: DragEvent) => {
   event.preventDefault()
 }
 
-const handleDrop = (event: DragEvent, targetIndex: number) => {
+const handleDrop = async (event: DragEvent, targetIndex: number) => {
   event.preventDefault()
   isDragging.value = false
   const sourceIndex = parseInt(event.dataTransfer?.getData('text/plain') || '0')
   if (sourceIndex !== targetIndex) {
-    console.log('Réordonnement:', sourceIndex, '->', targetIndex)
+    // Réordonner localement d'abord
+    const items = [...allDepartments.value]
+    const [movedItem] = items.splice(sourceIndex, 1)
+    items.splice(targetIndex, 0, movedItem)
+
+    // Mettre à jour l'ordre d'affichage local
+    allDepartments.value = items
+
+    // Envoyer au backend
+    try {
+      const departmentIds = items.map(d => d.id)
+      await reorderDepartments(departmentIds)
+      await loadDepartments()
+    }
+    catch (err: any) {
+      console.error('Erreur réordonnement:', err)
+      error.value = err.message || 'Erreur lors du réordonnement'
+      // Recharger pour annuler le changement local
+      await loadDepartments()
+    }
   }
 }
 
@@ -213,8 +315,41 @@ const goToServices = (departmentId: string) => {
 
 <template>
   <div class="p-6">
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+    <!-- Chargement -->
+    <div v-if="isLoading" class="flex items-center justify-center py-16">
+      <font-awesome-icon :icon="['fas', 'spinner']" class="w-8 h-8 animate-spin text-blue-500" />
+    </div>
+
+    <!-- Erreur globale -->
+    <div v-else-if="error && allDepartments.length === 0" class="py-12 text-center">
+      <font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="w-12 h-12 text-red-400 mb-4" />
+      <p class="text-gray-600 dark:text-gray-400 mb-4">{{ error }}</p>
+      <button
+        class="text-brand-red-600 hover:underline"
+        @click="loadDepartments"
+      >
+        Réessayer
+      </button>
+    </div>
+
+    <template v-else>
+      <!-- Erreur non-bloquante -->
+      <div
+        v-if="error"
+        class="mb-4 rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+      >
+        <font-awesome-icon :icon="['fas', 'exclamation-circle']" class="mr-2" />
+        {{ error }}
+        <button
+          class="ml-4 text-sm underline"
+          @click="error = null"
+        >
+          Fermer
+        </button>
+      </div>
+
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-6">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
           Départements
@@ -403,19 +538,8 @@ const goToServices = (departmentId: string) => {
               <!-- Département -->
               <td class="px-4 py-3">
                 <div class="flex items-center gap-3">
-                  <div
-                    v-if="department.icon"
-                    class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center"
-                  >
-                    <font-awesome-icon :icon="['fas', department.icon]" class="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                  </div>
-                  <div
-                    v-else-if="department.cover_image"
-                    class="w-10 h-10 rounded-lg overflow-hidden"
-                  >
-                    <img :src="department.cover_image" :alt="department.name" class="w-full h-full object-cover" />
-                  </div>
-                  <div v-else class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                  <!-- TODO: Afficher cover_image_external_id via le service MEDIA quand disponible -->
+                  <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
                     <font-awesome-icon :icon="['fas', 'building']" class="w-5 h-5 text-gray-400" />
                   </div>
                   <div>
@@ -612,42 +736,23 @@ const goToServices = (departmentId: string) => {
               />
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-              <!-- Icône -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Icône
-                </label>
-                <select
-                  v-model="newDepartment.icon"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent"
-                >
-                  <option value="">Aucune icône</option>
-                  <option v-for="icon in departmentIcons" :key="icon.value" :value="icon.value">
-                    {{ icon.label }}
-                  </option>
-                </select>
-                <div v-if="newDepartment.icon" class="mt-2 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                  <font-awesome-icon :icon="['fas', newDepartment.icon]" class="w-4 h-4" />
-                  <span>Aperçu</span>
-                </div>
-              </div>
-
-              <!-- Responsable -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Responsable
-                </label>
-                <select
-                  v-model="newDepartment.head_id"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent"
-                >
-                  <option value="">Aucun responsable</option>
-                  <option v-for="candidate in headCandidates" :key="candidate.id" :value="candidate.id">
-                    {{ candidate.name }}
-                  </option>
-                </select>
-              </div>
+            <!-- Responsable -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Responsable
+              </label>
+              <select
+                v-model="newDepartment.head_id"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent"
+              >
+                <option value="">Aucun responsable</option>
+                <option v-for="candidate in headCandidates" :key="candidate.id" :value="candidate.id">
+                  {{ candidate.name }}
+                </option>
+              </select>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Le responsable sera chargé depuis le service Identité
+              </p>
             </div>
 
             <!-- Actif -->
@@ -667,15 +772,17 @@ const goToServices = (departmentId: string) => {
           <div class="flex items-center justify-end gap-3 p-4 border-t border-gray-200 dark:border-gray-700">
             <button
               class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              :disabled="isSaving"
               @click="closeModals"
             >
               Annuler
             </button>
             <button
-              class="px-4 py-2 text-sm font-medium text-white bg-brand-red-600 hover:bg-brand-red-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              :disabled="!newDepartment.name || !newDepartment.code"
+              class="px-4 py-2 text-sm font-medium text-white bg-brand-red-600 hover:bg-brand-red-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+              :disabled="!newDepartment.name || !newDepartment.code || isSaving"
               @click="saveDepartment"
             >
+              <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="w-4 h-4 animate-spin" />
               {{ editingDepartment ? 'Enregistrer' : 'Créer' }}
             </button>
           </div>
@@ -751,14 +858,16 @@ const goToServices = (departmentId: string) => {
             </button>
             <button
               class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              :disabled="departmentUsage && !departmentUsage.can_delete"
+              :disabled="(departmentUsage && !departmentUsage.can_delete) || isSaving"
               @click="deleteDepartment"
             >
+              <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="w-4 h-4 animate-spin mr-1" />
               Supprimer
             </button>
           </div>
         </div>
       </div>
     </Teleport>
+    </template>
   </div>
 </template>

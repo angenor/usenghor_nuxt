@@ -147,6 +147,25 @@ const parsedConditions = computed<OutputData | null>(() => {
   }
 })
 
+// URL de l'image de couverture (chargée de manière asynchrone)
+const coverImageUrl = ref<string | null>(null)
+
+const { getMediaUrlById } = useMediaApi()
+
+// Charger l'URL de l'image quand call change
+watch(
+  () => call.value?.cover_image_external_id,
+  async (imageId) => {
+    if (imageId) {
+      coverImageUrl.value = await getMediaUrlById(imageId)
+    }
+    else {
+      coverImageUrl.value = null
+    }
+  },
+  { immediate: true },
+)
+
 // Couleurs par type
 const projectCallTypeColors: Record<string, string> = {
   application: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
@@ -304,6 +323,15 @@ const projectCallTypeColors: Record<string, string> = {
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Image de couverture -->
+      <div v-if="coverImageUrl" class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
+        <img
+          :src="coverImageUrl"
+          :alt="call.title"
+          class="h-64 w-full object-cover"
+        />
       </div>
 
       <!-- Description détaillée (EditorJS) -->
