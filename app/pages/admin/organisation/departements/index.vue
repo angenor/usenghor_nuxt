@@ -17,6 +17,8 @@ const {
   generateDepartmentCode,
 } = useDepartmentsApi()
 
+const { apiFetch } = useApi()
+
 // === STATE ===
 const searchQuery = ref('')
 const filterActive = ref<boolean | undefined>(undefined)
@@ -70,13 +72,42 @@ async function loadDepartments() {
   }
 }
 
+// Candidats responsables (utilisateurs)
+interface HeadCandidate {
+  id: string
+  name: string
+}
+const headCandidates = ref<HeadCandidate[]>([])
+
+async function loadHeadCandidates() {
+  try {
+    const response = await apiFetch<{
+      items: Array<{
+        id: string
+        first_name: string
+        last_name: string
+        salutation: string | null
+      }>
+    }>('/api/admin/users', {
+      query: { limit: 100, active: true },
+    })
+    headCandidates.value = response.items.map(user => ({
+      id: user.id,
+      name: user.salutation
+        ? `${user.salutation} ${user.first_name} ${user.last_name}`
+        : `${user.first_name} ${user.last_name}`,
+    }))
+  }
+  catch (err) {
+    console.error('Erreur chargement des candidats responsables:', err)
+  }
+}
+
 // Chargement initial
 onMounted(() => {
   loadDepartments()
+  loadHeadCandidates()
 })
-
-// TODO: Les candidats responsables seront chargés depuis une autre API (identité)
-const headCandidates = computed(() => [])
 
 // Départements filtrés et triés
 const filteredDepartments = computed(() => {

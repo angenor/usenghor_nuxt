@@ -73,16 +73,19 @@ const newService = ref({
 async function loadData() {
   isLoading.value = true
   try {
-    const [servicesData, groupedData, statsData, deptsData] = await Promise.all([
+    // Charger les départements en premier pour le debug
+    const deptsData = await getDepartmentsForSelect()
+    console.log('Départements chargés:', deptsData)
+    departments.value = deptsData
+
+    const [servicesData, groupedData, statsData] = await Promise.all([
       getAllServices(),
       getServicesGroupedByDepartment(),
-      getServicesStats(),
-      getDepartmentsForSelect()
+      getServicesStats()
     ])
     allServices.value = servicesData
     servicesGrouped.value = groupedData
     stats.value = statsData
-    departments.value = deptsData
   }
   catch (error) {
     console.error('Erreur lors du chargement des services:', error)

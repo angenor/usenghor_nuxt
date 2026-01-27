@@ -244,12 +244,14 @@ export function useServicesApi() {
       const response = await apiFetch<PaginatedResponse<DepartmentRead>>('/api/admin/departments', {
         query: { limit: 100 },
       })
-      for (const dept of response.items) {
-        departmentsCache.value.set(dept.id, dept)
+      if (response?.items) {
+        for (const dept of response.items) {
+          departmentsCache.value.set(dept.id, dept)
+        }
       }
     }
-    catch {
-      console.warn('Impossible de charger les départements')
+    catch (error) {
+      console.error('Erreur lors du chargement des départements:', error)
     }
 
     return departmentsCache.value
@@ -741,9 +743,36 @@ export function useServicesApi() {
    * Récupère les départements pour le select.
    */
   async function getDepartmentsForSelect(): Promise<Array<{ id: string; name: string; code: string }>> {
-    const departments = await loadDepartments()
+    // Forcer le rechargement si le cache est vide
+    if (departmentsCache.value.size === 0) {
+      await loadDepartments()
+    }
+
+    const departments = departmentsCache.value
+
+    // Si toujours vide, essayer un appel direct
+    if (departments.size === 0) {
+      try {
+        const response = await apiFetch<PaginatedResponse<DepartmentRead>>('/api/admin/departments', {
+          query: { limit: 100 },
+        })
+        if (response?.items) {
+          return response.items
+            .map(d => ({
+              id: d.id,
+              name: d.name,
+              code: d.code,
+            }))
+            .sort((a, b) => a.name.localeCompare(b.name))
+        }
+      }
+      catch (error) {
+        console.error('Erreur lors du chargement direct des départements:', error)
+      }
+      return []
+    }
+
     return Array.from(departments.values())
-      .filter(d => d.active)
       .map(d => ({
         id: d.id,
         name: d.name,
