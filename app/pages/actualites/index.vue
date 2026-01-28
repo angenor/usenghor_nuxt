@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import type { NewsDisplay } from '~/types/news'
+
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
-const { getAllNews, getUpcomingEvents, getAllOpenCalls } = useMockData()
+const { getAllPublishedNews } = usePublicNewsApi()
+const { getUpcomingEvents, getAllOpenCalls } = useMockData()
 
 // SEO
 useSeoMeta({
@@ -10,22 +13,52 @@ useSeoMeta({
 })
 
 // Get data
-const allNews = computed(() => getAllNews())
+const allNews = ref<NewsDisplay[]>([])
+const isLoading = ref(true)
+
+// Charger les actualités depuis l'API
+onMounted(async () => {
+  try {
+    allNews.value = await getAllPublishedNews()
+  } catch (error) {
+    console.error('Erreur lors du chargement des actualités:', error)
+    allNews.value = []
+  } finally {
+    isLoading.value = false
+  }
+})
+
 const upcomingEvents = computed(() => getUpcomingEvents().slice(0, 4))
 const openCalls = computed(() => getAllOpenCalls().slice(0, 3))
 
-// Featured news (first one)
-const featuredNews = computed(() => allNews.value[0] || null)
+// Featured news (first one with headline status or first published)
+const featuredNews = computed(() => {
+  const headline = allNews.value.find(n => n.highlight_status === 'headline')
+  return headline || allNews.value[0] || null
+})
 
-// Side news (2nd to 4th)
-const sideNews = computed(() => allNews.value.slice(1, 4))
+// Side news (next 3 featured or regular news)
+const sideNews = computed(() => {
+  const featured = allNews.value.filter(n =>
+    n.id !== featuredNews.value?.id &&
+    (n.highlight_status === 'featured' || n.highlight_status === 'standard')
+  )
+  return featured.slice(0, 3)
+})
 
 // Latest news - avec pagination
 const NEWS_PER_PAGE = 4
 const newsDisplayCount = ref(NEWS_PER_PAGE)
 
 // Toutes les actualités restantes (après featured + side)
-const remainingNews = computed(() => allNews.value.slice(4))
+const remainingNews = computed(() => {
+  const usedIds = [
+    featuredNews.value?.id,
+    ...sideNews.value.map(n => n.id)
+  ].filter(Boolean)
+
+  return allNews.value.filter(n => !usedIds.includes(n.id))
+})
 
 // Latest news avec limite
 const latestNews = computed(() => remainingNews.value.slice(0, newsDisplayCount.value))
@@ -47,15 +80,15 @@ const showLessNews = () => {
 }
 
 // Localization helpers
-const getLocalizedTitle = (item: { title_fr: string; title_en?: string; title_ar?: string }) => {
-  if (locale.value === 'en' && item.title_en) return item.title_en
-  if (locale.value === 'ar' && item.title_ar) return item.title_ar
-  return item.title_fr
+const getLocalizedTitle = (item: NewsDisplay) => {
+  // Pour le moment, on utilise uniquement le titre principal
+  // TODO: Implémenter le support multilingue complet
+  return item.title
 }
 
-const getLocalizedExcerpt = (item: { excerpt_fr: string; excerpt_en?: string }) => {
-  if (locale.value === 'en' && item.excerpt_en) return item.excerpt_en
-  return item.excerpt_fr
+const getLocalizedExcerpt = (item: NewsDisplay) => {
+  // Pour le moment, on utilise le summary
+  return item.summary || ''
 }
 
 const getLocalizedDescription = (item: { description_fr: string; description_en?: string }) => {
@@ -63,7 +96,8 @@ const getLocalizedDescription = (item: { description_fr: string; description_en?
   return item.description_fr
 }
 
-const formatDate = (dateStr: string) => {
+const formatDate = (dateStr: string | null | undefined) => {
+  if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleDateString(
     locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
@@ -71,7 +105,8 @@ const formatDate = (dateStr: string) => {
   )
 }
 
-const formatShortDate = (dateStr: string) => {
+const formatShortDate = (dateStr: string | null | undefined) => {
+  if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleDateString(
     locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
@@ -110,12 +145,20 @@ const typeColors: Record<string, string> = {
         <div class="flex flex-col lg:flex-row gap-8">
           <!-- Main content: Featured + Side -->
           <div class="lg:w-2/3">
-            <div class="flex flex-col md:flex-row gap-6">
+            <!-- Loading state -->
+            <div v-if="isLoading" class="flex items-center justify-center py-12">
+              <div class="flex flex-col items-center gap-4">
+                <div class="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ t('actualites.loading') }}</span>
+              </div>
+            </div>
+
+            <div v-else class="flex flex-col md:flex-row gap-6">
               <!-- Featured article -->
-              <NuxtLink v-if="featuredNews" :to="localePath(`/actualites/${featuredNews.id}`)" class="md:w-3/5 group block">
+              <NuxtLink v-if="featuredNews" :to="localePath(`/actualites/${featuredNews.slug}`)" class="md:w-3/5 group block">
                 <div class="overflow-hidden rounded-xl">
                   <img
-                    :src="featuredNews.image || 'https://picsum.photos/seed/default/800/500'"
+                    :src="featuredNews.cover_image || 'https://picsum.photos/seed/default/800/500'"
                     :alt="getLocalizedTitle(featuredNews)"
                     class="w-full h-64 md:h-80 object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
@@ -138,7 +181,7 @@ const typeColors: Record<string, string> = {
                   </p>
 
                   <div class="flex items-center gap-3 mt-4">
-                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(featuredNews.date) }}</span>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(featuredNews.published_at) }}</span>
                   </div>
                 </div>
               </NuxtLink>
@@ -148,13 +191,13 @@ const typeColors: Record<string, string> = {
                 <NuxtLink
                   v-for="(item, index) in sideNews"
                   :key="item.id"
-                  :to="localePath(`/actualites/${item.id}`)"
+                  :to="localePath(`/actualites/${item.slug}`)"
                   class="group block py-4"
                   :class="{ 'border-t border-gray-200 dark:border-gray-700': index > 0 }"
                 >
                   <div class="overflow-hidden rounded-lg mb-3">
                     <img
-                      :src="item.image || 'https://picsum.photos/seed/default/400/250'"
+                      :src="item.cover_image || 'https://picsum.photos/seed/default/400/250'"
                       :alt="getLocalizedTitle(item)"
                       class="w-full h-32 object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
@@ -166,7 +209,7 @@ const typeColors: Record<string, string> = {
                   </h4>
 
                   <div class="flex items-center gap-2 mt-2">
-                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(item.date) }}</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(item.published_at) }}</span>
                   </div>
                 </NuxtLink>
               </div>
@@ -193,12 +236,12 @@ const typeColors: Record<string, string> = {
           <NuxtLink
             v-for="item in latestNews"
             :key="item.id"
-            :to="localePath(`/actualites/${item.id}`)"
+            :to="localePath(`/actualites/${item.slug}`)"
             class="group block"
           >
             <div class="overflow-hidden rounded-xl">
               <img
-                :src="item.image || 'https://picsum.photos/seed/default/400/300'"
+                :src="item.cover_image || 'https://picsum.photos/seed/default/400/300'"
                 :alt="getLocalizedTitle(item)"
                 class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
@@ -215,7 +258,7 @@ const typeColors: Record<string, string> = {
               </p>
 
               <div class="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                {{ formatDate(item.date) }}
+                {{ formatDate(item.published_at) }}
               </div>
             </div>
           </NuxtLink>

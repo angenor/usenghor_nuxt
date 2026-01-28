@@ -1434,6 +1434,8 @@ export interface AuditLogStatistics {
   total: number
   by_action: Record<AuditAction, number>
   by_table: Record<string, number>
+  by_user?: { user_id: string; count: number }[]
+  by_day?: { date: string; count: number }[]
 }
 
 // Statistiques enrichies pour l'affichage UI

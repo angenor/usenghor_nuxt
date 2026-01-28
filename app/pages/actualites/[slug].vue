@@ -1,25 +1,50 @@
 <script setup lang="ts">
+import type { NewsDisplay } from '~/types/news'
+
 const route = useRoute()
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
-const { getNewsBySlug, getAllNews, getCampusById, getFlagEmoji } = useMockData()
+const { getNewsBySlug: getPublicNewsBySlug, getAllPublishedNews } = usePublicNewsApi()
+const { getCampusById, getFlagEmoji } = useMockData()
 
 // Get the news item
 const slug = computed(() => route.params.slug as string)
-const news = computed(() => getNewsBySlug(slug.value))
+const news = ref<NewsDisplay | null>(null)
+const relatedNewsItems = ref<NewsDisplay[]>([])
+const isLoading = ref(true)
 
-// 404 if not found - use onMounted to check after hydration
-onMounted(() => {
-  if (!news.value) {
+// Charger l'actualité depuis l'API
+onMounted(async () => {
+  try {
+    news.value = await getPublicNewsBySlug(slug.value)
+
+    if (!news.value) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Article not found'
+      })
+    }
+
+    // Charger les actualités liées
+    if (news.value.campus_id) {
+      const allNews = await getAllPublishedNews()
+      relatedNewsItems.value = allNews
+        .filter(n => n.campus_id === news.value!.campus_id && n.id !== news.value!.id)
+        .slice(0, 3)
+    }
+  } catch (error) {
+    console.error('Erreur lors du chargement de l\'actualité:', error)
     throw createError({
       statusCode: 404,
       statusMessage: 'Article not found'
     })
+  } finally {
+    isLoading.value = false
   }
 })
 
 // Get campus info
-const campus = computed(() => news.value ? getCampusById(news.value.campus_id) : null)
+const campus = computed(() => news.value?.campus_id ? getCampusById(news.value.campus_id) : null)
 const campusFlag = computed(() => campus.value ? getFlagEmoji(campus.value.country) : '')
 const campusName = computed(() => {
   if (!campus.value) return ''
@@ -31,26 +56,26 @@ const campusName = computed(() => {
 // Localization helpers
 const getLocalizedTitle = computed(() => {
   if (!news.value) return ''
-  if (locale.value === 'en' && news.value.title_en) return news.value.title_en
-  if (locale.value === 'ar' && news.value.title_ar) return news.value.title_ar
-  return news.value.title_fr
+  // Pour le moment, on utilise uniquement le titre principal
+  // TODO: Implémenter le support multilingue complet
+  return news.value.title
 })
 
 const getLocalizedExcerpt = computed(() => {
   if (!news.value) return ''
-  if (locale.value === 'en' && news.value.excerpt_en) return news.value.excerpt_en
-  return news.value.excerpt_fr
+  return news.value.summary || ''
 })
 
 // SEO
 useSeoMeta({
   title: () => `${getLocalizedTitle.value} | ${t('actualites.seo.title')}`,
   description: () => getLocalizedExcerpt.value,
-  ogImage: () => news.value?.image || 'https://picsum.photos/seed/og-news/1200/630'
+  ogImage: () => news.value?.cover_image || 'https://picsum.photos/seed/og-news/1200/630'
 })
 
 // Format date
-const formatDate = (dateStr: string) => {
+const formatDate = (dateStr: string | null | undefined) => {
+  if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleDateString(
     locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
@@ -59,32 +84,34 @@ const formatDate = (dateStr: string) => {
 }
 
 // Related news (same campus, excluding current)
-const relatedNews = computed(() => {
-  if (!news.value) return []
-  return getAllNews()
-    .filter(n => n.campus_id === news.value!.campus_id && n.id !== news.value!.id)
-    .slice(0, 3)
-})
+const relatedNews = computed(() => relatedNewsItems.value)
 
 // Get localized title for related news
-const getLocalizedTitleFor = (item: { title_fr: string; title_en?: string; title_ar?: string }) => {
-  if (locale.value === 'en' && item.title_en) return item.title_en
-  if (locale.value === 'ar' && item.title_ar) return item.title_ar
-  return item.title_fr
+const getLocalizedTitleFor = (item: NewsDisplay) => {
+  return item.title
 }
 </script>
 
 <template>
-  <div v-if="news">
-    <!-- Hero Section (PageHero style) -->
-    <section class="relative h-[50vh] min-h-[400px] max-h-[500px] overflow-hidden">
-      <!-- Background Image -->
-      <div class="absolute inset-0">
-        <img
-          :src="news.image || 'https://picsum.photos/seed/news-hero/1920/600'"
-          :alt="getLocalizedTitle"
-          class="w-full h-full object-cover"
-        >
+  <div>
+    <!-- Loading state -->
+    <div v-if="isLoading" class="flex items-center justify-center py-12 min-h-screen">
+      <div class="flex flex-col items-center gap-4">
+        <div class="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+        <span class="text-sm text-gray-500 dark:text-gray-400">{{ t('actualites.loading') }}</span>
+      </div>
+    </div>
+
+    <div v-else-if="news">
+      <!-- Hero Section (PageHero style) -->
+      <section class="relative h-[50vh] min-h-[400px] max-h-[500px] overflow-hidden">
+        <!-- Background Image -->
+        <div class="absolute inset-0">
+          <img
+            :src="news.cover_image || 'https://picsum.photos/seed/news-hero/1920/600'"
+            :alt="getLocalizedTitle"
+            class="w-full h-full object-cover"
+          >
         <!-- Gradient Overlays -->
         <div class="absolute inset-0 bg-gradient-to-r from-gray-900/80 via-gray-900/60 to-gray-900/40"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-gray-900/70 via-transparent to-gray-900/30"></div>
@@ -120,7 +147,7 @@ const getLocalizedTitleFor = (item: { title_fr: string; title_en?: string; title
               <span>{{ campusFlag }}</span>
               <span>{{ campusName }}</span>
             </span>
-            <span class="text-white/70 text-sm">{{ formatDate(news.date) }}</span>
+            <span class="text-white/70 text-sm">{{ formatDate(news.published_at) }}</span>
           </div>
 
           <!-- Title -->
@@ -142,7 +169,7 @@ const getLocalizedTitleFor = (item: { title_fr: string; title_en?: string; title
           <!-- Featured image -->
           <div class="overflow-hidden rounded-xl mb-8 shadow-lg">
             <img
-              :src="news.image || 'https://picsum.photos/seed/news-detail/800/450'"
+              :src="news.cover_image || 'https://picsum.photos/seed/news-detail/800/450'"
               :alt="getLocalizedTitle"
               class="w-full h-auto object-cover"
             >
@@ -194,10 +221,10 @@ const getLocalizedTitleFor = (item: { title_fr: string; title_en?: string; title
                 :key="item.id"
                 class="group"
               >
-                <NuxtLink :to="localePath(`/actualites/${item.id}`)">
+                <NuxtLink :to="localePath(`/actualites/${item.slug}`)">
                   <div class="overflow-hidden rounded-lg mb-3">
                     <img
-                      :src="item.image || 'https://picsum.photos/seed/related/400/250'"
+                      :src="item.cover_image || 'https://picsum.photos/seed/related/400/250'"
                       :alt="getLocalizedTitleFor(item)"
                       class="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
@@ -209,7 +236,7 @@ const getLocalizedTitleFor = (item: { title_fr: string; title_en?: string; title
                   </h3>
 
                   <div class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    {{ formatDate(item.date) }}
+                    {{ formatDate(item.published_at) }}
                   </div>
                 </NuxtLink>
               </article>
@@ -222,6 +249,7 @@ const getLocalizedTitleFor = (item: { title_fr: string; title_en?: string; title
           <ActualitesSidebar :show-news="false" />
         </aside>
       </div>
+    </div>
     </div>
   </div>
 </template>

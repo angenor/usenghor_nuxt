@@ -89,6 +89,10 @@ export function useAuditApi() {
     user_id?: string
     table_name?: string
     action?: AuditAction
+    date_from?: string
+    date_to?: string
+    ip_address?: string
+    search?: string
   } = {}): Promise<PaginatedResponse<AuditLogRead>> {
     return apiFetch<PaginatedResponse<AuditLogRead>>('/api/admin/audit-logs', {
       query: {
@@ -97,6 +101,10 @@ export function useAuditApi() {
         user_id: params.user_id,
         table_name: params.table_name,
         action: params.action,
+        date_from: params.date_from,
+        date_to: params.date_to,
+        ip_address: params.ip_address,
+        search: params.search,
       },
     })
   }
@@ -157,6 +165,9 @@ export function useAuditApi() {
     user_id?: string
     table_name?: string
     action?: AuditAction
+    date_from?: string
+    date_to?: string
+    ip_address?: string
   } = {}): string {
     const baseUrl = '/api/admin/audit-logs/export'
     const queryParams = new URLSearchParams()
@@ -164,6 +175,9 @@ export function useAuditApi() {
     if (params.user_id) queryParams.set('user_id', params.user_id)
     if (params.table_name) queryParams.set('table_name', params.table_name)
     if (params.action) queryParams.set('action', params.action)
+    if (params.date_from) queryParams.set('date_from', params.date_from)
+    if (params.date_to) queryParams.set('date_to', params.date_to)
+    if (params.ip_address) queryParams.set('ip_address', params.ip_address)
     queryParams.set('format', 'csv')
 
     const queryString = queryParams.toString()
@@ -376,8 +390,15 @@ export function useAuditApi() {
       total_events: stats.total,
       by_action: byAction,
       by_table: byTableArray,
-      by_user: [], // Le backend ne fournit pas cette info actuellement
-      by_day: [], // Le backend ne fournit pas cette info actuellement
+      by_user: stats.by_user?.map(u => ({
+        user_id: u.user_id,
+        user_name: u.user_id, // Peut être enrichi avec le nom réel plus tard
+        count: u.count,
+      })) || [],
+      by_day: stats.by_day?.map(d => ({
+        date: d.date,
+        count: d.count,
+      })) || [],
     }
   }
 

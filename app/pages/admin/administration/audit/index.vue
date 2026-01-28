@@ -91,6 +91,10 @@ const loadData = async () => {
       user_id: filters.value.user_id,
       table_name: filters.value.table_name,
       action: filters.value.action,
+      date_from: filters.value.date_from,
+      date_to: filters.value.date_to,
+      ip_address: filters.value.ip_address,
+      search: filters.value.search,
     })
 
     // Enrichir les logs avec le résumé
