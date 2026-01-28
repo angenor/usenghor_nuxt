@@ -1,80 +1,73 @@
 <script setup lang="ts">
-import type { AuditLog, AuditLogDetail, AuditAction, AuditLogFilters } from '~/composables/useMockData'
+import type {
+  AuditAction,
+  AuditLogDetail,
+  AuditLogRead,
+  AuditLogStatsUI,
+  AuditLogWithUser,
+} from '~/types/api'
 
 definePageMeta({
   layout: 'admin'
 })
 
 const {
-  getAllAuditLogs,
+  listAuditLogs,
   getAuditLogById,
   getAuditStatistics,
-  getAuditDistinctTablesList,
-  getAuditDistinctUsersList,
+  getDistinctTablesList,
+  enrichLog,
+  enrichLogDetail,
+  statsToUI,
   auditActionLabels,
   auditActionColors,
   auditActionIcons,
-  auditTableLabels,
   formatIpAddress,
   formatUserAgent,
   getTableLabel
-} = useMockData()
+} = useAuditApi()
 
 // === STATE ===
 const isLoading = ref(true)
-const logs = ref<AuditLog[]>([])
+const error = ref<string | null>(null)
+const logs = ref<AuditLogWithUser[]>([])
 const selectedLog = ref<AuditLogDetail | null>(null)
 const showDetailModal = ref(false)
 const showFilters = ref(false)
 const showStatistics = ref(false)
 
-// Pagination
+// Pagination (server-side)
 const currentPage = ref(1)
 const itemsPerPage = ref(20)
+const totalItems = ref(0)
+const totalPages = ref(0)
+
+// Statistics
+const statistics = ref<AuditLogStatsUI>({
+  total_events: 0,
+  by_action: { create: 0, update: 0, delete: 0, login: 0, logout: 0 },
+  by_table: [],
+  by_user: [],
+  by_day: [],
+})
 
 // Filters
-const filters = ref<AuditLogFilters>({
-  user_id: undefined,
-  action: undefined,
-  table_name: undefined,
-  date_from: undefined,
-  date_to: undefined,
-  ip_address: undefined,
-  search: undefined
+const filters = ref({
+  user_id: undefined as string | undefined,
+  action: undefined as AuditAction | undefined,
+  table_name: undefined as string | undefined,
+  date_from: undefined as string | undefined,
+  date_to: undefined as string | undefined,
+  ip_address: undefined as string | undefined,
+  search: undefined as string | undefined,
 })
 
 // Filter options
-const tableOptions = computed(() => getAuditDistinctTablesList())
-const userOptions = computed(() => getAuditDistinctUsersList())
+const tableOptions = computed(() => getDistinctTablesList())
 
 const actionOptions: AuditAction[] = ['create', 'update', 'delete', 'login', 'logout']
 
 // === COMPUTED ===
-const filteredLogs = computed(() => {
-  const cleanFilters: AuditLogFilters = {}
-  if (filters.value.user_id) cleanFilters.user_id = filters.value.user_id
-  if (filters.value.action) cleanFilters.action = filters.value.action
-  if (filters.value.table_name) cleanFilters.table_name = filters.value.table_name
-  if (filters.value.date_from) cleanFilters.date_from = filters.value.date_from
-  if (filters.value.date_to) cleanFilters.date_to = filters.value.date_to
-  if (filters.value.ip_address) cleanFilters.ip_address = filters.value.ip_address
-  if (filters.value.search) cleanFilters.search = filters.value.search
-
-  return getAllAuditLogs(Object.keys(cleanFilters).length > 0 ? cleanFilters : undefined)
-})
-
-const paginatedLogs = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return filteredLogs.value.slice(start, end)
-})
-
-const totalPages = computed(() => Math.ceil(filteredLogs.value.length / itemsPerPage.value))
-
-const statistics = computed(() => {
-  return getAuditStatistics(filters.value.date_from, filters.value.date_to)
-})
-
 const hasActiveFilters = computed(() => {
   return !!(
     filters.value.user_id ||
@@ -90,19 +83,44 @@ const hasActiveFilters = computed(() => {
 // === METHODS ===
 const loadData = async () => {
   isLoading.value = true
+  error.value = null
   try {
-    await new Promise(resolve => setTimeout(resolve, 300))
-    logs.value = getAllAuditLogs()
+    const response = await listAuditLogs({
+      page: currentPage.value,
+      limit: itemsPerPage.value,
+      user_id: filters.value.user_id,
+      table_name: filters.value.table_name,
+      action: filters.value.action,
+    })
+
+    // Enrichir les logs avec le résumé
+    logs.value = response.items.map(enrichLog)
+    totalItems.value = response.total
+    totalPages.value = response.pages
+  } catch (err: unknown) {
+    console.error('Erreur lors du chargement des logs:', err)
+    error.value = err instanceof Error ? err.message : 'Erreur lors du chargement des logs d\'audit'
   } finally {
     isLoading.value = false
   }
 }
 
-const viewLogDetail = (log: AuditLog) => {
-  const detail = getAuditLogById(log.id)
-  if (detail) {
-    selectedLog.value = detail
+const loadStatistics = async () => {
+  try {
+    const stats = await getAuditStatistics()
+    statistics.value = statsToUI(stats)
+  } catch (err) {
+    console.error('Erreur lors du chargement des statistiques:', err)
+  }
+}
+
+const viewLogDetail = async (log: AuditLogWithUser) => {
+  try {
+    const detail = await getAuditLogById(log.id)
+    selectedLog.value = enrichLogDetail(detail)
     showDetailModal.value = true
+  } catch (err) {
+    console.error('Erreur lors du chargement du détail:', err)
   }
 }
 
@@ -117,6 +135,7 @@ const clearFilters = () => {
     search: undefined
   }
   currentPage.value = 1
+  loadData()
 }
 
 const formatDateTime = (dateString: string) => {
@@ -148,17 +167,20 @@ const formatValue = (value: unknown): string => {
 const goToPage = (page: number) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page
+    loadData()
   }
 }
 
-// Watch filters to reset pagination
+// Watch filters to reload data
 watch(filters, () => {
   currentPage.value = 1
+  loadData()
 }, { deep: true })
 
 // Load data on mount
 onMounted(() => {
   loadData()
+  loadStatistics()
 })
 </script>
 
@@ -244,42 +266,21 @@ onMounted(() => {
             </div>
           </div>
 
-          <!-- Top Tables and Users -->
-          <div class="grid gap-6 lg:grid-cols-2">
-            <!-- Top Tables -->
-            <div>
-              <h4 class="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">Tables les plus actives</h4>
-              <div class="space-y-2">
-                <div
-                  v-for="item in statistics.by_table.slice(0, 5)"
-                  :key="item.table"
-                  class="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-700/50"
-                >
-                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ getTableLabel(item.table) }}</span>
-                  <span class="text-sm font-medium text-gray-900 dark:text-white">{{ item.count }}</span>
-                </div>
-                <p v-if="statistics.by_table.length === 0" class="text-sm text-gray-500 dark:text-gray-400">
-                  Aucune donnée
-                </p>
+          <!-- Top Tables -->
+          <div>
+            <h4 class="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">Tables les plus actives</h4>
+            <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <div
+                v-for="item in statistics.by_table.slice(0, 8)"
+                :key="item.table"
+                class="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-700/50"
+              >
+                <span class="text-sm text-gray-700 dark:text-gray-300">{{ getTableLabel(item.table) }}</span>
+                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ item.count }}</span>
               </div>
-            </div>
-
-            <!-- Top Users -->
-            <div>
-              <h4 class="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">Utilisateurs les plus actifs</h4>
-              <div class="space-y-2">
-                <div
-                  v-for="item in statistics.by_user.slice(0, 5)"
-                  :key="item.user_id"
-                  class="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-700/50"
-                >
-                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ item.user_name }}</span>
-                  <span class="text-sm font-medium text-gray-900 dark:text-white">{{ item.count }}</span>
-                </div>
-                <p v-if="statistics.by_user.length === 0" class="text-sm text-gray-500 dark:text-gray-400">
-                  Aucune donnée
-                </p>
-              </div>
+              <p v-if="statistics.by_table.length === 0" class="col-span-full text-sm text-gray-500 dark:text-gray-400">
+                Aucune donnée
+              </p>
             </div>
           </div>
         </div>
@@ -347,18 +348,15 @@ onMounted(() => {
               </select>
             </div>
 
-            <!-- User -->
+            <!-- User ID -->
             <div>
-              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Utilisateur</label>
-              <select
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">ID Utilisateur</label>
+              <input
                 v-model="filters.user_id"
+                type="text"
+                placeholder="UUID de l'utilisateur"
                 class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              >
-                <option :value="undefined">Tous les utilisateurs</option>
-                <option v-for="user in userOptions" :key="user.id" :value="user.id">
-                  {{ user.name }}
-                </option>
-              </select>
+              />
             </div>
 
             <!-- Date From -->
@@ -395,10 +393,18 @@ onMounted(() => {
         </div>
       </Transition>
 
+      <!-- Error message -->
+      <div v-if="error" class="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
+        <div class="flex items-center gap-2 text-red-700 dark:text-red-400">
+          <font-awesome-icon :icon="['fas', 'exclamation-circle']" class="h-5 w-5" />
+          <p>{{ error }}</p>
+        </div>
+      </div>
+
       <!-- Results count -->
       <div class="flex items-center justify-between">
         <p class="text-sm text-gray-500 dark:text-gray-400">
-          {{ filteredLogs.length }} événement{{ filteredLogs.length > 1 ? 's' : '' }}
+          {{ totalItems }} événement{{ totalItems > 1 ? 's' : '' }}
         </p>
       </div>
 
@@ -433,7 +439,7 @@ onMounted(() => {
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
               <tr
-                v-for="log in paginatedLogs"
+                v-for="log in logs"
                 :key="log.id"
                 class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
               >
@@ -441,9 +447,11 @@ onMounted(() => {
                   {{ formatDateTime(log.created_at) }}
                 </td>
                 <td class="px-4 py-3">
-                  <div v-if="log.user" class="text-sm">
-                    <p class="font-medium text-gray-900 dark:text-white">{{ log.user.name }}</p>
-                    <p class="text-gray-500 dark:text-gray-400">{{ log.user.email }}</p>
+                  <div v-if="log.user_id" class="text-sm">
+                    <p v-if="log.user" class="font-medium text-gray-900 dark:text-white">{{ log.user.name }}</p>
+                    <p v-else class="font-mono text-xs text-gray-500 dark:text-gray-400" :title="log.user_id">
+                      {{ log.user_id.slice(0, 8) }}...
+                    </p>
                   </div>
                   <span v-else class="text-sm text-gray-500 dark:text-gray-400">Système</span>
                 </td>
@@ -476,7 +484,7 @@ onMounted(() => {
                   </button>
                 </td>
               </tr>
-              <tr v-if="paginatedLogs.length === 0">
+              <tr v-if="logs.length === 0">
                 <td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                   <font-awesome-icon :icon="['fas', 'inbox']" class="mb-2 h-8 w-8" />
                   <p>Aucun événement trouvé</p>
@@ -575,12 +583,18 @@ onMounted(() => {
             <div class="mb-6 grid gap-4 sm:grid-cols-2">
               <div>
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Utilisateur</p>
-                <p class="text-gray-900 dark:text-white">
-                  {{ selectedLog.user?.name || 'Système' }}
-                </p>
-                <p v-if="selectedLog.user" class="text-sm text-gray-500 dark:text-gray-400">
-                  {{ selectedLog.user.email }}
-                </p>
+                <template v-if="selectedLog.user_id">
+                  <p v-if="selectedLog.user" class="text-gray-900 dark:text-white">
+                    {{ selectedLog.user.name }}
+                  </p>
+                  <p v-else class="font-mono text-xs text-gray-900 dark:text-white">
+                    {{ selectedLog.user_id }}
+                  </p>
+                  <p v-if="selectedLog.user" class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ selectedLog.user.email }}
+                  </p>
+                </template>
+                <p v-else class="text-gray-900 dark:text-white">Système</p>
               </div>
               <div>
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Action</p>

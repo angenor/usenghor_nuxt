@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import type { Country, CountryFilters } from '~/composables/useMockData'
+import type { Country, CountryFilters, CountryStats } from '~/composables/useCountriesApi'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
 })
 
 const {
-  getAllCountriesRef,
-  getActiveCountriesRef,
-  getCountryByIdRef,
-  getCountryByIsoCodeRef,
+  getAllCountries,
+  createCountry,
+  updateCountry,
+  toggleCountryActive,
+  deleteCountry,
   isIsoCodeTaken,
   isIsoCode3Taken,
   getCountryStats,
@@ -18,11 +19,19 @@ const {
   validatePhoneCodeFormat,
   validateIsoCode,
   validateIsoCode3,
-  generateCountryId
-} = useMockData()
+} = useCountriesApi()
 
 // === STATE ===
 const isLoading = ref(true)
+const isSaving = ref(false)
+const countries = ref<Country[]>([])
+const stats = ref<CountryStats>({
+  total: 0,
+  active: 0,
+  inactive: 0,
+  with_phone_code: 0,
+})
+
 const searchQuery = ref('')
 const activeFilter = ref<'all' | 'active' | 'inactive'>('all')
 const sortBy = ref<CountryFilters['sort_by']>('name_fr')
@@ -48,25 +57,22 @@ const formData = ref({
   name_en: '',
   name_ar: '',
   phone_code: '',
-  active: true
+  active: true,
 })
 const formErrors = ref<Record<string, string>>({})
 
 // === COMPUTED ===
-
-// Statistiques globales
-const stats = computed(() => getCountryStats())
 
 // Filtres appliqués
 const filters = computed<CountryFilters>(() => ({
   search: searchQuery.value || undefined,
   active: activeFilter.value === 'all' ? undefined : activeFilter.value === 'active',
   sort_by: sortBy.value,
-  sort_order: sortOrder.value
+  sort_order: sortOrder.value,
 }))
 
 // Liste filtrée
-const filteredCountries = computed(() => getAllCountriesRef(filters.value))
+const filteredCountries = computed(() => countries.value)
 
 // Pagination
 const totalPages = computed(() => Math.ceil(filteredCountries.value.length / itemsPerPage.value))
@@ -78,9 +84,24 @@ const paginatedCountries = computed(() => {
 
 // === METHODS ===
 
+// Charger les données
+async function loadData() {
+  isLoading.value = true
+  try {
+    countries.value = await getAllCountries(filters.value)
+    stats.value = await getCountryStats()
+  }
+  catch (error) {
+    console.error('Erreur lors du chargement des pays:', error)
+  }
+  finally {
+    isLoading.value = false
+  }
+}
+
 // Initialisation
 onMounted(() => {
-  isLoading.value = false
+  loadData()
 })
 
 // Réinitialiser les filtres
@@ -88,26 +109,20 @@ const resetFilters = () => {
   searchQuery.value = ''
   activeFilter.value = 'all'
   currentPage.value = 1
+  loadData()
 }
 
 // Trier par colonne
 const toggleSort = (column: CountryFilters['sort_by']) => {
   if (sortBy.value === column) {
     sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-  } else {
+  }
+  else {
     sortBy.value = column
     sortOrder.value = 'asc'
   }
   currentPage.value = 1
-}
-
-// Format date
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  })
+  loadData()
 }
 
 // Réinitialiser le formulaire
@@ -119,21 +134,23 @@ const resetForm = () => {
     name_en: '',
     name_ar: '',
     phone_code: '',
-    active: true
+    active: true,
   }
   formErrors.value = {}
 }
 
 // Valider le formulaire
-const validateForm = (isEdit = false): boolean => {
+const validateForm = async (isEdit = false): Promise<boolean> => {
   formErrors.value = {}
 
   // Code ISO 2
   if (!formData.value.iso_code.trim()) {
     formErrors.value.iso_code = 'Le code ISO 2 est requis'
-  } else if (!validateIsoCode(formData.value.iso_code)) {
+  }
+  else if (!validateIsoCode(formData.value.iso_code)) {
     formErrors.value.iso_code = 'Le code ISO doit contenir exactement 2 lettres majuscules'
-  } else if (!isEdit && isIsoCodeTaken(formData.value.iso_code)) {
+  }
+  else if (!isEdit && await isIsoCodeTaken(formData.value.iso_code)) {
     formErrors.value.iso_code = 'Ce code ISO est déjà utilisé'
   }
 
@@ -141,7 +158,8 @@ const validateForm = (isEdit = false): boolean => {
   if (formData.value.iso_code3.trim()) {
     if (!validateIsoCode3(formData.value.iso_code3)) {
       formErrors.value.iso_code3 = 'Le code ISO 3 doit contenir exactement 3 lettres majuscules'
-    } else if (isIsoCode3Taken(formData.value.iso_code3, selectedCountry.value?.id)) {
+    }
+    else if (await isIsoCode3Taken(formData.value.iso_code3, selectedCountry.value?.id)) {
       formErrors.value.iso_code3 = 'Ce code ISO 3 est déjà utilisé'
     }
   }
@@ -149,7 +167,8 @@ const validateForm = (isEdit = false): boolean => {
   // Nom français
   if (!formData.value.name_fr.trim()) {
     formErrors.value.name_fr = 'Le nom français est requis'
-  } else if (formData.value.name_fr.length < 2) {
+  }
+  else if (formData.value.name_fr.length < 2) {
     formErrors.value.name_fr = 'Le nom doit contenir au moins 2 caractères'
   }
 
@@ -179,7 +198,7 @@ const openEditModal = (country: Country) => {
     name_en: country.name_en || '',
     name_ar: country.name_ar || '',
     phone_code: country.phone_code || '',
-    active: country.active
+    active: country.active,
   }
   formErrors.value = {}
   showEditModal.value = true
@@ -192,65 +211,89 @@ const openDeleteModal = (country: Country) => {
 }
 
 // Enregistrer (ajout)
-const handleAdd = () => {
-  if (!validateForm()) return
+const handleAdd = async () => {
+  if (!await validateForm()) return
 
-  // Simulation de l'ajout
-  const newCountry: Country = {
-    id: generateCountryId(),
-    iso_code: formData.value.iso_code.toUpperCase(),
-    iso_code3: formData.value.iso_code3.toUpperCase() || null,
-    name_fr: formData.value.name_fr,
-    name_en: formData.value.name_en || null,
-    name_ar: formData.value.name_ar || null,
-    phone_code: formData.value.phone_code ? (formData.value.phone_code.startsWith('+') ? formData.value.phone_code : `+${formData.value.phone_code}`) : null,
-    active: formData.value.active,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+  isSaving.value = true
+  try {
+    await createCountry({
+      iso_code: formData.value.iso_code.toUpperCase(),
+      iso_code3: formData.value.iso_code3.toUpperCase() || null,
+      name_fr: formData.value.name_fr,
+      name_en: formData.value.name_en || null,
+      name_ar: formData.value.name_ar || null,
+      phone_code: formData.value.phone_code ? (formData.value.phone_code.startsWith('+') ? formData.value.phone_code : `+${formData.value.phone_code}`) : null,
+      active: formData.value.active,
+    })
+
+    showAddModal.value = false
+    resetForm()
+    await loadData()
   }
-
-  console.log('Ajout du pays:', newCountry)
-
-  showAddModal.value = false
-  resetForm()
+  catch (error) {
+    console.error('Erreur lors de l\'ajout du pays:', error)
+  }
+  finally {
+    isSaving.value = false
+  }
 }
 
 // Enregistrer (modification)
-const handleEdit = () => {
-  if (!validateForm(true) || !selectedCountry.value) return
+const handleEdit = async () => {
+  if (!await validateForm(true) || !selectedCountry.value) return
 
-  // Simulation de la modification
-  console.log('Modification du pays:', {
-    id: selectedCountry.value.id,
-    iso_code: selectedCountry.value.iso_code, // Non modifiable
-    iso_code3: formData.value.iso_code3.toUpperCase() || null,
-    name_fr: formData.value.name_fr,
-    name_en: formData.value.name_en || null,
-    name_ar: formData.value.name_ar || null,
-    phone_code: formData.value.phone_code ? (formData.value.phone_code.startsWith('+') ? formData.value.phone_code : `+${formData.value.phone_code}`) : null,
-    active: formData.value.active,
-    updated_at: new Date().toISOString()
-  })
+  isSaving.value = true
+  try {
+    await updateCountry(selectedCountry.value.id, {
+      iso_code3: formData.value.iso_code3.toUpperCase() || null,
+      name_fr: formData.value.name_fr,
+      name_en: formData.value.name_en || null,
+      name_ar: formData.value.name_ar || null,
+      phone_code: formData.value.phone_code ? (formData.value.phone_code.startsWith('+') ? formData.value.phone_code : `+${formData.value.phone_code}`) : null,
+      active: formData.value.active,
+    })
 
-  showEditModal.value = false
-  selectedCountry.value = null
-  resetForm()
+    showEditModal.value = false
+    selectedCountry.value = null
+    resetForm()
+    await loadData()
+  }
+  catch (error) {
+    console.error('Erreur lors de la modification du pays:', error)
+  }
+  finally {
+    isSaving.value = false
+  }
 }
 
 // Supprimer
-const handleDelete = () => {
+const handleDelete = async () => {
   if (!countryToDelete.value) return
 
-  // Simulation de la suppression
-  console.log('Suppression du pays:', countryToDelete.value.id)
-
-  showDeleteModal.value = false
-  countryToDelete.value = null
+  isSaving.value = true
+  try {
+    await deleteCountry(countryToDelete.value.id)
+    showDeleteModal.value = false
+    countryToDelete.value = null
+    await loadData()
+  }
+  catch (error) {
+    console.error('Erreur lors de la suppression du pays:', error)
+  }
+  finally {
+    isSaving.value = false
+  }
 }
 
 // Toggle actif/inactif
-const toggleActive = (country: Country) => {
-  console.log('Toggle actif/inactif:', country.id, !country.active)
+const toggleActive = async (country: Country) => {
+  try {
+    await toggleCountryActive(country.id)
+    await loadData()
+  }
+  catch (error) {
+    console.error('Erreur lors du toggle actif/inactif:', error)
+  }
 }
 
 // Fermer les modales
@@ -266,6 +309,7 @@ const closeModals = () => {
 // Watcher pour reset de la page lors des filtres
 watch([searchQuery, activeFilter], () => {
   currentPage.value = 1
+  loadData()
 })
 </script>
 
@@ -413,7 +457,7 @@ watch([searchQuery, activeFilter], () => {
         Aucun pays trouvé
       </h3>
       <p class="text-gray-500 dark:text-gray-400 mb-6">
-        {{ searchQuery || activeFilter !== 'all' ? 'Aucun résultat ne correspond à vos critères.' : 'Commencez par ajouter votre premier pays.' }}
+        {{ searchQuery || activeFilter !== 'all' ? 'Aucun résultat ne correspond à vos critères.' : 'Commencez par ajouter votre premier pays ou exécutez le script de seed.' }}
       </p>
       <button
         v-if="!searchQuery && activeFilter === 'all'"
@@ -550,7 +594,7 @@ watch([searchQuery, activeFilter], () => {
                   <!-- Supprimer -->
                   <button
                     class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                    title="Supprimer"
+                    title="Désactiver"
                     @click="openDeleteModal(country)"
                   >
                     <font-awesome-icon :icon="['fas', 'trash']" class="h-4 w-4" />
@@ -726,8 +770,10 @@ watch([searchQuery, activeFilter], () => {
               </button>
               <button
                 type="submit"
-                class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
+                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+                :disabled="isSaving"
               >
+                <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
                 Ajouter
               </button>
             </div>
@@ -871,8 +917,10 @@ watch([searchQuery, activeFilter], () => {
               </button>
               <button
                 type="submit"
-                class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
+                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+                :disabled="isSaving"
               >
+                <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
                 Enregistrer
               </button>
             </div>
@@ -890,18 +938,18 @@ watch([searchQuery, activeFilter], () => {
       >
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md">
           <div class="p-6 text-center">
-            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 mx-auto mb-4">
-              <font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="h-6 w-6 text-red-600 dark:text-red-400" />
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30 mx-auto mb-4">
+              <font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="h-6 w-6 text-amber-600 dark:text-amber-400" />
             </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              Supprimer ce pays ?
+              Désactiver ce pays ?
             </h3>
             <p class="text-gray-500 dark:text-gray-400 mb-6">
-              Vous êtes sur le point de supprimer
+              Vous êtes sur le point de désactiver
               <span class="font-medium text-gray-900 dark:text-white">
                 {{ getCountryFlagEmoji(countryToDelete.iso_code) }} {{ countryToDelete.name_fr }}
               </span>.
-              Cette action est irréversible.
+              Le pays ne sera plus visible dans les sélecteurs.
             </p>
             <div class="flex justify-center gap-3">
               <button
@@ -911,10 +959,12 @@ watch([searchQuery, activeFilter], () => {
                 Annuler
               </button>
               <button
-                class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50"
+                :disabled="isSaving"
                 @click="handleDelete"
               >
-                Supprimer
+                <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
+                Désactiver
               </button>
             </div>
           </div>

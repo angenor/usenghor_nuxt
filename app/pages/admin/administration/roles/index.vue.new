@@ -1,0 +1,490 @@
+<script setup lang="ts">
+import type {
+  RoleRead,
+  RoleWithPermissions,
+  PermissionRead,
+  PermissionGrouped,
+} from '~/composables/useRolesApi'
+import { useDebounceFn } from '@vueuse/core'
+
+definePageMeta({
+  layout: 'admin',
+})
+
+const {
+  listRoles,
+  getRoleById,
+  createRole,
+  updateRole,
+  deleteRole,
+  duplicateRole,
+  toggleRoleActive,
+  listPermissions,
+  updateRolePermissions,
+  getRoleUsers,
+  groupPermissionsByCategory,
+  getCategoryLabel,
+  canDeleteRole,
+  canDeactivateRole,
+  invalidateCache,
+} = useRolesApi()
+
+// === STATE ===
+const isLoading = ref(true)
+const isSaving = ref(false)
+const roles = ref<RoleRead[]>([])
+const totalRoles = ref(0)
+const allPermissions = ref<PermissionRead[]>([])
+
+// Stats
+const stats = ref({
+  total: 0,
+  active: 0,
+  system: 0,
+  total_users_with_roles: 0,
+})
+
+// Filters
+const filters = ref({
+  search: '',
+  active: undefined as boolean | undefined,
+  sort_by: 'hierarchy_level' as 'hierarchy_level' | 'name_fr' | 'code',
+  sort_order: 'desc' as 'asc' | 'desc',
+})
+
+// Modal states
+const showModal = ref(false)
+const showDeleteModal = ref(false)
+const showDuplicateModal = ref(false)
+const showUsersModal = ref(false)
+const editingRole = ref<RoleWithPermissions | null>(null)
+const selectedRole = ref<RoleRead | null>(null)
+const roleUsers = ref<Array<{ id: string; email: string; last_name: string; first_name: string; active: boolean }>>([])
+
+// Form data
+const form = ref({
+  code: '',
+  name_fr: '',
+  description: '',
+  hierarchy_level: 50,
+  active: true,
+  permission_ids: [] as string[],
+})
+
+// Duplicate form
+const duplicateForm = ref({
+  code: '',
+  name_fr: '',
+})
+
+// Permission categories for the form
+const permissionCategories = ref<PermissionGrouped[]>([])
+
+// Form validation errors
+const formErrors = ref<Record<string, string>>({})
+
+// System roles
+const systemRoles = ['super_admin', 'admin', 'user']
+
+// === COMPUTED ===
+const filteredRoles = computed(() => {
+  let result = [...roles.value]
+
+  // Filtre recherche
+  if (filters.value.search) {
+    const search = filters.value.search.toLowerCase()
+    result = result.filter(
+      r => r.code.toLowerCase().includes(search) || r.name_fr.toLowerCase().includes(search),
+    )
+  }
+
+  // Filtre actif
+  if (filters.value.active !== undefined) {
+    result = result.filter(r => r.active === filters.value.active)
+  }
+
+  // Tri
+  result.sort((a, b) => {
+    let comparison = 0
+    switch (filters.value.sort_by) {
+      case 'hierarchy_level':
+        comparison = a.hierarchy_level - b.hierarchy_level
+        break
+      case 'name_fr':
+        comparison = a.name_fr.localeCompare(b.name_fr)
+        break
+      case 'code':
+        comparison = a.code.localeCompare(b.code)
+        break
+    }
+    return filters.value.sort_order === 'desc' ? -comparison : comparison
+  })
+
+  return result
+})
+
+const hasActiveFilters = computed(() => {
+  return !!(filters.value.search || filters.value.active !== undefined)
+})
+
+const isEditing = computed(() => !!editingRole.value)
+
+const modalTitle = computed(() => {
+  return isEditing.value ? `Modifier le rôle "${editingRole.value?.name_fr}"` : 'Nouveau rôle'
+})
+
+const canSubmitForm = computed(() => {
+  return form.value.code.trim() !== ''
+    && form.value.name_fr.trim() !== ''
+    && validateRoleCode(form.value.code)
+    && validateRoleName(form.value.name_fr)
+    && validateHierarchyLevel(form.value.hierarchy_level)
+    && Object.keys(formErrors.value).length === 0
+})
+
+// === METHODS ===
+const loadData = async () => {
+  isLoading.value = true
+  try {
+    // Charger les rôles
+    const rolesResponse = await listRoles({ limit: 100 })
+    roles.value = rolesResponse.items
+    totalRoles.value = rolesResponse.total
+
+    // Charger les permissions
+    allPermissions.value = await listPermissions()
+
+    // Calculer les stats
+    stats.value = {
+      total: rolesResponse.total,
+      active: rolesResponse.items.filter(r => r.active).length,
+      system: rolesResponse.items.filter(r => systemRoles.includes(r.code)).length,
+      total_users_with_roles: 0,
+    }
+  }
+  catch (error) {
+    console.error('Erreur lors du chargement des données:', error)
+  }
+  finally {
+    isLoading.value = false
+  }
+}
+
+const clearFilters = () => {
+  filters.value = {
+    search: '',
+    active: undefined,
+    sort_by: 'hierarchy_level',
+    sort_order: 'desc',
+  }
+}
+
+const openCreateModal = async () => {
+  editingRole.value = null
+  form.value = {
+    code: '',
+    name_fr: '',
+    description: '',
+    hierarchy_level: 50,
+    active: true,
+    permission_ids: [],
+  }
+  formErrors.value = {}
+  permissionCategories.value = groupPermissionsByCategory(allPermissions.value)
+  showModal.value = true
+}
+
+const openEditModal = async (role: RoleRead) => {
+  const checkModify = canModifyRole(role)
+  if (!checkModify.canModify) {
+    alert(checkModify.warning || 'Ce rôle ne peut pas être modifié')
+    return
+  }
+
+  try {
+    const roleWithPerms = await getRoleById(role.id)
+    editingRole.value = roleWithPerms
+    form.value = {
+      code: roleWithPerms.code,
+      name_fr: roleWithPerms.name_fr,
+      description: roleWithPerms.description || '',
+      hierarchy_level: roleWithPerms.hierarchy_level,
+      active: roleWithPerms.active,
+      permission_ids: roleWithPerms.permissions.map(p => p.id),
+    }
+    formErrors.value = {}
+    permissionCategories.value = groupPermissionsByCategory(allPermissions.value)
+    showModal.value = true
+  }
+  catch (error) {
+    console.error('Erreur lors du chargement du rôle:', error)
+    alert('Erreur lors du chargement du rôle')
+  }
+}
+
+const closeModal = () => {
+  showModal.value = false
+  editingRole.value = null
+}
+
+const validateRoleCode = (code: string): boolean => {
+  return /^[a-z][a-z0-9_]{1,49}$/.test(code)
+}
+
+const validateRoleName = (name: string): boolean => {
+  return name.length >= 2 && name.length <= 100
+}
+
+const validateHierarchyLevel = (level: number): boolean => {
+  return Number.isInteger(level) && level >= 0 && level <= 100
+}
+
+const isRoleCodeAvailable = (code: string, excludeId?: string): boolean => {
+  return !roles.value.some(r => r.code === code && r.id !== excludeId)
+}
+
+const validateForm = () => {
+  formErrors.value = {}
+
+  if (!validateRoleCode(form.value.code)) {
+    formErrors.value.code = 'Le code doit être en snake_case (2-50 caractères)'
+  }
+  else if (!isRoleCodeAvailable(form.value.code, editingRole.value?.id)) {
+    formErrors.value.code = 'Ce code est déjà utilisé'
+  }
+
+  if (!validateRoleName(form.value.name_fr)) {
+    formErrors.value.name_fr = 'Le nom doit contenir entre 2 et 100 caractères'
+  }
+
+  if (!validateHierarchyLevel(form.value.hierarchy_level)) {
+    formErrors.value.hierarchy_level = 'Le niveau doit être un entier entre 0 et 100'
+  }
+
+  return Object.keys(formErrors.value).length === 0
+}
+
+const saveRole = async () => {
+  if (!validateForm()) return
+
+  isSaving.value = true
+  try {
+    if (isEditing.value && editingRole.value) {
+      await updateRole(editingRole.value.id, {
+        code: form.value.code,
+        name_fr: form.value.name_fr,
+        description: form.value.description || null,
+        hierarchy_level: form.value.hierarchy_level,
+        active: form.value.active,
+      })
+      await updateRolePermissions(editingRole.value.id, form.value.permission_ids)
+    }
+    else {
+      const result = await createRole({
+        code: form.value.code,
+        name_fr: form.value.name_fr,
+        description: form.value.description || null,
+        hierarchy_level: form.value.hierarchy_level,
+        active: form.value.active,
+      })
+      if (form.value.permission_ids.length > 0) {
+        await updateRolePermissions(result.id, form.value.permission_ids)
+      }
+    }
+
+    closeModal()
+    invalidateCache()
+    await loadData()
+  }
+  catch (error: unknown) {
+    console.error('Erreur lors de la sauvegarde:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue'
+    alert(`Erreur lors de la sauvegarde: ${errorMessage}`)
+  }
+  finally {
+    isSaving.value = false
+  }
+}
+
+const openDeleteModal = (role: RoleRead) => {
+  const check = canDeleteRole(role)
+  if (!check.canDelete) {
+    alert(check.reason || 'Ce rôle ne peut pas être supprimé')
+    return
+  }
+  selectedRole.value = role
+  showDeleteModal.value = true
+}
+
+const confirmDelete = async () => {
+  if (!selectedRole.value) return
+
+  isSaving.value = true
+  try {
+    await deleteRole(selectedRole.value.id)
+    showDeleteModal.value = false
+    selectedRole.value = null
+    invalidateCache()
+    await loadData()
+  }
+  catch (error: unknown) {
+    console.error('Erreur lors de la suppression:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue'
+    alert(`Erreur: ${errorMessage}`)
+  }
+  finally {
+    isSaving.value = false
+  }
+}
+
+const openDuplicateModal = (role: RoleRead) => {
+  selectedRole.value = role
+  duplicateForm.value = {
+    code: `${role.code}_copy`,
+    name_fr: `${role.name_fr} (copie)`,
+  }
+  showDuplicateModal.value = true
+}
+
+const confirmDuplicate = async () => {
+  if (!selectedRole.value) return
+
+  if (!validateRoleCode(duplicateForm.value.code)) {
+    alert('Le code doit être en snake_case')
+    return
+  }
+
+  if (!isRoleCodeAvailable(duplicateForm.value.code)) {
+    alert('Ce code est déjà utilisé')
+    return
+  }
+
+  isSaving.value = true
+  try {
+    await duplicateRole(selectedRole.value.id, {
+      new_code: duplicateForm.value.code,
+      new_name: duplicateForm.value.name_fr,
+    })
+    showDuplicateModal.value = false
+    selectedRole.value = null
+    invalidateCache()
+    await loadData()
+  }
+  catch (error: unknown) {
+    console.error('Erreur:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue'
+    alert(`Erreur: ${errorMessage}`)
+  }
+  finally {
+    isSaving.value = false
+  }
+}
+
+const handleToggleRoleActive = async (role: RoleRead) => {
+  const check = canDeactivateRole(role)
+  if (!check.canDeactivate) {
+    alert(check.reason || 'Ce rôle ne peut pas être désactivé')
+    return
+  }
+
+  isSaving.value = true
+  try {
+    await toggleRoleActive(role.id)
+    invalidateCache()
+    await loadData()
+  }
+  catch (error: unknown) {
+    console.error('Erreur:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue'
+    alert(`Erreur: ${errorMessage}`)
+  }
+  finally {
+    isSaving.value = false
+  }
+}
+
+const openUsersModal = async (role: RoleRead) => {
+  selectedRole.value = role
+  try {
+    roleUsers.value = await getRoleUsers(role.id)
+    showUsersModal.value = true
+  }
+  catch (error) {
+    console.error('Erreur:', error)
+    alert('Erreur lors du chargement des utilisateurs')
+  }
+}
+
+const togglePermission = (permissionId: string) => {
+  const index = form.value.permission_ids.indexOf(permissionId)
+  if (index === -1) {
+    form.value.permission_ids.push(permissionId)
+  }
+  else {
+    form.value.permission_ids.splice(index, 1)
+  }
+}
+
+const toggleCategory = (category: PermissionGrouped) => {
+  const categoryPermIds = category.permissions.map(p => p.id)
+  const allSelected = categoryPermIds.every(id => form.value.permission_ids.includes(id))
+
+  if (allSelected) {
+    form.value.permission_ids = form.value.permission_ids.filter(id => !categoryPermIds.includes(id))
+  }
+  else {
+    categoryPermIds.forEach((id) => {
+      if (!form.value.permission_ids.includes(id)) {
+        form.value.permission_ids.push(id)
+      }
+    })
+  }
+}
+
+const isCategoryFullySelected = (category: PermissionGrouped): boolean => {
+  return category.permissions.every(p => form.value.permission_ids.includes(p.id))
+}
+
+const isCategoryPartiallySelected = (category: PermissionGrouped): boolean => {
+  const selected = category.permissions.filter(p => form.value.permission_ids.includes(p.id)).length
+  return selected > 0 && selected < category.permissions.length
+}
+
+const getCategorySelectedCount = (category: PermissionGrouped): number => {
+  return category.permissions.filter(p => form.value.permission_ids.includes(p.id)).length
+}
+
+const isSystemRole = (role: RoleRead): boolean => {
+  return systemRoles.includes(role.code)
+}
+
+const canModifyRole = (role: RoleRead): { canModify: boolean; warning?: string } => {
+  if (role.code === 'super_admin') {
+    return { canModify: false, warning: 'Le super administrateur ne peut pas être modifié' }
+  }
+  return { canModify: true }
+}
+
+const getHierarchyLevelLabel = (level: number): string => {
+  if (level >= 90) return 'Critique'
+  if (level >= 70) return 'Élevé'
+  if (level >= 50) return 'Moyen'
+  if (level >= 30) return 'Modéré'
+  return 'Basique'
+}
+
+const getHierarchyLevelColor = (level: number): string => {
+  if (level >= 90) return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+  if (level >= 70) return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+  if (level >= 50) return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+  if (level >= 30) return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+  return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400'
+}
+
+const debouncedSearch = useDebounceFn(() => {}, 300)
+watch(() => filters.value.search, debouncedSearch)
+
+onMounted(() => {
+  loadData()
+})
+</script>
