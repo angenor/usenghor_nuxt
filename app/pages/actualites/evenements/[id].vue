@@ -1,56 +1,73 @@
 <script setup lang="ts">
+import type { EventPublic } from '~/composables/usePublicEventsApi'
+
 const route = useRoute()
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
-const { getEventById, getUpcomingEvents, getCampusById, getFlagEmoji } = useMockData()
+const { getEventBySlug, getUpcomingEvents } = usePublicEventsApi()
+const { getCampusById, getFlagEmoji } = useMockData()
 
 // Get the event
-const id = computed(() => route.params.id as string)
-const event = computed(() => getEventById(id.value))
+const slug = computed(() => route.params.id as string)
+const event = ref<EventPublic | null>(null)
+const relatedEventsData = ref<EventPublic[]>([])
+const isLoading = ref(true)
 
-// 404 if not found - use onMounted to check after hydration
-onMounted(() => {
-  if (!event.value) {
+// Charger l'événement depuis l'API
+onMounted(async () => {
+  try {
+    event.value = await getEventBySlug(slug.value)
+
+    if (!event.value) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Event not found'
+      })
+    }
+
+    // Charger les événements liés (événements à venir, excluant le courant)
+    const upcomingEvents = await getUpcomingEvents(10)
+    relatedEventsData.value = upcomingEvents
+      .filter(e => e.id !== event.value!.id)
+      .slice(0, 3)
+  } catch (error) {
+    console.error('Erreur lors du chargement de l\'événement:', error)
     throw createError({
       statusCode: 404,
       statusMessage: 'Event not found'
     })
+  } finally {
+    isLoading.value = false
   }
 })
 
-// Get campus info
-const campus = computed(() => event.value ? getCampusById(event.value.campus_id) : null)
-const campusFlag = computed(() => campus.value ? getFlagEmoji(campus.value.country) : '')
-const campusName = computed(() => {
-  if (!campus.value) return ''
-  if (locale.value === 'en' && campus.value.name_en) return campus.value.name_en
-  if (locale.value === 'ar' && campus.value.name_ar) return campus.value.name_ar
-  return campus.value.name_fr
-})
+// Get campus info - note: backend ne stocke pas campus_id pour événements
+const campus = computed(() => null)
+const campusFlag = computed(() => '')
+const campusName = computed(() => '')
 
 // Localization helpers
 const getLocalizedTitle = computed(() => {
   if (!event.value) return ''
-  if (locale.value === 'en' && event.value.title_en) return event.value.title_en
-  if (locale.value === 'ar' && event.value.title_ar) return event.value.title_ar
-  return event.value.title_fr
+  return event.value.title
 })
 
 const getLocalizedLocation = computed(() => {
   if (!event.value) return ''
-  if (locale.value === 'en' && event.value.location_en) return event.value.location_en
-  return event.value.location_fr
+  if (event.value.is_online) return t('actualites.events.online')
+  return event.value.venue || event.value.city || t('actualites.events.noLocation')
 })
 
 // SEO
 useSeoMeta({
   title: () => `${getLocalizedTitle.value} | ${t('actualites.events.title')}`,
-  description: () => event.value?.description_fr || '',
-  ogImage: () => event.value?.image || 'https://picsum.photos/seed/og-event/1200/630'
+  description: () => event.value?.description || '',
+  ogImage: () => event.value?.cover_image || 'https://picsum.photos/seed/og-event/1200/630'
 })
 
 // Format date
-const formatDate = (dateStr: string) => {
+const formatDate = (dateStr: string | null | undefined) => {
+  if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleDateString(
     locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
@@ -61,13 +78,14 @@ const formatDate = (dateStr: string) => {
 // Check if event is past
 const isPastEvent = computed(() => {
   if (!event.value) return false
-  return new Date(event.value.date) < new Date()
+  const endDate = event.value.end_date ? new Date(event.value.end_date) : new Date(event.value.start_date)
+  return endDate < new Date()
 })
 
 // Days until event
 const daysUntilEvent = computed(() => {
   if (!event.value) return 0
-  const eventDate = new Date(event.value.date)
+  const eventDate = new Date(event.value.start_date)
   const now = new Date()
   const diffTime = eventDate.getTime() - now.getTime()
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
@@ -77,27 +95,23 @@ const daysUntilEvent = computed(() => {
 // Type badge colors
 const typeBadgeColors: Record<string, string> = {
   conference: 'bg-brand-red-600',
-  atelier: 'bg-brand-blue-600',
-  ceremonie: 'bg-brand-blue-500',
-  autre: 'bg-gray-600'
+  workshop: 'bg-brand-blue-600',
+  ceremony: 'bg-brand-blue-500',
+  seminar: 'bg-purple-600',
+  symposium: 'bg-green-600',
+  other: 'bg-gray-600'
 }
 
 // Related events (upcoming, excluding current)
-const relatedEvents = computed(() => {
-  if (!event.value) return []
-  return getUpcomingEvents()
-    .filter(e => e.id !== event.value!.id)
-    .slice(0, 3)
-})
+const relatedEvents = computed(() => relatedEventsData.value)
 
 // Get localized title for related events
-const getLocalizedTitleFor = (item: { title_fr: string; title_en?: string; title_ar?: string }) => {
-  if (locale.value === 'en' && item.title_en) return item.title_en
-  if (locale.value === 'ar' && item.title_ar) return item.title_ar
-  return item.title_fr
+const getLocalizedTitleFor = (item: EventPublic) => {
+  return item.title
 }
 
-const formatShortDate = (dateStr: string) => {
+const formatShortDate = (dateStr: string | null | undefined) => {
+  if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleDateString(
     locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
@@ -107,13 +121,22 @@ const formatShortDate = (dateStr: string) => {
 </script>
 
 <template>
-  <div v-if="event">
+  <div>
+    <!-- Loading state -->
+    <div v-if="isLoading" class="flex items-center justify-center py-12 min-h-screen">
+      <div class="flex flex-col items-center gap-4">
+        <div class="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+        <span class="text-sm text-gray-500 dark:text-gray-400">{{ t('actualites.loading') }}</span>
+      </div>
+    </div>
+
+    <div v-else-if="event">
     <!-- Hero Section (PageHero style) -->
     <section class="relative h-[50vh] min-h-[400px] max-h-[500px] overflow-hidden">
       <!-- Background Image -->
       <div class="absolute inset-0">
         <img
-          :src="event.image || 'https://picsum.photos/seed/event-hero/1920/600'"
+          :src="event.cover_image || 'https://picsum.photos/seed/event-hero/1920/600'"
           :alt="getLocalizedTitle"
           class="w-full h-full object-cover"
         >
@@ -187,7 +210,7 @@ const formatShortDate = (dateStr: string) => {
           <!-- Featured image -->
           <div class="overflow-hidden rounded-xl mb-8 shadow-lg">
             <img
-              :src="event.image || 'https://picsum.photos/seed/event-detail/800/450'"
+              :src="event.cover_image || 'https://picsum.photos/seed/event-detail/800/450'"
               :alt="getLocalizedTitle"
               class="w-full h-auto object-cover"
             >
@@ -202,7 +225,7 @@ const formatShortDate = (dateStr: string) => {
                 {{ t('actualites.detail.event.date') }}
               </div>
               <div class="font-bold text-gray-900 dark:text-white text-sm">
-                {{ formatDate(event.date) }}
+                {{ formatDate(event.start_date) }}
               </div>
               <div
                 v-if="!isPastEvent && daysUntilEvent <= 14 && daysUntilEvent > 0"
@@ -251,7 +274,7 @@ const formatShortDate = (dateStr: string) => {
           <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Description</h2>
             <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-              {{ event.description_fr }}
+              {{ event.description }}
             </p>
 
             <!-- Additional simulated content -->
@@ -291,10 +314,10 @@ const formatShortDate = (dateStr: string) => {
                 :key="item.id"
                 class="group relative overflow-hidden rounded-xl h-56"
               >
-                <NuxtLink :to="localePath(`/actualites/evenements/${item.id}`)">
+                <NuxtLink :to="localePath(`/actualites/evenements/${item.slug}`)">
                   <!-- Background image -->
                   <img
-                    :src="item.image || 'https://picsum.photos/seed/related-event/400/300'"
+                    :src="item.cover_image || 'https://picsum.photos/seed/related-event/400/300'"
                     :alt="getLocalizedTitleFor(item)"
                     class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"
@@ -320,7 +343,7 @@ const formatShortDate = (dateStr: string) => {
 
                     <div class="flex items-center gap-2 mt-2 text-xs text-gray-200">
                       <font-awesome-icon icon="fa-solid fa-calendar" class="w-3 h-3" />
-                      {{ formatShortDate(item.date) }}
+                      {{ formatShortDate(item.start_date) }}
                     </div>
                   </div>
                 </NuxtLink>
@@ -334,6 +357,7 @@ const formatShortDate = (dateStr: string) => {
           <ActualitesSidebar :show-events="false" />
         </aside>
       </div>
+    </div>
     </div>
   </div>
 </template>

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { CampusEvent } from '~/composables/useMockData'
+import type { EventPublic, EventType } from '~/composables/usePublicEventsApi'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
-const { getUpcomingEvents, getPastEvents } = useMockData()
+const { getUpcomingEvents: getApiUpcomingEvents, getPastEvents: getApiPastEvents } = usePublicEventsApi()
 
 // SEO
 useSeoMeta({
@@ -11,12 +11,31 @@ useSeoMeta({
   description: () => t('actualites.events.subtitle')
 })
 
-// Filters
-const selectedType = ref<'all' | CampusEvent['type']>('all')
+// Data loading
+const upcomingEvents = ref<EventPublic[]>([])
+const pastEvents = ref<EventPublic[]>([])
+const isLoading = ref(true)
 
-// Get events
-const upcomingEvents = computed(() => getUpcomingEvents())
-const pastEvents = computed(() => getPastEvents())
+// Charger les événements depuis l'API
+onMounted(async () => {
+  try {
+    const [upcoming, past] = await Promise.all([
+      getApiUpcomingEvents(50),
+      getApiPastEvents(20)
+    ])
+    upcomingEvents.value = upcoming
+    pastEvents.value = past
+  } catch (error) {
+    console.error('Erreur lors du chargement des événements:', error)
+    upcomingEvents.value = []
+    pastEvents.value = []
+  } finally {
+    isLoading.value = false
+  }
+})
+
+// Filters
+const selectedType = ref<'all' | EventType>('all')
 
 // Filtered upcoming events
 const filteredUpcoming = computed(() => {
@@ -39,28 +58,31 @@ const otherUpcomingEvents = computed(() => filteredUpcoming.value.slice(4))
 // Show past events toggle
 const showPastEvents = ref(false)
 
-// Filter options
+// Filter options (adaptés aux types backend)
 const typeFilters = [
   { value: 'all', label: 'actualites.events.filters.all' },
   { value: 'conference', label: 'actualites.events.filters.conference' },
-  { value: 'atelier', label: 'actualites.events.filters.atelier' },
-  { value: 'ceremonie', label: 'actualites.events.filters.ceremonie' },
-  { value: 'autre', label: 'actualites.events.filters.autre' }
+  { value: 'workshop', label: 'actualites.events.filters.workshop' },
+  { value: 'ceremony', label: 'actualites.events.filters.ceremony' },
+  { value: 'seminar', label: 'actualites.events.filters.seminar' },
+  { value: 'symposium', label: 'actualites.events.filters.symposium' },
+  { value: 'other', label: 'actualites.events.filters.other' }
 ]
 
 // Localization helpers
-const getLocalizedTitle = (item: { title_fr: string; title_en?: string; title_ar?: string }) => {
-  if (locale.value === 'en' && item.title_en) return item.title_en
-  if (locale.value === 'ar' && item.title_ar) return item.title_ar
-  return item.title_fr
+const getLocalizedTitle = (item: EventPublic) => {
+  // Pour le moment, on utilise uniquement le titre principal
+  return item.title
 }
 
-const getLocalizedLocation = (item: { location_fr: string; location_en?: string }) => {
-  if (locale.value === 'en' && item.location_en) return item.location_en
-  return item.location_fr
+const getLocalizedLocation = (item: EventPublic) => {
+  // Utiliser venue ou city
+  if (item.is_online) return t('actualites.events.online')
+  return item.venue || item.city || t('actualites.events.noLocation')
 }
 
-const formatDate = (dateStr: string) => {
+const formatDate = (dateStr: string | null | undefined) => {
+  if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleDateString(
     locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
@@ -68,7 +90,8 @@ const formatDate = (dateStr: string) => {
   )
 }
 
-const formatShortDate = (dateStr: string) => {
+const formatShortDate = (dateStr: string | null | undefined) => {
+  if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleDateString(
     locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
@@ -79,9 +102,11 @@ const formatShortDate = (dateStr: string) => {
 // Event type colors
 const typeColors: Record<string, string> = {
   conference: 'bg-brand-red-600',
-  atelier: 'bg-brand-blue-600',
-  ceremonie: 'bg-brand-blue-500',
-  autre: 'bg-gray-600'
+  workshop: 'bg-brand-blue-600',
+  ceremony: 'bg-brand-blue-500',
+  seminar: 'bg-purple-600',
+  symposium: 'bg-green-600',
+  other: 'bg-gray-600'
 }
 </script>
 
@@ -95,6 +120,15 @@ const typeColors: Record<string, string> = {
     />
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <!-- Loading state -->
+      <div v-if="isLoading" class="flex items-center justify-center py-12">
+        <div class="flex flex-col items-center gap-4">
+          <div class="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+          <span class="text-sm text-gray-500 dark:text-gray-400">{{ t('actualites.loading') }}</span>
+        </div>
+      </div>
+
+      <div v-else>
       <!-- Filters -->
       <div class="mb-10">
         <div class="inline-flex flex-wrap gap-2">
@@ -125,12 +159,12 @@ const typeColors: Record<string, string> = {
           <NuxtLink
             v-for="event in featuredEvents"
             :key="event.id"
-            :to="localePath(`/actualites/evenements/${event.id}`)"
+            :to="localePath(`/actualites/evenements/${event.slug}`)"
             class="group relative overflow-hidden rounded-xl h-80 block"
           >
             <!-- Background image -->
             <img
-              :src="event.image || 'https://picsum.photos/seed/default-event/600/400'"
+              :src="event.cover_image || 'https://picsum.photos/seed/default-event/600/400'"
               :alt="getLocalizedTitle(event)"
               class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               loading="lazy"
@@ -140,7 +174,7 @@ const typeColors: Record<string, string> = {
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-300 group-hover:from-black/90"></div>
 
             <!-- Content -->
-            <div class="absolute inset-0 p-5 flex flex-col justify-end transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+            <div class="absolute inset-x-0 bottom-0 p-5 flex flex-col justify-end transform translate-y-0 group-hover:-translate-y-2 transition-transform duration-300">
               <div class="flex items-center gap-2 mb-2">
                 <span
                   class="inline-block px-2 py-0.5 text-xs font-semibold text-white rounded"
@@ -156,13 +190,13 @@ const typeColors: Record<string, string> = {
 
               <!-- Hidden on default, visible on hover -->
               <p class="mt-2 text-sm text-gray-200 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                {{ event.description_fr }}
+                {{ event.description }}
               </p>
 
               <div class="flex flex-col gap-1 mt-3 text-sm text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <span class="flex items-center gap-1">
                   <font-awesome-icon icon="fa-solid fa-calendar" class="w-3 h-3" />
-                  {{ formatDate(event.date) }}
+                  {{ formatDate(event.start_date) }}
                 </span>
                 <span class="flex items-center gap-1">
                   <font-awesome-icon icon="fa-solid fa-location-dot" class="w-3 h-3" />
@@ -191,13 +225,13 @@ const typeColors: Record<string, string> = {
               <NuxtLink
                 v-for="event in otherUpcomingEvents"
                 :key="event.id"
-                :to="localePath(`/actualites/evenements/${event.id}`)"
+                :to="localePath(`/actualites/evenements/${event.slug}`)"
                 class="group flex flex-col md:flex-row gap-4 pb-6 border-b border-gray-200 dark:border-gray-700"
               >
                 <!-- Thumbnail -->
                 <div class="md:w-1/4 overflow-hidden rounded-lg">
                   <img
-                    :src="event.image || 'https://picsum.photos/seed/default-event/600/400'"
+                    :src="event.cover_image || 'https://picsum.photos/seed/default-event/600/400'"
                     :alt="getLocalizedTitle(event)"
                     class="w-full h-40 md:h-32 object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
@@ -220,13 +254,13 @@ const typeColors: Record<string, string> = {
                   </h3>
 
                   <p class="mt-2 text-gray-600 dark:text-gray-400 line-clamp-2">
-                    {{ event.description_fr }}
+                    {{ event.description }}
                   </p>
 
                   <div class="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-500 dark:text-gray-400">
                     <span class="flex items-center gap-1">
                       <font-awesome-icon icon="fa-solid fa-calendar" class="w-3 h-3" />
-                      {{ formatDate(event.date) }}
+                      {{ formatDate(event.start_date) }}
                     </span>
                     <span class="flex items-center gap-1">
                       <font-awesome-icon icon="fa-solid fa-location-dot" class="w-3 h-3" />
@@ -271,14 +305,14 @@ const typeColors: Record<string, string> = {
                 <NuxtLink
                   v-for="event in filteredPast.slice(0, 6)"
                   :key="event.id"
-                  :to="localePath(`/actualites/evenements/${event.id}`)"
+                  :to="localePath(`/actualites/evenements/${event.slug}`)"
                   class="group flex items-center gap-4 py-3 border-b border-gray-200 dark:border-gray-700 opacity-70 hover:opacity-100 transition-opacity"
                 >
                   <!-- Date badge -->
                   <div class="flex-shrink-0 w-16 text-center">
                     <div class="bg-gray-100 dark:bg-gray-800 rounded-lg py-2">
                       <div class="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        {{ formatShortDate(event.date) }}
+                        {{ formatShortDate(event.start_date) }}
                       </div>
                     </div>
                   </div>
@@ -307,6 +341,7 @@ const typeColors: Record<string, string> = {
         <div class="lg:w-1/3">
           <ActualitesSidebar :show-events="false" />
         </div>
+      </div>
       </div>
     </div>
   </div>

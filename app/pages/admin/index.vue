@@ -1,46 +1,53 @@
 <script setup lang="ts">
+import type { ApplicationRead, ApplicationStatistics, EventRead, AuditLogWithUser } from '~/types/api'
+import type { NewsDisplay, NewsStats } from '~/types/news'
+
 definePageMeta({
   layout: 'admin'
 })
 
-const { locale } = useI18n()
+// APIs
+const { listApplications, getStatistics, applicationStatusLabels } = useApplicationsApi()
+const { listEvents } = useEventsApi()
+const { listNews, getNewsStats } = useAdminNewsApi()
+const { listAuditLogs, enrichLog, auditActionLabels, getTableLabel: getAuditTableLabel } = useAuditApi()
 
-// Données depuis useMockData
-const {
-  getAllOpenCalls,
-  getAllClosedCalls,
-  getUpcomingEvents,
-  getAllNews,
-  getRecentAuditLogs,
-  getActiveUsersCount
-} = useMockData()
+// === STATE ===
+const isLoading = ref(true)
+const error = ref<string | null>(null)
 
-// === STATS ===
-// Candidatures en attente (appels ouverts)
-const pendingApplications = computed(() => getAllOpenCalls().length)
-
-// Événements à venir (30 prochains jours)
-const upcomingEventsCount = computed(() => {
-  const now = new Date()
-  const thirtyDaysLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
-  return getUpcomingEvents().filter(e => new Date(e.date) <= thirtyDaysLater).length
+// Stats data
+const applicationStats = ref<ApplicationStatistics>({
+  total: 0,
+  submitted: 0,
+  under_review: 0,
+  accepted: 0,
+  rejected: 0,
+  waitlisted: 0,
+  incomplete: 0,
 })
-
-// Actualités publiées ce mois
-const newsThisMonth = computed(() => {
-  const now = new Date()
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-  return getAllNews().filter(n => new Date(n.date) >= startOfMonth).length
+const newsStats = ref<NewsStats>({
+  total: 0,
+  published: 0,
+  draft: 0,
+  archived: 0,
+  headline: 0,
+  featured: 0,
 })
+const upcomingEventsCount = ref(0)
 
-// Utilisateurs actifs
-const activeUsers = computed(() => getActiveUsersCount())
+// Lists data
+const recentApplications = ref<ApplicationRead[]>([])
+const upcomingEventsList = ref<EventRead[]>([])
+const recentNewsList = ref<NewsDisplay[]>([])
+const recentActivity = ref<AuditLogWithUser[]>([])
 
+// === COMPUTED STATS ===
 const stats = computed(() => [
   {
     id: 'applications',
-    label: 'Candidatures en attente',
-    value: pendingApplications.value,
+    label: 'Candidatures soumises',
+    value: applicationStats.value.submitted + applicationStats.value.under_review,
     change: 'À traiter',
     changeType: 'neutral',
     icon: 'fa-solid fa-file-alt',
@@ -48,86 +55,92 @@ const stats = computed(() => [
   },
   {
     id: 'events',
-    label: 'Événements (30 jours)',
+    label: 'Événements à venir',
     value: upcomingEventsCount.value,
-    change: 'À venir',
+    change: 'Prochains',
     changeType: 'neutral',
     icon: 'fa-solid fa-calendar-days',
     color: 'purple'
   },
   {
     id: 'news',
-    label: 'Actualités ce mois',
-    value: newsThisMonth.value,
-    change: 'Publiées',
+    label: 'Actualités publiées',
+    value: newsStats.value.published,
+    change: 'En ligne',
     changeType: 'positive',
     icon: 'fa-solid fa-newspaper',
     color: 'green'
   },
   {
-    id: 'users',
-    label: 'Utilisateurs actifs',
-    value: activeUsers.value,
-    change: 'En ligne',
-    changeType: 'positive',
+    id: 'total',
+    label: 'Total candidatures',
+    value: applicationStats.value.total,
+    change: 'Global',
+    changeType: 'neutral',
     icon: 'fa-solid fa-users',
     color: 'orange'
   }
 ])
 
-// === CANDIDATURES RÉCENTES ===
-const recentApplications = computed(() => {
-  // Combine appels ouverts et fermés, triés par date
-  const allCalls = [...getAllOpenCalls(), ...getAllClosedCalls()]
-    .sort((a, b) => new Date(b.deadline).getTime() - new Date(a.deadline).getTime())
-    .slice(0, 5)
+// === FETCH DATA ===
+async function fetchDashboardData() {
+  isLoading.value = true
+  error.value = null
 
-  return allCalls.map((call, index) => ({
-    id: call.id,
-    reference: `#2025-${String(1000 + index).padStart(4, '0')}`,
-    candidat: ['Amadou Diallo', 'Fatou Sow', 'Ibrahim Touré', 'Marie Koné', 'Ousmane Ba'][index % 5],
-    formation: call.title_fr,
-    date: call.deadline,
-    status: call.status
-  }))
-})
+  try {
+    // Fetch all data in parallel
+    const [
+      appStatsResult,
+      newsStatsResult,
+      applicationsResult,
+      upcomingEventsResult,
+      newsResult,
+      auditResult,
+    ] = await Promise.all([
+      getStatistics().catch(() => applicationStats.value),
+      getNewsStats().catch(() => newsStats.value),
+      listApplications({ limit: 5, sort_by: 'submitted_at', sort_order: 'desc' }).catch(() => ({ items: [], total: 0 })),
+      listEvents({ limit: 5, from_date: new Date().toISOString(), sort_by: 'start_date', sort_order: 'asc' }).catch(() => ({ items: [], total: 0 })),
+      listNews({ limit: 5, sort_by: 'updated_at', sort_order: 'desc' }).catch(() => ({ items: [], total: 0 })),
+      listAuditLogs({ limit: 10 }).catch(() => ({ items: [], total: 0 })),
+    ])
 
-// === ÉVÉNEMENTS À VENIR ===
-const upcomingEventsList = computed(() => {
-  return getUpcomingEvents().slice(0, 5).map(event => ({
-    id: event.id,
-    title: locale.value === 'en' && event.title_en ? event.title_en : event.title_fr,
-    date: event.date,
-    location: locale.value === 'en' && event.location_en ? event.location_en : event.location_fr,
-    registrations: Math.floor(Math.random() * 50) + 10 // Mock
-  }))
-})
+    // Update stats
+    applicationStats.value = appStatsResult
+    newsStats.value = newsStatsResult
+    upcomingEventsCount.value = upcomingEventsResult.total
 
-// === ACTUALITÉS RÉCENTES ===
-const recentNewsList = computed(() => {
-  return getAllNews().slice(0, 5).map((news, index) => ({
-    id: news.id,
-    title: locale.value === 'en' && news.title_en ? news.title_en : news.title_fr,
-    author: ['Marie Dupont', 'Jean Martin', 'Sophie Bernard', 'Pierre Durand', 'Aminata Koné'][index % 5],
-    date: news.date,
-    status: news.is_featured ? 'published' : (index % 3 === 0 ? 'draft' : 'published')
-  }))
-})
+    // Update lists
+    recentApplications.value = applicationsResult.items
+    upcomingEventsList.value = upcomingEventsResult.items
+    recentNewsList.value = newsResult.items
+    recentActivity.value = auditResult.items.map(enrichLog)
+  } catch (e) {
+    console.error('Error fetching dashboard data:', e)
+    error.value = 'Erreur lors du chargement des données du tableau de bord'
+  } finally {
+    isLoading.value = false
+  }
+}
 
-// === ACTIVITÉ RÉCENTE ===
-const recentActivity = computed(() => {
-  return getRecentAuditLogs(10).map(log => ({
-    id: log.id,
-    user: log.user_name,
-    action: getActionLabel(log.action),
-    target: log.record_label,
-    table: getTableLabel(log.table_name),
-    time: formatRelativeTime(log.created_at),
-    icon: getActionIcon(log.action)
-  }))
+// Load data on mount
+onMounted(() => {
+  fetchDashboardData()
 })
 
 // === HELPERS ===
+const getApplicationStatusClasses = (status: string) => {
+  const colors: Record<string, string> = {
+    submitted: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    under_review: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    accepted: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    rejected: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    waitlisted: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+    incomplete: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+  }
+  return colors[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+}
+
 const getColorClasses = (color: string) => {
   const colors: Record<string, { bg: string; text: string; icon: string }> = {
     blue: {
@@ -257,6 +270,14 @@ const formatDate = (dateString: string) => {
       </div>
     </div>
 
+    <!-- Error message -->
+    <div v-if="error" class="rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
+      <div class="flex items-center gap-2">
+        <font-awesome-icon icon="fa-solid fa-circle-exclamation" class="h-4 w-4" />
+        {{ error }}
+      </div>
+    </div>
+
     <!-- Stats cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <div
@@ -315,7 +336,13 @@ const formatDate = (dateString: string) => {
             Voir tout
           </NuxtLink>
         </div>
-        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+        <div v-if="isLoading" class="p-6 text-center text-gray-500 dark:text-gray-400">
+          <font-awesome-icon icon="fa-solid fa-spinner" class="w-5 h-5 animate-spin" />
+        </div>
+        <div v-else-if="recentApplications.length === 0" class="p-6 text-center text-gray-500 dark:text-gray-400">
+          Aucune candidature récente
+        </div>
+        <div v-else class="divide-y divide-gray-200 dark:divide-gray-700">
           <div
             v-for="app in recentApplications"
             :key="app.id"
@@ -325,27 +352,27 @@ const formatDate = (dateString: string) => {
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2">
                   <span class="text-sm font-mono text-gray-500 dark:text-gray-400">
-                    {{ app.reference }}
+                    {{ app.reference_number }}
                   </span>
                   <span
                     :class="[
                       'text-xs font-medium px-2 py-0.5 rounded-full',
-                      getStatusClasses(app.status)
+                      getApplicationStatusClasses(app.status)
                     ]"
                   >
-                    {{ getStatusLabel(app.status) }}
+                    {{ applicationStatusLabels[app.status] }}
                   </span>
                 </div>
                 <p class="text-sm font-medium text-gray-900 dark:text-white mt-1 truncate">
-                  {{ app.candidat }}
+                  {{ app.last_name }} {{ app.first_name }}
                 </p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
-                  {{ app.formation }}
+                  {{ app.email }}
                 </p>
               </div>
               <div class="text-right ml-4">
                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ formatDate(app.date) }}
+                  {{ formatDate(app.submitted_at) }}
                 </p>
               </div>
             </div>
@@ -366,7 +393,13 @@ const formatDate = (dateString: string) => {
             Voir tout
           </NuxtLink>
         </div>
-        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+        <div v-if="isLoading" class="p-6 text-center text-gray-500 dark:text-gray-400">
+          <font-awesome-icon icon="fa-solid fa-spinner" class="w-5 h-5 animate-spin" />
+        </div>
+        <div v-else-if="upcomingEventsList.length === 0" class="p-6 text-center text-gray-500 dark:text-gray-400">
+          Aucun événement à venir
+        </div>
+        <div v-else class="divide-y divide-gray-200 dark:divide-gray-700">
           <div
             v-for="event in upcomingEventsList"
             :key="event.id"
@@ -380,18 +413,22 @@ const formatDate = (dateString: string) => {
                 <div class="flex items-center gap-3 mt-1">
                   <span class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                     <font-awesome-icon icon="fa-solid fa-calendar" class="w-3 h-3" />
-                    {{ formatDate(event.date) }}
+                    {{ formatDate(event.start_date) }}
                   </span>
-                  <span class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 truncate">
+                  <span v-if="event.venue || event.city" class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 truncate">
                     <font-awesome-icon icon="fa-solid fa-location-dot" class="w-3 h-3" />
-                    {{ event.location }}
+                    {{ event.venue || event.city }}
+                  </span>
+                  <span v-else-if="event.is_online" class="text-xs text-indigo-500 flex items-center gap-1">
+                    <font-awesome-icon icon="fa-solid fa-video" class="w-3 h-3" />
+                    En ligne
                   </span>
                 </div>
               </div>
-              <div class="flex items-center gap-1 ml-4">
+              <div v-if="event.registration_required && event.max_attendees" class="flex items-center gap-1 ml-4">
                 <font-awesome-icon icon="fa-solid fa-users" class="w-3 h-3 text-gray-400" />
                 <span class="text-sm font-medium text-gray-600 dark:text-gray-300">
-                  {{ event.registrations }}
+                  {{ event.max_attendees }}
                 </span>
               </div>
             </div>
@@ -415,7 +452,13 @@ const formatDate = (dateString: string) => {
             Voir tout
           </NuxtLink>
         </div>
-        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+        <div v-if="isLoading" class="p-6 text-center text-gray-500 dark:text-gray-400">
+          <font-awesome-icon icon="fa-solid fa-spinner" class="w-5 h-5 animate-spin" />
+        </div>
+        <div v-else-if="recentNewsList.length === 0" class="p-6 text-center text-gray-500 dark:text-gray-400">
+          Aucune actualité récente
+        </div>
+        <div v-else class="divide-y divide-gray-200 dark:divide-gray-700">
           <div
             v-for="news in recentNewsList"
             :key="news.id"
@@ -427,11 +470,11 @@ const formatDate = (dateString: string) => {
                   {{ news.title }}
                 </p>
                 <div class="flex items-center gap-3 mt-1">
-                  <span class="text-xs text-gray-500 dark:text-gray-400">
-                    Par {{ news.author }}
+                  <span v-if="news.author" class="text-xs text-gray-500 dark:text-gray-400">
+                    Par {{ news.author.name }}
                   </span>
                   <span class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ formatDate(news.date) }}
+                    {{ formatDate(news.published_at || news.updated_at) }}
                   </span>
                 </div>
               </div>
@@ -461,7 +504,13 @@ const formatDate = (dateString: string) => {
             Voir tout
           </NuxtLink>
         </div>
-        <div class="divide-y divide-gray-200 dark:divide-gray-700 max-h-[400px] overflow-y-auto">
+        <div v-if="isLoading" class="p-6 text-center text-gray-500 dark:text-gray-400">
+          <font-awesome-icon icon="fa-solid fa-spinner" class="w-5 h-5 animate-spin" />
+        </div>
+        <div v-else-if="recentActivity.length === 0" class="p-6 text-center text-gray-500 dark:text-gray-400">
+          Aucune activité récente
+        </div>
+        <div v-else class="divide-y divide-gray-200 dark:divide-gray-700 max-h-[400px] overflow-y-auto">
           <div
             v-for="activity in recentActivity"
             :key="activity.id"
@@ -469,20 +518,20 @@ const formatDate = (dateString: string) => {
           >
             <div class="w-8 h-8 rounded-full bg-brand-blue-100 dark:bg-brand-blue-900/30 flex items-center justify-center flex-shrink-0">
               <font-awesome-icon
-                :icon="activity.icon"
+                :icon="getActionIcon(activity.action)"
                 class="w-3 h-3 text-brand-blue-600 dark:text-brand-blue-400"
               />
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-sm text-gray-900 dark:text-white">
-                <span class="font-medium">{{ activity.user }}</span>
-                {{ activity.action }} une {{ activity.table }}
+                <span class="font-medium">{{ activity.user?.name || 'Système' }}</span>
+                {{ getActionLabel(activity.action) }} {{ getAuditTableLabel(activity.table_name) }}
               </p>
-              <p class="text-xs text-brand-blue-600 dark:text-brand-blue-400 truncate">
-                {{ activity.target }}
+              <p v-if="activity.summary" class="text-xs text-brand-blue-600 dark:text-brand-blue-400 truncate">
+                {{ activity.summary }}
               </p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                {{ activity.time }}
+                {{ formatRelativeTime(activity.created_at) }}
               </p>
             </div>
           </div>

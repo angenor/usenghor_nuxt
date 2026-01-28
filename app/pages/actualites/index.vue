@@ -4,7 +4,8 @@ import type { NewsDisplay } from '~/types/news'
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getAllPublishedNews } = usePublicNewsApi()
-const { getUpcomingEvents, getAllOpenCalls } = useMockData()
+const { getUpcomingEvents: getApiUpcomingEvents } = usePublicEventsApi()
+const { getAllOpenCalls } = useMockData()
 
 // SEO
 useSeoMeta({
@@ -14,21 +15,28 @@ useSeoMeta({
 
 // Get data
 const allNews = ref<NewsDisplay[]>([])
+const upcomingEventsData = ref<any[]>([])
 const isLoading = ref(true)
 
-// Charger les actualités depuis l'API
+// Charger les actualités et événements depuis l'API
 onMounted(async () => {
   try {
-    allNews.value = await getAllPublishedNews()
+    const [news, events] = await Promise.all([
+      getAllPublishedNews(),
+      getApiUpcomingEvents(4)
+    ])
+    allNews.value = news
+    upcomingEventsData.value = events
   } catch (error) {
-    console.error('Erreur lors du chargement des actualités:', error)
+    console.error('Erreur lors du chargement des données:', error)
     allNews.value = []
+    upcomingEventsData.value = []
   } finally {
     isLoading.value = false
   }
 })
 
-const upcomingEvents = computed(() => getUpcomingEvents().slice(0, 4))
+const upcomingEvents = computed(() => upcomingEventsData.value)
 const openCalls = computed(() => getAllOpenCalls().slice(0, 3))
 
 // Featured news (first one with headline status or first published)
@@ -117,9 +125,16 @@ const formatShortDate = (dateStr: string | null | undefined) => {
 // Event type colors
 const typeColors: Record<string, string> = {
   conference: 'bg-brand-red-600',
-  atelier: 'bg-brand-blue-600',
-  ceremonie: 'bg-brand-blue-500',
-  autre: 'bg-gray-600'
+  workshop: 'bg-brand-blue-600',
+  ceremony: 'bg-brand-blue-500',
+  seminar: 'bg-purple-600',
+  symposium: 'bg-green-600',
+  other: 'bg-gray-600'
+}
+
+// Helper pour les événements
+const getEventTitle = (event: any) => {
+  return event.title
 }
 </script>
 
@@ -307,13 +322,13 @@ const typeColors: Record<string, string> = {
           <NuxtLink
             v-for="event in upcomingEvents"
             :key="event.id"
-            :to="localePath(`/actualites/evenements/${event.id}`)"
+            :to="localePath(`/actualites/evenements/${event.slug}`)"
             class="group relative overflow-hidden rounded-xl h-72 block"
           >
             <!-- Background image -->
             <img
-              :src="event.image || 'https://picsum.photos/seed/default-event/600/400'"
-              :alt="getLocalizedTitle(event)"
+              :src="event.cover_image || 'https://picsum.photos/seed/default-event/600/400'"
+              :alt="getEventTitle(event)"
               class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               loading="lazy"
             >
@@ -333,13 +348,13 @@ const typeColors: Record<string, string> = {
               </div>
 
               <h3 class="text-lg font-bold text-white leading-tight line-clamp-2 group-hover:underline">
-                {{ getLocalizedTitle(event) }}
+                {{ getEventTitle(event) }}
               </h3>
 
               <div class="flex items-center gap-3 mt-2 text-sm text-gray-200">
                 <span class="flex items-center gap-1">
                   <font-awesome-icon icon="fa-solid fa-calendar" class="w-3 h-3" />
-                  {{ formatShortDate(event.date) }}
+                  {{ formatShortDate(event.start_date) }}
                 </span>
               </div>
             </div>

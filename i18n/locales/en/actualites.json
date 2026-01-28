@@ -51,18 +51,24 @@
       "past": "Past Events",
       "noEvents": "No events scheduled at the moment",
       "noResults": "No events match your criteria",
+      "online": "Online",
+      "noLocation": "Location to be defined",
       "filters": {
         "all": "All",
         "conference": "Conferences",
-        "atelier": "Workshops",
-        "ceremonie": "Ceremonies",
-        "autre": "Other"
+        "workshop": "Workshops",
+        "ceremony": "Ceremonies",
+        "seminar": "Seminars",
+        "symposium": "Symposiums",
+        "other": "Other"
       },
       "types": {
         "conference": "Conference",
-        "atelier": "Workshop",
-        "ceremonie": "Ceremony",
-        "autre": "Other"
+        "workshop": "Workshop",
+        "ceremony": "Ceremony",
+        "seminar": "Seminar",
+        "symposium": "Symposium",
+        "other": "Other"
       }
     },
     "campus": {
@@ -79,6 +85,7 @@
       "description": "Come back soon to discover our latest news."
     },
     "readMore": "Read more",
+    "loading": "Loading...",
     "detail": {
       "news": {
         "breadcrumb": "News",

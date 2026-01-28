@@ -51,18 +51,24 @@
       "past": "Événements passés",
       "noEvents": "Aucun événement prévu pour le moment",
       "noResults": "Aucun événement ne correspond à vos critères",
+      "online": "En ligne",
+      "noLocation": "Lieu à définir",
       "filters": {
         "all": "Tous",
         "conference": "Conférences",
-        "atelier": "Ateliers",
-        "ceremonie": "Cérémonies",
-        "autre": "Autres"
+        "workshop": "Ateliers",
+        "ceremony": "Cérémonies",
+        "seminar": "Séminaires",
+        "symposium": "Colloques",
+        "other": "Autres"
       },
       "types": {
         "conference": "Conférence",
-        "atelier": "Atelier",
-        "ceremonie": "Cérémonie",
-        "autre": "Autre"
+        "workshop": "Atelier",
+        "ceremony": "Cérémonie",
+        "seminar": "Séminaire",
+        "symposium": "Colloque",
+        "other": "Autre"
       }
     },
     "campus": {
@@ -79,6 +85,7 @@
       "description": "Revenez bientôt pour découvrir nos dernières actualités."
     },
     "readMore": "Lire la suite",
+    "loading": "Chargement...",
     "detail": {
       "news": {
         "breadcrumb": "Actualité",

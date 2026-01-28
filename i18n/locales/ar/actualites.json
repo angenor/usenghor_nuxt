@@ -51,18 +51,24 @@
       "past": "الفعاليات السابقة",
       "noEvents": "لا توجد فعاليات مجدولة حالياً",
       "noResults": "لا توجد فعاليات تطابق معاييرك",
+      "online": "عبر الإنترنت",
+      "noLocation": "المكان سيحدد لاحقاً",
       "filters": {
         "all": "الكل",
         "conference": "المؤتمرات",
-        "atelier": "ورش العمل",
-        "ceremonie": "الاحتفالات",
-        "autre": "أخرى"
+        "workshop": "ورش العمل",
+        "ceremony": "الاحتفالات",
+        "seminar": "الندوات",
+        "symposium": "الملتقيات",
+        "other": "أخرى"
       },
       "types": {
         "conference": "مؤتمر",
-        "atelier": "ورشة عمل",
-        "ceremonie": "احتفال",
-        "autre": "أخرى"
+        "workshop": "ورشة عمل",
+        "ceremony": "احتفال",
+        "seminar": "ندوة",
+        "symposium": "ملتقى",
+        "other": "أخرى"
       }
     },
     "campus": {
@@ -79,6 +85,7 @@
       "description": "عد قريباً لاكتشاف آخر أخبارنا."
     },
     "readMore": "اقرأ المزيد",
+    "loading": "جاري التحميل...",
     "detail": {
       "news": {
         "breadcrumb": "خبر",
