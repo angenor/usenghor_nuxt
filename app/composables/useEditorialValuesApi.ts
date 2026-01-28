@@ -27,6 +27,199 @@ const VALUES_CATEGORY_CODE = 'values'
 // Préfixe pour les clés de valeurs fondamentales
 const CORE_VALUE_KEY_PREFIX = 'core_value_'
 
+// ============================================================================
+// STRUCTURE PAR PAGES ET SECTIONS DU FRONT-OFFICE
+// ============================================================================
+
+// Types pour la structure par page
+export interface PageSection {
+  id: string
+  name: string
+  description: string
+  icon: string
+  color: string
+  editorialKeys: ValueSectionKey[] // Clés des contenus éditoriaux associés
+  fields: PageSectionField[]
+}
+
+export interface PageSectionField {
+  key: string
+  label: string
+  description: string
+  type: 'text' | 'textarea' | 'number' | 'html' | 'image' | 'list'
+  i18nKey?: string // Clé i18n si le champ utilise les traductions
+  editorialKey?: ValueSectionKey // Clé éditoriale si éditable via le backend
+  editable: boolean
+}
+
+export interface FrontOfficePage {
+  id: string
+  name: string
+  slug: string
+  description: string
+  icon: string
+  sections: PageSection[]
+}
+
+// ============================================================================
+// DÉFINITION DE LA PAGE D'ACCUEIL - TOUS LES CHAMPS ÉDITABLES
+// ============================================================================
+
+export const homepageSections: PageSection[] = [
+  {
+    id: 'hero',
+    name: 'Section Hero (Carrousel)',
+    description: 'Bannière principale avec carrousel d\'images et textes d\'accroche',
+    icon: 'image',
+    color: 'bg-gradient-to-r from-brand-blue-500 to-brand-red-500 text-white',
+    editorialKeys: [
+      'hero.slide1.title', 'hero.slide1.subtitle',
+      'hero.slide2.title', 'hero.slide2.subtitle',
+      'hero.slide3.title', 'hero.slide3.subtitle',
+      'hero.slide4.title', 'hero.slide4.subtitle',
+      'hero.cta.discover', 'hero.cta.contact',
+    ],
+    fields: [
+      { key: 'hero.slide1.title', label: 'Slide 1 - Titre', description: 'Titre du premier slide', type: 'text', editorialKey: 'hero.slide1.title', editable: true },
+      { key: 'hero.slide1.subtitle', label: 'Slide 1 - Sous-titre', description: 'Sous-titre du premier slide', type: 'textarea', editorialKey: 'hero.slide1.subtitle', editable: true },
+      { key: 'hero.slide2.title', label: 'Slide 2 - Titre', description: 'Titre du deuxième slide', type: 'text', editorialKey: 'hero.slide2.title', editable: true },
+      { key: 'hero.slide2.subtitle', label: 'Slide 2 - Sous-titre', description: 'Sous-titre du deuxième slide', type: 'textarea', editorialKey: 'hero.slide2.subtitle', editable: true },
+      { key: 'hero.slide3.title', label: 'Slide 3 - Titre', description: 'Titre du troisième slide', type: 'text', editorialKey: 'hero.slide3.title', editable: true },
+      { key: 'hero.slide3.subtitle', label: 'Slide 3 - Sous-titre', description: 'Sous-titre du troisième slide', type: 'textarea', editorialKey: 'hero.slide3.subtitle', editable: true },
+      { key: 'hero.slide4.title', label: 'Slide 4 - Titre', description: 'Titre du quatrième slide', type: 'text', editorialKey: 'hero.slide4.title', editable: true },
+      { key: 'hero.slide4.subtitle', label: 'Slide 4 - Sous-titre', description: 'Sous-titre du quatrième slide', type: 'textarea', editorialKey: 'hero.slide4.subtitle', editable: true },
+      { key: 'hero.cta.discover', label: 'Bouton "Découvrir"', description: 'Texte du bouton principal', type: 'text', editorialKey: 'hero.cta.discover', editable: true },
+      { key: 'hero.cta.contact', label: 'Bouton "Contact"', description: 'Texte du bouton secondaire', type: 'text', editorialKey: 'hero.cta.contact', editable: true },
+    ],
+  },
+  {
+    id: 'mission',
+    name: 'Section Mission & Vision',
+    description: 'Présentation de la mission, vision et expérience Senghor',
+    icon: 'bullseye',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    editorialKeys: [
+      'mission.badge', 'mission.title', 'mission.subtitle',
+      'mission.mission.title', 'mission.mission.description', 'mission.mission.tagline',
+      'mission.vision.title', 'mission.vision.description',
+    ],
+    fields: [
+      { key: 'mission.badge', label: 'Badge', description: 'Texte du badge au-dessus du titre', type: 'text', editorialKey: 'mission.badge', editable: true },
+      { key: 'mission.title', label: 'Titre de section', description: 'Titre principal de la section', type: 'text', editorialKey: 'mission.title', editable: true },
+      { key: 'mission.subtitle', label: 'Sous-titre', description: 'Description courte sous le titre', type: 'textarea', editorialKey: 'mission.subtitle', editable: true },
+      { key: 'mission.mission.title', label: 'Titre Mission', description: 'Titre de la carte Mission', type: 'text', editorialKey: 'mission.mission.title', editable: true },
+      { key: 'mission.mission.description', label: 'Description Mission', description: 'Contenu de la carte Mission', type: 'html', editorialKey: 'mission.mission.description', editable: true },
+      { key: 'mission.mission.tagline', label: 'Tagline Mission', description: 'Phrase d\'accroche de la mission', type: 'text', editorialKey: 'mission.mission.tagline', editable: true },
+      { key: 'mission.vision.title', label: 'Titre Vision', description: 'Titre de la carte Vision', type: 'text', editorialKey: 'mission.vision.title', editable: true },
+      { key: 'mission.vision.description', label: 'Description Vision', description: 'Contenu de la carte Vision', type: 'html', editorialKey: 'mission.vision.description', editable: true },
+    ],
+  },
+  {
+    id: 'experience',
+    name: 'L\'expérience Senghor',
+    description: 'Bloc présentant l\'expérience étudiante avec statistiques',
+    icon: 'graduation-cap',
+    color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+    editorialKeys: [
+      'experience.badge', 'experience.title', 'experience.description', 'experience.cta',
+      'experience.stats.countries', 'experience.stats.countries.value',
+      'experience.stats.graduates', 'experience.stats.graduates.value',
+      'experience.stats.years', 'experience.stats.years.value',
+    ],
+    fields: [
+      { key: 'experience.badge', label: 'Badge Expérience', description: 'Texte du badge', type: 'text', editorialKey: 'experience.badge', editable: true },
+      { key: 'experience.title', label: 'Titre Expérience', description: 'Titre du bloc', type: 'text', editorialKey: 'experience.title', editable: true },
+      { key: 'experience.description', label: 'Description', description: 'Texte descriptif', type: 'textarea', editorialKey: 'experience.description', editable: true },
+      { key: 'experience.cta', label: 'Bouton CTA', description: 'Texte du bouton d\'action', type: 'text', editorialKey: 'experience.cta', editable: true },
+      { key: 'experience.stats.countries', label: 'Stat Pays - Libellé', description: 'Libellé de la statistique pays', type: 'text', editorialKey: 'experience.stats.countries', editable: true },
+      { key: 'experience.stats.countries.value', label: 'Stat Pays - Valeur', description: 'Nombre de pays (ex: 54)', type: 'number', editorialKey: 'experience.stats.countries.value', editable: true },
+      { key: 'experience.stats.graduates', label: 'Stat Diplômés - Libellé', description: 'Libellé de la statistique diplômés', type: 'text', editorialKey: 'experience.stats.graduates', editable: true },
+      { key: 'experience.stats.graduates.value', label: 'Stat Diplômés - Valeur', description: 'Nombre de diplômés (ex: 5000)', type: 'number', editorialKey: 'experience.stats.graduates.value', editable: true },
+      { key: 'experience.stats.years', label: 'Stat Années - Libellé', description: 'Libellé de la statistique années', type: 'text', editorialKey: 'experience.stats.years', editable: true },
+      { key: 'experience.stats.years.value', label: 'Stat Années - Valeur', description: 'Nombre d\'années (ex: 30)', type: 'number', editorialKey: 'experience.stats.years.value', editable: true },
+    ],
+  },
+  {
+    id: 'formations',
+    name: 'Section Formations',
+    description: 'Affichage des formations vedettes',
+    icon: 'book-open',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    editorialKeys: ['formations.badge', 'formations.title', 'formations.subtitle', 'formations.cta'],
+    fields: [
+      { key: 'formations.badge', label: 'Badge', description: 'Texte du badge', type: 'text', editorialKey: 'formations.badge', editable: true },
+      { key: 'formations.title', label: 'Titre', description: 'Titre de la section', type: 'text', editorialKey: 'formations.title', editable: true },
+      { key: 'formations.subtitle', label: 'Sous-titre', description: 'Description sous le titre', type: 'textarea', editorialKey: 'formations.subtitle', editable: true },
+      { key: 'formations.cta', label: 'Bouton "Voir tout"', description: 'Texte du bouton CTA', type: 'text', editorialKey: 'formations.cta', editable: true },
+    ],
+  },
+  {
+    id: 'history',
+    name: 'Section Histoire',
+    description: 'Chronologie de l\'histoire de l\'université',
+    icon: 'landmark',
+    color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+    editorialKeys: [
+      'history.badge', 'history.title', 'history.subtitle',
+      'history.genesis.date', 'history.genesis.title', 'history.genesis.description',
+      'history.usenghor.since', 'history.usenghor.title', 'history.usenghor.description',
+      'history.legacy.badge', 'history.legacy.title', 'history.legacy.description',
+    ],
+    fields: [
+      { key: 'history.badge', label: 'Badge', description: 'Texte du badge', type: 'text', editorialKey: 'history.badge', editable: true },
+      { key: 'history.title', label: 'Titre', description: 'Titre principal', type: 'text', editorialKey: 'history.title', editable: true },
+      { key: 'history.subtitle', label: 'Sous-titre', description: 'Description', type: 'textarea', editorialKey: 'history.subtitle', editable: true },
+      { key: 'history.genesis.date', label: 'Genèse - Date', description: 'Date de la genèse (ex: 1989)', type: 'text', editorialKey: 'history.genesis.date', editable: true },
+      { key: 'history.genesis.title', label: 'Genèse - Titre', description: 'Titre du bloc genèse', type: 'text', editorialKey: 'history.genesis.title', editable: true },
+      { key: 'history.genesis.description', label: 'Genèse - Description', description: 'Contenu du bloc genèse', type: 'html', editorialKey: 'history.genesis.description', editable: true },
+      { key: 'history.usenghor.since', label: 'USenghor - Depuis', description: 'Date de création (ex: Depuis 1990)', type: 'text', editorialKey: 'history.usenghor.since', editable: true },
+      { key: 'history.usenghor.title', label: 'USenghor - Titre', description: 'Titre du bloc université', type: 'text', editorialKey: 'history.usenghor.title', editable: true },
+      { key: 'history.usenghor.description', label: 'USenghor - Description', description: 'Contenu du bloc université', type: 'html', editorialKey: 'history.usenghor.description', editable: true },
+      { key: 'history.legacy.badge', label: 'Héritage - Badge', description: 'Badge du bloc héritage', type: 'text', editorialKey: 'history.legacy.badge', editable: true },
+      { key: 'history.legacy.title', label: 'Héritage - Titre', description: 'Titre du bloc héritage', type: 'text', editorialKey: 'history.legacy.title', editable: true },
+      { key: 'history.legacy.description', label: 'Héritage - Description', description: 'Contenu du bloc héritage', type: 'html', editorialKey: 'history.legacy.description', editable: true },
+    ],
+  },
+  {
+    id: 'partners',
+    name: 'Section Partenaires & Gouvernance',
+    description: 'Textes fondateurs et pays bailleurs',
+    icon: 'handshake',
+    color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
+    editorialKeys: [
+      'governance.badge', 'governance.title', 'governance.subtitle',
+      'governance.foundingTexts.badge', 'governance.foundingTexts.title', 'governance.foundingTexts.description',
+      'governance.donorCountries.title', 'governance.donorCountries.description',
+    ],
+    fields: [
+      { key: 'governance.badge', label: 'Badge', description: 'Texte du badge', type: 'text', editorialKey: 'governance.badge', editable: true },
+      { key: 'governance.title', label: 'Titre', description: 'Titre principal', type: 'text', editorialKey: 'governance.title', editable: true },
+      { key: 'governance.subtitle', label: 'Sous-titre', description: 'Description', type: 'textarea', editorialKey: 'governance.subtitle', editable: true },
+      { key: 'governance.foundingTexts.badge', label: 'Textes fondateurs - Badge', description: 'Badge du bloc', type: 'text', editorialKey: 'governance.foundingTexts.badge', editable: true },
+      { key: 'governance.foundingTexts.title', label: 'Textes fondateurs - Titre', description: 'Titre du bloc', type: 'text', editorialKey: 'governance.foundingTexts.title', editable: true },
+      { key: 'governance.foundingTexts.description', label: 'Textes fondateurs - Description', description: 'Contenu du bloc', type: 'html', editorialKey: 'governance.foundingTexts.description', editable: true },
+      { key: 'governance.donorCountries.title', label: 'Pays bailleurs - Titre', description: 'Titre du bloc', type: 'text', editorialKey: 'governance.donorCountries.title', editable: true },
+      { key: 'governance.donorCountries.description', label: 'Pays bailleurs - Description', description: 'Description du bloc', type: 'textarea', editorialKey: 'governance.donorCountries.description', editable: true },
+    ],
+  },
+]
+
+// Pages du front-office
+export const frontOfficePages: FrontOfficePage[] = [
+  {
+    id: 'homepage',
+    name: 'Page d\'accueil',
+    slug: '/',
+    description: 'Page principale du site avec les sections Hero, Mission, Formations, Histoire et Partenaires',
+    icon: 'home',
+    sections: homepageSections,
+  },
+]
+
+// ============================================================================
+// LABELS ET CONFIGURATIONS EXISTANTS (rétrocompatibilité)
+// ============================================================================
+
 // Labels pour les sections
 export const valueSectionLabels: Record<ValueSectionKey, string> = {
   mission: 'Mission',
@@ -125,14 +318,25 @@ export function useEditorialValuesApi() {
     category_code?: string | null
     value_type?: EditorialValueType | null
   } = {}): Promise<PaginatedResponse<EditorialContentRead>> {
+    // Construire l'objet query en filtrant les valeurs null/undefined
+    const query: Record<string, string | number> = {
+      page: params.page ?? 1,
+      limit: params.limit ?? 100,
+    }
+
+    // Ajouter les paramètres optionnels seulement s'ils ont une valeur
+    if (params.search) {
+      query.search = params.search
+    }
+    if (params.category_code) {
+      query.category_code = params.category_code
+    }
+    if (params.value_type) {
+      query.value_type = params.value_type
+    }
+
     return apiFetch<PaginatedResponse<EditorialContentRead>>('/api/admin/editorial/contents', {
-      query: {
-        page: params.page ?? 1,
-        limit: params.limit ?? 100,
-        search: params.search,
-        category_code: params.category_code,
-        value_type: params.value_type,
-      },
+      query,
     })
   }
 
@@ -295,7 +499,7 @@ export function useEditorialValuesApi() {
    * Crée une nouvelle valeur fondamentale
    */
   async function createCoreValue(data: CoreValueData, categoryId: string): Promise<CoreValue> {
-    const key = `${CORE_VALUE_KEY_PREFIX}${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const key = `${CORE_VALUE_KEY_PREFIX}${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
 
     const response = await createContent({
       key,
@@ -352,6 +556,7 @@ export function useEditorialValuesApi() {
     // Mettre à jour chaque valeur avec son nouvel ordre
     for (let i = 0; i < orderedIds.length; i++) {
       const id = orderedIds[i]
+      if (!id) continue
       const current = await getCoreValueById(id)
       if (current && current.display_order !== i + 1) {
         await updateCoreValue(id, { display_order: i + 1 })
@@ -543,5 +748,9 @@ export function useEditorialValuesApi() {
     valueSectionColors,
     sectionKeys,
     coreValueAvailableIcons,
+
+    // Structure par pages (front-office)
+    frontOfficePages,
+    homepageSections,
   }
 }

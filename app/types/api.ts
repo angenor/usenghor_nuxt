@@ -1310,7 +1310,70 @@ export interface EditorialBulkUpdateResult {
 
 // --- Value Sections (Frontend-specific types) ---
 
-export type ValueSectionKey = 'mission' | 'vision' | 'history' | 'rector_message'
+// Clés principales (sections)
+export type ValueSectionKey =
+  | 'mission'
+  | 'vision'
+  | 'history'
+  | 'rector_message'
+  // Hero section
+  | 'hero.slide1.title'
+  | 'hero.slide1.subtitle'
+  | 'hero.slide2.title'
+  | 'hero.slide2.subtitle'
+  | 'hero.slide3.title'
+  | 'hero.slide3.subtitle'
+  | 'hero.slide4.title'
+  | 'hero.slide4.subtitle'
+  | 'hero.cta.discover'
+  | 'hero.cta.contact'
+  // Mission section
+  | 'mission.badge'
+  | 'mission.title'
+  | 'mission.subtitle'
+  | 'mission.mission.title'
+  | 'mission.mission.description'
+  | 'mission.mission.tagline'
+  | 'mission.vision.title'
+  | 'mission.vision.description'
+  // Experience section
+  | 'experience.badge'
+  | 'experience.title'
+  | 'experience.description'
+  | 'experience.cta'
+  | 'experience.stats.countries'
+  | 'experience.stats.countries.value'
+  | 'experience.stats.graduates'
+  | 'experience.stats.graduates.value'
+  | 'experience.stats.years'
+  | 'experience.stats.years.value'
+  // Formations section
+  | 'formations.badge'
+  | 'formations.title'
+  | 'formations.subtitle'
+  | 'formations.cta'
+  // History section
+  | 'history.badge'
+  | 'history.title'
+  | 'history.subtitle'
+  | 'history.genesis.date'
+  | 'history.genesis.title'
+  | 'history.genesis.description'
+  | 'history.usenghor.since'
+  | 'history.usenghor.title'
+  | 'history.usenghor.description'
+  | 'history.legacy.badge'
+  | 'history.legacy.title'
+  | 'history.legacy.description'
+  // Partners/Governance section
+  | 'governance.badge'
+  | 'governance.title'
+  | 'governance.subtitle'
+  | 'governance.foundingTexts.badge'
+  | 'governance.foundingTexts.title'
+  | 'governance.foundingTexts.description'
+  | 'governance.donorCountries.title'
+  | 'governance.donorCountries.description'
 
 export interface ValueSection {
   id: string

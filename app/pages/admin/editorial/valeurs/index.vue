@@ -1,73 +1,53 @@
 <script setup lang="ts">
-import type { OutputData } from '@editorjs/editorjs'
 import type {
   CoreValue,
+  EditorialContentRead,
   EditorialHistoryRead,
   EditorialValuesStats,
-  ValueSection,
   ValueSectionKey,
 } from '~/types/api'
+import type { FrontOfficePage, PageSection, PageSectionField } from '~/composables/useEditorialValuesApi'
 
 definePageMeta({
   layout: 'admin',
 })
 
 const {
-  getValueSections,
+  listContents,
+  getContentByKey,
+  createContent,
+  updateContent,
   getCoreValues,
-  updateValueSection: apiUpdateSection,
   createCoreValue: apiCreateCoreValue,
   updateCoreValue: apiUpdateCoreValue,
   deleteCoreValue: apiDeleteCoreValue,
   getValuesCategory,
   getValuesStats,
-  getValueHistory: apiGetValueHistory,
+  getContentHistory,
   isCoreValueTitleTaken: apiIsCoreValueTitleTaken,
   validateCoreValueTitle,
   validateCoreValueDescription,
-  canEditValueSection,
   getNextCoreValueOrder,
-  valueSectionLabels,
-  valueSectionDescriptions,
-  valueSectionIcons,
-  valueSectionColors,
-  sectionKeys,
   coreValueAvailableIcons,
+  frontOfficePages,
 } = useEditorialValuesApi()
 
 // === STATE ===
 const isLoading = ref(true)
 const isSaving = ref(false)
 const error = ref<string | null>(null)
-const activeTab = ref<'sections' | 'values'>('sections')
+const successMessage = ref<string | null>(null)
+const activeTab = ref<'pages' | 'values'>('pages')
+const selectedPage = ref<FrontOfficePage | null>(null)
+const expandedSections = ref<Set<string>>(new Set())
 
-// Sections state
-const sections = ref<ValueSection[]>([])
-const editingSection = ref<ValueSectionKey | null>(null)
-const sectionForm = ref<{
-  title: string
-  content: OutputData | null
-}>({
-  title: '',
-  content: null,
-})
+// Tous les contenus éditoriaux chargés depuis la BDD
+const allContents = ref<Map<string, EditorialContentRead>>(new Map())
 
-// Helper pour parser le contenu EditorJS depuis le backend
-function parseEditorJSContent(content: string): OutputData | null {
-  if (!content) return null
-  try {
-    return JSON.parse(content) as OutputData
-  }
-  catch {
-    console.error('Erreur parsing EditorJS content')
-    return null
-  }
-}
-
-// Helper pour obtenir le contenu parsé d'une section
-function getSectionParsedContent(section: ValueSection): OutputData | null {
-  return parseEditorJSContent(section.content)
-}
+// Field editing state
+const editingFieldKey = ref<string | null>(null)
+const editingFieldValue = ref<string>('')
+const editingFieldType = ref<'text' | 'textarea' | 'number' | 'html'>('text')
 
 // Core values state
 const coreValues = ref<CoreValue[]>([])
@@ -85,11 +65,11 @@ const valueFormErrors = ref<Record<string, string>>({})
 
 // History state
 const showHistoryModal = ref(false)
-const selectedHistoryItem = ref<{ id: string, type: 'section' | 'value', name: string } | null>(null)
+const selectedHistoryItem = ref<{ id: string, name: string } | null>(null)
 const historyItems = ref<EditorialHistoryRead[]>([])
 const isLoadingHistory = ref(false)
 
-// Category ID (nécessaire pour créer des valeurs)
+// Category ID (nécessaire pour créer des contenus)
 const categoryId = ref<string | null>(null)
 
 // Statistics
@@ -105,6 +85,9 @@ const globalStats = ref<EditorialValuesStats>({
 // Initialisation
 onMounted(() => {
   loadData()
+  if (frontOfficePages.length > 0) {
+    selectedPage.value = frontOfficePages[0] ?? null
+  }
 })
 
 async function loadData() {
@@ -118,14 +101,18 @@ async function loadData() {
       categoryId.value = category.id
     }
 
-    // Charger les données en parallèle
-    const [sectionsData, valuesData, statsData] = await Promise.all([
-      getValueSections(),
+    // Charger tous les contenus éditoriaux (limit max 100 côté backend)
+    const contentsResponse = await listContents({ limit: 100 })
+    allContents.value = new Map(
+      contentsResponse.items.map(c => [c.key, c]),
+    )
+
+    // Charger les valeurs fondamentales et stats
+    const [valuesData, statsData] = await Promise.all([
       getCoreValues(true),
       getValuesStats(),
     ])
 
-    sections.value = sectionsData
     coreValues.value = valuesData
     globalStats.value = statsData
   }
@@ -145,7 +132,7 @@ const formatDate = (dateString: string) => {
     month: 'long',
     year: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   })
 }
 
@@ -153,66 +140,152 @@ const formatDateShort = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('fr-FR', {
     day: 'numeric',
     month: 'short',
-    year: 'numeric'
+    year: 'numeric',
   })
 }
 
-// === SECTIONS METHODS ===
-
-const getSection = (key: ValueSectionKey): ValueSection | undefined => {
-  return sections.value.find(s => s.key === key)
+// Show success message
+function showSuccess(message: string) {
+  successMessage.value = message
+  setTimeout(() => {
+    successMessage.value = null
+  }, 3000)
 }
 
-const startEditingSection = (key: ValueSectionKey) => {
-  const section = getSection(key)
-  if (section && canEditValueSection(section)) {
-    editingSection.value = key
-    sectionForm.value = {
-      title: section.title,
-      content: parseEditorJSContent(section.content),
-    }
+// === PAGE SECTIONS METHODS ===
+
+const toggleSection = (sectionId: string) => {
+  if (expandedSections.value.has(sectionId)) {
+    expandedSections.value.delete(sectionId)
+  }
+  else {
+    expandedSections.value.add(sectionId)
   }
 }
 
-const cancelEditingSection = () => {
-  editingSection.value = null
-  sectionForm.value = { title: '', content: null }
+const isSectionExpanded = (sectionId: string) => {
+  return expandedSections.value.has(sectionId)
 }
 
-async function saveSection() {
-  if (!editingSection.value) return
+// Compte les champs éditables
+const countEditableFields = (pageSection: PageSection) => {
+  return pageSection.fields.filter(f => f.editable).length
+}
 
-  const section = getSection(editingSection.value)
-  if (!section) return
+// Récupère la valeur actuelle d'un champ
+const getFieldValue = (field: PageSectionField): string => {
+  if (!field.editorialKey) return ''
+  const content = allContents.value.get(field.editorialKey)
+  return content?.value || ''
+}
+
+// Vérifie si un champ a une valeur
+const hasFieldValue = (field: PageSectionField): boolean => {
+  return !!getFieldValue(field)
+}
+
+// === FIELD EDITING METHODS ===
+
+function startEditingField(field: PageSectionField) {
+  if (!field.editorialKey) return
+  editingFieldKey.value = field.editorialKey
+  editingFieldValue.value = getFieldValue(field)
+  editingFieldType.value = field.type === 'number' ? 'number' : field.type === 'textarea' || field.type === 'html' ? 'textarea' : 'text'
+}
+
+function cancelEditingField() {
+  editingFieldKey.value = null
+  editingFieldValue.value = ''
+}
+
+async function saveField() {
+  if (!editingFieldKey.value || !categoryId.value) return
 
   isSaving.value = true
   error.value = null
 
   try {
-    // Le composable gère la sérialisation JSON de l'OutputData
-    const updated = await apiUpdateSection(section.id, {
-      title: sectionForm.value.title,
-      content: sectionForm.value.content || undefined,
-    })
+    const existingContent = allContents.value.get(editingFieldKey.value)
 
-    // Mettre à jour le state local
-    const index = sections.value.findIndex(s => s.key === editingSection.value)
-    if (index !== -1) {
-      sections.value[index] = updated
+    if (existingContent) {
+      // Mettre à jour le contenu existant
+      const updated = await updateContent(existingContent.id, {
+        value: editingFieldValue.value,
+      })
+      allContents.value.set(editingFieldKey.value, updated)
+    }
+    else {
+      // Créer un nouveau contenu
+      const result = await createContent({
+        key: editingFieldKey.value,
+        value: editingFieldValue.value,
+        value_type: 'text',
+        category_id: categoryId.value,
+        description: editingFieldKey.value,
+        admin_editable: true,
+      })
+
+      // Recharger le contenu créé
+      try {
+        const newContent = await getContentByKey(editingFieldKey.value)
+        allContents.value.set(editingFieldKey.value, newContent)
+      }
+      catch {
+        // Si on ne peut pas recharger, on met à jour avec les infos minimales
+        allContents.value.set(editingFieldKey.value, {
+          id: result.id,
+          key: editingFieldKey.value,
+          value: editingFieldValue.value,
+          value_type: 'text',
+          category_id: categoryId.value,
+          description: editingFieldKey.value,
+          admin_editable: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+      }
     }
 
     // Rafraîchir les stats
     globalStats.value = await getValuesStats()
 
-    editingSection.value = null
-    sectionForm.value = { title: '', content: null }
+    showSuccess('Champ enregistré avec succès')
+    editingFieldKey.value = null
+    editingFieldValue.value = ''
   }
   catch (err) {
-    console.error('Erreur sauvegarde section:', err)
+    console.error('Erreur sauvegarde champ:', err)
     error.value = 'Erreur lors de la sauvegarde'
   }
   finally {
     isSaving.value = false
+  }
+}
+
+// === FIELD HISTORY ===
+
+async function openFieldHistory(field: PageSectionField) {
+  if (!field.editorialKey) return
+
+  const content = allContents.value.get(field.editorialKey)
+  if (!content) return
+
+  selectedHistoryItem.value = {
+    id: content.id,
+    name: field.label,
+  }
+  showHistoryModal.value = true
+  isLoadingHistory.value = true
+
+  try {
+    historyItems.value = await getContentHistory(content.id)
+  }
+  catch (err) {
+    console.error('Erreur chargement historique:', err)
+    historyItems.value = []
+  }
+  finally {
+    isLoadingHistory.value = false
   }
 }
 
@@ -223,7 +296,7 @@ const resetValueForm = () => {
     title: '',
     description: '',
     icon: 'star',
-    is_active: true
+    is_active: true,
   }
   valueFormErrors.value = {}
 }
@@ -238,7 +311,6 @@ async function validateValueForm(): Promise<boolean> {
     valueFormErrors.value.title = 'Le titre doit contenir entre 2 et 50 caractères'
   }
   else {
-    // Vérifier si le titre est déjà utilisé (async)
     const isTaken = await apiIsCoreValueTitleTaken(valueForm.value.title, editingValue.value?.id)
     if (isTaken) {
       valueFormErrors.value.title = 'Ce titre est déjà utilisé'
@@ -267,7 +339,7 @@ const openEditValueModal = (value: CoreValue) => {
     title: value.title,
     description: value.description,
     icon: value.icon,
-    is_active: value.is_active
+    is_active: value.is_active,
   }
   valueFormErrors.value = {}
   showValueModal.value = true
@@ -287,7 +359,6 @@ async function saveValue() {
 
   try {
     if (editingValue.value) {
-      // Mise à jour d'une valeur existante
       const updated = await apiUpdateCoreValue(editingValue.value.id, {
         title: valueForm.value.title,
         description: valueForm.value.description,
@@ -295,14 +366,12 @@ async function saveValue() {
         is_active: valueForm.value.is_active,
       })
 
-      // Mettre à jour le state local
       const index = coreValues.value.findIndex(v => v.id === editingValue.value?.id)
       if (index !== -1) {
         coreValues.value[index] = updated
       }
     }
     else {
-      // Création d'une nouvelle valeur
       if (!categoryId.value) {
         error.value = 'Catégorie non trouvée'
         return
@@ -321,16 +390,14 @@ async function saveValue() {
       )
 
       coreValues.value.push(newValue)
-      // Trier par display_order
       coreValues.value.sort((a, b) => a.display_order - b.display_order)
     }
 
-    // Rafraîchir les stats
     globalStats.value = await getValuesStats()
-
     showValueModal.value = false
     editingValue.value = null
     resetValueForm()
+    showSuccess('Valeur enregistrée avec succès')
   }
   catch (err) {
     console.error('Erreur sauvegarde valeur:', err)
@@ -349,15 +416,11 @@ async function deleteValue() {
 
   try {
     await apiDeleteCoreValue(valueToDelete.value.id)
-
-    // Mettre à jour le state local
     coreValues.value = coreValues.value.filter(v => v.id !== valueToDelete.value?.id)
-
-    // Rafraîchir les stats
     globalStats.value = await getValuesStats()
-
     showDeleteModal.value = false
     valueToDelete.value = null
+    showSuccess('Valeur supprimée avec succès')
   }
   catch (err) {
     console.error('Erreur suppression valeur:', err)
@@ -368,71 +431,49 @@ async function deleteValue() {
   }
 }
 
-// Reorder values
 async function moveValue(index: number, direction: 'up' | 'down') {
   const newIndex = direction === 'up' ? index - 1 : index + 1
   if (newIndex < 0 || newIndex >= coreValues.value.length) return
 
   const items = [...coreValues.value]
-  ;[items[index], items[newIndex]] = [items[newIndex], items[index]]
+  const temp = items[index]
+  const swap = items[newIndex]
+  if (!temp || !swap) return
+  items[index] = swap
+  items[newIndex] = temp
 
-  // Mettre à jour display_order localement
   items.forEach((item, i) => {
     item.display_order = i + 1
   })
   coreValues.value = items
 
-  // Sauvegarder les nouveaux ordres sur le serveur
   try {
     const valueToMove = coreValues.value[newIndex]
     const swappedValue = coreValues.value[index]
 
-    await Promise.all([
-      apiUpdateCoreValue(valueToMove.id, { display_order: valueToMove.display_order }),
-      apiUpdateCoreValue(swappedValue.id, { display_order: swappedValue.display_order }),
-    ])
+    if (valueToMove && swappedValue) {
+      await Promise.all([
+        apiUpdateCoreValue(valueToMove.id, { display_order: valueToMove.display_order }),
+        apiUpdateCoreValue(swappedValue.id, { display_order: swappedValue.display_order }),
+      ])
+    }
   }
   catch (err) {
     console.error('Erreur réorganisation:', err)
-    // En cas d'erreur, recharger les données
     await loadData()
-  }
-}
-
-// === HISTORY METHODS ===
-
-async function openSectionHistory(section: ValueSection) {
-  selectedHistoryItem.value = {
-    id: section.id,
-    type: 'section',
-    name: section.title,
-  }
-  showHistoryModal.value = true
-  isLoadingHistory.value = true
-
-  try {
-    historyItems.value = await apiGetValueHistory(section.id)
-  }
-  catch (err) {
-    console.error('Erreur chargement historique:', err)
-    historyItems.value = []
-  }
-  finally {
-    isLoadingHistory.value = false
   }
 }
 
 async function openValueHistory(value: CoreValue) {
   selectedHistoryItem.value = {
     id: value.id,
-    type: 'value',
     name: value.title,
   }
   showHistoryModal.value = true
   isLoadingHistory.value = true
 
   try {
-    historyItems.value = await apiGetValueHistory(value.id)
+    historyItems.value = await getContentHistory(value.id)
   }
   catch (err) {
     console.error('Erreur chargement historique:', err)
@@ -449,7 +490,6 @@ function closeHistoryModal() {
   historyItems.value = []
 }
 
-// Close modals
 function closeModals() {
   showValueModal.value = false
   showDeleteModal.value = false
@@ -460,7 +500,6 @@ function closeModals() {
   resetValueForm()
 }
 
-// Truncate text helper
 function truncateText(text: string | null, maxLength: number): string {
   if (!text) return ''
   if (text.length <= maxLength) return text
@@ -474,13 +513,30 @@ function truncateText(text: string | null, maxLength: number): string {
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-          Valeurs de l'université
+          Contenus éditoriaux
         </h1>
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Gérez les contenus de présentation : mission, vision, valeurs fondamentales
+          Gérez les contenus des pages du site par section
         </p>
       </div>
     </div>
+
+    <!-- Success message -->
+    <Transition
+      enter-active-class="transition ease-out duration-300"
+      enter-from-class="opacity-0 transform -translate-y-2"
+      enter-to-class="opacity-100 transform translate-y-0"
+      leave-active-class="transition ease-in duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="successMessage" class="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
+        <div class="flex items-center gap-3">
+          <font-awesome-icon :icon="['fas', 'check-circle']" class="h-5 w-5 text-green-600 dark:text-green-400" />
+          <p class="text-sm text-green-700 dark:text-green-300">{{ successMessage }}</p>
+        </div>
+      </div>
+    </Transition>
 
     <!-- Loading -->
     <div v-if="isLoading" class="flex items-center justify-center py-12">
@@ -510,8 +566,8 @@ function truncateText(text: string | null, maxLength: number): string {
               <font-awesome-icon :icon="['fas', 'file-alt']" class="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ globalStats.sections_count }}</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Sections</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ allContents.size }}</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Contenus définis</p>
             </div>
           </div>
         </div>
@@ -560,13 +616,13 @@ function truncateText(text: string | null, maxLength: number): string {
         <nav class="-mb-px flex space-x-8">
           <button
             class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors"
-            :class="activeTab === 'sections'
+            :class="activeTab === 'pages'
               ? 'border-primary-500 text-primary-600 dark:text-primary-400'
               : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
-            @click="activeTab = 'sections'"
+            @click="activeTab = 'pages'"
           >
-            <font-awesome-icon :icon="['fas', 'file-alt']" class="mr-2 h-4 w-4" />
-            Sections de présentation
+            <font-awesome-icon :icon="['fas', 'sitemap']" class="mr-2 h-4 w-4" />
+            Par page du site
           </button>
           <button
             class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors"
@@ -584,124 +640,189 @@ function truncateText(text: string | null, maxLength: number): string {
         </nav>
       </div>
 
-      <!-- Sections Tab -->
-      <div v-if="activeTab === 'sections'" class="space-y-6">
-        <div
-          v-for="key in sectionKeys"
-          :key="key"
-          class="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
-        >
-          <div class="border-b border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between p-4">
-              <div class="flex items-center gap-3">
-                <div
-                  class="flex h-10 w-10 items-center justify-center rounded-lg"
-                  :class="valueSectionColors[key]"
-                >
-                  <font-awesome-icon :icon="['fas', valueSectionIcons[key]]" class="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 class="font-medium text-gray-900 dark:text-white">
-                    {{ valueSectionLabels[key] }}
-                  </h3>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ valueSectionDescriptions[key] }}
-                  </p>
-                </div>
+      <!-- Pages Tab -->
+      <div v-if="activeTab === 'pages'" class="space-y-6">
+        <!-- Page selector -->
+        <div v-if="frontOfficePages.length > 1" class="flex gap-2 flex-wrap">
+          <button
+            v-for="page in frontOfficePages"
+            :key="page.id"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors"
+            :class="selectedPage?.id === page.id
+              ? 'border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
+              : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'"
+            @click="selectedPage = page"
+          >
+            <font-awesome-icon :icon="['fas', page.icon]" class="h-4 w-4" />
+            {{ page.name }}
+          </button>
+        </div>
+
+        <!-- Selected page info -->
+        <div v-if="selectedPage" class="space-y-4">
+          <div class="rounded-lg border border-primary-200 bg-primary-50 p-4 dark:border-primary-800 dark:bg-primary-900/20">
+            <div class="flex items-start gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/40">
+                <font-awesome-icon :icon="['fas', selectedPage.icon]" class="h-5 w-5 text-primary-600 dark:text-primary-400" />
               </div>
-              <div class="flex items-center gap-2">
-                <button
-                  v-if="getSection(key)"
-                  class="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                  title="Voir l'historique"
-                  @click="openSectionHistory(getSection(key)!)"
-                >
-                  <font-awesome-icon :icon="['fas', 'history']" class="h-4 w-4" />
-                </button>
-                <button
-                  v-if="editingSection !== key && getSection(key)"
-                  class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors"
-                  @click="startEditingSection(key)"
-                >
-                  <font-awesome-icon :icon="['fas', 'edit']" class="h-4 w-4" />
-                  Modifier
-                </button>
+              <div>
+                <h3 class="font-semibold text-primary-900 dark:text-primary-100">{{ selectedPage.name }}</h3>
+                <p class="text-sm text-primary-700 dark:text-primary-300">{{ selectedPage.description }}</p>
+                <p class="text-xs text-primary-600 dark:text-primary-400 mt-1">
+                  URL : <code class="bg-primary-100 dark:bg-primary-900/40 px-1 rounded">{{ selectedPage.slug }}</code>
+                </p>
               </div>
             </div>
           </div>
 
-          <!-- Section content or editing form -->
-          <div class="p-4">
-            <template v-if="editingSection === key">
-              <!-- Edit form -->
-              <div class="space-y-4">
-                <div>
-                  <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Titre
-                  </label>
-                  <input
-                    v-model="sectionForm.title"
-                    type="text"
-                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    placeholder="Titre de la section"
-                  />
-                </div>
-                <div>
-                  <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Contenu
-                  </label>
-                  <EditorJS
-                    v-if="sectionForm.content"
-                    v-model="sectionForm.content"
-                    :min-height="300"
-                    placeholder="Commencez à rédiger le contenu..."
-                  />
-                  <div v-else class="rounded-lg border border-gray-300 bg-gray-50 p-8 text-center dark:border-gray-600 dark:bg-gray-700">
-                    <p class="text-gray-500 dark:text-gray-400">Chargement de l'éditeur...</p>
+          <!-- Sections list -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              Sections de la page
+            </h3>
+
+            <div class="space-y-3">
+              <div
+                v-for="pageSection in selectedPage.sections"
+                :key="pageSection.id"
+                class="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 overflow-hidden"
+              >
+                <!-- Section header -->
+                <button
+                  class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                  @click="toggleSection(pageSection.id)"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="flex h-10 w-10 items-center justify-center rounded-lg"
+                      :class="pageSection.color"
+                    >
+                      <font-awesome-icon :icon="['fas', pageSection.icon]" class="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 class="font-medium text-gray-900 dark:text-white">{{ pageSection.name }}</h4>
+                      <p class="text-sm text-gray-500 dark:text-gray-400">{{ pageSection.description }}</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                      {{ countEditableFields(pageSection) }} champ(s)
+                    </span>
+                    <font-awesome-icon
+                      :icon="['fas', isSectionExpanded(pageSection.id) ? 'chevron-up' : 'chevron-down']"
+                      class="h-4 w-4 text-gray-400"
+                    />
+                  </div>
+                </button>
+
+                <!-- Section content (expanded) -->
+                <div
+                  v-if="isSectionExpanded(pageSection.id)"
+                  class="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800/50"
+                >
+                  <div class="space-y-3">
+                    <div
+                      v-for="field in pageSection.fields"
+                      :key="field.key"
+                      class="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 overflow-hidden"
+                    >
+                      <!-- Field header -->
+                      <div class="flex items-center justify-between p-3 border-b border-gray-100 dark:border-gray-700">
+                        <div class="flex items-center gap-2">
+                          <span class="font-medium text-gray-900 dark:text-white text-sm">{{ field.label }}</span>
+                          <span
+                            v-if="hasFieldValue(field)"
+                            class="text-xs px-1.5 py-0.5 rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                          >
+                            Défini
+                          </span>
+                          <span
+                            v-else
+                            class="text-xs px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
+                          >
+                            Non défini
+                          </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <button
+                            v-if="hasFieldValue(field)"
+                            class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                            title="Historique"
+                            @click="openFieldHistory(field)"
+                          >
+                            <font-awesome-icon :icon="['fas', 'history']" class="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            v-if="editingFieldKey !== field.editorialKey"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-gray-300 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors"
+                            @click="startEditingField(field)"
+                          >
+                            <font-awesome-icon :icon="['fas', 'edit']" class="h-3 w-3" />
+                            Modifier
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- Field content / Edit form -->
+                      <div class="p-3">
+                        <!-- Editing mode -->
+                        <div v-if="editingFieldKey === field.editorialKey" class="space-y-3">
+                          <div>
+                            <label class="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
+                              {{ field.description }}
+                            </label>
+                            <input
+                              v-if="editingFieldType === 'text' || editingFieldType === 'number'"
+                              v-model="editingFieldValue"
+                              :type="editingFieldType"
+                              class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                              :placeholder="field.label"
+                            />
+                            <textarea
+                              v-else
+                              v-model="editingFieldValue"
+                              rows="4"
+                              class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                              :placeholder="field.label"
+                            />
+                          </div>
+                          <div class="flex items-center justify-end gap-2">
+                            <button
+                              type="button"
+                              class="rounded-md px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                              :disabled="isSaving"
+                              @click="cancelEditingField"
+                            >
+                              Annuler
+                            </button>
+                            <button
+                              type="button"
+                              class="inline-flex items-center gap-1.5 rounded-md bg-primary-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
+                              :disabled="isSaving"
+                              @click="saveField"
+                            >
+                              <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-3 w-3 animate-spin" />
+                              <font-awesome-icon v-else :icon="['fas', 'save']" class="h-3 w-3" />
+                              Enregistrer
+                            </button>
+                          </div>
+                        </div>
+
+                        <!-- Display mode -->
+                        <div v-else>
+                          <p v-if="hasFieldValue(field)" class="text-sm text-gray-700 dark:text-gray-300">
+                            {{ getFieldValue(field) }}
+                          </p>
+                          <p v-else class="text-sm text-gray-400 dark:text-gray-500 italic">
+                            Aucune valeur définie. Cliquez sur "Modifier" pour ajouter du contenu.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div class="flex items-center justify-end gap-3">
-                  <button
-                    type="button"
-                    class="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
-                    :disabled="isSaving"
-                    @click="cancelEditingSection"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    type="button"
-                    class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
-                    :disabled="isSaving"
-                    @click="saveSection"
-                  >
-                    <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
-                    <font-awesome-icon v-else :icon="['fas', 'save']" class="h-4 w-4" />
-                    Enregistrer
-                  </button>
-                </div>
               </div>
-            </template>
-            <template v-else-if="getSection(key)">
-              <!-- Preview avec EditorJSRenderer -->
-              <EditorJSRenderer
-                v-if="getSectionParsedContent(getSection(key)!)"
-                :data="getSectionParsedContent(getSection(key)!)!"
-              />
-              <p v-else class="text-gray-500 dark:text-gray-400">
-                Aucun contenu pour cette section.
-              </p>
-              <div class="mt-4 border-t border-gray-100 pt-4 dark:border-gray-700">
-                <p class="text-xs text-gray-500 dark:text-gray-400">
-                  Dernière modification : {{ formatDate(getSection(key)!.updated_at) }}
-                </p>
-              </div>
-            </template>
-            <template v-else>
-              <p class="text-gray-500 dark:text-gray-400">
-                Aucun contenu pour cette section.
-              </p>
-            </template>
+            </div>
           </div>
         </div>
       </div>
@@ -745,12 +866,10 @@ function truncateText(text: string | null, maxLength: number): string {
             :class="{ 'opacity-60': !value.is_active }"
           >
             <div class="flex items-start gap-4">
-              <!-- Icon -->
               <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/30">
                 <font-awesome-icon :icon="['fas', value.icon]" class="h-6 w-6 text-primary-600 dark:text-primary-400" />
               </div>
 
-              <!-- Content -->
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2">
                   <h3 class="font-medium text-gray-900 dark:text-white">
@@ -771,9 +890,7 @@ function truncateText(text: string | null, maxLength: number): string {
                 </p>
               </div>
 
-              <!-- Actions -->
               <div class="flex items-center gap-1">
-                <!-- Move up -->
                 <button
                   class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   title="Monter"
@@ -782,7 +899,6 @@ function truncateText(text: string | null, maxLength: number): string {
                 >
                   <font-awesome-icon :icon="['fas', 'chevron-up']" class="h-4 w-4" />
                 </button>
-                <!-- Move down -->
                 <button
                   class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   title="Descendre"
@@ -791,7 +907,6 @@ function truncateText(text: string | null, maxLength: number): string {
                 >
                   <font-awesome-icon :icon="['fas', 'chevron-down']" class="h-4 w-4" />
                 </button>
-                <!-- History -->
                 <button
                   class="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                   title="Historique"
@@ -799,7 +914,6 @@ function truncateText(text: string | null, maxLength: number): string {
                 >
                   <font-awesome-icon :icon="['fas', 'history']" class="h-4 w-4" />
                 </button>
-                <!-- Edit -->
                 <button
                   class="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                   title="Modifier"
@@ -807,7 +921,6 @@ function truncateText(text: string | null, maxLength: number): string {
                 >
                   <font-awesome-icon :icon="['fas', 'edit']" class="h-4 w-4" />
                 </button>
-                <!-- Delete -->
                 <button
                   class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                   title="Supprimer"
@@ -843,7 +956,6 @@ function truncateText(text: string | null, maxLength: number): string {
           </div>
 
           <form class="space-y-4 p-6" @submit.prevent="saveValue">
-            <!-- Title -->
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Titre *
@@ -860,7 +972,6 @@ function truncateText(text: string | null, maxLength: number): string {
               </p>
             </div>
 
-            <!-- Description -->
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Description *
@@ -880,7 +991,6 @@ function truncateText(text: string | null, maxLength: number): string {
               </p>
             </div>
 
-            <!-- Icon -->
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Icône
@@ -902,7 +1012,6 @@ function truncateText(text: string | null, maxLength: number): string {
               </div>
             </div>
 
-            <!-- Active -->
             <div class="flex items-center gap-3">
               <input
                 id="is_active"
@@ -915,7 +1024,6 @@ function truncateText(text: string | null, maxLength: number): string {
               </label>
             </div>
 
-            <!-- Actions -->
             <div class="flex justify-end gap-3 pt-4">
               <button
                 type="button"
@@ -1005,7 +1113,6 @@ function truncateText(text: string | null, maxLength: number): string {
           </div>
 
           <div class="flex-1 overflow-y-auto p-6">
-            <!-- Loading history -->
             <div v-if="isLoadingHistory" class="flex items-center justify-center py-8">
               <font-awesome-icon :icon="['fas', 'spinner']" class="h-6 w-6 animate-spin text-gray-400" />
             </div>
@@ -1029,9 +1136,6 @@ function truncateText(text: string | null, maxLength: number): string {
                   <div class="mb-2 flex items-center justify-between">
                     <span class="text-sm text-gray-500 dark:text-gray-400">
                       {{ formatDate(entry.modified_at) }}
-                    </span>
-                    <span v-if="entry.modified_by_external_id" class="text-xs text-gray-400 dark:text-gray-500">
-                      ID: {{ entry.modified_by_external_id.substring(0, 8) }}...
                     </span>
                   </div>
                   <div class="text-sm">
@@ -1065,10 +1169,5 @@ function truncateText(text: string | null, maxLength: number): string {
         </div>
       </div>
     </Teleport>
-
-    <!-- Last updated info -->
-    <div v-if="!isLoading" class="text-center text-sm text-gray-500 dark:text-gray-400">
-      Dernière modification : {{ globalStats.last_updated ? formatDate(globalStats.last_updated) : '-' }}
-    </div>
   </div>
 </template>

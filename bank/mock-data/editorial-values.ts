@@ -6,9 +6,10 @@
 // ============================================================================
 
 import type { EditorialValueType } from './editorial-statistics'
+import type { ValueSectionKey } from '~/types/api'
 
-// Types de section de contenu
-export type ValueSectionKey = 'mission' | 'vision' | 'history' | 'rector_message'
+// Réexportation pour compatibilité
+export type { ValueSectionKey }
 
 // Section de contenu éditorial (mission, vision, etc.)
 export interface ValueSection {
