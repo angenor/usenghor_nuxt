@@ -48,6 +48,7 @@ const allContents = ref<Map<string, EditorialContentRead>>(new Map())
 const editingFieldKey = ref<string | null>(null)
 const editingFieldValue = ref<string>('')
 const editingFieldType = ref<'text' | 'textarea' | 'number' | 'html'>('text')
+const editingFieldValueType = ref<'text' | 'number' | 'html'>('text') // Type pour le backend
 
 // Core values state
 const coreValues = ref<CoreValue[]>([])
@@ -191,11 +192,14 @@ function startEditingField(field: PageSectionField) {
   editingFieldKey.value = field.editorialKey
   editingFieldValue.value = getFieldValue(field)
   editingFieldType.value = field.type === 'number' ? 'number' : field.type === 'textarea' || field.type === 'html' ? 'textarea' : 'text'
+  // Type pour le backend (text, number, html)
+  editingFieldValueType.value = field.type === 'number' ? 'number' : field.type === 'html' ? 'html' : 'text'
 }
 
 function cancelEditingField() {
   editingFieldKey.value = null
   editingFieldValue.value = ''
+  editingFieldValueType.value = 'text'
 }
 
 async function saveField() {
@@ -206,11 +210,14 @@ async function saveField() {
 
   try {
     const existingContent = allContents.value.get(editingFieldKey.value)
+    // Toujours convertir la valeur en string (le backend attend une string)
+    const valueAsString = String(editingFieldValue.value)
 
     if (existingContent) {
       // Mettre à jour le contenu existant
       const updated = await updateContent(existingContent.id, {
-        value: editingFieldValue.value,
+        value: valueAsString,
+        value_type: editingFieldValueType.value,
       })
       allContents.value.set(editingFieldKey.value, updated)
     }
@@ -218,8 +225,8 @@ async function saveField() {
       // Créer un nouveau contenu
       const result = await createContent({
         key: editingFieldKey.value,
-        value: editingFieldValue.value,
-        value_type: 'text',
+        value: valueAsString,
+        value_type: editingFieldValueType.value,
         category_id: categoryId.value,
         description: editingFieldKey.value,
         admin_editable: true,
@@ -235,8 +242,8 @@ async function saveField() {
         allContents.value.set(editingFieldKey.value, {
           id: result.id,
           key: editingFieldKey.value,
-          value: editingFieldValue.value,
-          value_type: 'text',
+          value: valueAsString,
+          value_type: editingFieldValueType.value,
           category_id: categoryId.value,
           description: editingFieldKey.value,
           admin_editable: true,
@@ -252,6 +259,7 @@ async function saveField() {
     showSuccess('Champ enregistré avec succès')
     editingFieldKey.value = null
     editingFieldValue.value = ''
+    editingFieldValueType.value = 'text'
   }
   catch (err) {
     console.error('Erreur sauvegarde champ:', err)
