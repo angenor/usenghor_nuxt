@@ -100,6 +100,38 @@ export interface ApplicationCallWithDetails extends ApplicationCallRead {
 }
 
 // ============================================================================
+// Application Call Public (pour le front-office)
+// ============================================================================
+
+export interface ApplicationCallPublic {
+  id: string
+  title: string
+  slug: string
+  description: string | null
+  cover_image_external_id: string | null
+  program_external_id: string | null
+  campus_external_id: string | null
+  type: CallType
+  status: CallStatus
+  opening_date: string | null
+  deadline: string | null
+  program_start_date: string | null
+  program_end_date: string | null
+  target_audience: string | null
+  registration_fee: number | null
+  currency: string
+  external_form_url: string | null
+  use_internal_form: boolean
+}
+
+export interface ApplicationCallPublicWithDetails extends ApplicationCallPublic {
+  eligibility_criteria: CallEligibilityCriteriaRead[]
+  coverage: CallCoverageRead[]
+  required_documents: CallRequiredDocumentRead[]
+  schedule: CallScheduleRead[]
+}
+
+// ============================================================================
 // Application Call Create / Update
 // ============================================================================
 

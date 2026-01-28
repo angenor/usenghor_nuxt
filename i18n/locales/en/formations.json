@@ -16,10 +16,13 @@
       "masters": "Master's Programs",
       "doctorat": "Doctorate",
       "doctorats": "Doctoral Programs",
+      "doctorate": "Doctorate",
       "du": "University Diploma",
       "diplomes-universitaires": "University Diplomas",
+      "university_diploma": "University Diploma",
       "certifiante": "Certificate Program",
-      "certifiantes": "Certificate Programs"
+      "certifiantes": "Certificate Programs",
+      "certificate": "Certificate Program"
     },
     "typeDescriptions": {
       "masters": "2-year Master's programs offered at our Alexandria campus and partner campuses",
@@ -64,7 +67,11 @@
       "relatedFormations": "Related Programs",
       "back": "Back to Programs",
       "downloadProgram": "Download Program",
-      "downloadPdf": "PDF"
+      "downloadPdf": "PDF",
+      "skills": "Skills Acquired",
+      "careerOpportunities": "Career Opportunities",
+      "teachingMethods": "Teaching Methods",
+      "requiredDegree": "Prerequisites"
     },
     "candidature": {
       "seo": {

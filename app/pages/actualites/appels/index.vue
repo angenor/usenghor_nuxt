@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import type { CampusCall } from '~/composables/useMockData'
+import type { ApplicationCallPublic, CallType, CallStatus } from '~/types/api'
+import { callTypeLabels, callStatusLabels } from '~/composables/usePublicCallsApi'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
-const { getAllCalls } = useMockData()
 const route = useRoute()
 const router = useRouter()
+
+const { listCalls } = usePublicCallsApi()
 
 // SEO
 useSeoMeta({
@@ -13,28 +15,77 @@ useSeoMeta({
   description: () => t('actualites.calls.subtitle')
 })
 
+// Mapping des types API vers les clés i18n
+const typeToI18nKey: Record<CallType, string> = {
+  application: 'candidature',
+  scholarship: 'bourse',
+  project: 'projet',
+  recruitment: 'recrutement',
+  training: 'formation',
+}
+
+// Mapping des statuts API vers les clés i18n
+const statusToI18nKey: Record<CallStatus, string> = {
+  ongoing: 'open',
+  upcoming: 'upcoming',
+  closed: 'closed',
+}
+
 // Filters - initialized from query parameters
-const validTypes = ['all', 'candidature', 'bourse', 'projet', 'recrutement'] as const
-const validStatuses = ['all', 'open', 'closed'] as const
+const validTypes = ['all', 'application', 'scholarship', 'project', 'recruitment', 'training'] as const
+const validStatuses = ['all', 'ongoing', 'closed'] as const
 
-const getInitialType = (): 'all' | CampusCall['type'] => {
+const getInitialType = (): 'all' | CallType => {
   const type = route.query.type as string
-  if (type && validTypes.includes(type as any)) {
-    return type as 'all' | CampusCall['type']
+  if (type && validTypes.includes(type as typeof validTypes[number])) {
+    return type as 'all' | CallType
   }
   return 'all'
 }
 
-const getInitialStatus = (): 'all' | 'open' | 'closed' => {
+const getInitialStatus = (): 'all' | CallStatus => {
   const status = route.query.status as string
-  if (status && validStatuses.includes(status as any)) {
-    return status as 'all' | 'open' | 'closed'
+  if (status && validStatuses.includes(status as typeof validStatuses[number])) {
+    return status as 'all' | CallStatus
   }
   return 'all'
 }
 
-const selectedType = ref<'all' | CampusCall['type']>(getInitialType())
-const selectedStatus = ref<'all' | 'open' | 'closed'>(getInitialStatus())
+const selectedType = ref<'all' | CallType>(getInitialType())
+const selectedStatus = ref<'all' | CallStatus>(getInitialStatus())
+
+// Pagination
+const currentPage = ref(1)
+const itemsPerPage = ref(10)
+
+// Data
+const calls = ref<ApplicationCallPublic[]>([])
+const totalCalls = ref(0)
+const totalPages = ref(0)
+const loading = ref(false)
+const error = ref<string | null>(null)
+
+// Fetch calls from API
+async function fetchCalls() {
+  loading.value = true
+  error.value = null
+  try {
+    const response = await listCalls({
+      page: currentPage.value,
+      limit: itemsPerPage.value,
+      call_type: selectedType.value,
+      call_status: selectedStatus.value,
+    })
+    calls.value = response.items
+    totalCalls.value = response.total
+    totalPages.value = response.pages
+  } catch (e) {
+    error.value = t('actualites.calls.errorLoading')
+    console.error('Error fetching calls:', e)
+  } finally {
+    loading.value = false
+  }
+}
 
 // Update URL when filters change
 watch([selectedType, selectedStatus], () => {
@@ -42,65 +93,34 @@ watch([selectedType, selectedStatus], () => {
   if (selectedType.value !== 'all') query.type = selectedType.value
   if (selectedStatus.value !== 'all') query.status = selectedStatus.value
   router.replace({ query })
+  currentPage.value = 1
+  fetchCalls()
 })
 
-// All calls
-const allCalls = computed(() => getAllCalls())
+watch(currentPage, fetchCalls)
 
-// Filtered calls
-const filteredCalls = computed(() => {
-  let calls = allCalls.value
-
-  // Filter by type
-  if (selectedType.value !== 'all') {
-    calls = calls.filter(c => c.type === selectedType.value)
-  }
-
-  // Filter by status
-  if (selectedStatus.value !== 'all') {
-    calls = calls.filter(c => c.status === selectedStatus.value)
-  }
-
-  // Sort: open calls first, then closed calls
-  // Within each group, sort by deadline (soonest first)
-  return [...calls].sort((a, b) => {
-    // Open calls come before closed calls
-    if (a.status !== b.status) {
-      return a.status === 'open' ? -1 : 1
-    }
-    // Within same status, sort by deadline
-    return new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
-  })
-})
+// Initial fetch
+onMounted(fetchCalls)
 
 // Filter options
 const typeFilters = [
   { value: 'all', label: 'actualites.calls.filters.all' },
-  { value: 'candidature', label: 'actualites.calls.filters.candidature' },
-  { value: 'bourse', label: 'actualites.calls.filters.bourse' },
-  { value: 'projet', label: 'actualites.calls.filters.projet' },
-  { value: 'recrutement', label: 'actualites.calls.filters.recrutement' }
+  { value: 'application', label: 'actualites.calls.filters.candidature' },
+  { value: 'scholarship', label: 'actualites.calls.filters.bourse' },
+  { value: 'project', label: 'actualites.calls.filters.projet' },
+  { value: 'recruitment', label: 'actualites.calls.filters.recrutement' },
+  { value: 'training', label: 'actualites.calls.filters.formation' },
 ]
 
 const statusFilters = [
   { value: 'all', label: 'actualites.calls.status.all' },
-  { value: 'open', label: 'actualites.calls.status.open' },
+  { value: 'ongoing', label: 'actualites.calls.status.open' },
   { value: 'closed', label: 'actualites.calls.status.closed' }
 ]
 
-// Localization helpers
-const getLocalizedTitle = (item: { title_fr: string; title_en?: string; title_ar?: string }) => {
-  if (locale.value === 'en' && item.title_en) return item.title_en
-  if (locale.value === 'ar' && item.title_ar) return item.title_ar
-  return item.title_fr
-}
-
-const getLocalizedDescription = (item: { description_fr: string; description_en?: string }) => {
-  if (locale.value === 'en' && item.description_en) return item.description_en
-  return item.description_fr
-}
-
-const formatDate = (dateStr: string) => {
+// Format date
+const formatDate = (dateStr: string | null) => {
+  if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleDateString(
     locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
@@ -109,12 +129,34 @@ const formatDate = (dateStr: string) => {
 }
 
 // Days until deadline
-const daysUntilDeadline = (deadlineStr: string) => {
+const daysUntilDeadline = (deadlineStr: string | null) => {
+  if (!deadlineStr) return 0
   const deadline = new Date(deadlineStr)
   const now = new Date()
   const diffTime = deadline.getTime() - now.getTime()
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
   return diffDays
+}
+
+// Check if deadline is passed
+const isDeadlinePassed = (deadline: string | null) => {
+  if (!deadline) return false
+  return new Date(deadline) < new Date()
+}
+
+// Get type label for i18n
+const getTypeLabel = (type: CallType) => {
+  const key = typeToI18nKey[type]
+  return t(`actualites.calls.filters.${key}`)
+}
+
+// Get placeholder image
+const getCallImage = (call: ApplicationCallPublic) => {
+  if (call.cover_image_external_id) {
+    // TODO: Construct actual image URL from media service
+    return `https://picsum.photos/seed/${call.id}/800/400`
+  }
+  return `https://picsum.photos/seed/${call.slug}/800/400`
 }
 </script>
 
@@ -137,7 +179,7 @@ const daysUntilDeadline = (deadlineStr: string) => {
             <button
               v-for="filter in typeFilters"
               :key="filter.value"
-              @click="selectedType = filter.value as any"
+              @click="selectedType = filter.value as 'all' | CallType"
               class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
               :class="selectedType === filter.value
                 ? 'bg-brand-blue-600 text-white shadow-md'
@@ -155,7 +197,7 @@ const daysUntilDeadline = (deadlineStr: string) => {
             <button
               v-for="filter in statusFilters"
               :key="filter.value"
-              @click="selectedStatus = filter.value as any"
+              @click="selectedStatus = filter.value as 'all' | CallStatus"
               class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
               :class="selectedStatus === filter.value
                 ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-md'
@@ -170,127 +212,166 @@ const daysUntilDeadline = (deadlineStr: string) => {
       <div class="flex flex-col lg:flex-row gap-8">
         <!-- Main content -->
         <div class="lg:w-2/3">
-          <!-- Results count -->
-          <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-            {{ filteredCalls.length }} {{ filteredCalls.length === 1 ? 'résultat' : 'résultats' }}
-          </p>
+          <!-- Loading -->
+          <div v-if="loading" class="flex items-center justify-center py-16">
+            <div class="h-8 w-8 animate-spin rounded-full border-4 border-brand-blue-600 border-t-transparent"></div>
+          </div>
 
-          <!-- Calls list -->
-          <div v-if="filteredCalls.length > 0" class="space-y-6">
-            <NuxtLink
-              v-for="call in filteredCalls"
-              :key="call.id"
-              :to="localePath(`/actualites/appels/${call.id}`)"
-              class="group rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border block"
-              :class="call.status === 'closed'
-                ? 'bg-gray-50 dark:bg-gray-800/50 border-gray-300 dark:border-gray-600 opacity-80 hover:opacity-100'
-                : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'"
+          <!-- Error -->
+          <div v-else-if="error" class="text-center py-16 bg-red-50 dark:bg-red-900/20 rounded-xl">
+            <font-awesome-icon icon="fa-solid fa-exclamation-triangle" class="w-16 h-16 text-red-400 mb-4" />
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ t('actualites.calls.errorTitle') }}</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-4">{{ error }}</p>
+            <button
+              @click="fetchCalls"
+              class="px-4 py-2 bg-brand-blue-600 text-white rounded-lg hover:bg-brand-blue-700 transition-colors"
             >
-              <div class="flex flex-col md:flex-row">
-                <!-- Image -->
-                <div class="md:w-1/3 overflow-hidden relative">
-                  <img
-                    :src="call.image || 'https://picsum.photos/seed/default-call/800/400'"
-                    :alt="getLocalizedTitle(call)"
-                    class="w-full h-48 md:h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    :class="call.status === 'closed' ? 'grayscale group-hover:grayscale-0' : ''"
-                    loading="lazy"
-                  >
-                  <!-- Closed overlay -->
-                  <div
-                    v-if="call.status === 'closed'"
-                    class="absolute inset-0 bg-gray-900/20 dark:bg-gray-900/40 flex items-center justify-center"
-                  >
-                    <span class="px-3 py-1.5 bg-gray-700 dark:bg-gray-600 text-white text-sm font-semibold rounded-full">
-                      {{ t('actualites.calls.closed') }}
-                    </span>
-                  </div>
-                </div>
+              {{ t('actualites.calls.retry') }}
+            </button>
+          </div>
 
-                <!-- Content -->
-                <div class="md:w-2/3 p-6">
-                  <div class="flex flex-wrap items-center gap-2 mb-3">
-                    <span
-                      class="inline-block px-2 py-0.5 text-xs font-medium rounded"
-                      :class="call.status === 'closed'
-                        ? 'text-gray-600 dark:text-gray-400 bg-gray-200 dark:bg-gray-700'
-                        : 'text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30'"
-                    >
-                      {{ t(`actualites.calls.filters.${call.type}`) }}
-                    </span>
-                    <span
-                      v-if="call.status === 'open' && daysUntilDeadline(call.deadline) <= 7 && daysUntilDeadline(call.deadline) > 0"
-                      class="inline-block px-2 py-0.5 text-xs font-medium text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded animate-pulse"
-                    >
-                      {{ daysUntilDeadline(call.deadline) }} jours restants
-                    </span>
-                    <span
-                      v-else-if="call.status === 'open'"
-                      class="inline-block px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded"
-                    >
-                      {{ t('actualites.calls.status.open') }}
-                    </span>
-                  </div>
+          <template v-else>
+            <!-- Results count -->
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+              {{ totalCalls }} {{ totalCalls === 1 ? 'résultat' : 'résultats' }}
+            </p>
 
-                  <h3
-                    class="text-xl font-bold leading-tight transition-colors"
-                    :class="call.status === 'closed'
-                      ? 'text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200'
-                      : 'text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400'"
-                  >
-                    {{ getLocalizedTitle(call) }}
-                  </h3>
-
-                  <p class="mt-3 line-clamp-3" :class="call.status === 'closed' ? 'text-gray-500 dark:text-gray-500' : 'text-gray-600 dark:text-gray-400'">
-                    {{ getLocalizedDescription(call) }}
-                  </p>
-
-                  <!-- Partner logos -->
-                  <div v-if="call.partner_logos && call.partner_logos.length > 0" class="flex items-center gap-3 mt-4">
+            <!-- Calls list -->
+            <div v-if="calls.length > 0" class="space-y-6">
+              <NuxtLink
+                v-for="call in calls"
+                :key="call.id"
+                :to="localePath(`/actualites/appels/${call.slug}`)"
+                class="group rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border block"
+                :class="call.status === 'closed'
+                  ? 'bg-gray-50 dark:bg-gray-800/50 border-gray-300 dark:border-gray-600 opacity-80 hover:opacity-100'
+                  : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'"
+              >
+                <div class="flex flex-col md:flex-row">
+                  <!-- Image -->
+                  <div class="md:w-1/3 overflow-hidden relative">
                     <img
-                      v-for="(logo, index) in call.partner_logos.slice(0, 3)"
-                      :key="index"
-                      :src="logo"
-                      alt="Partner logo"
-                      class="h-8 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300"
+                      :src="getCallImage(call)"
+                      :alt="call.title"
+                      class="w-full h-48 md:h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      :class="call.status === 'closed' ? 'grayscale group-hover:grayscale-0' : ''"
                       loading="lazy"
                     >
+                    <!-- Closed overlay -->
+                    <div
+                      v-if="call.status === 'closed'"
+                      class="absolute inset-0 bg-gray-900/20 dark:bg-gray-900/40 flex items-center justify-center"
+                    >
+                      <span class="px-3 py-1.5 bg-gray-700 dark:bg-gray-600 text-white text-sm font-semibold rounded-full">
+                        {{ t('actualites.calls.closed') }}
+                      </span>
+                    </div>
                   </div>
 
-                  <div class="flex items-center justify-between mt-6 pt-4 border-t" :class="call.status === 'closed' ? 'border-gray-300 dark:border-gray-600' : 'border-gray-200 dark:border-gray-700'">
-                    <div class="text-sm">
-                      <span class="text-gray-500 dark:text-gray-400">{{ t('actualites.calls.deadline') }}:</span>
+                  <!-- Content -->
+                  <div class="md:w-2/3 p-6">
+                    <div class="flex flex-wrap items-center gap-2 mb-3">
                       <span
-                        class="ml-1 font-semibold"
-                        :class="call.status === 'closed' ? 'text-gray-400 dark:text-gray-500 line-through' : 'text-red-600 dark:text-red-400'"
+                        class="inline-block px-2 py-0.5 text-xs font-medium rounded"
+                        :class="call.status === 'closed'
+                          ? 'text-gray-600 dark:text-gray-400 bg-gray-200 dark:bg-gray-700'
+                          : 'text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30'"
                       >
-                        {{ formatDate(call.deadline) }}
+                        {{ getTypeLabel(call.type) }}
+                      </span>
+                      <span
+                        v-if="call.status === 'ongoing' && call.deadline && daysUntilDeadline(call.deadline) <= 7 && daysUntilDeadline(call.deadline) > 0"
+                        class="inline-block px-2 py-0.5 text-xs font-medium text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded animate-pulse"
+                      >
+                        {{ daysUntilDeadline(call.deadline) }} jours restants
+                      </span>
+                      <span
+                        v-else-if="call.status === 'ongoing'"
+                        class="inline-block px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded"
+                      >
+                        {{ t('actualites.calls.status.open') }}
+                      </span>
+                      <span
+                        v-else-if="call.status === 'upcoming'"
+                        class="inline-block px-2 py-0.5 text-xs font-medium text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30 rounded"
+                      >
+                        {{ t('actualites.calls.status.upcoming') || 'À venir' }}
                       </span>
                     </div>
 
-                    <span
-                      class="inline-flex items-center gap-2 px-4 py-2 font-medium rounded-lg"
+                    <h3
+                      class="text-xl font-bold leading-tight transition-colors"
                       :class="call.status === 'closed'
-                        ? 'bg-gray-500 text-white'
-                        : 'bg-brand-blue-600 text-white'"
+                        ? 'text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200'
+                        : 'text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400'"
                     >
-                      {{ call.status === 'closed' ? t('actualites.calls.viewArchive') : t('actualites.readMore') }}
-                      <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
-                    </span>
+                      {{ call.title }}
+                    </h3>
+
+                    <p
+                      v-if="call.description"
+                      class="mt-3 line-clamp-3"
+                      :class="call.status === 'closed' ? 'text-gray-500 dark:text-gray-500' : 'text-gray-600 dark:text-gray-400'"
+                    >
+                      {{ call.description }}
+                    </p>
+
+                    <div class="flex items-center justify-between mt-6 pt-4 border-t" :class="call.status === 'closed' ? 'border-gray-300 dark:border-gray-600' : 'border-gray-200 dark:border-gray-700'">
+                      <div v-if="call.deadline" class="text-sm">
+                        <span class="text-gray-500 dark:text-gray-400">{{ t('actualites.calls.deadline') }}:</span>
+                        <span
+                          class="ml-1 font-semibold"
+                          :class="call.status === 'closed' ? 'text-gray-400 dark:text-gray-500 line-through' : 'text-red-600 dark:text-red-400'"
+                        >
+                          {{ formatDate(call.deadline) }}
+                        </span>
+                      </div>
+
+                      <span
+                        class="inline-flex items-center gap-2 px-4 py-2 font-medium rounded-lg"
+                        :class="call.status === 'closed'
+                          ? 'bg-gray-500 text-white'
+                          : 'bg-brand-blue-600 text-white'"
+                      >
+                        {{ call.status === 'closed' ? t('actualites.calls.viewArchive') : t('actualites.readMore') }}
+                        <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </NuxtLink>
-          </div>
+              </NuxtLink>
+            </div>
 
-          <!-- Empty state -->
-          <div v-else class="text-center py-16 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-            <font-awesome-icon icon="fa-solid fa-bullhorn" class="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" />
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ t('actualites.calls.noResults') }}</h3>
-            <p class="text-gray-500 dark:text-gray-400">
-              {{ t('actualites.empty.description') }}
-            </p>
-          </div>
+            <!-- Empty state -->
+            <div v-else class="text-center py-16 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+              <font-awesome-icon icon="fa-solid fa-bullhorn" class="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" />
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ t('actualites.calls.noResults') }}</h3>
+              <p class="text-gray-500 dark:text-gray-400">
+                {{ t('actualites.empty.description') }}
+              </p>
+            </div>
+
+            <!-- Pagination -->
+            <div v-if="totalPages > 1" class="flex items-center justify-center gap-2 mt-8">
+              <button
+                :disabled="currentPage === 1"
+                @click="currentPage--"
+                class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <font-awesome-icon icon="fa-solid fa-chevron-left" class="w-4 h-4" />
+              </button>
+              <span class="text-sm text-gray-600 dark:text-gray-300">
+                Page {{ currentPage }} / {{ totalPages }}
+              </span>
+              <button
+                :disabled="currentPage === totalPages"
+                @click="currentPage++"
+                class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-4 h-4" />
+              </button>
+            </div>
+          </template>
         </div>
 
         <!-- Sidebar -->

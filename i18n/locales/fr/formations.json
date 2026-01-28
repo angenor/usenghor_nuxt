@@ -16,10 +16,13 @@
       "masters": "Masters",
       "doctorat": "Doctorat",
       "doctorats": "Doctorats",
+      "doctorate": "Doctorat",
       "du": "Diplôme d'Université",
       "diplomes-universitaires": "Diplômes d'Université",
+      "university_diploma": "Diplôme d'Université",
       "certifiante": "Formation certifiante",
-      "certifiantes": "Formations certifiantes"
+      "certifiantes": "Formations certifiantes",
+      "certificate": "Formation certifiante"
     },
     "typeDescriptions": {
       "masters": "Programmes de Master en 2 ans dispensés sur notre campus d'Alexandrie et nos campus externalisés",
@@ -64,7 +67,11 @@
       "relatedFormations": "Formations similaires",
       "back": "Retour aux formations",
       "downloadProgram": "Télécharger le programme",
-      "downloadPdf": "PDF"
+      "downloadPdf": "PDF",
+      "skills": "Compétences acquises",
+      "careerOpportunities": "Débouchés professionnels",
+      "teachingMethods": "Méthodes pédagogiques",
+      "requiredDegree": "Prérequis"
     },
     "candidature": {
       "seo": {

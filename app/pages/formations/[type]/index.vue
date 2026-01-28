@@ -1,117 +1,160 @@
 <script setup lang="ts">
-import type { FormationType } from '@bank/mock-data/formations'
+import type { ProgramPublic } from '~/composables/usePublicProgramsApi'
 
 const route = useRoute()
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const localePath = useLocalePath()
-const { getFormationsByType } = useMockData()
-
-// Mapping from URL slug to FormationType
-const typeSlugToFormationType: Record<string, FormationType> = {
-  'masters': 'master',
-  'doctorats': 'doctorat',
-  'diplomes-universitaires': 'du',
-  'certifiantes': 'certifiante'
-}
+const {
+  listProgramsByType,
+  urlSlugToProgramType,
+  programTypeToUrlSlug,
+  publicProgramTypeColors,
+} = usePublicProgramsApi()
 
 // Valid types for route validation
 const validTypes = ['masters', 'doctorats', 'diplomes-universitaires', 'certifiantes']
 
 // Get current type from route
 const typeSlug = computed(() => route.params.type as string)
-const formationType = computed(() => typeSlugToFormationType[typeSlug.value])
+const programType = computed(() => urlSlugToProgramType[typeSlug.value])
 const isValidType = computed(() => validTypes.includes(typeSlug.value))
 
+// State
+const programs = ref<ProgramPublic[]>([])
+const loading = ref(true)
+const error = ref<string | null>(null)
+
+// Other types data for sidebar
+const otherTypesData = ref<Record<string, ProgramPublic[]>>({})
+
 // 404 if invalid type
-onMounted(() => {
-  if (!isValidType.value) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Formation type not found'
-    })
+if (!isValidType.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Formation type not found',
+  })
+}
+
+// Fetch programs
+const fetchPrograms = async () => {
+  if (!programType.value) return
+
+  loading.value = true
+  error.value = null
+
+  try {
+    programs.value = await listProgramsByType(programType.value)
+
+    // Fetch other types for sidebar
+    for (const slug of validTypes) {
+      if (slug !== typeSlug.value) {
+        const type = urlSlugToProgramType[slug]
+        if (type) {
+          otherTypesData.value[slug] = await listProgramsByType(type)
+        }
+      }
+    }
   }
-})
+  catch (err: unknown) {
+    const fetchError = err as { message?: string }
+    error.value = fetchError.message || 'Erreur lors du chargement'
+    console.error('Error fetching programs:', err)
+  }
+  finally {
+    loading.value = false
+  }
+}
+
+// Fetch on mount
+onMounted(fetchPrograms)
+
+// SSR data
+const { data: programsData } = await useAsyncData(
+  `programs-${typeSlug.value}`,
+  async () => {
+    if (!programType.value) return []
+    try {
+      return await listProgramsByType(programType.value)
+    }
+    catch {
+      return []
+    }
+  },
+)
+
+// Initialize from SSR
+if (programsData.value && programsData.value.length > 0) {
+  programs.value = programsData.value
+  loading.value = false
+}
 
 // SEO
 useSeoMeta({
   title: () => t('formations.seo.titleType', { type: t(`formations.types.${typeSlug.value}`) }),
-  description: () => t('formations.seo.descriptionType', { type: t(`formations.types.${typeSlug.value}`) })
+  description: () => t('formations.seo.descriptionType', { type: t(`formations.types.${typeSlug.value}`) }),
 })
-
-// Filters
-const validCampuses = ['all', 'alexandrie', 'externalise', 'en_ligne'] as const
-const selectedCampus = ref<typeof validCampuses[number]>('all')
-const showOnlyOpenApplications = ref(false)
-
-// Get formations by type
-const allFormations = computed(() => {
-  if (!formationType.value) return []
-  return getFormationsByType(formationType.value)
-})
-
-// Filtered formations
-const filteredFormations = computed(() => {
-  let result = allFormations.value
-
-  if (selectedCampus.value !== 'all') {
-    result = result.filter(f => f.campus === selectedCampus.value)
-  }
-
-  if (showOnlyOpenApplications.value) {
-    result = result.filter(f => f.application_open)
-  }
-
-  return result
-})
-
-// Campus filter options
-const campusFilters = [
-  { value: 'all', label: 'formations.filters.all' },
-  { value: 'alexandrie', label: 'formations.campus.alexandrie' },
-  { value: 'externalise', label: 'formations.campus.externalise' },
-  { value: 'en_ligne', label: 'formations.campus.en_ligne' }
-]
 
 // Breadcrumb
 const breadcrumb = computed(() => [
   { label: t('nav.home'), to: '/' },
   { label: t('nav.training'), to: '/carrieres#etudiants' },
-  { label: t(`formations.types.${typeSlug.value}`) }
+  { label: t(`formations.types.${typeSlug.value}`) },
 ])
 
 // Other formation types for sidebar
 const otherTypes = computed(() => {
   return validTypes
     .filter(slug => slug !== typeSlug.value)
-    .map(slug => ({
-      slug,
-      label: t(`formations.types.${slug}`),
-      formations: getFormationsByType(typeSlugToFormationType[slug]).slice(0, 3),
-      count: getFormationsByType(typeSlugToFormationType[slug]).length,
-      icon: slug === 'masters' ? 'fa-graduation-cap'
-        : slug === 'doctorats' ? 'fa-user-graduate'
-        : slug === 'diplomes-universitaires' ? 'fa-certificate'
-        : 'fa-award',
-      color: slug === 'masters' ? 'bg-indigo-500'
-        : slug === 'doctorats' ? 'bg-purple-600'
-        : slug === 'diplomes-universitaires' ? 'bg-teal-500'
-        : 'bg-rose-500'
-    }))
+    .map((slug) => {
+      const typePrograms = otherTypesData.value[slug] || []
+      return {
+        slug,
+        label: t(`formations.types.${slug}`),
+        programs: typePrograms.slice(0, 3),
+        count: typePrograms.length,
+        icon: slug === 'masters'
+          ? 'fa-graduation-cap'
+          : slug === 'doctorats'
+            ? 'fa-user-graduate'
+            : slug === 'diplomes-universitaires'
+              ? 'fa-certificate'
+              : 'fa-award',
+        color: slug === 'masters'
+          ? 'bg-indigo-500'
+          : slug === 'doctorats'
+            ? 'bg-purple-600'
+            : slug === 'diplomes-universitaires'
+              ? 'bg-teal-500'
+              : 'bg-rose-500',
+      }
+    })
 })
 
-// Get localized title for formation
-const getLocalizedTitle = (f: any) => {
-  if (locale.value === 'en' && f.title_en) return f.title_en
-  if (locale.value === 'ar' && f.title_ar) return f.title_ar
-  return f.title_fr
+// Get localized title for program
+const getLocalizedTitle = (p: ProgramPublic) => {
+  // Backend doesn't support localization yet, return main title
+  return p.title
 }
 
-// Get thumbnail version of image (100x100)
-const getThumbnail = (f: any) => {
-  if (!f.image) return `https://picsum.photos/seed/${f.slug}/100/100`
-  // Convert large image URL to thumbnail size
-  return f.image.replace(/\/\d+\/\d+$/, '/100/100')
+// Get thumbnail version of image
+const getThumbnail = (p: ProgramPublic) => {
+  if (p.cover_image_external_id) {
+    return `/api/media/${p.cover_image_external_id}?w=100&h=100`
+  }
+  return `https://picsum.photos/seed/${p.slug}/100/100`
 }
+
+// Get program URL
+const getProgramUrl = (p: ProgramPublic) => {
+  const pTypeSlug = programTypeToUrlSlug[p.type]
+  return localePath(`/formations/${pTypeSlug}/${p.slug}`)
+}
+
+// Type config for current type
+const typeConfig = computed(() => {
+  if (!programType.value) return publicProgramTypeColors.master
+  return publicProgramTypeColors[programType.value]
+})
 </script>
 
 <template>
@@ -124,73 +167,111 @@ const getThumbnail = (f: any) => {
       :breadcrumb="breadcrumb"
     />
 
-    <!-- Filters & Content -->
-    <section class="py-12 bg-white dark:bg-gray-950">
+    <!-- Loading state -->
+    <section v-if="loading" class="py-16 bg-white dark:bg-gray-950">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-center">
+          <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-brand-blue-600 border-t-transparent mx-auto mb-4" />
+            <p class="text-gray-600 dark:text-gray-400">
+              {{ t('common.loading') }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Error state -->
+    <section v-else-if="error" class="py-16 bg-white dark:bg-gray-950">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <font-awesome-icon icon="fa-solid fa-exclamation-triangle" class="w-16 h-16 text-red-500 mb-4" />
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            {{ t('common.error') }}
+          </h2>
+          <p class="text-gray-600 dark:text-gray-400 mb-6">
+            {{ error }}
+          </p>
+          <button
+            class="px-6 py-3 bg-brand-blue-600 hover:bg-brand-blue-700 text-white font-medium rounded-lg transition-colors"
+            @click="fetchPrograms"
+          >
+            {{ t('common.retry') || 'Réessayer' }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Content -->
+    <section v-else class="py-12 bg-white dark:bg-gray-950">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col lg:flex-row gap-8">
           <!-- Main Content -->
           <div class="flex-1">
-            <!-- Filters -->
-            <div class="mb-10 space-y-6">
-              <!-- Campus filters -->
-              <div>
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mr-4">{{ t('formations.filters.campus') }} :</span>
-                <div class="inline-flex flex-wrap gap-2 mt-2">
-                  <button
-                    v-for="filter in campusFilters"
-                    :key="filter.value"
-                    @click="selectedCampus = filter.value as any"
-                    class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
-                    :class="selectedCampus === filter.value
-                      ? 'bg-brand-blue-600 text-white shadow-md'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
+            <!-- Programs Grid -->
+            <div v-if="programs.length > 0" class="grid md:grid-cols-2 gap-6">
+              <NuxtLink
+                v-for="program in programs"
+                :key="program.id"
+                :to="getProgramUrl(program)"
+                class="group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700"
+              >
+                <!-- Image -->
+                <div class="relative h-48 overflow-hidden">
+                  <img
+                    :src="program.cover_image_external_id
+                      ? `/api/media/${program.cover_image_external_id}`
+                      : `https://picsum.photos/seed/${program.slug}/600/400`"
+                    :alt="getLocalizedTitle(program)"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
                   >
-                    {{ t(filter.label) }}
-                  </button>
-                </div>
-                <!-- Lien vers partenaires quand campus externalisé est sélectionné -->
-                <div v-if="selectedCampus === 'externalise'" class="mt-3">
-                  <NuxtLink
-                    :to="localePath('/a-propos/partenaires')"
-                    class="inline-flex items-center gap-2 text-sm text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 transition-colors"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-handshake" class="w-4 h-4" />
-                    {{ t('formations.filters.viewPartners') }}
-                    <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
-                  </NuxtLink>
-                </div>
-              </div>
+                  <!-- Gradient overlay -->
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-              <!-- Application status toggle -->
-              <div class="flex items-center gap-3">
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input
-                    v-model="showOnlyOpenApplications"
-                    type="checkbox"
-                    class="sr-only peer"
-                  >
-                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-blue-300 dark:peer-focus:ring-brand-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-brand-blue-600"></div>
-                  <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {{ t('formations.filters.applicationOpen') }}
-                  </span>
-                </label>
-              </div>
-            </div>
+                  <!-- Type badge -->
+                  <div class="absolute bottom-3 left-3">
+                    <span
+                      class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-white rounded-full shadow-lg backdrop-blur-sm"
+                      :class="typeConfig.bgColor"
+                    >
+                      <font-awesome-icon :icon="typeConfig.icon" class="w-3 h-3" />
+                      {{ t(`formations.types.${program.type}`) }}
+                    </span>
+                  </div>
+                </div>
 
-            <!-- Formations Grid -->
-            <div v-if="filteredFormations.length > 0" class="grid md:grid-cols-2 gap-6">
-              <CardsCardFormation
-                v-for="formation in filteredFormations"
-                :key="formation.id"
-                :formation="formation"
-                :show-type="false"
-              />
+                <!-- Content -->
+                <div class="p-5">
+                  <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
+                    {{ getLocalizedTitle(program) }}
+                  </h3>
+
+                  <p v-if="program.description" class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                    {{ program.description }}
+                  </p>
+
+                  <!-- Meta info -->
+                  <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                    <span v-if="program.duration_months" class="flex items-center gap-1">
+                      <font-awesome-icon icon="fa-solid fa-clock" class="w-4 h-4" />
+                      {{ program.duration_months }} mois
+                    </span>
+                    <span v-if="program.credits" class="flex items-center gap-1">
+                      <font-awesome-icon icon="fa-solid fa-award" class="w-4 h-4" />
+                      {{ program.credits }} ECTS
+                    </span>
+                  </div>
+                </div>
+              </NuxtLink>
             </div>
 
             <!-- Empty state -->
             <div v-else class="text-center py-16 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
               <font-awesome-icon icon="fa-solid fa-folder-open" class="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" />
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ t('formations.empty.title') }}</h3>
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                {{ t('formations.empty.title') }}
+              </h3>
               <p class="text-gray-500 dark:text-gray-400">
                 {{ t('formations.empty.description') }}
               </p>
@@ -243,26 +324,26 @@ const getThumbnail = (f: any) => {
                   </span>
                 </NuxtLink>
 
-                <!-- Sample formations with thumbnails -->
+                <!-- Sample programs with thumbnails -->
                 <div class="divide-y divide-gray-200 dark:divide-gray-700">
                   <NuxtLink
-                    v-for="formation in type.formations"
-                    :key="formation.id"
-                    :to="localePath(`/formations/${type.slug}/${formation.slug}`)"
+                    v-for="program in type.programs"
+                    :key="program.id"
+                    :to="getProgramUrl(program)"
                     class="flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors group"
                   >
                     <!-- Thumbnail -->
                     <div class="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200 dark:bg-gray-700">
                       <img
-                        :src="getThumbnail(formation)"
-                        :alt="getLocalizedTitle(formation)"
+                        :src="getThumbnail(program)"
+                        :alt="getLocalizedTitle(program)"
                         class="w-full h-full object-cover"
                         loading="lazy"
-                      />
+                      >
                     </div>
                     <!-- Title -->
                     <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors line-clamp-2 leading-tight">
-                      {{ getLocalizedTitle(formation) }}
+                      {{ getLocalizedTitle(program) }}
                     </span>
                   </NuxtLink>
                 </div>

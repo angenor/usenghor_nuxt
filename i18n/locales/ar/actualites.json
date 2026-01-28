@@ -29,12 +29,14 @@
         "candidature": "الترشحات",
         "bourse": "المنح",
         "projet": "المشاريع",
-        "recrutement": "التوظيف"
+        "recrutement": "التوظيف",
+        "formation": "التدريب"
       },
       "status": {
         "all": "جميع الحالات",
         "open": "مفتوح",
-        "closed": "مغلق"
+        "closed": "مغلق",
+        "upcoming": "قادم"
       },
       "deadline": "الموعد النهائي للتسجيل",
       "apply": "تقديم",
@@ -95,6 +97,7 @@
       "call": {
         "breadcrumb": "دعوة",
         "deadline": "الموعد النهائي للتسجيل",
+        "openingDate": "تاريخ الافتتاح",
         "campus": "الحرم",
         "type": "النوع",
         "status": "الحالة",
@@ -106,7 +109,15 @@
         "relatedCalls": "دعوات أخرى مفتوحة",
         "backToCalls": "العودة إلى الدعوات",
         "daysLeft": "يوم متبقي | {count} أيام متبقية",
-        "deadlinePassed": "انتهى الموعد النهائي"
+        "deadlinePassed": "انتهى الموعد النهائي",
+        "targetAudience": "الفئة المستهدفة",
+        "eligibilityCriteria": "معايير الأهلية",
+        "coverage": "التغطية",
+        "requiredDocuments": "الوثائق المطلوبة",
+        "schedule": "الجدول الزمني",
+        "registrationFee": "رسوم التسجيل",
+        "notFound": "الدعوة غير موجودة",
+        "notFoundDescription": "الدعوة التي تبحث عنها غير موجودة أو تم حذفها."
       },
       "event": {
         "breadcrumb": "فعالية",

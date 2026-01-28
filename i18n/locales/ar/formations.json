@@ -16,10 +16,13 @@
       "masters": "برامج الماجستير",
       "doctorat": "دكتوراه",
       "doctorats": "برامج الدكتوراه",
+      "doctorate": "دكتوراه",
       "du": "شهادة جامعية",
       "diplomes-universitaires": "الشهادات الجامعية",
+      "university_diploma": "شهادة جامعية",
       "certifiante": "برنامج شهادة",
-      "certifiantes": "برامج الشهادات"
+      "certifiantes": "برامج الشهادات",
+      "certificate": "برنامج شهادة"
     },
     "typeDescriptions": {
       "masters": "برامج ماجستير لمدة عامين في حرمنا الجامعي بالإسكندرية والحرم الجامعية الشريكة",
@@ -64,7 +67,11 @@
       "relatedFormations": "برامج ذات صلة",
       "back": "العودة إلى البرامج",
       "downloadProgram": "تحميل البرنامج",
-      "downloadPdf": "PDF"
+      "downloadPdf": "PDF",
+      "skills": "المهارات المكتسبة",
+      "careerOpportunities": "الفرص المهنية",
+      "teachingMethods": "طرق التدريس",
+      "requiredDegree": "المتطلبات الأساسية"
     },
     "candidature": {
       "seo": {

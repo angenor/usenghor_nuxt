@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import type { NewsDisplay } from '~/types/news'
+import type { ApplicationCallPublic, CallType } from '~/types/api'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getAllPublishedNews } = usePublicNewsApi()
 const { getUpcomingEvents: getApiUpcomingEvents } = usePublicEventsApi()
-const { getAllOpenCalls } = useMockData()
+const { listOngoingCalls } = usePublicCallsApi()
 
 // SEO
 useSeoMeta({
@@ -13,31 +14,44 @@ useSeoMeta({
   description: () => t('actualites.seo.description')
 })
 
+// Mapping des types API vers les clés i18n
+const typeToI18nKey: Record<CallType, string> = {
+  application: 'candidature',
+  scholarship: 'bourse',
+  project: 'projet',
+  recruitment: 'recrutement',
+  training: 'formation',
+}
+
 // Get data
 const allNews = ref<NewsDisplay[]>([])
 const upcomingEventsData = ref<any[]>([])
+const openCallsData = ref<ApplicationCallPublic[]>([])
 const isLoading = ref(true)
 
-// Charger les actualités et événements depuis l'API
+// Charger les actualités, événements et appels depuis l'API
 onMounted(async () => {
   try {
-    const [news, events] = await Promise.all([
+    const [news, events, calls] = await Promise.all([
       getAllPublishedNews(),
-      getApiUpcomingEvents(4)
+      getApiUpcomingEvents(4),
+      listOngoingCalls()
     ])
     allNews.value = news
     upcomingEventsData.value = events
+    openCallsData.value = calls.slice(0, 3)
   } catch (error) {
     console.error('Erreur lors du chargement des données:', error)
     allNews.value = []
     upcomingEventsData.value = []
+    openCallsData.value = []
   } finally {
     isLoading.value = false
   }
 })
 
 const upcomingEvents = computed(() => upcomingEventsData.value)
-const openCalls = computed(() => getAllOpenCalls().slice(0, 3))
+const openCalls = computed(() => openCallsData.value)
 
 // Featured news (first one with headline status or first published)
 const featuredNews = computed(() => {
@@ -99,9 +113,10 @@ const getLocalizedExcerpt = (item: NewsDisplay) => {
   return item.summary || ''
 }
 
-const getLocalizedDescription = (item: { description_fr: string; description_en?: string }) => {
-  if (locale.value === 'en' && item.description_en) return item.description_en
-  return item.description_fr
+// Helper pour obtenir le label du type d'appel
+const getCallTypeLabel = (type: CallType) => {
+  const key = typeToI18nKey[type]
+  return t(`actualites.calls.filters.${key}`)
 }
 
 const formatDate = (dateStr: string | null | undefined) => {
@@ -384,14 +399,14 @@ const getEventTitle = (event: any) => {
           <NuxtLink
             v-for="call in openCalls"
             :key="call.id"
-            :to="localePath(`/actualites/appels/${call.id}`)"
+            :to="localePath(`/actualites/appels/${call.slug}`)"
             class="group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-200 dark:border-gray-700 block"
           >
             <!-- Image -->
             <div class="overflow-hidden h-48">
               <img
-                :src="call.image || 'https://picsum.photos/seed/default-call/800/400'"
-                :alt="getLocalizedTitle(call)"
+                :src="`https://picsum.photos/seed/${call.slug}/800/400`"
+                :alt="call.title"
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
               >
@@ -401,20 +416,20 @@ const getEventTitle = (event: any) => {
             <div class="p-5">
               <div class="flex items-center gap-2 mb-3">
                 <span class="inline-block px-2 py-0.5 text-xs font-medium text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded">
-                  {{ t(`actualites.calls.filters.${call.type}`) }}
+                  {{ getCallTypeLabel(call.type) }}
                 </span>
               </div>
 
               <h3 class="text-lg font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
-                {{ getLocalizedTitle(call) }}
+                {{ call.title }}
               </h3>
 
-              <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                {{ getLocalizedDescription(call) }}
+              <p v-if="call.description" class="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                {{ call.description }}
               </p>
 
               <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <div class="text-sm">
+                <div v-if="call.deadline" class="text-sm">
                   <span class="text-gray-500 dark:text-gray-400">{{ t('actualites.calls.deadline') }}:</span>
                   <span class="ml-1 font-semibold text-red-600 dark:text-red-400">{{ formatShortDate(call.deadline) }}</span>
                 </div>

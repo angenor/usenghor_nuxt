@@ -174,7 +174,7 @@ const typeColors: Record<string, string> = {
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-300 group-hover:from-black/90"></div>
 
             <!-- Content -->
-            <div class="absolute inset-x-0 bottom-0 p-5 flex flex-col justify-end transform translate-y-0 group-hover:-translate-y-2 transition-transform duration-300">
+            <div class="absolute inset-x-0 bottom-0 p-5 transform transition-transform duration-300 group-hover:-translate-y-3">
               <div class="flex items-center gap-2 mb-2">
                 <span
                   class="inline-block px-2 py-0.5 text-xs font-semibold text-white rounded"
@@ -184,16 +184,16 @@ const typeColors: Record<string, string> = {
                 </span>
               </div>
 
-              <h3 class="text-lg font-bold text-white leading-tight line-clamp-2 group-hover:underline">
+              <h3 class="text-lg font-bold text-white leading-tight line-clamp-2 mb-2">
                 {{ getLocalizedTitle(event) }}
               </h3>
 
               <!-- Hidden on default, visible on hover -->
-              <p class="mt-2 text-sm text-gray-200 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <p class="text-sm text-gray-200 line-clamp-2 mb-2 opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-20 transition-all duration-300">
                 {{ event.description }}
               </p>
 
-              <div class="flex flex-col gap-1 mt-3 text-sm text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div class="flex flex-col gap-1 text-sm text-gray-200 opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-20 transition-all duration-300">
                 <span class="flex items-center gap-1">
                   <font-awesome-icon icon="fa-solid fa-calendar" class="w-3 h-3" />
                   {{ formatDate(event.start_date) }}

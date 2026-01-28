@@ -29,12 +29,14 @@
         "candidature": "Candidatures",
         "bourse": "Bourses",
         "projet": "Projets",
-        "recrutement": "Recrutements"
+        "recrutement": "Recrutements",
+        "formation": "Formations"
       },
       "status": {
         "all": "Tous les statuts",
         "open": "En cours",
-        "closed": "Clos"
+        "closed": "Clos",
+        "upcoming": "À venir"
       },
       "deadline": "Date limite d'inscription",
       "apply": "Postuler",
@@ -95,6 +97,7 @@
       "call": {
         "breadcrumb": "Appel",
         "deadline": "Date limite d'inscription",
+        "openingDate": "Ouverture",
         "campus": "Campus",
         "type": "Type",
         "status": "Statut",
@@ -106,7 +109,15 @@
         "relatedCalls": "Autres appels en cours",
         "backToCalls": "Retour aux appels",
         "daysLeft": "{count} jour restant | {count} jours restants",
-        "deadlinePassed": "Date limite dépassée"
+        "deadlinePassed": "Date limite dépassée",
+        "targetAudience": "Public cible",
+        "eligibilityCriteria": "Critères d'éligibilité",
+        "coverage": "Prises en charge",
+        "requiredDocuments": "Documents requis",
+        "schedule": "Calendrier",
+        "registrationFee": "Frais d'inscription",
+        "notFound": "Appel non trouvé",
+        "notFoundDescription": "L'appel que vous recherchez n'existe pas ou a été supprimé."
       },
       "event": {
         "breadcrumb": "Événement",
