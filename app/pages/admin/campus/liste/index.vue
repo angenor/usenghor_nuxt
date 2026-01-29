@@ -13,7 +13,7 @@ const {
 } = useCampusApi()
 
 const {
-  getAllCountries,
+  getAllCountriesPublic,
   getFlagEmoji,
 } = useCountriesApi()
 
@@ -61,7 +61,7 @@ async function loadCampuses() {
 
 async function loadCountries() {
   try {
-    countries.value = await getAllCountries()
+    countries.value = await getAllCountriesPublic()
   } catch (e) {
     console.error('Erreur chargement pays:', e)
   }

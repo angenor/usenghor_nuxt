@@ -9,7 +9,7 @@ const router = useRouter()
 
 // APIs
 const { createCampus } = useCampusApi()
-const { getAllCountries, getFlagEmoji } = useCountriesApi()
+const { getAllCountriesPublic, getFlagEmoji } = useCountriesApi()
 const { apiFetch } = useApi()
 
 // Données de référence
@@ -55,7 +55,7 @@ async function loadHeadCandidates() {
 // Charger les données au montage
 onMounted(async () => {
   await Promise.all([
-    getAllCountries().then(data => countries.value = data).catch(console.error),
+    getAllCountriesPublic().then(data => countries.value = data).catch(console.error),
     loadHeadCandidates(),
   ])
   isLoadingData.value = false

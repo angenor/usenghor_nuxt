@@ -37,7 +37,7 @@ const phaseColors: Record<string, string> = {
   'الحالي': '#FCE4EC'
 }
 
-// Timeline events data from i18n
+// Timeline events data from i18n (4 étapes clés)
 const timelineEvents = computed(() => [
   {
     year: '1989',
@@ -51,28 +51,6 @@ const timelineEvents = computed(() => [
     ]
   },
   {
-    year: '1991',
-    title: t('history.timeline.1991.title'),
-    description: t('history.timeline.1991.description'),
-    bgColor: phaseColors[t('history.timeline.1991.phase')] || '#FDF6E3',
-    media: [
-      { type: 'image', src: 'https://picsum.photos/seed/redonnet/800/600', alt: 'Jean-Claude Redonnet' },
-      { type: 'image', src: 'https://picsum.photos/seed/campus91/800/600', alt: 'Campus 1991' },
-      { type: 'image', src: 'https://picsum.photos/seed/students91/800/600', alt: 'Étudiants 1991' }
-    ]
-  },
-  {
-    year: '1993',
-    title: t('history.timeline.1993.title'),
-    description: t('history.timeline.1993.description'),
-    bgColor: phaseColors[t('history.timeline.1993.phase')] || '#E8F5E9',
-    media: [
-      { type: 'image', src: 'https://picsum.photos/seed/seck/800/600', alt: 'Souleymane Seck' },
-      { type: 'image', src: 'https://picsum.photos/seed/expansion/800/600', alt: 'Expansion' },
-      { type: 'image', src: 'https://picsum.photos/seed/programs/800/600', alt: 'Programmes' }
-    ]
-  },
-  {
     year: '2002',
     title: t('history.timeline.2002.title'),
     description: t('history.timeline.2002.description'),
@@ -81,28 +59,6 @@ const timelineEvents = computed(() => [
       { type: 'image', src: 'https://picsum.photos/seed/constant/800/600', alt: 'Fred Constant' },
       { type: 'image', src: 'https://picsum.photos/seed/elkosheri/800/600', alt: 'Ahmed El Kosheri' },
       { type: 'image', src: 'https://picsum.photos/seed/decade2000/800/600', alt: 'Décennie 2000' }
-    ]
-  },
-  {
-    year: '2004',
-    title: t('history.timeline.2004.title'),
-    description: t('history.timeline.2004.description'),
-    bgColor: phaseColors[t('history.timeline.2004.phase')] || '#E3F2FD',
-    media: [
-      { type: 'image', src: 'https://picsum.photos/seed/texier/800/600', alt: 'Fernand Texier' },
-      { type: 'image', src: 'https://picsum.photos/seed/helal/800/600', alt: 'Hany Helal' },
-      { type: 'image', src: 'https://picsum.photos/seed/international/800/600', alt: 'Rayonnement international' }
-    ]
-  },
-  {
-    year: '2009',
-    title: t('history.timeline.2009.title'),
-    description: t('history.timeline.2009.description'),
-    bgColor: phaseColors[t('history.timeline.2009.phase')] || '#E3F2FD',
-    media: [
-      { type: 'image', src: 'https://picsum.photos/seed/lourde/800/600', alt: 'Albert Lourde' },
-      { type: 'image', src: 'https://picsum.photos/seed/modern/800/600', alt: 'Modernisation' },
-      { type: 'image', src: 'https://picsum.photos/seed/campus2009/800/600', alt: 'Campus 2009' }
     ]
   },
   {
@@ -205,9 +161,9 @@ onMounted(() => {
   if (timelineRef.value) {
     ScrollTrigger.create({
       trigger: timelineRef.value,
-      // Start après toutes les sections pinnées (8 sections x 100% = 800%)
-      start: 'bottom+=800% bottom',
-      end: 'bottom+=800% top',
+      // Start après toutes les sections pinnées (4 sections x 100% = 400%)
+      start: 'bottom+=400% bottom',
+      end: 'bottom+=400% top',
       onEnter: () => {
         // Quand on quitte la timeline, transformer sticky en relative pour scroller avec footer
         if (yearDisplayRef.value) {

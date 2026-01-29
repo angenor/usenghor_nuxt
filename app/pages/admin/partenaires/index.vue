@@ -91,16 +91,13 @@ const countries = ref<CountryOption[]>([])
 
 async function loadCountries() {
   try {
-    const response = await apiFetch<{
-      items: Array<{
-        id: string
-        name_fr: string
-        iso_code: string
-      }>
-    }>('/api/admin/countries', {
-      query: { limit: 300, active: true },
-    })
-    countries.value = response.items.map(c => ({
+    // Utiliser l'endpoint public qui ne nécessite pas de permission spéciale
+    const response = await apiFetch<Array<{
+      id: string
+      name_fr: string
+      iso_code: string
+    }>>('/api/public/countries/all')
+    countries.value = response.map(c => ({
       id: c.id,
       name: c.name_fr,
       flag: getFlagEmoji(c.iso_code),

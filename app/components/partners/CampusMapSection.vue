@@ -1,19 +1,45 @@
 <script setup lang="ts">
 import World from '@svg-maps/world'
+import type { CampusPublic } from '~/composables/usePublicCampusApi'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
-const { campusExternalises, campusPrincipal, getFlagEmoji } = useMockData()
+const {
+  getAllCampuses,
+  getCoverImageUrl,
+  getCampusFlagEmoji,
+  getFlagEmoji,
+  getCampusLocation,
+} = usePublicCampusApi()
 
 const { elementRef: headerRef } = useScrollAnimation({ animation: 'fadeInDown' })
 const { elementRef: mapRef } = useScrollAnimation({ animation: 'fadeInLeft', threshold: 0.1 })
 const { elementRef: campusButtonsRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.2 })
+
+// === ÉTAT DE CHARGEMENT ===
+const loading = ref(true)
+const error = ref<string | null>(null)
+const campusesData = ref<CampusPublic[]>([])
 
 // Ref for the campus card to scroll to
 const campusCardRef = ref<HTMLElement | null>(null)
 
 // World map data
 const map = World
+
+// === CHARGEMENT DES DONNÉES ===
+onMounted(async () => {
+  try {
+    campusesData.value = await getAllCampuses()
+  }
+  catch (e) {
+    console.error('Erreur chargement campus:', e)
+    error.value = 'Erreur lors du chargement des campus'
+  }
+  finally {
+    loading.value = false
+  }
+})
 
 // Country names in French (ISO code -> French name)
 const countryNamesFr: Record<string, string> = {
@@ -85,78 +111,69 @@ const handleMouseMove = (event: MouseEvent) => {
   }
 }
 
-// Build all campuses list (headquarters + external)
+// Interface unifiée pour l'affichage des campus (API + siège)
 interface CampusItem {
   id: string
-  slug?: string
-  name_fr: string
-  name_en?: string
-  name_ar?: string
-  city_fr: string
-  city_en?: string
-  city_ar?: string
-  country: string
-  country_fr: string
-  country_en?: string
-  country_ar?: string
-  description_fr: string
-  description_en?: string
-  description_ar?: string
-  image?: string
-  type: 'headquarters' | 'campus'
-  url?: string
+  code: string
+  name: string
+  city: string | null
+  country_iso_code: string | null
+  country_name: string | null
+  description: string | null
+  image: string | null
+  is_headquarters: boolean
 }
 
+// Transformer CampusPublic en CampusItem
+const transformCampus = (campus: CampusPublic): CampusItem => ({
+  id: campus.id,
+  code: campus.code,
+  name: campus.name,
+  city: campus.city,
+  country_iso_code: campus.country_iso_code,
+  country_name: campus.country_name_fr,
+  description: campus.description,
+  image: getCoverImageUrl(campus),
+  is_headquarters: campus.is_headquarters,
+})
+
+// Tous les campus (siège + externalisés)
 const allCampuses = computed<CampusItem[]>(() => {
-  const headquarters: CampusItem = {
-    id: 'headquarters',
-    name_fr: campusPrincipal.name_fr,
-    name_en: campusPrincipal.name_en,
-    name_ar: campusPrincipal.name_ar,
-    city_fr: campusPrincipal.city_fr,
-    city_en: campusPrincipal.city_en,
-    city_ar: campusPrincipal.city_ar,
-    country: 'EG',
-    country_fr: 'Égypte',
-    country_en: 'Egypt',
-    country_ar: 'مصر',
-    description_fr: "Siège principal de l'Université Senghor, situé dans la ville historique d'Alexandrie.",
-    description_en: 'Main headquarters of Senghor University, located in the historic city of Alexandria.',
-    description_ar: 'المقر الرئيسي لجامعة سنغور، يقع في مدينة الإسكندرية التاريخية.',
-    image: '/images/bg/backgroud_senghor1.jpg',
-    type: 'headquarters',
-    url: 'https://www.usenghor.org'
-  }
-
-  const external = campusExternalises.value.map(c => ({
-    ...c,
-    type: 'campus' as const
-  }))
-
-  return [headquarters, ...external]
+  return campusesData.value.map(transformCampus)
 })
 
-// External campuses only (for the buttons list - excludes headquarters)
+// Campus externalisés uniquement (pour les boutons - exclut le siège)
 const externalCampusesOnly = computed(() => {
-  return allCampuses.value.filter(c => c.type === 'campus')
+  return allCampuses.value.filter(c => !c.is_headquarters)
 })
 
-// Selected campus state - First external campus by default
-const selectedCampus = ref<CampusItem>((externalCampusesOnly.value[0] ?? allCampuses.value[0])!)
+// Campus siège
+const headquartersCampus = computed(() => {
+  return allCampuses.value.find(c => c.is_headquarters) || null
+})
 
-// Build colored countries from campus data
-const coloredCountries = computed(() => {
-  const countries: Record<string, { color: string; type: string; slug?: string }> = {
-    // Headquarters (Egypt)
-    eg: { color: '#2b4bbf', type: 'headquarters' }
+// Campus sélectionné - Premier campus externalisé par défaut
+const selectedCampus = ref<CampusItem | null>(null)
+
+// Initialiser le campus sélectionné une fois les données chargées
+watch(externalCampusesOnly, (campuses) => {
+  if (campuses.length > 0 && !selectedCampus.value) {
+    selectedCampus.value = campuses[0]
   }
+}, { immediate: true })
 
-  // Add external campuses
-  campusExternalises.value.forEach(campus => {
-    countries[campus.country.toLowerCase()] = {
-      color: '#f32525',
-      type: 'campus',
-      slug: campus.slug
+// Construire les pays colorés depuis les données des campus
+const coloredCountries = computed(() => {
+  const countries: Record<string, { color: string; type: string; code?: string }> = {}
+
+  campusesData.value.forEach((campus) => {
+    if (campus.country_iso_code) {
+      const isoLower = campus.country_iso_code.toLowerCase()
+      countries[isoLower] = {
+        color: campus.is_headquarters ? '#2b4bbf' : '#f32525',
+        type: campus.is_headquarters ? 'headquarters' : 'campus',
+        code: campus.code,
+      }
     }
   })
 
@@ -187,7 +204,7 @@ const adjustBrightness = (hex: string, percent: number): string => {
 // Get color for a country
 const getColor = (id: string): string => {
   const isHovered = hovered.value?.id === id
-  const isSelected = selectedCampus.value?.country.toLowerCase() === id
+  const isSelected = selectedCampus.value?.country_iso_code?.toLowerCase() === id
   const countryData = coloredCountries.value[id]
 
   if (countryData) {
@@ -209,7 +226,7 @@ const getColor = (id: string): string => {
 
 // Get campus for a country
 const getCampusForCountry = (countryId: string) => {
-  return allCampuses.value.find(c => c.country.toLowerCase() === countryId)
+  return allCampuses.value.find(c => c.country_iso_code?.toLowerCase() === countryId)
 }
 
 // Computed property for hovered campus
@@ -250,15 +267,22 @@ const handleTooltipClick = () => {
   }
 }
 
-// Get localized field helper
-const getLocalizedField = (campus: CampusItem, field: string): string => {
-  if (locale.value === 'ar') {
-    return (campus as any)[`${field}_ar`] || (campus as any)[`${field}_en`] || (campus as any)[`${field}_fr`]
-  }
-  if (locale.value === 'en') {
-    return (campus as any)[`${field}_en`] || (campus as any)[`${field}_fr`]
-  }
-  return (campus as any)[`${field}_fr`]
+// Helper pour obtenir le nom du campus
+const getCampusName = (campus: CampusItem): string => {
+  return campus.name || ''
+}
+
+// Helper pour obtenir la localisation du campus
+const getCampusLocationText = (campus: CampusItem): string => {
+  const parts: string[] = []
+  if (campus.city) parts.push(campus.city)
+  if (campus.country_name) parts.push(campus.country_name)
+  return parts.join(', ')
+}
+
+// Helper pour obtenir la description du campus
+const getCampusDescription = (campus: CampusItem): string => {
+  return campus.description || ''
 }
 
 // Fallback image handler
@@ -295,156 +319,161 @@ const handleImageError = (e: Event) => {
         </p>
       </div>
 
-      <!-- Legend -->
-      <div class="flex flex-wrap justify-center gap-4 lg:gap-6 mb-8">
-        <div class="flex items-center gap-2">
-          <span class="w-4 h-4 rounded-full bg-brand-blue-500"></span>
-          <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('partners.campus.headquarters') }}</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="w-4 h-4 rounded-full bg-brand-red-500"></span>
-          <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('partners.campus.externalCampus') }}</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="w-4 h-4 rounded-full bg-green-500"></span>
-          <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('partners.campus.selected') }}</span>
-        </div>
+      <!-- Loading State -->
+      <div v-if="loading" class="flex items-center justify-center py-20">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue-600"></div>
       </div>
 
-      <!-- Campus Name Cards -->
-      <div ref="campusButtonsRef" class="mb-12">
-        <div class="flex flex-wrap justify-center gap-3">
-          <button
-            v-for="campus in externalCampusesOnly"
-            :key="campus.id"
-            class="campus-name-card"
-            :class="{
-              'campus-name-card--active': selectedCampus.id === campus.id
-            }"
-            @click="selectedCampus = campus; scrollToCampusCard()"
-          >
-            <span class="ltr:mr-1 rtl:ml-1">{{ getFlagEmoji(campus.country) }}</span>
-            {{ getLocalizedField(campus, 'country') }}
-          </button>
-        </div>
+      <!-- Error State -->
+      <div v-else-if="error" class="text-center py-12">
+        <font-awesome-icon icon="fa-solid fa-exclamation-triangle" class="w-12 h-12 text-red-500 mb-4" />
+        <p class="text-red-600 dark:text-red-400">{{ error }}</p>
       </div>
 
-      <!-- Map and Card Container -->
-      <div ref="mapRef" class="relative flex flex-col lg:flex-row gap-6 lg:gap-0">
-        <!-- Map Container -->
-        <div class="relative flex-1 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-3xl p-4 lg:p-8 border border-gray-200/50 dark:border-gray-700/50 shadow-xl ltr:lg:mr-[-80px] rtl:lg:ml-[-80px] z-10">
-          <!-- Map -->
-          <div class="map-container relative" @mousemove="handleMouseMove">
-            <svg
-              :viewBox="map.viewBox"
-              class="world-map w-full h-auto"
-              xmlns="http://www.w3.org/2000/svg"
+      <!-- Content (when loaded) -->
+      <template v-else>
+        <!-- Legend -->
+        <div class="flex flex-wrap justify-center gap-4 lg:gap-6 mb-8">
+          <div class="flex items-center gap-2">
+            <span class="w-4 h-4 rounded-full bg-brand-blue-500"></span>
+            <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('partners.campus.headquarters') }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-4 h-4 rounded-full bg-brand-red-500"></span>
+            <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('partners.campus.externalCampus') }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-4 h-4 rounded-full bg-green-500"></span>
+            <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('partners.campus.selected') }}</span>
+          </div>
+        </div>
+
+        <!-- Campus Name Cards -->
+        <div ref="campusButtonsRef" class="mb-12">
+          <div class="flex flex-wrap justify-center gap-3">
+            <button
+              v-for="campus in externalCampusesOnly"
+              :key="campus.id"
+              class="campus-name-card"
+              :class="{
+                'campus-name-card--active': selectedCampus?.id === campus.id
+              }"
+              @click="selectedCampus = campus; scrollToCampusCard()"
             >
-              <path
-                v-for="location in map.locations"
-                :key="location.id"
-                :d="location.path"
-                :fill="getColor(location.id)"
-                stroke="#fff"
-                stroke-width="0.5"
-                class="map-path"
-                :class="{ 'cursor-pointer': coloredCountries[location.id] }"
-                @mouseenter="hovered = location"
-                @mouseleave="hovered = null"
-                @click="handleCountryClick(location)"
-              />
-            </svg>
+              <span class="ltr:mr-1 rtl:ml-1">{{ getFlagEmoji(campus.country_iso_code) }}</span>
+              {{ campus.country_name || campus.city }}
+            </button>
+          </div>
+        </div>
 
-            <!-- Tooltip -->
-            <Transition name="fade">
-              <div
-                v-if="hovered"
-                class="tooltip"
-                :class="{ 'tooltip-clickable': hoveredCampus }"
-                :style="{
-                  left: mousePosition.x + 15 + 'px',
-                  top: mousePosition.y - 10 + 'px'
-                }"
-                @click.stop="handleTooltipClick"
+        <!-- Map and Card Container -->
+        <div ref="mapRef" class="relative flex flex-col lg:flex-row gap-6 lg:gap-0">
+          <!-- Map Container -->
+          <div class="relative flex-1 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-3xl p-4 lg:p-8 border border-gray-200/50 dark:border-gray-700/50 shadow-xl ltr:lg:mr-[-80px] rtl:lg:ml-[-80px] z-10">
+            <!-- Map -->
+            <div class="map-container relative" @mousemove="handleMouseMove">
+              <svg
+                :viewBox="map.viewBox"
+                class="world-map w-full h-auto"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                <template v-if="hoveredCampus">
-                  <span class="tooltip-campus-name">{{ getLocalizedField(hoveredCampus, 'name') }}</span>
-                  <span class="tooltip-hint">{{ locale === 'ar' ? 'انقر للعرض' : locale === 'en' ? 'Click to view' : 'Cliquer pour voir' }}</span>
-                </template>
-                <template v-else>
-                  {{ getCountryName(hovered.id, hovered.name) }}
-                </template>
+                <path
+                  v-for="location in map.locations"
+                  :key="location.id"
+                  :d="location.path"
+                  :fill="getColor(location.id)"
+                  stroke="#fff"
+                  stroke-width="0.5"
+                  class="map-path"
+                  :class="{ 'cursor-pointer': coloredCountries[location.id] }"
+                  @mouseenter="hovered = location"
+                  @mouseleave="hovered = null"
+                  @click="handleCountryClick(location)"
+                />
+              </svg>
+
+              <!-- Tooltip -->
+              <Transition name="fade">
+                <div
+                  v-if="hovered"
+                  class="tooltip"
+                  :class="{ 'tooltip-clickable': hoveredCampus }"
+                  :style="{
+                    left: mousePosition.x + 15 + 'px',
+                    top: mousePosition.y - 10 + 'px'
+                  }"
+                  @click.stop="handleTooltipClick"
+                >
+                  <template v-if="hoveredCampus">
+                    <span class="tooltip-campus-name">{{ getCampusName(hoveredCampus) }}</span>
+                    <span class="tooltip-hint">{{ locale === 'ar' ? 'انقر للعرض' : locale === 'en' ? 'Click to view' : 'Cliquer pour voir' }}</span>
+                  </template>
+                  <template v-else>
+                    {{ getCountryName(hovered.id, hovered.name) }}
+                  </template>
+                </div>
+              </Transition>
+            </div>
+          </div>
+
+          <!-- Campus Card (Notebook style) -->
+          <div v-if="selectedCampus" ref="campusCardRef" class="campus-card-wrapper lg:w-[380px] lg:flex-shrink-0 z-20 lg:mt-12">
+            <Transition
+              mode="out-in"
+              enter-active-class="animate__animated animate__flipInY animate__faster"
+              leave-active-class="animate__animated animate__flipOutY animate__faster"
+            >
+              <div class="campus-card" :key="selectedCampus.id">
+                <!-- Image -->
+                <div class="card-image">
+                  <img
+                    :src="selectedCampus.image || `https://picsum.photos/seed/${selectedCampus.id}/600/400`"
+                    :alt="getCampusName(selectedCampus)"
+                    @error="handleImageError"
+                  />
+                  <!-- Badge -->
+                  <div
+                    class="absolute top-4 ltr:left-4 rtl:right-4 px-3 py-1 rounded-full text-xs font-semibold text-white"
+                    :class="selectedCampus.is_headquarters ? 'bg-brand-blue-500' : 'bg-brand-red-500'"
+                  >
+                    {{ selectedCampus.is_headquarters ? t('partners.campus.headquarters') : t('partners.campus.externalCampus') }}
+                  </div>
+                </div>
+
+                <!-- Content -->
+                <div class="card-content">
+                  <h3 class="card-title">{{ getCampusName(selectedCampus) }}</h3>
+                  <p class="card-country">
+                    <font-awesome-icon icon="fa-solid fa-location-dot" class="w-3 h-3 ltr:mr-1 rtl:ml-1" />
+                    {{ getCampusLocationText(selectedCampus) }}
+                  </p>
+                  <div v-if="getCampusDescription(selectedCampus)" class="card-text">
+                    <p>{{ getCampusDescription(selectedCampus) }}</p>
+                  </div>
+
+                  <!-- CTA -->
+                  <NuxtLink
+                    v-if="selectedCampus.is_headquarters"
+                    :to="localePath('/site')"
+                    class="card-cta"
+                  >
+                    {{ t('partners.campus.viewDetails') }}
+                    <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 ltr:ml-2 rtl:mr-2 rtl:rotate-180" />
+                  </NuxtLink>
+                  <NuxtLink
+                    v-else
+                    :to="localePath(`/a-propos/partenaires/campus/${selectedCampus.code.toLowerCase()}`)"
+                    class="card-cta"
+                  >
+                    {{ t('partners.campus.viewDetails') }}
+                    <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 ltr:ml-2 rtl:mr-2 rtl:rotate-180" />
+                  </NuxtLink>
+                </div>
               </div>
             </Transition>
           </div>
         </div>
-
-        <!-- Campus Card (Notebook style) -->
-        <div ref="campusCardRef" class="campus-card-wrapper lg:w-[380px] lg:flex-shrink-0 z-20 lg:mt-12">
-          <Transition
-            mode="out-in"
-            enter-active-class="animate__animated animate__flipInY animate__faster"
-            leave-active-class="animate__animated animate__flipOutY animate__faster"
-          >
-            <div class="campus-card" :key="selectedCampus.id">
-              <!-- Image -->
-              <div class="card-image">
-                <img
-                  :src="selectedCampus.image || `https://picsum.photos/seed/${selectedCampus.id}/600/400`"
-                  :alt="getLocalizedField(selectedCampus, 'name')"
-                  @error="handleImageError"
-                />
-                <!-- Badge -->
-                <div
-                  class="absolute top-4 ltr:left-4 rtl:right-4 px-3 py-1 rounded-full text-xs font-semibold text-white"
-                  :class="selectedCampus.type === 'headquarters' ? 'bg-brand-blue-500' : 'bg-brand-red-500'"
-                >
-                  {{ selectedCampus.type === 'headquarters' ? t('partners.campus.headquarters') : t('partners.campus.externalCampus') }}
-                </div>
-              </div>
-
-              <!-- Content -->
-              <div class="card-content">
-                <h3 class="card-title">{{ getLocalizedField(selectedCampus, 'name') }}</h3>
-                <p class="card-country">
-                  <font-awesome-icon icon="fa-solid fa-location-dot" class="w-3 h-3 ltr:mr-1 rtl:ml-1" />
-                  {{ getLocalizedField(selectedCampus, 'city') }}, {{ getLocalizedField(selectedCampus, 'country') }}
-                </p>
-                <div class="card-text">
-                  <p>{{ getLocalizedField(selectedCampus, 'description') }}</p>
-                </div>
-
-                <!-- CTA -->
-                <NuxtLink
-                  v-if="selectedCampus.type === 'headquarters'"
-                  :to="localePath('/site')"
-                  class="card-cta"
-                >
-                  {{ t('partners.campus.viewDetails') }}
-                  <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 ltr:ml-2 rtl:mr-2 rtl:rotate-180" />
-                </NuxtLink>
-                <NuxtLink
-                  v-else-if="selectedCampus.type === 'campus' && selectedCampus.slug"
-                  :to="localePath(`/a-propos/partenaires/campus/${selectedCampus.slug}`)"
-                  class="card-cta"
-                >
-                  {{ t('partners.campus.viewDetails') }}
-                  <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 ltr:ml-2 rtl:mr-2 rtl:rotate-180" />
-                </NuxtLink>
-                <a
-                  v-else-if="selectedCampus.url"
-                  :href="selectedCampus.url"
-                  target="_blank"
-                  class="card-cta"
-                >
-                  {{ t('partners.campus.visitWebsite') }}
-                  <font-awesome-icon icon="fa-solid fa-external-link-alt" class="w-4 h-4 ltr:ml-2 rtl:mr-2" />
-                </a>
-              </div>
-            </div>
-          </Transition>
-        </div>
-      </div>
+      </template>
     </div>
   </section>
 </template>

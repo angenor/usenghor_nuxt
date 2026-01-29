@@ -24,7 +24,8 @@ const {
   slugify,
 } = useAdminNewsApi()
 
-const { departments, campusExternalises } = useMockData()
+const { departments } = useMockData()
+const { getCampuses, getUsers, campuses: campusesCache } = useReferenceData()
 
 // === STATE ===
 // Filtres
@@ -141,7 +142,7 @@ const loadNews = async () => {
 
 // Charger au montage
 onMounted(async () => {
-  await Promise.all([loadTags(), loadStats(), loadNews()])
+  await Promise.all([loadTags(), loadStats(), loadNews(), getCampuses(), getUsers()])
 })
 
 // Recharger quand les filtres changent
@@ -160,7 +161,7 @@ watch(currentPage, () => {
 })
 
 // === COMPUTED ===
-const allCampuses = computed(() => campusExternalises.value)
+const allCampuses = computed(() => campusesCache.value)
 const allDepartments = computed(() => departments.value)
 
 // Vérifier si filtres actifs
@@ -623,6 +624,9 @@ const truncate = (text: string, length: number) => {
                 Auteur
               </th>
               <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Campus
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Tags
               </th>
               <th
@@ -702,6 +706,12 @@ const truncate = (text: string, length: number) => {
                     {{ newsItem.author.name }}
                   </span>
                 </div>
+                <span v-else class="text-sm text-gray-400">-</span>
+              </td>
+              <td class="px-4 py-3">
+                <span v-if="newsItem.campus_name" class="text-sm text-gray-600 dark:text-gray-300">
+                  {{ newsItem.campus_name }}
+                </span>
                 <span v-else class="text-sm text-gray-400">-</span>
               </td>
               <td class="px-4 py-3">

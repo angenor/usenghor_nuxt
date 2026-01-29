@@ -206,6 +206,7 @@ export function useAdminNewsApi() {
 
   /**
    * Liste les actualités avec pagination et filtres.
+   * Charge également les données de référence pour résoudre les noms.
    */
   async function listNews(params: NewsFilters & {
     page?: number
@@ -213,21 +214,26 @@ export function useAdminNewsApi() {
     sort_by?: string
     sort_order?: 'asc' | 'desc'
   } = {}): Promise<PaginatedResponse<NewsDisplay>> {
-    const response = await apiFetch<PaginatedResponse<NewsWithTags>>('/api/admin/news', {
-      query: {
-        page: params.page || 1,
-        limit: params.limit || 20,
-        search: params.search,
-        status: params.status !== 'all' ? params.status : undefined,
-        highlight_status: params.highlight_status !== 'all' ? params.highlight_status : undefined,
-        tag_id: params.tag_id,
-        campus_id: params.campus_id,
-        from_date: params.from_date,
-        to_date: params.to_date,
-        sort_by: params.sort_by,
-        sort_order: params.sort_order,
-      },
-    })
+    // Charger les données de référence en parallèle avec les actualités
+    const [response] = await Promise.all([
+      apiFetch<PaginatedResponse<NewsWithTags>>('/api/admin/news', {
+        query: {
+          page: params.page || 1,
+          limit: params.limit || 20,
+          search: params.search,
+          status: params.status !== 'all' ? params.status : undefined,
+          highlight_status: params.highlight_status !== 'all' ? params.highlight_status : undefined,
+          tag_id: params.tag_id,
+          campus_id: params.campus_id,
+          from_date: params.from_date,
+          to_date: params.to_date,
+          sort_by: params.sort_by,
+          sort_order: params.sort_order,
+        },
+      }),
+      getUsers(),
+      getCampuses(),
+    ])
 
     return {
       ...response,

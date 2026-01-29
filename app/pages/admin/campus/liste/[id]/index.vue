@@ -15,7 +15,7 @@ const {
   deleteCampus: apiDeleteCampus,
 } = useCampusApi()
 
-const { getAllCountries, getFlagEmoji } = useCountriesApi()
+const { getAllCountriesPublic, getFlagEmoji } = useCountriesApi()
 const { getMediaUrl } = useMediaApi()
 const { apiFetch } = useApi()
 
@@ -70,7 +70,7 @@ async function loadCampus() {
 
 async function loadCountries() {
   try {
-    countries.value = await getAllCountries()
+    countries.value = await getAllCountriesPublic()
   } catch (e) {
     console.error('Erreur chargement pays:', e)
   }
@@ -258,7 +258,7 @@ const toggleActive = async () => {
             </div>
             <div v-if="campus.latitude && campus.longitude" class="text-sm text-gray-500">
               <font-awesome-icon :icon="['fas', 'globe']" class="mr-2" />
-              Coordonnées: {{ campus.latitude.toFixed(4) }}, {{ campus.longitude.toFixed(4) }}
+              Coordonnées: {{ Number(campus.latitude).toFixed(4) }}, {{ Number(campus.longitude).toFixed(4) }}
             </div>
             <!-- Placeholder pour la carte -->
             <div class="mt-4 flex h-48 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700">

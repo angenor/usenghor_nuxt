@@ -14,7 +14,7 @@ const {
   updateCampus: apiUpdateCampus,
 } = useCampusApi()
 
-const { getAllCountries, getFlagEmoji } = useCountriesApi()
+const { getAllCountriesPublic, getFlagEmoji } = useCountriesApi()
 const { apiFetch } = useApi()
 const { getMediaUrl } = useMediaApi()
 
@@ -112,7 +112,7 @@ const loadCampusData = () => {
 onMounted(async () => {
   await Promise.all([
     loadCampus(),
-    getAllCountries().then(data => countries.value = data).catch(console.error),
+    getAllCountriesPublic().then(data => countries.value = data).catch(console.error),
     loadHeadCandidates(),
   ])
   isLoadingData.value = false
