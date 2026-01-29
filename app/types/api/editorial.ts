@@ -322,6 +322,25 @@ export type ValueSectionKey =
   | 'careers.partners.types.title'
   | 'careers.partners.form.title'
   | 'careers.partners.form.text'
+  // Page Projets - Hero
+  | 'projects.hero.badge'
+  | 'projects.hero.title'
+  | 'projects.hero.subtitle'
+  // Page Projets - Introduction
+  | 'projects.intro.title'
+  | 'projects.intro.description'
+  | 'projects.intro.stats.projects.label'
+  | 'projects.intro.stats.countries.label'
+  | 'projects.intro.stats.beneficiaries.label'
+  // Page Projets - Projets à la une
+  | 'projects.featured.title'
+  | 'projects.featured.badge'
+  // Page Projets - Liste des projets
+  | 'projects.list.title'
+  // Page Projets - CTA
+  | 'projects.cta.title'
+  | 'projects.cta.description'
+  | 'projects.cta.button'
 
 export interface ValueSection {
   id: string

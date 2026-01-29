@@ -29,6 +29,8 @@ const predefinedKeyFigures = [
   { key: 'stats_students', label: 'Étudiants actuels', description: 'Nombre d\'étudiants actuellement inscrits' },
   { key: 'stats_nationalities', label: 'Nationalités représentées', description: 'Nombre de nationalités parmi les étudiants' },
   { key: 'stats_open_positions', label: 'Postes ouverts', description: 'Nombre de postes actuellement ouverts au recrutement' },
+  { key: 'stats_project_countries', label: 'Pays (projets)', description: 'Nombre de pays couverts par les projets de recherche' },
+  { key: 'stats_project_beneficiaries', label: 'Bénéficiaires (projets)', description: 'Nombre de bénéficiaires des projets de recherche' },
 ]
 
 // === STATE ===

@@ -646,6 +646,80 @@ export const careersPageSections: PageSection[] = [
   },
 ]
 
+// ============================================================================
+// DÉFINITION DE LA PAGE PROJETS
+// ============================================================================
+
+export const projectsPageSections: PageSection[] = [
+  {
+    id: 'projects-hero',
+    name: 'Hero Projets',
+    description: 'Bannière principale de la page Projets',
+    icon: 'image',
+    color: 'bg-gradient-to-r from-gray-800 to-gray-900 text-white',
+    editorialKeys: ['projects.hero.badge', 'projects.hero.title', 'projects.hero.subtitle'],
+    fields: [
+      { key: 'projects.hero.badge', label: 'Badge', description: 'Texte du badge au-dessus du titre', type: 'text', editorialKey: 'projects.hero.badge', editable: true },
+      { key: 'projects.hero.title', label: 'Titre', description: 'Titre principal du hero', type: 'text', editorialKey: 'projects.hero.title', editable: true },
+      { key: 'projects.hero.subtitle', label: 'Sous-titre', description: 'Sous-titre du hero', type: 'textarea', editorialKey: 'projects.hero.subtitle', editable: true },
+    ],
+  },
+  {
+    id: 'projects-intro',
+    name: 'Section Introduction',
+    description: 'Introduction avec statistiques clés',
+    icon: 'info-circle',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    editorialKeys: [
+      'projects.intro.title', 'projects.intro.description',
+      'projects.intro.stats.projects.label', 'projects.intro.stats.countries.label', 'projects.intro.stats.beneficiaries.label',
+    ],
+    fields: [
+      { key: 'projects.intro.title', label: 'Titre', description: 'Titre de la section introduction', type: 'text', editorialKey: 'projects.intro.title', editable: true },
+      { key: 'projects.intro.description', label: 'Description', description: 'Texte de présentation', type: 'textarea', editorialKey: 'projects.intro.description', editable: true },
+      { key: 'projects.intro.stats.projects.label', label: 'Label Projets', description: 'Libellé pour le nombre de projets (valeur dynamique)', type: 'text', editorialKey: 'projects.intro.stats.projects.label', editable: true },
+      { key: 'projects.intro.stats.countries.label', label: 'Label Pays', description: 'Libellé pour les pays (valeur dans Chiffres clés)', type: 'text', editorialKey: 'projects.intro.stats.countries.label', editable: true },
+      { key: 'projects.intro.stats.beneficiaries.label', label: 'Label Bénéficiaires', description: 'Libellé pour les bénéficiaires (valeur dans Chiffres clés)', type: 'text', editorialKey: 'projects.intro.stats.beneficiaries.label', editable: true },
+    ],
+  },
+  {
+    id: 'projects-featured',
+    name: 'Section Projets à la une',
+    description: 'Projets phares mis en avant',
+    icon: 'star',
+    color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+    editorialKeys: ['projects.featured.title', 'projects.featured.badge'],
+    fields: [
+      { key: 'projects.featured.title', label: 'Titre', description: 'Titre de la section projets à la une', type: 'text', editorialKey: 'projects.featured.title', editable: true },
+      { key: 'projects.featured.badge', label: 'Badge', description: 'Badge à côté du titre', type: 'text', editorialKey: 'projects.featured.badge', editable: true },
+    ],
+  },
+  {
+    id: 'projects-list',
+    name: 'Section Liste des projets',
+    description: 'Grille des projets avec filtres par catégorie et statut',
+    icon: 'th-large',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    editorialKeys: ['projects.list.title'],
+    fields: [
+      { key: 'projects.list.title', label: 'Titre', description: 'Titre de la section liste', type: 'text', editorialKey: 'projects.list.title', editable: true },
+    ],
+  },
+  {
+    id: 'projects-cta',
+    name: 'Section CTA',
+    description: 'Appel à l\'action pour contacter l\'université',
+    icon: 'bullhorn',
+    color: 'bg-brand-blue-100 text-brand-blue-800 dark:bg-brand-blue-900/30 dark:text-brand-blue-300',
+    editorialKeys: ['projects.cta.title', 'projects.cta.description', 'projects.cta.button'],
+    fields: [
+      { key: 'projects.cta.title', label: 'Titre', description: 'Titre du bloc CTA', type: 'text', editorialKey: 'projects.cta.title', editable: true },
+      { key: 'projects.cta.description', label: 'Description', description: 'Texte d\'accompagnement', type: 'textarea', editorialKey: 'projects.cta.description', editable: true },
+      { key: 'projects.cta.button', label: 'Bouton', description: 'Texte du bouton', type: 'text', editorialKey: 'projects.cta.button', editable: true },
+    ],
+  },
+]
+
 // Pages du front-office
 export const frontOfficePages: FrontOfficePage[] = [
   {
@@ -703,6 +777,14 @@ export const frontOfficePages: FrontOfficePage[] = [
     description: 'Opportunités pour enseignants, étudiants et partenaires',
     icon: 'briefcase',
     sections: careersPageSections,
+  },
+  {
+    id: 'projects',
+    name: 'Page Projets',
+    slug: '/projets',
+    description: 'Projets de recherche et développement de l\'université',
+    icon: 'project-diagram',
+    sections: projectsPageSections,
   },
 ]
 
@@ -1248,5 +1330,6 @@ export function useEditorialValuesApi() {
     teamPageSections,
     partnersPageSections,
     careersPageSections,
+    projectsPageSections,
   }
 }
