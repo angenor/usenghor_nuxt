@@ -122,6 +122,13 @@
       "externalCampus": "Campus externalisé",
       "selected": "Sélectionné"
     },
+    "types": {
+      "charterOperator": "Opérateur de la charte",
+      "campusPartner": "Partenaire campus",
+      "programPartner": "Partenaire programme",
+      "projectPartner": "Partenaire projet",
+      "other": "Autre"
+    },
     "filters": {
       "all": "Tous",
       "charter": "Opérateurs de la charte",
@@ -130,7 +137,9 @@
       "research": "Recherche",
       "culture": "Culture",
       "environment": "Environnement",
-      "institutional": "Institutionnels"
+      "institutional": "Institutionnels",
+      "corporate": "Entreprises",
+      "ngo": "ONG"
     },
     "card": {
       "visitWebsite": "Visiter le site",

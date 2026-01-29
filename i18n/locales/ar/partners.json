@@ -122,6 +122,13 @@
       "externalCampus": "فرع جامعي",
       "selected": "محدد"
     },
+    "types": {
+      "charterOperator": "مشغل الميثاق",
+      "campusPartner": "شريك الحرم الجامعي",
+      "programPartner": "شريك البرنامج",
+      "projectPartner": "شريك المشروع",
+      "other": "أخرى"
+    },
     "filters": {
       "all": "الكل",
       "charter": "مشغلو الميثاق",
@@ -130,7 +137,9 @@
       "research": "بحث",
       "culture": "ثقافة",
       "environment": "بيئة",
-      "institutional": "مؤسسي"
+      "institutional": "مؤسسي",
+      "corporate": "شركات",
+      "ngo": "منظمات غير حكومية"
     },
     "card": {
       "visitWebsite": "زيارة الموقع",

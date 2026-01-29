@@ -32,6 +32,20 @@ export interface CampusPublic {
   country_name_fr: string | null
 }
 
+/**
+ * Partenaire d'un campus
+ */
+export interface CampusPartnerPublic {
+  id: string
+  name: string
+  description: string | null
+  logo_url: string | null
+  website: string | null
+  type: 'charter_operator' | 'campus_partner' | 'program_partner' | 'project_partner' | 'other'
+  country_iso_code: string | null
+  country_name_fr: string | null
+}
+
 // ============================================================================
 // HELPERS
 // ============================================================================
@@ -126,6 +140,13 @@ export function usePublicCampusApi() {
     }
   }
 
+  /**
+   * Récupère les partenaires d'un campus
+   */
+  async function getCampusPartners(campusId: string): Promise<CampusPartnerPublic[]> {
+    return $fetch<CampusPartnerPublic[]>(`${baseUrl}/api/public/campuses/${campusId}/partners`)
+  }
+
   // ==========================================================================
   // HELPERS
   // ==========================================================================
@@ -165,18 +186,39 @@ export function usePublicCampusApi() {
     return parts.join(', ')
   }
 
+  /**
+   * Retourne l'URL du logo d'un partenaire ou un placeholder
+   */
+  function getPartnerLogoUrl(partner: CampusPartnerPublic): string {
+    const resolvedUrl = resolveMediaUrl(partner.logo_url)
+    if (resolvedUrl) {
+      return resolvedUrl
+    }
+    return `https://picsum.photos/seed/partner-${partner.id}/200/200`
+  }
+
+  /**
+   * Retourne l'emoji du drapeau du pays d'un partenaire
+   */
+  function getPartnerFlagEmoji(partner: CampusPartnerPublic): string {
+    return getFlagEmoji(partner.country_iso_code)
+  }
+
   return {
     // API calls
     listCampuses,
     getAllCampuses,
     getCampusByCode,
     getCampusBySlug,
+    getCampusPartners,
 
     // Helpers
     getCampusUrl,
     getCoverImageUrl,
     getCampusFlagEmoji,
     getCampusLocation,
+    getPartnerLogoUrl,
+    getPartnerFlagEmoji,
     getFlagEmoji,
   }
 }
