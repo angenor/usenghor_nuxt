@@ -536,6 +536,116 @@ export const partnersPageSections: PageSection[] = [
   },
 ]
 
+// ============================================================================
+// DÉFINITION DE LA PAGE CARRIÈRES
+// ============================================================================
+
+export const careersPageSections: PageSection[] = [
+  {
+    id: 'careers-hero',
+    name: 'Hero Carrières',
+    description: 'Bannière principale de la page Carrières',
+    icon: 'image',
+    color: 'bg-gradient-to-r from-lime-500 to-lime-400 text-white',
+    editorialKeys: ['careers.hero.title', 'careers.hero.subtitle'],
+    fields: [
+      { key: 'careers.hero.title', label: 'Titre', description: 'Titre principal du hero', type: 'text', editorialKey: 'careers.hero.title', editable: true },
+      { key: 'careers.hero.subtitle', label: 'Sous-titre', description: 'Sous-titre du hero', type: 'textarea', editorialKey: 'careers.hero.subtitle', editable: true },
+    ],
+  },
+  {
+    id: 'careers-intro',
+    name: 'Section Introduction',
+    description: 'Introduction avec statistiques clés',
+    icon: 'info-circle',
+    color: 'bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-300',
+    editorialKeys: [
+      'careers.intro.title', 'careers.intro.text',
+      'careers.intro.stats.positions.label', 'careers.intro.stats.nationalities.label', 'careers.intro.stats.years.label',
+    ],
+    fields: [
+      { key: 'careers.intro.title', label: 'Titre', description: 'Titre de la section introduction', type: 'text', editorialKey: 'careers.intro.title', editable: true },
+      { key: 'careers.intro.text', label: 'Texte', description: 'Texte de présentation', type: 'textarea', editorialKey: 'careers.intro.text', editable: true },
+      { key: 'careers.intro.stats.positions.label', label: 'Label Postes', description: 'Libellé pour le nombre de postes (valeur dans Chiffres clés)', type: 'text', editorialKey: 'careers.intro.stats.positions.label', editable: true },
+      { key: 'careers.intro.stats.nationalities.label', label: 'Label Nationalités', description: 'Libellé pour les nationalités (valeur dans Chiffres clés)', type: 'text', editorialKey: 'careers.intro.stats.nationalities.label', editable: true },
+      { key: 'careers.intro.stats.years.label', label: 'Label Années', description: 'Libellé pour les années (valeur dans Chiffres clés)', type: 'text', editorialKey: 'careers.intro.stats.years.label', editable: true },
+    ],
+  },
+  {
+    id: 'careers-opportunities',
+    name: 'Section Opportunités',
+    description: 'Cartes des 3 types d\'opportunités (enseignants, étudiants, partenaires)',
+    icon: 'door-open',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    editorialKeys: ['careers.opportunities.title', 'careers.opportunities.subtitle'],
+    fields: [
+      { key: 'careers.opportunities.title', label: 'Titre', description: 'Titre de la section opportunités', type: 'text', editorialKey: 'careers.opportunities.title', editable: true },
+      { key: 'careers.opportunities.subtitle', label: 'Sous-titre', description: 'Sous-titre de la section', type: 'textarea', editorialKey: 'careers.opportunities.subtitle', editable: true },
+    ],
+  },
+  {
+    id: 'careers-teachers',
+    name: 'Section Enseignants',
+    description: 'Opportunités pour les enseignants et chercheurs',
+    icon: 'chalkboard-user',
+    color: 'bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-300',
+    editorialKeys: [
+      'careers.teachers.title', 'careers.teachers.text',
+      'careers.teachers.benefits.title', 'careers.teachers.positions.title',
+      'careers.teachers.cta.title', 'careers.teachers.cta.text', 'careers.teachers.cta.email', 'careers.teachers.cta.button',
+    ],
+    fields: [
+      { key: 'careers.teachers.title', label: 'Titre', description: 'Titre de la section enseignants', type: 'text', editorialKey: 'careers.teachers.title', editable: true },
+      { key: 'careers.teachers.text', label: 'Texte', description: 'Texte de présentation', type: 'textarea', editorialKey: 'careers.teachers.text', editable: true },
+      { key: 'careers.teachers.benefits.title', label: 'Titre Avantages', description: 'Titre de la sous-section avantages', type: 'text', editorialKey: 'careers.teachers.benefits.title', editable: true },
+      { key: 'careers.teachers.positions.title', label: 'Titre Postes', description: 'Titre de la sous-section types de postes', type: 'text', editorialKey: 'careers.teachers.positions.title', editable: true },
+      { key: 'careers.teachers.cta.title', label: 'CTA - Titre', description: 'Titre du bloc appel à l\'action', type: 'text', editorialKey: 'careers.teachers.cta.title', editable: true },
+      { key: 'careers.teachers.cta.text', label: 'CTA - Texte', description: 'Texte d\'accompagnement', type: 'textarea', editorialKey: 'careers.teachers.cta.text', editable: true },
+      { key: 'careers.teachers.cta.email', label: 'CTA - Email', description: 'Adresse email de contact', type: 'text', editorialKey: 'careers.teachers.cta.email', editable: true },
+      { key: 'careers.teachers.cta.button', label: 'CTA - Bouton', description: 'Texte du bouton', type: 'text', editorialKey: 'careers.teachers.cta.button', editable: true },
+    ],
+  },
+  {
+    id: 'careers-students',
+    name: 'Section Étudiants',
+    description: 'Opportunités pour les futurs étudiants',
+    icon: 'graduation-cap',
+    color: 'bg-brand-blue-100 text-brand-blue-800 dark:bg-brand-blue-900/30 dark:text-brand-blue-300',
+    editorialKeys: [
+      'careers.students.title', 'careers.students.text',
+      'careers.students.why.title', 'careers.students.programs.title',
+      'careers.students.cta.title', 'careers.students.cta.text', 'careers.students.cta.button',
+    ],
+    fields: [
+      { key: 'careers.students.title', label: 'Titre', description: 'Titre de la section étudiants', type: 'text', editorialKey: 'careers.students.title', editable: true },
+      { key: 'careers.students.text', label: 'Texte', description: 'Texte de présentation', type: 'textarea', editorialKey: 'careers.students.text', editable: true },
+      { key: 'careers.students.why.title', label: 'Titre "Pourquoi nous"', description: 'Titre de la sous-section pourquoi étudier chez nous', type: 'text', editorialKey: 'careers.students.why.title', editable: true },
+      { key: 'careers.students.programs.title', label: 'Titre Programmes', description: 'Titre de la sous-section programmes', type: 'text', editorialKey: 'careers.students.programs.title', editable: true },
+      { key: 'careers.students.cta.title', label: 'CTA - Titre', description: 'Titre du bloc appel à l\'action', type: 'text', editorialKey: 'careers.students.cta.title', editable: true },
+      { key: 'careers.students.cta.text', label: 'CTA - Texte', description: 'Texte d\'accompagnement', type: 'textarea', editorialKey: 'careers.students.cta.text', editable: true },
+      { key: 'careers.students.cta.button', label: 'CTA - Bouton', description: 'Texte du bouton inscription', type: 'text', editorialKey: 'careers.students.cta.button', editable: true },
+    ],
+  },
+  {
+    id: 'careers-partners',
+    name: 'Section Partenaires (Carrières)',
+    description: 'Opportunités de partenariat et formulaire de contact',
+    icon: 'handshake',
+    color: 'bg-brand-red-100 text-brand-red-800 dark:bg-brand-red-900/30 dark:text-brand-red-300',
+    editorialKeys: [
+      'careers.partners.title', 'careers.partners.text',
+      'careers.partners.types.title', 'careers.partners.form.title', 'careers.partners.form.text',
+    ],
+    fields: [
+      { key: 'careers.partners.title', label: 'Titre', description: 'Titre de la section partenaires', type: 'text', editorialKey: 'careers.partners.title', editable: true },
+      { key: 'careers.partners.text', label: 'Texte', description: 'Texte de présentation', type: 'textarea', editorialKey: 'careers.partners.text', editable: true },
+      { key: 'careers.partners.types.title', label: 'Titre Types', description: 'Titre de la sous-section types de partenariats', type: 'text', editorialKey: 'careers.partners.types.title', editable: true },
+      { key: 'careers.partners.form.title', label: 'Formulaire - Titre', description: 'Titre du formulaire de contact', type: 'text', editorialKey: 'careers.partners.form.title', editable: true },
+      { key: 'careers.partners.form.text', label: 'Formulaire - Texte', description: 'Texte d\'accompagnement du formulaire', type: 'textarea', editorialKey: 'careers.partners.form.text', editable: true },
+    ],
+  },
+]
+
 // Pages du front-office
 export const frontOfficePages: FrontOfficePage[] = [
   {
@@ -585,6 +695,14 @@ export const frontOfficePages: FrontOfficePage[] = [
     description: 'Campus externalisés et partenaires institutionnels',
     icon: 'handshake',
     sections: partnersPageSections,
+  },
+  {
+    id: 'careers',
+    name: 'Page Carrières',
+    slug: '/carrieres',
+    description: 'Opportunités pour enseignants, étudiants et partenaires',
+    icon: 'briefcase',
+    sections: careersPageSections,
   },
 ]
 
@@ -1129,5 +1247,6 @@ export function useEditorialValuesApi() {
     organizationPageSections,
     teamPageSections,
     partnersPageSections,
+    careersPageSections,
   }
 }

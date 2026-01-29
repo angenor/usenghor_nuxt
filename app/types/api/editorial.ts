@@ -287,6 +287,41 @@ export type ValueSectionKey =
   | 'partners.list.badge'
   | 'partners.list.title'
   | 'partners.list.subtitle'
+  // Page Carrières - Hero
+  | 'careers.hero.title'
+  | 'careers.hero.subtitle'
+  // Page Carrières - Introduction
+  | 'careers.intro.title'
+  | 'careers.intro.text'
+  | 'careers.intro.stats.positions.label'
+  | 'careers.intro.stats.nationalities.label'
+  | 'careers.intro.stats.years.label'
+  // Page Carrières - Opportunités
+  | 'careers.opportunities.title'
+  | 'careers.opportunities.subtitle'
+  // Page Carrières - Enseignants
+  | 'careers.teachers.title'
+  | 'careers.teachers.text'
+  | 'careers.teachers.benefits.title'
+  | 'careers.teachers.positions.title'
+  | 'careers.teachers.cta.title'
+  | 'careers.teachers.cta.text'
+  | 'careers.teachers.cta.email'
+  | 'careers.teachers.cta.button'
+  // Page Carrières - Étudiants
+  | 'careers.students.title'
+  | 'careers.students.text'
+  | 'careers.students.why.title'
+  | 'careers.students.cta.title'
+  | 'careers.students.cta.text'
+  | 'careers.students.cta.button'
+  | 'careers.students.programs.title'
+  // Page Carrières - Partenaires
+  | 'careers.partners.title'
+  | 'careers.partners.text'
+  | 'careers.partners.types.title'
+  | 'careers.partners.form.title'
+  | 'careers.partners.form.text'
 
 export interface ValueSection {
   id: string

@@ -28,6 +28,7 @@ const predefinedKeyFigures = [
   { key: 'stats_professors', label: 'Nombre d\'enseignants', description: 'Nombre de professeurs et intervenants' },
   { key: 'stats_students', label: 'Étudiants actuels', description: 'Nombre d\'étudiants actuellement inscrits' },
   { key: 'stats_nationalities', label: 'Nationalités représentées', description: 'Nombre de nationalités parmi les étudiants' },
+  { key: 'stats_open_positions', label: 'Postes ouverts', description: 'Nombre de postes actuellement ouverts au recrutement' },
 ]
 
 // === STATE ===
