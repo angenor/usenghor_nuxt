@@ -410,18 +410,7 @@ export type ValueSectionKey =
   | 'site.facility.hotel.description'
   | 'site.facility.hotel.features'
   | 'site.facility.hotel.capacity'
-  // Page Site - Localisation
-  | 'site.location.title'
-  | 'site.location.subtitle'
-  | 'site.location.address'
-  | 'site.location.addressValue'
-  | 'site.location.coordinates'
-  | 'site.location.coordinatesValue'
-  | 'site.location.phone'
-  | 'site.location.phoneValue'
-  | 'site.location.email'
-  | 'site.location.emailValue'
-  | 'site.location.openMaps'
+  // Page Site - Localisation : utilise les données centralisées de Contact (/admin/editorial/contact)
   // Page Site - CTA
   | 'site.cta.title'
   | 'site.cta.description'

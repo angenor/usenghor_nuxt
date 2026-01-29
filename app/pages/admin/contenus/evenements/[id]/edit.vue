@@ -21,10 +21,14 @@ const {
 } = useEventsApi()
 
 const {
-  campusExternalises,
   departments,
   getAllProjects,
 } = useMockData()
+
+const {
+  getCampuses,
+  campuses: allCampuses,
+} = useReferenceData()
 
 // Contenu EditorJS (séparé du formulaire pour éviter les problèmes de réactivité)
 const content = ref<OutputData | undefined>(undefined)
@@ -72,10 +76,14 @@ const notFound = ref(false)
 const error = ref<string | null>(null)
 const formInitialized = ref(false)
 
-// Charger l'événement
+// Charger l'événement et les données de référence
 onMounted(async () => {
   try {
-    const event = await getEventById(eventId.value)
+    // Charger les campus en parallèle avec l'événement
+    const [event] = await Promise.all([
+      getEventById(eventId.value),
+      getCampuses(),
+    ])
 
     // Mapper les données backend vers le formulaire
     form.value = {
@@ -146,11 +154,6 @@ const goBack = () => {
 }
 
 // === LISTES DE RÉFÉRENCE ===
-const campusList = computed(() => [
-  { id: 'siege', name: 'Siège - Alexandrie' },
-  ...campusExternalises.value.map(c => ({ id: c.id, name: c.name_fr }))
-])
-
 const departmentList = computed(() =>
   departments.value.map(d => ({ id: d.id, name: d.name_fr }))
 )
@@ -652,7 +655,7 @@ const tabs = [
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               >
                 <option value="">Aucun campus</option>
-                <option v-for="campus in campusList" :key="campus.id" :value="campus.id">
+                <option v-for="campus in allCampuses" :key="campus.id" :value="campus.id">
                   {{ campus.name }}
                 </option>
               </select>

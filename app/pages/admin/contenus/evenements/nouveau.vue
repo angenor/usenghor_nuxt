@@ -15,11 +15,14 @@ const {
 } = useEventsApi()
 
 const {
-  campusExternalises,
   departments,
   getAllProjects,
-  partenaires
 } = useMockData()
+
+const {
+  getCampuses,
+  campuses: allCampuses,
+} = useReferenceData()
 
 // Onglet actif
 const activeTab = ref<'general' | 'datetime' | 'location' | 'registration' | 'associations' | 'options'>('general')
@@ -73,12 +76,12 @@ const goBack = () => {
   router.push('/admin/contenus/evenements')
 }
 
-// === LISTES DE RÉFÉRENCE ===
-const campusList = computed(() => [
-  { id: 'siege', name: 'Siège - Alexandrie' },
-  ...campusExternalises.value.map(c => ({ id: c.id, name: c.name_fr }))
-])
+// Charger les données de référence au montage
+onMounted(async () => {
+  await getCampuses()
+})
 
+// === LISTES DE RÉFÉRENCE ===
 const departmentList = computed(() =>
   departments.value.map(d => ({ id: d.id, name: d.name_fr }))
 )
@@ -518,7 +521,7 @@ const tabs = [
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             >
               <option value="">Aucun campus</option>
-              <option v-for="campus in campusList" :key="campus.id" :value="campus.id">
+              <option v-for="campus in allCampuses" :key="campus.id" :value="campus.id">
                 {{ campus.name }}
               </option>
             </select>

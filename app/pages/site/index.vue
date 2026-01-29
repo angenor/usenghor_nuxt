@@ -1,14 +1,62 @@
 <script setup lang="ts">
 import type { SiteFacility } from '~/composables/useMockData'
+import type { ContactInfo } from '~/composables/useContactApi'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getAllSiteFacilities } = useMockData()
+const { getContactInfo, getGoogleMapsUrlWithCoords } = useContactApi()
 
 // SEO
 useSeoMeta({
   title: () => t('site.seo.title'),
   description: () => t('site.seo.description')
+})
+
+// Contact info (centralisé depuis /admin/editorial/contact)
+const contactInfo = ref<ContactInfo | null>(null)
+
+onMounted(async () => {
+  try {
+    contactInfo.value = await getContactInfo()
+  }
+  catch (e) {
+    console.warn('Informations de contact non disponibles, utilisation des fallbacks')
+  }
+})
+
+// Computed contact data avec fallbacks
+const locationAddress = computed(() => {
+  if (contactInfo.value?.address) {
+    const { street, postal_code, city, country } = contactInfo.value.address
+    return [street, postal_code, city, country].filter(Boolean).join(', ')
+  }
+  return 'Université Senghor, Alexandrie, Égypte'
+})
+
+const locationCoordinates = computed(() => {
+  if (contactInfo.value?.address) {
+    const { latitude, longitude } = contactInfo.value.address
+    if (latitude && longitude) {
+      return `${latitude}, ${longitude}`
+    }
+  }
+  return '31.2018, 29.9158'
+})
+
+const locationPhone = computed(() => {
+  return contactInfo.value?.phones?.main || '+20 3 484 3562'
+})
+
+const locationEmail = computed(() => {
+  return contactInfo.value?.emails?.general || 'info@usenghor.org'
+})
+
+const mapsUrl = computed(() => {
+  if (contactInfo.value?.address) {
+    return getGoogleMapsUrlWithCoords(contactInfo.value.address)
+  }
+  return 'https://www.google.com/maps/place/Senghor+University/@31.2018,29.9158,17z'
 })
 
 // Get data
@@ -474,7 +522,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
       </div>
     </section>
 
-    <!-- Location Section -->
+    <!-- Location Section - Données centralisées depuis /admin/editorial/contact -->
     <section class="py-16 bg-gray-50 dark:bg-gray-900">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
@@ -489,7 +537,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
         <div class="grid lg:grid-cols-2 gap-12">
           <!-- Map image - clickable to open Google Maps -->
           <a
-            href="https://www.google.com/maps/place/Senghor+University/@31.2018,29.9158,17z"
+            :href="mapsUrl"
             target="_blank"
             rel="noopener noreferrer"
             class="group aspect-video lg:aspect-square bg-gray-200 dark:bg-gray-800 rounded-2xl overflow-hidden relative block"
@@ -516,7 +564,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
             </div>
           </a>
 
-          <!-- Contact info -->
+          <!-- Contact info - depuis useContactApi -->
           <div class="space-y-6">
             <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
               <div class="flex items-start gap-4">
@@ -525,7 +573,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
                 </div>
                 <div>
                   <h3 class="font-bold text-gray-900 dark:text-white mb-1">{{ t('site.location.address') }}</h3>
-                  <p class="text-gray-600 dark:text-gray-400">{{ t('site.location.addressValue') }}</p>
+                  <p class="text-gray-600 dark:text-gray-400">{{ locationAddress }}</p>
                 </div>
               </div>
             </div>
@@ -537,7 +585,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
                 </div>
                 <div>
                   <h3 class="font-bold text-gray-900 dark:text-white mb-1">{{ t('site.location.coordinates') }}</h3>
-                  <p class="text-gray-600 dark:text-gray-400">{{ t('site.location.coordinatesValue') }}</p>
+                  <p class="text-gray-600 dark:text-gray-400">{{ locationCoordinates }}</p>
                 </div>
               </div>
             </div>
@@ -549,7 +597,9 @@ const getNextBgColor = (index: number, isDark: boolean) => {
                 </div>
                 <div>
                   <h3 class="font-bold text-gray-900 dark:text-white mb-1">{{ t('site.location.phone') }}</h3>
-                  <p class="text-gray-600 dark:text-gray-400">{{ t('site.location.phoneValue') }}</p>
+                  <a :href="`tel:${locationPhone.replace(/\\s/g, '')}`" class="text-gray-600 dark:text-gray-400 hover:text-brand-blue-600 dark:hover:text-brand-blue-400 transition-colors">
+                    {{ locationPhone }}
+                  </a>
                 </div>
               </div>
             </div>
@@ -561,7 +611,9 @@ const getNextBgColor = (index: number, isDark: boolean) => {
                 </div>
                 <div>
                   <h3 class="font-bold text-gray-900 dark:text-white mb-1">{{ t('site.location.email') }}</h3>
-                  <p class="text-gray-600 dark:text-gray-400">{{ t('site.location.emailValue') }}</p>
+                  <a :href="`mailto:${locationEmail}`" class="text-gray-600 dark:text-gray-400 hover:text-brand-blue-600 dark:hover:text-brand-blue-400 transition-colors">
+                    {{ locationEmail }}
+                  </a>
                 </div>
               </div>
             </div>
