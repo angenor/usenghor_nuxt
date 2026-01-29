@@ -283,25 +283,9 @@ export function useAdminSidebar() {
       id: 'media',
       label: 'Médiathèque',
       icon: 'fa-solid fa-photo-video',
+      route: '/admin/mediatheque',
       permissions: ['media.view'],
-      children: [
-        {
-          id: 'media-library',
-          label: 'Fichiers médias',
-          icon: 'fa-solid fa-images',
-          route: '/admin/mediatheque/fichiers',
-          permissions: ['media.view'],
-          description: 'Images, vidéos, documents'
-        },
-        {
-          id: 'albums',
-          label: 'Albums',
-          icon: 'fa-solid fa-folder-open',
-          route: '/admin/mediatheque/albums',
-          permissions: ['media.view'],
-          description: 'Galeries photos et vidéos'
-        }
-      ]
+      description: 'Fichiers et albums'
     },
 
     // ========================================================================

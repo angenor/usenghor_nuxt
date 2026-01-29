@@ -611,7 +611,7 @@ const formatDate = (dateString: string) => {
         </NuxtLink>
 
         <NuxtLink
-          to="/admin/mediatheque/fichiers"
+          to="/admin/mediatheque"
           class="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 dark:border-gray-700
                  hover:border-brand-blue-300 dark:hover:border-brand-blue-600 hover:bg-brand-blue-50
                  dark:hover:bg-brand-blue-900/20 transition-colors group"

@@ -323,10 +323,10 @@ const moveToLast = async (index: number) => {
       <h2 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">Album non trouvé</h2>
       <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">L'album demandé n'existe pas ou a été supprimé</p>
       <NuxtLink
-        to="/admin/mediatheque/albums"
+        to="/admin/mediatheque"
         class="text-sm text-blue-600 hover:underline dark:text-blue-400"
       >
-        Retour aux albums
+        Retour à la médiathèque
       </NuxtLink>
     </div>
 
@@ -337,11 +337,11 @@ const moveToLast = async (index: number) => {
         <div>
           <div class="mb-2 flex items-center gap-2">
             <NuxtLink
-              to="/admin/mediatheque/albums"
+              to="/admin/mediatheque"
               class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
             >
               <font-awesome-icon icon="fa-solid fa-arrow-left" class="mr-1 h-3 w-3" />
-              Albums
+              Médiathèque
             </NuxtLink>
           </div>
           <h1 class="flex items-center gap-3 text-2xl font-bold text-gray-900 dark:text-white">
