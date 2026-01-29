@@ -117,14 +117,12 @@ export const homepageSections: PageSection[] = [
   {
     id: 'experience',
     name: 'L\'expérience Senghor',
-    description: 'Bloc présentant l\'expérience étudiante avec statistiques',
+    description: 'Bloc présentant l\'expérience étudiante (les statistiques sont gérées dans Chiffres clés)',
     icon: 'graduation-cap',
     color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
     editorialKeys: [
       'experience.badge', 'experience.title', 'experience.description', 'experience.cta',
-      'experience.stats.countries', 'experience.stats.countries.value',
-      'experience.stats.graduates', 'experience.stats.graduates.value',
-      'experience.stats.years', 'experience.stats.years.value',
+      'experience.stats.countries', 'experience.stats.graduates', 'experience.stats.years',
     ],
     fields: [
       { key: 'experience.badge', label: 'Badge Expérience', description: 'Texte du badge', type: 'text', editorialKey: 'experience.badge', editable: true },
@@ -132,11 +130,8 @@ export const homepageSections: PageSection[] = [
       { key: 'experience.description', label: 'Description', description: 'Texte descriptif', type: 'textarea', editorialKey: 'experience.description', editable: true },
       { key: 'experience.cta', label: 'Bouton CTA', description: 'Texte du bouton d\'action', type: 'text', editorialKey: 'experience.cta', editable: true },
       { key: 'experience.stats.countries', label: 'Stat Pays - Libellé', description: 'Libellé de la statistique pays', type: 'text', editorialKey: 'experience.stats.countries', editable: true },
-      { key: 'experience.stats.countries.value', label: 'Stat Pays - Valeur', description: 'Nombre de pays (ex: 54)', type: 'number', editorialKey: 'experience.stats.countries.value', editable: true },
       { key: 'experience.stats.graduates', label: 'Stat Diplômés - Libellé', description: 'Libellé de la statistique diplômés', type: 'text', editorialKey: 'experience.stats.graduates', editable: true },
-      { key: 'experience.stats.graduates.value', label: 'Stat Diplômés - Valeur', description: 'Nombre de diplômés (ex: 5000)', type: 'number', editorialKey: 'experience.stats.graduates.value', editable: true },
       { key: 'experience.stats.years', label: 'Stat Années - Libellé', description: 'Libellé de la statistique années', type: 'text', editorialKey: 'experience.stats.years', editable: true },
-      { key: 'experience.stats.years.value', label: 'Stat Années - Valeur', description: 'Nombre d\'années (ex: 30)', type: 'number', editorialKey: 'experience.stats.years.value', editable: true },
     ],
   },
   {
