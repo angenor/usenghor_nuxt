@@ -51,7 +51,7 @@ const form = ref({
   registration_link: '',
   max_attendees: undefined as number | undefined,
   campus_external_id: '',
-  department_external_id: '',
+  sector_external_id: '',
   project_external_id: '',
   organizer_external_id: '',
   album_external_id: '',
@@ -132,7 +132,7 @@ const saveForm = async () => {
       cover_image_external_id: toUuidOrNull(form.value.cover_image_external_id),
       country_external_id: toUuidOrNull(form.value.country_external_id),
       campus_external_id: toUuidOrNull(form.value.campus_external_id),
-      department_external_id: toUuidOrNull(form.value.department_external_id),
+      sector_external_id: toUuidOrNull(form.value.sector_external_id),
       project_external_id: toUuidOrNull(form.value.project_external_id),
       organizer_external_id: toUuidOrNull(form.value.organizer_external_id),
       album_external_id: toUuidOrNull(form.value.album_external_id),
@@ -529,7 +529,7 @@ const tabs = [
               Département
             </label>
             <select
-              v-model="form.department_external_id"
+              v-model="form.sector_external_id"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             >
               <option value="">Aucun département</option>

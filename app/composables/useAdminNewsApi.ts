@@ -154,8 +154,8 @@ export function useAdminNewsApi() {
       // Associations
       campus_id: news.campus_external_id,
       campus_name: null, // TODO: Résoudre via API
-      department_id: news.department_external_id,
-      department_name: null,
+      sector_id: news.sector_external_id,
+      sector_name: null,
       service_id: news.service_external_id,
       service_name: null,
       event_id: news.event_external_id,
@@ -249,7 +249,7 @@ export function useAdminNewsApi() {
     highlight_status?: NewsHighlightStatus
     cover_image_external_id?: string | null
     campus_external_id?: string | null
-    department_external_id?: string | null
+    sector_external_id?: string | null
     service_external_id?: string | null
     event_external_id?: string | null
     project_external_id?: string | null
@@ -272,7 +272,7 @@ export function useAdminNewsApi() {
       highlight_status: data.highlight_status || 'standard',
       cover_image_external_id: data.cover_image_external_id,
       campus_external_id: data.campus_external_id,
-      department_external_id: data.department_external_id,
+      sector_external_id: data.sector_external_id,
       service_external_id: data.service_external_id,
       event_external_id: data.event_external_id,
       project_external_id: data.project_external_id,
@@ -303,7 +303,7 @@ export function useAdminNewsApi() {
     highlight_status?: NewsHighlightStatus
     cover_image_external_id?: string | null
     campus_external_id?: string | null
-    department_external_id?: string | null
+    sector_external_id?: string | null
     service_external_id?: string | null
     event_external_id?: string | null
     project_external_id?: string | null
@@ -323,7 +323,7 @@ export function useAdminNewsApi() {
     if (data.highlight_status !== undefined) payload.highlight_status = data.highlight_status
     if (data.cover_image_external_id !== undefined) payload.cover_image_external_id = data.cover_image_external_id
     if (data.campus_external_id !== undefined) payload.campus_external_id = data.campus_external_id
-    if (data.department_external_id !== undefined) payload.department_external_id = data.department_external_id
+    if (data.sector_external_id !== undefined) payload.sector_external_id = data.sector_external_id
     if (data.service_external_id !== undefined) payload.service_external_id = data.service_external_id
     if (data.event_external_id !== undefined) payload.event_external_id = data.event_external_id
     if (data.project_external_id !== undefined) payload.project_external_id = data.project_external_id

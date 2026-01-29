@@ -54,7 +54,7 @@ export interface ProjectFilters {
   status?: ProjectStatus | 'all'
   publication_status?: PublicationStatus | 'all'
   category_id?: string | 'all'
-  department_external_id?: string | 'all'
+  sector_external_id?: string | 'all'
 }
 
 // ============================================================================
@@ -227,7 +227,7 @@ export function useProjectsApi() {
         status: params.status !== 'all' ? params.status : undefined,
         publication_status: params.publication_status !== 'all' ? params.publication_status : undefined,
         category_id: params.category_id !== 'all' ? params.category_id : undefined,
-        department_external_id: params.department_external_id !== 'all' ? params.department_external_id : undefined,
+        sector_external_id: params.sector_external_id !== 'all' ? params.sector_external_id : undefined,
       },
     })
 

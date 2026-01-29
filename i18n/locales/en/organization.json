@@ -2,17 +2,17 @@
   "organization": {
     "seo": {
       "title": "Our Organization | Senghor University",
-      "description": "Discover the organization of Senghor University: organizational chart, academic departments and services."
+      "description": "Discover the organization of Senghor University: organizational chart, academic sectors and services."
     },
     "hero": {
       "title": "Our Organization",
       "subtitle": "Organizational structure and University services"
     },
     "intro": {
-      "text": "Senghor University is organized around 5 academic departments and services dedicated to supporting students and the functioning of the institution.",
+      "text": "Senghor University is organized around 5 academic sectors and services dedicated to supporting students and the functioning of the institution.",
       "nav": {
         "orgchart": "Org Chart",
-        "departments": "Departments",
+        "sectors": "Sectors",
         "services": "Services"
       }
     },
@@ -25,16 +25,16 @@
       "cabinet_desc": "Coordination of strategic activities and institutional communication",
       "sg": "Secretary General",
       "sg_desc": "Administrative management and service coordination",
-      "departments_level": "Academic Departments",
-      "dept_culture": "Culture",
-      "dept_environment": "Environment",
-      "dept_management": "Administration & Management",
-      "dept_health": "Health",
-      "dept_doctoral": "Doctoral School"
+      "sectors_level": "Academic Sectors",
+      "sector_culture": "Culture",
+      "sector_environment": "Environment",
+      "sector_management": "Administration & Management",
+      "sector_health": "Health",
+      "sector_doctoral": "Doctoral School"
     },
-    "departments": {
-      "title": "Academic Departments",
-      "subtitle": "5 departments dedicated to training African executives",
+    "sectors": {
+      "title": "Academic Sectors",
+      "subtitle": "5 sectors dedicated to training African executives",
       "head": "Head",
       "view_programs": "View details",
       "no_programs": "Programs coming soon",
@@ -45,7 +45,7 @@
       "subtitle": "Dedicated teams for support",
       "categories": {
         "rectorat": "Rectorate",
-        "departements": "Departments",
+        "sectors": "Sectors",
         "academique": "Academic Services",
         "administratif": "Administrative Services"
       },

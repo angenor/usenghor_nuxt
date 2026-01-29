@@ -21,7 +21,7 @@ const {
   formatBudget,
 } = useProjectsApi()
 
-const { departments } = useReferenceData()
+const { sectors } = useReferenceData()
 
 // === ÉTAT ===
 const isLoading = ref(true)
@@ -41,7 +41,7 @@ const searchQuery = ref('')
 const filterStatus = ref<ProjectStatus | 'all'>('all')
 const filterPublicationStatus = ref<PublicationStatus | 'all'>('all')
 const filterCategory = ref<string | 'all'>('all')
-const filterDepartment = ref<string | 'all'>('all')
+const filterSector = ref<string | 'all'>('all')
 
 // === PAGINATION ===
 const currentPage = ref(1)
@@ -65,7 +65,7 @@ async function loadProjects() {
       status: filterStatus.value,
       publication_status: filterPublicationStatus.value,
       category_id: filterCategory.value,
-      department_external_id: filterDepartment.value,
+      sector_external_id: filterSector.value,
     })
 
     projects.value = response.items
@@ -108,7 +108,7 @@ onMounted(async () => {
 })
 
 // Recharger quand les filtres changent
-watch([searchQuery, filterStatus, filterPublicationStatus, filterCategory, filterDepartment], () => {
+watch([searchQuery, filterStatus, filterPublicationStatus, filterCategory, filterSector], () => {
   currentPage.value = 1
   selectedIds.value = []
   selectAll.value = false
@@ -149,7 +149,7 @@ const resetFilters = () => {
   filterStatus.value = 'all'
   filterPublicationStatus.value = 'all'
   filterCategory.value = 'all'
-  filterDepartment.value = 'all'
+  filterSector.value = 'all'
 }
 
 const handleDelete = async (project: ProjectDisplay) => {
@@ -225,10 +225,10 @@ const getExtraCategoriesCount = (project: ProjectDisplay) => {
   return project.categories.length - 2
 }
 
-const getDepartmentName = (deptId: string | null) => {
-  if (!deptId) return '-'
-  const dept = departments.value?.find((d: any) => d.id === deptId)
-  return dept?.name || '-'
+const getSectorName = (sectorId: string | null) => {
+  if (!sectorId) return '-'
+  const sec = sectors.value?.find((d: any) => d.id === sectorId)
+  return sec?.name || '-'
 }
 </script>
 
@@ -329,14 +329,14 @@ const getDepartmentName = (deptId: string | null) => {
           </option>
         </select>
 
-        <!-- Département -->
+        <!-- Secteur -->
         <select
-          v-model="filterDepartment"
+          v-model="filterSector"
           class="rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
         >
-          <option value="all">Tous départements</option>
-          <option v-for="dept in departments" :key="dept.id" :value="dept.id">
-            {{ dept.name }}
+          <option value="all">Tous secteurs</option>
+          <option v-for="sec in sectors" :key="sec.id" :value="sec.id">
+            {{ sec.name }}
           </option>
         </select>
 
@@ -495,7 +495,7 @@ const getDepartmentName = (deptId: string | null) => {
               </td>
               <td class="px-4 py-3">
                 <span class="text-sm text-gray-600 dark:text-gray-300">
-                  {{ getDepartmentName(project.department_external_id) }}
+                  {{ getSectorName(project.sector_external_id) }}
                 </span>
               </td>
               <td class="px-4 py-3">

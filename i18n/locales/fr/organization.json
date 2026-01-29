@@ -2,17 +2,17 @@
   "organization": {
     "seo": {
       "title": "Notre organisation | Université Senghor",
-      "description": "Découvrez l'organisation de l'Université Senghor : organigramme, départements académiques et services."
+      "description": "Découvrez l'organisation de l'Université Senghor : organigramme, secteurs académiques et services."
     },
     "hero": {
       "title": "Notre organisation",
       "subtitle": "Structure organisationnelle et services de l'Université"
     },
     "intro": {
-      "text": "L'Université Senghor est organisée autour de 5 départements académiques et de services dédiés à l'accompagnement des étudiants et au fonctionnement de l'institution.",
+      "text": "L'Université Senghor est organisée autour de 5 secteurs académiques et de services dédiés à l'accompagnement des étudiants et au fonctionnement de l'institution.",
       "nav": {
         "orgchart": "Organigramme",
-        "departments": "Départements",
+        "sectors": "Secteurs",
         "services": "Services"
       }
     },
@@ -25,16 +25,16 @@
       "cabinet_desc": "Coordination des activités stratégiques et communication institutionnelle",
       "sg": "Secrétaire Général",
       "sg_desc": "Gestion administrative et coordination des services",
-      "departments_level": "Départements académiques",
-      "dept_culture": "Culture",
-      "dept_environment": "Environnement",
-      "dept_management": "Administration et Gestion",
-      "dept_health": "Santé",
-      "dept_doctoral": "École doctorale"
+      "sectors_level": "Secteurs académiques",
+      "sector_culture": "Culture",
+      "sector_environment": "Environnement",
+      "sector_management": "Administration et Gestion",
+      "sector_health": "Santé",
+      "sector_doctoral": "École doctorale"
     },
-    "departments": {
-      "title": "Départements académiques",
-      "subtitle": "5 départements au service de la formation des cadres africains",
+    "sectors": {
+      "title": "Secteurs académiques",
+      "subtitle": "5 secteurs au service de la formation des cadres africains",
       "head": "Responsable",
       "view_programs": "Voir les détails",
       "no_programs": "Formations à venir",
@@ -45,7 +45,7 @@
       "subtitle": "Des équipes dédiées à l'accompagnement",
       "categories": {
         "rectorat": "Rectorat",
-        "departements": "Départements",
+        "sectors": "Secteurs",
         "academique": "Services académiques",
         "administratif": "Services administratifs"
       },

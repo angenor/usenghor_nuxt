@@ -1,10 +1,10 @@
 <script setup lang="ts">
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
-const { departments, getFormationsByDepartment } = useMockData()
+const { sectors, getFormationsBySector } = useMockData()
 const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.05 })
 
-// Map department icons to Font Awesome icons
+// Map sector icons to Font Awesome icons
 const iconMap: Record<string, string> = {
   palette: 'fa-solid fa-palette',
   leaf: 'fa-solid fa-leaf',
@@ -13,7 +13,7 @@ const iconMap: Record<string, string> = {
   'graduation-cap': 'fa-solid fa-graduation-cap'
 }
 
-// Color configuration per department
+// Color configuration per sector
 // svgFill = couleur de la section courante (pour les bulles SVG)
 // nextBg = couleur de fond de la section suivante (pour le fond du separateur)
 const colorConfig: Record<string, {
@@ -83,31 +83,31 @@ const getColors = (hexColor: string) => colorConfig[hexColor] || colorConfig['#F
 
 // Couleur de la section courante (pour le SVG/bulles)
 const getCurrentSvgColor = (index: number, isDark: boolean) => {
-  const dept = departments.value[index]
-  const config = getColors(dept.color)
+  const dept = sectors.value[index]
+  const config = getColors(sec.color)
   return isDark ? config.bgDarkHex : config.bgLightHex
 }
 
 // Couleur de fond de la section suivante (pour le fond du séparateur)
 const getNextBgColor = (index: number, isDark: boolean) => {
-  if (index >= departments.value.length - 1) return isDark ? '#111827' : '#f3f4f6'
-  const nextDept = departments.value[index + 1]
-  const config = getColors(nextDept.color)
+  if (index >= sectors.value.length - 1) return isDark ? '#111827' : '#f3f4f6'
+  const nextSec = sectors.value[index + 1]
+  const config = getColors(nextSec.color)
   return isDark ? config.bgDarkHex : config.bgLightHex
 }
 
-// Get department name based on locale
-const getDeptName = (dept: any) => {
-  if (locale.value === 'ar') return dept.name_ar
-  if (locale.value === 'en') return dept.name_en
-  return dept.name_fr
+// Get sector name based on locale
+const getSectorName = (sec: any) => {
+  if (locale.value === 'ar') return sec.name_ar
+  if (locale.value === 'en') return sec.name_en
+  return sec.name_fr
 }
 
-// Get department description based on locale
-const getDeptDescription = (dept: any) => {
-  if (locale.value === 'ar') return dept.description_ar || dept.description_fr
-  if (locale.value === 'en') return dept.description_en || dept.description_fr
-  return dept.description_fr
+// Get sector description based on locale
+const getSectorDescription = (sec: any) => {
+  if (locale.value === 'ar') return sec.description_ar || sec.description_fr
+  if (locale.value === 'en') return sec.description_en || sec.description_fr
+  return sec.description_fr
 }
 
 // Get formation name based on locale
@@ -118,15 +118,15 @@ const getFormationName = (formation: any) => {
 }
 
 // Images illustratives par département (utilisant picsum avec seed pour consistance)
-const deptImages: Record<string, string> = {
-  'dept-culture': 'https://picsum.photos/seed/culture-art/600/400',
-  'dept-environnement': 'https://picsum.photos/seed/environment-nature/600/400',
-  'dept-management': 'https://picsum.photos/seed/business-management/600/400',
-  'dept-sante': 'https://picsum.photos/seed/health-medical/600/400',
-  'dept-doctoral': 'https://picsum.photos/seed/research-doctoral/600/400'
+const sectorImages: Record<string, string> = {
+  'sec-culture': 'https://picsum.photos/seed/culture-art/600/400',
+  'sec-environnement': 'https://picsum.photos/seed/environment-nature/600/400',
+  'sec-management': 'https://picsum.photos/seed/business-management/600/400',
+  'sec-sante': 'https://picsum.photos/seed/health-medical/600/400',
+  'sec-doctoral': 'https://picsum.photos/seed/research-doctoral/600/400'
 }
 
-const getDeptImage = (deptId: string) => deptImages[deptId] || 'https://picsum.photos/seed/university/600/400'
+const getSectorImage = (deptId: string) => sectorImages[deptId] || 'https://picsum.photos/seed/university/600/400'
 </script>
 
 <template>
@@ -136,23 +136,23 @@ const getDeptImage = (deptId: string) => deptImages[deptId] || 'https://picsum.p
       <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
           <span class="relative inline-block">
-            {{ t('organization.departments.title') }}
+            {{ t('organization.sectors.title') }}
             <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-red-500 to-brand-red-300 rounded-full"></span>
           </span>
         </h2>
         <p class="mt-6 text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-          {{ t('organization.departments.subtitle') }}
+          {{ t('organization.sectors.subtitle') }}
         </p>
       </div>
     </div>
 
     <!-- Départements avec bubble waves -->
     <div
-      v-for="(dept, index) in departments"
-      :key="dept.id"
-      :id="dept.slug"
+      v-for="(dept, index) in sectors"
+      :key="sec.id"
+      :id="sec.slug"
       class="section-bubble transition-colors duration-300 scroll-mt-20"
-      :class="[getColors(dept.color)?.bgLight, getColors(dept.color)?.bgDark]"
+      :class="[getColors(sec.color)?.bgLight, getColors(sec.color)?.bgDark]"
     >
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
         <!-- Layout flex avec alternance image gauche/droite -->
@@ -166,7 +166,7 @@ const getDeptImage = (deptId: string) => deptImages[deptId] || 'https://picsum.p
               <!-- Forme décorative derrière l'image -->
               <div
                 class="absolute -inset-4 rounded-3xl opacity-30 blur-xl transition-all duration-500 group-hover:opacity-50"
-                :class="getColors(dept.color).iconBg"
+                :class="getColors(sec.color).iconBg"
               ></div>
               <!-- Container image avec forme organique -->
               <div class="relative overflow-hidden rounded-3xl shadow-2xl">
@@ -180,26 +180,26 @@ const getDeptImage = (deptId: string) => deptImages[deptId] || 'https://picsum.p
                   }"
                 >
                   <img
-                    :src="getDeptImage(dept.id)"
-                    :alt="getDeptName(dept)"
+                    :src="getSectorImage(sec.id)"
+                    :alt="getSectorName(sec)"
                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                 </div>
                 <!-- Overlay gradient -->
                 <div
                   class="absolute inset-0 opacity-20"
-                  :class="getColors(dept.color).iconBg"
+                  :class="getColors(sec.color).iconBg"
                 ></div>
                 <!-- Badge flottant avec icône -->
                 <div
                   class="absolute bottom-4 shadow-lg flex items-center justify-center w-16 h-16 rounded-2xl"
                   :class="[
-                    getColors(dept.color).iconBg,
+                    getColors(sec.color).iconBg,
                     index % 2 === 0 ? 'right-4' : 'left-4'
                   ]"
                 >
                   <font-awesome-icon
-                    :icon="getIcon(dept.icon)"
+                    :icon="getIcon(sec.icon)"
                     class="w-8 h-8 text-white"
                   />
                 </div>
@@ -212,40 +212,40 @@ const getDeptImage = (deptId: string) => deptImages[deptId] || 'https://picsum.p
             <!-- Titre -->
             <h3
               class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4"
-              :class="getColors(dept.color).textDark"
+              :class="getColors(sec.color).textDark"
             >
-              {{ getDeptName(dept) }}
+              {{ getSectorName(sec) }}
             </h3>
 
             <!-- Ligne décorative -->
             <div
               class="w-20 h-1 rounded-full mb-6"
-              :class="getColors(dept.color).iconBg"
+              :class="getColors(sec.color).iconBg"
             ></div>
 
             <!-- Description -->
             <p
               class="text-gray-700 leading-relaxed text-lg mb-8"
-              :class="getColors(dept.color).textDark"
+              :class="getColors(sec.color).textDark"
             >
-              {{ getDeptDescription(dept) }}
+              {{ getSectorDescription(sec) }}
             </p>
 
             <!-- Formations badges -->
-            <div v-if="getFormationsByDepartment(dept.id).length > 0">
+            <div v-if="getFormationsBySector(sec.id).length > 0">
               <h4
                 class="text-sm font-semibold uppercase tracking-wider mb-4 text-gray-600"
-                :class="getColors(dept.color).textDark"
+                :class="getColors(sec.color).textDark"
               >
-                {{ t('organization.departments.view_programs') }}
+                {{ t('organization.sectors.view_programs') }}
               </h4>
               <div class="flex flex-wrap gap-3">
                 <NuxtLink
-                  v-for="formation in getFormationsByDepartment(dept.id)"
+                  v-for="formation in getFormationsBySector(sec.id)"
                   :key="formation.id"
                   :to="localePath(`/formations/${formation.slug}`)"
                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:scale-105 hover:-translate-y-0.5"
-                  :class="[getColors(dept.color).badgeBg, getColors(dept.color).badgeText]"
+                  :class="[getColors(sec.color).badgeBg, getColors(sec.color).badgeText]"
                 >
                   <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-3.5 h-3.5" />
                   {{ getFormationName(formation) }}
@@ -255,9 +255,9 @@ const getDeptImage = (deptId: string) => deptImages[deptId] || 'https://picsum.p
             <p
               v-else
               class="text-sm italic text-gray-500"
-              :class="getColors(dept.color).textDark"
+              :class="getColors(sec.color).textDark"
             >
-              {{ t('organization.departments.no_programs') }}
+              {{ t('organization.sectors.no_programs') }}
             </p>
           </div>
         </div>
@@ -266,7 +266,7 @@ const getDeptImage = (deptId: string) => deptImages[deptId] || 'https://picsum.p
       <!-- Wave separator (sauf dernier) -->
       <!-- Fond = couleur section suivante, SVG = couleur section courante -->
       <div
-        v-if="index < departments.length - 1"
+        v-if="index < sectors.length - 1"
         class="wave-separator"
       >
         <!-- Light mode -->

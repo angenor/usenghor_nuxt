@@ -16,7 +16,7 @@ const {
   publicationStatusLabels,
 } = useProjectsApi()
 
-const { departments } = useReferenceData()
+const { sectors } = useReferenceData()
 
 // Données de référence
 const categories = ref<ProjectCategoryRead[]>([])
@@ -35,7 +35,7 @@ const form = reactive({
   summary: '',
   description: undefined as OutputData | undefined,
   cover_image_external_id: null as string | null,
-  department_external_id: null as string | null,
+  sector_external_id: null as string | null,
   manager_external_id: null as string | null,
   start_date: '',
   end_date: '',
@@ -95,7 +95,7 @@ const saveForm = async () => {
       summary: form.summary || null,
       description: descriptionJson,
       cover_image_external_id: form.cover_image_external_id,
-      department_external_id: form.department_external_id,
+      sector_external_id: form.sector_external_id,
       manager_external_id: form.manager_external_id,
       start_date: form.start_date || null,
       end_date: form.end_date || null,
@@ -317,12 +317,12 @@ const tabs = [
             Département porteur
           </label>
           <select
-            v-model="form.department_external_id"
+            v-model="form.sector_external_id"
             class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           >
-            <option :value="null">Sélectionnez un département</option>
-            <option v-for="dept in departments" :key="dept.id" :value="dept.id">
-              {{ dept.name }}
+            <option :value="null">Sélectionnez un secteur</option>
+            <option v-for="sec in sectors" :key="sec.id" :value="sec.id">
+              {{ sec.name }}
             </option>
           </select>
         </div>

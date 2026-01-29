@@ -3,12 +3,12 @@
  * Permet de développer le frontend sans base de données
  *
  * Usage:
- * const { departments, staff, formations } = useMockData()
+ * const { sectors, staff, formations } = useMockData()
  *
  * Pour basculer vers l'API réelle, remplacer les imports par des appels API
  */
 
-import { mockDepartments, type Department } from '@bank/mock-data/departments'
+import { mockSectors, type Sector } from '@bank/mock-data/sectors'
 import { mockServices, type Service } from '@bank/mock-data/services'
 import { mockStaff, type Staff } from '@bank/mock-data/staff'
 import { mockPaysBailleurs, getFlagEmoji, type PaysBailleur } from '@bank/mock-data/pays-bailleurs'
@@ -264,23 +264,23 @@ import {
   type CategoryUsage
 } from '@bank/mock-data/project-categories'
 import {
-  mockDepartmentsAdmin,
-  departmentIcons,
-  generateDepartmentId,
-  generateDepartmentCode,
-  getAllDepartmentsAdmin as getAllDepartmentsAdminFromMock,
-  getDepartmentByIdAdmin as getDepartmentByIdAdminFromMock,
-  getDepartmentByCodeAdmin as getDepartmentByCodeAdminFromMock,
-  getFilteredDepartmentsAdmin as getFilteredDepartmentsAdminFromMock,
-  getDepartmentStats,
-  checkDepartmentUsage,
-  getDepartmentHeadCandidates as getDepartmentHeadCandidatesFromMock,
-  getDepartmentsForSelect as getDepartmentsForSelectFromMock,
-  type DepartmentAdmin,
-  type DepartmentStats,
-  type DepartmentFilters,
-  type DepartmentUsage
-} from '@bank/mock-data/departments-admin'
+  mockSectorsAdmin,
+  sectorIcons,
+  generateSectorId,
+  generateSectorCode,
+  getAllSectorsAdmin as getAllSectorsAdminFromMock,
+  getSectorByIdAdmin as getSectorByIdAdminFromMock,
+  getSectorByCodeAdmin as getSectorByCodeAdminFromMock,
+  getFilteredSectorsAdmin as getFilteredSectorsAdminFromMock,
+  getSectorStats,
+  checkSectorUsage,
+  getSectorHeadCandidates as getSectorHeadCandidatesFromMock,
+  getSectorsForSelect as getSectorsForSelectFromMock,
+  type SectorAdmin,
+  type SectorStats,
+  type SectorFilters,
+  type SectorUsage
+} from '@bank/mock-data/sectors-admin'
 import {
   mockServiceObjectives,
   mockServiceAchievements,
@@ -317,19 +317,19 @@ import {
   generateServiceId,
   getAllServicesAdmin as getAllServicesAdminFromMock,
   getServiceByIdAdmin as getServiceByIdAdminFromMock,
-  getServicesByDepartmentId as getServicesByDepartmentIdFromMock,
+  getServicesBySectorId as getServicesBySectorIdFromMock,
   getFilteredServicesAdmin as getFilteredServicesAdminFromMock,
-  getServicesGroupedByDepartment as getServicesGroupedByDepartmentFromMock,
+  getServicesGroupedBySector as getServicesGroupedBySectorFromMock,
   getServiceStats,
   checkServiceUsage,
   getServiceHeadCandidates as getServiceHeadCandidatesFromMock,
   getServicesForSelect as getServicesForSelectFromMock,
-  getDepartmentsForServiceSelect as getDepartmentsForServiceSelectFromMock,
+  getSectorsForServiceSelect as getSectorsForServiceSelectFromMock,
   type ServiceAdmin,
   type ServiceStats,
   type ServiceFilters,
   type ServiceUsage,
-  type ServicesByDepartment
+  type ServicesBySector
 } from '@bank/mock-data/services-admin'
 import {
   mockCampusAdmin,
@@ -755,14 +755,14 @@ import {
 } from '@bank/mock-data/users-admin'
 
 export function useMockData() {
-  // === DÉPARTEMENTS ===
-  const departments = computed(() => mockDepartments)
+  // === SECTEURS ===
+  const sectors = computed(() => mockSectors)
 
-  const getDepartmentById = (id: string) =>
-    mockDepartments.find(d => d.id === id)
+  const getSectorById = (id: string) =>
+    mockSectors.find(d => d.id === id)
 
-  const getDepartmentBySlug = (slug: string) =>
-    mockDepartments.find(d => d.slug === slug)
+  const getSectorBySlug = (slug: string) =>
+    mockSectors.find(d => d.slug === slug)
 
   // === SERVICES ===
   const services = computed(() => mockServices)
@@ -779,8 +779,8 @@ export function useMockData() {
   const getStaffByType = (type: Staff['staff_type']) =>
     mockStaff.filter(s => s.is_published && s.staff_type === type)
 
-  const getStaffByDepartment = (departmentId: string) =>
-    mockStaff.filter(s => s.is_published && s.department_id === departmentId)
+  const getStaffBySector = (sectorId: string) =>
+    mockStaff.filter(s => s.is_published && s.sector_id === sectorId)
 
   const getStaffByService = (serviceId: string) =>
     mockStaff.filter(s => s.is_published && s.service_id === serviceId)
@@ -1030,8 +1030,8 @@ export function useMockData() {
   const getFormationsByCampus = (campus: Formation['campus']) =>
     mockFormations.filter(f => f.is_published && f.campus === campus)
 
-  const getFormationsByDepartment = (departmentId: string) =>
-    mockFormations.filter(f => f.is_published && f.department_id === departmentId)
+  const getFormationsBySector = (sectorId: string) =>
+    mockFormations.filter(f => f.is_published && f.sector_id === sectorId)
 
   const getFormationBySlug = (slug: string) =>
     mockFormations.find(f => f.slug === slug)
@@ -1051,12 +1051,12 @@ export function useMockData() {
   const getFormationsWithOpenApplications = () =>
     mockFormations.filter(f => f.is_published && f.application_open)
 
-  // Get related formations (same type or department, excluding current)
+  // Get related formations (same type or sector, excluding current)
   const getRelatedFormations = (formation: Formation, limit = 3) =>
     mockFormations
       .filter(f => f.is_published && f.id !== formation.id && (
         f.formation_type === formation.formation_type ||
-        f.department_id === formation.department_id
+        f.sector_id === formation.sector_id
       ))
       .slice(0, limit)
 
@@ -1130,8 +1130,8 @@ export function useMockData() {
   const getFeaturedAlumni = () =>
     mockAlumni.filter(a => a.is_published && a.is_featured)
 
-  const getAlumniByDepartment = (departmentId: string) =>
-    mockAlumni.filter(a => a.is_published && a.department_id === departmentId)
+  const getAlumniBySector = (sectorId: string) =>
+    mockAlumni.filter(a => a.is_published && a.sector_id === sectorId)
 
   const getAlumniByYear = (year: number) =>
     mockAlumni.filter(a => a.is_published && a.graduation_year === year)
@@ -1578,32 +1578,32 @@ export function useMockData() {
   // Vérifier l'utilisation d'une catégorie (pour la suppression)
   const getProjectCategoryUsage = (categoryId: string) => checkProjectCategoryUsage(categoryId)
 
-  // === DÉPARTEMENTS (ADMIN) ===
-  const departmentsAdmin = computed(() => mockDepartmentsAdmin)
+  // === SECTEURS (ADMIN) ===
+  const sectorsAdmin = computed(() => mockSectorsAdmin)
 
-  // Récupérer tous les départements (admin)
-  const getAllDepartmentsAdmin = () => getAllDepartmentsAdminFromMock()
+  // Récupérer tous les secteurs (admin)
+  const getAllSectorsAdmin = () => getAllSectorsAdminFromMock()
 
-  // Récupérer un département par ID (admin)
-  const getDepartmentByIdAdmin = (id: string) => getDepartmentByIdAdminFromMock(id)
+  // Récupérer un secteur par ID (admin)
+  const getSectorByIdAdmin = (id: string) => getSectorByIdAdminFromMock(id)
 
-  // Récupérer un département par code (admin)
-  const getDepartmentByCodeAdmin = (code: string) => getDepartmentByCodeAdminFromMock(code)
+  // Récupérer un secteur par code (admin)
+  const getSectorByCodeAdmin = (code: string) => getSectorByCodeAdminFromMock(code)
 
-  // Récupérer les départements filtrés (admin)
-  const getFilteredDepartmentsAdmin = (filters?: DepartmentFilters) => getFilteredDepartmentsAdminFromMock(filters)
+  // Récupérer les secteurs filtrés (admin)
+  const getFilteredSectorsAdmin = (filters?: SectorFilters) => getFilteredSectorsAdminFromMock(filters)
 
-  // Statistiques des départements
-  const getDepartmentsStats = () => getDepartmentStats()
+  // Statistiques des secteurs
+  const getSectorsStats = () => getSectorStats()
 
-  // Vérifier l'utilisation d'un département (pour la suppression)
-  const getDepartmentUsage = (departmentId: string) => checkDepartmentUsage(departmentId)
+  // Vérifier l'utilisation d'un secteur (pour la suppression)
+  const getSectorUsage = (sectorId: string) => checkSectorUsage(sectorId)
 
   // Liste des responsables potentiels
-  const getDepartmentHeadCandidates = () => getDepartmentHeadCandidatesFromMock()
+  const getSectorHeadCandidates = () => getSectorHeadCandidatesFromMock()
 
-  // Liste des départements pour select
-  const getDepartmentsForSelect = () => getDepartmentsForSelectFromMock()
+  // Liste des secteurs pour select
+  const getSectorsForSelect = () => getSectorsForSelectFromMock()
 
   // === SERVICES (ADMIN) ===
   const servicesAdmin = computed(() => mockServicesAdmin)
@@ -1614,14 +1614,14 @@ export function useMockData() {
   // Récupérer un service par ID (admin)
   const getServiceByIdAdmin = (id: string) => getServiceByIdAdminFromMock(id)
 
-  // Récupérer les services d'un département
-  const getServicesByDepartmentIdAdmin = (departmentId: string) => getServicesByDepartmentIdFromMock(departmentId)
+  // Récupérer les services d'un secteur
+  const getServicesBySectorIdAdmin = (sectorId: string) => getServicesBySectorIdFromMock(sectorId)
 
   // Récupérer les services filtrés (admin)
   const getFilteredServicesAdmin = (filters?: ServiceFilters) => getFilteredServicesAdminFromMock(filters)
 
-  // Récupérer les services groupés par département
-  const getServicesGroupedByDepartmentAdmin = () => getServicesGroupedByDepartmentFromMock()
+  // Récupérer les services groupés par secteur
+  const getServicesGroupedBySectorAdmin = () => getServicesGroupedBySectorFromMock()
 
   // Statistiques des services
   const getServicesStats = () => getServiceStats()
@@ -1635,12 +1635,12 @@ export function useMockData() {
   // Liste des services pour select
   const getServicesForSelect = () => getServicesForSelectFromMock()
 
-  // Liste des départements pour le select dans formulaire service
-  const getDepartmentsForServiceSelect = () => getDepartmentsForServiceSelectFromMock()
+  // Liste des secteurs pour le select dans formulaire service
+  const getSectorsForServiceSelect = () => getSectorsForServiceSelectFromMock()
 
   return {
     // Données
-    departments,
+    sectors,
     services,
     staff,
     paysBailleurs,
@@ -1657,9 +1657,9 @@ export function useMockData() {
     siteFacilities,
     siteGallery,
 
-    // Getters départements
-    getDepartmentById,
-    getDepartmentBySlug,
+    // Getters secteurs
+    getSectorById,
+    getSectorBySlug,
 
     // Getters services
     getServicesByCategory,
@@ -1667,7 +1667,7 @@ export function useMockData() {
 
     // Getters staff
     getStaffByType,
-    getStaffByDepartment,
+    getStaffBySector,
     getStaffByService,
     getStaffById,
 
@@ -1717,7 +1717,7 @@ export function useMockData() {
     getFormationsFeatured,
     getFormationsByType,
     getFormationsByCampus,
-    getFormationsByDepartment,
+    getFormationsBySector,
     getFormationBySlug,
     getFormationsCountByType,
     getFormationsWithOpenApplications,
@@ -1747,7 +1747,7 @@ export function useMockData() {
     // Getters alumni
     getAllAlumni,
     getFeaturedAlumni,
-    getAlumniByDepartment,
+    getAlumniBySector,
     getAlumniByYear,
     getAlumniByCountry,
     getAlumniByIndustry,
@@ -1974,31 +1974,31 @@ export function useMockData() {
     countries,
 
     // Départements (admin)
-    departmentsAdmin,
-    getAllDepartmentsAdmin,
-    getDepartmentByIdAdmin,
-    getDepartmentByCodeAdmin,
-    getFilteredDepartmentsAdmin,
-    getDepartmentsStats,
-    getDepartmentUsage,
-    getDepartmentHeadCandidates,
-    getDepartmentsForSelect,
-    departmentIcons,
-    generateDepartmentId,
-    generateDepartmentCode,
+    sectorsAdmin,
+    getAllSectorsAdmin,
+    getSectorByIdAdmin,
+    getSectorByCodeAdmin,
+    getFilteredSectorsAdmin,
+    getSectorsStats,
+    getSectorUsage,
+    getSectorHeadCandidates,
+    getSectorsForSelect,
+    sectorIcons,
+    generateSectorId,
+    generateSectorCode,
 
     // Services (admin)
     servicesAdmin,
     getAllServicesAdmin,
     getServiceByIdAdmin,
-    getServicesByDepartmentIdAdmin,
+    getServicesBySectorIdAdmin,
     getFilteredServicesAdmin,
-    getServicesGroupedByDepartmentAdmin,
+    getServicesGroupedBySectorAdmin,
     getServicesStats,
     getServiceUsage,
     getServiceHeadCandidates,
     getServicesForSelect,
-    getDepartmentsForServiceSelect,
+    getSectorsForServiceSelect,
     serviceCategoryLabels,
     generateServiceId,
 
@@ -2365,7 +2365,7 @@ export function useMockData() {
 
 // Export des types pour utilisation externe
 export type {
-  Department,
+  Sector,
   Service,
   Staff,
   PaysBailleur,
@@ -2461,10 +2461,10 @@ export type {
   ProjectPublicationStatus,
   ProjectFilters,
   ProjectStats,
-  DepartmentAdmin,
-  DepartmentStats,
-  DepartmentFilters,
-  DepartmentUsage,
+  SectorAdmin,
+  SectorStats,
+  SectorFilters,
+  SectorUsage,
   ServiceObjective,
   ServiceAchievement,
   ServiceProject,
@@ -2476,7 +2476,7 @@ export type {
   ServiceStats,
   ServiceFilters,
   ServiceUsage,
-  ServicesByDepartment,
+  ServicesBySector,
   CampusAdmin,
   CampusPartnerAdmin,
   CampusStats,

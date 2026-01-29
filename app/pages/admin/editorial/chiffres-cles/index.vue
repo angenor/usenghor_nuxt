@@ -19,7 +19,9 @@ const {
 // Ces chiffres sont utilisés sur différentes pages du site
 const predefinedKeyFigures = [
   { key: 'stats_countries', label: 'Nombre de pays africains', description: 'Nombre de pays africains représentés' },
+  { key: 'stats_donor_countries', label: 'Pays bailleurs', description: 'Nombre de pays contributeurs au financement' },
   { key: 'stats_graduates', label: 'Nombre de diplômés', description: 'Nombre total de diplômés depuis la création' },
+  { key: 'stats_alumni', label: 'Alumni (réseau)', description: 'Nombre d\'anciens diplômés dans le réseau alumni' },
   { key: 'stats_years', label: 'Années d\'existence', description: 'Nombre d\'années depuis la création de l\'université' },
   { key: 'stats_programs', label: 'Nombre de formations', description: 'Nombre de programmes de formation proposés' },
   { key: 'stats_partners', label: 'Nombre de partenaires', description: 'Nombre d\'universités et institutions partenaires' },

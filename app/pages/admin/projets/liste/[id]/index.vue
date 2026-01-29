@@ -22,7 +22,7 @@ const {
   formatBudget,
 } = useProjectsApi()
 
-const { departments } = useReferenceData()
+const { sectors } = useReferenceData()
 
 // État
 const project = ref<ProjectDisplay | null>(null)
@@ -51,10 +51,10 @@ const goBack = () => router.push('/admin/projets/liste')
 const goToEdit = () => router.push(`/admin/projets/liste/${projectId.value}/edit`)
 
 // Helpers
-const getDepartmentName = (deptId: string | null) => {
-  if (!deptId) return null
-  const dept = departments.value?.find((d: any) => d.id === deptId)
-  return dept?.name || null
+const getSectorName = (sectorId: string | null) => {
+  if (!sectorId) return null
+  const sec = sectors.value?.find((d: any) => d.id === sectorId)
+  return sec?.name || null
 }
 
 const formatDateTime = (date: string | undefined) => {
@@ -259,10 +259,10 @@ const parsedDescription = computed<OutputData | null>(() => {
                 </span>
               </dd>
             </div>
-            <div v-if="getDepartmentName(project.department_external_id)">
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Département</dt>
+            <div v-if="getSectorName(project.sector_external_id)">
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Secteur</dt>
               <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                {{ getDepartmentName(project.department_external_id) }}
+                {{ getSectorName(project.sector_external_id) }}
               </dd>
             </div>
           </dl>

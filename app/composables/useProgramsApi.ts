@@ -55,7 +55,7 @@ export function useProgramsApi() {
         search: params.search || undefined,
         type: params.type !== 'all' ? params.type : undefined,
         status: params.status !== 'all' ? params.status : undefined,
-        department_external_id: params.department_id || undefined,
+        sector_external_id: params.sector_id || undefined,
       },
     })
   }

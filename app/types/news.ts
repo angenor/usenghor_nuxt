@@ -77,7 +77,7 @@ export interface NewsRead {
   video_url: string | null
   cover_image_external_id: string | null
   campus_external_id: string | null
-  department_external_id: string | null
+  sector_external_id: string | null
   service_external_id: string | null
   event_external_id: string | null
   project_external_id: string | null
@@ -126,8 +126,8 @@ export interface NewsDisplay {
   // Associations (IDs)
   campus_id: string | null
   campus_name: string | null
-  department_id: string | null
-  department_name: string | null
+  sector_id: string | null
+  sector_name: string | null
   service_id: string | null
   service_name: string | null
   event_id: string | null
@@ -183,7 +183,7 @@ export interface NewsCreatePayload {
   highlight_status?: NewsHighlightStatus
   cover_image_external_id?: string | null
   campus_external_id?: string | null
-  department_external_id?: string | null
+  sector_external_id?: string | null
   service_external_id?: string | null
   event_external_id?: string | null
   project_external_id?: string | null
@@ -203,7 +203,7 @@ export interface NewsUpdatePayload {
   highlight_status?: NewsHighlightStatus
   cover_image_external_id?: string | null
   campus_external_id?: string | null
-  department_external_id?: string | null
+  sector_external_id?: string | null
   service_external_id?: string | null
   event_external_id?: string | null
   project_external_id?: string | null
@@ -246,7 +246,7 @@ export interface NewsFilters {
   tag_id?: string
   author_id?: string
   campus_id?: string
-  department_id?: string
+  sector_id?: string
   from_date?: string
   to_date?: string
 }

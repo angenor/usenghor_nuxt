@@ -199,6 +199,90 @@ export const homepageSections: PageSection[] = [
   },
 ]
 
+// ============================================================================
+// DÉFINITION DE LA PAGE À PROPOS
+// ============================================================================
+
+export const aboutPageSections: PageSection[] = [
+  {
+    id: 'about-hero',
+    name: 'Hero À propos',
+    description: 'Bannière principale de la page À propos',
+    icon: 'image',
+    color: 'bg-gradient-to-r from-brand-blue-500 to-brand-red-500 text-white',
+    editorialKeys: ['about.hero.title', 'about.hero.subtitle'],
+    fields: [
+      { key: 'about.hero.title', label: 'Titre', description: 'Titre principal du hero', type: 'text', editorialKey: 'about.hero.title', editable: true },
+      { key: 'about.hero.subtitle', label: 'Sous-titre', description: 'Sous-titre du hero', type: 'textarea', editorialKey: 'about.hero.subtitle', editable: true },
+    ],
+  },
+  {
+    id: 'about-mission',
+    name: 'Section Mission',
+    description: 'Présentation de la mission de l\'université',
+    icon: 'bullseye',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    editorialKeys: ['about.mission.title', 'about.mission.content', 'about.mission.cta.history', 'about.mission.cta.governance'],
+    fields: [
+      { key: 'about.mission.title', label: 'Titre Mission', description: 'Titre de la section mission', type: 'text', editorialKey: 'about.mission.title', editable: true },
+      { key: 'about.mission.content', label: 'Contenu Mission', description: 'Texte de présentation de la mission', type: 'html', editorialKey: 'about.mission.content', editable: true },
+      { key: 'about.mission.cta.history', label: 'Lien Histoire', description: 'Libellé du lien vers l\'histoire', type: 'text', editorialKey: 'about.mission.cta.history', editable: true },
+      { key: 'about.mission.cta.governance', label: 'Lien Gouvernance', description: 'Libellé du lien vers la gouvernance', type: 'text', editorialKey: 'about.mission.cta.governance', editable: true },
+    ],
+  },
+  {
+    id: 'about-stats',
+    name: 'Section Statistiques',
+    description: 'Libellés des statistiques (les valeurs numériques sont dans Chiffres clés)',
+    icon: 'chart-bar',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    editorialKeys: ['about.stats.years.label', 'about.stats.countries.label', 'about.stats.alumni.label', 'about.stats.programs.label'],
+    fields: [
+      { key: 'about.stats.years.label', label: 'Libellé Années', description: 'Ex: "années d\'existence"', type: 'text', editorialKey: 'about.stats.years.label', editable: true },
+      { key: 'about.stats.countries.label', label: 'Libellé Pays', description: 'Ex: "pays bailleurs"', type: 'text', editorialKey: 'about.stats.countries.label', editable: true },
+      { key: 'about.stats.alumni.label', label: 'Libellé Diplômés', description: 'Ex: "diplômés"', type: 'text', editorialKey: 'about.stats.alumni.label', editable: true },
+      { key: 'about.stats.programs.label', label: 'Libellé Formations', description: 'Ex: "formations"', type: 'text', editorialKey: 'about.stats.programs.label', editable: true },
+    ],
+  },
+  {
+    id: 'about-engagements',
+    name: 'Section Engagements & Valeurs',
+    description: 'Les 5 valeurs fondamentales et la charte éthique',
+    icon: 'heart',
+    color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+    editorialKeys: [
+      'about.engagements.title',
+      'about.engagements.excellence.title', 'about.engagements.excellence.text',
+      'about.engagements.ethics.title', 'about.engagements.ethics.text',
+      'about.engagements.inclusion.title', 'about.engagements.inclusion.text',
+      'about.engagements.innovation.title', 'about.engagements.innovation.text',
+      'about.engagements.solidarity.title', 'about.engagements.solidarity.text',
+      'about.charter.title', 'about.charter.download',
+    ],
+    fields: [
+      { key: 'about.engagements.title', label: 'Titre Section', description: 'Titre de la section engagements', type: 'text', editorialKey: 'about.engagements.title', editable: true },
+      // Excellence
+      { key: 'about.engagements.excellence.title', label: 'Excellence - Titre', description: 'Titre de la valeur Excellence', type: 'text', editorialKey: 'about.engagements.excellence.title', editable: true },
+      { key: 'about.engagements.excellence.text', label: 'Excellence - Description', description: 'Description de la valeur Excellence', type: 'textarea', editorialKey: 'about.engagements.excellence.text', editable: true },
+      // Ethics
+      { key: 'about.engagements.ethics.title', label: 'Éthique - Titre', description: 'Titre de la valeur Éthique', type: 'text', editorialKey: 'about.engagements.ethics.title', editable: true },
+      { key: 'about.engagements.ethics.text', label: 'Éthique - Description', description: 'Description de la valeur Éthique', type: 'textarea', editorialKey: 'about.engagements.ethics.text', editable: true },
+      // Inclusion
+      { key: 'about.engagements.inclusion.title', label: 'Inclusion - Titre', description: 'Titre de la valeur Inclusion', type: 'text', editorialKey: 'about.engagements.inclusion.title', editable: true },
+      { key: 'about.engagements.inclusion.text', label: 'Inclusion - Description', description: 'Description de la valeur Inclusion', type: 'textarea', editorialKey: 'about.engagements.inclusion.text', editable: true },
+      // Innovation
+      { key: 'about.engagements.innovation.title', label: 'Innovation - Titre', description: 'Titre de la valeur Innovation', type: 'text', editorialKey: 'about.engagements.innovation.title', editable: true },
+      { key: 'about.engagements.innovation.text', label: 'Innovation - Description', description: 'Description de la valeur Innovation', type: 'textarea', editorialKey: 'about.engagements.innovation.text', editable: true },
+      // Solidarity
+      { key: 'about.engagements.solidarity.title', label: 'Solidarité - Titre', description: 'Titre de la valeur Solidarité', type: 'text', editorialKey: 'about.engagements.solidarity.title', editable: true },
+      { key: 'about.engagements.solidarity.text', label: 'Solidarité - Description', description: 'Description de la valeur Solidarité', type: 'textarea', editorialKey: 'about.engagements.solidarity.text', editable: true },
+      // Charter
+      { key: 'about.charter.title', label: 'Charte - Titre', description: 'Titre de la section charte', type: 'text', editorialKey: 'about.charter.title', editable: true },
+      { key: 'about.charter.download', label: 'Charte - Bouton', description: 'Texte du bouton téléchargement', type: 'text', editorialKey: 'about.charter.download', editable: true },
+    ],
+  },
+]
+
 // Pages du front-office
 export const frontOfficePages: FrontOfficePage[] = [
   {
@@ -208,6 +292,14 @@ export const frontOfficePages: FrontOfficePage[] = [
     description: 'Page principale du site avec les sections Hero, Mission, Formations, Histoire et Partenaires',
     icon: 'home',
     sections: homepageSections,
+  },
+  {
+    id: 'about',
+    name: 'Page À propos',
+    slug: '/a-propos',
+    description: 'Présentation de l\'université : mission, statistiques et engagements',
+    icon: 'info-circle',
+    sections: aboutPageSections,
   },
 ]
 
@@ -747,5 +839,6 @@ export function useEditorialValuesApi() {
     // Structure par pages (front-office)
     frontOfficePages,
     homepageSections,
+    aboutPageSections,
   }
 }

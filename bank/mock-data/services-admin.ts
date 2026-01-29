@@ -5,7 +5,7 @@
  */
 
 import { mockServices, type Service, type ServiceCategory } from './services'
-import { mockDepartmentsAdmin, type DepartmentAdmin } from './departments-admin'
+import { mockSectorsAdmin, type SectorAdmin } from './sectors-admin'
 import { mockStaff, type Staff } from './staff'
 import {
   mockServiceObjectives,
@@ -16,8 +16,8 @@ import {
 // Types
 export interface ServiceAdmin {
   id: string
-  department_id?: string
-  department?: {
+  sector_id?: string
+  sector?: {
     id: string
     name: string
     code: string
@@ -52,9 +52,9 @@ export interface ServiceStats {
   inactive: number
   withHead: number
   withoutHead: number
-  byDepartment: Array<{
-    department_id: string
-    department_name: string
+  bySector: Array<{
+    sector_id: string
+    sector_name: string
     count: number
   }>
   totalObjectives: number
@@ -64,9 +64,9 @@ export interface ServiceStats {
 
 export interface ServiceFilters {
   search?: string
-  department_id?: string
+  sector_id?: string
   active?: boolean
-  sort_by?: 'name' | 'display_order' | 'department' | 'objectives_count'
+  sort_by?: 'name' | 'display_order' | 'sector' | 'objectives_count'
   sort_order?: 'asc' | 'desc'
 }
 
@@ -78,8 +78,8 @@ export interface ServiceUsage {
   items_sample: Array<{ type: string; title: string }>
 }
 
-export interface ServicesByDepartment {
-  department: {
+export interface ServicesBySector {
+  sector: {
     id: string
     name: string
     code: string
@@ -101,8 +101,8 @@ function getStaffById(id: string): Staff | undefined {
 }
 
 // Helper pour trouver un département
-function getDepartmentById(id: string): DepartmentAdmin | undefined {
-  return mockDepartmentsAdmin.find(d => d.id === id)
+function getSectorById(id: string): SectorAdmin | undefined {
+  return mockSectorsAdmin.find(d => d.id === id)
 }
 
 // Compteurs par service
@@ -119,7 +119,7 @@ function countProjectsByService(serviceId: string): number {
 }
 
 // Mapping entre services existants et départements (simulation)
-const serviceToDepartmentMap: Record<string, string> = {
+const serviceToSectorMap: Record<string, string> = {
   'srv-cabinet': 'dept-management',
   'srv-communication': 'dept-management',
   'srv-direction-campus': 'dept-management',
@@ -149,18 +149,18 @@ const serviceToHeadMap: Record<string, string> = {
 
 // Conversion d'un service public vers service admin
 function toServiceAdmin(service: Service): ServiceAdmin {
-  const departmentId = serviceToDepartmentMap[service.id]
-  const department = departmentId ? getDepartmentById(departmentId) : undefined
+  const sectorId = serviceToSectorMap[service.id]
+  const sec = sectorId ? getSectorById(sectorId) : undefined
   const headId = serviceToHeadMap[service.id] || service.head_id
   const head = headId ? getStaffById(headId) : undefined
 
   return {
     id: service.id,
-    department_id: departmentId,
-    department: department ? {
-      id: department.id,
-      name: department.name,
-      code: department.code
+    sector_id: sectorId,
+    sector: sec ? {
+      id: sec.id,
+      name: sec.name,
+      code: sec.code
     } : undefined,
     name: service.name_fr,
     description: service.description_fr,
@@ -197,7 +197,7 @@ export function generateServiceId(): string {
 export function getAllServicesAdmin(): ServiceAdmin[] {
   return [...mockServicesAdmin].sort((a, b) => {
     // Tri par département puis par ordre d'affichage
-    const deptCompare = (a.department?.name || '').localeCompare(b.department?.name || '')
+    const deptCompare = (a.sector?.name || '').localeCompare(b.sector?.name || '')
     if (deptCompare !== 0) return deptCompare
     return a.display_order - b.display_order
   })
@@ -209,9 +209,9 @@ export function getServiceByIdAdmin(id: string): ServiceAdmin | undefined {
 }
 
 // Récupérer les services d'un département
-export function getServicesByDepartmentId(departmentId: string): ServiceAdmin[] {
+export function getServicesBySectorId(sectorId: string): ServiceAdmin[] {
   return mockServicesAdmin
-    .filter(s => s.department_id === departmentId)
+    .filter(s => s.sector_id === sectorId)
     .sort((a, b) => a.display_order - b.display_order)
 }
 
@@ -220,8 +220,8 @@ export function getFilteredServicesAdmin(filters?: ServiceFilters): ServiceAdmin
   let result = getAllServicesAdmin()
 
   // Filtre par département
-  if (filters?.department_id) {
-    result = result.filter(s => s.department_id === filters.department_id)
+  if (filters?.sector_id) {
+    result = result.filter(s => s.sector_id === filters.sector_id)
   }
 
   // Filtre par statut actif
@@ -235,7 +235,7 @@ export function getFilteredServicesAdmin(filters?: ServiceFilters): ServiceAdmin
     result = result.filter(s =>
       s.name.toLowerCase().includes(search) ||
       s.description?.toLowerCase().includes(search) ||
-      s.department?.name.toLowerCase().includes(search) ||
+      s.sector?.name.toLowerCase().includes(search) ||
       s.head?.name.toLowerCase().includes(search) ||
       s.email?.toLowerCase().includes(search)
     )
@@ -251,8 +251,8 @@ export function getFilteredServicesAdmin(filters?: ServiceFilters): ServiceAdmin
       case 'name':
         comparison = a.name.localeCompare(b.name)
         break
-      case 'department':
-        comparison = (a.department?.name || '').localeCompare(b.department?.name || '')
+      case 'sector':
+        comparison = (a.sector?.name || '').localeCompare(b.sector?.name || '')
         break
       case 'objectives_count':
         comparison = a.objectives_count - b.objectives_count
@@ -269,23 +269,23 @@ export function getFilteredServicesAdmin(filters?: ServiceFilters): ServiceAdmin
 }
 
 // Récupérer les services groupés par département
-export function getServicesGroupedByDepartment(): ServicesByDepartment[] {
+export function getServicesGroupedBySector(): ServicesBySector[] {
   const services = getAllServicesAdmin()
   const grouped = new Map<string, ServiceAdmin[]>()
 
   for (const service of services) {
-    const deptId = service.department_id || 'none'
+    const deptId = service.sector_id || 'none'
     if (!grouped.has(deptId)) {
       grouped.set(deptId, [])
     }
     grouped.get(deptId)!.push(service)
   }
 
-  const result: ServicesByDepartment[] = []
+  const result: ServicesBySector[] = []
   for (const [deptId, deptServices] of grouped) {
-    const dept = getDepartmentById(deptId)
+    const dept = getSectorById(deptId)
     result.push({
-      department: dept ? {
+      sector: dept ? {
         id: dept.id,
         name: dept.name,
         code: dept.code,
@@ -300,7 +300,7 @@ export function getServicesGroupedByDepartment(): ServicesByDepartment[] {
   }
 
   // Trier par nom de département
-  return result.sort((a, b) => a.department.name.localeCompare(b.department.name))
+  return result.sort((a, b) => a.sector.name.localeCompare(b.sector.name))
 }
 
 // Statistiques des services
@@ -311,16 +311,16 @@ export function getServiceStats(): ServiceStats {
   // Compter par département
   const byDeptMap = new Map<string, number>()
   for (const service of services) {
-    const deptId = service.department_id || 'none'
+    const deptId = service.sector_id || 'none'
     byDeptMap.set(deptId, (byDeptMap.get(deptId) || 0) + 1)
   }
 
-  const byDepartment: ServiceStats['byDepartment'] = []
+  const bySector: ServiceStats['bySector'] = []
   for (const [deptId, count] of byDeptMap) {
-    const dept = getDepartmentById(deptId)
-    byDepartment.push({
-      department_id: deptId,
-      department_name: dept?.name || 'Sans département',
+    const dept = getSectorById(deptId)
+    bySector.push({
+      sector_id: deptId,
+      sector_name: dept?.name || 'Sans département',
       count
     })
   }
@@ -331,7 +331,7 @@ export function getServiceStats(): ServiceStats {
     inactive: services.length - activeServices.length,
     withHead: services.filter(s => s.head_id).length,
     withoutHead: services.filter(s => !s.head_id).length,
-    byDepartment: byDepartment.sort((a, b) => b.count - a.count),
+    bySector: bySector.sort((a, b) => b.count - a.count),
     totalObjectives: mockServiceObjectives.length,
     totalAchievements: mockServiceAchievements.length,
     totalProjects: mockServiceProjects.length
@@ -381,20 +381,20 @@ export function getServiceHeadCandidates(): Array<{ id: string; name: string; ti
 }
 
 // Services pour select (formulaires)
-export function getServicesForSelect(): Array<{ id: string; name: string; department?: string }> {
+export function getServicesForSelect(): Array<{ id: string; name: string; sector?: string }> {
   return mockServicesAdmin
     .filter(s => s.active)
     .map(s => ({
       id: s.id,
       name: s.name,
-      department: s.department?.name
+      sector: s.sector?.name
     }))
     .sort((a, b) => a.name.localeCompare(b.name))
 }
 
 // Départements pour select dans le formulaire de service
-export function getDepartmentsForServiceSelect(): Array<{ id: string; name: string; code: string }> {
-  return mockDepartmentsAdmin
+export function getSectorsForServiceSelect(): Array<{ id: string; name: string; code: string }> {
+  return mockSectorsAdmin
     .filter(d => d.active)
     .map(d => ({
       id: d.id,

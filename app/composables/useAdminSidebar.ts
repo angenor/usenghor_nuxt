@@ -210,12 +210,12 @@ export function useAdminSidebar() {
       permissions: ['organization.view'],
       children: [
         {
-          id: 'departments',
-          label: 'Départements',
+          id: 'sectors',
+          label: 'Secteurs',
           icon: 'fa-solid fa-sitemap',
-          route: '/admin/organisation/departements',
+          route: '/admin/organisation/secteurs',
           permissions: ['organization.view'],
-          description: 'Départements académiques'
+          description: 'Secteurs'
         },
         {
           id: 'services',

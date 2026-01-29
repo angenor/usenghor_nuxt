@@ -3,7 +3,7 @@ import type {
   ServiceDisplay,
   ServiceUsage,
   ServiceStats,
-  ServicesByDepartment,
+  ServicesBySector,
 } from '~/composables/useServicesApi'
 
 definePageMeta({
@@ -13,10 +13,10 @@ definePageMeta({
 const route = useRoute()
 const {
   getAllServices,
-  getServicesGroupedByDepartment,
+  getServicesGroupedBySector,
   getServicesStats,
   getServiceUsage: fetchServiceUsage,
-  getDepartmentsForSelect,
+  getSectorsForSelect,
   createService: apiCreateService,
   updateService: apiUpdateService,
   deleteService: apiDeleteService,
@@ -30,9 +30,9 @@ const { apiFetch } = useApi()
 const isLoading = ref(true)
 const isSaving = ref(false)
 const searchQuery = ref('')
-const filterDepartment = ref<string | undefined>(route.query.department as string || undefined)
+const filterSector = ref<string | undefined>(route.query.sector as string || undefined)
 const filterActive = ref<boolean | undefined>(undefined)
-const sortBy = ref<'name' | 'display_order' | 'department' | 'objectives_count'>('display_order')
+const sortBy = ref<'name' | 'display_order' | 'sector' | 'objectives_count'>('display_order')
 const sortOrder = ref<'asc' | 'desc'>('asc')
 const viewMode = ref<'table' | 'grouped'>('table')
 const showAddModal = ref(false)
@@ -41,23 +41,23 @@ const showDeleteModal = ref(false)
 const editingService = ref<ServiceDisplay | null>(null)
 const deletingService = ref<ServiceDisplay | null>(null)
 const serviceUsage = ref<ServiceUsage | null>(null)
-const expandedDepartments = ref<Set<string>>(new Set())
+const expandedSectors = ref<Set<string>>(new Set())
 
 // Données chargées depuis l'API
 const allServices = ref<ServiceDisplay[]>([])
-const servicesGrouped = ref<ServicesByDepartment[]>([])
+const servicesGrouped = ref<ServicesBySector[]>([])
 const stats = ref<ServiceStats>({
   total: 0,
   active: 0,
   inactive: 0,
   withHead: 0,
   withoutHead: 0,
-  byDepartment: [],
+  bySector: [],
   totalObjectives: 0,
   totalAchievements: 0,
   totalProjects: 0
 })
-const departments = ref<Array<{ id: string; name: string; code: string }>>([])
+const sectors = ref<Array<{ id: string; name: string; code: string }>>([])
 
 // Candidats responsables (utilisateurs)
 interface HeadCandidate {
@@ -69,7 +69,7 @@ const headCandidates = ref<HeadCandidate[]>([])
 // Form state
 const newService = ref({
   name: '',
-  department_id: '',
+  sector_id: '',
   description: '',
   mission: '',
   head_external_id: '',
@@ -106,13 +106,13 @@ async function loadHeadCandidates() {
 async function loadData() {
   isLoading.value = true
   try {
-    // Charger les départements en premier
-    const deptsData = await getDepartmentsForSelect()
-    departments.value = deptsData
+    // Charger les secteurs en premier
+    const sectorsData = await getSectorsForSelect()
+    sectors.value = sectorsData
 
     const [servicesData, groupedData, statsData] = await Promise.all([
       getAllServices(),
-      getServicesGroupedByDepartment(),
+      getServicesGroupedBySector(),
       getServicesStats()
     ])
     allServices.value = servicesData
@@ -177,8 +177,8 @@ function enrichServicesWithHeads() {
 onMounted(async () => {
   await Promise.all([loadData(), loadHeadCandidates()])
   enrichServicesWithHeads()
-  if (filterDepartment.value) {
-    expandedDepartments.value.add(filterDepartment.value)
+  if (filterSector.value) {
+    expandedSectors.value.add(filterSector.value)
   }
 })
 
@@ -186,9 +186,9 @@ onMounted(async () => {
 const filteredServices = computed(() => {
   let result = [...allServices.value]
 
-  // Filtre par département
-  if (filterDepartment.value) {
-    result = result.filter(s => s.department_id === filterDepartment.value)
+  // Filtre par secteur
+  if (filterSector.value) {
+    result = result.filter(s => s.sector_id === filterSector.value)
   }
 
   // Filtre par statut actif
@@ -202,7 +202,7 @@ const filteredServices = computed(() => {
     result = result.filter(s =>
       s.name.toLowerCase().includes(query) ||
       s.description?.toLowerCase().includes(query) ||
-      s.department?.name?.toLowerCase().includes(query) ||
+      s.sector?.name?.toLowerCase().includes(query) ||
       s.head?.name?.toLowerCase().includes(query) ||
       s.email?.toLowerCase().includes(query)
     )
@@ -213,8 +213,8 @@ const filteredServices = computed(() => {
     let comparison = 0
     if (sortBy.value === 'name') {
       comparison = a.name.localeCompare(b.name)
-    } else if (sortBy.value === 'department') {
-      comparison = (a.department?.name || '').localeCompare(b.department?.name || '')
+    } else if (sortBy.value === 'sector') {
+      comparison = (a.sector?.name || '').localeCompare(b.sector?.name || '')
     } else if (sortBy.value === 'objectives_count') {
       comparison = a.objectives_count - b.objectives_count
     } else if (sortBy.value === 'display_order') {
@@ -253,7 +253,7 @@ const filteredServicesGrouped = computed(() => {
 })
 
 // === METHODS ===
-const toggleSort = (field: 'name' | 'display_order' | 'department' | 'objectives_count') => {
+const toggleSort = (field: 'name' | 'display_order' | 'sector' | 'objectives_count') => {
   if (sortBy.value === field) {
     sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
   } else {
@@ -262,34 +262,34 @@ const toggleSort = (field: 'name' | 'display_order' | 'department' | 'objectives
   }
 }
 
-const getSortIcon = (field: 'name' | 'display_order' | 'department' | 'objectives_count') => {
+const getSortIcon = (field: 'name' | 'display_order' | 'sector' | 'objectives_count') => {
   if (sortBy.value !== field) return 'sort'
   return sortOrder.value === 'asc' ? 'sort-up' : 'sort-down'
 }
 
-const toggleDepartmentExpand = (departmentId: string) => {
-  if (expandedDepartments.value.has(departmentId)) {
-    expandedDepartments.value.delete(departmentId)
+const toggleSectorExpand = (sectorId: string) => {
+  if (expandedSectors.value.has(sectorId)) {
+    expandedSectors.value.delete(sectorId)
   } else {
-    expandedDepartments.value.add(departmentId)
+    expandedSectors.value.add(sectorId)
   }
 }
 
-const expandAllDepartments = () => {
+const expandAllSectors = () => {
   servicesGrouped.value.forEach(group => {
-    expandedDepartments.value.add(group.department.id)
+    expandedSectors.value.add(group.sector.id)
   })
 }
 
-const collapseAllDepartments = () => {
-  expandedDepartments.value.clear()
+const collapseAllSectors = () => {
+  expandedSectors.value.clear()
 }
 
 // Modals
 const openAddModal = () => {
   newService.value = {
     name: '',
-    department_id: filterDepartment.value || '',
+    sector_id: filterSector.value || '',
     description: '',
     mission: '',
     head_external_id: '',
@@ -304,7 +304,7 @@ const openEditModal = (service: ServiceDisplay) => {
   editingService.value = service
   newService.value = {
     name: service.name,
-    department_id: service.department_id || '',
+    sector_id: service.sector_id || '',
     description: service.description || '',
     mission: service.mission || '',
     head_external_id: service.head_external_id || '',
@@ -336,7 +336,7 @@ const saveService = async () => {
   try {
     const serviceData = {
       name: newService.value.name,
-      department_id: newService.value.department_id || null,
+      sector_id: newService.value.sector_id || null,
       description: newService.value.description || null,
       mission: newService.value.mission || null,
       head_external_id: newService.value.head_external_id || null,
@@ -406,9 +406,9 @@ const formatDate = (dateString: string) => {
   })
 }
 
-// Clear department filter from URL
-const clearDepartmentFilter = () => {
-  filterDepartment.value = undefined
+// Clear sector filter from URL
+const clearSectorFilter = () => {
+  filterSector.value = undefined
   navigateTo('/admin/organisation/services')
 }
 </script>
@@ -524,14 +524,14 @@ const clearDepartmentFilter = () => {
           </div>
         </div>
 
-        <!-- Filtre par département -->
+        <!-- Filtre par secteur -->
         <div class="w-full md:w-56">
           <select
-            v-model="filterDepartment"
+            v-model="filterSector"
             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent"
           >
-            <option :value="undefined">Tous les départements</option>
-            <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+            <option :value="undefined">Tous les secteurs</option>
+            <option v-for="dept in sectors" :key="dept.id" :value="dept.id">
               {{ dept.name }}
             </option>
           </select>
@@ -572,19 +572,19 @@ const clearDepartmentFilter = () => {
         </div>
       </div>
 
-      <!-- Active department filter indicator -->
+      <!-- Active sector filter indicator -->
       <div
-        v-if="filterDepartment"
+        v-if="filterSector"
         class="mt-3 flex items-center gap-2"
       >
         <span class="text-sm text-gray-500 dark:text-gray-400">Filtré par :</span>
         <span
           class="inline-flex items-center gap-1 px-2 py-1 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full"
         >
-          {{ departments.find(d => d.id === filterDepartment)?.name }}
+          {{ sectors.find(d => d.id === filterSector)?.name }}
           <button
             class="ml-1 hover:text-blue-600 dark:hover:text-blue-200"
-            @click="clearDepartmentFilter"
+            @click="clearSectorFilter"
           >
             <font-awesome-icon :icon="['fas', 'times']" class="w-3 h-3" />
           </button>
@@ -610,10 +610,10 @@ const clearDepartmentFilter = () => {
               <th class="px-4 py-3 text-left">
                 <button
                   class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-200"
-                  @click="toggleSort('department')"
+                  @click="toggleSort('sector')"
                 >
-                  Département
-                  <font-awesome-icon :icon="['fas', getSortIcon('department')]" class="w-3 h-3" />
+                  Secteur
+                  <font-awesome-icon :icon="['fas', getSortIcon('sector')]" class="w-3 h-3" />
                 </button>
               </th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -658,13 +658,13 @@ const clearDepartmentFilter = () => {
                 </div>
               </td>
 
-              <!-- Département -->
+              <!-- Secteur -->
               <td class="px-4 py-3">
                 <span
-                  v-if="service.department"
+                  v-if="service.sector"
                   class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded"
                 >
-                  {{ service.department.name }}
+                  {{ service.sector.name }}
                 </span>
                 <span v-else class="text-sm text-gray-400 dark:text-gray-500 italic">
                   Non assigné
@@ -798,29 +798,29 @@ const clearDepartmentFilter = () => {
         <font-awesome-icon :icon="['fas', 'sitemap']" class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-4" />
         <p class="text-gray-500 dark:text-gray-400">Aucun service trouvé</p>
         <button
-          v-if="searchQuery || filterDepartment || filterActive !== undefined"
+          v-if="searchQuery || filterSector || filterActive !== undefined"
           class="mt-2 text-sm text-brand-red-600 dark:text-brand-red-400 hover:underline"
-          @click="searchQuery = ''; filterDepartment = undefined; filterActive = undefined"
+          @click="searchQuery = ''; filterSector = undefined; filterActive = undefined"
         >
           Réinitialiser les filtres
         </button>
       </div>
     </div>
 
-    <!-- Vue Groupée par département -->
+    <!-- Vue Groupée par secteur -->
     <div v-else class="space-y-4">
       <!-- Expand/Collapse all buttons -->
       <div class="flex items-center justify-end gap-2 mb-2">
         <button
           class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-          @click="expandAllDepartments"
+          @click="expandAllSectors"
         >
           Tout déplier
         </button>
         <span class="text-gray-300 dark:text-gray-600">|</span>
         <button
           class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-          @click="collapseAllDepartments"
+          @click="collapseAllSectors"
         >
           Tout replier
         </button>
@@ -829,24 +829,24 @@ const clearDepartmentFilter = () => {
       <!-- Department accordions -->
       <div
         v-for="group in filteredServicesGrouped"
-        :key="group.department.id"
+        :key="group.sector.id"
         class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
       >
         <!-- Department header -->
         <button
           class="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-          @click="toggleDepartmentExpand(group.department.id)"
+          @click="toggleSectorExpand(group.sector.id)"
         >
           <div class="flex items-center gap-3">
             <div
-              v-if="group.department.icon"
+              v-if="group.sector.icon"
               class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center"
             >
-              <font-awesome-icon :icon="['fas', group.department.icon]" class="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <font-awesome-icon :icon="['fas', group.sector.icon]" class="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </div>
             <div class="text-left">
               <p class="font-medium text-gray-900 dark:text-white">
-                {{ group.department.name }}
+                {{ group.sector.name }}
               </p>
               <p class="text-sm text-gray-500 dark:text-gray-400">
                 {{ group.services.length }} service(s)
@@ -856,13 +856,13 @@ const clearDepartmentFilter = () => {
           <font-awesome-icon
             :icon="['fas', 'chevron-down']"
             class="w-4 h-4 text-gray-400 transition-transform"
-            :class="{ 'rotate-180': expandedDepartments.has(group.department.id) }"
+            :class="{ 'rotate-180': expandedSectors.has(group.sector.id) }"
           />
         </button>
 
         <!-- Services list -->
         <div
-          v-show="expandedDepartments.has(group.department.id)"
+          v-show="expandedSectors.has(group.sector.id)"
           class="border-t border-gray-200 dark:border-gray-700"
         >
           <div class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -977,17 +977,17 @@ const clearDepartmentFilter = () => {
           </div>
 
           <div class="p-4 space-y-4">
-            <!-- Département parent -->
+            <!-- Secteur parent -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Département *
+                Secteur *
               </label>
               <select
-                v-model="newService.department_id"
+                v-model="newService.sector_id"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent"
               >
-                <option value="">Sélectionner un département</option>
-                <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+                <option value="">Sélectionner un secteur</option>
+                <option v-for="dept in sectors" :key="dept.id" :value="dept.id">
                   {{ dept.name }} ({{ dept.code }})
                 </option>
               </select>
@@ -1103,7 +1103,7 @@ const clearDepartmentFilter = () => {
             </button>
             <button
               class="px-4 py-2 text-sm font-medium text-white bg-brand-red-600 hover:bg-brand-red-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              :disabled="!newService.name || !newService.department_id || isSaving"
+              :disabled="!newService.name || !newService.sector_id || isSaving"
               @click="saveService"
             >
               <span v-if="isSaving">Enregistrement...</span>

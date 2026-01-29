@@ -5,7 +5,7 @@
  * Structure conforme au schéma SQL: bank/modele_de_donnee/schema.sql
  */
 
-export * from './departments'
+export * from './sectors'
 export * from './services'
 export * from './staff'
 export * from './pays-bailleurs'

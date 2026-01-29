@@ -95,8 +95,8 @@ export function usePublicNewsApi() {
       // Associations
       campus_id: news.campus_external_id,
       campus_name: null, // TODO: Résoudre via API
-      department_id: news.department_external_id,
-      department_name: null,
+      sector_id: news.sector_external_id,
+      sector_name: null,
       service_id: news.service_external_id,
       service_name: null,
       event_id: news.event_external_id,

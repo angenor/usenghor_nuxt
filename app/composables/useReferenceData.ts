@@ -2,7 +2,7 @@
  * Composable pour les données de référence
  * =========================================
  *
- * Récupère les données de référence (campus, départements, services, etc.)
+ * Récupère les données de référence (campus, secteurs, services, etc.)
  * depuis le backend pour les formulaires.
  */
 
@@ -21,7 +21,7 @@ export interface CampusRef {
   active: boolean
 }
 
-export interface DepartmentRef {
+export interface SectorRef {
   id: string
   code: string
   name: string
@@ -32,7 +32,7 @@ export interface ServiceRef {
   id: string
   code: string
   name: string
-  department_id: string
+  sector_id: string
   active: boolean
 }
 
@@ -65,7 +65,7 @@ export function useReferenceData() {
 
   // Cache pour éviter des appels répétés
   const campusesCache = ref<CampusRef[]>([])
-  const departmentsCache = ref<DepartmentRef[]>([])
+  const sectorsCache = ref<SectorRef[]>([])
   const servicesCache = ref<ServiceRef[]>([])
   const usersCache = ref<UserRef[]>([])
   const projectsCache = ref<ProjectRef[]>([])
@@ -108,11 +108,11 @@ export function useReferenceData() {
   }
 
   /**
-   * Récupère la liste des départements.
+   * Récupère la liste des secteurs.
    */
-  async function getDepartments(forceRefresh = false): Promise<DepartmentRef[]> {
-    if (departmentsCache.value.length > 0 && !forceRefresh) {
-      return departmentsCache.value
+  async function getSectors(forceRefresh = false): Promise<SectorRef[]> {
+    if (sectorsCache.value.length > 0 && !forceRefresh) {
+      return sectorsCache.value
     }
 
     try {
@@ -121,20 +121,20 @@ export function useReferenceData() {
         code: string
         name: string
         active: boolean
-      }>>('/api/admin/departments', {
+      }>>('/api/admin/sectors', {
         query: { limit: 100, active: true },
       })
 
-      departmentsCache.value = response.items.map(d => ({
+      sectorsCache.value = response.items.map(d => ({
         id: d.id,
         code: d.code,
         name: d.name,
         active: d.active,
       }))
 
-      return departmentsCache.value
+      return sectorsCache.value
     } catch (e) {
-      console.error('Erreur chargement départements:', e)
+      console.error('Erreur chargement secteurs:', e)
       return []
     }
   }
@@ -152,7 +152,7 @@ export function useReferenceData() {
         id: string
         code: string
         name: string
-        department_id: string
+        sector_id: string
         active: boolean
       }>>('/api/admin/services', {
         query: { limit: 100, active: true },
@@ -162,7 +162,7 @@ export function useReferenceData() {
         id: s.id,
         code: s.code,
         name: s.name,
-        department_id: s.department_id,
+        sector_id: s.sector_id,
         active: s.active,
       }))
 
@@ -267,10 +267,10 @@ export function useReferenceData() {
   }
 
   /**
-   * Récupère les services filtrés par département.
+   * Récupère les services filtrés par secteur.
    */
-  function getServicesByDepartment(departmentId: string): ServiceRef[] {
-    return servicesCache.value.filter(s => s.department_id === departmentId)
+  function getServicesBySector(sectorId: string): ServiceRef[] {
+    return servicesCache.value.filter(s => s.sector_id === sectorId)
   }
 
   /**
@@ -279,7 +279,7 @@ export function useReferenceData() {
   async function loadAllReferenceData(): Promise<void> {
     await Promise.all([
       getCampuses(),
-      getDepartments(),
+      getSectors(),
       getServices(),
       getUsers(),
     ])
@@ -290,7 +290,7 @@ export function useReferenceData() {
    */
   function clearCache(): void {
     campusesCache.value = []
-    departmentsCache.value = []
+    sectorsCache.value = []
     servicesCache.value = []
     usersCache.value = []
     projectsCache.value = []
@@ -300,12 +300,12 @@ export function useReferenceData() {
   return {
     // Getters
     getCampuses,
-    getDepartments,
+    getSectors,
     getServices,
     getUsers,
     getProjects,
     getEvents,
-    getServicesByDepartment,
+    getServicesBySector,
 
     // Utilitaires
     loadAllReferenceData,
@@ -313,7 +313,7 @@ export function useReferenceData() {
 
     // Cache (pour accès direct si déjà chargé)
     campuses: campusesCache,
-    departments: departmentsCache,
+    sectors: sectorsCache,
     services: servicesCache,
     users: usersCache,
     projects: projectsCache,

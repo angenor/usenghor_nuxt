@@ -4,15 +4,30 @@
  *
  * Gestion des services via l'API backend FastAPI.
  * Aligné sur le schéma SQL: services (04_organization.sql)
+ * Fallback sur les données mock si l'API n'est pas disponible.
  */
 
 import type {
-  DepartmentRead,
+  SectorRead,
   IdResponse,
   MessageResponse,
   PaginatedResponse,
   ServiceRead,
 } from '~/types/api'
+
+// Import mock data pour fallback en développement
+import {
+  mockServicesAdmin,
+  getAllServicesAdmin as getMockAllServices,
+  getServiceByIdAdmin as getMockServiceById,
+  getServicesBySectorId as getMockServicesBySectorId,
+  getServicesGroupedBySector as getMockServicesGroupedBySector,
+  getServiceStats as getMockServiceStats,
+  checkServiceUsage as getMockServiceUsage,
+  getSectorsForServiceSelect as getMockSectorsForSelect,
+  type ServiceAdmin,
+  type ServicesBySector as MockServicesBySector,
+} from '@bank/mock-data/services-admin'
 
 // ============================================================================
 // Types Backend (alignés sur les schemas Pydantic)
@@ -67,7 +82,7 @@ export interface ServiceCreate {
   phone?: string | null
   head_external_id?: string | null
   album_external_id?: string | null
-  department_id?: string | null
+  sector_id?: string | null
   display_order?: number
   active?: boolean
 }
@@ -80,7 +95,7 @@ export interface ServiceUpdate {
   phone?: string | null
   head_external_id?: string | null
   album_external_id?: string | null
-  department_id?: string | null
+  sector_id?: string | null
   display_order?: number
   active?: boolean
 }
@@ -142,7 +157,7 @@ export interface ServiceReorder {
 // ============================================================================
 
 export interface ServiceDisplay extends ServiceRead {
-  department?: {
+  sector?: {
     id: string
     name: string
     code: string
@@ -164,9 +179,9 @@ export interface ServiceStats {
   inactive: number
   withHead: number
   withoutHead: number
-  byDepartment: Array<{
-    department_id: string
-    department_name: string
+  bySector: Array<{
+    sector_id: string
+    sector_name: string
     count: number
   }>
   totalObjectives: number
@@ -176,9 +191,9 @@ export interface ServiceStats {
 
 export interface ServiceFilters {
   search?: string
-  department_id?: string
+  sector_id?: string
   active?: boolean
-  sort_by?: 'name' | 'display_order' | 'department' | 'objectives_count'
+  sort_by?: 'name' | 'display_order' | 'sector' | 'objectives_count'
   sort_order?: 'asc' | 'desc'
 }
 
@@ -190,8 +205,8 @@ export interface ServiceUsage {
   items_sample: Array<{ type: string; title: string }>
 }
 
-export interface ServicesByDepartment {
-  department: {
+export interface ServicesBySector {
+  sector: {
     id: string
     name: string
     code: string
@@ -225,36 +240,54 @@ export const projectStatusColors: Record<ProjectStatus, string> = {
 export function useServicesApi() {
   const { apiFetch } = useApi()
 
-  // Cache pour les départements (éviter les appels multiples)
-  const departmentsCache = ref<Map<string, DepartmentRead>>(new Map())
+  // Cache pour les secteurs (éviter les appels multiples)
+  const sectorsCache = ref<Map<string, SectorRead>>(new Map())
 
   // =========================================================================
   // Helpers
   // =========================================================================
 
   /**
-   * Charge et cache les départements.
+   * Charge et cache les secteurs.
    */
-  async function loadDepartments(): Promise<Map<string, DepartmentRead>> {
-    if (departmentsCache.value.size > 0) {
-      return departmentsCache.value
+  async function loadSectors(): Promise<Map<string, SectorRead>> {
+    if (sectorsCache.value.size > 0) {
+      return sectorsCache.value
     }
 
     try {
-      const response = await apiFetch<PaginatedResponse<DepartmentRead>>('/api/admin/departments', {
+      const response = await apiFetch<PaginatedResponse<SectorRead>>('/api/admin/sectors', {
         query: { limit: 100 },
       })
       if (response?.items) {
         for (const dept of response.items) {
-          departmentsCache.value.set(dept.id, dept)
+          sectorsCache.value.set(dept.id, dept)
         }
       }
     }
-    catch (error) {
-      console.error('Erreur lors du chargement des départements:', error)
+    catch {
+      // Fallback sur mock data
+      console.warn('[useServicesApi] API unavailable, loading sectors from mock data')
+      const mockSectors = getMockSectorsForSelect()
+      for (const sector of mockSectors) {
+        sectorsCache.value.set(sector.id, {
+          id: sector.id,
+          code: sector.code,
+          name: sector.name,
+          description: null,
+          mission: null,
+          icon_external_id: null,
+          cover_image_external_id: null,
+          head_external_id: null,
+          display_order: 0,
+          active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+      }
     }
 
-    return departmentsCache.value
+    return sectorsCache.value
   }
 
   /**
@@ -263,13 +296,13 @@ export function useServicesApi() {
   function transformToDisplay(
     service: ServiceRead,
     details?: { objectives: number; achievements: number; projects: number },
-    departments?: Map<string, DepartmentRead>,
+    sectors?: Map<string, SectorRead>,
   ): ServiceDisplay {
-    const dept = service.department_id && departments?.get(service.department_id)
+    const dept = service.sector_id && sectors?.get(service.sector_id)
 
     return {
       ...service,
-      department: dept
+      sector: dept
         ? {
             id: dept.id,
             name: dept.name,
@@ -288,13 +321,13 @@ export function useServicesApi() {
    */
   function transformWithDetailsToDisplay(
     service: ServiceWithDetails,
-    departments?: Map<string, DepartmentRead>,
+    sectors?: Map<string, SectorRead>,
   ): ServiceDisplay {
-    const dept = service.department_id && departments?.get(service.department_id)
+    const dept = service.sector_id && sectors?.get(service.sector_id)
 
     return {
       ...service,
-      department: dept
+      sector: dept
         ? {
             id: dept.id,
             name: dept.name,
@@ -305,6 +338,46 @@ export function useServicesApi() {
       objectives_count: service.objectives?.length ?? 0,
       achievements_count: service.achievements?.length ?? 0,
       projects_count: service.projects?.length ?? 0,
+    }
+  }
+
+  /**
+   * Transforme ServiceAdmin (mock) vers ServiceDisplay.
+   */
+  function transformMockToDisplay(service: ServiceAdmin): ServiceDisplay {
+    return {
+      id: service.id,
+      code: service.id, // Mock doesn't have code, use id
+      name: service.name,
+      description: service.description || null,
+      mission: service.mission || null,
+      sector_id: service.sector_id || null,
+      sector: service.sector
+        ? {
+            id: service.sector.id,
+            name: service.sector.name,
+            code: service.sector.code,
+          }
+        : null,
+      head_external_id: service.head_id || null,
+      head: service.head
+        ? {
+            id: service.head.id,
+            name: service.head.name,
+            title: service.head.title || null,
+            photo: service.head.photo || null,
+          }
+        : null,
+      email: service.email || null,
+      phone: service.phone || null,
+      album_external_id: service.album_id || null,
+      display_order: service.display_order,
+      active: service.active,
+      objectives_count: service.objectives_count,
+      achievements_count: service.achievements_count,
+      projects_count: service.projects_count,
+      created_at: service.created_at,
+      updated_at: service.updated_at,
     }
   }
 
@@ -319,34 +392,66 @@ export function useServicesApi() {
     page?: number
     limit?: number
   } = {}): Promise<PaginatedResponse<ServiceDisplay>> {
-    const departments = await loadDepartments()
+    try {
+      const sectors = await loadSectors()
 
-    const response = await apiFetch<PaginatedResponse<ServiceRead>>('/api/admin/services', {
-      query: {
+      const response = await apiFetch<PaginatedResponse<ServiceRead>>('/api/admin/services', {
+        query: {
+          page: params.page || 1,
+          limit: params.limit || 100,
+          search: params.search,
+          sector_id: params.sector_id,
+          active: params.active,
+        },
+      })
+
+      // Pour chaque service, récupérer les compteurs
+      const servicesWithDetails = await Promise.all(
+        response.items.map(async (service) => {
+          try {
+            const details = await getServiceById(service.id)
+            return transformWithDetailsToDisplay(details, sectors)
+          }
+          catch {
+            return transformToDisplay(service, undefined, sectors)
+          }
+        }),
+      )
+
+      return {
+        ...response,
+        items: servicesWithDetails,
+      }
+    }
+    catch {
+      // Fallback sur mock data
+      console.warn('[useServicesApi] API unavailable, using mock data')
+      const mockServices = getMockAllServices()
+      let filteredServices = mockServices
+
+      // Appliquer les filtres
+      if (params.sector_id) {
+        filteredServices = filteredServices.filter(s => s.sector_id === params.sector_id)
+      }
+      if (params.active !== undefined) {
+        filteredServices = filteredServices.filter(s => s.active === params.active)
+      }
+      if (params.search) {
+        const search = params.search.toLowerCase()
+        filteredServices = filteredServices.filter(s =>
+          s.name.toLowerCase().includes(search)
+          || s.description?.toLowerCase().includes(search)
+          || s.sector?.name?.toLowerCase().includes(search),
+        )
+      }
+
+      return {
+        items: filteredServices.map(transformMockToDisplay),
+        total: filteredServices.length,
         page: params.page || 1,
         limit: params.limit || 100,
-        search: params.search,
-        department_id: params.department_id,
-        active: params.active,
-      },
-    })
-
-    // Pour chaque service, récupérer les compteurs
-    const servicesWithDetails = await Promise.all(
-      response.items.map(async (service) => {
-        try {
-          const details = await getServiceById(service.id)
-          return transformWithDetailsToDisplay(details, departments)
-        }
-        catch {
-          return transformToDisplay(service, undefined, departments)
-        }
-      }),
-    )
-
-    return {
-      ...response,
-      items: servicesWithDetails,
+        pages: 1,
+      }
     }
   }
 
@@ -354,8 +459,15 @@ export function useServicesApi() {
    * Récupère tous les services avec détails.
    */
   async function getAllServices(): Promise<ServiceDisplay[]> {
-    const response = await listServices({ limit: 100 })
-    return response.items
+    try {
+      const response = await listServices({ limit: 100 })
+      return response.items
+    }
+    catch {
+      // Fallback sur mock data
+      console.warn('[useServicesApi] API unavailable, using mock data')
+      return getMockAllServices().map(transformMockToDisplay)
+    }
   }
 
   /**
@@ -625,28 +737,28 @@ export function useServicesApi() {
    */
   async function getServicesStats(): Promise<ServiceStats> {
     const services = await getAllServices()
-    const departments = await loadDepartments()
+    const sectors =await loadSectors()
 
-    // Compter par département
+    // Compter par secteur
     const byDeptMap = new Map<string, number>()
     let totalObjectives = 0
     let totalAchievements = 0
     let totalProjects = 0
 
     for (const service of services) {
-      const deptId = service.department_id || 'none'
+      const deptId = service.sector_id || 'none'
       byDeptMap.set(deptId, (byDeptMap.get(deptId) || 0) + 1)
       totalObjectives += service.objectives_count
       totalAchievements += service.achievements_count
       totalProjects += service.projects_count
     }
 
-    const byDepartment: ServiceStats['byDepartment'] = []
+    const bySector: ServiceStats['bySector'] = []
     for (const [deptId, count] of byDeptMap) {
-      const dept = departments.get(deptId)
-      byDepartment.push({
-        department_id: deptId,
-        department_name: dept?.name || 'Sans département',
+      const dept = sectors.get(deptId)
+      bySector.push({
+        sector_id: deptId,
+        sector_name: dept?.name || 'Sans secteur',
         count,
       })
     }
@@ -657,7 +769,7 @@ export function useServicesApi() {
       inactive: services.filter(s => !s.active).length,
       withHead: services.filter(s => s.head_external_id).length,
       withoutHead: services.filter(s => !s.head_external_id).length,
-      byDepartment: byDepartment.sort((a, b) => b.count - a.count),
+      bySector: bySector.sort((a, b) => b.count - a.count),
       totalObjectives,
       totalAchievements,
       totalProjects,
@@ -665,26 +777,26 @@ export function useServicesApi() {
   }
 
   /**
-   * Récupère les services groupés par département.
+   * Récupère les services groupés par secteur.
    */
-  async function getServicesGroupedByDepartment(): Promise<ServicesByDepartment[]> {
+  async function getServicesGroupedBySector(): Promise<ServicesBySector[]> {
     const services = await getAllServices()
-    const departments = await loadDepartments()
+    const sectors =await loadSectors()
     const grouped = new Map<string, ServiceDisplay[]>()
 
     for (const service of services) {
-      const deptId = service.department_id || 'none'
+      const deptId = service.sector_id || 'none'
       if (!grouped.has(deptId)) {
         grouped.set(deptId, [])
       }
       grouped.get(deptId)!.push(service)
     }
 
-    const result: ServicesByDepartment[] = []
+    const result: ServicesBySector[] = []
     for (const [deptId, deptServices] of grouped) {
-      const dept = departments.get(deptId)
+      const dept = sectors.get(deptId)
       result.push({
-        department: dept
+        sector: dept
           ? {
               id: dept.id,
               name: dept.name,
@@ -693,14 +805,14 @@ export function useServicesApi() {
             }
           : {
               id: 'none',
-              name: 'Sans département',
+              name: 'Sans secteur',
               code: 'N/A',
             },
         services: deptServices.sort((a, b) => a.display_order - b.display_order),
       })
     }
 
-    return result.sort((a, b) => a.department.name.localeCompare(b.department.name))
+    return result.sort((a, b) => a.sector.name.localeCompare(b.sector.name))
   }
 
   /**
@@ -740,20 +852,20 @@ export function useServicesApi() {
   }
 
   /**
-   * Récupère les départements pour le select.
+   * Récupère les secteurs pour le select.
    */
-  async function getDepartmentsForSelect(): Promise<Array<{ id: string; name: string; code: string }>> {
+  async function getSectorsForSelect(): Promise<Array<{ id: string; name: string; code: string }>> {
     // Forcer le rechargement si le cache est vide
-    if (departmentsCache.value.size === 0) {
-      await loadDepartments()
+    if (sectorsCache.value.size === 0) {
+      await loadSectors()
     }
 
-    const departments = departmentsCache.value
+    const sectors = sectorsCache.value
 
     // Si toujours vide, essayer un appel direct
-    if (departments.size === 0) {
+    if (sectors.size === 0) {
       try {
-        const response = await apiFetch<PaginatedResponse<DepartmentRead>>('/api/admin/departments', {
+        const response = await apiFetch<PaginatedResponse<SectorRead>>('/api/admin/sectors', {
           query: { limit: 100 },
         })
         if (response?.items) {
@@ -766,13 +878,16 @@ export function useServicesApi() {
             .sort((a, b) => a.name.localeCompare(b.name))
         }
       }
-      catch (error) {
-        console.error('Erreur lors du chargement direct des départements:', error)
+      catch {
+        // Fallback sur mock data
+        console.warn('[useServicesApi] API unavailable, using mock data for sectors')
+        return getMockSectorsForSelect()
       }
-      return []
+      // Fallback sur mock data si pas de résultats
+      return getMockSectorsForSelect()
     }
 
-    return Array.from(departments.values())
+    return Array.from(sectors.values())
       .map(d => ({
         id: d.id,
         name: d.name,
@@ -801,10 +916,10 @@ export function useServicesApi() {
   }
 
   /**
-   * Invalide le cache des départements.
+   * Invalide le cache des secteurs.
    */
-  function invalidateDepartmentsCache(): void {
-    departmentsCache.value.clear()
+  function invalidateSectorsCache(): void {
+    sectorsCache.value.clear()
   }
 
   return {
@@ -843,16 +958,16 @@ export function useServicesApi() {
 
     // Statistics & Utilities
     getServicesStats,
-    getServicesGroupedByDepartment,
+    getServicesGroupedBySector,
     getServiceUsage,
-    getDepartmentsForSelect,
+    getSectorsForSelect,
 
     // Helpers
     generateServiceId,
     formatDate,
     transformToDisplay,
     transformWithDetailsToDisplay,
-    invalidateDepartmentsCache,
+    invalidateSectorsCache,
 
     // Labels
     projectStatusLabels,

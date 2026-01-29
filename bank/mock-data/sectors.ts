@@ -1,9 +1,9 @@
 /**
- * Mock Data: Départements
- * Table SQL: departments
+ * Mock Data: Secteurs
+ * Table SQL: sectors
  */
 
-export interface Department {
+export interface Sector {
   id: string
   slug: string
   name_fr: string
@@ -19,15 +19,15 @@ export interface Department {
   is_active: boolean
 }
 
-export const mockDepartments: Department[] = [
+export const mockSectors: Sector[] = [
   {
-    id: 'dept-culture',
+    id: 'sec-culture',
     slug: 'culture',
     name_fr: 'Culture',
     name_en: 'Culture',
     name_ar: 'الثقافة',
-    description_fr: 'Le département Culture forme des professionnels capables de concevoir et mettre en œuvre des politiques culturelles adaptées aux réalités africaines.',
-    description_en: 'The Culture department trains professionals capable of designing and implementing cultural policies adapted to African realities.',
+    description_fr: 'Le secteur Culture forme des professionnels capables de concevoir et mettre en œuvre des politiques culturelles adaptées aux réalités africaines.',
+    description_en: 'The Culture sector trains professionals capable of designing and implementing cultural policies adapted to African realities.',
     icon: 'palette',
     color: '#8B5CF6',
     head_id: 'staff-001',
@@ -35,13 +35,13 @@ export const mockDepartments: Department[] = [
     is_active: true
   },
   {
-    id: 'dept-environnement',
+    id: 'sec-environnement',
     slug: 'environnement',
     name_fr: 'Environnement',
     name_en: 'Environment',
     name_ar: 'البيئة',
-    description_fr: 'Le département Environnement forme des cadres spécialisés dans la gestion durable des ressources naturelles et l\'adaptation au changement climatique.',
-    description_en: 'The Environment department trains executives specialized in sustainable natural resource management and climate change adaptation.',
+    description_fr: 'Le secteur Environnement forme des cadres spécialisés dans la gestion durable des ressources naturelles et l\'adaptation au changement climatique.',
+    description_en: 'The Environment sector trains executives specialized in sustainable natural resource management and climate change adaptation.',
     icon: 'leaf',
     color: '#10B981',
     head_id: 'staff-002',
@@ -49,13 +49,13 @@ export const mockDepartments: Department[] = [
     is_active: true
   },
   {
-    id: 'dept-management',
+    id: 'sec-management',
     slug: 'management',
     name_fr: 'Management',
     name_en: 'Management',
     name_ar: 'الإدارة',
-    description_fr: 'Le département Management forme des dirigeants et gestionnaires capables de piloter des organisations publiques et privées en Afrique.',
-    description_en: 'The Management department trains leaders and managers capable of leading public and private organizations in Africa.',
+    description_fr: 'Le secteur Management forme des dirigeants et gestionnaires capables de piloter des organisations publiques et privées en Afrique.',
+    description_en: 'The Management sector trains leaders and managers capable of leading public and private organizations in Africa.',
     icon: 'briefcase',
     color: '#F59E0B',
     head_id: 'staff-003',
@@ -63,13 +63,13 @@ export const mockDepartments: Department[] = [
     is_active: true
   },
   {
-    id: 'dept-sante',
+    id: 'sec-sante',
     slug: 'sante',
     name_fr: 'Santé',
     name_en: 'Health',
     name_ar: 'الصحة',
-    description_fr: 'Le département Santé forme des professionnels de santé publique et des gestionnaires de systèmes de santé pour l\'Afrique.',
-    description_en: 'The Health department trains public health professionals and health system managers for Africa.',
+    description_fr: 'Le secteur Santé forme des professionnels de santé publique et des gestionnaires de systèmes de santé pour l\'Afrique.',
+    description_en: 'The Health sector trains public health professionals and health system managers for Africa.',
     icon: 'heart-pulse',
     color: '#EF4444',
     head_id: 'staff-004',
@@ -77,7 +77,7 @@ export const mockDepartments: Department[] = [
     is_active: true
   },
   {
-    id: 'dept-doctoral',
+    id: 'sec-doctoral',
     slug: 'ecole-doctorale',
     name_fr: 'École doctorale',
     name_en: 'Doctoral School',

@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import type { DepartmentDisplay, DepartmentUsage } from '~/composables/useDepartmentsApi'
+import type { SectorDisplay, SectorUsage } from '~/composables/useSectorsApi'
 
 definePageMeta({
   layout: 'admin'
 })
 
 const {
-  getAllDepartments,
-  getDepartmentsStats,
-  getDepartmentUsage,
-  createDepartment,
-  updateDepartment,
-  deleteDepartment: apiDeleteDepartment,
-  toggleDepartmentActive: apiToggleDepartmentActive,
-  reorderDepartments,
-  generateDepartmentCode,
-} = useDepartmentsApi()
+  getAllSectors,
+  getSectorsStats,
+  getSectorUsage,
+  createSector,
+  updateSector,
+  deleteSector: apiDeleteDepartment,
+  toggleSectorActive: apiToggleDepartmentActive,
+  reorderSectors,
+  generateSectorCode,
+} = useSectorsApi()
 
 const { apiFetch } = useApi()
 
@@ -27,13 +27,13 @@ const sortOrder = ref<'asc' | 'desc'>('asc')
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const showDeleteModal = ref(false)
-const editingDepartment = ref<DepartmentDisplay | null>(null)
-const deletingDepartment = ref<DepartmentDisplay | null>(null)
-const departmentUsage = ref<DepartmentUsage | null>(null)
+const editingSector = ref<SectorDisplay | null>(null)
+const deletingSector = ref<SectorDisplay | null>(null)
+const sectorUsage = ref<SectorUsage | null>(null)
 const isDragging = ref(false)
 
 // Données chargées depuis l'API
-const allDepartments = ref<DepartmentDisplay[]>([])
+const allSectors = ref<SectorDisplay[]>([])
 const stats = ref({ total: 0, active: 0, totalServices: 0, withHead: 0 })
 const isLoading = ref(true)
 const isSaving = ref(false)
@@ -42,7 +42,7 @@ const error = ref<string | null>(null)
 // Form state
 // Note: icon_external_id et cover_image_external_id sont des UUID pour le service MEDIA
 // La sélection d'icônes FontAwesome n'est pas disponible dans ce schéma
-const newDepartment = ref({
+const newSector = ref({
   name: '',
   code: '',
   description: '',
@@ -52,20 +52,20 @@ const newDepartment = ref({
 })
 
 // === CHARGEMENT DES DONNÉES ===
-async function loadDepartments() {
+async function loadSectors() {
   isLoading.value = true
   error.value = null
   try {
-    const [departments, departmentsStats] = await Promise.all([
-      getAllDepartments(),
-      getDepartmentsStats(),
+    const [sectorsData, sectorsStats] = await Promise.all([
+      getAllSectors(),
+      getSectorsStats(),
     ])
-    allDepartments.value = departments
-    stats.value = departmentsStats
+    allSectors.value = sectorsData
+    stats.value = sectorsStats
   }
   catch (err: any) {
-    console.error('Erreur chargement départements:', err)
-    error.value = err.message || 'Erreur lors du chargement des départements'
+    console.error('Erreur chargement secteurs:', err)
+    error.value = err.message || 'Erreur lors du chargement des secteurs'
   }
   finally {
     isLoading.value = false
@@ -103,16 +103,16 @@ async function loadHeadCandidates() {
   }
 }
 
-// Enrichir les départements avec les infos des responsables
-function enrichDepartmentsWithHeads() {
+// Enrichir les secteurs avec les infos des responsables
+function enrichSectorsWithHeads() {
   if (headCandidates.value.length === 0) return
 
-  allDepartments.value = allDepartments.value.map((dept) => {
-    if (dept.head_external_id) {
-      const candidate = headCandidates.value.find(c => c.id === dept.head_external_id)
+  allSectors.value = allSectors.value.map((sec) => {
+    if (sec.head_external_id) {
+      const candidate = headCandidates.value.find(c => c.id === sec.head_external_id)
       if (candidate) {
         return {
-          ...dept,
+          ...sec,
           head: {
             id: candidate.id,
             name: candidate.name,
@@ -122,19 +122,19 @@ function enrichDepartmentsWithHeads() {
         }
       }
     }
-    return { ...dept, head: null }
+    return { ...sec, head: null }
   })
 }
 
 // Chargement initial
 onMounted(async () => {
-  await Promise.all([loadDepartments(), loadHeadCandidates()])
-  enrichDepartmentsWithHeads()
+  await Promise.all([loadSectors(), loadHeadCandidates()])
+  enrichSectorsWithHeads()
 })
 
-// Départements filtrés et triés
-const filteredDepartments = computed(() => {
-  let result = [...allDepartments.value]
+// Secteurs filtrés et triés
+const filteredSectors = computed(() => {
+  let result = [...allSectors.value]
 
   // Filtre par statut actif
   if (filterActive.value !== undefined) {
@@ -190,14 +190,14 @@ const getSortIcon = (field: 'name' | 'code' | 'display_order' | 'services_count'
 
 // Auto-génération du code
 const updateCode = () => {
-  if (newDepartment.value.name && !editingDepartment.value) {
-    newDepartment.value.code = generateDepartmentCode(newDepartment.value.name)
+  if (newSector.value.name && !editingSector.value) {
+    newSector.value.code = generateSectorCode(newSector.value.name)
   }
 }
 
 // Modals
 const openAddModal = () => {
-  newDepartment.value = {
+  newSector.value = {
     name: '',
     code: '',
     description: '',
@@ -208,22 +208,22 @@ const openAddModal = () => {
   showAddModal.value = true
 }
 
-const openEditModal = (department: DepartmentDisplay) => {
-  editingDepartment.value = department
-  newDepartment.value = {
-    name: department.name,
-    code: department.code,
-    description: department.description || '',
-    mission: department.mission || '',
-    head_id: department.head_external_id || '',
-    active: department.active
+const openEditModal = (sector: SectorDisplay) => {
+  editingSector.value = sector
+  newSector.value = {
+    name: sector.name,
+    code: sector.code,
+    description: sector.description || '',
+    mission: sector.mission || '',
+    head_id: sector.head_external_id || '',
+    active: sector.active
   }
   showEditModal.value = true
 }
 
-const openDeleteModal = async (department: DepartmentDisplay) => {
-  deletingDepartment.value = department
-  departmentUsage.value = await getDepartmentUsage(department.id)
+const openDeleteModal = async (sector: SectorDisplay) => {
+  deletingSector.value = sector
+  sectorUsage.value = await getSectorUsage(sector.id)
   showDeleteModal.value = true
 }
 
@@ -231,73 +231,73 @@ const closeModals = () => {
   showAddModal.value = false
   showEditModal.value = false
   showDeleteModal.value = false
-  editingDepartment.value = null
-  deletingDepartment.value = null
-  departmentUsage.value = null
+  editingSector.value = null
+  deletingSector.value = null
+  sectorUsage.value = null
 }
 
 // CRUD operations
-const saveDepartment = async () => {
-  if (!newDepartment.value.name || !newDepartment.value.code) return
+const saveSector = async () => {
+  if (!newSector.value.name || !newSector.value.code) return
 
   isSaving.value = true
   error.value = null
 
   try {
     const payload = {
-      code: newDepartment.value.code,
-      name: newDepartment.value.name,
-      description: newDepartment.value.description || null,
-      mission: newDepartment.value.mission || null,
-      head_external_id: newDepartment.value.head_id || null,
-      active: newDepartment.value.active,
+      code: newSector.value.code,
+      name: newSector.value.name,
+      description: newSector.value.description || null,
+      mission: newSector.value.mission || null,
+      head_external_id: newSector.value.head_id || null,
+      active: newSector.value.active,
     }
 
-    if (editingDepartment.value) {
+    if (editingSector.value) {
       // Mise à jour
-      await updateDepartment(editingDepartment.value.id, payload)
+      await updateSector(editingSector.value.id, payload)
     }
     else {
       // Création
-      await createDepartment(payload)
+      await createSector(payload)
     }
     closeModals()
-    await loadDepartments()
-    enrichDepartmentsWithHeads()
+    await loadSectors()
+    enrichSectorsWithHeads()
   }
   catch (err: any) {
-    console.error('Erreur sauvegarde département:', err)
-    error.value = err.message || 'Erreur lors de la sauvegarde du département'
+    console.error('Erreur sauvegarde secteur:', err)
+    error.value = err.message || 'Erreur lors de la sauvegarde du secteur'
   }
   finally {
     isSaving.value = false
   }
 }
 
-const deleteDepartment = async () => {
-  if (!deletingDepartment.value) return
+const deleteSector = async () => {
+  if (!deletingSector.value) return
 
   isSaving.value = true
   error.value = null
 
   try {
-    await apiDeleteDepartment(deletingDepartment.value.id)
+    await apiDeleteDepartment(deletingSector.value.id)
     closeModals()
-    await loadDepartments()
+    await loadSectors()
   }
   catch (err: any) {
-    console.error('Erreur suppression département:', err)
-    error.value = err.message || 'Erreur lors de la suppression du département'
+    console.error('Erreur suppression secteur:', err)
+    error.value = err.message || 'Erreur lors de la suppression du secteur'
   }
   finally {
     isSaving.value = false
   }
 }
 
-const toggleDepartmentActive = async (department: DepartmentDisplay) => {
+const toggleSectorActive = async (sector: SectorDisplay) => {
   try {
-    await apiToggleDepartmentActive(department.id)
-    await loadDepartments()
+    await apiToggleSectorActive(sector.id)
+    await loadSectors()
   }
   catch (err: any) {
     console.error('Erreur basculement état actif:', err)
@@ -322,24 +322,24 @@ const handleDrop = async (event: DragEvent, targetIndex: number) => {
   const sourceIndex = parseInt(event.dataTransfer?.getData('text/plain') || '0')
   if (sourceIndex !== targetIndex) {
     // Réordonner localement d'abord
-    const items = [...allDepartments.value]
+    const items = [...allSectors.value]
     const [movedItem] = items.splice(sourceIndex, 1)
     items.splice(targetIndex, 0, movedItem)
 
     // Mettre à jour l'ordre d'affichage local
-    allDepartments.value = items
+    allSectors.value = items
 
     // Envoyer au backend
     try {
-      const departmentIds = items.map(d => d.id)
-      await reorderDepartments(departmentIds)
-      await loadDepartments()
+      const sectorIds = items.map(d => d.id)
+      await reorderSectors(sectorIds)
+      await loadSectors()
     }
     catch (err: any) {
       console.error('Erreur réordonnement:', err)
       error.value = err.message || 'Erreur lors du réordonnement'
       // Recharger pour annuler le changement local
-      await loadDepartments()
+      await loadSectors()
     }
   }
 }
@@ -357,9 +357,9 @@ const formatDate = (dateString: string) => {
   })
 }
 
-// Lien vers les services du département
-const goToServices = (departmentId: string) => {
-  navigateTo(`/admin/organisation/services?department=${departmentId}`)
+// Lien vers les services du secteur
+const goToServices = (sectorId: string) => {
+  navigateTo(`/admin/organisation/services?sector=${sectorId}`)
 }
 </script>
 
@@ -371,12 +371,12 @@ const goToServices = (departmentId: string) => {
     </div>
 
     <!-- Erreur globale -->
-    <div v-else-if="error && allDepartments.length === 0" class="py-12 text-center">
+    <div v-else-if="error && allSectors.length === 0" class="py-12 text-center">
       <font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="w-12 h-12 text-red-400 mb-4" />
       <p class="text-gray-600 dark:text-gray-400 mb-4">{{ error }}</p>
       <button
         class="text-brand-red-600 hover:underline"
-        @click="loadDepartments"
+        @click="loadSectors"
       >
         Réessayer
       </button>
@@ -402,10 +402,10 @@ const goToServices = (departmentId: string) => {
       <div class="flex items-center justify-between mb-6">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-          Départements
+          Secteurs
         </h1>
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Gestion des départements de l'université
+          Gestion des secteurs de l'université
         </p>
       </div>
       <button
@@ -413,7 +413,7 @@ const goToServices = (departmentId: string) => {
         @click="openAddModal"
       >
         <font-awesome-icon :icon="['fas', 'plus']" class="w-4 h-4" />
-        Nouveau département
+        Nouveau secteur
       </button>
     </div>
 
@@ -505,7 +505,7 @@ const goToServices = (departmentId: string) => {
     >
       <div class="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300">
         <font-awesome-icon :icon="['fas', 'info-circle']" class="w-4 h-4" />
-        <span>Glissez-déposez les lignes pour réordonner l'affichage des départements</span>
+        <span>Glissez-déposez les lignes pour réordonner l'affichage des secteurs</span>
       </div>
     </div>
 
@@ -521,7 +521,7 @@ const goToServices = (departmentId: string) => {
                   class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-200"
                   @click="toggleSort('name')"
                 >
-                  Département
+                  Secteur
                   <font-awesome-icon :icon="['fas', getSortIcon('name')]" class="w-3 h-3" />
                 </button>
               </th>
@@ -565,10 +565,10 @@ const goToServices = (departmentId: string) => {
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
             <tr
-              v-for="(department, index) in filteredDepartments"
-              :key="department.id"
+              v-for="(sector, index) in filteredSectors"
+              :key="sector.id"
               class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-              :class="{ 'opacity-50': !department.active }"
+              :class="{ 'opacity-50': !sector.active }"
               :draggable="!searchQuery && filterActive === undefined"
               @dragstart="handleDragStart($event, index)"
               @dragover="handleDragOver"
@@ -585,7 +585,7 @@ const goToServices = (departmentId: string) => {
                 </button>
               </td>
 
-              <!-- Département -->
+              <!-- Secteur -->
               <td class="px-4 py-3">
                 <div class="flex items-center gap-3">
                   <!-- TODO: Afficher cover_image_external_id via le service MEDIA quand disponible -->
@@ -594,10 +594,10 @@ const goToServices = (departmentId: string) => {
                   </div>
                   <div>
                     <p class="font-medium text-gray-900 dark:text-white">
-                      {{ department.name }}
+                      {{ sector.name }}
                     </p>
-                    <p v-if="department.description" class="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
-                      {{ department.description }}
+                    <p v-if="sector.description" class="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
+                      {{ sector.description }}
                     </p>
                   </div>
                 </div>
@@ -606,28 +606,28 @@ const goToServices = (departmentId: string) => {
               <!-- Code -->
               <td class="px-4 py-3">
                 <code class="px-2 py-1 text-xs font-mono bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
-                  {{ department.code }}
+                  {{ sector.code }}
                 </code>
               </td>
 
               <!-- Responsable -->
               <td class="px-4 py-3">
-                <div v-if="department.head" class="flex items-center gap-2">
+                <div v-if="sector.head" class="flex items-center gap-2">
                   <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center overflow-hidden">
                     <img
-                      v-if="department.head.photo"
-                      :src="department.head.photo"
-                      :alt="department.head.name"
+                      v-if="sector.head.photo"
+                      :src="sector.head.photo"
+                      :alt="sector.head.name"
                       class="w-full h-full object-cover"
                     />
                     <font-awesome-icon v-else :icon="['fas', 'user']" class="w-4 h-4 text-gray-400" />
                   </div>
                   <div>
                     <p class="text-sm font-medium text-gray-900 dark:text-white">
-                      {{ department.head.name }}
+                      {{ sector.head.name }}
                     </p>
-                    <p v-if="department.head.title" class="text-xs text-gray-500 dark:text-gray-400">
-                      {{ department.head.title }}
+                    <p v-if="sector.head.title" class="text-xs text-gray-500 dark:text-gray-400">
+                      {{ sector.head.title }}
                     </p>
                   </div>
                 </div>
@@ -640,10 +640,10 @@ const goToServices = (departmentId: string) => {
               <td class="px-4 py-3 text-center">
                 <button
                   class="inline-flex items-center gap-1 px-2 py-1 text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors"
-                  @click="goToServices(department.id)"
+                  @click="goToServices(sector.id)"
                 >
                   <font-awesome-icon :icon="['fas', 'sitemap']" class="w-3 h-3" />
-                  {{ department.services_count }}
+                  {{ sector.services_count }}
                 </button>
               </td>
 
@@ -651,20 +651,20 @@ const goToServices = (departmentId: string) => {
               <td class="px-4 py-3 text-center">
                 <button
                   class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full transition-colors"
-                  :class="department.active
+                  :class="sector.active
                     ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
                     : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'"
-                  @click="toggleDepartmentActive(department)"
+                  @click="toggleSectorActive(sector)"
                 >
-                  <font-awesome-icon :icon="['fas', department.active ? 'check-circle' : 'pause-circle']" class="w-3 h-3" />
-                  {{ department.active ? 'Actif' : 'Inactif' }}
+                  <font-awesome-icon :icon="['fas', sector.active ? 'check-circle' : 'pause-circle']" class="w-3 h-3" />
+                  {{ sector.active ? 'Actif' : 'Inactif' }}
                 </button>
               </td>
 
               <!-- Ordre -->
               <td class="px-4 py-3 text-center">
                 <span class="text-sm text-gray-500 dark:text-gray-400">
-                  {{ department.display_order }}
+                  {{ sector.display_order }}
                 </span>
               </td>
 
@@ -674,14 +674,14 @@ const goToServices = (departmentId: string) => {
                   <button
                     class="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                     title="Modifier"
-                    @click="openEditModal(department)"
+                    @click="openEditModal(sector)"
                   >
                     <font-awesome-icon :icon="['fas', 'edit']" class="w-4 h-4" />
                   </button>
                   <button
                     class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                     title="Supprimer"
-                    @click="openDeleteModal(department)"
+                    @click="openDeleteModal(sector)"
                   >
                     <font-awesome-icon :icon="['fas', 'trash']" class="w-4 h-4" />
                   </button>
@@ -694,11 +694,11 @@ const goToServices = (departmentId: string) => {
 
       <!-- Empty state -->
       <div
-        v-if="filteredDepartments.length === 0"
+        v-if="filteredSectors.length === 0"
         class="py-12 text-center"
       >
         <font-awesome-icon :icon="['fas', 'building']" class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-4" />
-        <p class="text-gray-500 dark:text-gray-400">Aucun département trouvé</p>
+        <p class="text-gray-500 dark:text-gray-400">Aucun secteur trouvé</p>
         <button
           v-if="searchQuery || filterActive !== undefined"
           class="mt-2 text-sm text-brand-red-600 dark:text-brand-red-400 hover:underline"
@@ -719,7 +719,7 @@ const goToServices = (departmentId: string) => {
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
           <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-              {{ editingDepartment ? 'Modifier le département' : 'Nouveau département' }}
+              {{ editingSector ? 'Modifier le secteur' : 'Nouveau secteur' }}
             </h2>
             <button
               class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg"
@@ -736,7 +736,7 @@ const goToServices = (departmentId: string) => {
                 Nom *
               </label>
               <input
-                v-model="newDepartment.name"
+                v-model="newSector.name"
                 type="text"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent"
                 placeholder="Ex: Culture"
@@ -750,13 +750,13 @@ const goToServices = (departmentId: string) => {
                 Code *
               </label>
               <input
-                v-model="newDepartment.code"
+                v-model="newSector.code"
                 type="text"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent font-mono"
                 placeholder="Ex: DEP-CUL"
               />
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Code unique pour identifier le département
+                Code unique pour identifier le secteur
               </p>
             </div>
 
@@ -766,10 +766,10 @@ const goToServices = (departmentId: string) => {
                 Description
               </label>
               <textarea
-                v-model="newDepartment.description"
+                v-model="newSector.description"
                 rows="3"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent"
-                placeholder="Description courte du département..."
+                placeholder="Description courte du secteur..."
               />
             </div>
 
@@ -779,10 +779,10 @@ const goToServices = (departmentId: string) => {
                 Mission
               </label>
               <textarea
-                v-model="newDepartment.mission"
+                v-model="newSector.mission"
                 rows="4"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent"
-                placeholder="Mission et objectifs du département..."
+                placeholder="Mission et objectifs du secteur..."
               />
             </div>
 
@@ -792,7 +792,7 @@ const goToServices = (departmentId: string) => {
                 Responsable
               </label>
               <select
-                v-model="newDepartment.head_id"
+                v-model="newSector.head_id"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent"
               >
                 <option value="">Aucun responsable</option>
@@ -809,12 +809,12 @@ const goToServices = (departmentId: string) => {
             <div class="flex items-center gap-3">
               <input
                 id="active"
-                v-model="newDepartment.active"
+                v-model="newSector.active"
                 type="checkbox"
                 class="w-4 h-4 text-brand-red-600 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-brand-red-500"
               />
               <label for="active" class="text-sm text-gray-700 dark:text-gray-300">
-                Département actif
+                Secteur actif
               </label>
             </div>
           </div>
@@ -829,11 +829,11 @@ const goToServices = (departmentId: string) => {
             </button>
             <button
               class="px-4 py-2 text-sm font-medium text-white bg-brand-red-600 hover:bg-brand-red-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
-              :disabled="!newDepartment.name || !newDepartment.code || isSaving"
-              @click="saveDepartment"
+              :disabled="!newSector.name || !newSector.code || isSaving"
+              @click="saveSector"
             >
               <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="w-4 h-4 animate-spin" />
-              {{ editingDepartment ? 'Enregistrer' : 'Créer' }}
+              {{ editingSector ? 'Enregistrer' : 'Créer' }}
             </button>
           </div>
         </div>
@@ -843,7 +843,7 @@ const goToServices = (departmentId: string) => {
     <!-- Modal Suppression -->
     <Teleport to="body">
       <div
-        v-if="showDeleteModal && deletingDepartment"
+        v-if="showDeleteModal && deletingSector"
         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
         @click.self="closeModals"
       >
@@ -853,25 +853,25 @@ const goToServices = (departmentId: string) => {
               <font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="w-6 h-6 text-red-600 dark:text-red-400" />
             </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              Supprimer le département
+              Supprimer le secteur
             </h3>
             <p class="text-gray-500 dark:text-gray-400 mb-4">
-              Êtes-vous sûr de vouloir supprimer <strong class="text-gray-900 dark:text-white">{{ deletingDepartment.name }}</strong> ?
+              Êtes-vous sûr de vouloir supprimer <strong class="text-gray-900 dark:text-white">{{ deletingSector.name }}</strong> ?
             </p>
 
             <!-- Avertissement si utilisé -->
             <div
-              v-if="departmentUsage && !departmentUsage.can_delete"
+              v-if="sectorUsage && !sectorUsage.can_delete"
               class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-4 text-left"
             >
               <div class="flex items-start gap-2">
                 <font-awesome-icon :icon="['fas', 'warning']" class="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5" />
                 <div class="text-sm">
                   <p class="font-medium text-amber-800 dark:text-amber-200">
-                    Ce département ne peut pas être supprimé
+                    Ce secteur ne peut pas être supprimé
                   </p>
                   <p class="text-amber-700 dark:text-amber-300 mt-1">
-                    Il contient {{ departmentUsage.services_count }} service(s).
+                    Il contient {{ sectorUsage.services_count }} service(s).
                     Veuillez d'abord supprimer ou réassigner les services.
                   </p>
                 </div>
@@ -880,19 +880,19 @@ const goToServices = (departmentId: string) => {
 
             <!-- Info d'utilisation -->
             <div
-              v-else-if="departmentUsage && departmentUsage.services_count > 0"
+              v-else-if="sectorUsage && sectorUsage.services_count > 0"
               class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4 text-left"
             >
               <div class="flex items-start gap-2">
                 <font-awesome-icon :icon="['fas', 'info-circle']" class="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5" />
                 <div class="text-sm">
                   <p class="font-medium text-blue-800 dark:text-blue-200">
-                    Utilisation du département
+                    Utilisation du secteur
                   </p>
                   <ul class="text-blue-700 dark:text-blue-300 mt-1 space-y-1">
-                    <li>{{ departmentUsage.services_count }} service(s)</li>
-                    <li>{{ departmentUsage.programs_count }} programme(s)</li>
-                    <li>{{ departmentUsage.projects_count }} projet(s)</li>
+                    <li>{{ sectorUsage.services_count }} service(s)</li>
+                    <li>{{ sectorUsage.programs_count }} programme(s)</li>
+                    <li>{{ sectorUsage.projects_count }} projet(s)</li>
                   </ul>
                 </div>
               </div>
@@ -908,8 +908,8 @@ const goToServices = (departmentId: string) => {
             </button>
             <button
               class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              :disabled="(departmentUsage && !departmentUsage.can_delete) || isSaving"
-              @click="deleteDepartment"
+              :disabled="(sectorUsage && !sectorUsage.can_delete) || isSaving"
+              @click="deleteSector"
             >
               <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="w-4 h-4 animate-spin mr-1" />
               Supprimer

@@ -19,7 +19,7 @@ export interface ProgramPublic {
   description: string | null
   teaching_methods: string | null
   cover_image_external_id: string | null
-  department_external_id: string | null
+  sector_external_id: string | null
   type: ProgramType
   duration_months: number | null
   credits: number | null

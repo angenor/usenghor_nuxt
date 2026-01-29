@@ -59,7 +59,7 @@ const form = reactive({
   author_id: '',
   tags: [] as string[],
   campus_id: '',
-  department_id: '',
+  sector_id: '',
   service_id: '',
   event_id: '',
   project_id: '',
@@ -116,8 +116,8 @@ watch(() => form.title, (newTitle) => {
 
 // Filtered services based on department
 const filteredServices = computed(() => {
-  if (!form.department_id) return []
-  return allServices.value.filter(s => s.department_id === form.department_id)
+  if (!form.sector_id) return []
+  return allServices.value.filter(s => s.sector_id === form.sector_id)
 })
 
 // Selected tags objects
@@ -202,7 +202,7 @@ async function submitForm() {
       // Filtrer les IDs mock - seuls les vrais UUIDs sont envoyés
       cover_image_external_id: toUUIDOrNull(form.cover_image_external_id),
       campus_external_id: toUUIDOrNull(form.campus_id),
-      department_external_id: toUUIDOrNull(form.department_id),
+      sector_external_id: toUUIDOrNull(form.sector_id),
       service_external_id: toUUIDOrNull(form.service_id),
       event_external_id: toUUIDOrNull(form.event_id),
       project_external_id: toUUIDOrNull(form.project_id),
@@ -472,12 +472,12 @@ async function createTag() {
 
           <!-- Département -->
           <div>
-            <label for="department_id" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label for="sector_id" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Département associé
             </label>
             <select
-              id="department_id"
-              v-model="form.department_id"
+              id="sector_id"
+              v-model="form.sector_id"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             >
               <option value="">Aucun</option>
@@ -495,7 +495,7 @@ async function createTag() {
             <select
               id="service_id"
               v-model="form.service_id"
-              :disabled="!form.department_id"
+              :disabled="!form.sector_id"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             >
               <option value="">Aucun</option>

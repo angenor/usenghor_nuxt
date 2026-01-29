@@ -498,7 +498,7 @@ export interface EventRead {
   cover_image_external_id: string | null
   country_external_id: string | null
   campus_external_id: string | null
-  department_external_id: string | null
+  sector_external_id: string | null
   project_external_id: string | null
   organizer_external_id: string | null
   album_external_id: string | null
@@ -538,7 +538,7 @@ export interface EventCreatePayload {
   cover_image_external_id?: string | null
   country_external_id?: string | null
   campus_external_id?: string | null
-  department_external_id?: string | null
+  sector_external_id?: string | null
   project_external_id?: string | null
   organizer_external_id?: string | null
   album_external_id?: string | null
@@ -567,7 +567,7 @@ export interface EventUpdatePayload {
   cover_image_external_id?: string | null
   country_external_id?: string | null
   campus_external_id?: string | null
-  department_external_id?: string | null
+  sector_external_id?: string | null
   project_external_id?: string | null
   organizer_external_id?: string | null
   album_external_id?: string | null
@@ -648,7 +648,7 @@ export interface ProgramRead {
   description: string | null
   teaching_methods: string | null
   cover_image_external_id: string | null
-  department_external_id: string | null
+  sector_external_id: string | null
   coordinator_external_id: string | null
   type: ProgramType
   duration_months: number | null
@@ -678,7 +678,7 @@ export interface ProgramCreatePayload {
   slug: string
   description?: string | null
   teaching_methods?: string | null
-  department_external_id?: string | null
+  sector_external_id?: string | null
   type: ProgramType
   duration_months?: number | null
   credits?: number | null
@@ -695,7 +695,7 @@ export interface ProgramUpdatePayload {
   slug?: string
   description?: string | null
   teaching_methods?: string | null
-  department_external_id?: string | null
+  sector_external_id?: string | null
   type?: ProgramType
   duration_months?: number | null
   credits?: number | null
@@ -960,7 +960,7 @@ export interface ProjectRead {
   summary: string | null
   description: string | null
   cover_image_external_id: string | null
-  department_external_id: string | null
+  sector_external_id: string | null
   manager_external_id: string | null
   album_external_id: string | null
   start_date: string | null
@@ -984,7 +984,7 @@ export interface ProjectCreatePayload {
   summary?: string | null
   description?: string | null
   cover_image_external_id?: string | null
-  department_external_id?: string | null
+  sector_external_id?: string | null
   manager_external_id?: string | null
   album_external_id?: string | null
   start_date?: string | null
@@ -1004,7 +1004,7 @@ export interface ProjectUpdatePayload {
   summary?: string | null
   description?: string | null
   cover_image_external_id?: string | null
-  department_external_id?: string | null
+  sector_external_id?: string | null
   manager_external_id?: string | null
   album_external_id?: string | null
   start_date?: string | null
@@ -1088,10 +1088,10 @@ export interface ProjectMediaRead {
 }
 
 // ============================================================================
-// Organization - Departments
+// Organization - Sectors
 // ============================================================================
 
-export interface DepartmentRead {
+export interface SectorRead {
   id: string
   code: string
   name: string
@@ -1113,7 +1113,7 @@ export interface ServiceRead {
   mission: string | null
   email: string | null
   phone: string | null
-  department_id: string | null
+  sector_id: string | null
   head_external_id: string | null
   album_external_id: string | null
   display_order: number
@@ -1122,11 +1122,11 @@ export interface ServiceRead {
   updated_at: string
 }
 
-export interface DepartmentWithServices extends DepartmentRead {
+export interface SectorWithServices extends SectorRead {
   services: ServiceRead[]
 }
 
-export interface DepartmentCreate {
+export interface SectorCreate {
   code: string
   name: string
   description?: string | null
@@ -1138,7 +1138,7 @@ export interface DepartmentCreate {
   active?: boolean
 }
 
-export interface DepartmentUpdate {
+export interface SectorUpdate {
   code?: string
   name?: string
   description?: string | null
@@ -1150,8 +1150,8 @@ export interface DepartmentUpdate {
   active?: boolean
 }
 
-export interface DepartmentReorder {
-  department_ids: string[]
+export interface SectorReorder {
+  sector_ids: string[]
 }
 
 // ============================================================================
@@ -1374,6 +1374,33 @@ export type ValueSectionKey =
   | 'governance.foundingTexts.description'
   | 'governance.donorCountries.title'
   | 'governance.donorCountries.description'
+  // Page À propos - Hero
+  | 'about.hero.title'
+  | 'about.hero.subtitle'
+  // Page À propos - Mission
+  | 'about.mission.title'
+  | 'about.mission.content'
+  | 'about.mission.cta.history'
+  | 'about.mission.cta.governance'
+  // Page À propos - Stats (libellés uniquement, valeurs dans chiffres-clés)
+  | 'about.stats.years.label'
+  | 'about.stats.countries.label'
+  | 'about.stats.alumni.label'
+  | 'about.stats.programs.label'
+  // Page À propos - Engagements
+  | 'about.engagements.title'
+  | 'about.engagements.excellence.title'
+  | 'about.engagements.excellence.text'
+  | 'about.engagements.ethics.title'
+  | 'about.engagements.ethics.text'
+  | 'about.engagements.inclusion.title'
+  | 'about.engagements.inclusion.text'
+  | 'about.engagements.innovation.title'
+  | 'about.engagements.innovation.text'
+  | 'about.engagements.solidarity.title'
+  | 'about.engagements.solidarity.text'
+  | 'about.charter.title'
+  | 'about.charter.download'
 
 export interface ValueSection {
   id: string
