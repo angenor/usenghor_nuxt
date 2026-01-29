@@ -4,9 +4,11 @@
  *
  * Récupère les données de référence (campus, secteurs, services, etc.)
  * depuis le backend pour les formulaires.
+ * Fallback vers les données mock si l'API n'est pas disponible.
  */
 
 import type { PaginatedResponse } from '~/types/api'
+import { mockUsers } from '@bank/mock-data/users-admin'
 
 // ============================================================================
 // Types
@@ -175,6 +177,7 @@ export function useReferenceData() {
 
   /**
    * Récupère la liste des utilisateurs (pour auteur).
+   * Fallback vers les données mock si l'API n'est pas disponible.
    */
   async function getUsers(forceRefresh = false): Promise<UserRef[]> {
     if (usersCache.value.length > 0 && !forceRefresh) {
@@ -201,8 +204,18 @@ export function useReferenceData() {
 
       return usersCache.value
     } catch (e) {
-      console.error('Erreur chargement utilisateurs:', e)
-      return []
+      console.warn('API utilisateurs non disponible, utilisation des données mock:', e)
+      // Fallback vers les données mock
+      usersCache.value = mockUsers
+        .filter(u => u.active)
+        .map(u => ({
+          id: u.id,
+          email: u.email,
+          last_name: u.last_name,
+          first_name: u.first_name,
+          full_name: `${u.first_name} ${u.last_name}`,
+        }))
+      return usersCache.value
     }
   }
 
