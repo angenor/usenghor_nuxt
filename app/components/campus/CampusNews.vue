@@ -1,13 +1,23 @@
 <script setup lang="ts">
+import type { NewsDisplay } from '~/types/news'
+
 interface Props {
   campusId: string
 }
 
 const props = defineProps<Props>()
 const { t, locale } = useI18n()
-const { getCampusNews } = useMockData()
+const localePath = useLocalePath()
+const { listPublishedNews } = usePublicNewsApi()
 
-const news = computed(() => getCampusNews(props.campusId))
+// Fetch news from API
+const { data: newsResponse, pending } = await useAsyncData(
+  `campus-news-${props.campusId}`,
+  () => listPublishedNews({ campus_id: props.campusId, limit: 20 }),
+  { server: true }
+)
+
+const news = computed(() => newsResponse.value?.items || [])
 
 // Featured article (first one)
 const featuredNews = computed(() => news.value[0] || null)
@@ -18,23 +28,19 @@ const sideNews = computed(() => news.value.slice(1, 4))
 // Remaining articles (5th and onwards) - displayed in two-column format
 const remainingNews = computed(() => news.value.slice(4))
 
-// Get localized title
-const getLocalizedTitle = (item: (typeof news.value)[0]) => {
-  if (!item) return ''
-  if (locale.value === 'en' && item.title_en) return item.title_en
-  if (locale.value === 'ar' && item.title_ar) return item.title_ar
-  return item.title_fr
+// Get article URL
+const getNewsUrl = (item: NewsDisplay) => {
+  return localePath(`/actualites/${item.slug}`)
 }
 
-// Get localized excerpt
-const getLocalizedExcerpt = (item: (typeof news.value)[0]) => {
-  if (!item) return ''
-  if (locale.value === 'en' && item.excerpt_en) return item.excerpt_en
-  return item.excerpt_fr
+// Get cover image URL
+const getCoverImage = (item: NewsDisplay) => {
+  return item.cover_image || `https://picsum.photos/seed/news-${item.id}/800/500`
 }
 
-// Format date
-const formatDate = (dateStr: string) => {
+// Format date with locale
+const formatDate = (dateStr: string | null | undefined) => {
+  if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleDateString(
     locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
@@ -53,7 +59,12 @@ const formatDate = (dateStr: string) => {
       </span>
     </h2>
 
-    <div v-if="news.length > 0">
+    <!-- Loading state -->
+    <div v-if="pending" class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-blue-500"></div>
+    </div>
+
+    <div v-else-if="news.length > 0">
       <!-- Section 1: Featured + Side articles -->
       <div class="flex flex-col lg:flex-row lg:space-x-8">
         <!-- Left: Featured article -->
@@ -62,8 +73,8 @@ const formatDate = (dateStr: string) => {
             <!-- Hero image -->
             <div class="overflow-hidden rounded-xl">
               <img
-                :src="featuredNews.image || 'https://picsum.photos/seed/default/800/500'"
-                :alt="getLocalizedTitle(featuredNews)"
+                :src="getCoverImage(featuredNews)"
+                :alt="featuredNews.title"
                 class="w-full h-64 md:h-80 object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
               >
@@ -78,26 +89,22 @@ const formatDate = (dateStr: string) => {
 
               <!-- Title -->
               <h3 class="text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 dark:text-white leading-tight">
-                <a
-                  v-if="featuredNews.url"
-                  :href="featuredNews.url"
+                <NuxtLink
+                  :to="getNewsUrl(featuredNews)"
                   class="hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200"
                 >
-                  {{ getLocalizedTitle(featuredNews) }}
-                </a>
-                <span v-else class="cursor-pointer hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200">
-                  {{ getLocalizedTitle(featuredNews) }}
-                </span>
+                  {{ featuredNews.title }}
+                </NuxtLink>
               </h3>
 
               <!-- Excerpt -->
-              <p class="mt-3 text-gray-600 dark:text-gray-400 text-base lg:text-lg leading-relaxed">
-                {{ getLocalizedExcerpt(featuredNews) }}
+              <p v-if="featuredNews.summary" class="mt-3 text-gray-600 dark:text-gray-400 text-base lg:text-lg leading-relaxed">
+                {{ featuredNews.summary }}
               </p>
 
               <!-- Date -->
               <div class="flex items-center gap-3 mt-4">
-                <span class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(featuredNews.date) }}</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(featuredNews.published_at) }}</span>
               </div>
             </div>
           </div>
@@ -116,8 +123,8 @@ const formatDate = (dateStr: string) => {
               <div class="md:w-2/5 lg:w-2/5 flex-shrink-0">
                 <div class="overflow-hidden rounded-lg">
                   <img
-                    :src="item.image || 'https://picsum.photos/seed/default/400/250'"
-                    :alt="getLocalizedTitle(item)"
+                    :src="getCoverImage(item)"
+                    :alt="item.title"
                     class="w-full h-40 md:h-32 object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
                   >
@@ -128,26 +135,22 @@ const formatDate = (dateStr: string) => {
               <div class="md:w-3/5 lg:w-3/5 flex flex-col justify-center">
                 <!-- Title -->
                 <h4 class="text-lg lg:text-xl font-bold text-gray-900 dark:text-white leading-tight">
-                  <a
-                    v-if="item.url"
-                    :href="item.url"
+                  <NuxtLink
+                    :to="getNewsUrl(item)"
                     class="hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200"
                   >
-                    {{ getLocalizedTitle(item) }}
-                  </a>
-                  <span v-else class="cursor-pointer hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200">
-                    {{ getLocalizedTitle(item) }}
-                  </span>
+                    {{ item.title }}
+                  </NuxtLink>
                 </h4>
 
                 <!-- Excerpt -->
-                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2">
-                  {{ getLocalizedExcerpt(item) }}
+                <p v-if="item.summary" class="mt-2 text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2">
+                  {{ item.summary }}
                 </p>
 
                 <!-- Date -->
                 <div class="flex items-center gap-2 mt-3">
-                  <span class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(item.date) }}</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(item.published_at) }}</span>
                 </div>
               </div>
             </article>
@@ -165,8 +168,8 @@ const formatDate = (dateStr: string) => {
           <!-- Image -->
           <div class="overflow-hidden rounded-xl">
             <img
-              :src="item.image || 'https://picsum.photos/seed/default/600/400'"
-              :alt="getLocalizedTitle(item)"
+              :src="getCoverImage(item)"
+              :alt="item.title"
               class="w-full h-48 md:h-56 object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
             >
@@ -174,33 +177,29 @@ const formatDate = (dateStr: string) => {
 
           <!-- Title -->
           <h4 class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white leading-tight mt-4">
-            <a
-              v-if="item.url"
-              :href="item.url"
+            <NuxtLink
+              :to="getNewsUrl(item)"
               class="hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200"
             >
-              {{ getLocalizedTitle(item) }}
-            </a>
-            <span v-else class="cursor-pointer hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200">
-              {{ getLocalizedTitle(item) }}
-            </span>
+              {{ item.title }}
+            </NuxtLink>
           </h4>
 
           <!-- Excerpt -->
-          <p class="mt-3 text-gray-600 dark:text-gray-400 text-base leading-relaxed line-clamp-3">
-            {{ getLocalizedExcerpt(item) }}
+          <p v-if="item.summary" class="mt-3 text-gray-600 dark:text-gray-400 text-base leading-relaxed line-clamp-3">
+            {{ item.summary }}
           </p>
 
           <!-- Date -->
           <div class="flex items-center gap-3 mt-4">
-            <span class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(item.date) }}</span>
+            <span class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(item.published_at) }}</span>
           </div>
         </article>
       </div>
     </div>
 
     <!-- Empty state -->
-    <div v-else class="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+    <div v-else-if="!pending" class="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
       <font-awesome-icon icon="fa-solid fa-newspaper" class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-4" />
       <p class="text-gray-500 dark:text-gray-400">{{ t('partners.campus.noNews') }}</p>
     </div>

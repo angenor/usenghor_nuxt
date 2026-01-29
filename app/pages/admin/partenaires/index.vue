@@ -22,6 +22,10 @@ const {
 const { apiFetch } = useApi()
 const { getMediaUrl, uploadMedia } = useMediaApi()
 
+// API pour les associations campus et projets
+const { getAllCampuses, addCampusPartner, removeCampusPartner } = useCampusApi()
+const { listProjects, addProjectPartner, removeProjectPartner } = useProjectsApi()
+
 // === STATE ===
 const searchQuery = ref('')
 const filterType = ref<PartnerType | ''>('')
@@ -57,8 +61,54 @@ const newPartner = ref({
   email: '',
   phone: '',
   display_order: 0,
-  active: true
+  active: true,
+  // Champs pour les associations (many-to-many)
+  selected_campus_ids: [] as string[],
+  selected_project_ids: [] as string[],
+  // IDs déjà associés (pour éviter les doublons)
+  existing_campus_ids: [] as string[],
+  existing_project_ids: [] as string[],
 })
+
+// Campus et projets pour les associations conditionnelles
+interface CampusOption {
+  id: string
+  name: string
+  code: string
+}
+interface ProjectOption {
+  id: string
+  title: string
+}
+const campuses = ref<CampusOption[]>([])
+const projects = ref<ProjectOption[]>([])
+
+async function loadCampuses() {
+  try {
+    const response = await getAllCampuses({ limit: 100 })
+    campuses.value = response.items.map(c => ({
+      id: c.id,
+      name: c.name,
+      code: c.code,
+    })).sort((a, b) => a.name.localeCompare(b.name, 'fr'))
+  }
+  catch (err) {
+    console.error('Erreur chargement des campus:', err)
+  }
+}
+
+async function loadProjects() {
+  try {
+    const response = await listProjects({ limit: 100 })
+    projects.value = response.items.map(p => ({
+      id: p.id,
+      title: p.title,
+    })).sort((a, b) => a.title.localeCompare(b.title, 'fr'))
+  }
+  catch (err) {
+    console.error('Erreur chargement des projets:', err)
+  }
+}
 
 // === CHARGEMENT DES DONNÉES ===
 async function loadPartners() {
@@ -141,7 +191,7 @@ function enrichPartnersWithCountries() {
 
 // Chargement initial
 onMounted(async () => {
-  await Promise.all([loadPartners(), loadCountries()])
+  await Promise.all([loadPartners(), loadCountries(), loadCampuses(), loadProjects()])
   enrichPartnersWithCountries()
 })
 
@@ -229,13 +279,23 @@ const openAddModal = () => {
     email: '',
     phone: '',
     display_order: maxOrder + 1,
-    active: true
+    active: true,
+    selected_campus_ids: [],
+    selected_project_ids: [],
+    existing_campus_ids: [],
+    existing_project_ids: [],
   }
   showAddModal.value = true
 }
 
-const openEditModal = (partner: PartnerDisplay) => {
+const openEditModal = async (partner: PartnerDisplay) => {
   editingPartner.value = partner
+
+  // Charger les associations existantes
+  const associations = await getPartnerAssociations(partner.id)
+  const existingCampusIds = associations.campuses.map(c => c.id)
+  const existingProjectIds = associations.projects.map(p => p.id)
+
   newPartner.value = {
     name: partner.name,
     description: partner.description || '',
@@ -246,7 +306,11 @@ const openEditModal = (partner: PartnerDisplay) => {
     email: partner.email || '',
     phone: partner.phone || '',
     display_order: partner.display_order,
-    active: partner.active
+    active: partner.active,
+    selected_campus_ids: [...existingCampusIds],
+    selected_project_ids: [...existingProjectIds],
+    existing_campus_ids: existingCampusIds,
+    existing_project_ids: existingProjectIds,
   }
   showEditModal.value = true
 }
@@ -294,7 +358,33 @@ const handleAddPartner = async () => {
       active: newPartner.value.active,
     }
 
-    await createPartner(payload)
+    const result = await createPartner(payload)
+    const partnerId = result.id
+
+    // Créer les associations campus (pour partenaires académiques)
+    if (newPartner.value.type === 'program_partner' && newPartner.value.selected_campus_ids.length > 0) {
+      for (const campusId of newPartner.value.selected_campus_ids) {
+        try {
+          await addCampusPartner(campusId, { partner_external_id: partnerId })
+        }
+        catch (err) {
+          console.error('Erreur association campus:', err)
+        }
+      }
+    }
+
+    // Créer les associations projet (pour partenaires de projet)
+    if (newPartner.value.type === 'project_partner' && newPartner.value.selected_project_ids.length > 0) {
+      for (const projectId of newPartner.value.selected_project_ids) {
+        try {
+          await addProjectPartner(projectId, { partner_external_id: partnerId })
+        }
+        catch (err) {
+          console.error('Erreur association projet:', err)
+        }
+      }
+    }
+
     closeModals()
     await loadPartners()
     enrichPartnersWithCountries()
@@ -329,6 +419,66 @@ const handleEditPartner = async () => {
     }
 
     await updatePartner(editingPartner.value.id, payload)
+    const partnerId = editingPartner.value.id
+
+    // Gérer les associations campus (pour partenaires académiques)
+    if (newPartner.value.type === 'program_partner') {
+      // Ajouter les nouvelles associations
+      const newCampusIds = newPartner.value.selected_campus_ids.filter(
+        id => !newPartner.value.existing_campus_ids.includes(id)
+      )
+      for (const campusId of newCampusIds) {
+        try {
+          await addCampusPartner(campusId, { partner_external_id: partnerId })
+        }
+        catch (err) {
+          console.error('Erreur ajout association campus:', err)
+        }
+      }
+
+      // Supprimer les associations décochées
+      const removedCampusIds = newPartner.value.existing_campus_ids.filter(
+        id => !newPartner.value.selected_campus_ids.includes(id)
+      )
+      for (const campusId of removedCampusIds) {
+        try {
+          await removeCampusPartner(campusId, partnerId)
+        }
+        catch (err) {
+          console.error('Erreur suppression association campus:', err)
+        }
+      }
+    }
+
+    // Gérer les associations projet (pour partenaires de projet)
+    if (newPartner.value.type === 'project_partner') {
+      // Ajouter les nouvelles associations
+      const newProjectIds = newPartner.value.selected_project_ids.filter(
+        id => !newPartner.value.existing_project_ids.includes(id)
+      )
+      for (const projectId of newProjectIds) {
+        try {
+          await addProjectPartner(projectId, { partner_external_id: partnerId })
+        }
+        catch (err) {
+          console.error('Erreur ajout association projet:', err)
+        }
+      }
+
+      // Supprimer les associations décochées
+      const removedProjectIds = newPartner.value.existing_project_ids.filter(
+        id => !newPartner.value.selected_project_ids.includes(id)
+      )
+      for (const projectId of removedProjectIds) {
+        try {
+          await removeProjectPartner(projectId, partnerId)
+        }
+        catch (err) {
+          console.error('Erreur suppression association projet:', err)
+        }
+      }
+    }
+
     closeModals()
     await loadPartners()
     enrichPartnersWithCountries()
@@ -966,6 +1116,65 @@ async function handleLogoUpload(event: Event) {
                     {{ pt.label }}
                   </option>
                 </select>
+              </div>
+
+              <!-- Campus associés (pour partenaires académiques) -->
+              <div v-if="newPartner.type === 'program_partner'">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Campus associés
+                  <span class="text-xs text-gray-500 font-normal">(optionnel, plusieurs possibles)</span>
+                </label>
+                <div class="max-h-40 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-lg p-2 space-y-1 bg-white dark:bg-gray-700">
+                  <label
+                    v-for="campus in campuses"
+                    :key="campus.id"
+                    class="flex items-center gap-2 p-1.5 rounded hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="campus.id"
+                      v-model="newPartner.selected_campus_ids"
+                      class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600"
+                    />
+                    <span class="text-sm text-gray-900 dark:text-white">{{ campus.name }}</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">({{ campus.code }})</span>
+                  </label>
+                  <p v-if="campuses.length === 0" class="text-xs text-gray-500 dark:text-gray-400 text-center py-2">
+                    Aucun campus disponible
+                  </p>
+                </div>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  {{ newPartner.selected_campus_ids.length }} campus sélectionné(s)
+                </p>
+              </div>
+
+              <!-- Projets associés (pour partenaires de projet) -->
+              <div v-if="newPartner.type === 'project_partner'">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Projets associés
+                  <span class="text-xs text-gray-500 font-normal">(optionnel, plusieurs possibles)</span>
+                </label>
+                <div class="max-h-40 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-lg p-2 space-y-1 bg-white dark:bg-gray-700">
+                  <label
+                    v-for="project in projects"
+                    :key="project.id"
+                    class="flex items-center gap-2 p-1.5 rounded hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="project.id"
+                      v-model="newPartner.selected_project_ids"
+                      class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 dark:border-gray-500 dark:bg-gray-600"
+                    />
+                    <span class="text-sm text-gray-900 dark:text-white">{{ project.title }}</span>
+                  </label>
+                  <p v-if="projects.length === 0" class="text-xs text-gray-500 dark:text-gray-400 text-center py-2">
+                    Aucun projet disponible
+                  </p>
+                </div>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  {{ newPartner.selected_project_ids.length }} projet(s) sélectionné(s)
+                </p>
               </div>
 
               <!-- Description -->

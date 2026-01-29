@@ -17,6 +17,19 @@ export default {
         sans: ['Inter Variable', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
       },
       colors: {
+        // Primary color (alias for brand-blue)
+        'primary': {
+          50: '#eef2ff',
+          100: '#dce6ff',
+          200: '#baccff',
+          300: '#8aabff',
+          400: '#5478e6',
+          500: '#2b4bbf',
+          600: '#233da0',
+          700: '#1c3080',
+          800: '#152460',
+          900: '#0e1840'
+        },
         'brand-blue': {
           50: '#eef2ff',
           100: '#dce6ff',

@@ -236,18 +236,33 @@ export function usePartnersApi() {
   }
 
   /**
-   * Récupère les associations d'un partenaire.
-   * Note: Pour l'instant retourne des valeurs vides car le backend
-   * n'a pas encore d'endpoint dédié pour les associations.
+   * Récupère les associations d'un partenaire (campus et projets).
    */
-  async function getPartnerAssociations(_id: string): Promise<PartnerAssociations> {
-    // TODO: Implémenter quand le backend aura un endpoint pour les associations
-    return {
-      campuses: [],
-      projects: [],
-      events: [],
-      total: 0,
-      can_delete: true,
+  async function getPartnerAssociations(id: string): Promise<PartnerAssociations> {
+    try {
+      const response = await apiFetch<{
+        campuses: Array<{ id: string, name: string, code: string }>
+        projects: Array<{ id: string, title: string, role: string | null }>
+        campuses_count: number
+        projects_count: number
+      }>(`/api/admin/partners/${id}/associations`)
+
+      return {
+        campuses: response.campuses,
+        projects: response.projects.map(p => ({ id: p.id, title: p.title })),
+        events: [], // Pas encore implémenté
+        total: response.campuses_count + response.projects_count,
+        can_delete: response.campuses_count + response.projects_count === 0,
+      }
+    }
+    catch {
+      return {
+        campuses: [],
+        projects: [],
+        events: [],
+        total: 0,
+        can_delete: true,
+      }
     }
   }
 

@@ -1,13 +1,23 @@
 <script setup lang="ts">
+import type { EventPublic } from '~/composables/usePublicEventsApi'
+
 interface Props {
   campusId: string
 }
 
 const props = defineProps<Props>()
 const { t, locale } = useI18n()
-const { getCampusEvents } = useMockData()
+const localePath = useLocalePath()
+const { listPublishedEvents } = usePublicEventsApi()
 
-const events = computed(() => getCampusEvents(props.campusId))
+// Fetch events from API
+const { data: eventsResponse, pending } = await useAsyncData(
+  `campus-events-${props.campusId}`,
+  () => listPublishedEvents({ campus_id: props.campusId, limit: 20 }),
+  { server: true }
+)
+
+const events = computed(() => eventsResponse.value?.items || [])
 
 // Featured events (first 4) - for the trending section
 const featuredEvents = computed(() => events.value.slice(0, 4))
@@ -18,23 +28,28 @@ const latestEvents = computed(() => events.value.slice(4, 8))
 // Next highlighted event (9th if exists)
 const highlightedEvent = computed(() => events.value[8] || null)
 
-// Get localized title
-const getLocalizedTitle = (item: (typeof events.value)[0]) => {
-  if (!item) return ''
-  if (locale.value === 'en' && item.title_en) return item.title_en
-  if (locale.value === 'ar' && item.title_ar) return item.title_ar
-  return item.title_fr
+// Get event URL
+const getEventUrl = (event: EventPublic) => {
+  return localePath(`/evenements/${event.slug}`)
 }
 
-// Get localized location
-const getLocalizedLocation = (item: (typeof events.value)[0]) => {
-  if (!item) return ''
-  if (locale.value === 'en' && item.location_en) return item.location_en
-  return item.location_fr
+// Get cover image URL
+const getCoverImage = (event: EventPublic) => {
+  return event.cover_image || `https://picsum.photos/seed/event-${event.id}/600/400`
+}
+
+// Get location string
+const getLocation = (event: EventPublic) => {
+  const parts = []
+  if (event.venue) parts.push(event.venue)
+  if (event.city) parts.push(event.city)
+  if (event.is_online) parts.push(t('partners.campus.events.online'))
+  return parts.join(', ') || t('partners.campus.events.locationTBA')
 }
 
 // Format date
-const formatDate = (dateStr: string) => {
+const formatDate = (dateStr: string | null | undefined) => {
+  if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleDateString(
     locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
@@ -42,17 +57,27 @@ const formatDate = (dateStr: string) => {
   )
 }
 
-// Event type colors
+// Event type colors - mapping API types to colors
 const typeColors: Record<string, string> = {
   conference: 'bg-red-600',
-  atelier: 'bg-indigo-600',
-  ceremonie: 'bg-brand-blue-600',
-  autre: 'bg-gray-600'
+  workshop: 'bg-indigo-600',
+  ceremony: 'bg-brand-blue-600',
+  seminar: 'bg-purple-600',
+  symposium: 'bg-green-600',
+  other: 'bg-gray-600'
 }
 
 // Get type label
 const getTypeLabel = (type: string) => {
-  return t(`partners.campus.events.types.${type}`)
+  const typeMap: Record<string, string> = {
+    conference: 'conference',
+    workshop: 'atelier',
+    ceremony: 'ceremonie',
+    seminar: 'seminaire',
+    symposium: 'colloque',
+    other: 'autre'
+  }
+  return t(`partners.campus.events.types.${typeMap[type] || 'autre'}`)
 }
 </script>
 
@@ -66,7 +91,12 @@ const getTypeLabel = (type: string) => {
       </span>
     </h2>
 
-    <div v-if="events.length > 0">
+    <!-- Loading state -->
+    <div v-if="pending" class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-blue-500"></div>
+    </div>
+
+    <div v-else-if="events.length > 0">
       <!-- Section 1: Trending/Featured Events (4 cards with hover effect) -->
       <div v-if="featuredEvents.length > 0" class="mb-10">
         <h3 class="border-b-2 border-brand-blue-600 mb-6">
@@ -81,14 +111,14 @@ const getTypeLabel = (type: string) => {
             :key="event.id"
             class="w-full md:w-1/2 lg:w-1/4 mb-4 lg:mb-0"
           >
-            <a
-              :href="event.url || '#'"
+            <NuxtLink
+              :to="getEventUrl(event)"
               class="h-72 md:h-96 block group relative md:mx-2 overflow-hidden rounded-xl"
             >
               <!-- Background Image -->
               <img
-                :src="event.image || 'https://picsum.photos/seed/default-event/600/400'"
-                :alt="getLocalizedTitle(event)"
+                :src="getCoverImage(event)"
+                :alt="event.title"
                 class="absolute z-0 object-cover w-full h-72 md:h-96 transform transition-transform duration-500 group-hover:scale-110"
                 loading="lazy"
               >
@@ -102,33 +132,33 @@ const getTypeLabel = (type: string) => {
                     <!-- Event Type Badge -->
                     <span
                       class="inline-block px-2 py-1 text-xs font-semibold text-white rounded mb-3"
-                      :class="typeColors[event.type]"
+                      :class="typeColors[event.type] || 'bg-gray-600'"
                     >
                       {{ getTypeLabel(event.type) }}
                     </span>
                     <!-- Title -->
                     <h4 class="font-bold text-white leading-tight transition duration-300 text-lg md:text-xl pb-4 group-hover:underline">
-                      {{ getLocalizedTitle(event) }}
+                      {{ event.title }}
                     </h4>
                   </div>
                 </div>
                 <div class="h-1/2">
                   <!-- Description (hidden, shown on hover) -->
-                  <p class="text-white text-sm pb-3 opacity-0 transition duration-300 group-hover:opacity-100 line-clamp-3">
-                    {{ event.description_fr }}
+                  <p v-if="event.description" class="text-white text-sm pb-3 opacity-0 transition duration-300 group-hover:opacity-100 line-clamp-3">
+                    {{ event.description }}
                   </p>
                   <!-- Date & Location -->
                   <div class="text-gray-200 text-sm opacity-0 transition duration-300 group-hover:opacity-100 flex items-center gap-2 mb-3">
                     <font-awesome-icon icon="fa-solid fa-calendar" class="w-3 h-3" />
-                    <span>{{ formatDate(event.date) }}</span>
+                    <span>{{ formatDate(event.start_date) }}</span>
                   </div>
                   <div class="text-gray-200 text-sm opacity-0 transition duration-300 group-hover:opacity-100 flex items-center gap-2">
                     <font-awesome-icon icon="fa-solid fa-location-dot" class="w-3 h-3" />
-                    <span>{{ getLocalizedLocation(event) }}</span>
+                    <span>{{ getLocation(event) }}</span>
                   </div>
                 </div>
               </div>
-            </a>
+            </NuxtLink>
           </div>
         </div>
       </div>
@@ -155,8 +185,8 @@ const getTypeLabel = (type: string) => {
                 <div class="md:mx-2">
                   <div class="overflow-hidden rounded-lg">
                     <img
-                      :src="event.image || 'https://picsum.photos/seed/default-event/600/400'"
-                      :alt="getLocalizedTitle(event)"
+                      :src="getCoverImage(event)"
+                      :alt="event.title"
                       class="w-full h-40 md:h-32 object-cover transition-transform duration-500 hover:scale-105"
                       loading="lazy"
                     >
@@ -170,29 +200,29 @@ const getTypeLabel = (type: string) => {
                   <!-- Type Badge -->
                   <span
                     class="inline-block px-2 py-0.5 text-xs font-semibold text-white rounded mb-2"
-                    :class="typeColors[event.type]"
+                    :class="typeColors[event.type] || 'bg-gray-600'"
                   >
                     {{ getTypeLabel(event.type) }}
                   </span>
                   <!-- Title -->
                   <h4 class="text-gray-900 dark:text-white font-bold text-xl md:text-2xl pb-2 leading-tight">
-                    <a href="#" class="hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200">
-                      {{ getLocalizedTitle(event) }}
-                    </a>
+                    <NuxtLink :to="getEventUrl(event)" class="hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200">
+                      {{ event.title }}
+                    </NuxtLink>
                   </h4>
                   <!-- Description -->
-                  <p class="text-gray-600 dark:text-gray-400 pb-2 line-clamp-2">
-                    {{ event.description_fr }}
+                  <p v-if="event.description" class="text-gray-600 dark:text-gray-400 pb-2 line-clamp-2">
+                    {{ event.description }}
                   </p>
                   <!-- Meta info -->
                   <div class="text-gray-500 dark:text-gray-400 py-1 text-sm flex flex-wrap gap-4">
                     <span class="flex items-center gap-1">
                       <font-awesome-icon icon="fa-solid fa-calendar" class="w-3 h-3" />
-                      {{ formatDate(event.date) }}
+                      {{ formatDate(event.start_date) }}
                     </span>
                     <span class="flex items-center gap-1">
                       <font-awesome-icon icon="fa-solid fa-location-dot" class="w-3 h-3" />
-                      {{ getLocalizedLocation(event) }}
+                      {{ getLocation(event) }}
                     </span>
                   </div>
                 </div>
@@ -219,11 +249,11 @@ const getTypeLabel = (type: string) => {
             </h3>
 
             <!-- Event Card -->
-            <div class="group">
+            <NuxtLink :to="getEventUrl(highlightedEvent)" class="group block">
               <div class="overflow-hidden rounded-xl">
                 <img
-                  :src="highlightedEvent.image || 'https://picsum.photos/seed/default-event/600/400'"
-                  :alt="getLocalizedTitle(highlightedEvent)"
+                  :src="getCoverImage(highlightedEvent)"
+                  :alt="highlightedEvent.title"
                   class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                 >
@@ -232,42 +262,40 @@ const getTypeLabel = (type: string) => {
               <!-- Type Badge -->
               <span
                 class="inline-block px-2 py-1 text-xs font-semibold text-white rounded mt-4"
-                :class="typeColors[highlightedEvent.type]"
+                :class="typeColors[highlightedEvent.type] || 'bg-gray-600'"
               >
                 {{ getTypeLabel(highlightedEvent.type) }}
               </span>
 
               <!-- Title -->
-              <h4 class="text-gray-900 dark:text-white font-bold text-xl md:text-2xl pb-3 leading-tight mt-2">
-                <a href="#" class="hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200">
-                  {{ getLocalizedTitle(highlightedEvent) }}
-                </a>
+              <h4 class="text-gray-900 dark:text-white font-bold text-xl md:text-2xl pb-3 leading-tight mt-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors duration-200">
+                {{ highlightedEvent.title }}
               </h4>
 
               <!-- Description -->
-              <p class="text-gray-600 dark:text-gray-400 pb-3 line-clamp-3">
-                {{ highlightedEvent.description_fr }}
+              <p v-if="highlightedEvent.description" class="text-gray-600 dark:text-gray-400 pb-3 line-clamp-3">
+                {{ highlightedEvent.description }}
               </p>
 
               <!-- Meta info -->
               <div class="text-gray-500 dark:text-gray-400 text-sm space-y-1">
                 <div class="flex items-center gap-2">
                   <font-awesome-icon icon="fa-solid fa-calendar" class="w-3 h-3" />
-                  <span>{{ formatDate(highlightedEvent.date) }}</span>
+                  <span>{{ formatDate(highlightedEvent.start_date) }}</span>
                 </div>
                 <div class="flex items-center gap-2">
                   <font-awesome-icon icon="fa-solid fa-location-dot" class="w-3 h-3" />
-                  <span>{{ getLocalizedLocation(highlightedEvent) }}</span>
+                  <span>{{ getLocation(highlightedEvent) }}</span>
                 </div>
               </div>
-            </div>
+            </NuxtLink>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Empty state -->
-    <div v-else class="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+    <div v-else-if="!pending" class="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
       <font-awesome-icon icon="fa-solid fa-calendar-alt" class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-4" />
       <p class="text-gray-500 dark:text-gray-400">{{ t('partners.campus.noEvents') }}</p>
     </div>
