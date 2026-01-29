@@ -1454,6 +1454,26 @@ export type ValueSectionKey =
   | 'strategy.fundraising.cta.title'
   | 'strategy.fundraising.cta.text'
   | 'strategy.fundraising.cta.button'
+  // Page Organisation - Hero
+  | 'organization.hero.title'
+  | 'organization.hero.subtitle'
+  // Page Organisation - Organigramme
+  | 'organization.orgchart.title'
+  | 'organization.intro.text'
+  | 'organization.services.categories.rectorat'
+  | 'organization.services.categories.departements'
+  | 'organization.services.categories.academique'
+  | 'organization.services.categories.administratif'
+  | 'organization.departments.view_programs'
+  // Page Organisation - Secteurs
+  | 'organization.sectors.title'
+  | 'organization.sectors.subtitle'
+  | 'organization.sectors.view_programs'
+  | 'organization.sectors.no_programs'
+  // Page Organisation - CTA
+  | 'organization.cta.title'
+  | 'organization.cta.text'
+  | 'organization.cta.button'
 
 export interface ValueSection {
   id: string

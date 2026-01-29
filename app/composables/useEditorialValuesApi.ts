@@ -415,6 +415,77 @@ export const strategyPageSections: PageSection[] = [
   },
 ]
 
+// ============================================================================
+// DÉFINITION DE LA PAGE ORGANISATION
+// ============================================================================
+
+export const organizationPageSections: PageSection[] = [
+  {
+    id: 'organization-hero',
+    name: 'Hero Organisation',
+    description: 'Bannière principale de la page Organisation',
+    icon: 'image',
+    color: 'bg-gradient-to-r from-brand-blue-500 to-brand-red-500 text-white',
+    editorialKeys: ['organization.hero.title', 'organization.hero.subtitle'],
+    fields: [
+      { key: 'organization.hero.title', label: 'Titre', description: 'Titre principal du hero', type: 'text', editorialKey: 'organization.hero.title', editable: true },
+      { key: 'organization.hero.subtitle', label: 'Sous-titre', description: 'Sous-titre du hero', type: 'textarea', editorialKey: 'organization.hero.subtitle', editable: true },
+    ],
+  },
+  {
+    id: 'organization-orgchart',
+    name: 'Section Organigramme',
+    description: 'Structure organisationnelle avec les catégories de services',
+    icon: 'sitemap',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    editorialKeys: [
+      'organization.orgchart.title', 'organization.intro.text',
+      'organization.services.categories.rectorat', 'organization.services.categories.departements',
+      'organization.services.categories.academique', 'organization.services.categories.administratif',
+      'organization.departments.view_programs',
+    ],
+    fields: [
+      { key: 'organization.orgchart.title', label: 'Titre Organigramme', description: 'Titre de la section organigramme', type: 'text', editorialKey: 'organization.orgchart.title', editable: true },
+      { key: 'organization.intro.text', label: 'Texte d\'introduction', description: 'Texte de présentation de l\'organisation', type: 'textarea', editorialKey: 'organization.intro.text', editable: true },
+      { key: 'organization.services.categories.rectorat', label: 'Catégorie Rectorat', description: 'Libellé de la catégorie Rectorat', type: 'text', editorialKey: 'organization.services.categories.rectorat', editable: true },
+      { key: 'organization.services.categories.departements', label: 'Catégorie Départements', description: 'Libellé de la catégorie Départements', type: 'text', editorialKey: 'organization.services.categories.departements', editable: true },
+      { key: 'organization.services.categories.academique', label: 'Catégorie Académique', description: 'Libellé de la catégorie Services académiques', type: 'text', editorialKey: 'organization.services.categories.academique', editable: true },
+      { key: 'organization.services.categories.administratif', label: 'Catégorie Administratif', description: 'Libellé de la catégorie Services administratifs', type: 'text', editorialKey: 'organization.services.categories.administratif', editable: true },
+      { key: 'organization.departments.view_programs', label: 'Lien Voir les programmes', description: 'Texte du lien vers les programmes', type: 'text', editorialKey: 'organization.departments.view_programs', editable: true },
+    ],
+  },
+  {
+    id: 'organization-sectors',
+    name: 'Section Secteurs',
+    description: 'Présentation des secteurs académiques',
+    icon: 'layer-group',
+    color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+    editorialKeys: [
+      'organization.sectors.title', 'organization.sectors.subtitle',
+      'organization.sectors.view_programs', 'organization.sectors.no_programs',
+    ],
+    fields: [
+      { key: 'organization.sectors.title', label: 'Titre Secteurs', description: 'Titre de la section secteurs', type: 'text', editorialKey: 'organization.sectors.title', editable: true },
+      { key: 'organization.sectors.subtitle', label: 'Sous-titre Secteurs', description: 'Sous-titre de la section', type: 'text', editorialKey: 'organization.sectors.subtitle', editable: true },
+      { key: 'organization.sectors.view_programs', label: 'Voir les formations', description: 'Texte du lien vers les formations', type: 'text', editorialKey: 'organization.sectors.view_programs', editable: true },
+      { key: 'organization.sectors.no_programs', label: 'Aucune formation', description: 'Message quand pas de formations', type: 'text', editorialKey: 'organization.sectors.no_programs', editable: true },
+    ],
+  },
+  {
+    id: 'organization-cta',
+    name: 'Section CTA',
+    description: 'Appel à l\'action vers la page équipe',
+    icon: 'bullhorn',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    editorialKeys: ['organization.cta.title', 'organization.cta.text', 'organization.cta.button'],
+    fields: [
+      { key: 'organization.cta.title', label: 'Titre CTA', description: 'Titre du bloc appel à l\'action', type: 'text', editorialKey: 'organization.cta.title', editable: true },
+      { key: 'organization.cta.text', label: 'Texte CTA', description: 'Texte d\'accompagnement', type: 'textarea', editorialKey: 'organization.cta.text', editable: true },
+      { key: 'organization.cta.button', label: 'Bouton CTA', description: 'Texte du bouton', type: 'text', editorialKey: 'organization.cta.button', editable: true },
+    ],
+  },
+]
+
 // Pages du front-office
 export const frontOfficePages: FrontOfficePage[] = [
   {
@@ -440,6 +511,14 @@ export const frontOfficePages: FrontOfficePage[] = [
     description: 'Plan stratégique 2024-2030, axes, indicateurs et levée de fonds',
     icon: 'compass',
     sections: strategyPageSections,
+  },
+  {
+    id: 'organization',
+    name: 'Page Organisation',
+    slug: '/a-propos/organisation',
+    description: 'Organigramme, services et secteurs académiques',
+    icon: 'sitemap',
+    sections: organizationPageSections,
   },
 ]
 
@@ -981,5 +1060,6 @@ export function useEditorialValuesApi() {
     homepageSections,
     aboutPageSections,
     strategyPageSections,
+    organizationPageSections,
   }
 }

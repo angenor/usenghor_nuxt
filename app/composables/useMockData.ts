@@ -764,6 +764,16 @@ export function useMockData() {
   const getSectorBySlug = (slug: string) =>
     mockSectors.find(d => d.slug === slug)
 
+  // === DÉPARTEMENTS (alias pour secteurs, rétrocompatibilité) ===
+  // Les staff utilisent department_id (dept-*) qui correspond aux sectors (sec-*)
+  const departments = computed(() => mockSectors)
+
+  const getDepartmentById = (id: string) => {
+    // Support les deux formats: dept-* et sec-*
+    const normalizedId = id.replace(/^dept-/, 'sec-')
+    return mockSectors.find(d => d.id === normalizedId || d.id === id)
+  }
+
   // === SERVICES ===
   const services = computed(() => mockServices)
 
@@ -1660,6 +1670,10 @@ export function useMockData() {
     // Getters secteurs
     getSectorById,
     getSectorBySlug,
+
+    // Départements (alias pour secteurs)
+    departments,
+    getDepartmentById,
 
     // Getters services
     getServicesByCategory,
