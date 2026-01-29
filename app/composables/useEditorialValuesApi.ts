@@ -438,37 +438,10 @@ export const organizationPageSections: PageSection[] = [
     description: 'Structure organisationnelle avec les catégories de services',
     icon: 'sitemap',
     color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-    editorialKeys: [
-      'organization.orgchart.title', 'organization.intro.text',
-      'organization.services.categories.rectorat', 'organization.services.categories.departements',
-      'organization.services.categories.academique', 'organization.services.categories.administratif',
-      'organization.departments.view_programs',
-    ],
+    editorialKeys: ['organization.orgchart.title', 'organization.intro.text'],
     fields: [
       { key: 'organization.orgchart.title', label: 'Titre Organigramme', description: 'Titre de la section organigramme', type: 'text', editorialKey: 'organization.orgchart.title', editable: true },
       { key: 'organization.intro.text', label: 'Texte d\'introduction', description: 'Texte de présentation de l\'organisation', type: 'textarea', editorialKey: 'organization.intro.text', editable: true },
-      { key: 'organization.services.categories.rectorat', label: 'Catégorie Rectorat', description: 'Libellé de la catégorie Rectorat', type: 'text', editorialKey: 'organization.services.categories.rectorat', editable: true },
-      { key: 'organization.services.categories.departements', label: 'Catégorie Départements', description: 'Libellé de la catégorie Départements', type: 'text', editorialKey: 'organization.services.categories.departements', editable: true },
-      { key: 'organization.services.categories.academique', label: 'Catégorie Académique', description: 'Libellé de la catégorie Services académiques', type: 'text', editorialKey: 'organization.services.categories.academique', editable: true },
-      { key: 'organization.services.categories.administratif', label: 'Catégorie Administratif', description: 'Libellé de la catégorie Services administratifs', type: 'text', editorialKey: 'organization.services.categories.administratif', editable: true },
-      { key: 'organization.departments.view_programs', label: 'Lien Voir les programmes', description: 'Texte du lien vers les programmes', type: 'text', editorialKey: 'organization.departments.view_programs', editable: true },
-    ],
-  },
-  {
-    id: 'organization-sectors',
-    name: 'Section Secteurs',
-    description: 'Présentation des secteurs académiques',
-    icon: 'layer-group',
-    color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
-    editorialKeys: [
-      'organization.sectors.title', 'organization.sectors.subtitle',
-      'organization.sectors.view_programs', 'organization.sectors.no_programs',
-    ],
-    fields: [
-      { key: 'organization.sectors.title', label: 'Titre Secteurs', description: 'Titre de la section secteurs', type: 'text', editorialKey: 'organization.sectors.title', editable: true },
-      { key: 'organization.sectors.subtitle', label: 'Sous-titre Secteurs', description: 'Sous-titre de la section', type: 'text', editorialKey: 'organization.sectors.subtitle', editable: true },
-      { key: 'organization.sectors.view_programs', label: 'Voir les formations', description: 'Texte du lien vers les formations', type: 'text', editorialKey: 'organization.sectors.view_programs', editable: true },
-      { key: 'organization.sectors.no_programs', label: 'Aucune formation', description: 'Message quand pas de formations', type: 'text', editorialKey: 'organization.sectors.no_programs', editable: true },
     ],
   },
   {
@@ -482,6 +455,70 @@ export const organizationPageSections: PageSection[] = [
       { key: 'organization.cta.title', label: 'Titre CTA', description: 'Titre du bloc appel à l\'action', type: 'text', editorialKey: 'organization.cta.title', editable: true },
       { key: 'organization.cta.text', label: 'Texte CTA', description: 'Texte d\'accompagnement', type: 'textarea', editorialKey: 'organization.cta.text', editable: true },
       { key: 'organization.cta.button', label: 'Bouton CTA', description: 'Texte du bouton', type: 'text', editorialKey: 'organization.cta.button', editable: true },
+    ],
+  },
+]
+
+// ============================================================================
+// DÉFINITION DE LA PAGE ÉQUIPE
+// ============================================================================
+
+export const teamPageSections: PageSection[] = [
+  {
+    id: 'team-hero',
+    name: 'Hero Équipe',
+    description: 'Bannière principale de la page Équipe',
+    icon: 'image',
+    color: 'bg-gradient-to-r from-brand-blue-500 to-brand-red-500 text-white',
+    editorialKeys: ['team.hero.title', 'team.hero.subtitle'],
+    fields: [
+      { key: 'team.hero.title', label: 'Titre', description: 'Titre principal du hero', type: 'text', editorialKey: 'team.hero.title', editable: true },
+      { key: 'team.hero.subtitle', label: 'Sous-titre', description: 'Sous-titre du hero', type: 'textarea', editorialKey: 'team.hero.subtitle', editable: true },
+    ],
+  },
+  {
+    id: 'team-cta',
+    name: 'Section CTA',
+    description: 'Appel à l\'action vers la page carrières',
+    icon: 'bullhorn',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    editorialKeys: ['team.cta.title', 'team.cta.text', 'team.cta.button'],
+    fields: [
+      { key: 'team.cta.title', label: 'Titre CTA', description: 'Titre du bloc appel à l\'action', type: 'text', editorialKey: 'team.cta.title', editable: true },
+      { key: 'team.cta.text', label: 'Texte CTA', description: 'Texte d\'accompagnement', type: 'textarea', editorialKey: 'team.cta.text', editable: true },
+      { key: 'team.cta.button', label: 'Bouton CTA', description: 'Texte du bouton', type: 'text', editorialKey: 'team.cta.button', editable: true },
+    ],
+  },
+]
+
+// ============================================================================
+// DÉFINITION DE LA PAGE PARTENAIRES
+// ============================================================================
+
+export const partnersPageSections: PageSection[] = [
+  {
+    id: 'partners-hero',
+    name: 'Hero Partenaires',
+    description: 'Bannière principale de la page Partenaires',
+    icon: 'image',
+    color: 'bg-gradient-to-r from-brand-blue-500 to-brand-red-500 text-white',
+    editorialKeys: ['partners.hero.badge', 'partners.hero.title', 'partners.hero.subtitle'],
+    fields: [
+      { key: 'partners.hero.badge', label: 'Badge', description: 'Texte du badge au-dessus du titre', type: 'text', editorialKey: 'partners.hero.badge', editable: true },
+      { key: 'partners.hero.title', label: 'Titre', description: 'Titre principal du hero', type: 'text', editorialKey: 'partners.hero.title', editable: true },
+      { key: 'partners.hero.subtitle', label: 'Sous-titre', description: 'Sous-titre du hero', type: 'textarea', editorialKey: 'partners.hero.subtitle', editable: true },
+    ],
+  },
+  {
+    id: 'partners-campus',
+    name: 'Section Campus Externalisés',
+    description: 'Carte interactive des campus et partenaires dans le monde',
+    icon: 'globe-africa',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    editorialKeys: ['partners.campus.title', 'partners.campus.subtitle'],
+    fields: [
+      { key: 'partners.campus.title', label: 'Titre section', description: 'Titre de la section campus', type: 'text', editorialKey: 'partners.campus.title', editable: true },
+      { key: 'partners.campus.subtitle', label: 'Sous-titre section', description: 'Description de la section', type: 'textarea', editorialKey: 'partners.campus.subtitle', editable: true },
     ],
   },
 ]
@@ -519,6 +556,22 @@ export const frontOfficePages: FrontOfficePage[] = [
     description: 'Organigramme, services et secteurs académiques',
     icon: 'sitemap',
     sections: organizationPageSections,
+  },
+  {
+    id: 'team',
+    name: 'Page Équipe',
+    slug: '/a-propos/equipe',
+    description: 'Présentation de l\'équipe avec filtres par type',
+    icon: 'users',
+    sections: teamPageSections,
+  },
+  {
+    id: 'partners',
+    name: 'Page Partenaires',
+    slug: '/a-propos/partenaires',
+    description: 'Campus externalisés et partenaires institutionnels',
+    icon: 'handshake',
+    sections: partnersPageSections,
   },
 ]
 
@@ -1061,5 +1114,7 @@ export function useEditorialValuesApi() {
     aboutPageSections,
     strategyPageSections,
     organizationPageSections,
+    teamPageSections,
+    partnersPageSections,
   }
 }

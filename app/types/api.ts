@@ -1460,20 +1460,24 @@ export type ValueSectionKey =
   // Page Organisation - Organigramme
   | 'organization.orgchart.title'
   | 'organization.intro.text'
-  | 'organization.services.categories.rectorat'
-  | 'organization.services.categories.departements'
-  | 'organization.services.categories.academique'
-  | 'organization.services.categories.administratif'
-  | 'organization.departments.view_programs'
-  // Page Organisation - Secteurs
-  | 'organization.sectors.title'
-  | 'organization.sectors.subtitle'
-  | 'organization.sectors.view_programs'
-  | 'organization.sectors.no_programs'
   // Page Organisation - CTA
   | 'organization.cta.title'
   | 'organization.cta.text'
   | 'organization.cta.button'
+  // Page Équipe - Hero
+  | 'team.hero.title'
+  | 'team.hero.subtitle'
+  // Page Équipe - CTA
+  | 'team.cta.title'
+  | 'team.cta.text'
+  | 'team.cta.button'
+  // Page Partenaires - Hero
+  | 'partners.hero.badge'
+  | 'partners.hero.title'
+  | 'partners.hero.subtitle'
+  // Page Partenaires - Section Campus
+  | 'partners.campus.title'
+  | 'partners.campus.subtitle'
 
 export interface ValueSection {
   id: string
