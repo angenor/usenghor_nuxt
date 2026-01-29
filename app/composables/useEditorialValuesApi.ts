@@ -795,6 +795,101 @@ export const alumniPageSections: PageSection[] = [
   },
 ]
 
+// ============================================================================
+// DÉFINITION DE LA PAGE SITE (CAMPUS)
+// ============================================================================
+
+export const sitePageSections: PageSection[] = [
+  {
+    id: 'site-hero',
+    name: 'Hero Site',
+    description: 'Bannière principale de la page Site/Campus',
+    icon: 'image',
+    color: 'bg-gradient-to-r from-gray-800 to-gray-900 text-white',
+    editorialKeys: ['site.hero.badge', 'site.hero.title', 'site.hero.subtitle'],
+    fields: [
+      { key: 'site.hero.badge', label: 'Badge', description: 'Texte du badge au-dessus du titre', type: 'text', editorialKey: 'site.hero.badge', editable: true },
+      { key: 'site.hero.title', label: 'Titre', description: 'Titre principal du hero', type: 'text', editorialKey: 'site.hero.title', editable: true },
+      { key: 'site.hero.subtitle', label: 'Sous-titre', description: 'Sous-titre du hero', type: 'textarea', editorialKey: 'site.hero.subtitle', editable: true },
+    ],
+  },
+  {
+    id: 'site-presentation',
+    name: 'Section Présentation',
+    description: 'Présentation du campus avec statistiques (les valeurs numériques sont dans Chiffres clés)',
+    icon: 'building',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    editorialKeys: [
+      'site.presentation.title', 'site.presentation.description', 'site.presentation.address',
+      'site.presentation.stats.surface.label', 'site.presentation.stats.rooms.label',
+      'site.presentation.stats.capacity.label', 'site.presentation.stats.founded.label',
+    ],
+    fields: [
+      { key: 'site.presentation.title', label: 'Titre', description: 'Titre de la section présentation', type: 'text', editorialKey: 'site.presentation.title', editable: true },
+      { key: 'site.presentation.description', label: 'Description', description: 'Texte de présentation du campus', type: 'textarea', editorialKey: 'site.presentation.description', editable: true },
+      { key: 'site.presentation.address', label: 'Adresse courte', description: 'Adresse affichée dans la section présentation', type: 'text', editorialKey: 'site.presentation.address', editable: true },
+      { key: 'site.presentation.stats.surface.label', label: 'Label Surface', description: 'Libellé pour la surface (valeur dans Chiffres clés)', type: 'text', editorialKey: 'site.presentation.stats.surface.label', editable: true },
+      { key: 'site.presentation.stats.rooms.label', label: 'Label Salles', description: 'Libellé pour le nombre de salles (valeur dans Chiffres clés)', type: 'text', editorialKey: 'site.presentation.stats.rooms.label', editable: true },
+      { key: 'site.presentation.stats.capacity.label', label: 'Label Capacité', description: 'Libellé pour la capacité (valeur dans Chiffres clés)', type: 'text', editorialKey: 'site.presentation.stats.capacity.label', editable: true },
+      { key: 'site.presentation.stats.founded.label', label: 'Label Fondation', description: 'Libellé pour l\'année de fondation (valeur dans Chiffres clés)', type: 'text', editorialKey: 'site.presentation.stats.founded.label', editable: true },
+    ],
+  },
+  {
+    id: 'site-facilities',
+    name: 'Section Infrastructures',
+    description: 'Liste des infrastructures du campus (les infrastructures viennent de la BDD)',
+    icon: 'warehouse',
+    color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+    editorialKeys: ['site.facilities.title', 'site.facilities.subtitle', 'site.facilities.capacity'],
+    fields: [
+      { key: 'site.facilities.title', label: 'Titre', description: 'Titre de la section infrastructures', type: 'text', editorialKey: 'site.facilities.title', editable: true },
+      { key: 'site.facilities.subtitle', label: 'Sous-titre', description: 'Sous-titre de la section', type: 'textarea', editorialKey: 'site.facilities.subtitle', editable: true },
+      { key: 'site.facilities.capacity', label: 'Label Capacité', description: 'Libellé pour la capacité des infrastructures', type: 'text', editorialKey: 'site.facilities.capacity', editable: true },
+    ],
+  },
+  {
+    id: 'site-location',
+    name: 'Section Localisation',
+    description: 'Informations de localisation et contact du campus',
+    icon: 'map-marker-alt',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    editorialKeys: [
+      'site.location.title', 'site.location.subtitle',
+      'site.location.address', 'site.location.addressValue',
+      'site.location.coordinates', 'site.location.coordinatesValue',
+      'site.location.phone', 'site.location.phoneValue',
+      'site.location.email', 'site.location.emailValue',
+      'site.location.openMaps',
+    ],
+    fields: [
+      { key: 'site.location.title', label: 'Titre', description: 'Titre de la section localisation', type: 'text', editorialKey: 'site.location.title', editable: true },
+      { key: 'site.location.subtitle', label: 'Sous-titre', description: 'Sous-titre de la section', type: 'textarea', editorialKey: 'site.location.subtitle', editable: true },
+      { key: 'site.location.address', label: 'Label Adresse', description: 'Libellé pour l\'adresse', type: 'text', editorialKey: 'site.location.address', editable: true },
+      { key: 'site.location.addressValue', label: 'Valeur Adresse', description: 'Adresse complète du campus', type: 'text', editorialKey: 'site.location.addressValue', editable: true },
+      { key: 'site.location.coordinates', label: 'Label Coordonnées', description: 'Libellé pour les coordonnées GPS', type: 'text', editorialKey: 'site.location.coordinates', editable: true },
+      { key: 'site.location.coordinatesValue', label: 'Valeur Coordonnées', description: 'Coordonnées GPS du campus', type: 'text', editorialKey: 'site.location.coordinatesValue', editable: true },
+      { key: 'site.location.phone', label: 'Label Téléphone', description: 'Libellé pour le téléphone', type: 'text', editorialKey: 'site.location.phone', editable: true },
+      { key: 'site.location.phoneValue', label: 'Numéro Téléphone', description: 'Numéro de téléphone du campus', type: 'text', editorialKey: 'site.location.phoneValue', editable: true },
+      { key: 'site.location.email', label: 'Label Email', description: 'Libellé pour l\'email', type: 'text', editorialKey: 'site.location.email', editable: true },
+      { key: 'site.location.emailValue', label: 'Adresse Email', description: 'Adresse email du campus', type: 'text', editorialKey: 'site.location.emailValue', editable: true },
+      { key: 'site.location.openMaps', label: 'Bouton Maps', description: 'Texte du bouton pour ouvrir Google Maps', type: 'text', editorialKey: 'site.location.openMaps', editable: true },
+    ],
+  },
+  {
+    id: 'site-cta',
+    name: 'Section CTA',
+    description: 'Appel à l\'action pour visiter ou contacter le campus',
+    icon: 'bullhorn',
+    color: 'bg-brand-blue-100 text-brand-blue-800 dark:bg-brand-blue-900/30 dark:text-brand-blue-300',
+    editorialKeys: ['site.cta.title', 'site.cta.description', 'site.cta.contactButton'],
+    fields: [
+      { key: 'site.cta.title', label: 'Titre', description: 'Titre du bloc CTA', type: 'text', editorialKey: 'site.cta.title', editable: true },
+      { key: 'site.cta.description', label: 'Description', description: 'Texte d\'accompagnement', type: 'textarea', editorialKey: 'site.cta.description', editable: true },
+      { key: 'site.cta.contactButton', label: 'Bouton Contact', description: 'Texte du bouton contact', type: 'text', editorialKey: 'site.cta.contactButton', editable: true },
+    ],
+  },
+]
+
 // Pages du front-office
 export const frontOfficePages: FrontOfficePage[] = [
   {
@@ -868,6 +963,14 @@ export const frontOfficePages: FrontOfficePage[] = [
     description: 'Réseau des anciens diplômés et histoires de réussite',
     icon: 'user-graduate',
     sections: alumniPageSections,
+  },
+  {
+    id: 'site',
+    name: 'Page Site / Campus',
+    slug: '/site',
+    description: 'Présentation du campus, infrastructures et localisation',
+    icon: 'building',
+    sections: sitePageSections,
   },
 ]
 
@@ -1415,5 +1518,6 @@ export function useEditorialValuesApi() {
     careersPageSections,
     projectsPageSections,
     alumniPageSections,
+    sitePageSections,
   }
 }

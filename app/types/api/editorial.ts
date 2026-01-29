@@ -360,6 +360,38 @@ export type ValueSectionKey =
   | 'alumni.cta.title'
   | 'alumni.cta.description'
   | 'alumni.cta.button'
+  // Page Site - Hero
+  | 'site.hero.badge'
+  | 'site.hero.title'
+  | 'site.hero.subtitle'
+  // Page Site - Présentation
+  | 'site.presentation.title'
+  | 'site.presentation.description'
+  | 'site.presentation.address'
+  | 'site.presentation.stats.surface.label'
+  | 'site.presentation.stats.rooms.label'
+  | 'site.presentation.stats.capacity.label'
+  | 'site.presentation.stats.founded.label'
+  // Page Site - Infrastructures
+  | 'site.facilities.title'
+  | 'site.facilities.subtitle'
+  | 'site.facilities.capacity'
+  // Page Site - Localisation
+  | 'site.location.title'
+  | 'site.location.subtitle'
+  | 'site.location.address'
+  | 'site.location.addressValue'
+  | 'site.location.coordinates'
+  | 'site.location.coordinatesValue'
+  | 'site.location.phone'
+  | 'site.location.phoneValue'
+  | 'site.location.email'
+  | 'site.location.emailValue'
+  | 'site.location.openMaps'
+  // Page Site - CTA
+  | 'site.cta.title'
+  | 'site.cta.description'
+  | 'site.cta.contactButton'
 
 export interface ValueSection {
   id: string

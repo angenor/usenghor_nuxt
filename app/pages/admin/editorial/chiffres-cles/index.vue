@@ -34,6 +34,10 @@ const predefinedKeyFigures = [
   { key: 'stats_alumni_countries', label: 'Pays (alumni)', description: 'Nombre de pays représentés dans le réseau alumni' },
   { key: 'stats_alumni_sectors', label: 'Secteurs (alumni)', description: 'Nombre de secteurs d\'activité des anciens diplômés' },
   { key: 'stats_promotions', label: 'Promotions', description: 'Nombre de promotions depuis la création' },
+  { key: 'stats_site_surface', label: 'Surface (campus)', description: 'Surface totale du campus en m²' },
+  { key: 'stats_site_rooms', label: 'Salles (campus)', description: 'Nombre de salles de cours et espaces de travail' },
+  { key: 'stats_site_capacity', label: 'Capacité (campus)', description: 'Capacité d\'accueil totale du campus' },
+  { key: 'stats_site_founded', label: 'Année de fondation', description: 'Année de création de l\'université' },
 ]
 
 // === STATE ===
