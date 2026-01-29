@@ -224,6 +224,24 @@ export function usePublicCampusApi() {
     return getFlagEmoji(partner.country_iso_code)
   }
 
+  /**
+   * Retourne l'URL de la photo d'un membre d'équipe ou un placeholder
+   */
+  function getTeamMemberPhotoUrl(member: CampusTeamMemberPublic): string {
+    const resolvedUrl = resolveMediaUrl(member.photo_url)
+    if (resolvedUrl) {
+      return resolvedUrl
+    }
+    return `https://i.pravatar.cc/200?u=${member.id}`
+  }
+
+  /**
+   * Retourne le nom complet d'un membre d'équipe
+   */
+  function getTeamMemberFullName(member: CampusTeamMemberPublic): string {
+    return `${member.first_name} ${member.last_name}`
+  }
+
   return {
     // API calls
     listCampuses,
@@ -231,6 +249,7 @@ export function usePublicCampusApi() {
     getCampusByCode,
     getCampusBySlug,
     getCampusPartners,
+    getCampusTeam,
 
     // Helpers
     getCampusUrl,
@@ -239,6 +258,8 @@ export function usePublicCampusApi() {
     getCampusLocation,
     getPartnerLogoUrl,
     getPartnerFlagEmoji,
+    getTeamMemberPhotoUrl,
+    getTeamMemberFullName,
     getFlagEmoji,
   }
 }

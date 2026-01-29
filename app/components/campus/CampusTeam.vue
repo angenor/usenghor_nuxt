@@ -1,20 +1,22 @@
 <script setup lang="ts">
+import type { CampusTeamMemberPublic } from '~/composables/usePublicCampusApi'
+
 interface Props {
   campusId: string
 }
 
 const props = defineProps<Props>()
-const { t, locale } = useI18n()
-const { getCampusTeam } = useMockData()
+const { t } = useI18n()
+const { getCampusTeam, getTeamMemberPhotoUrl, getTeamMemberFullName } = usePublicCampusApi()
 
-const teamMembers = computed(() => getCampusTeam(props.campusId))
+// Fetch team members from API
+const { data: teamData, pending } = await useAsyncData(
+  `campus-team-${props.campusId}`,
+  () => getCampusTeam(props.campusId),
+  { server: true }
+)
 
-// Get localized role
-const getLocalizedRole = (member: any) => {
-  if (locale.value === 'ar' && member.role_ar) return member.role_ar
-  if (locale.value === 'en' && member.role_en) return member.role_en
-  return member.role_fr
-}
+const teamMembers = computed(() => teamData.value || [])
 </script>
 
 <template>
@@ -26,7 +28,12 @@ const getLocalizedRole = (member: any) => {
       </span>
     </h2>
 
-    <div v-if="teamMembers.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <!-- Loading state -->
+    <div v-if="pending" class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-blue-500"></div>
+    </div>
+
+    <div v-else-if="teamMembers.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div
         v-for="member in teamMembers"
         :key="member.id"
@@ -35,8 +42,8 @@ const getLocalizedRole = (member: any) => {
         <!-- Photo -->
         <div class="relative aspect-square overflow-hidden">
           <img
-            :src="member.photo"
-            :alt="member.name"
+            :src="getTeamMemberPhotoUrl(member)"
+            :alt="getTeamMemberFullName(member)"
             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           >
           <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
@@ -45,10 +52,10 @@ const getLocalizedRole = (member: any) => {
         <!-- Info -->
         <div class="p-4">
           <h4 class="font-bold text-gray-900 dark:text-white mb-1">
-            {{ member.name }}
+            {{ getTeamMemberFullName(member) }}
           </h4>
           <p class="text-sm text-brand-red-600 dark:text-brand-red-400 mb-3">
-            {{ getLocalizedRole(member) }}
+            {{ member.position }}
           </p>
 
           <!-- Contact -->
@@ -64,7 +71,8 @@ const getLocalizedRole = (member: any) => {
       </div>
     </div>
 
-    <div v-else class="text-center py-12">
+    <!-- Empty state -->
+    <div v-else-if="!pending" class="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
       <font-awesome-icon icon="fa-solid fa-users" class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-4" />
       <p class="text-gray-500 dark:text-gray-400">{{ t('partners.campus.noTeam') }}</p>
     </div>
