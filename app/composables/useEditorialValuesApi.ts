@@ -283,6 +283,138 @@ export const aboutPageSections: PageSection[] = [
   },
 ]
 
+// ============================================================================
+// DÉFINITION DE LA PAGE STRATÉGIE
+// ============================================================================
+
+export const strategyPageSections: PageSection[] = [
+  {
+    id: 'strategy-hero',
+    name: 'Hero Stratégie',
+    description: 'Bannière principale de la page Stratégie',
+    icon: 'image',
+    color: 'bg-gradient-to-r from-brand-blue-500 to-brand-red-500 text-white',
+    editorialKeys: ['strategy.hero.title', 'strategy.hero.subtitle'],
+    fields: [
+      { key: 'strategy.hero.title', label: 'Titre', description: 'Titre principal du hero', type: 'text', editorialKey: 'strategy.hero.title', editable: true },
+      { key: 'strategy.hero.subtitle', label: 'Sous-titre', description: 'Sous-titre du hero', type: 'textarea', editorialKey: 'strategy.hero.subtitle', editable: true },
+    ],
+  },
+  {
+    id: 'strategy-plan',
+    name: 'Plan Stratégique',
+    description: 'Présentation du plan stratégique 2024-2030',
+    icon: 'file-alt',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    editorialKeys: ['strategy.plan.title', 'strategy.plan.summary', 'strategy.plan.download'],
+    fields: [
+      { key: 'strategy.plan.title', label: 'Titre', description: 'Titre de la section', type: 'text', editorialKey: 'strategy.plan.title', editable: true },
+      { key: 'strategy.plan.summary', label: 'Résumé', description: 'Texte de présentation du plan', type: 'html', editorialKey: 'strategy.plan.summary', editable: true },
+      { key: 'strategy.plan.download', label: 'Bouton téléchargement', description: 'Texte du bouton PDF', type: 'text', editorialKey: 'strategy.plan.download', editable: true },
+    ],
+  },
+  {
+    id: 'strategy-axes',
+    name: 'Axes Stratégiques',
+    description: 'Les 3 axes stratégiques avec leurs objectifs',
+    icon: 'compass',
+    color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+    editorialKeys: [
+      'strategy.axes.title', 'strategy.axes.subtitle',
+      'strategy.axes.items.a1.code', 'strategy.axes.items.a1.title', 'strategy.axes.items.a1.description',
+      'strategy.axes.items.a1.objective1', 'strategy.axes.items.a1.objective2', 'strategy.axes.items.a1.objective3',
+      'strategy.axes.items.a2.code', 'strategy.axes.items.a2.title', 'strategy.axes.items.a2.description',
+      'strategy.axes.items.a2.objective1', 'strategy.axes.items.a2.objective2', 'strategy.axes.items.a2.objective3',
+      'strategy.axes.items.a3.code', 'strategy.axes.items.a3.title', 'strategy.axes.items.a3.description',
+      'strategy.axes.items.a3.objective1', 'strategy.axes.items.a3.objective2', 'strategy.axes.items.a3.objective3',
+    ],
+    fields: [
+      { key: 'strategy.axes.title', label: 'Titre section', description: 'Titre de la section axes', type: 'text', editorialKey: 'strategy.axes.title', editable: true },
+      { key: 'strategy.axes.subtitle', label: 'Sous-titre section', description: 'Sous-titre de la section', type: 'text', editorialKey: 'strategy.axes.subtitle', editable: true },
+      // Axe 1
+      { key: 'strategy.axes.items.a1.code', label: 'Axe 1 - Code', description: 'Code de l\'axe (ex: A1)', type: 'text', editorialKey: 'strategy.axes.items.a1.code', editable: true },
+      { key: 'strategy.axes.items.a1.title', label: 'Axe 1 - Titre', description: 'Titre de l\'axe 1', type: 'text', editorialKey: 'strategy.axes.items.a1.title', editable: true },
+      { key: 'strategy.axes.items.a1.description', label: 'Axe 1 - Description', description: 'Description de l\'axe 1', type: 'textarea', editorialKey: 'strategy.axes.items.a1.description', editable: true },
+      { key: 'strategy.axes.items.a1.objective1', label: 'Axe 1 - Objectif 1', description: 'Premier objectif', type: 'text', editorialKey: 'strategy.axes.items.a1.objective1', editable: true },
+      { key: 'strategy.axes.items.a1.objective2', label: 'Axe 1 - Objectif 2', description: 'Deuxième objectif', type: 'text', editorialKey: 'strategy.axes.items.a1.objective2', editable: true },
+      { key: 'strategy.axes.items.a1.objective3', label: 'Axe 1 - Objectif 3', description: 'Troisième objectif', type: 'text', editorialKey: 'strategy.axes.items.a1.objective3', editable: true },
+      // Axe 2
+      { key: 'strategy.axes.items.a2.code', label: 'Axe 2 - Code', description: 'Code de l\'axe (ex: A2)', type: 'text', editorialKey: 'strategy.axes.items.a2.code', editable: true },
+      { key: 'strategy.axes.items.a2.title', label: 'Axe 2 - Titre', description: 'Titre de l\'axe 2', type: 'text', editorialKey: 'strategy.axes.items.a2.title', editable: true },
+      { key: 'strategy.axes.items.a2.description', label: 'Axe 2 - Description', description: 'Description de l\'axe 2', type: 'textarea', editorialKey: 'strategy.axes.items.a2.description', editable: true },
+      { key: 'strategy.axes.items.a2.objective1', label: 'Axe 2 - Objectif 1', description: 'Premier objectif', type: 'text', editorialKey: 'strategy.axes.items.a2.objective1', editable: true },
+      { key: 'strategy.axes.items.a2.objective2', label: 'Axe 2 - Objectif 2', description: 'Deuxième objectif', type: 'text', editorialKey: 'strategy.axes.items.a2.objective2', editable: true },
+      { key: 'strategy.axes.items.a2.objective3', label: 'Axe 2 - Objectif 3', description: 'Troisième objectif', type: 'text', editorialKey: 'strategy.axes.items.a2.objective3', editable: true },
+      // Axe 3
+      { key: 'strategy.axes.items.a3.code', label: 'Axe 3 - Code', description: 'Code de l\'axe (ex: A3)', type: 'text', editorialKey: 'strategy.axes.items.a3.code', editable: true },
+      { key: 'strategy.axes.items.a3.title', label: 'Axe 3 - Titre', description: 'Titre de l\'axe 3', type: 'text', editorialKey: 'strategy.axes.items.a3.title', editable: true },
+      { key: 'strategy.axes.items.a3.description', label: 'Axe 3 - Description', description: 'Description de l\'axe 3', type: 'textarea', editorialKey: 'strategy.axes.items.a3.description', editable: true },
+      { key: 'strategy.axes.items.a3.objective1', label: 'Axe 3 - Objectif 1', description: 'Premier objectif', type: 'text', editorialKey: 'strategy.axes.items.a3.objective1', editable: true },
+      { key: 'strategy.axes.items.a3.objective2', label: 'Axe 3 - Objectif 2', description: 'Deuxième objectif', type: 'text', editorialKey: 'strategy.axes.items.a3.objective2', editable: true },
+      { key: 'strategy.axes.items.a3.objective3', label: 'Axe 3 - Objectif 3', description: 'Troisième objectif', type: 'text', editorialKey: 'strategy.axes.items.a3.objective3', editable: true },
+    ],
+  },
+  {
+    id: 'strategy-indicators',
+    name: 'Indicateurs Cibles 2030',
+    description: 'Les objectifs chiffrés pour 2030 (les valeurs numériques sont dans Chiffres clés)',
+    icon: 'chart-line',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    editorialKeys: [
+      'strategy.indicators.title', 'strategy.indicators.subtitle',
+      'strategy.indicators.items.students', 'strategy.indicators.items.programs',
+      'strategy.indicators.items.women', 'strategy.indicators.items.insertion',
+    ],
+    fields: [
+      { key: 'strategy.indicators.title', label: 'Titre section', description: 'Titre de la section indicateurs', type: 'text', editorialKey: 'strategy.indicators.title', editable: true },
+      { key: 'strategy.indicators.subtitle', label: 'Sous-titre section', description: 'Sous-titre de la section', type: 'text', editorialKey: 'strategy.indicators.subtitle', editable: true },
+      { key: 'strategy.indicators.items.students', label: 'Libellé Étudiants', description: 'Libellé pour l\'indicateur étudiants', type: 'text', editorialKey: 'strategy.indicators.items.students', editable: true },
+      { key: 'strategy.indicators.items.programs', label: 'Libellé Formations', description: 'Libellé pour l\'indicateur formations', type: 'text', editorialKey: 'strategy.indicators.items.programs', editable: true },
+      { key: 'strategy.indicators.items.women', label: 'Libellé Femmes', description: 'Libellé pour l\'indicateur parité', type: 'text', editorialKey: 'strategy.indicators.items.women', editable: true },
+      { key: 'strategy.indicators.items.insertion', label: 'Libellé Insertion', description: 'Libellé pour l\'indicateur insertion', type: 'text', editorialKey: 'strategy.indicators.items.insertion', editable: true },
+    ],
+  },
+  {
+    id: 'strategy-fundraising',
+    name: 'Levée de Fonds',
+    description: 'Projets de financement et appel aux dons',
+    icon: 'hand-holding-usd',
+    color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+    editorialKeys: [
+      'strategy.fundraising.title', 'strategy.fundraising.subtitle',
+      'strategy.fundraising.projects.scholarships.title', 'strategy.fundraising.projects.scholarships.description', 'strategy.fundraising.projects.scholarships.amount',
+      'strategy.fundraising.projects.campus.title', 'strategy.fundraising.projects.campus.description', 'strategy.fundraising.projects.campus.amount',
+      'strategy.fundraising.projects.research.title', 'strategy.fundraising.projects.research.description', 'strategy.fundraising.projects.research.amount',
+      'strategy.fundraising.projects.library.title', 'strategy.fundraising.projects.library.description', 'strategy.fundraising.projects.library.amount',
+      'strategy.fundraising.cta.title', 'strategy.fundraising.cta.text', 'strategy.fundraising.cta.button',
+    ],
+    fields: [
+      { key: 'strategy.fundraising.title', label: 'Titre section', description: 'Titre de la section levée de fonds', type: 'text', editorialKey: 'strategy.fundraising.title', editable: true },
+      { key: 'strategy.fundraising.subtitle', label: 'Sous-titre section', description: 'Sous-titre de la section', type: 'text', editorialKey: 'strategy.fundraising.subtitle', editable: true },
+      // Projet Bourses
+      { key: 'strategy.fundraising.projects.scholarships.title', label: 'Bourses - Titre', description: 'Titre du projet bourses', type: 'text', editorialKey: 'strategy.fundraising.projects.scholarships.title', editable: true },
+      { key: 'strategy.fundraising.projects.scholarships.description', label: 'Bourses - Description', description: 'Description du projet', type: 'textarea', editorialKey: 'strategy.fundraising.projects.scholarships.description', editable: true },
+      { key: 'strategy.fundraising.projects.scholarships.amount', label: 'Bourses - Montant', description: 'Montant recherché', type: 'text', editorialKey: 'strategy.fundraising.projects.scholarships.amount', editable: true },
+      // Projet Campus
+      { key: 'strategy.fundraising.projects.campus.title', label: 'Campus - Titre', description: 'Titre du projet campus', type: 'text', editorialKey: 'strategy.fundraising.projects.campus.title', editable: true },
+      { key: 'strategy.fundraising.projects.campus.description', label: 'Campus - Description', description: 'Description du projet', type: 'textarea', editorialKey: 'strategy.fundraising.projects.campus.description', editable: true },
+      { key: 'strategy.fundraising.projects.campus.amount', label: 'Campus - Montant', description: 'Montant recherché', type: 'text', editorialKey: 'strategy.fundraising.projects.campus.amount', editable: true },
+      // Projet Recherche
+      { key: 'strategy.fundraising.projects.research.title', label: 'Recherche - Titre', description: 'Titre du projet recherche', type: 'text', editorialKey: 'strategy.fundraising.projects.research.title', editable: true },
+      { key: 'strategy.fundraising.projects.research.description', label: 'Recherche - Description', description: 'Description du projet', type: 'textarea', editorialKey: 'strategy.fundraising.projects.research.description', editable: true },
+      { key: 'strategy.fundraising.projects.research.amount', label: 'Recherche - Montant', description: 'Montant recherché', type: 'text', editorialKey: 'strategy.fundraising.projects.research.amount', editable: true },
+      // Projet Bibliothèque
+      { key: 'strategy.fundraising.projects.library.title', label: 'Bibliothèque - Titre', description: 'Titre du projet bibliothèque', type: 'text', editorialKey: 'strategy.fundraising.projects.library.title', editable: true },
+      { key: 'strategy.fundraising.projects.library.description', label: 'Bibliothèque - Description', description: 'Description du projet', type: 'textarea', editorialKey: 'strategy.fundraising.projects.library.description', editable: true },
+      { key: 'strategy.fundraising.projects.library.amount', label: 'Bibliothèque - Montant', description: 'Montant recherché', type: 'text', editorialKey: 'strategy.fundraising.projects.library.amount', editable: true },
+      // CTA
+      { key: 'strategy.fundraising.cta.title', label: 'CTA - Titre', description: 'Titre du bloc appel à l\'action', type: 'text', editorialKey: 'strategy.fundraising.cta.title', editable: true },
+      { key: 'strategy.fundraising.cta.text', label: 'CTA - Texte', description: 'Texte d\'accompagnement', type: 'textarea', editorialKey: 'strategy.fundraising.cta.text', editable: true },
+      { key: 'strategy.fundraising.cta.button', label: 'CTA - Bouton', description: 'Texte du bouton', type: 'text', editorialKey: 'strategy.fundraising.cta.button', editable: true },
+    ],
+  },
+]
+
 // Pages du front-office
 export const frontOfficePages: FrontOfficePage[] = [
   {
@@ -300,6 +432,14 @@ export const frontOfficePages: FrontOfficePage[] = [
     description: 'Présentation de l\'université : mission, statistiques et engagements',
     icon: 'info-circle',
     sections: aboutPageSections,
+  },
+  {
+    id: 'strategy',
+    name: 'Page Stratégie',
+    slug: '/a-propos/strategie',
+    description: 'Plan stratégique 2024-2030, axes, indicateurs et levée de fonds',
+    icon: 'compass',
+    sections: strategyPageSections,
   },
 ]
 
@@ -840,5 +980,6 @@ export function useEditorialValuesApi() {
     frontOfficePages,
     homepageSections,
     aboutPageSections,
+    strategyPageSections,
   }
 }
