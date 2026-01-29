@@ -415,6 +415,82 @@ export type ValueSectionKey =
   | 'site.cta.title'
   | 'site.cta.description'
   | 'site.cta.contactButton'
+  // Page Histoire - Hero & Intro
+  | 'historypage.hero.badge'
+  | 'historypage.hero.title'
+  | 'historypage.hero.subtitle'
+  | 'historypage.intro.text'
+  // Page Histoire - Genèse
+  | 'historypage.genesis.date'
+  | 'historypage.genesis.title'
+  | 'historypage.genesis.description'
+  | 'historypage.genesis.point1'
+  | 'historypage.genesis.point2'
+  // Page Histoire - Fondateurs
+  | 'historypage.founders.title'
+  | 'historypage.founders.subtitle'
+  | 'historypage.founders.senghor.role'
+  | 'historypage.founders.druon.role'
+  | 'historypage.founders.boutros.role'
+  | 'historypage.founders.dupuy.role'
+  // Page Histoire - USenghor
+  | 'historypage.usenghor.since'
+  | 'historypage.usenghor.title'
+  | 'historypage.usenghor.description'
+  | 'historypage.usenghor.milestone1.title'
+  | 'historypage.usenghor.milestone1.desc'
+  | 'historypage.usenghor.milestone2.title'
+  | 'historypage.usenghor.milestone2.desc'
+  // Page Histoire - Timeline 1989
+  | 'historypage.timeline.1989.title'
+  | 'historypage.timeline.1989.description'
+  | 'historypage.timeline.1989.rector'
+  | 'historypage.timeline.1989.president'
+  // Page Histoire - Timeline 1991
+  | 'historypage.timeline.1991.title'
+  | 'historypage.timeline.1991.description'
+  | 'historypage.timeline.1991.rector'
+  | 'historypage.timeline.1991.president'
+  // Page Histoire - Timeline 1993
+  | 'historypage.timeline.1993.title'
+  | 'historypage.timeline.1993.description'
+  | 'historypage.timeline.1993.rector'
+  | 'historypage.timeline.1993.president'
+  // Page Histoire - Timeline 2002
+  | 'historypage.timeline.2002.title'
+  | 'historypage.timeline.2002.description'
+  | 'historypage.timeline.2002.rector'
+  | 'historypage.timeline.2002.president'
+  // Page Histoire - Timeline 2004
+  | 'historypage.timeline.2004.title'
+  | 'historypage.timeline.2004.description'
+  | 'historypage.timeline.2004.rector'
+  | 'historypage.timeline.2004.president'
+  // Page Histoire - Timeline 2009
+  | 'historypage.timeline.2009.title'
+  | 'historypage.timeline.2009.description'
+  | 'historypage.timeline.2009.rector'
+  | 'historypage.timeline.2009.president'
+  // Page Histoire - Timeline 2016
+  | 'historypage.timeline.2016.title'
+  | 'historypage.timeline.2016.description'
+  | 'historypage.timeline.2016.rector'
+  | 'historypage.timeline.2016.president'
+  // Page Histoire - Timeline 2020
+  | 'historypage.timeline.2020.title'
+  | 'historypage.timeline.2020.description'
+  // Page Histoire - Direction actuelle
+  | 'historypage.leadership.title'
+  | 'historypage.leadership.rector.name'
+  | 'historypage.leadership.rector.title'
+  | 'historypage.leadership.rector.since'
+  | 'historypage.leadership.president.name'
+  | 'historypage.leadership.president.title'
+  // Page Histoire - Héritage
+  | 'historypage.legacy.badge'
+  | 'historypage.legacy.title'
+  | 'historypage.legacy.description'
+  | 'historypage.legacy.tags'
 
 export interface ValueSection {
   id: string

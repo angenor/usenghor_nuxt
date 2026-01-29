@@ -314,6 +314,7 @@ export function useReferenceData() {
     // Getters
     getCampuses,
     getSectors,
+    getDepartments: getSectors, // Alias pour compatibilité
     getServices,
     getUsers,
     getProjects,
@@ -327,6 +328,7 @@ export function useReferenceData() {
     // Cache (pour accès direct si déjà chargé)
     campuses: campusesCache,
     sectors: sectorsCache,
+    departments: sectorsCache, // Alias pour compatibilité
     services: servicesCache,
     users: usersCache,
     projects: projectsCache,
