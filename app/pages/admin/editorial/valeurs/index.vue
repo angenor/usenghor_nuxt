@@ -78,7 +78,7 @@ async function loadData() {
       categoryId.value = category.id
     }
 
-    const contentsResponse = await listContents({ limit: 100 })
+    const contentsResponse = await listContents({ limit: 500 })
     allContents.value = new Map(
       contentsResponse.items.map(c => [c.key, c]),
     )
@@ -116,8 +116,21 @@ async function handleSaveField(key: string, value: string, valueType: 'text' | '
   error.value = null
 
   try {
-    const existingContent = allContents.value.get(key)
+    let existingContent = allContents.value.get(key)
     const valueAsString = String(value)
+
+    // Si le contenu n'est pas dans le cache local, vérifier s'il existe en BDD
+    if (!existingContent) {
+      try {
+        existingContent = await getContentByKey(key)
+        if (existingContent) {
+          allContents.value.set(key, existingContent)
+        }
+      }
+      catch {
+        // Le contenu n'existe pas en BDD, on va le créer
+      }
+    }
 
     if (existingContent) {
       const updated = await updateContent(existingContent.id, {

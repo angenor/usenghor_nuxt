@@ -372,10 +372,44 @@ export type ValueSectionKey =
   | 'site.presentation.stats.rooms.label'
   | 'site.presentation.stats.capacity.label'
   | 'site.presentation.stats.founded.label'
-  // Page Site - Infrastructures
+  // Page Site - Infrastructures (titres de section)
   | 'site.facilities.title'
   | 'site.facilities.subtitle'
   | 'site.facilities.capacity'
+  // Page Site - Installation: Hébergement
+  | 'site.facility.housing.name'
+  | 'site.facility.housing.description'
+  | 'site.facility.housing.features'
+  | 'site.facility.housing.capacity'
+  // Page Site - Installation: Bibliothèque
+  | 'site.facility.library.name'
+  | 'site.facility.library.description'
+  | 'site.facility.library.features'
+  | 'site.facility.library.capacity'
+  // Page Site - Installation: Salles de Conférence
+  | 'site.facility.conference.name'
+  | 'site.facility.conference.description'
+  | 'site.facility.conference.features'
+  | 'site.facility.conference.capacity'
+  // Page Site - Installation: Espaces Académiques
+  | 'site.facility.academic.name'
+  | 'site.facility.academic.description'
+  | 'site.facility.academic.features'
+  | 'site.facility.academic.capacity'
+  // Page Site - Installation: Installations Sportives
+  | 'site.facility.sports.name'
+  | 'site.facility.sports.description'
+  | 'site.facility.sports.features'
+  // Page Site - Installation: Piscine
+  | 'site.facility.pool.name'
+  | 'site.facility.pool.description'
+  | 'site.facility.pool.features'
+  | 'site.facility.pool.capacity'
+  // Page Site - Installation: Hôtel
+  | 'site.facility.hotel.name'
+  | 'site.facility.hotel.description'
+  | 'site.facility.hotel.features'
+  | 'site.facility.hotel.capacity'
   // Page Site - Localisation
   | 'site.location.title'
   | 'site.location.subtitle'
