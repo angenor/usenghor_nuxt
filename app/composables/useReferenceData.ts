@@ -205,11 +205,16 @@ export function useReferenceData() {
       return usersCache.value
     } catch (e) {
       console.warn('API utilisateurs non disponible, utilisation des données mock:', e)
-      // Fallback vers les données mock
+      // Fallback vers les données mock avec UUIDs générés
+      // Convertir user_001 -> 00000000-0000-0000-0000-000000000001
+      const toMockUuid = (mockId: string): string => {
+        const num = mockId.replace('user_', '').padStart(12, '0')
+        return `00000000-0000-0000-0000-${num}`
+      }
       usersCache.value = mockUsers
         .filter(u => u.active)
         .map(u => ({
-          id: u.id,
+          id: toMockUuid(u.id),
           email: u.email,
           last_name: u.last_name,
           first_name: u.first_name,

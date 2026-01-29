@@ -58,6 +58,7 @@ export const highlightStatusColors: Record<NewsHighlightStatus, string> = {
 
 export function useAdminNewsApi() {
   const { apiFetch } = useApi()
+  const { users: usersCache, campuses: campusesCache, getUsers, getCampuses } = useReferenceData()
 
   // =========================================================================
   // Transformations
@@ -137,9 +138,14 @@ export function useAdminNewsApi() {
         : null, // TODO: Résoudre via API Media
       cover_image_alt: news.title,
       cover_image_external_id: news.cover_image_external_id,
-      // Auteur (à résoudre si nécessaire)
+      // Auteur (résolu depuis le cache)
       author: news.author_external_id
-        ? { id: news.author_external_id, name: 'Auteur', role: '' }
+        ? (() => {
+            const user = usersCache.value.find(u => u.id === news.author_external_id)
+            return user
+              ? { id: user.id, name: user.full_name, role: '' }
+              : { id: news.author_external_id, name: 'Auteur inconnu', role: '' }
+          })()
         : null,
       author_external_id: news.author_external_id,
       // Tags
@@ -153,7 +159,9 @@ export function useAdminNewsApi() {
       media: [],
       // Associations
       campus_id: news.campus_external_id,
-      campus_name: null, // TODO: Résoudre via API
+      campus_name: news.campus_external_id
+        ? campusesCache.value.find(c => c.id === news.campus_external_id)?.name ?? null
+        : null,
       sector_id: news.sector_external_id,
       sector_name: null,
       service_id: news.service_external_id,
@@ -229,9 +237,15 @@ export function useAdminNewsApi() {
 
   /**
    * Récupère une actualité par son ID.
+   * Charge également les données de référence pour résoudre les noms.
    */
   async function getNewsById(id: string): Promise<NewsDisplay> {
-    const news = await apiFetch<NewsWithTags>(`/api/admin/news/${id}`)
+    // Charger les données de référence en parallèle avec l'actualité
+    const [news] = await Promise.all([
+      apiFetch<NewsWithTags>(`/api/admin/news/${id}`),
+      getUsers(),
+      getCampuses(),
+    ])
     return transformToDisplay(news)
   }
 
