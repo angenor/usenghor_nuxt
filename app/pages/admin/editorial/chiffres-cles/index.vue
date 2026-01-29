@@ -31,6 +31,9 @@ const predefinedKeyFigures = [
   { key: 'stats_open_positions', label: 'Postes ouverts', description: 'Nombre de postes actuellement ouverts au recrutement' },
   { key: 'stats_project_countries', label: 'Pays (projets)', description: 'Nombre de pays couverts par les projets de recherche' },
   { key: 'stats_project_beneficiaries', label: 'Bénéficiaires (projets)', description: 'Nombre de bénéficiaires des projets de recherche' },
+  { key: 'stats_alumni_countries', label: 'Pays (alumni)', description: 'Nombre de pays représentés dans le réseau alumni' },
+  { key: 'stats_alumni_sectors', label: 'Secteurs (alumni)', description: 'Nombre de secteurs d\'activité des anciens diplômés' },
+  { key: 'stats_promotions', label: 'Promotions', description: 'Nombre de promotions depuis la création' },
 ]
 
 // === STATE ===

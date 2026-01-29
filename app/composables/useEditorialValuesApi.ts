@@ -720,6 +720,81 @@ export const projectsPageSections: PageSection[] = [
   },
 ]
 
+// ============================================================================
+// DÉFINITION DE LA PAGE ALUMNI
+// ============================================================================
+
+export const alumniPageSections: PageSection[] = [
+  {
+    id: 'alumni-hero',
+    name: 'Hero Alumni',
+    description: 'Bannière principale de la page Alumni',
+    icon: 'image',
+    color: 'bg-gradient-to-r from-gray-800 to-gray-900 text-white',
+    editorialKeys: ['alumni.hero.badge', 'alumni.hero.title', 'alumni.hero.subtitle'],
+    fields: [
+      { key: 'alumni.hero.badge', label: 'Badge', description: 'Texte du badge au-dessus du titre', type: 'text', editorialKey: 'alumni.hero.badge', editable: true },
+      { key: 'alumni.hero.title', label: 'Titre', description: 'Titre principal du hero', type: 'text', editorialKey: 'alumni.hero.title', editable: true },
+      { key: 'alumni.hero.subtitle', label: 'Sous-titre', description: 'Sous-titre du hero', type: 'textarea', editorialKey: 'alumni.hero.subtitle', editable: true },
+    ],
+  },
+  {
+    id: 'alumni-stats',
+    name: 'Section Statistiques',
+    description: 'Titre et libellés des statistiques (les valeurs numériques sont dans Chiffres clés)',
+    icon: 'chart-bar',
+    color: 'bg-brand-blue-100 text-brand-blue-800 dark:bg-brand-blue-900/30 dark:text-brand-blue-300',
+    editorialKeys: [
+      'alumni.stats.title',
+      'alumni.stats.alumni.label', 'alumni.stats.countries.label',
+      'alumni.stats.sectors.label', 'alumni.stats.promotions.label',
+    ],
+    fields: [
+      { key: 'alumni.stats.title', label: 'Titre', description: 'Titre de la section statistiques', type: 'text', editorialKey: 'alumni.stats.title', editable: true },
+      { key: 'alumni.stats.alumni.label', label: 'Label Diplômés', description: 'Libellé pour le nombre de diplômés (valeur dans Chiffres clés)', type: 'text', editorialKey: 'alumni.stats.alumni.label', editable: true },
+      { key: 'alumni.stats.countries.label', label: 'Label Pays', description: 'Libellé pour le nombre de pays (valeur dans Chiffres clés)', type: 'text', editorialKey: 'alumni.stats.countries.label', editable: true },
+      { key: 'alumni.stats.sectors.label', label: 'Label Secteurs', description: 'Libellé pour le nombre de secteurs (valeur dans Chiffres clés)', type: 'text', editorialKey: 'alumni.stats.sectors.label', editable: true },
+      { key: 'alumni.stats.promotions.label', label: 'Label Promotions', description: 'Libellé pour le nombre de promotions (valeur dans Chiffres clés)', type: 'text', editorialKey: 'alumni.stats.promotions.label', editable: true },
+    ],
+  },
+  {
+    id: 'alumni-testimonials',
+    name: 'Section Témoignages',
+    description: 'Histoires de réussite des anciens diplômés (les témoignages viennent de la BDD)',
+    icon: 'quote-left',
+    color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+    editorialKeys: ['alumni.testimonials.title', 'alumni.testimonials.subtitle'],
+    fields: [
+      { key: 'alumni.testimonials.title', label: 'Titre', description: 'Titre de la section témoignages', type: 'text', editorialKey: 'alumni.testimonials.title', editable: true },
+      { key: 'alumni.testimonials.subtitle', label: 'Sous-titre', description: 'Sous-titre de la section', type: 'textarea', editorialKey: 'alumni.testimonials.subtitle', editable: true },
+    ],
+  },
+  {
+    id: 'alumni-list',
+    name: 'Section Liste Alumni',
+    description: 'Grille des anciens diplômés avec filtres (les données viennent de la BDD)',
+    icon: 'users',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    editorialKeys: ['alumni.list.title'],
+    fields: [
+      { key: 'alumni.list.title', label: 'Titre', description: 'Titre de la section liste', type: 'text', editorialKey: 'alumni.list.title', editable: true },
+    ],
+  },
+  {
+    id: 'alumni-cta',
+    name: 'Section CTA',
+    description: 'Appel à l\'action pour rejoindre le réseau alumni',
+    icon: 'bullhorn',
+    color: 'bg-brand-blue-100 text-brand-blue-800 dark:bg-brand-blue-900/30 dark:text-brand-blue-300',
+    editorialKeys: ['alumni.cta.title', 'alumni.cta.description', 'alumni.cta.button'],
+    fields: [
+      { key: 'alumni.cta.title', label: 'Titre', description: 'Titre du bloc CTA', type: 'text', editorialKey: 'alumni.cta.title', editable: true },
+      { key: 'alumni.cta.description', label: 'Description', description: 'Texte d\'accompagnement', type: 'textarea', editorialKey: 'alumni.cta.description', editable: true },
+      { key: 'alumni.cta.button', label: 'Bouton', description: 'Texte du bouton', type: 'text', editorialKey: 'alumni.cta.button', editable: true },
+    ],
+  },
+]
+
 // Pages du front-office
 export const frontOfficePages: FrontOfficePage[] = [
   {
@@ -785,6 +860,14 @@ export const frontOfficePages: FrontOfficePage[] = [
     description: 'Projets de recherche et développement de l\'université',
     icon: 'project-diagram',
     sections: projectsPageSections,
+  },
+  {
+    id: 'alumni',
+    name: 'Page Alumni',
+    slug: '/alumni',
+    description: 'Réseau des anciens diplômés et histoires de réussite',
+    icon: 'user-graduate',
+    sections: alumniPageSections,
   },
 ]
 
@@ -1331,5 +1414,6 @@ export function useEditorialValuesApi() {
     partnersPageSections,
     careersPageSections,
     projectsPageSections,
+    alumniPageSections,
   }
 }

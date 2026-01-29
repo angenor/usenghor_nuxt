@@ -341,6 +341,25 @@ export type ValueSectionKey =
   | 'projects.cta.title'
   | 'projects.cta.description'
   | 'projects.cta.button'
+  // Page Alumni - Hero
+  | 'alumni.hero.badge'
+  | 'alumni.hero.title'
+  | 'alumni.hero.subtitle'
+  // Page Alumni - Section Stats
+  | 'alumni.stats.title'
+  | 'alumni.stats.alumni.label'
+  | 'alumni.stats.countries.label'
+  | 'alumni.stats.sectors.label'
+  | 'alumni.stats.promotions.label'
+  // Page Alumni - Témoignages
+  | 'alumni.testimonials.title'
+  | 'alumni.testimonials.subtitle'
+  // Page Alumni - Liste
+  | 'alumni.list.title'
+  // Page Alumni - CTA
+  | 'alumni.cta.title'
+  | 'alumni.cta.description'
+  | 'alumni.cta.button'
 
 export interface ValueSection {
   id: string
