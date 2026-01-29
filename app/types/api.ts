@@ -794,21 +794,6 @@ export interface ProgramCourseUpdatePayload {
 // Event Registrations (Content Service)
 // ============================================================================
 
-export type RegistrationStatus = 'registered' | 'confirmed' | 'cancelled' | 'attended'
-
-export interface EventRegistrationRead {
-  id: string
-  event_id: string
-  user_external_id: string | null
-  last_name: string | null
-  first_name: string | null
-  email: string
-  phone: string | null
-  organization: string | null
-  status: RegistrationStatus
-  registered_at: string
-}
-
 export interface EventRegistrationCreate {
   last_name?: string | null
   first_name?: string | null
@@ -1478,6 +1463,10 @@ export type ValueSectionKey =
   // Page Partenaires - Section Campus
   | 'partners.campus.title'
   | 'partners.campus.subtitle'
+  // Page Partenaires - Section Liste des partenaires
+  | 'partners.list.badge'
+  | 'partners.list.title'
+  | 'partners.list.subtitle'
 
 export interface ValueSection {
   id: string

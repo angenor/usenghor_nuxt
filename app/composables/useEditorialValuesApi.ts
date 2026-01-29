@@ -521,6 +521,19 @@ export const partnersPageSections: PageSection[] = [
       { key: 'partners.campus.subtitle', label: 'Sous-titre section', description: 'Description de la section', type: 'textarea', editorialKey: 'partners.campus.subtitle', editable: true },
     ],
   },
+  {
+    id: 'partners-list',
+    name: 'Section Liste des Partenaires',
+    description: 'Grille des partenaires institutionnels avec filtres',
+    icon: 'handshake',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    editorialKeys: ['partners.list.badge', 'partners.list.title', 'partners.list.subtitle'],
+    fields: [
+      { key: 'partners.list.badge', label: 'Badge', description: 'Texte du badge de la section', type: 'text', editorialKey: 'partners.list.badge', editable: true },
+      { key: 'partners.list.title', label: 'Titre section', description: 'Titre de la section partenaires', type: 'text', editorialKey: 'partners.list.title', editable: true },
+      { key: 'partners.list.subtitle', label: 'Sous-titre section', description: 'Description de la section', type: 'textarea', editorialKey: 'partners.list.subtitle', editable: true },
+    ],
+  },
 ]
 
 // Pages du front-office
@@ -579,32 +592,32 @@ export const frontOfficePages: FrontOfficePage[] = [
 // LABELS ET CONFIGURATIONS EXISTANTS (rétrocompatibilité)
 // ============================================================================
 
-// Labels pour les sections
-export const valueSectionLabels: Record<ValueSectionKey, string> = {
+// Labels pour les sections (legacy, utilisé uniquement pour les 4 sections principales)
+export const valueSectionLabels: Partial<Record<ValueSectionKey, string>> = {
   mission: 'Mission',
   vision: 'Vision',
   history: 'Historique / À propos',
   rector_message: 'Mot du recteur',
 }
 
-// Descriptions pour les sections
-export const valueSectionDescriptions: Record<ValueSectionKey, string> = {
+// Descriptions pour les sections (legacy)
+export const valueSectionDescriptions: Partial<Record<ValueSectionKey, string>> = {
   mission: 'La mission de l\'Université Senghor et ses objectifs principaux',
   vision: 'La vision à long terme et les aspirations de l\'université',
   history: 'L\'histoire et le contexte de création de l\'université',
   rector_message: 'Le message du recteur aux étudiants et partenaires',
 }
 
-// Icônes pour les sections
-export const valueSectionIcons: Record<ValueSectionKey, string> = {
+// Icônes pour les sections (legacy)
+export const valueSectionIcons: Partial<Record<ValueSectionKey, string>> = {
   mission: 'bullseye',
   vision: 'eye',
   history: 'book-open',
   rector_message: 'user-tie',
 }
 
-// Couleurs pour les sections
-export const valueSectionColors: Record<ValueSectionKey, string> = {
+// Couleurs pour les sections (legacy)
+export const valueSectionColors: Partial<Record<ValueSectionKey, string>> = {
   mission: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
   vision: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
   history: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
