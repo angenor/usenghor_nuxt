@@ -46,6 +46,19 @@ export interface CampusPartnerPublic {
   country_name_fr: string | null
 }
 
+/**
+ * Membre d'équipe d'un campus
+ */
+export interface CampusTeamMemberPublic {
+  id: string
+  first_name: string
+  last_name: string
+  position: string
+  photo_url: string | null
+  email: string | null
+  display_order: number
+}
+
 // ============================================================================
 // HELPERS
 // ============================================================================
@@ -145,6 +158,13 @@ export function usePublicCampusApi() {
    */
   async function getCampusPartners(campusId: string): Promise<CampusPartnerPublic[]> {
     return $fetch<CampusPartnerPublic[]>(`${baseUrl}/api/public/campuses/${campusId}/partners`)
+  }
+
+  /**
+   * Récupère les membres de l'équipe d'un campus
+   */
+  async function getCampusTeam(campusId: string): Promise<CampusTeamMemberPublic[]> {
+    return $fetch<CampusTeamMemberPublic[]>(`${baseUrl}/api/public/campuses/${campusId}/team`)
   }
 
   // ==========================================================================
