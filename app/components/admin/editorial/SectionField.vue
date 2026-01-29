@@ -16,13 +16,30 @@ const emit = defineEmits<{
 }>()
 
 const editingValue = ref('')
-const editingType = ref<'text' | 'textarea' | 'number'>('text')
+const editingType = ref<'text' | 'textarea' | 'number' | 'list'>('text')
 
 const hasValue = computed(() => !!props.value)
 
+// Pour le type list, convertir la valeur en tableau pour l'affichage
+const listItems = computed(() => {
+  if (props.field.type !== 'list' || !props.value) return []
+  return props.value.split('\n').filter(item => item.trim())
+})
+
 function startEditing() {
   editingValue.value = props.value
-  editingType.value = props.field.type === 'number' ? 'number' : props.field.type === 'textarea' || props.field.type === 'html' ? 'textarea' : 'text'
+  if (props.field.type === 'number') {
+    editingType.value = 'number'
+  }
+  else if (props.field.type === 'textarea' || props.field.type === 'html') {
+    editingType.value = 'textarea'
+  }
+  else if (props.field.type === 'list') {
+    editingType.value = 'list'
+  }
+  else {
+    editingType.value = 'text'
+  }
   emit('edit')
 }
 
@@ -87,10 +104,22 @@ function cancel() {
           <input
             v-if="editingType === 'text' || editingType === 'number'"
             v-model="editingValue"
-            :type="editingType"
+            :type="editingType === 'number' ? 'number' : 'text'"
             class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             :placeholder="field.label"
           />
+          <div v-else-if="editingType === 'list'" class="space-y-2">
+            <textarea
+              v-model="editingValue"
+              rows="6"
+              class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white font-mono"
+              :placeholder="`${field.label} (une ligne par élément)`"
+            />
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              <font-awesome-icon :icon="['fas', 'info-circle']" class="mr-1" />
+              Entrez un élément par ligne. Chaque ligne deviendra un élément de la liste.
+            </p>
+          </div>
           <textarea
             v-else
             v-model="editingValue"
@@ -123,7 +152,19 @@ function cancel() {
 
       <!-- Display mode -->
       <div v-else>
-        <p v-if="hasValue" class="text-sm text-gray-700 dark:text-gray-300">
+        <!-- List display -->
+        <ul v-if="field.type === 'list' && listItems.length > 0" class="space-y-1">
+          <li
+            v-for="(item, index) in listItems"
+            :key="index"
+            class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300"
+          >
+            <font-awesome-icon :icon="['fas', 'check']" class="mt-1 h-3 w-3 text-green-500 flex-shrink-0" />
+            <span>{{ item }}</span>
+          </li>
+        </ul>
+        <!-- Text display -->
+        <p v-else-if="hasValue" class="text-sm text-gray-700 dark:text-gray-300">
           {{ value }}
         </p>
         <p v-else class="text-sm text-gray-400 dark:text-gray-500 italic">
