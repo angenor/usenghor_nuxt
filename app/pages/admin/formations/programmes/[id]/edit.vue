@@ -50,6 +50,7 @@ const form = ref({
   degree_awarded: '',
   required_degree: '',
   status: 'draft' as PublicationStatus,
+  is_featured: false,
 })
 
 // État des compétences
@@ -95,6 +96,7 @@ async function loadProgram() {
       degree_awarded: program.value.degree_awarded || '',
       required_degree: program.value.required_degree || '',
       status: program.value.status,
+      is_featured: program.value.is_featured || false,
     }
   } catch (e) {
     console.error('Erreur lors du chargement du programme:', e)
@@ -425,6 +427,7 @@ const submitForm = async () => {
       degree_awarded: form.value.degree_awarded || null,
       required_degree: form.value.required_degree || null,
       status: form.value.status,
+      is_featured: form.value.is_featured,
     })
 
     hasChanges.value = false
@@ -751,22 +754,46 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
           Publication
         </h2>
 
-        <div class="sm:max-w-xs">
-          <label for="status" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Statut de publication
-          </label>
-          <select
-            id="status"
-            v-model="form.status"
-            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          >
-            <option v-for="ps in publicationStatuses" :key="ps.value" :value="ps.value">
-              {{ ps.label }}
-            </option>
-          </select>
-          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Seuls les programmes publiés sont visibles sur le site public.
-          </p>
+        <div class="grid gap-6 sm:grid-cols-2">
+          <div>
+            <label for="status" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Statut de publication
+            </label>
+            <select
+              id="status"
+              v-model="form.status"
+              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            >
+              <option v-for="ps in publicationStatuses" :key="ps.value" :value="ps.value">
+                {{ ps.label }}
+              </option>
+            </select>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Seuls les programmes publiés sont visibles sur le site public.
+            </p>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Mise en avant
+            </label>
+            <label class="mt-2 flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-700/50 dark:hover:bg-gray-700">
+              <input
+                v-model="form.is_featured"
+                type="checkbox"
+                class="h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 dark:border-gray-600 dark:bg-gray-700"
+              >
+              <div>
+                <span class="flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-white">
+                  <font-awesome-icon icon="fa-solid fa-star" class="h-3.5 w-3.5 text-amber-500" />
+                  À la une
+                </span>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  Afficher sur la page d'accueil
+                </p>
+              </div>
+            </label>
+          </div>
         </div>
       </div>
 

@@ -61,6 +61,7 @@ const programForm = ref({
   degree_awarded: '',
   required_degree: '',
   status: 'draft' as PublicationStatus,
+  is_featured: false,
 })
 
 // === DATA LOADING ===
@@ -222,6 +223,7 @@ function openCreateModal() {
     degree_awarded: 'Master professionnel',
     required_degree: 'Bac+4 minimum',
     status: 'draft',
+    is_featured: false,
   }
   showCreateModal.value = true
 }
@@ -265,6 +267,7 @@ async function handleCreateProgram() {
       degree_awarded: programForm.value.degree_awarded || null,
       required_degree: programForm.value.required_degree || null,
       status: programForm.value.status,
+      is_featured: programForm.value.is_featured,
     }
     const result = await createProgram(payload)
     closeCreateModal()
@@ -578,8 +581,14 @@ async function bulkDelete() {
                       <font-awesome-icon icon="fa-solid fa-graduation-cap" class="h-5 w-5 text-gray-400" />
                     </div>
                     <div class="min-w-0">
-                      <p class="truncate font-medium text-gray-900 dark:text-white">
+                      <p class="flex items-center gap-1.5 truncate font-medium text-gray-900 dark:text-white">
                         {{ program.title }}
+                        <font-awesome-icon
+                          v-if="program.is_featured"
+                          icon="fa-solid fa-star"
+                          class="h-3.5 w-3.5 text-amber-500"
+                          title="À la une"
+                        />
                       </p>
                       <p class="truncate text-xs text-gray-500 dark:text-gray-400">
                         {{ program.code }} · {{ program.slug }}
@@ -863,18 +872,40 @@ async function bulkDelete() {
               />
             </div>
 
-            <!-- Statut -->
-            <div>
-              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Statut de publication
-              </label>
-              <select
-                v-model="programForm.status"
-                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              >
-                <option value="draft">Brouillon</option>
-                <option value="published">Publié</option>
-              </select>
+            <!-- Statut et À la une -->
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Statut de publication
+                </label>
+                <select
+                  v-model="programForm.status"
+                  class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="draft">Brouillon</option>
+                  <option value="published">Publié</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Mise en avant
+                </label>
+                <label class="mt-2 flex cursor-pointer items-center gap-3">
+                  <input
+                    v-model="programForm.is_featured"
+                    type="checkbox"
+                    class="h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 dark:border-gray-600 dark:bg-gray-700"
+                  >
+                  <span class="text-sm text-gray-700 dark:text-gray-300">
+                    <font-awesome-icon icon="fa-solid fa-star" class="mr-1 h-3 w-3 text-amber-500" />
+                    À la une
+                  </span>
+                </label>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Afficher sur la page d'accueil
+                </p>
+              </div>
             </div>
 
             <!-- Boutons -->

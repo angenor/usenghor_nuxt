@@ -1,6 +1,10 @@
 <script setup lang="ts">
+import { useAuthStore } from '~/stores/auth'
+
 const { isCollapsed } = useAdminSidebar()
 const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
 
 // Breadcrumb basé sur la route
 const breadcrumbs = computed(() => {
@@ -40,19 +44,42 @@ const toggleUserMenu = () => {
 // Fermer le menu au clic extérieur
 const userMenuRef = ref<HTMLElement | null>(null)
 
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
-
 const handleClickOutside = (event: MouseEvent) => {
   if (userMenuRef.value && !userMenuRef.value.contains(event.target as Node)) {
     showUserMenu.value = false
   }
 }
+
+// Déconnexion
+const handleLogout = () => {
+  authStore.logout()
+  router.push('/admin/login')
+}
+
+// Recherche globale
+const showSearchModal = ref(false)
+
+const openSearchModal = () => {
+  showSearchModal.value = true
+}
+
+// Raccourci clavier ⌘K / Ctrl+K
+const handleGlobalKeydown = (event: KeyboardEvent) => {
+  if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+    event.preventDefault()
+    openSearchModal()
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+  document.addEventListener('keydown', handleGlobalKeydown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+  document.removeEventListener('keydown', handleGlobalKeydown)
+})
 </script>
 
 <template>
@@ -98,6 +125,7 @@ const handleClickOutside = (event: MouseEvent) => {
       <div class="flex items-center gap-4">
         <!-- Recherche globale -->
         <button
+          @click="openSearchModal"
           class="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400
                  bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700
                  transition-colors"
@@ -205,6 +233,7 @@ const handleClickOutside = (event: MouseEvent) => {
 
               <div class="border-t border-gray-200 dark:border-gray-700 py-1">
                 <button
+                  @click="handleLogout"
                   class="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400
                          hover:bg-red-50 dark:hover:bg-red-900/20"
                 >
@@ -218,4 +247,7 @@ const handleClickOutside = (event: MouseEvent) => {
       </div>
     </div>
   </header>
+
+  <!-- Modal de recherche -->
+  <AdminSearchModal v-model="showSearchModal" />
 </template>

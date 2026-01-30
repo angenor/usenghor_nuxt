@@ -25,6 +25,7 @@ export interface ProgramPublic {
   credits: number | null
   degree_awarded: string | null
   required_degree: string | null
+  is_featured: boolean
 }
 
 export interface ProgramPublicWithDetails extends ProgramPublic {
@@ -150,6 +151,13 @@ export function usePublicProgramsApi() {
   }
 
   /**
+   * Liste les programmes mis à la une (featured)
+   */
+  async function listFeaturedPrograms(limit = 4): Promise<ProgramPublic[]> {
+    return publicFetch<ProgramPublic[]>(`/api/public/programs/featured?limit=${limit}`)
+  }
+
+  /**
    * Récupère des programmes similaires (même type ou département)
    */
   async function getRelatedPrograms(
@@ -198,6 +206,7 @@ export function usePublicProgramsApi() {
     getProgramBySlug,
     listProgramsByType,
     listProgramsByDepartment,
+    listFeaturedPrograms,
     getRelatedPrograms,
 
     // Helpers

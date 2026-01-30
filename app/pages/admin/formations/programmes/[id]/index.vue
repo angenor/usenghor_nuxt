@@ -7,7 +7,6 @@ definePageMeta({
 
 const route = useRoute()
 const router = useRouter()
-const toast = useToast()
 
 const {
   getProgramById,
@@ -33,11 +32,7 @@ async function loadProgram() {
     program.value = await getProgramById(route.params.id as string)
   } catch (e) {
     console.error('Erreur lors du chargement du programme:', e)
-    toast.add({
-      title: 'Erreur',
-      description: 'Programme non trouvé',
-      color: 'error',
-    })
+    alert('Programme non trouvé')
     router.replace('/admin/formations/programmes')
   } finally {
     loading.value = false
@@ -58,19 +53,10 @@ async function confirmDelete() {
   actionLoading.value = true
   try {
     await deleteProgram(program.value.id)
-    toast.add({
-      title: 'Succès',
-      description: 'Programme supprimé avec succès',
-      color: 'success',
-    })
     router.push('/admin/formations/programmes')
   } catch (e) {
     console.error('Erreur lors de la suppression:', e)
-    toast.add({
-      title: 'Erreur',
-      description: 'Impossible de supprimer le programme',
-      color: 'error',
-    })
+    alert('Impossible de supprimer le programme')
   } finally {
     actionLoading.value = false
     showDeleteModal.value = false
@@ -84,18 +70,9 @@ async function togglePublished() {
   try {
     const updated = await toggleProgramStatus(program.value.id)
     program.value = { ...program.value, status: updated.status }
-    toast.add({
-      title: 'Succès',
-      description: isPublished(updated.status) ? 'Programme publié' : 'Programme dépublié',
-      color: 'success',
-    })
   } catch (e) {
     console.error('Erreur lors du changement de statut:', e)
-    toast.add({
-      title: 'Erreur',
-      description: 'Impossible de modifier le statut',
-      color: 'error',
-    })
+    alert('Impossible de modifier le statut')
   } finally {
     actionLoading.value = false
   }
@@ -124,19 +101,10 @@ async function confirmDuplicate() {
   actionLoading.value = true
   try {
     const result = await duplicateProgram(program.value.id, duplicateForm.value)
-    toast.add({
-      title: 'Succès',
-      description: 'Programme dupliqué avec succès',
-      color: 'success',
-    })
     router.push(`/admin/formations/programmes/${result.id}/edit`)
   } catch (e) {
     console.error('Erreur lors de la duplication:', e)
-    toast.add({
-      title: 'Erreur',
-      description: 'Impossible de dupliquer le programme',
-      color: 'error',
-    })
+    alert('Impossible de dupliquer le programme')
   } finally {
     actionLoading.value = false
     showDuplicateModal.value = false

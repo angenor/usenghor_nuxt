@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import type { Formation } from '~/composables/useMockData'
+import type { ProgramPublic } from '~/composables/usePublicProgramsApi'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
-const { getFormationsFeatured } = useMockData()
+const {
+  listFeaturedPrograms,
+  formatDuration,
+  programTypeToUrlSlug,
+} = usePublicProgramsApi()
 
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, loadContent } = useEditorialContent('homepage')
@@ -11,58 +15,57 @@ const { getContent, loadContent } = useEditorialContent('homepage')
 const { elementRef: headerRef } = useScrollAnimation({ animation: 'fadeInDown' })
 const { elementRef: cardsRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.1 })
 
-onMounted(() => {
+// Programmes à la une
+const featuredPrograms = ref<ProgramPublic[]>([])
+const loading = ref(true)
+
+onMounted(async () => {
   // Charger les contenus éditoriaux (non-bloquant)
   loadContent()
+
+  // Charger les programmes à la une depuis l'API
+  try {
+    featuredPrograms.value = await listFeaturedPrograms(4)
+  } catch (e) {
+    console.error('Erreur lors du chargement des programmes à la une:', e)
+  } finally {
+    loading.value = false
+  }
 })
-
-// Get 4 featured formations
-const featuredFormations = computed(() => getFormationsFeatured().slice(0, 4))
-
-// Mapping type to URL slug
-const typeToSlug: Record<string, string> = {
-  master: 'masters',
-  doctorat: 'doctorats',
-  du: 'diplomes-universitaires',
-  certifiante: 'certifiantes'
-}
 
 // Type badge colors
 const typeBgColors: Record<string, string> = {
   master: 'bg-brand-blue-500',
-  doctorat: 'bg-brand-red-600',
-  du: 'bg-brand-blue-600',
-  certifiante: 'bg-brand-red-500'
+  doctorate: 'bg-brand-red-600',
+  university_diploma: 'bg-brand-blue-600',
+  certificate: 'bg-brand-red-500'
 }
 
-// Get localized title
-const getLocalizedTitle = (formation: Formation) => {
-  if (locale.value === 'en' && formation.title_en) return formation.title_en
-  if (locale.value === 'ar' && formation.title_ar) return formation.title_ar
-  return formation.title_fr
+// Get localized title (pour l'instant, on utilise le titre principal)
+const getLocalizedTitle = (program: ProgramPublic) => {
+  return program.title
 }
 
 // Get localized description
-const getLocalizedDescription = (formation: Formation) => {
-  if (locale.value === 'en' && formation.short_description_en) return formation.short_description_en
-  return formation.short_description_fr
+const getLocalizedDescription = (program: ProgramPublic) => {
+  return program.description || ''
 }
 
 // Get localized duration
-const getLocalizedDuration = (formation: Formation) => {
-  if (locale.value === 'en' && formation.duration_en) return formation.duration_en
-  return formation.duration_fr
+const getLocalizedDuration = (program: ProgramPublic) => {
+  return formatDuration(program.duration_months, locale.value)
 }
 
 // Detail page URL
-const getDetailUrl = (formation: Formation) => {
-  const typeSlug = typeToSlug[formation.formation_type]
-  return localePath(`/formations/${typeSlug}/${formation.slug}`)
+const getDetailUrl = (program: ProgramPublic) => {
+  const typeSlug = programTypeToUrlSlug[program.type]
+  return localePath(`/formations/${typeSlug}/${program.slug}`)
 }
 
 // Image URL with fallback
-const getImageUrl = (formation: Formation) => {
-  return formation.image || `https://picsum.photos/seed/${formation.slug}/800/600`
+const getImageUrl = (program: ProgramPublic) => {
+  // Pour l'instant, utiliser picsum comme fallback
+  return `https://picsum.photos/seed/${program.slug}/800/600`
 }
 </script>
 
@@ -86,56 +89,62 @@ const getImageUrl = (formation: Formation) => {
         </p>
       </div>
 
+      <!-- Loading state -->
+      <div v-if="loading" class="flex justify-center items-center py-20">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue-600"></div>
+      </div>
+
+      <!-- Empty state -->
+      <div v-else-if="featuredPrograms.length === 0" class="text-center py-20">
+        <p class="text-gray-500 dark:text-gray-400">
+          {{ t('formations.index.noFeatured') }}
+        </p>
+      </div>
+
       <!-- Formations Grid - flex layout like original design -->
-      <div ref="cardsRef" class="px-5 grid sm:grid-cols-2 xl:flex items-center justify-center gap-8 lg:gap-16 xl:gap-20 mb-16">
+      <div v-else ref="cardsRef" class="px-5 grid sm:grid-cols-2 xl:flex items-center justify-center gap-8 lg:gap-16 xl:gap-20 mb-16">
         <article
-          v-for="formation in featuredFormations"
-          :key="formation.id"
+          v-for="program in featuredPrograms"
+          :key="program.id"
           class="group"
         >
           <div class="relative">
             <!-- Image -->
             <img
-              :src="getImageUrl(formation)"
-              :alt="getLocalizedTitle(formation)"
+              :src="getImageUrl(program)"
+              :alt="getLocalizedTitle(program)"
               class="w-full aspect-[3/2] lg:aspect-[3/4] h-44 lg:h-[26rem] xl:h-[24rem] object-cover shadow-lg"
             />
-
-            <!-- Application open badge -->
-            <span
-              v-if="formation.application_open"
-              class="absolute top-3 left-3 px-3 py-1.5 text-xs font-medium bg-green-500 text-white rounded-full flex items-center gap-1.5 z-10 shadow-md"
-            >
-              <span class="w-2 h-2 bg-white rounded-full animate-pulse" />
-              {{ t('formations.card.applicationOpen') }}
-            </span>
 
             <!-- Overlay Card - positioned to the right of image on lg+ -->
             <div class="lg:rounded-l-[30px] lg:rounded-t-[30px] bg-white dark:bg-gray-800 lg:absolute bottom-6 -right-10 xl:-right-8 lg:w-[16rem] xl:w-[14rem] px-6 xl:px-5 py-5 lg:h-80 xl:h-72 shadow-lg transition-all duration-300 group-hover:shadow-xl">
               <!-- Duration -->
               <span class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
                 <font-awesome-icon icon="fa-solid fa-clock" class="w-3.5 h-3.5 text-brand-red-500" />
-                {{ getLocalizedDuration(formation) }}
+                {{ getLocalizedDuration(program) }}
               </span>
 
               <!-- Title -->
               <h3 class="text-xl xl:text-lg font-bold leading-tight mt-1.5 mb-2.5 text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors line-clamp-2">
-                {{ getLocalizedTitle(formation) }}
+                {{ getLocalizedTitle(program) }}
               </h3>
 
-              <!-- Campus -->
-              <span class="inline-block text-brand-blue-500 dark:text-brand-blue-400 text-sm capitalize hover:underline">
-                {{ t(`formations.campus.${formation.campus}`) }}
+              <!-- Type badge -->
+              <span
+                :class="[typeBgColors[program.type] || 'bg-gray-500']"
+                class="inline-block text-white text-xs px-2 py-0.5 rounded capitalize"
+              >
+                {{ t(`formations.types.${program.type}`) }}
               </span>
 
               <!-- Description -->
               <p class="text-gray-700 dark:text-gray-300 my-5 xl:my-3 leading-relaxed text-sm line-clamp-3 xl:line-clamp-2">
-                {{ getLocalizedDescription(formation) }}
+                {{ getLocalizedDescription(program) }}
               </p>
 
               <!-- Read more link -->
               <NuxtLink
-                :to="getDetailUrl(formation)"
+                :to="getDetailUrl(program)"
                 class="flex justify-end items-center uppercase text-brand-blue-600 dark:text-brand-blue-400 font-semibold text-sm hover:text-brand-blue-500 transition-colors"
               >
                 <span class="mr-4 block w-10 h-0.5 bg-brand-blue-600 dark:bg-brand-blue-400 transition-all group-hover:w-14"></span>

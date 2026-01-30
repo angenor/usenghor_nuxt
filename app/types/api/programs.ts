@@ -78,6 +78,7 @@ export interface ProgramRead {
   degree_awarded: string | null
   required_degree: string | null
   status: PublicationStatus
+  is_featured: boolean
   display_order: number
   created_at: string
   updated_at: string
@@ -107,6 +108,7 @@ export interface ProgramCreatePayload {
   degree_awarded?: string | null
   required_degree?: string | null
   status?: PublicationStatus
+  is_featured?: boolean
   display_order?: number
 }
 
@@ -124,6 +126,7 @@ export interface ProgramUpdatePayload {
   degree_awarded?: string | null
   required_degree?: string | null
   status?: PublicationStatus
+  is_featured?: boolean
   display_order?: number
 }
 
