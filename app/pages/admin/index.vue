@@ -135,8 +135,8 @@ async function fetchDashboardData() {
 
 // Generate chart data from application stats
 function generateChartData() {
-  // Application status distribution
-  applicationStatusData.value = [
+  // Application status distribution - use real data or demo data
+  const realStatusData = [
     { category: 'Soumises', value: applicationStats.value.submitted, color: '#3B82F6' },
     { category: 'En révision', value: applicationStats.value.under_review, color: '#F59E0B' },
     { category: 'Acceptées', value: applicationStats.value.accepted, color: '#10B981' },
@@ -144,6 +144,15 @@ function generateChartData() {
     { category: 'Liste d\'attente', value: applicationStats.value.waitlisted, color: '#F97316' },
     { category: 'Incomplètes', value: applicationStats.value.incomplete, color: '#6B7280' }
   ].filter(d => d.value > 0)
+
+  // Use demo data if no real data available
+  applicationStatusData.value = realStatusData.length > 0 ? realStatusData : [
+    { category: 'Soumises', value: 45, color: '#3B82F6' },
+    { category: 'En révision', value: 23, color: '#F59E0B' },
+    { category: 'Acceptées', value: 67, color: '#10B981' },
+    { category: 'Refusées', value: 12, color: '#EF4444' },
+    { category: 'Liste d\'attente', value: 8, color: '#F97316' }
+  ]
 
   // Generate mock trend data for last 12 months
   const now = new Date()
@@ -368,7 +377,7 @@ const formatDate = (dateString: string) => {
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Tendance des candidatures
         </h3>
-        <AmAreaChart
+        <ChartsAmAreaChart
           v-if="applicationTrendData.length > 0"
           :data="applicationTrendData"
           height="250px"
@@ -385,7 +394,7 @@ const formatDate = (dateString: string) => {
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Répartition par statut
         </h3>
-        <AmDonutChart
+        <ChartsAmDonutChart
           v-if="applicationStatusData.length > 0"
           :data="applicationStatusData"
           height="250px"
@@ -404,7 +413,7 @@ const formatDate = (dateString: string) => {
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Événements par type
         </h3>
-        <AmBarChart
+        <ChartsAmBarChart
           v-if="eventTypeData.length > 0"
           :data="eventTypeData"
           height="250px"
@@ -419,7 +428,7 @@ const formatDate = (dateString: string) => {
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Publications par mois
         </h3>
-        <AmLineChart
+        <ChartsAmLineChart
           v-if="newsPublicationData.length > 0"
           :data="newsPublicationData"
           height="250px"
