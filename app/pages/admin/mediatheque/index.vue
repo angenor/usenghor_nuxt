@@ -749,10 +749,10 @@ async function loadEntities() {
       results.push(...projectResults)
     }
 
-    // Trier: entités non liées d'abord, puis liées
+    // Trier: entités liées d'abord, puis non liées
     entityOptions.value = results.sort((a, b) => {
       if (a.isLinked === b.isLinked) return a.name.localeCompare(b.name)
-      return a.isLinked ? 1 : -1
+      return a.isLinked ? -1 : 1
     })
   } catch (error) {
     console.error('Erreur chargement entités:', error)
