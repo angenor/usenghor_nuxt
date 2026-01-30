@@ -30,6 +30,12 @@ const {
   addMediaToAlbum
 } = useAlbumsApi()
 
+// APIs pour les entités (associations albums)
+const { listCampuses, addCampusAlbum, getCampusAlbums } = useCampusApi()
+const { getAllServices, addAlbumToService, getServiceAlbums } = useServicesApi()
+const { listEvents, addEventAlbum, getEventAlbums } = useEventsApi()
+const { listProjects, addProjectAlbum, listProjectMedia } = useProjectsApi()
+
 // Constantes
 const mediaTypeLabels: Record<string, string> = {
   image: 'Image',
@@ -103,6 +109,22 @@ const showCreateAlbumModal = ref(false)
 const showEditAlbumModal = ref(false)
 const showDeleteAlbumModal = ref(false)
 const showAlbumDetailModal = ref(false)
+const showLinkEntityModal = ref(false)
+
+// Types d'entités pour l'association
+type EntityType = 'campus' | 'service' | 'event' | 'project'
+interface EntityOption {
+  id: string
+  name: string
+  type: EntityType
+  isLinked?: boolean
+}
+
+// État pour l'association d'album à une entité
+const linkEntityType = ref<EntityType | 'all'>('all')
+const entityOptions = ref<EntityOption[]>([])
+const isLoadingEntities = ref(false)
+const albumToLink = ref<AlbumRead | null>(null)
 
 const selectedMedia = ref<MediaRead | null>(null)
 const deletingMedia = ref<MediaRead | null>(null)
@@ -631,6 +653,173 @@ const handleAddToAlbum = async (albumId: string) => {
 const handleCreateAlbumWithSelection = () => {
   closeAddToAlbumModal()
   openCreateAlbumModal()
+}
+
+// === ASSOCIER ALBUM À UNE ENTITÉ ===
+const entityTypeLabels: Record<EntityType, string> = {
+  campus: 'Campus',
+  service: 'Service',
+  event: 'Événement',
+  project: 'Projet'
+}
+
+const entityTypeIcons: Record<EntityType, string> = {
+  campus: 'fa-building-columns',
+  service: 'fa-cogs',
+  event: 'fa-calendar-alt',
+  project: 'fa-diagram-project'
+}
+
+async function loadEntities() {
+  isLoadingEntities.value = true
+  entityOptions.value = []
+
+  const albumId = albumToLink.value?.id
+
+  try {
+    const results: EntityOption[] = []
+
+    // Charger selon le filtre ou tout
+    if (linkEntityType.value === 'all' || linkEntityType.value === 'campus') {
+      const campuses = await listCampuses({ limit: 100 })
+      // Vérifier les associations existantes pour chaque campus
+      const campusResults = await Promise.all(
+        campuses.items.map(async (c) => {
+          let isLinked = false
+          if (albumId) {
+            try {
+              const linkedAlbums = await getCampusAlbums(c.id)
+              isLinked = linkedAlbums.includes(albumId)
+            } catch { /* ignore */ }
+          }
+          return { id: c.id, name: c.name, type: 'campus' as EntityType, isLinked }
+        })
+      )
+      results.push(...campusResults)
+    }
+
+    if (linkEntityType.value === 'all' || linkEntityType.value === 'service') {
+      const services = await getAllServices()
+      const serviceResults = await Promise.all(
+        services.map(async (s) => {
+          let isLinked = false
+          if (albumId) {
+            try {
+              const linkedAlbums = await getServiceAlbums(s.id)
+              isLinked = linkedAlbums.includes(albumId)
+            } catch { /* ignore */ }
+          }
+          return { id: s.id, name: s.name, type: 'service' as EntityType, isLinked }
+        })
+      )
+      results.push(...serviceResults)
+    }
+
+    if (linkEntityType.value === 'all' || linkEntityType.value === 'event') {
+      const events = await listEvents({ limit: 100 })
+      const eventResults = await Promise.all(
+        events.items.map(async (e) => {
+          let isLinked = false
+          if (albumId) {
+            try {
+              const linkedAlbums = await getEventAlbums(e.id)
+              isLinked = linkedAlbums.includes(albumId)
+            } catch { /* ignore */ }
+          }
+          return { id: e.id, name: e.title, type: 'event' as EntityType, isLinked }
+        })
+      )
+      results.push(...eventResults)
+    }
+
+    if (linkEntityType.value === 'all' || linkEntityType.value === 'project') {
+      const projects = await listProjects({ limit: 100 })
+      const projectResults = await Promise.all(
+        projects.items.map(async (p) => {
+          let isLinked = false
+          if (albumId) {
+            try {
+              const linkedMedia = await listProjectMedia(p.id)
+              isLinked = linkedMedia.some(m => m.album_external_id === albumId)
+            } catch { /* ignore */ }
+          }
+          return { id: p.id, name: p.title, type: 'project' as EntityType, isLinked }
+        })
+      )
+      results.push(...projectResults)
+    }
+
+    // Trier: entités non liées d'abord, puis liées
+    entityOptions.value = results.sort((a, b) => {
+      if (a.isLinked === b.isLinked) return a.name.localeCompare(b.name)
+      return a.isLinked ? 1 : -1
+    })
+  } catch (error) {
+    console.error('Erreur chargement entités:', error)
+  } finally {
+    isLoadingEntities.value = false
+  }
+}
+
+const openLinkEntityModal = async (album: AlbumRead) => {
+  albumToLink.value = album
+  linkEntityType.value = 'all'
+  showLinkEntityModal.value = true
+  await loadEntities()
+}
+
+const closeLinkEntityModal = () => {
+  showLinkEntityModal.value = false
+  albumToLink.value = null
+  entityOptions.value = []
+}
+
+watch(linkEntityType, () => {
+  if (showLinkEntityModal.value) {
+    loadEntities()
+  }
+})
+
+const handleLinkToEntity = async (entity: EntityOption) => {
+  if (!albumToLink.value) return
+  isSaving.value = true
+
+  const entityTypeLabel = {
+    campus: 'au campus',
+    service: 'au service',
+    event: 'à l\'événement',
+    project: 'au projet',
+  }[entity.type]
+
+  try {
+    switch (entity.type) {
+      case 'campus':
+        await addCampusAlbum(entity.id, albumToLink.value.id)
+        break
+      case 'service':
+        await addAlbumToService(entity.id, albumToLink.value.id)
+        break
+      case 'event':
+        await addEventAlbum(entity.id, albumToLink.value.id)
+        break
+      case 'project':
+        await addProjectAlbum(entity.id, albumToLink.value.id)
+        break
+    }
+    alert(`Album "${albumToLink.value.title}" associé ${entityTypeLabel} "${entity.name}" avec succès.`)
+    closeLinkEntityModal()
+  } catch (error: unknown) {
+    console.error('Erreur association album:', error)
+    // Vérifier si c'est une erreur 409 (Conflict = déjà associé)
+    const fetchError = error as { statusCode?: number; status?: number }
+    if (fetchError.statusCode === 409 || fetchError.status === 409) {
+      alert(`L'album "${albumToLink.value.title}" est déjà associé ${entityTypeLabel} "${entity.name}".`)
+    } else {
+      alert('Erreur lors de l\'association de l\'album. Veuillez réessayer.')
+    }
+  } finally {
+    isSaving.value = false
+  }
 }
 </script>
 
@@ -1246,6 +1435,13 @@ const handleCreateAlbumWithSelection = () => {
               </NuxtLink>
               <button
                 class="rounded-full bg-white p-2 text-gray-700 transition-colors hover:bg-gray-100"
+                title="Associer à une entité"
+                @click="openLinkEntityModal(album)"
+              >
+                <font-awesome-icon icon="fa-solid fa-link" class="h-4 w-4" />
+              </button>
+              <button
+                class="rounded-full bg-white p-2 text-gray-700 transition-colors hover:bg-gray-100"
                 title="Modifier"
                 @click="openEditAlbumModal(album)"
               >
@@ -1276,6 +1472,13 @@ const handleCreateAlbumWithSelection = () => {
                     :icon="album.status === 'draft' ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"
                     class="h-4 w-4"
                   />
+                </button>
+                <button
+                  class="rounded p-1.5 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
+                  title="Associer à une entité"
+                  @click="openLinkEntityModal(album)"
+                >
+                  <font-awesome-icon icon="fa-solid fa-link" class="h-4 w-4" />
                 </button>
               </div>
               <button
@@ -1981,6 +2184,131 @@ const handleCreateAlbumWithSelection = () => {
               >
                 Ajouter des médias
               </NuxtLink>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Modal pour associer un album à une entité -->
+    <Teleport to="body">
+      <div
+        v-if="showLinkEntityModal && albumToLink"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        @click.self="closeLinkEntityModal"
+      >
+        <div class="flex max-h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-gray-800">
+          <!-- Header -->
+          <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                Associer l'album à une entité
+              </h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                {{ albumToLink.name }}
+              </p>
+            </div>
+            <button
+              class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
+              @click="closeLinkEntityModal"
+            >
+              <font-awesome-icon icon="fa-solid fa-times" class="h-5 w-5" />
+            </button>
+          </div>
+
+          <!-- Filtre par type -->
+          <div class="border-b border-gray-200 px-6 py-3 dark:border-gray-700">
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="typeOption in [
+                  { value: 'all', label: 'Tous', icon: 'fa-th-large' },
+                  { value: 'campus', label: 'Campus', icon: 'fa-university' },
+                  { value: 'service', label: 'Services', icon: 'fa-cogs' },
+                  { value: 'event', label: 'Événements', icon: 'fa-calendar' },
+                  { value: 'project', label: 'Projets', icon: 'fa-project-diagram' },
+                ]"
+                :key="typeOption.value"
+                :class="[
+                  'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                  linkEntityType === typeOption.value
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                ]"
+                @click="linkEntityType = typeOption.value as EntityType | 'all'"
+              >
+                <font-awesome-icon :icon="`fa-solid ${typeOption.icon}`" class="h-3 w-3" />
+                {{ typeOption.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Liste des entités -->
+          <div class="flex-1 overflow-y-auto p-4">
+            <div v-if="isLoadingEntities" class="flex items-center justify-center py-8">
+              <font-awesome-icon icon="fa-solid fa-spinner" class="h-6 w-6 animate-spin text-blue-600" />
+            </div>
+
+            <div v-else-if="entityOptions.length === 0" class="py-8 text-center">
+              <font-awesome-icon icon="fa-solid fa-inbox" class="mb-3 h-10 w-10 text-gray-300 dark:text-gray-600" />
+              <p class="text-sm text-gray-500 dark:text-gray-400">Aucune entité disponible</p>
+            </div>
+
+            <div v-else class="space-y-2">
+              <button
+                v-for="entity in entityOptions"
+                :key="`${entity.type}-${entity.id}`"
+                :class="[
+                  'flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-left transition-colors',
+                  entity.isLinked
+                    ? 'cursor-default border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20'
+                    : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 dark:border-gray-600 dark:hover:border-blue-600 dark:hover:bg-blue-900/20'
+                ]"
+                :disabled="entity.isLinked"
+                @click="!entity.isLinked && handleLinkToEntity(entity)"
+              >
+                <div :class="[
+                  'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg',
+                  entity.isLinked ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700'
+                ]">
+                  <font-awesome-icon
+                    :icon="`fa-solid ${
+                      entity.type === 'campus' ? 'fa-university' :
+                      entity.type === 'service' ? 'fa-cogs' :
+                      entity.type === 'event' ? 'fa-calendar' : 'fa-project-diagram'
+                    }`"
+                    :class="[
+                      'h-5 w-5',
+                      entity.isLinked ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'
+                    ]"
+                  />
+                </div>
+                <div class="flex-1 overflow-hidden">
+                  <p :class="[
+                    'truncate font-medium',
+                    entity.isLinked ? 'text-green-800 dark:text-green-300' : 'text-gray-900 dark:text-white'
+                  ]">
+                    {{ entity.name }}
+                  </p>
+                  <p :class="[
+                    'text-xs',
+                    entity.isLinked ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'
+                  ]">
+                    {{
+                      entity.type === 'campus' ? 'Campus' :
+                      entity.type === 'service' ? 'Service' :
+                      entity.type === 'event' ? 'Événement' : 'Projet'
+                    }}
+                    <span v-if="entity.isLinked" class="ml-1 font-medium">• Déjà associé</span>
+                  </p>
+                </div>
+                <font-awesome-icon
+                  :icon="entity.isLinked ? 'fa-solid fa-check-circle' : 'fa-solid fa-link'"
+                  :class="[
+                    'h-4 w-4',
+                    entity.isLinked ? 'text-green-500' : 'text-gray-400'
+                  ]"
+                />
+              </button>
             </div>
           </div>
         </div>

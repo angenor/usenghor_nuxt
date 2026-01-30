@@ -158,6 +158,36 @@ export function useEventsApi() {
   }
 
   // =========================================================================
+  // Media Library
+  // =========================================================================
+
+  /**
+   * Liste les albums d'un événement.
+   */
+  async function getEventAlbums(eventId: string): Promise<string[]> {
+    return apiFetch<string[]>(`/api/admin/events/${eventId}/media-library`)
+  }
+
+  /**
+   * Ajoute un album à la médiathèque d'un événement.
+   */
+  async function addEventAlbum(eventId: string, albumId: string): Promise<MessageResponse> {
+    return apiFetch<MessageResponse>(`/api/admin/events/${eventId}/media-library`, {
+      method: 'POST',
+      body: { album_external_id: albumId },
+    })
+  }
+
+  /**
+   * Retire un album de la médiathèque d'un événement.
+   */
+  async function removeEventAlbum(eventId: string, albumId: string): Promise<MessageResponse> {
+    return apiFetch<MessageResponse>(`/api/admin/events/${eventId}/media-library/${albumId}`, {
+      method: 'DELETE',
+    })
+  }
+
+  // =========================================================================
   // Helpers
   // =========================================================================
 
@@ -222,6 +252,11 @@ export function useEventsApi() {
     publishEvent,
     cancelEvent,
     duplicateEvent,
+
+    // Media Library
+    getEventAlbums,
+    addEventAlbum,
+    removeEventAlbum,
 
     // Helpers
     slugifyEvent,

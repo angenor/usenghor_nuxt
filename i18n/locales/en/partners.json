@@ -105,7 +105,8 @@
         "videos": "Videos",
         "photos": "Photos",
         "viewGallery": "View gallery",
-        "photoAlbum": "Photo Album"
+        "photoAlbum": "Photo Album",
+        "error": "Error loading media"
       },
       "formations": {
         "title": "Completed Programs",

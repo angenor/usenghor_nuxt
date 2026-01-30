@@ -105,7 +105,8 @@
         "videos": "فيديوهات",
         "photos": "صور",
         "viewGallery": "عرض المعرض",
-        "photoAlbum": "ألبوم الصور"
+        "photoAlbum": "ألبوم الصور",
+        "error": "خطأ في تحميل الوسائط"
       },
       "formations": {
         "title": "البرامج المنجزة",

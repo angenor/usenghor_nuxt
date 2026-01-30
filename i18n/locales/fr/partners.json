@@ -105,7 +105,8 @@
         "videos": "Vidéos",
         "photos": "Photos",
         "viewGallery": "Voir la galerie",
-        "photoAlbum": "Album photos"
+        "photoAlbum": "Album photos",
+        "error": "Erreur lors du chargement des médias"
       },
       "formations": {
         "title": "Formations réalisées",

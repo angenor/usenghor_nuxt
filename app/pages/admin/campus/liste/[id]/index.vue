@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { CampusWithTeam } from '~/composables/useCampusApi'
 import type { CountryRead } from '~/composables/useCountriesApi'
+import type { AlbumWithMedia } from '~/composables/useAlbumsApi'
 
 definePageMeta({
   layout: 'admin'
@@ -11,10 +12,13 @@ const router = useRouter()
 
 const {
   getCampusById,
+  getCampusAlbums,
+  removeCampusAlbum,
   toggleCampusActive: apiToggleActive,
   deleteCampus: apiDeleteCampus,
 } = useCampusApi()
 
+const { getAlbumById } = useAlbumsApi()
 const { getAllCountriesPublic, getFlagEmoji } = useCountriesApi()
 const { getMediaUrl } = useMediaApi()
 const { apiFetch } = useApi()
@@ -23,6 +27,7 @@ const { apiFetch } = useApi()
 const loading = ref(true)
 const campus = ref<CampusWithTeam | null>(null)
 const countries = ref<CountryRead[]>([])
+const campusAlbums = ref<AlbumWithMedia[]>([])
 
 // Info du responsable (head)
 interface HeadInfo {
@@ -60,6 +65,8 @@ async function loadCampus() {
     if (campus.value?.head_external_id) {
       await loadHeadInfo(campus.value.head_external_id)
     }
+    // Charger les albums associés
+    await loadCampusAlbums()
   } catch (e) {
     console.error('Erreur chargement campus:', e)
     campus.value = null
@@ -82,6 +89,29 @@ async function loadHeadInfo(userId: string) {
   } catch (e) {
     console.error('Erreur chargement info responsable:', e)
     headInfo.value = null
+  }
+}
+
+async function loadCampusAlbums() {
+  try {
+    const albumIds = await getCampusAlbums(campusId.value)
+    // Charger les détails de chaque album
+    const albumPromises = albumIds.map(id => getAlbumById(id))
+    campusAlbums.value = await Promise.all(albumPromises)
+  } catch (e) {
+    console.error('Erreur chargement albums:', e)
+    campusAlbums.value = []
+  }
+}
+
+async function handleRemoveAlbum(albumId: string) {
+  if (!confirm('Êtes-vous sûr de vouloir retirer cet album du campus ?')) return
+  try {
+    await removeCampusAlbum(campusId.value, albumId)
+    await loadCampusAlbums()
+  } catch (e) {
+    console.error('Erreur retrait album:', e)
+    alert('Erreur lors du retrait de l\'album')
   }
 }
 
@@ -270,6 +300,83 @@ const toggleActive = async () => {
           </div>
         </div>
 
+        <!-- Médiathèque (Albums associés) -->
+        <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+          <div class="mb-4 flex items-center justify-between">
+            <h2 class="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+              <font-awesome-icon :icon="['fas', 'images']" class="h-5 w-5 text-purple-500" />
+              Médiathèque
+            </h2>
+            <NuxtLink
+              to="/admin/mediatheque"
+              class="text-sm text-blue-600 hover:underline dark:text-blue-400"
+            >
+              Gérer
+            </NuxtLink>
+          </div>
+
+          <div v-if="campusAlbums.length > 0" class="space-y-3">
+            <div
+              v-for="album in campusAlbums"
+              :key="album.id"
+              class="group relative flex items-center gap-3 rounded-lg border border-gray-200 p-3 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
+            >
+              <!-- Miniature -->
+              <div class="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700">
+                <img
+                  v-if="album.media_items?.length && album.media_items[0]"
+                  :src="getMediaUrl(album.media_items[0].id) ?? undefined"
+                  :alt="album.title"
+                  class="h-full w-full object-cover"
+                  @error="($event.target as HTMLImageElement).style.display = 'none'"
+                />
+                <div v-else class="flex h-full w-full items-center justify-center">
+                  <font-awesome-icon :icon="['fas', 'images']" class="text-gray-400" />
+                </div>
+              </div>
+
+              <!-- Info -->
+              <div class="min-w-0 flex-1">
+                <h4 class="truncate font-medium text-gray-900 dark:text-white">
+                  {{ album.title }}
+                </h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ album.media_items?.length || 0 }} média{{ (album.media_items?.length || 0) > 1 ? 's' : '' }}
+                </p>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <NuxtLink
+                  :to="`/admin/mediatheque/albums/${album.id}`"
+                  class="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-600"
+                  title="Voir l'album"
+                >
+                  <font-awesome-icon :icon="['fas', 'eye']" class="h-4 w-4" />
+                </NuxtLink>
+                <button
+                  class="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+                  title="Retirer du campus"
+                  @click="handleRemoveAlbum(album.id)"
+                >
+                  <font-awesome-icon :icon="['fas', 'unlink']" class="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div v-else class="py-8 text-center">
+            <font-awesome-icon :icon="['fas', 'photo-video']" class="mb-2 text-3xl text-gray-300 dark:text-gray-600" />
+            <p class="text-sm text-gray-500 dark:text-gray-400">Aucun album associé</p>
+            <NuxtLink
+              to="/admin/mediatheque"
+              class="mt-2 inline-block text-sm text-blue-600 hover:underline dark:text-blue-400"
+            >
+              Associer un album
+            </NuxtLink>
+          </div>
+        </div>
+
         <!-- Partenaires (TODO: enrichir avec les données partenaires) -->
         <!-- Section masquée pour l'instant - sera implémentée ultérieurement -->
       </div>
@@ -289,6 +396,13 @@ const toggleActive = async () => {
                 Membres d'équipe
               </span>
               <span class="font-semibold text-gray-900 dark:text-white">{{ campus.team_members?.length || 0 }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                <font-awesome-icon :icon="['fas', 'images']" class="h-4 w-4 text-purple-500" />
+                Albums
+              </span>
+              <span class="font-semibold text-gray-900 dark:text-white">{{ campusAlbums.length }}</span>
             </div>
           </div>
         </div>

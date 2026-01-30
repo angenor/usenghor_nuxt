@@ -59,6 +59,27 @@ export interface CampusTeamMemberPublic {
   display_order: number
 }
 
+/**
+ * Média public dans un album
+ */
+export interface MediaPublic {
+  id: string
+  name: string
+  type: string
+  url: string | null
+  alt_text: string | null
+}
+
+/**
+ * Album public avec ses médias
+ */
+export interface AlbumPublicWithMedia {
+  id: string
+  title: string
+  description: string | null
+  media_items: MediaPublic[]
+}
+
 // ============================================================================
 // HELPERS
 // ============================================================================
@@ -167,6 +188,13 @@ export function usePublicCampusApi() {
     return $fetch<CampusTeamMemberPublic[]>(`${baseUrl}/api/public/campuses/${campusId}/team`)
   }
 
+  /**
+   * Récupère les albums publiés d'un campus avec leurs médias
+   */
+  async function getCampusAlbums(campusId: string): Promise<AlbumPublicWithMedia[]> {
+    return $fetch<AlbumPublicWithMedia[]>(`${baseUrl}/api/public/campuses/${campusId}/albums`)
+  }
+
   // ==========================================================================
   // HELPERS
   // ==========================================================================
@@ -250,6 +278,7 @@ export function usePublicCampusApi() {
     getCampusBySlug,
     getCampusPartners,
     getCampusTeam,
+    getCampusAlbums,
 
     // Helpers
     getCampusUrl,
