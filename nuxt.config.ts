@@ -15,10 +15,10 @@ export default defineNuxtConfig({
     '@bank': fileURLToPath(new URL('./bank', import.meta.url))
   },
   nitro: {
-    preset: 'static',
+    preset: process.env.NITRO_PRESET || 'node-server',
     prerender: {
       failOnError: false,
-      crawlLinks: true
+      crawlLinks: false
     },
     devProxy: {
       '/api': {
