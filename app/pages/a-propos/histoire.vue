@@ -5,6 +5,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 const { t } = useI18n()
 
+// Contenus éditoriaux avec fallback sur i18n
+const { getContent, loadContent } = useEditorialContent('history')
+
 // SEO
 useSeoMeta({
   title: () => t('history.title'),
@@ -18,7 +21,7 @@ useSeoMeta({
 const breadcrumb = computed(() => [
   { label: t('nav.home'), to: '/' },
   { label: t('nav.about'), to: '/a-propos' },
-  { label: t('history.title') }
+  { label: getContent('history.title') }
 ])
 
 // Phase colors mapping
@@ -37,13 +40,13 @@ const phaseColors: Record<string, string> = {
   'الحالي': '#FCE4EC'
 }
 
-// Timeline events data from i18n (4 étapes clés)
+// Timeline events data from editorial content (4 étapes clés)
 const timelineEvents = computed(() => [
   {
     year: '1989',
-    title: t('history.timeline.1989.title'),
-    description: t('history.timeline.1989.description'),
-    bgColor: phaseColors[t('history.timeline.1989.phase')] || '#FDF6E3',
+    title: getContent('history.timeline.1989.title'),
+    description: getContent('history.timeline.1989.description'),
+    bgColor: phaseColors[getContent('history.timeline.1989.phase')] || '#FDF6E3',
     media: [
       { type: 'image', src: 'https://picsum.photos/seed/dakar89/800/600', alt: 'Sommet de Dakar 1989' },
       { type: 'image', src: 'https://picsum.photos/seed/francophonie/800/600', alt: 'Francophonie' },
@@ -52,9 +55,9 @@ const timelineEvents = computed(() => [
   },
   {
     year: '2002',
-    title: t('history.timeline.2002.title'),
-    description: t('history.timeline.2002.description'),
-    bgColor: phaseColors[t('history.timeline.2002.phase')] || '#E8F5E9',
+    title: getContent('history.timeline.2002.title'),
+    description: getContent('history.timeline.2002.description'),
+    bgColor: phaseColors[getContent('history.timeline.2002.phase')] || '#E8F5E9',
     media: [
       { type: 'image', src: 'https://picsum.photos/seed/constant/800/600', alt: 'Fred Constant' },
       { type: 'image', src: 'https://picsum.photos/seed/elkosheri/800/600', alt: 'Ahmed El Kosheri' },
@@ -63,9 +66,9 @@ const timelineEvents = computed(() => [
   },
   {
     year: '2016',
-    title: t('history.timeline.2016.title'),
-    description: t('history.timeline.2016.description'),
-    bgColor: phaseColors[t('history.timeline.2016.phase')] || '#FCE4EC',
+    title: getContent('history.timeline.2016.title'),
+    description: getContent('history.timeline.2016.description'),
+    bgColor: phaseColors[getContent('history.timeline.2016.phase')] || '#FCE4EC',
     media: [
       { type: 'image', src: 'https://picsum.photos/seed/verdel/800/600', alt: 'Pr. Thierry Verdel' },
       { type: 'image', src: 'https://picsum.photos/seed/strategy2016/800/600', alt: 'Stratégie' },
@@ -74,9 +77,9 @@ const timelineEvents = computed(() => [
   },
   {
     year: '2020',
-    title: t('history.timeline.2020.title'),
-    description: t('history.timeline.2020.description'),
-    bgColor: phaseColors[t('history.timeline.2020.phase')] || '#FCE4EC',
+    title: getContent('history.timeline.2020.title'),
+    description: getContent('history.timeline.2020.description'),
+    bgColor: phaseColors[getContent('history.timeline.2020.phase')] || '#FCE4EC',
     media: [
       { type: 'image', src: 'https://picsum.photos/seed/30years/800/600', alt: '30 ans' },
       { type: 'image', src: 'https://picsum.photos/seed/alumni/800/600', alt: 'Alumni' },
@@ -142,6 +145,9 @@ const splitIntoWords = (text: string): string[] => {
 }
 
 onMounted(() => {
+  // Charger les contenus éditoriaux (non-bloquant)
+  loadContent()
+
   if (import.meta.server) return
 
   // Scroll to top on page load with smooth animation
@@ -282,8 +288,8 @@ onUnmounted(() => {
   <div class="histoire-page">
     <!-- Hero Section -->
     <PageHero
-      :title="t('history.badge')"
-      :subtitle="t('history.subtitle')"
+      :title="getContent('history.badge')"
+      :subtitle="getContent('history.subtitle')"
       image="/images/bg/backgroud_senghor3.jpg"
       :breadcrumb="breadcrumb"
     />
@@ -301,15 +307,15 @@ onUnmounted(() => {
             <div class="space-y-6 flex flex-col justify-center">
               <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
                 <span class="relative inline-block">
-                  {{ t('history.title') }}
+                  {{ getContent('history.title') }}
                   <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
                 </span>
               </h2>
               <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-                {{ t('history.subtitle') }}
+                {{ getContent('history.subtitle') }}
               </p>
               <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-                {{ t('history.genesis.point1') }}
+                {{ getContent('history.genesis.point1') }}
               </p>
             </div>
             <!-- SVG Image -->

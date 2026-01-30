@@ -1,28 +1,31 @@
 <script setup lang="ts">
-const { t } = useI18n()
 const localePath = useLocalePath()
 
+// Contenus éditoriaux avec fallback sur i18n
+const { getContent, loadContent } = useEditorialContent('homepage')
+
+// Configuration des slides avec clés éditoriales
 const slides = [
   {
     image: '/images/bg/backgroud_senghor1.jpg',
-    titleKey: 'hero.slides.slide1.title',
-    subtitleKey: 'hero.slides.slide1.subtitle'
+    editorialTitleKey: 'hero.slide1.title',
+    editorialSubtitleKey: 'hero.slide1.subtitle',
   },
   {
     image: '/images/bg/backgroud_senghor2.jpg',
-    titleKey: 'hero.slides.slide2.title',
-    subtitleKey: 'hero.slides.slide2.subtitle'
+    editorialTitleKey: 'hero.slide2.title',
+    editorialSubtitleKey: 'hero.slide2.subtitle',
   },
   {
     image: '/images/bg/backgroud_senghor3.jpg',
-    titleKey: 'hero.slides.slide3.title',
-    subtitleKey: 'hero.slides.slide3.subtitle'
+    editorialTitleKey: 'hero.slide3.title',
+    editorialSubtitleKey: 'hero.slide3.subtitle',
   },
   {
     image: '/images/bg/backgroud_senghor4.jpg',
-    titleKey: 'hero.slides.slide4.title',
-    subtitleKey: 'hero.slides.slide4.subtitle'
-  }
+    editorialTitleKey: 'hero.slide4.title',
+    editorialSubtitleKey: 'hero.slide4.subtitle',
+  },
 ]
 
 const currentSlide = ref(0)
@@ -30,6 +33,20 @@ const isTransitioning = ref(false)
 let slideInterval: ReturnType<typeof setInterval> | null = null
 
 const currentSlideData = computed(() => slides[currentSlide.value])
+
+// Titre et sous-titre du slide courant (avec fallback i18n)
+const currentTitle = computed(() => {
+  const slide = currentSlideData.value
+  return slide ? getContent(slide.editorialTitleKey) : ''
+})
+const currentSubtitle = computed(() => {
+  const slide = currentSlideData.value
+  return slide ? getContent(slide.editorialSubtitleKey) : ''
+})
+
+// Textes des boutons CTA
+const ctaDiscover = computed(() => getContent('hero.cta.discover'))
+const ctaContact = computed(() => getContent('hero.cta.contact'))
 
 const goToSlide = (index: number, resetTimer = false) => {
   if (isTransitioning.value || index === currentSlide.value) return
@@ -53,6 +70,10 @@ const prevSlide = () => {
 }
 
 onMounted(() => {
+  // Charger les contenus éditoriaux (non-bloquant)
+  loadContent()
+
+  // Démarrer le carrousel
   slideInterval = setInterval(() => goToSlide((currentSlide.value + 1) % slides.length), 6000)
 })
 
@@ -97,7 +118,7 @@ onUnmounted(() => {
             :key="currentSlide + '-title'"
             class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight mb-6 animate__animated animate__fadeInUp"
           >
-            {{ t(currentSlideData.titleKey) }}
+            {{ currentTitle }}
           </h1>
 
           <!-- Subtitle -->
@@ -105,7 +126,7 @@ onUnmounted(() => {
             :key="currentSlide + '-subtitle'"
             class="text-lg sm:text-xl text-white/80 leading-relaxed mb-10 max-w-2xl animate__animated animate__fadeInUp animate__delay-1s"
           >
-            {{ t(currentSlideData.subtitleKey) }}
+            {{ currentSubtitle }}
           </p>
 
           <!-- CTA Buttons -->
@@ -114,14 +135,14 @@ onUnmounted(() => {
               :to="localePath('/formations')"
               class="group relative inline-flex items-center px-8 py-4 bg-brand-blue-500 text-white font-semibold rounded-full overflow-hidden transition-all duration-300 hover:bg-brand-blue-600 hover:shadow-2xl hover:shadow-brand-blue-500/30 hover:-translate-y-1"
             >
-              <span class="relative z-10">{{ t('hero.cta.discover') }}</span>
+              <span class="relative z-10">{{ ctaDiscover }}</span>
               <font-awesome-icon icon="fa-solid fa-arrow-right" class="relative z-10 w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
             </NuxtLink>
             <NuxtLink
               :to="localePath('/contact')"
               class="group inline-flex items-center px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-full border border-white/30 transition-all duration-300 hover:bg-white/20 hover:-translate-y-1"
             >
-              <span>{{ t('hero.cta.contact') }}</span>
+              <span>{{ ctaContact }}</span>
             </NuxtLink>
           </div>
         </div>

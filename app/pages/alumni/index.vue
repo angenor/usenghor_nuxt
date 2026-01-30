@@ -12,6 +12,14 @@ const {
   getDepartmentById
 } = useMockData()
 
+// Contenus éditoriaux avec fallback sur i18n
+const { getContent, loadContent } = useEditorialContent('alumni')
+
+onMounted(() => {
+  // Charger les contenus éditoriaux (non-bloquant)
+  loadContent()
+})
+
 // SEO
 useSeoMeta({
   title: () => t('alumni.seo.title'),
@@ -118,10 +126,10 @@ const getDepartmentName = (deptId: string) => {
 
 // Stats display
 const stats = computed(() => [
-  { value: '4200+', label: t('alumni.stats.alumni') },
-  { value: `${alumniStats.value.countries}+`, label: t('alumni.stats.countries') },
-  { value: `${alumniStats.value.industries}`, label: t('alumni.stats.sectors') },
-  { value: '30+', label: t('alumni.stats.promotions') }
+  { value: '4200+', label: getContent('alumni.stats.alumni.label', 'alumni.stats.alumni') },
+  { value: `${alumniStats.value.countries}+`, label: getContent('alumni.stats.countries.label', 'alumni.stats.countries') },
+  { value: `${alumniStats.value.industries}`, label: getContent('alumni.stats.sectors.label', 'alumni.stats.sectors') },
+  { value: '30+', label: getContent('alumni.stats.promotions.label', 'alumni.stats.promotions') }
 ])
 
 // Reset filters
@@ -140,13 +148,13 @@ const resetFilters = () => {
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
           <span class="inline-block px-4 py-1.5 text-sm font-semibold text-brand-blue-900 bg-brand-blue-400 rounded-full mb-6">
-            {{ t('alumni.hero.badge') }}
+            {{ getContent('alumni.hero.badge') }}
           </span>
           <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
-            {{ t('alumni.hero.title') }}
+            {{ getContent('alumni.hero.title') }}
           </h1>
           <p class="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
-            {{ t('alumni.hero.subtitle') }}
+            {{ getContent('alumni.hero.subtitle') }}
           </p>
         </div>
       </div>
@@ -162,7 +170,7 @@ const resetFilters = () => {
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-3xl mx-auto mb-12">
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            {{ t('alumni.stats.title') }}
+            {{ getContent('alumni.stats.title') }}
           </h2>
         </div>
 
@@ -184,10 +192,10 @@ const resetFilters = () => {
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            {{ t('alumni.testimonials.title') }}
+            {{ getContent('alumni.testimonials.title') }}
           </h2>
           <p class="text-lg text-gray-600 dark:text-gray-400">
-            {{ t('alumni.testimonials.subtitle') }}
+            {{ getContent('alumni.testimonials.subtitle') }}
           </p>
         </div>
 
@@ -254,7 +262,7 @@ const resetFilters = () => {
     <section class="py-16 bg-white dark:bg-gray-950">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-          {{ t('alumni.list.title') }}
+          {{ getContent('alumni.list.title') }}
         </h2>
 
         <!-- Filters -->
@@ -403,16 +411,16 @@ const resetFilters = () => {
     <section class="py-16 bg-gradient-to-r from-brand-blue-500 to-brand-blue-600">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl font-bold text-white mb-4">
-          {{ t('alumni.cta.title') }}
+          {{ getContent('alumni.cta.title') }}
         </h2>
         <p class="text-lg text-brand-blue-100 mb-8">
-          {{ t('alumni.cta.description') }}
+          {{ getContent('alumni.cta.description') }}
         </p>
         <NuxtLink
           :to="localePath('/contact')"
           class="inline-flex items-center gap-2 px-8 py-4 bg-white text-brand-blue-600 font-semibold rounded-lg hover:bg-brand-blue-50 transition-colors shadow-lg"
         >
-          {{ t('alumni.cta.button') }}
+          {{ getContent('alumni.cta.button') }}
           <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
         </NuxtLink>
       </div>

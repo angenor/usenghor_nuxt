@@ -4,6 +4,14 @@ const localePath = useLocalePath()
 const { locale } = useI18n()
 const isRtl = computed(() => locale.value === 'ar')
 
+// Contenus éditoriaux avec fallback sur i18n
+const { getContent, loadContent } = useEditorialContent('organization')
+
+onMounted(() => {
+  // Charger les contenus éditoriaux (non-bloquant)
+  loadContent()
+})
+
 // SEO
 useSeoMeta({
   title: () => t('organization.seo.title'),
@@ -27,8 +35,8 @@ const { elementRef: ctaRef } = useScrollAnimation({ animation: 'zoomIn', thresho
   <div>
     <!-- Hero -->
     <PageHero
-      :title="t('organization.hero.title')"
-      :subtitle="t('organization.hero.subtitle')"
+      :title="getContent('organization.hero.title')"
+      :subtitle="getContent('organization.hero.subtitle')"
       image="/images/bg/backgroud_senghor3.jpg"
       :breadcrumb="breadcrumb"
     />
@@ -47,17 +55,17 @@ const { elementRef: ctaRef } = useScrollAnimation({ animation: 'zoomIn', thresho
       <div ref="ctaRef" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div class="bg-brand-blue-50 dark:bg-brand-blue-900/20 rounded-2xl p-8 lg:p-12 hover:shadow-xl transition-shadow duration-300">
           <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            {{ t('organization.cta.title') }}
+            {{ getContent('organization.cta.title') }}
           </h3>
           <p class="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-            {{ t('organization.cta.text') }}
+            {{ getContent('organization.cta.text') }}
           </p>
           <NuxtLink
             :to="localePath('/a-propos/equipe')"
             class="group inline-flex items-center gap-3 px-8 py-4 bg-brand-blue-500 hover:bg-brand-blue-600 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-brand-blue-500/30 hover:-translate-y-0.5"
           >
             <font-awesome-icon icon="fa-solid fa-users" class="w-5 h-5" />
-            <span>{{ t('organization.cta.button') }}</span>
+            <span>{{ getContent('organization.cta.button') }}</span>
             <font-awesome-icon
               :icon="isRtl ? 'fa-solid fa-arrow-left' : 'fa-solid fa-arrow-right'"
               class="w-4 h-4 transition-transform duration-300"

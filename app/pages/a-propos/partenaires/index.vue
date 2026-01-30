@@ -2,6 +2,14 @@
 const { t } = useI18n()
 const localePath = useLocalePath()
 
+// Contenus éditoriaux avec fallback sur i18n
+const { getContent, loadContent } = useEditorialContent('partners')
+
+onMounted(() => {
+  // Charger les contenus éditoriaux (non-bloquant)
+  loadContent()
+})
+
 // SEO
 useSeoMeta({
   title: () => t('partners.seo.title'),
@@ -15,7 +23,7 @@ useSeoMeta({
 const breadcrumb = computed(() => [
   { label: t('nav.home'), to: localePath('/') },
   { label: t('nav.about'), to: localePath('/a-propos') },
-  { label: t('partners.hero.title') }
+  { label: getContent('partners.hero.title') }
 ])
 </script>
 
@@ -23,9 +31,9 @@ const breadcrumb = computed(() => [
   <div>
     <!-- Hero Section -->
     <PageHero
-      :badge="t('partners.hero.badge')"
-      :title="t('partners.hero.title')"
-      :subtitle="t('partners.hero.subtitle')"
+      :badge="getContent('partners.hero.badge')"
+      :title="getContent('partners.hero.title')"
+      :subtitle="getContent('partners.hero.subtitle')"
       :breadcrumb="breadcrumb"
       badge-icon="fa-solid fa-globe"
     />

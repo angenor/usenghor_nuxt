@@ -5,8 +5,16 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getFormationsFeatured } = useMockData()
 
+// Contenus éditoriaux avec fallback sur i18n
+const { getContent, loadContent } = useEditorialContent('homepage')
+
 const { elementRef: headerRef } = useScrollAnimation({ animation: 'fadeInDown' })
 const { elementRef: cardsRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.1 })
+
+onMounted(() => {
+  // Charger les contenus éditoriaux (non-bloquant)
+  loadContent()
+})
 
 // Get 4 featured formations
 const featuredFormations = computed(() => getFormationsFeatured().slice(0, 4))
@@ -68,13 +76,13 @@ const getImageUrl = (formation: Formation) => {
           class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 mb-4 hover:bg-brand-blue-200 dark:hover:bg-brand-blue-900/50 transition-colors cursor-pointer"
         >
           <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-3.5 h-3.5 mr-2" />
-          {{ t('formations.index.featured.badge') }}
+          {{ getContent('formations.badge', 'formations.index.featured.badge') }}
         </NuxtLink>
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-          {{ t('formations.index.featured.title') }}
+          {{ getContent('formations.title', 'formations.index.featured.title') }}
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          {{ t('formations.index.subtitle') }}
+          {{ getContent('formations.subtitle', 'formations.index.subtitle') }}
         </p>
       </div>
 
@@ -144,7 +152,7 @@ const getImageUrl = (formation: Formation) => {
           :to="localePath('/carrieres') + '#etudiants'"
           class="inline-flex items-center gap-2 px-8 py-4 bg-brand-blue-600 hover:bg-brand-blue-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
         >
-          {{ t('formations.index.viewAll') }}
+          {{ getContent('formations.cta', 'formations.index.viewAll') }}
           <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
         </NuxtLink>
       </div>

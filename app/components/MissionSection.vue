@@ -1,6 +1,9 @@
 <script setup lang="ts">
 const { t } = useI18n()
 
+// Contenus éditoriaux avec fallback sur i18n
+const { getContent, loadContent } = useEditorialContent('homepage')
+
 const { elementRef: headerRef } = useScrollAnimation({ animation: 'fadeInDown' })
 const { elementRef: missionCardRef } = useScrollAnimation({ animation: 'fadeInLeft', threshold: 0.2 })
 const { elementRef: visionCardRef } = useScrollAnimation({ animation: 'fadeInRight', threshold: 0.2 })
@@ -11,18 +14,18 @@ const hasAnimated = ref(false)
 const animatedStats = ref({
   countries: 0,
   graduates: 0,
-  years: 0
+  years: 0,
 })
 
 const targetStats = {
   countries: 54,
   graduates: 5000,
-  years: 30
+  years: 30,
 }
 
 const animateValue = (key: keyof typeof animatedStats.value, target: number, duration = 2000) => {
   const startTime = performance.now()
-  const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4)
+  const easeOutQuart = (x: number) => 1 - Math.pow(1 - x, 4)
 
   const updateValue = (currentTime: number) => {
     const elapsed = currentTime - startTime
@@ -45,13 +48,16 @@ const startAnimation = () => {
 let observer: IntersectionObserver | null = null
 
 onMounted(() => {
+  // Charger les contenus éditoriaux (non-bloquant)
+  loadContent()
+
   observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) startAnimation()
       })
     },
-    { threshold: 0.3 }
+    { threshold: 0.3 },
   )
   if (statsRef.value) observer.observe(statsRef.value)
 })
@@ -92,13 +98,13 @@ onUnmounted(() => {
       <div ref="headerRef" class="text-center mb-16 lg:mb-20">
         <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 mb-4">
           <font-awesome-icon icon="fa-solid fa-compass" class="w-3.5 h-3.5 mr-2" />
-          {{ t('mission.badge') }}
+          {{ getContent('mission.badge') }}
         </span>
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-          {{ t('mission.title') }}
+          {{ getContent('mission.title') }}
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          {{ t('mission.subtitle') }}
+          {{ getContent('mission.subtitle') }}
         </p>
       </div>
 
@@ -133,15 +139,15 @@ onUnmounted(() => {
             <!-- Content -->
             <div class="relative z-10">
               <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors duration-300">
-                {{ t('mission.mission.title') }}
+                {{ getContent('mission.mission.title') }}
               </h3>
               <p class="text-gray-600 dark:text-gray-300 text-lg leading-relaxed mb-6">
-                {{ t('mission.mission.description') }}
+                {{ getContent('mission.mission.description') }}
               </p>
               <div class="flex items-center gap-3">
                 <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-brand-blue-100 to-brand-blue-200 dark:from-brand-blue-900/40 dark:to-brand-blue-800/40 text-brand-blue-700 dark:text-brand-blue-300 border border-brand-blue-200/50 dark:border-brand-blue-700/50 group-hover:scale-105 transition-transform duration-300">
                   <font-awesome-icon icon="fa-solid fa-wand-magic-sparkles" class="w-4 h-4 mr-2 animate-pulse" />
-                  {{ t('mission.mission.tagline') }}
+                  {{ getContent('mission.mission.tagline') }}
                 </span>
               </div>
             </div>
@@ -182,10 +188,10 @@ onUnmounted(() => {
             <!-- Content -->
             <div class="relative z-10">
               <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-brand-red-600 dark:group-hover:text-brand-red-400 transition-colors duration-300">
-                {{ t('mission.vision.title') }}
+                {{ getContent('mission.vision.title') }}
               </h3>
               <p class="text-gray-600 dark:text-gray-300 text-lg leading-relaxed mb-6">
-                {{ t('mission.vision.description') }}
+                {{ getContent('mission.vision.description') }}
               </p>
               <!-- Vision Values -->
               <div class="flex flex-wrap gap-2">
@@ -221,15 +227,15 @@ onUnmounted(() => {
           <div class="max-w-2xl">
             <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-white/10 backdrop-blur-sm text-white border border-white/20 mb-6">
               <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-3.5 h-3.5 mr-2 text-brand-blue-400" />
-              {{ t('mission.experience.badge') }}
+              {{ getContent('experience.badge', 'mission.experience.badge') }}
             </span>
 
             <h3 class="text-3xl lg:text-4xl font-bold text-white mb-4">
-              {{ t('mission.experience.title') }}
+              {{ getContent('experience.title', 'mission.experience.title') }}
             </h3>
 
             <p class="text-lg text-white/80 leading-relaxed mb-8">
-              {{ t('mission.experience.description') }}
+              {{ getContent('experience.description', 'mission.experience.description') }}
             </p>
 
             <div class="flex flex-wrap gap-4 mb-8">
@@ -251,7 +257,7 @@ onUnmounted(() => {
               to="/about/experience"
               class="group inline-flex items-center gap-2 px-8 py-4 bg-brand-blue-500 text-white font-semibold rounded-full transition-all duration-300 hover:bg-brand-blue-600 hover:shadow-xl hover:shadow-brand-blue-500/30 hover:-translate-y-1"
             >
-              <span>{{ t('mission.experience.cta') }}</span>
+              <span>{{ getContent('experience.cta', 'mission.experience.cta') }}</span>
               <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
             </NuxtLink>
           </div>
@@ -260,15 +266,15 @@ onUnmounted(() => {
           <div ref="statsRef" class="hidden lg:flex absolute right-16 top-1/2 -translate-y-1/2 flex-col gap-6">
             <div class="stat-card text-center p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/10 transition-all duration-500" :class="{ 'stat-visible': hasAnimated }">
               <div class="text-4xl font-bold text-white mb-1 tabular-nums">{{ animatedStats.countries }}+</div>
-              <div class="text-sm text-white/70">{{ t('mission.experience.stats.countries') }}</div>
+              <div class="text-sm text-white/70">{{ getContent('experience.stats.countries', 'mission.experience.stats.countries') }}</div>
             </div>
             <div class="stat-card text-center p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/10 transition-all duration-500 delay-100" :class="{ 'stat-visible': hasAnimated }">
               <div class="text-4xl font-bold text-white mb-1 tabular-nums">{{ animatedStats.graduates.toLocaleString() }}+</div>
-              <div class="text-sm text-white/70">{{ t('mission.experience.stats.graduates') }}</div>
+              <div class="text-sm text-white/70">{{ getContent('experience.stats.graduates', 'mission.experience.stats.graduates') }}</div>
             </div>
             <div class="stat-card text-center p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/10 transition-all duration-500 delay-200" :class="{ 'stat-visible': hasAnimated }">
               <div class="text-4xl font-bold text-white mb-1 tabular-nums">{{ animatedStats.years }}+</div>
-              <div class="text-sm text-white/70">{{ t('mission.experience.stats.years') }}</div>
+              <div class="text-sm text-white/70">{{ getContent('experience.stats.years', 'mission.experience.stats.years') }}</div>
             </div>
           </div>
         </div>

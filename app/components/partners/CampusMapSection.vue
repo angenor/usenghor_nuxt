@@ -354,13 +354,13 @@ const handleImageError = (e: Event) => {
             <button
               v-for="campus in externalCampusesOnly"
               :key="campus.id"
-              class="campus-name-card"
-              :class="{
-                'campus-name-card--active': selectedCampus?.id === campus.id
-              }"
+              class="group relative px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 border"
+              :class="selectedCampus?.id === campus.id
+                ? 'bg-brand-blue-500 text-white border-brand-blue-500 shadow-lg shadow-brand-blue-500/25'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-brand-blue-300 dark:hover:border-brand-blue-600 hover:shadow-md'"
               @click="selectedCampus = campus; scrollToCampusCard()"
             >
-              <span class="ltr:mr-1 rtl:ml-1">{{ getFlagEmoji(campus.country_iso_code) }}</span>
+              <span class="ltr:mr-1.5 rtl:ml-1.5">{{ getFlagEmoji(campus.country_iso_code) }}</span>
               {{ campus.country_name || campus.city }}
             </button>
           </div>
@@ -416,57 +416,63 @@ const handleImageError = (e: Event) => {
             </div>
           </div>
 
-          <!-- Campus Card (Notebook style) -->
-          <div v-if="selectedCampus" ref="campusCardRef" class="campus-card-wrapper lg:w-[380px] lg:flex-shrink-0 z-20 lg:mt-12">
+          <!-- Campus Card -->
+          <div v-if="selectedCampus" ref="campusCardRef" class="lg:w-[400px] lg:flex-shrink-0 z-20 lg:mt-8">
             <Transition
               mode="out-in"
-              enter-active-class="animate__animated animate__flipInY animate__faster"
-              leave-active-class="animate__animated animate__flipOutY animate__faster"
+              enter-active-class="animate__animated animate__fadeInRight animate__faster"
+              leave-active-class="animate__animated animate__fadeOutRight animate__faster"
             >
-              <div class="campus-card" :key="selectedCampus.id">
+              <div :key="selectedCampus.id" class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-200/50 dark:border-gray-700/50 shadow-xl">
                 <!-- Image -->
-                <div class="card-image">
+                <div class="relative h-52 overflow-hidden">
                   <img
                     :src="selectedCampus.image || `https://picsum.photos/seed/${selectedCampus.id}/600/400`"
                     :alt="getCampusName(selectedCampus)"
+                    class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                     @error="handleImageError"
                   />
+                  <!-- Gradient Overlay -->
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
                   <!-- Badge -->
                   <div
-                    class="absolute top-4 ltr:left-4 rtl:right-4 px-3 py-1 rounded-full text-xs font-semibold text-white"
-                    :class="selectedCampus.is_headquarters ? 'bg-brand-blue-500' : 'bg-brand-red-500'"
+                    class="absolute top-4 ltr:left-4 rtl:right-4 px-3 py-1.5 rounded-full text-xs font-semibold text-white backdrop-blur-sm"
+                    :class="selectedCampus.is_headquarters ? 'bg-brand-blue-500/90' : 'bg-brand-red-500/90'"
                   >
                     {{ selectedCampus.is_headquarters ? t('partners.campus.headquarters') : t('partners.campus.externalCampus') }}
+                  </div>
+                  <!-- Location on image -->
+                  <div class="absolute bottom-4 ltr:left-4 rtl:right-4 flex items-center text-white text-sm">
+                    <font-awesome-icon icon="fa-solid fa-location-dot" class="w-3.5 h-3.5 ltr:mr-1.5 rtl:ml-1.5" />
+                    {{ getCampusLocationText(selectedCampus) }}
                   </div>
                 </div>
 
                 <!-- Content -->
-                <div class="card-content">
-                  <h3 class="card-title">{{ getCampusName(selectedCampus) }}</h3>
-                  <p class="card-country">
-                    <font-awesome-icon icon="fa-solid fa-location-dot" class="w-3 h-3 ltr:mr-1 rtl:ml-1" />
-                    {{ getCampusLocationText(selectedCampus) }}
+                <div class="p-6">
+                  <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                    {{ getCampusName(selectedCampus) }}
+                  </h3>
+                  <p v-if="getCampusDescription(selectedCampus)" class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-5">
+                    {{ getCampusDescription(selectedCampus) }}
                   </p>
-                  <div v-if="getCampusDescription(selectedCampus)" class="card-text">
-                    <p>{{ getCampusDescription(selectedCampus) }}</p>
-                  </div>
 
                   <!-- CTA -->
                   <NuxtLink
                     v-if="selectedCampus.is_headquarters"
                     :to="localePath('/site')"
-                    class="card-cta"
+                    class="inline-flex items-center justify-center w-full px-5 py-3 rounded-xl bg-gradient-to-r from-brand-blue-500 to-brand-blue-600 text-white font-semibold text-sm transition-all duration-300 hover:from-brand-blue-600 hover:to-brand-blue-700 hover:shadow-lg hover:shadow-brand-blue-500/25"
                   >
                     {{ t('partners.campus.viewDetails') }}
-                    <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 ltr:ml-2 rtl:mr-2 rtl:rotate-180" />
+                    <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 ltr:ml-2 rtl:mr-2 rtl:rotate-180 transition-transform group-hover:translate-x-1" />
                   </NuxtLink>
                   <NuxtLink
                     v-else
                     :to="localePath(`/a-propos/partenaires/campus/${selectedCampus.code.toLowerCase()}`) + '#calls'"
-                    class="card-cta"
+                    class="inline-flex items-center justify-center w-full px-5 py-3 rounded-xl bg-gradient-to-r from-brand-blue-500 to-brand-blue-600 text-white font-semibold text-sm transition-all duration-300 hover:from-brand-blue-600 hover:to-brand-blue-700 hover:shadow-lg hover:shadow-brand-blue-500/25"
                   >
                     {{ t('partners.campus.viewDetails') }}
-                    <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 ltr:ml-2 rtl:mr-2 rtl:rotate-180" />
+                    <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 ltr:ml-2 rtl:mr-2 rtl:rotate-180 transition-transform group-hover:translate-x-1" />
                   </NuxtLink>
                 </div>
               </div>
@@ -575,299 +581,4 @@ const handleImageError = (e: Event) => {
   animation-delay: 2s;
 }
 
-/* Campus Card - Notebook Style */
-.campus-card-wrapper {
-  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.15));
-}
-
-.campus-card {
-  background-color: white;
-  border-radius: 1rem;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  padding-left: 30px;
-  background:
-    repeating-linear-gradient(#0000 0 calc(1.4rem - 1px), #e5e7eb 0 1.4rem) right bottom / 100% 100%,
-    linear-gradient(#2b4bbf 0 0) 30px 0 / 2px 100% #fff;
-  background-repeat: no-repeat;
-  line-height: 1.4rem;
-  -webkit-mask: radial-gradient(circle 0.8rem at 2px 50%, #0000 98%, #000) 0 0 / 100% 2.8rem;
-  mask: radial-gradient(circle 0.8rem at 2px 50%, #0000 98%, #000) 0 0 / 100% 2.8rem;
-}
-
-/* RTL styles for notebook card */
-:root[dir="rtl"] .campus-card {
-  padding-left: 0;
-  padding-right: 30px;
-  background:
-    repeating-linear-gradient(#0000 0 calc(1.4rem - 1px), #e5e7eb 0 1.4rem) left bottom / 100% 100%,
-    linear-gradient(#2b4bbf 0 0) calc(100% - 30px) 0 / 2px 100% #fff;
-  background-repeat: no-repeat;
-  -webkit-mask: radial-gradient(circle 0.8rem at calc(100% - 2px) 50%, #0000 98%, #000) 0 0 / 100% 2.8rem;
-  mask: radial-gradient(circle 0.8rem at calc(100% - 2px) 50%, #0000 98%, #000) 0 0 / 100% 2.8rem;
-}
-
-:root.dark .campus-card {
-  background:
-    repeating-linear-gradient(#0000 0 calc(1.4rem - 1px), #374151 0 1.4rem) right bottom / 100% 100%,
-    linear-gradient(#2b4bbf 0 0) 30px 0 / 2px 100% #1f2937;
-  background-repeat: no-repeat;
-}
-
-:root.dark[dir="rtl"] .campus-card {
-  background:
-    repeating-linear-gradient(#0000 0 calc(1.4rem - 1px), #374151 0 1.4rem) left bottom / 100% 100%,
-    linear-gradient(#2b4bbf 0 0) calc(100% - 30px) 0 / 2px 100% #1f2937;
-  background-repeat: no-repeat;
-}
-
-.card-image {
-  height: 200px;
-  padding: 1.4rem 1.4rem 0;
-  position: relative;
-}
-
-.card-image::before,
-.card-image::after {
-  content: "";
-  position: absolute;
-  width: 20px;
-  left: 60%;
-  top: 0;
-  height: 45px;
-  background: rgba(230, 230, 230, 0.72);
-  transform: rotate(45deg);
-}
-
-.card-image::after {
-  transform: rotate(-45deg);
-  top: auto;
-  bottom: -22px;
-  left: 40%;
-}
-
-/* RTL tape decorations */
-:root[dir="rtl"] .card-image::before {
-  left: auto;
-  right: 60%;
-  transform: rotate(-45deg);
-}
-
-:root[dir="rtl"] .card-image::after {
-  left: auto;
-  right: 40%;
-  transform: rotate(45deg);
-}
-
-:root.dark .card-image::before,
-:root.dark .card-image::after {
-  background: rgba(55, 65, 81, 0.72);
-}
-
-.card-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 0.5rem;
-}
-
-.card-content {
-  padding: 1.4rem;
-}
-
-.card-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #111827;
-  margin: 0 0 0.5rem 0;
-  line-height: 1.4rem;
-  padding-top: 0.7rem;
-}
-
-:root.dark .card-title {
-  color: #f9fafb;
-}
-
-.card-country {
-  font-size: 0.875rem;
-  color: #6b7280;
-  display: flex;
-  align-items: center;
-  margin: 0 0 1.4rem 0;
-  line-height: 1.4rem;
-}
-
-:root.dark .card-country {
-  color: #9ca3af;
-}
-
-.card-text {
-  margin: 0 0 1.4rem 0;
-}
-
-.card-text p {
-  font-size: 0.875rem;
-  color: #4b5563;
-  margin: 0;
-  line-height: 1.4rem;
-}
-
-:root.dark .card-text p {
-  color: #d1d5db;
-}
-
-.card-cta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 0.875rem 1.25rem;
-  background: #fffef0;
-  color: #1e40af;
-  font-weight: 600;
-  font-family: 'Caveat', 'Comic Sans MS', cursive;
-  font-size: 1.1rem;
-  text-decoration: none;
-  position: relative;
-  border: none;
-  box-shadow:
-    2px 2px 0 rgba(0, 0, 0, 0.1),
-    inset 0 0 20px rgba(255, 251, 235, 0.5);
-  transition: all 0.2s ease;
-  transform: rotate(-1deg);
-}
-
-.card-cta::before {
-  content: '';
-  position: absolute;
-  top: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  height: 12px;
-  background: linear-gradient(
-    to bottom,
-    rgba(43, 75, 191, 0.6) 0%,
-    rgba(43, 75, 191, 0.4) 100%
-  );
-  border-radius: 2px;
-}
-
-.card-cta::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    90deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.02) 2px,
-    rgba(0, 0, 0, 0.02) 4px
-  );
-  pointer-events: none;
-}
-
-.card-cta:hover {
-  transform: rotate(0deg) translateY(-3px);
-  box-shadow:
-    4px 4px 0 rgba(0, 0, 0, 0.15),
-    inset 0 0 20px rgba(255, 251, 235, 0.5);
-}
-
-:root.dark .card-cta {
-  background: #fefce8;
-  color: #1e40af;
-}
-
-/* Campus Name Cards */
-.campus-name-card {
-  padding: 0.5rem 1rem;
-  background: #fffef0;
-  color: #374151;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
-  position: relative;
-  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.08);
-  transition: all 0.2s ease;
-  transform: rotate(var(--rotation, 0deg));
-}
-
-.campus-name-card:nth-child(odd) {
-  --rotation: -1deg;
-}
-
-.campus-name-card:nth-child(even) {
-  --rotation: 1deg;
-}
-
-.campus-name-card:nth-child(3n) {
-  --rotation: -0.5deg;
-}
-
-.campus-name-card::before {
-  content: '';
-  position: absolute;
-  top: -3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40%;
-  height: 8px;
-  background: rgba(156, 163, 175, 0.5);
-  border-radius: 1px;
-}
-
-.campus-name-card:hover {
-  transform: rotate(0deg) translateY(-3px);
-  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.12);
-  background: #fefce8;
-}
-
-.campus-name-card--active {
-  background: #dbeafe;
-  color: #1e40af;
-  font-weight: 600;
-}
-
-.campus-name-card--active::before {
-  background: rgba(43, 75, 191, 0.6);
-}
-
-.campus-name-card--headquarters {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.campus-name-card--headquarters::before {
-  background: rgba(245, 158, 11, 0.6);
-}
-
-.campus-name-card--headquarters.campus-name-card--active {
-  background: #fde68a;
-}
-
-:root.dark .campus-name-card {
-  background: #374151;
-  color: #e5e7eb;
-}
-
-:root.dark .campus-name-card:hover {
-  background: #4b5563;
-}
-
-:root.dark .campus-name-card--active {
-  background: #1e40af;
-  color: #fff;
-}
-
-:root.dark .campus-name-card--headquarters {
-  background: #78350f;
-  color: #fef3c7;
-}
-
-:root.dark .campus-name-card--headquarters.campus-name-card--active {
-  background: #b45309;
-}
 </style>

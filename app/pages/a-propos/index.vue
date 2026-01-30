@@ -2,6 +2,9 @@
 const { t } = useI18n()
 const { listContents } = useEditorialApi()
 
+// Contenus éditoriaux avec fallback sur i18n
+const { getContent, loadContent } = useEditorialContent('about')
+
 // SEO
 useSeoMeta({
   title: () => t('about.seo.title'),
@@ -27,8 +30,12 @@ const keyFigures = ref({
   stats_programs: '',
 })
 
-// Load key figures on mount
+// Load key figures and editorial content on mount
 onMounted(async () => {
+  // Charger les contenus éditoriaux (non-bloquant)
+  loadContent()
+
+  // Charger les chiffres clés
   try {
     const response = await listContents({ value_type: 'number', limit: 50 })
     for (const item of response.items) {
@@ -47,50 +54,64 @@ onMounted(async () => {
 const stats = computed(() => [
   {
     value: keyFigures.value.stats_years || statsFallback.value.stats_years,
-    label: t('about.stats.years'),
+    label: getContent('about.stats.years.label', 'about.stats.years'),
   },
   {
     value: keyFigures.value.stats_donor_countries || statsFallback.value.stats_donor_countries,
-    label: t('about.stats.countries'),
+    label: getContent('about.stats.countries.label', 'about.stats.countries'),
   },
   {
     value: keyFigures.value.stats_alumni || statsFallback.value.stats_alumni,
-    label: t('about.stats.alumni'),
+    label: getContent('about.stats.alumni.label', 'about.stats.alumni'),
   },
   {
     value: keyFigures.value.stats_programs || statsFallback.value.stats_programs,
-    label: t('about.stats.programs'),
+    label: getContent('about.stats.programs.label', 'about.stats.programs'),
   },
 ])
 
-// Values data
+// Values data (engagements)
 const values = computed(() => [
   {
     icon: 'star',
-    title: t('about.engagements.values.excellence.title'),
-    text: t('about.engagements.values.excellence.text'),
+    title: getContent('about.engagements.excellence.title'),
+    text: getContent('about.engagements.excellence.text'),
   },
   {
     icon: 'shield',
-    title: t('about.engagements.values.ethics.title'),
-    text: t('about.engagements.values.ethics.text'),
+    title: getContent('about.engagements.ethics.title'),
+    text: getContent('about.engagements.ethics.text'),
   },
   {
     icon: 'users',
-    title: t('about.engagements.values.inclusion.title'),
-    text: t('about.engagements.values.inclusion.text'),
+    title: getContent('about.engagements.inclusion.title'),
+    text: getContent('about.engagements.inclusion.text'),
   },
   {
     icon: 'lightbulb',
-    title: t('about.engagements.values.innovation.title'),
-    text: t('about.engagements.values.innovation.text'),
+    title: getContent('about.engagements.innovation.title'),
+    text: getContent('about.engagements.innovation.text'),
   },
   {
     icon: 'handshake',
-    title: t('about.engagements.values.solidarity.title'),
-    text: t('about.engagements.values.solidarity.text'),
+    title: getContent('about.engagements.solidarity.title'),
+    text: getContent('about.engagements.solidarity.text'),
   },
 ])
+
+// Hero content
+const heroTitle = computed(() => getContent('about.hero.title'))
+const heroSubtitle = computed(() => getContent('about.hero.subtitle'))
+
+// Mission content
+const missionTitle = computed(() => getContent('about.mission.title'))
+const missionContent = computed(() => getContent('about.mission.content'))
+
+// Engagements title
+const engagementsTitle = computed(() => getContent('about.engagements.title'))
+
+// Charter
+const charterDownload = computed(() => getContent('about.charter.download'))
 
 // Breadcrumb
 const breadcrumb = computed(() => [
@@ -103,8 +124,8 @@ const breadcrumb = computed(() => [
   <div>
     <!-- Hero Section -->
     <PageHero
-      :title="t('about.hero.title')"
-      :subtitle="t('about.hero.subtitle')"
+      :title="heroTitle"
+      :subtitle="heroSubtitle"
       image="/images/bg/backgroud_senghor3.jpg"
       :breadcrumb="breadcrumb"
     />
@@ -114,11 +135,11 @@ const breadcrumb = computed(() => [
 
     <!-- Mission Section -->
     <SectionAboutMission
-      :title="t('about.mission.title')"
-      :content="t('about.mission.content')"
+      :title="missionTitle"
+      :content="missionContent"
       :cta-links="[
-        { label: t('about.mission.discover.history'), to: '/a-propos/histoire', icon: 'fa-solid fa-landmark' },
-        { label: t('about.mission.discover.governance'), to: '/a-propos/gouvernance', icon: 'fa-solid fa-building-columns' }
+        { label: getContent('about.mission.cta.history', 'about.mission.discover.history'), to: '/a-propos/histoire', icon: 'fa-solid fa-landmark' },
+        { label: getContent('about.mission.cta.governance', 'about.mission.discover.governance'), to: '/a-propos/gouvernance', icon: 'fa-solid fa-building-columns' }
       ]"
     />
 
@@ -130,9 +151,9 @@ const breadcrumb = computed(() => [
 
     <!-- Engagements Section -->
     <SectionEngagements
-      :title="t('about.engagements.title')"
+      :title="engagementsTitle"
       :values="values"
-      :charter="{ label: t('about.charter.download'), url: '/documents/charte-ethique.pdf' }"
+      :charter="{ label: charterDownload, url: '/documents/charte-ethique.pdf' }"
     />
   </div>
 </template>

@@ -7,6 +7,9 @@ const localePath = useLocalePath()
 const { getAllSiteFacilities } = useMockData()
 const { getContactInfo, getGoogleMapsUrlWithCoords } = useContactApi()
 
+// Contenus éditoriaux avec fallback sur i18n
+const { getContent, loadContent } = useEditorialContent('site')
+
 // SEO
 useSeoMeta({
   title: () => t('site.seo.title'),
@@ -17,6 +20,9 @@ useSeoMeta({
 const contactInfo = ref<ContactInfo | null>(null)
 
 onMounted(async () => {
+  // Charger les contenus éditoriaux (non-bloquant)
+  loadContent()
+
   try {
     contactInfo.value = await getContactInfo()
   }
@@ -106,10 +112,10 @@ const getLocalizedFacilityFeatures = (facility: SiteFacility) => {
 
 // Stats
 const stats = computed(() => [
-  { label: t('site.presentation.stats.surface'), value: t('site.presentation.stats.surfaceValue') },
-  { label: t('site.presentation.stats.rooms'), value: t('site.presentation.stats.roomsValue') },
-  { label: t('site.presentation.stats.capacity'), value: t('site.presentation.stats.capacityValue') },
-  { label: t('site.presentation.stats.founded'), value: t('site.presentation.stats.foundedValue') }
+  { label: getContent('site.presentation.stats.surface'), value: getContent('site.presentation.stats.surfaceValue') },
+  { label: getContent('site.presentation.stats.rooms'), value: getContent('site.presentation.stats.roomsValue') },
+  { label: getContent('site.presentation.stats.capacity'), value: getContent('site.presentation.stats.capacityValue') },
+  { label: getContent('site.presentation.stats.founded'), value: getContent('site.presentation.stats.foundedValue') }
 ])
 
 // Color configuration per facility (rotating colors)
@@ -196,13 +202,13 @@ const getNextBgColor = (index: number, isDark: boolean) => {
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
           <span class="inline-block px-4 py-1.5 text-sm font-semibold text-brand-blue-900 bg-brand-blue-400 rounded-full mb-6">
-            {{ t('site.hero.badge') }}
+            {{ getContent('site.hero.badge') }}
           </span>
           <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
-            {{ t('site.hero.title') }}
+            {{ getContent('site.hero.title') }}
           </h1>
           <p class="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
-            {{ t('site.hero.subtitle') }}
+            {{ getContent('site.hero.subtitle') }}
           </p>
         </div>
       </div>
@@ -220,14 +226,14 @@ const getNextBgColor = (index: number, isDark: boolean) => {
           <!-- Text -->
           <div>
             <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-              {{ t('site.presentation.title') }}
+              {{ getContent('site.presentation.title') }}
             </h2>
             <p class="text-lg text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-              {{ t('site.presentation.description') }}
+              {{ getContent('site.presentation.description') }}
             </p>
             <div class="flex items-center gap-3 text-gray-600 dark:text-gray-400">
               <font-awesome-icon icon="fa-solid fa-location-dot" class="w-5 h-5 text-brand-blue-600" />
-              <span>{{ t('site.presentation.address') }}</span>
+              <span>{{ getContent('site.presentation.address') }}</span>
             </div>
           </div>
 
@@ -257,12 +263,12 @@ const getNextBgColor = (index: number, isDark: boolean) => {
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
             <span class="relative inline-block">
-              {{ t('site.facilities.title') }}
+              {{ getContent('site.facilities.title') }}
               <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
             </span>
           </h2>
           <p class="mt-6 text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            {{ t('site.facilities.subtitle') }}
+            {{ getContent('site.facilities.subtitle') }}
           </p>
         </div>
       </div>
@@ -434,7 +440,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/60 dark:bg-gray-800/60"
               >
                 <font-awesome-icon icon="fa-solid fa-users" class="w-4 h-4" />
-                {{ t('site.facilities.capacity') }}: {{ facility.capacity }}
+                {{ getContent('site.facilities.capacity') }}: {{ facility.capacity }}
               </div>
             </div>
           </div>
@@ -527,10 +533,10 @@ const getNextBgColor = (index: number, isDark: boolean) => {
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            {{ t('site.location.title') }}
+            {{ getContent('site.location.title') }}
           </h2>
           <p class="text-lg text-gray-600 dark:text-gray-400">
-            {{ t('site.location.subtitle') }}
+            {{ getContent('site.location.subtitle') }}
           </p>
         </div>
 
@@ -559,7 +565,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
               </div>
               <span class="px-6 py-3 bg-white/90 dark:bg-gray-900/90 text-brand-blue-600 dark:text-brand-blue-400 font-semibold rounded-full shadow-lg flex items-center gap-2 group-hover:bg-brand-blue-600 group-hover:text-white transition-colors">
                 <font-awesome-icon icon="fa-solid fa-external-link-alt" class="w-4 h-4" />
-                {{ t('site.location.openMaps') }}
+                {{ getContent('site.location.openMaps') }}
               </span>
             </div>
           </a>

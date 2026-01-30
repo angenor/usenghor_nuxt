@@ -1,6 +1,9 @@
 <script setup lang="ts">
 const { t } = useI18n()
 
+// Contenus éditoriaux avec fallback sur i18n
+const { getContent, loadContent } = useEditorialContent('homepage')
+
 const { elementRef: headerRef } = useScrollAnimation({ animation: 'fadeInDown' })
 const { elementRef: genesisRef } = useScrollAnimation({ animation: 'fadeInLeft', threshold: 0.15 })
 const { elementRef: foundersRef } = useScrollAnimation({ animation: 'fadeInRight', threshold: 0.15 })
@@ -11,8 +14,13 @@ const founders = [
   { name: 'Léopold Sédar Senghor', role: 'history.founders.senghor.role', icon: 'fa-solid fa-feather-pointed' },
   { name: 'Maurice Druon', role: 'history.founders.druon.role', icon: 'fa-solid fa-pen-nib' },
   { name: 'Boutros Boutros-Ghali', role: 'history.founders.boutros.role', icon: 'fa-solid fa-globe' },
-  { name: 'René-Jean Dupuy', role: 'history.founders.dupuy.role', icon: 'fa-solid fa-scale-balanced' }
+  { name: 'René-Jean Dupuy', role: 'history.founders.dupuy.role', icon: 'fa-solid fa-scale-balanced' },
 ]
+
+onMounted(() => {
+  // Charger les contenus éditoriaux (non-bloquant)
+  loadContent()
+})
 </script>
 
 <template>
@@ -35,13 +43,13 @@ const founders = [
       <div ref="headerRef" class="text-center mb-16 lg:mb-20">
         <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 mb-4">
           <font-awesome-icon icon="fa-solid fa-landmark" class="w-3.5 h-3.5 mr-2" />
-          {{ t('history.badge') }}
+          {{ getContent('history.badge') }}
         </span>
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-          {{ t('history.title') }}
+          {{ getContent('history.title') }}
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-          {{ t('history.subtitle') }}
+          {{ getContent('history.subtitle') }}
         </p>
       </div>
 
@@ -68,16 +76,16 @@ const founders = [
 
                 <div class="hidden lg:block mb-4">
                   <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-blue-100 dark:bg-brand-blue-900/40 text-brand-blue-700 dark:text-brand-blue-300">
-                    {{ t('history.genesis.date') }}
+                    {{ getContent('history.genesis.date') }}
                   </span>
                 </div>
 
                 <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                  {{ t('history.genesis.title') }}
+                  {{ getContent('history.genesis.title') }}
                 </h3>
 
                 <p class="text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-                  {{ t('history.genesis.description') }}
+                  {{ getContent('history.genesis.description') }}
                 </p>
 
                 <div class="space-y-3">
@@ -85,13 +93,13 @@ const founders = [
                     <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-brand-blue-100 dark:bg-brand-blue-900/40 flex items-center justify-center">
                       <font-awesome-icon icon="fa-solid fa-handshake" class="w-4 h-4 text-brand-blue-600 dark:text-brand-blue-400" />
                     </div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ t('history.genesis.point1') }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ getContent('history.genesis.point1') }}</p>
                   </div>
                   <div class="flex items-start gap-3 lg:flex-row-reverse lg:text-right">
                     <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-brand-blue-100 dark:bg-brand-blue-900/40 flex items-center justify-center">
                       <font-awesome-icon icon="fa-solid fa-bullseye" class="w-4 h-4 text-brand-blue-600 dark:text-brand-blue-400" />
                     </div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ t('history.genesis.point2') }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ getContent('history.genesis.point2') }}</p>
                   </div>
                 </div>
               </div>
@@ -101,10 +109,10 @@ const founders = [
             <div ref="foundersRef" class="mt-8 lg:mt-0 lg:pl-16">
               <div class="mb-6">
                 <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  {{ t('history.founders.title') }}
+                  {{ getContent('history.founders.title') }}
                 </h4>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
-                  {{ t('history.founders.subtitle') }}
+                  {{ getContent('history.founders.subtitle') }}
                 </p>
               </div>
 
@@ -140,21 +148,21 @@ const founders = [
                   <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-red-400 to-brand-red-600 flex items-center justify-center">
                     <font-awesome-icon icon="fa-solid fa-university" class="w-4 h-4 text-white" />
                   </div>
-                  <span class="text-sm font-semibold text-brand-red-600 dark:text-brand-red-400">{{ t('history.usenghor.since') }}</span>
+                  <span class="text-sm font-semibold text-brand-red-600 dark:text-brand-red-400">{{ getContent('history.usenghor.since') }}</span>
                 </div>
 
                 <div class="hidden lg:block mb-4">
                   <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-red-100 dark:bg-brand-red-900/40 text-brand-red-700 dark:text-brand-red-300">
-                    {{ t('history.usenghor.since') }}
+                    {{ getContent('history.usenghor.since') }}
                   </span>
                 </div>
 
                 <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                  {{ t('history.usenghor.title') }}
+                  {{ getContent('history.usenghor.title') }}
                 </h3>
 
                 <p class="text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-                  {{ t('history.usenghor.description') }}
+                  {{ getContent('history.usenghor.description') }}
                 </p>
 
                 <div class="space-y-4">
@@ -193,15 +201,15 @@ const founders = [
               <div class="max-w-3xl mx-auto text-center">
                 <div class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-white/10 backdrop-blur-sm text-white border border-white/20 mb-6">
                   <font-awesome-icon icon="fa-solid fa-star" class="w-3.5 h-3.5 mr-2 text-brand-blue-400" />
-                  {{ t('history.legacy.badge') }}
+                  {{ getContent('history.legacy.badge') }}
                 </div>
 
                 <h3 class="text-2xl lg:text-3xl font-bold text-white mb-4">
-                  {{ t('history.legacy.title') }}
+                  {{ getContent('history.legacy.title') }}
                 </h3>
 
                 <p class="text-white/80 leading-relaxed mb-6">
-                  {{ t('history.legacy.description') }}
+                  {{ getContent('history.legacy.description') }}
                 </p>
 
                 <div class="flex flex-wrap justify-center gap-4">

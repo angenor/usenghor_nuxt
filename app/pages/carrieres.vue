@@ -1,6 +1,14 @@
 <script setup lang="ts">
 const { t } = useI18n()
 
+// Contenus éditoriaux avec fallback sur i18n
+const { getContent, loadContent } = useEditorialContent('careers')
+
+onMounted(() => {
+  // Charger les contenus éditoriaux (non-bloquant)
+  loadContent()
+})
+
 // SEO
 useSeoMeta({
   title: () => t('careers.seo.title'),
@@ -20,8 +28,8 @@ const breadcrumb = computed(() => [
   <div>
     <!-- Hero -->
     <PageHero
-      :title="t('careers.hero.title')"
-      :subtitle="t('careers.hero.subtitle')"
+      :title="getContent('careers.hero.title')"
+      :subtitle="getContent('careers.hero.subtitle')"
       image="/images/bg/backgroud_senghor3.jpg"
       :breadcrumb="breadcrumb"
     />

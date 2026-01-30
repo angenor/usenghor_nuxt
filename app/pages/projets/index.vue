@@ -5,6 +5,14 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getAllProjects, getFeaturedProjects, getAllProjectCategories } = useMockData()
 
+// Contenus éditoriaux avec fallback sur i18n
+const { getContent, loadContent } = useEditorialContent('projects')
+
+onMounted(() => {
+  // Charger les contenus éditoriaux (non-bloquant)
+  loadContent()
+})
+
 // SEO
 useSeoMeta({
   title: () => t('projets.seo.title'),
@@ -119,9 +127,9 @@ const formatDate = (dateStr: string) => {
 
 // Stats
 const stats = computed(() => [
-  { value: allProjects.value.filter(p => p.status === 'ongoing').length, label: t('projets.intro.stats.projects') },
-  { value: '15+', label: t('projets.intro.stats.countries') },
-  { value: '10K+', label: t('projets.intro.stats.beneficiaries') }
+  { value: allProjects.value.filter(p => p.status === 'ongoing').length, label: getContent('projects.intro.stats.projects.label', 'projets.intro.stats.projects') },
+  { value: '15+', label: getContent('projects.intro.stats.countries.label', 'projets.intro.stats.countries') },
+  { value: '10K+', label: getContent('projects.intro.stats.beneficiaries.label', 'projets.intro.stats.beneficiaries') }
 ])
 </script>
 
@@ -133,13 +141,13 @@ const stats = computed(() => [
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
           <span class="inline-block px-4 py-1.5 text-sm font-semibold text-brand-blue-900 bg-brand-blue-400 rounded-full mb-6">
-            {{ t('projets.hero.badge') }}
+            {{ getContent('projects.hero.badge', 'projets.hero.badge') }}
           </span>
           <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
-            {{ t('projets.hero.title') }}
+            {{ getContent('projects.hero.title', 'projets.hero.title') }}
           </h1>
           <p class="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
-            {{ t('projets.hero.subtitle') }}
+            {{ getContent('projects.hero.subtitle', 'projets.hero.subtitle') }}
           </p>
         </div>
       </div>
@@ -155,10 +163,10 @@ const stats = computed(() => [
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-3xl mx-auto mb-12">
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            {{ t('projets.intro.title') }}
+            {{ getContent('projects.intro.title', 'projets.intro.title') }}
           </h2>
           <p class="text-lg text-gray-600 dark:text-gray-400">
-            {{ t('projets.intro.description') }}
+            {{ getContent('projects.intro.description', 'projets.intro.description') }}
           </p>
         </div>
 
@@ -181,10 +189,10 @@ const stats = computed(() => [
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center gap-4 mb-10">
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
-            {{ t('projets.featured.title') }}
+            {{ getContent('projects.featured.title', 'projets.featured.title') }}
           </h2>
           <span class="inline-block px-3 py-1 text-xs font-semibold text-brand-blue-800 bg-brand-blue-200 dark:bg-brand-blue-900/50 dark:text-brand-blue-300 rounded-full uppercase tracking-wide">
-            {{ t('projets.featured.badge') }}
+            {{ getContent('projects.featured.badge', 'projets.featured.badge') }}
           </span>
         </div>
 
@@ -251,7 +259,7 @@ const stats = computed(() => [
     <section class="py-16 bg-white dark:bg-gray-950">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-          {{ t('projets.list.title') }}
+          {{ getContent('projects.list.title', 'projets.list.title') }}
         </h2>
 
         <!-- Filters -->
@@ -362,16 +370,16 @@ const stats = computed(() => [
     <section class="py-16 bg-gradient-to-r from-brand-blue-500 to-brand-blue-600">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl font-bold text-white mb-4">
-          {{ t('projets.cta.title') }}
+          {{ getContent('projects.cta.title', 'projets.cta.title') }}
         </h2>
         <p class="text-lg text-brand-blue-100 mb-8">
-          {{ t('projets.cta.description') }}
+          {{ getContent('projects.cta.description', 'projets.cta.description') }}
         </p>
         <NuxtLink
           :to="localePath('/contact')"
           class="inline-flex items-center gap-2 px-8 py-4 bg-white text-brand-blue-600 font-semibold rounded-lg hover:bg-brand-blue-50 transition-colors shadow-lg"
         >
-          {{ t('projets.cta.button') }}
+          {{ getContent('projects.cta.button', 'projets.cta.button') }}
           <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
         </NuxtLink>
       </div>

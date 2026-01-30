@@ -1,6 +1,9 @@
 <script setup lang="ts">
 const { t } = useI18n()
 
+// Contenus éditoriaux avec fallback sur i18n
+const { getContent, loadContent } = useEditorialContent('homepage')
+
 const { elementRef: headerRef } = useScrollAnimation({ animation: 'fadeInDown' })
 const { elementRef: foundingTextsRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.15 })
 const { elementRef: donorCountriesRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.2 })
@@ -11,16 +14,21 @@ const donorCountries = [
   { code: 'BE', name: 'Wallonie-Bruxelles' },
   { code: 'CH', name: 'Suisse' },
   { code: 'QC', name: 'Québec' },
-  { code: 'EG', name: 'Égypte' }
+  { code: 'EG', name: 'Égypte' },
 ]
 
 // Fonction pour obtenir l'URL du drapeau (gère le cas spécial du Québec)
 const getFlagUrl = (code: string) => {
   if (code === 'QC') {
-    return 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Flag_of_Quebec.svg/120px-Flag_of_Quebec.svg.png'
+    return 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Flag_of_Quebec.svg/200px-Flag_of_Quebec.svg.png'
   }
-  return `https://flagcdn.com/w80/${code.toLowerCase()}.png`
+  return `https://flagcdn.com/w160/${code.toLowerCase()}.png`
 }
+
+onMounted(() => {
+  // Charger les contenus éditoriaux (non-bloquant)
+  loadContent()
+})
 </script>
 
 <template>
@@ -39,13 +47,13 @@ const getFlagUrl = (code: string) => {
       <div ref="headerRef" class="text-center mb-16 lg:mb-20">
         <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 mb-4">
           <font-awesome-icon icon="fa-solid fa-landmark" class="w-3.5 h-3.5 mr-2" />
-          {{ t('governance.badge') }}
+          {{ getContent('governance.badge') }}
         </span>
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-          {{ t('governance.title') }}
+          {{ getContent('governance.title') }}
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          {{ t('governance.subtitle') }}
+          {{ getContent('governance.subtitle') }}
         </p>
       </div>
 
@@ -68,13 +76,13 @@ const getFlagUrl = (code: string) => {
           <div class="space-y-6">
             <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-brand-blue-100 dark:bg-brand-blue-900/40 text-brand-blue-700 dark:text-brand-blue-300">
               <font-awesome-icon icon="fa-solid fa-scroll" class="w-3 h-3 mr-2" />
-              {{ t('governance.foundingTexts.badge') }}
+              {{ getContent('governance.foundingTexts.badge') }}
             </div>
             <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
-              {{ t('governance.foundingTexts.title') }}
+              {{ getContent('governance.foundingTexts.title') }}
             </h3>
             <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
-              {{ t('governance.foundingTexts.description') }}
+              {{ getContent('governance.foundingTexts.description') }}
             </p>
             <ul class="space-y-3">
               <li class="flex items-start gap-3">
@@ -111,52 +119,23 @@ const getFlagUrl = (code: string) => {
           </p>
         </div>
 
-        <!-- Marquee Container -->
-        <div class="marquee-container overflow-hidden relative">
-          <!-- Gradient overlays for fade effect -->
-          <div class="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white dark:from-gray-950 to-transparent z-10 pointer-events-none"></div>
-          <div class="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white dark:from-gray-950 to-transparent z-10 pointer-events-none"></div>
-
-          <!-- Scrolling track -->
-          <div class="marquee-track flex">
-            <!-- First set of items -->
-            <div class="marquee-content flex gap-6 animate-marquee">
-              <div
-                v-for="country in donorCountries"
-                :key="'first-' + country.code"
-                class="flex-shrink-0 group relative bg-white dark:bg-gray-800/50 rounded-xl px-6 py-4 border border-gray-200/50 dark:border-gray-700/50 hover:border-brand-blue-300 dark:hover:border-brand-blue-600 transition-all duration-300 hover:shadow-lg hover:shadow-brand-blue-500/10"
-              >
-                <div class="flex items-center gap-3">
-                  <img
-                    :src="getFlagUrl(country.code)"
-                    :alt="country.name"
-                    class="w-10 h-7 object-cover rounded shadow-sm group-hover:scale-110 transition-transform duration-300"
-                  />
-                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                    {{ country.name }}
-                  </span>
-                </div>
-              </div>
+        <!-- Flags Grid -->
+        <div class="flex flex-wrap justify-center gap-8 lg:gap-12">
+          <div
+            v-for="country in donorCountries"
+            :key="country.code"
+            class="group flex flex-col items-center gap-3"
+          >
+            <div class="relative bg-white dark:bg-gray-800/50 rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 hover:border-brand-blue-300 dark:hover:border-brand-blue-600 transition-all duration-300 hover:shadow-lg hover:shadow-brand-blue-500/10">
+              <img
+                :src="getFlagUrl(country.code)"
+                :alt="country.name"
+                class="w-20 h-14 sm:w-24 sm:h-16 lg:w-28 lg:h-20 object-cover rounded shadow-md group-hover:scale-105 transition-transform duration-300"
+              />
             </div>
-            <!-- Duplicate set for seamless loop -->
-            <div class="marquee-content flex gap-6 animate-marquee" aria-hidden="true">
-              <div
-                v-for="country in donorCountries"
-                :key="'second-' + country.code"
-                class="flex-shrink-0 group relative bg-white dark:bg-gray-800/50 rounded-xl px-6 py-4 border border-gray-200/50 dark:border-gray-700/50 hover:border-brand-blue-300 dark:hover:border-brand-blue-600 transition-all duration-300 hover:shadow-lg hover:shadow-brand-blue-500/10"
-              >
-                <div class="flex items-center gap-3">
-                  <img
-                    :src="getFlagUrl(country.code)"
-                    :alt="country.name"
-                    class="w-10 h-7 object-cover rounded shadow-sm group-hover:scale-110 transition-transform duration-300"
-                  />
-                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                    {{ country.name }}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {{ country.name }}
+            </span>
           </div>
         </div>
       </div>
@@ -273,35 +252,4 @@ const getFlagUrl = (code: string) => {
   }
 }
 
-/* Marquee Animation for Donor Countries */
-.marquee-container {
-  padding: 1rem 0;
-}
-
-.marquee-track {
-  display: flex;
-  width: max-content;
-}
-
-.marquee-content {
-  padding-right: 1.5rem;
-}
-
-.animate-marquee {
-  animation: marquee 30s linear infinite;
-}
-
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
-}
-
-/* Pause animation on hover */
-.marquee-track:hover .animate-marquee {
-  animation-play-state: paused;
-}
 </style>
