@@ -113,14 +113,14 @@ export function usePublicProgramsApi() {
     limit?: number
     search?: string
     program_type?: ProgramType
-    department_id?: string
+    sector_id?: string
   } = {}): Promise<PaginatedResponse<ProgramPublic>> {
     const query = new URLSearchParams()
     if (params.page) query.set('page', String(params.page))
     if (params.limit) query.set('limit', String(params.limit))
     if (params.search) query.set('search', params.search)
     if (params.program_type) query.set('program_type', params.program_type)
-    if (params.department_id) query.set('department_id', params.department_id)
+    if (params.sector_id) query.set('sector_id', params.sector_id)
 
     const queryString = query.toString()
     const url = `/api/public/programs${queryString ? `?${queryString}` : ''}`

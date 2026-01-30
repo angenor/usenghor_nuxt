@@ -46,7 +46,7 @@ export function useProgramsApi() {
     search?: string
     type?: ProgramType | 'all'
     status?: PublicationStatus | 'all'
-    department_id?: string
+    sector_id?: string
   } = {}): Promise<PaginatedResponse<ProgramRead>> {
     return apiFetch<PaginatedResponse<ProgramRead>>('/api/admin/programs', {
       query: {
