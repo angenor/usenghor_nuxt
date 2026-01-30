@@ -3,7 +3,6 @@ import type { ApplicationWithDetails, ApplicationStatus, ApplicationDocumentRead
 
 definePageMeta({
   layout: 'admin',
-  middleware: 'admin-auth',
 })
 
 const route = useRoute()

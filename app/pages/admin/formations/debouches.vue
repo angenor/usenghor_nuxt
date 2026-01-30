@@ -3,7 +3,6 @@ import type { ProgramCareerOpportunityRead, ProgramRead, ProgramType } from '~/t
 
 definePageMeta({
   layout: 'admin',
-  middleware: 'admin-auth',
 })
 
 // === API COMPOSABLES ===

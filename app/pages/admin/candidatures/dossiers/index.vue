@@ -3,7 +3,6 @@ import type { ApplicationRead, ApplicationStatus, ApplicationStatistics } from '
 
 definePageMeta({
   layout: 'admin',
-  middleware: 'admin-auth',
 })
 
 const router = useRouter()

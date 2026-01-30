@@ -11,7 +11,6 @@ const { listCampuses } = useCampusApi()
 
 definePageMeta({
   layout: 'admin',
-  middleware: 'admin-auth',
 })
 
 const router = useRouter()

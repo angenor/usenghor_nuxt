@@ -3,7 +3,6 @@ import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({
   layout: 'admin',
-  middleware: 'admin-auth',
 })
 
 // === STORES & COMPOSABLES ===

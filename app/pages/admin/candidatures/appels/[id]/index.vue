@@ -11,7 +11,6 @@ import {
 
 definePageMeta({
   layout: 'admin',
-  middleware: 'admin-auth',
 })
 
 const route = useRoute()

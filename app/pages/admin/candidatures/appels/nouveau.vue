@@ -3,7 +3,6 @@ import type { CallType, PublicationStatus, CallEligibilityCriteriaCreate, CallCo
 
 definePageMeta({
   layout: 'admin',
-  middleware: 'admin-auth',
 })
 
 const router = useRouter()
