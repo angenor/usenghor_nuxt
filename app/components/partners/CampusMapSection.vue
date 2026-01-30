@@ -306,7 +306,7 @@ const handleImageError = (e: Event) => {
       <div ref="headerRef" class="text-center mb-12 lg:mb-16">
         <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 mb-4">
           <font-awesome-icon icon="fa-solid fa-globe-africa" class="w-3.5 h-3.5 mr-2" />
-          {{ t('partners.campus.title') }}
+          {{ t('partners.campus.badge') }}
         </span>
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
           <span class="relative inline-block">
