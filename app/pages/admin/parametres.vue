@@ -57,8 +57,8 @@ const salutationOptions = [
 const userEmail = computed(() => authStore.user?.email || 'admin@usenghor.org')
 
 const userInitials = computed(() => {
-  const first = profileForm.value.first_name?.charAt(0) || authStore.user?.first_name?.charAt(0) || ''
-  const last = profileForm.value.last_name?.charAt(0) || authStore.user?.last_name?.charAt(0) || ''
+  const first = profileForm.value.first_name?.charAt(0) || ''
+  const last = profileForm.value.last_name?.charAt(0) || ''
   return (first + last).toUpperCase() || 'U'
 })
 
@@ -87,15 +87,20 @@ const passwordErrors = computed(() => {
 })
 
 // === LIFECYCLE ===
-onMounted(() => {
-  loadUserData()
+onMounted(async () => {
+  await loadUserData()
   loadPreferences()
 })
 
 // === METHODS ===
-function loadUserData() {
+async function loadUserData() {
   isLoading.value = true
   try {
+    // Toujours essayer de récupérer les données fraîches depuis l'API
+    if (authStore.token) {
+      await authStore.fetchCurrentUser()
+    }
+
     const user = authStore.user
     if (user) {
       profileForm.value = {
@@ -109,6 +114,13 @@ function loadUserData() {
         address: user.address || '',
       }
     }
+    else {
+      // Aucune donnée disponible - afficher un message d'erreur
+      errorMessage.value = 'Impossible de charger les données du profil. Vérifiez que le backend est lancé.'
+    }
+  }
+  catch {
+    errorMessage.value = 'Erreur lors du chargement des données du profil'
   }
   finally {
     isLoading.value = false
@@ -156,14 +168,31 @@ async function saveProfile() {
   isSaving.value = true
   clearMessages()
   try {
-    // TODO: Appeler l'API backend quand disponible
-    // await updateUserProfile(profileForm.value)
-    await new Promise(resolve => setTimeout(resolve, 500)) // Simulation
+    // Appeler l'API backend PUT /api/auth/me
+    await $fetch('/api/auth/me', {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      body: {
+        first_name: profileForm.value.first_name,
+        last_name: profileForm.value.last_name,
+        salutation: profileForm.value.salutation,
+        phone: profileForm.value.phone || null,
+        phone_whatsapp: profileForm.value.phone_whatsapp || null,
+        linkedin: profileForm.value.linkedin || null,
+        city: profileForm.value.city || null,
+        address: profileForm.value.address || null,
+      },
+    })
+
+    // Recharger les données utilisateur depuis l'API
+    await authStore.fetchCurrentUser()
+
     showSuccess('Profil mis à jour avec succès')
     activeSection.value = null
   }
-  catch {
-    errorMessage.value = 'Erreur lors de la mise à jour du profil'
+  catch (e: unknown) {
+    const fetchError = e as { data?: { detail?: string } }
+    errorMessage.value = fetchError.data?.detail || 'Erreur lors de la mise à jour du profil'
   }
   finally {
     isSaving.value = false
@@ -218,22 +247,31 @@ async function savePassword() {
   isSaving.value = true
   clearMessages()
   try {
-    // TODO: Appeler l'API backend
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // Appeler l'API backend PUT /api/auth/me/password
+    await $fetch('/api/auth/me/password', {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      body: {
+        current_password: securityForm.value.current_password,
+        new_password: securityForm.value.new_password,
+      },
+    })
+
     showSuccess('Mot de passe modifié avec succès')
     securityForm.value = { current_password: '', new_password: '', confirm_password: '' }
     activeSection.value = null
   }
-  catch {
-    errorMessage.value = 'Erreur lors du changement de mot de passe'
+  catch (e: unknown) {
+    const fetchError = e as { data?: { detail?: string } }
+    errorMessage.value = fetchError.data?.detail || 'Erreur lors du changement de mot de passe'
   }
   finally {
     isSaving.value = false
   }
 }
 
-function cancelEdit() {
-  loadUserData()
+async function cancelEdit() {
+  await loadUserData()
   loadPreferences()
   activeSection.value = null
   clearMessages()

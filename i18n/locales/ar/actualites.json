@@ -116,6 +116,12 @@
         "requiredDocuments": "الوثائق المطلوبة",
         "schedule": "الجدول الزمني",
         "registrationFee": "رسوم التسجيل",
+        "courseFee": "رسوم الدورة",
+        "scholarshipBenefits": "مزايا المنحة",
+        "programDates": "تواريخ البرنامج",
+        "programStart": "بداية البرنامج",
+        "programEnd": "نهاية البرنامج",
+        "whatsIncluded": "ما يتضمنه",
         "notFound": "الدعوة غير موجودة",
         "notFoundDescription": "الدعوة التي تبحث عنها غير موجودة أو تم حذفها."
       },

@@ -116,6 +116,12 @@
         "requiredDocuments": "Documents requis",
         "schedule": "Calendrier",
         "registrationFee": "Frais d'inscription",
+        "courseFee": "Frais de formation",
+        "scholarshipBenefits": "Avantages de la bourse",
+        "programDates": "Dates du programme",
+        "programStart": "Début du programme",
+        "programEnd": "Fin du programme",
+        "whatsIncluded": "Ce qui est inclus",
         "notFound": "Appel non trouvé",
         "notFoundDescription": "L'appel que vous recherchez n'existe pas ou a été supprimé."
       },
