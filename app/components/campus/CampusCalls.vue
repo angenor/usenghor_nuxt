@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import type { ApplicationCallPublic } from '~/types/api'
+import type { CampusPartnerPublic, CampusTeamMemberPublic } from '~/composables/usePublicCampusApi'
+import type { EventPublic } from '~/composables/usePublicEventsApi'
+import type { NewsDisplay } from '~/types/news'
 
 interface Props {
   campusId: string
@@ -8,7 +11,9 @@ interface Props {
 const props = defineProps<Props>()
 const { t, locale } = useI18n()
 const { listPublicCalls } = useApplicationCallsApi()
-const { getCampusEvents, getCampusNews, getCampusTeam, partenaires } = useMockData()
+const { getCampusPartners, getCampusTeam: fetchCampusTeam, getPartnerLogoUrl, getTeamMemberPhotoUrl, getTeamMemberFullName } = usePublicCampusApi()
+const { listPublishedEvents } = usePublicEventsApi()
+const { listPublishedNews } = usePublicNewsApi()
 
 // Fetch calls from API using useLazyAsyncData to avoid SSR issues with v-if
 const { data: callsResponse, pending: loading } = useLazyAsyncData(
@@ -17,6 +22,27 @@ const { data: callsResponse, pending: loading } = useLazyAsyncData(
 )
 
 const allCalls = computed(() => callsResponse.value?.items || [])
+
+// Fetch sidebar data from real API
+const { data: eventsResponse } = useLazyAsyncData(
+  `campus-events-${props.campusId}`,
+  () => listPublishedEvents({ campus_id: props.campusId, limit: 10 })
+)
+
+const { data: newsResponse } = useLazyAsyncData(
+  `campus-news-${props.campusId}`,
+  () => listPublishedNews({ campus_id: props.campusId, limit: 10 })
+)
+
+const { data: partnersData } = useLazyAsyncData(
+  `campus-partners-${props.campusId}`,
+  () => getCampusPartners(props.campusId)
+)
+
+const { data: teamData } = useLazyAsyncData(
+  `campus-team-${props.campusId}`,
+  () => fetchCampusTeam(props.campusId)
+)
 
 // Active filter
 type FilterType = 'all' | 'calls' | 'formations' | 'closed' | 'recruitments'
@@ -89,46 +115,46 @@ const displayedRecruitments = computed(() =>
 )
 
 // === SIDEBAR DATA ===
-const allEvents = computed(() => getCampusEvents(props.campusId))
-const allNews = computed(() => getCampusNews(props.campusId))
+const allEvents = computed<EventPublic[]>(() => eventsResponse.value?.items || [])
+const allNews = computed<NewsDisplay[]>(() => newsResponse.value?.items || [])
 
 // Get upcoming events (future) or recent events if no future ones
 const sidebarEvents = computed(() => {
   const now = new Date()
   const upcoming = allEvents.value
-    .filter(e => new Date(e.date) >= now)
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .filter(e => new Date(e.start_date) >= now)
+    .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
     .slice(0, 3)
 
   if (upcoming.length > 0) return upcoming
 
   // Fallback: show most recent past events
   return allEvents.value
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime())
     .slice(0, 3)
 })
 
 // Check if showing upcoming or past events
 const hasUpcomingEvents = computed(() => {
   const now = new Date()
-  return allEvents.value.some(e => new Date(e.date) >= now)
+  return allEvents.value.some(e => new Date(e.start_date) >= now)
 })
 
 // Get recent news (limit to 4)
 const sidebarNews = computed(() => {
   return allNews.value
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort((a, b) => new Date(b.published_at || b.created_at).getTime() - new Date(a.published_at || a.created_at).getTime())
     .slice(0, 4)
 })
 
 // Get campus partners (limit to 6 for sidebar)
-const sidebarPartners = computed(() => {
-  return partenaires.value.slice(0, 6)
+const sidebarPartners = computed<CampusPartnerPublic[]>(() => {
+  return (partnersData.value || []).slice(0, 6)
 })
 
 // Get campus team (limit to 4 for sidebar)
-const sidebarTeam = computed(() => {
-  return getCampusTeam(props.campusId).slice(0, 4)
+const sidebarTeam = computed<CampusTeamMemberPublic[]>(() => {
+  return (teamData.value || []).slice(0, 4)
 })
 
 // Check if section should be visible (hide empty sections in 'all' mode)
@@ -144,26 +170,21 @@ const hasAnyData = computed(() => {
 })
 
 // Localized getters
-const getLocalizedEventTitle = (event: CampusEvent) => {
-  if (locale.value === 'en' && event.title_en) return event.title_en
-  if (locale.value === 'ar' && event.title_ar) return event.title_ar
-  return event.title_fr
+const getEventTitle = (event: EventPublic) => {
+  return event.title
 }
 
-const getLocalizedNewsTitle = (news: CampusNews) => {
-  if (locale.value === 'en' && news.title_en) return news.title_en
-  if (locale.value === 'ar' && news.title_ar) return news.title_ar
-  return news.title_fr
+const getNewsTitle = (news: NewsDisplay) => {
+  return news.title
 }
 
-const getLocalizedPartnerName = (partner: Partenaire) => {
-  if (locale.value === 'en' && partner.name_en) return partner.name_en
-  if (locale.value === 'ar' && partner.name_ar) return partner.name_ar
-  return partner.name_fr
+const getPartnerName = (partner: CampusPartnerPublic) => {
+  return partner.name
 }
 
 // Format date
-const formatDate = (dateStr: string) => {
+const formatDate = (dateStr: string | null | undefined) => {
+  if (!dateStr) return ''
   const date = new Date(dateStr)
   return date.toLocaleDateString(
     locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
@@ -394,11 +415,11 @@ const formatDate = (dateStr: string) => {
               :class="{ 'border-t border-gray-200 dark:border-gray-700': index > 0 }"
             >
               <!-- Thumbnail -->
-              <div v-if="event.image" class="w-2/5 flex-shrink-0">
+              <div v-if="event.cover_image" class="w-2/5 flex-shrink-0">
                 <div class="overflow-hidden rounded-lg">
                   <img
-                    :src="event.image"
-                    :alt="getLocalizedEventTitle(event)"
+                    :src="event.cover_image"
+                    :alt="getEventTitle(event)"
                     class="w-full h-24 object-cover transition-transform duration-300 group-hover:scale-105"
                     loading="lazy"
                   >
@@ -407,11 +428,14 @@ const formatDate = (dateStr: string) => {
               <!-- Content -->
               <div class="flex-1 flex flex-col justify-center">
                 <h4 class="text-sm font-semibold text-gray-900 dark:text-white leading-tight line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
-                  {{ getLocalizedEventTitle(event) }}
+                  <NuxtLink v-if="event.slug" :to="`/evenements/${event.slug}`">
+                    {{ getEventTitle(event) }}
+                  </NuxtLink>
+                  <span v-else>{{ getEventTitle(event) }}</span>
                 </h4>
                 <span class="text-xs text-gray-500 dark:text-gray-400 mt-1 inline-flex items-center gap-1">
                   <font-awesome-icon icon="fa-regular fa-calendar" class="w-3 h-3" />
-                  {{ formatDate(event.date) }}
+                  {{ formatDate(event.start_date) }}
                 </span>
               </div>
             </article>
@@ -449,11 +473,11 @@ const formatDate = (dateStr: string) => {
               :class="{ 'border-t border-gray-200 dark:border-gray-700': index > 0 }"
             >
               <!-- Thumbnail -->
-              <div v-if="news.image" class="w-2/5 flex-shrink-0">
+              <div v-if="news.cover_image" class="w-2/5 flex-shrink-0">
                 <div class="overflow-hidden rounded-lg">
                   <img
-                    :src="news.image"
-                    :alt="getLocalizedNewsTitle(news)"
+                    :src="news.cover_image"
+                    :alt="getNewsTitle(news)"
                     class="w-full h-24 object-cover transition-transform duration-300 group-hover:scale-105"
                     loading="lazy"
                   >
@@ -462,13 +486,13 @@ const formatDate = (dateStr: string) => {
               <!-- Content -->
               <div class="flex-1 flex flex-col justify-center">
                 <h4 class="text-sm font-semibold text-gray-900 dark:text-white leading-tight line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
-                  <a v-if="news.url" :href="news.url">
-                    {{ getLocalizedNewsTitle(news) }}
-                  </a>
-                  <span v-else>{{ getLocalizedNewsTitle(news) }}</span>
+                  <NuxtLink v-if="news.slug" :to="`/actualites/${news.slug}`">
+                    {{ getNewsTitle(news) }}
+                  </NuxtLink>
+                  <span v-else>{{ getNewsTitle(news) }}</span>
                 </h4>
                 <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {{ formatDate(news.date) }}
+                  {{ formatDate(news.published_at || news.created_at) }}
                 </span>
               </div>
             </article>
@@ -503,12 +527,12 @@ const formatDate = (dateStr: string) => {
               v-for="partner in sidebarPartners"
               :key="partner.id"
               :href="partner.website || '#'"
-              :title="getLocalizedPartnerName(partner)"
+              :title="getPartnerName(partner)"
               class="group flex items-center justify-center p-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-brand-blue-400 dark:hover:border-brand-blue-500 transition-colors"
             >
               <img
-                :src="partner.logo"
-                :alt="getLocalizedPartnerName(partner)"
+                :src="getPartnerLogoUrl(partner)"
+                :alt="getPartnerName(partner)"
                 class="w-full h-12 object-contain opacity-70 group-hover:opacity-100 transition-opacity"
                 loading="lazy"
               >
@@ -547,17 +571,17 @@ const formatDate = (dateStr: string) => {
               class="flex items-center gap-3"
             >
               <img
-                :src="member.photo"
-                :alt="member.name"
+                :src="getTeamMemberPhotoUrl(member)"
+                :alt="getTeamMemberFullName(member)"
                 class="w-10 h-10 rounded-full object-cover"
                 loading="lazy"
               >
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
-                  {{ member.name }}
+                  {{ getTeamMemberFullName(member) }}
                 </p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
-                  {{ member.role_fr }}
+                  {{ member.position }}
                 </p>
               </div>
             </div>
