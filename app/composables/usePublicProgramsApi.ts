@@ -93,8 +93,7 @@ export const publicProgramTypeColors: Record<ProgramType, { icon: string; color:
 // ============================================================================
 
 export function usePublicProgramsApi() {
-  const config = useRuntimeConfig()
-  const baseUrl = config.public.apiBase || 'http://localhost:8000'
+  const baseUrl = useApiBase()
 
   /**
    * Fetch helper pour les endpoints publics (sans authentification)

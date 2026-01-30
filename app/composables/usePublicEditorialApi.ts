@@ -30,8 +30,7 @@ export interface EditorialContentPublic {
 // ============================================================================
 
 export function usePublicEditorialApi() {
-  const config = useRuntimeConfig()
-  const baseUrl = (config.public.apiBase || config.public.apiBaseUrl || 'http://localhost:8000') as string
+  const baseUrl = useApiBase()
 
   // ==========================================================================
   // API CALLS

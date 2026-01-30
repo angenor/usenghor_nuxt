@@ -136,19 +136,17 @@ export function useMediaApi() {
   /**
    * Construit l'URL complète d'un média
    * Accepte soit un objet MediaRead/MediaUploadResponse, soit un ID string
+   * Note: Utilise des URLs relatives pour que nginx puisse les proxier
    */
   function getMediaUrl(mediaOrId: MediaRead | MediaUploadResponse | string | null): string | null {
     if (!mediaOrId) return null
-
-    const config = useRuntimeConfig()
-    const baseUrl = config.public.apiBase || 'http://localhost:8000'
 
     // Si c'est un ID (string UUID), utiliser l'endpoint public de download
     if (typeof mediaOrId === 'string') {
       // Vérifier que c'est un UUID valide (éviter les chemins relatifs)
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
       if (uuidRegex.test(mediaOrId)) {
-        return `${baseUrl}/api/public/media/${mediaOrId}/download`
+        return `/api/public/media/${mediaOrId}/download`
       }
       return null
     }
@@ -158,8 +156,8 @@ export function useMediaApi() {
       return mediaOrId.url
     }
 
-    // Sinon, construire l'URL avec le backend (accès direct au fichier statique)
-    return `${baseUrl}${mediaOrId.url}`
+    // Sinon, retourner l'URL relative (nginx proxiera vers le backend)
+    return mediaOrId.url
   }
 
   /**
@@ -279,11 +277,9 @@ export function useMediaApi() {
    * Télécharge plusieurs médias dans un fichier ZIP
    */
   async function downloadMediaZip(mediaIds: string[]): Promise<Blob> {
-    const config = useRuntimeConfig()
-    const baseUrl = config.public.apiBase || 'http://localhost:8000'
     const authStore = useAuthStore()
 
-    const response = await fetch(`${baseUrl}/api/admin/media/download-zip`, {
+    const response = await fetch(`/api/admin/media/download-zip`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -302,9 +298,7 @@ export function useMediaApi() {
    * Retourne l'URL de téléchargement direct d'un média
    */
   function getDownloadUrl(mediaId: string): string {
-    const config = useRuntimeConfig()
-    const baseUrl = config.public.apiBase || 'http://localhost:8000'
-    return `${baseUrl}/api/admin/media/${mediaId}/download`
+    return `/api/admin/media/${mediaId}/download`
   }
 
   return {

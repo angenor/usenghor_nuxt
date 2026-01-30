@@ -21,8 +21,7 @@ import type {
 // ============================================================================
 
 export function usePublicNewsApi() {
-  const config = useRuntimeConfig()
-  const baseURL = (config.public.apiBase || config.public.apiBaseUrl || 'http://localhost:8000') as string
+  const baseURL = useApiBase()
 
   // =========================================================================
   // Transformations (réutilisées depuis useAdminNewsApi)

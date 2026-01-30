@@ -101,8 +101,7 @@ export function getFlagEmoji(isoCode: string | null | undefined): string {
 // ============================================================================
 
 export function usePublicCampusApi() {
-  const config = useRuntimeConfig()
-  const baseUrl = (config.public.apiBase || config.public.apiBaseUrl || 'http://localhost:8000') as string
+  const baseUrl = useApiBase()
 
   /**
    * Résout une URL de média (ajoute le baseUrl si c'est un chemin relatif)

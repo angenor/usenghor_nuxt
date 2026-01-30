@@ -36,8 +36,7 @@ export const callStatusColors: Record<CallStatus, string> = {
 }
 
 export function usePublicCallsApi() {
-  const config = useRuntimeConfig()
-  const apiBase = config.public.apiBase || ''
+  const apiBase = useApiBase()
 
   async function publicFetch<T>(
     endpoint: string,

@@ -62,8 +62,7 @@ export function getFlagEmoji(isoCode: string | null | undefined): string {
 // ============================================================================
 
 export function usePublicPartnersApi() {
-  const config = useRuntimeConfig()
-  const baseUrl = (config.public.apiBase || config.public.apiBaseUrl || 'http://localhost:8000') as string
+  const baseUrl = useApiBase()
   const { getMediaUrl } = useMediaApi()
   const { getAllCountriesPublic } = useCountriesApi()
 

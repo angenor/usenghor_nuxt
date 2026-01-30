@@ -47,8 +47,7 @@ export interface EventRegistration {
 // ============================================================================
 
 export function usePublicEventsApi() {
-  const config = useRuntimeConfig()
-  const baseURL = (config.public.apiBase || config.public.apiBaseUrl || 'http://localhost:8000') as string
+  const baseURL = useApiBase()
 
   // =========================================================================
   // Transformations
