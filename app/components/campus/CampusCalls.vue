@@ -16,33 +16,47 @@ const { listPublishedEvents } = usePublicEventsApi()
 const { listPublishedNews } = usePublicNewsApi()
 
 // Fetch calls from API using useLazyAsyncData to avoid SSR issues with v-if
-const { data: callsResponse, pending: loading } = useLazyAsyncData(
+const { data: callsResponse, pending: loading, refresh: refreshCalls } = useLazyAsyncData(
   `campus-calls-${props.campusId}`,
-  () => listPublicCalls({ campus_external_id: props.campusId, limit: 100 })
+  () => listPublicCalls({ campus_external_id: props.campusId, limit: 100 }),
+  { server: false }
 )
 
 const allCalls = computed(() => callsResponse.value?.items || [])
 
 // Fetch sidebar data from real API
-const { data: eventsResponse } = useLazyAsyncData(
+const { data: eventsResponse, refresh: refreshEvents } = useLazyAsyncData(
   `campus-events-${props.campusId}`,
-  () => listPublishedEvents({ campus_id: props.campusId, limit: 10 })
+  () => listPublishedEvents({ campus_id: props.campusId, limit: 10 }),
+  { server: false }
 )
 
-const { data: newsResponse } = useLazyAsyncData(
+const { data: newsResponse, refresh: refreshNews } = useLazyAsyncData(
   `campus-news-${props.campusId}`,
-  () => listPublishedNews({ campus_id: props.campusId, limit: 10 })
+  () => listPublishedNews({ campus_id: props.campusId, limit: 10 }),
+  { server: false }
 )
 
-const { data: partnersData } = useLazyAsyncData(
+const { data: partnersData, refresh: refreshPartners } = useLazyAsyncData(
   `campus-partners-${props.campusId}`,
-  () => getCampusPartners(props.campusId)
+  () => getCampusPartners(props.campusId),
+  { server: false }
 )
 
-const { data: teamData } = useLazyAsyncData(
+const { data: teamData, refresh: refreshTeam } = useLazyAsyncData(
   `campus-team-${props.campusId}`,
-  () => fetchCampusTeam(props.campusId)
+  () => fetchCampusTeam(props.campusId),
+  { server: false }
 )
+
+// Force refresh data on mount (fixes hydration issue with conditional rendering)
+onMounted(() => {
+  refreshCalls()
+  refreshEvents()
+  refreshNews()
+  refreshPartners()
+  refreshTeam()
+})
 
 // Active filter
 type FilterType = 'all' | 'calls' | 'formations' | 'closed' | 'recruitments'
