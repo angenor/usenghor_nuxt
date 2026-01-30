@@ -103,7 +103,7 @@ export const mockApplicationCalls: ApplicationCall[] = [
     description: `L'Université Senghor ouvre ses candidatures pour le Master en Développement, formation phare destinée aux futurs cadres africains souhaitant contribuer au développement durable du continent.
 
 Cette formation de deux ans permet aux étudiants d'acquérir des compétences approfondies en gestion de projets, politiques publiques et développement territorial.`,
-    program_external_id: 'prog-master-dev',
+    program_external_id: 'form-master-management-projets',
     campus_external_id: 'campus-alexandrie',
     type: 'application',
     status: 'ongoing',

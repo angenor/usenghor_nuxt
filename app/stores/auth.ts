@@ -99,8 +99,14 @@ export const useAuthStore = defineStore('auth', () => {
       tokenCookie.value = data.access_token
       refreshTokenCookie.value = data.refresh_token
       return true
-    } catch {
-      logout()
+    }
+    catch (error: unknown) {
+      // Ne logout que si le serveur répond avec une erreur d'auth (401/403)
+      // Pas de logout sur erreur réseau (backend indisponible)
+      const fetchError = error as { status?: number }
+      if (fetchError.status === 401 || fetchError.status === 403) {
+        logout()
+      }
       return false
     }
   }

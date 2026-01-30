@@ -100,7 +100,10 @@ export function usePublicProgramsApi() {
    * Fetch helper pour les endpoints publics (sans authentification)
    */
   async function publicFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const response = await $fetch<T>(`${baseUrl}${endpoint}`, {
+    const fullUrl = `${baseUrl}${endpoint}`
+    console.log('[DEBUG usePublicProgramsApi] Fetching:', fullUrl)
+    console.log('[DEBUG usePublicProgramsApi] baseUrl:', baseUrl)
+    const response = await $fetch<T>(fullUrl, {
       ...options,
     })
     return response

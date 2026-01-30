@@ -49,21 +49,39 @@ const isCallOpen = computed(() => {
   return true
 })
 
+// Get the linked program details
+const linkedProgram = computed(() => {
+  console.log('[DEBUG] Computing linkedProgram:')
+  console.log('[DEBUG]   - call.program_external_id:', call.value?.program_external_id)
+  console.log('[DEBUG]   - programs.length:', programs.value.length)
+  if (!call.value?.program_external_id || programs.value.length === 0) {
+    console.log('[DEBUG]   - Returning null (missing data)')
+    return null
+  }
+  const found = programs.value.find(p => p.id === call.value!.program_external_id)
+  console.log('[DEBUG]   - Found program:', found?.title || 'NOT FOUND')
+  return found || null
+})
+
 // Fetch call data
 async function fetchCall() {
   loading.value = true
   error.value = null
   try {
+    console.log('[DEBUG] Fetching call with slug:', slug.value)
     call.value = await getCallBySlug(slug.value)
+    console.log('[DEBUG] Call response:', call.value)
+    console.log('[DEBUG] Call program_external_id:', call.value?.program_external_id)
     if (!call.value) {
       error.value = t('candidatures.notFound')
     } else if (call.value.program_external_id) {
       // Pre-select the linked formation
       form.value.program_external_id = call.value.program_external_id
+      console.log('[DEBUG] Pre-selected program_external_id:', form.value.program_external_id)
     }
   } catch (e) {
     error.value = t('candidatures.notFound')
-    console.error('Error fetching call:', e)
+    console.error('[DEBUG] Error fetching call:', e)
   } finally {
     loading.value = false
   }
@@ -73,10 +91,14 @@ async function fetchCall() {
 async function fetchPrograms() {
   loadingPrograms.value = true
   try {
+    console.log('[DEBUG] Fetching programs...')
     const response = await listPrograms({ limit: 100 })
+    console.log('[DEBUG] Programs response:', response)
+    console.log('[DEBUG] Programs items:', response.items)
     programs.value = response.items
+    console.log('[DEBUG] programs.value set to:', programs.value.length, 'items')
   } catch (e) {
-    console.error('Error fetching programs:', e)
+    console.error('[DEBUG] Error fetching programs:', e)
   } finally {
     loadingPrograms.value = false
   }
@@ -104,6 +126,8 @@ async function submitApplication() {
 
 // Initial fetch
 onMounted(() => {
+  alert('Page [slug].vue chargée!')
+  console.log('=== PAGE MOUNTED ===')
   fetchCall()
   fetchPrograms()
 })
@@ -212,8 +236,48 @@ useSeoMeta({
     <!-- Form -->
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <form @submit.prevent="submitApplication" class="space-y-8">
-        <!-- Formation Choice -->
-        <div v-if="programs.length > 0" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <!-- Formation Choice - Fixed (when linked to call) -->
+        <div v-if="call.program_external_id" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+            <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-5 h-5 text-brand-blue-600" />
+            {{ t('candidatures.formationChoice') || "Choix de formation" }}
+          </h2>
+
+          <div class="flex items-center gap-4 p-4 rounded-lg bg-brand-blue-50 dark:bg-brand-blue-900/20 border border-brand-blue-200 dark:border-brand-blue-800">
+            <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-brand-blue-100 dark:bg-brand-blue-900/40 flex items-center justify-center">
+              <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-6 h-6 text-brand-blue-600 dark:text-brand-blue-400" />
+            </div>
+            <div class="flex-1">
+              <!-- Afficher les détails du programme si disponibles -->
+              <template v-if="linkedProgram">
+                <p class="font-semibold text-gray-900 dark:text-white">
+                  {{ linkedProgram.title }}
+                </p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                  {{ publicProgramTypeLabels[linkedProgram.type] }} - {{ linkedProgram.code }}
+                </p>
+              </template>
+              <!-- Sinon, afficher un message générique -->
+              <template v-else>
+                <p class="font-semibold text-gray-900 dark:text-white">
+                  {{ t('candidatures.linkedFormationForCall') || "Formation associée à cet appel" }}
+                </p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                  {{ t('candidatures.formationPreselected') || "La formation est présélectionnée automatiquement" }}
+                </p>
+              </template>
+            </div>
+            <div class="flex-shrink-0">
+              <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                <font-awesome-icon icon="fa-solid fa-check-circle" class="w-4 h-4" />
+                {{ t('candidatures.linkedFormation') || "Formation liée" }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formation Choice - Selectable (when no linked formation) -->
+        <div v-else-if="programs.length > 0" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
             <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-5 h-5 text-brand-blue-600" />
             {{ t('candidatures.formationChoice') || "Choix de formation" }}
@@ -234,10 +298,6 @@ useSeoMeta({
                 {{ program.title }} ({{ publicProgramTypeLabels[program.type] }} - {{ program.code }})
               </option>
             </select>
-            <p v-if="call.program_external_id && form.program_external_id === call.program_external_id" class="mt-2 text-sm text-green-600 dark:text-green-400">
-              <font-awesome-icon icon="fa-solid fa-check-circle" class="w-4 h-4 mr-1" />
-              {{ t('candidatures.preselectedFormation') || "Formation présélectionnée pour cet appel" }}
-            </p>
           </div>
         </div>
 

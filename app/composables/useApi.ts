@@ -32,10 +32,11 @@ export function useApi() {
         headers,
         query: Object.keys(cleanQuery).length > 0 ? cleanQuery : undefined,
       })
-    } catch (error: unknown) {
+    }
+    catch (error: unknown) {
       const fetchError = error as { status?: number; data?: { detail?: string } }
 
-      // Token expiré : tenter un refresh
+      // Token expiré : tenter un refresh (seulement si on a bien un 401 du serveur)
       if (fetchError.status === 401 && authStore.refreshToken) {
         const refreshed = await authStore.refreshAccessToken()
         if (refreshed) {
@@ -46,8 +47,11 @@ export function useApi() {
             query: Object.keys(cleanQuery).length > 0 ? cleanQuery : undefined,
           })
         }
-        // Refresh échoué → rediriger vers login
-        navigateTo('/admin/login')
+        // Refresh échoué avec erreur d'auth → rediriger vers login
+        // (seulement si on n'est plus authentifié, sinon c'est une erreur réseau)
+        if (!authStore.isAuthenticated) {
+          navigateTo('/admin/login')
+        }
       }
 
       throw error
