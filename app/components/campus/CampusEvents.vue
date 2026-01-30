@@ -30,7 +30,7 @@ const highlightedEvent = computed(() => events.value[8] || null)
 
 // Get event URL
 const getEventUrl = (event: EventPublic) => {
-  return localePath(`/evenements/${event.slug}`)
+  return localePath(`/actualites/evenements/${event.slug}`)
 }
 
 // Get cover image URL

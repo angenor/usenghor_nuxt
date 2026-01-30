@@ -30,6 +30,33 @@ const {
   deleteScheduleItem: apiDeleteScheduleItem,
 } = useApplicationCallsApi()
 
+const { listCampuses } = useCampusApi()
+
+// Charger les campus pour le sélecteur
+interface CampusOption {
+  id: string
+  name: string
+  code: string
+}
+const campusOptions = ref<CampusOption[]>([])
+const loadingCampuses = ref(false)
+
+async function loadCampuses() {
+  loadingCampuses.value = true
+  try {
+    const response = await listCampuses({ page: 1, limit: 100 })
+    campusOptions.value = response.items.map(c => ({
+      id: c.id,
+      name: c.name,
+      code: c.code,
+    }))
+  } catch {
+    console.error('Erreur lors du chargement des campus')
+  } finally {
+    loadingCampuses.value = false
+  }
+}
+
 // === STATE ===
 const loading = ref(false)
 const error = ref<string | null>(null)
@@ -83,6 +110,7 @@ const form = ref({
   description: '',
   type: 'application' as CallType,
   status: 'upcoming' as const,
+  campus_external_id: '' as string,
   opening_date: '',
   deadline: '',
   program_start_date: '',
@@ -116,6 +144,7 @@ async function fetchCall() {
       description: call.description || '',
       type: call.type,
       status: call.status,
+      campus_external_id: call.campus_external_id || '',
       opening_date: call.opening_date?.split('T')[0] || '',
       deadline: call.deadline?.split('T')[0] || '',
       program_start_date: call.program_start_date?.split('T')[0] || '',
@@ -172,7 +201,10 @@ async function fetchCall() {
   }
 }
 
-onMounted(fetchCall)
+onMounted(() => {
+  fetchCall()
+  loadCampuses()
+})
 
 // Navigation
 const goBack = () => {
@@ -295,6 +327,7 @@ const saveForm = async () => {
       description: form.value.description || null,
       type: form.value.type,
       status: form.value.status,
+      campus_external_id: form.value.campus_external_id || null,
       opening_date: form.value.opening_date || null,
       deadline: form.value.deadline || null,
       program_start_date: form.value.program_start_date || null,
@@ -518,6 +551,23 @@ const tabs = [
               <option value="recruitment">Recrutement</option>
               <option value="training">Formation</option>
             </select>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Campus associé
+            </label>
+            <select
+              v-model="form.campus_external_id"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              :disabled="loadingCampuses"
+            >
+              <option value="">Aucun campus (siège)</option>
+              <option v-for="campus in campusOptions" :key="campus.id" :value="campus.id">
+                {{ campus.name }} ({{ campus.code }})
+              </option>
+            </select>
+            <p class="mt-1 text-xs text-gray-500">Laissez vide pour un appel du siège principal</p>
           </div>
 
           <div>
