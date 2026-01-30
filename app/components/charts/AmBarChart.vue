@@ -21,21 +21,34 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   categoryField: 'category',
   valueField: 'value',
-  height: '400px',
+  height: '300px',
   animated: true,
   horizontal: false
 })
 
 const chartId = `bar-chart-${useId()}`
-const { am5, am5xy, createRoot } = useAmCharts({ animated: props.animated })
 
-let root: ReturnType<typeof createRoot> = null
+let root: any = null
 
-onMounted(() => {
-  if (!am5) return
+onMounted(async () => {
+  // Import dynamique côté client uniquement
+  const am5 = await import('@amcharts/amcharts5')
+  const am5xy = await import('@amcharts/amcharts5/xy')
+  const am5themes_Animated = (await import('@amcharts/amcharts5/themes/Animated')).default
 
-  root = createRoot(chartId)
-  if (!root) return
+  // Attendre que l'élément DOM soit disponible
+  await nextTick()
+
+  const element = document.getElementById(chartId)
+  if (!element) return
+
+  // Créer la racine
+  root = am5.Root.new(chartId)
+
+  // Appliquer le thème animé
+  if (props.animated) {
+    root.setThemes([am5themes_Animated.new(root)])
+  }
 
   // Créer le graphique XY
   const chart = root.container.children.push(
@@ -48,7 +61,7 @@ onMounted(() => {
     })
   )
 
-  let xAxis, yAxis
+  let xAxis: any, yAxis: any
 
   if (props.horizontal) {
     // Barres horizontales
@@ -127,6 +140,12 @@ onMounted(() => {
   series.appear(1000)
   chart.appear(1000, 100)
 })
+
+onUnmounted(() => {
+  if (root) {
+    root.dispose()
+  }
+})
 </script>
 
 <template>
@@ -140,7 +159,7 @@ onMounted(() => {
         class="flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg"
         :style="{ width: '100%', height: height }"
       >
-        <span class="text-gray-500">Chargement du graphique...</span>
+        <span class="text-gray-500">Chargement...</span>
       </div>
     </template>
   </ClientOnly>

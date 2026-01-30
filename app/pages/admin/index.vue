@@ -8,9 +8,16 @@ definePageMeta({
 
 // APIs
 const { listApplications, getStatistics, applicationStatusLabels } = useApplicationsApi()
-const { listEvents } = useEventsApi()
+const { listEvents, getEventsStats } = useEventsApi()
 const { listNews, getNewsStats } = useAdminNewsApi()
 const { listAuditLogs, enrichLog, auditActionLabels, getTableLabel: getAuditTableLabel } = useAuditApi()
+
+// === CHART DATA ===
+// Données pour les graphiques (seront remplacées par des données API réelles)
+const applicationTrendData = ref<{ date: string; value: number }[]>([])
+const applicationStatusData = ref<{ category: string; value: number; color: string }[]>([])
+const eventTypeData = ref<{ category: string; value: number }[]>([])
+const newsPublicationData = ref<{ date: string; value: number }[]>([])
 
 // === STATE ===
 const isLoading = ref(true)
@@ -115,12 +122,56 @@ async function fetchDashboardData() {
     upcomingEventsList.value = upcomingEventsResult.items
     recentNewsList.value = newsResult.items
     recentActivity.value = auditResult.items.map(enrichLog)
+
+    // Generate chart data from stats
+    generateChartData()
   } catch (e) {
     console.error('Error fetching dashboard data:', e)
     error.value = 'Erreur lors du chargement des données du tableau de bord'
   } finally {
     isLoading.value = false
   }
+}
+
+// Generate chart data from application stats
+function generateChartData() {
+  // Application status distribution
+  applicationStatusData.value = [
+    { category: 'Soumises', value: applicationStats.value.submitted, color: '#3B82F6' },
+    { category: 'En révision', value: applicationStats.value.under_review, color: '#F59E0B' },
+    { category: 'Acceptées', value: applicationStats.value.accepted, color: '#10B981' },
+    { category: 'Refusées', value: applicationStats.value.rejected, color: '#EF4444' },
+    { category: 'Liste d\'attente', value: applicationStats.value.waitlisted, color: '#F97316' },
+    { category: 'Incomplètes', value: applicationStats.value.incomplete, color: '#6B7280' }
+  ].filter(d => d.value > 0)
+
+  // Generate mock trend data for last 12 months
+  const now = new Date()
+  applicationTrendData.value = Array.from({ length: 12 }, (_, i) => {
+    const date = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1)
+    return {
+      date: date.toISOString(),
+      value: Math.floor(Math.random() * 50) + 10 + (i * 5)
+    }
+  })
+
+  // Mock event type distribution
+  eventTypeData.value = [
+    { category: 'Conférences', value: 12 },
+    { category: 'Ateliers', value: 8 },
+    { category: 'Séminaires', value: 15 },
+    { category: 'Cérémonies', value: 4 },
+    { category: 'Autres', value: 6 }
+  ]
+
+  // Mock news publication trend
+  newsPublicationData.value = Array.from({ length: 6 }, (_, i) => {
+    const date = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1)
+    return {
+      date: date.toISOString(),
+      value: Math.floor(Math.random() * 10) + 2
+    }
+  })
 }
 
 // Load data on mount
@@ -306,6 +357,75 @@ const formatDate = (dateString: string) => {
           <p class="text-sm text-gray-500 dark:text-gray-400">
             {{ stat.label }}
           </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Application trend chart -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Tendance des candidatures
+        </h3>
+        <AmAreaChart
+          v-if="applicationTrendData.length > 0"
+          :data="applicationTrendData"
+          height="250px"
+          color="#3B82F6"
+          :gradient-fill="true"
+        />
+        <div v-else class="h-[250px] flex items-center justify-center text-gray-500">
+          Chargement...
+        </div>
+      </div>
+
+      <!-- Application status donut -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Répartition par statut
+        </h3>
+        <AmDonutChart
+          v-if="applicationStatusData.length > 0"
+          :data="applicationStatusData"
+          height="250px"
+          :inner-radius="50"
+          :center-value="applicationStats.total"
+          center-label="Total"
+          :show-legend="true"
+        />
+        <div v-else class="h-[250px] flex items-center justify-center text-gray-500">
+          Chargement...
+        </div>
+      </div>
+
+      <!-- Event types chart -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Événements par type
+        </h3>
+        <AmBarChart
+          v-if="eventTypeData.length > 0"
+          :data="eventTypeData"
+          height="250px"
+        />
+        <div v-else class="h-[250px] flex items-center justify-center text-gray-500">
+          Chargement...
+        </div>
+      </div>
+
+      <!-- News publication trend -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Publications par mois
+        </h3>
+        <AmLineChart
+          v-if="newsPublicationData.length > 0"
+          :data="newsPublicationData"
+          height="250px"
+        />
+        <div v-else class="h-[250px] flex items-center justify-center text-gray-500">
+          Chargement...
         </div>
       </div>
     </div>

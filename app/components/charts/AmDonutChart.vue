@@ -33,15 +33,28 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const chartId = `donut-chart-${useId()}`
-const { am5, am5percent, createRoot } = useAmCharts({ animated: props.animated })
 
-let root: ReturnType<typeof createRoot> = null
+let root: any = null
 
-onMounted(() => {
-  if (!am5) return
+onMounted(async () => {
+  // Import dynamique côté client uniquement
+  const am5 = await import('@amcharts/amcharts5')
+  const am5percent = await import('@amcharts/amcharts5/percent')
+  const am5themes_Animated = (await import('@amcharts/amcharts5/themes/Animated')).default
 
-  root = createRoot(chartId)
-  if (!root) return
+  // Attendre que l'élément DOM soit disponible
+  await nextTick()
+
+  const element = document.getElementById(chartId)
+  if (!element) return
+
+  // Créer la racine
+  root = am5.Root.new(chartId)
+
+  // Appliquer le thème animé
+  if (props.animated) {
+    root.setThemes([am5themes_Animated.new(root)])
+  }
 
   // Créer le conteneur principal
   const container = root.container.children.push(
@@ -77,7 +90,7 @@ onMounted(() => {
   })
 
   // Couleurs personnalisées si fournies
-  series.slices.template.adapters.add('fill', (fill, target) => {
+  series.slices.template.adapters.add('fill', (fill: any, target: any) => {
     const dataItem = target.dataItem
     if (dataItem) {
       const data = dataItem.dataContext as DataPoint
@@ -156,6 +169,12 @@ onMounted(() => {
 
   // Animation d'apparition
   series.appear(1000, 100)
+})
+
+onUnmounted(() => {
+  if (root) {
+    root.dispose()
+  }
 })
 </script>
 

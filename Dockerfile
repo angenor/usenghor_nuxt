@@ -22,6 +22,9 @@ ARG NUXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ENV NUXT_PUBLIC_API_BASE=$NUXT_PUBLIC_API_BASE
 ENV NUXT_PUBLIC_API_BASE_URL=$NUXT_PUBLIC_API_BASE_URL
 
+# Increase Node.js memory limit for build
+ENV NODE_OPTIONS="--max-old-space-size=3072"
+
 # Build the application
 RUN pnpm build
 
