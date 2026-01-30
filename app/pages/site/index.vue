@@ -10,6 +10,9 @@ const { getContactInfo, getGoogleMapsUrlWithCoords } = useContactApi()
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, loadContent } = useEditorialContent('site')
 
+// Chiffres-clés depuis l'admin
+const { getFigure, loadKeyFigures } = useKeyFigures()
+
 // SEO
 useSeoMeta({
   title: () => t('site.seo.title'),
@@ -22,6 +25,8 @@ const contactInfo = ref<ContactInfo | null>(null)
 onMounted(async () => {
   // Charger les contenus éditoriaux (non-bloquant)
   loadContent()
+  // Charger les chiffres-clés (non-bloquant)
+  loadKeyFigures()
 
   try {
     contactInfo.value = await getContactInfo()
@@ -110,12 +115,12 @@ const getLocalizedFacilityFeatures = (facility: SiteFacility) => {
   return facility.features_fr
 }
 
-// Stats
+// Stats - labels depuis éditorial, valeurs depuis chiffres-clés avec fallback i18n
 const stats = computed(() => [
-  { label: getContent('site.presentation.stats.surface'), value: getContent('site.presentation.stats.surfaceValue') },
-  { label: getContent('site.presentation.stats.rooms'), value: getContent('site.presentation.stats.roomsValue') },
-  { label: getContent('site.presentation.stats.capacity'), value: getContent('site.presentation.stats.capacityValue') },
-  { label: getContent('site.presentation.stats.founded'), value: getContent('site.presentation.stats.foundedValue') }
+  { label: getContent('site.presentation.stats.surface'), value: getFigure('stats_site_surface', getContent('site.presentation.stats.surfaceValue')) },
+  { label: getContent('site.presentation.stats.rooms'), value: getFigure('stats_site_rooms', getContent('site.presentation.stats.roomsValue')) },
+  { label: getContent('site.presentation.stats.capacity'), value: getFigure('stats_site_capacity', getContent('site.presentation.stats.capacityValue')) },
+  { label: getContent('site.presentation.stats.founded'), value: getFigure('stats_site_founded', getContent('site.presentation.stats.foundedValue')) }
 ])
 
 // Color configuration per facility (rotating colors)

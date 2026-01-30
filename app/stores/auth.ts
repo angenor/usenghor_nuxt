@@ -1,6 +1,14 @@
 import { defineStore } from 'pinia'
 import type { TokenResponse, UserMe } from '~/types/api'
 
+// Type minimal pour le cache cookie (évite les problèmes de taille)
+interface UserCacheData {
+  id: string
+  email: string
+  first_name?: string | null
+  last_name?: string | null
+}
+
 export const useAuthStore = defineStore('auth', () => {
   // Utiliser useCookie pour la persistance SSR-compatible
   const tokenCookie = useCookie<string | null>('auth_token', {
@@ -11,9 +19,24 @@ export const useAuthStore = defineStore('auth', () => {
     maxAge: 60 * 60 * 24 * 30, // 30 jours
     sameSite: 'lax',
   })
+  // Cache minimal utilisateur SSR-compatible (seulement les données essentielles)
+  const userCacheCookie = useCookie<UserCacheData | null>('auth_user_min', {
+    maxAge: 60 * 60 * 24 * 7, // 7 jours
+    sameSite: 'lax',
+  })
+  // Nettoyer l'ancien cookie volumineux qui causait des problèmes
+  const oldUserCache = useCookie('auth_user_cache')
+  if (oldUserCache.value) {
+    oldUserCache.value = null
+  }
 
   // Utilisateur connecté
   const user = ref<UserMe | null>(null)
+
+  // Initialiser depuis le cache minimal si disponible (pour l'affichage immédiat)
+  if (userCacheCookie.value && !user.value) {
+    user.value = userCacheCookie.value as UserMe
+  }
 
   // Refs réactives synchronisées avec les cookies
   const token = computed({
@@ -35,25 +58,20 @@ export const useAuthStore = defineStore('auth', () => {
         headers: { Authorization: `Bearer ${token.value}` },
       })
       user.value = userData
-      // Sauvegarder en localStorage pour le fallback (quand backend indisponible)
-      if (import.meta.client) {
-        localStorage.setItem('usenghor-user-cache', JSON.stringify(userData))
+      // Sauvegarder seulement les données minimales dans le cookie (évite les problèmes de taille)
+      userCacheCookie.value = {
+        id: userData.id,
+        email: userData.email,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
       }
       return userData
     }
     catch {
-      // Fallback: charger depuis le cache local si le backend n'est pas disponible
-      if (import.meta.client) {
-        const cached = localStorage.getItem('usenghor-user-cache')
-        if (cached) {
-          try {
-            user.value = JSON.parse(cached) as UserMe
-            return user.value
-          }
-          catch {
-            // Ignore parsing errors
-          }
-        }
+      // Fallback: utiliser le cache minimal si disponible
+      if (userCacheCookie.value) {
+        user.value = userCacheCookie.value as UserMe
+        return user.value
       }
       user.value = null
       return null
@@ -91,10 +109,8 @@ export const useAuthStore = defineStore('auth', () => {
     tokenCookie.value = null
     refreshTokenCookie.value = null
     user.value = null
-    // Nettoyer le cache utilisateur
-    if (import.meta.client) {
-      localStorage.removeItem('usenghor-user-cache')
-    }
+    // Nettoyer le cache utilisateur (cookie SSR-compatible)
+    userCacheCookie.value = null
   }
 
   return {

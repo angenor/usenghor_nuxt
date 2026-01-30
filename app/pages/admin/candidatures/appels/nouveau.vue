@@ -17,6 +17,7 @@ const {
 } = useApplicationCallsApi()
 
 const { listCampuses } = useCampusApi()
+const { listPrograms, programTypeLabels } = useProgramsApi()
 
 // Charger les campus pour le sélecteur
 interface CampusOption {
@@ -27,7 +28,18 @@ interface CampusOption {
 const campusOptions = ref<CampusOption[]>([])
 const loadingCampuses = ref(false)
 
+// Charger les formations pour le sélecteur
+interface ProgramOption {
+  id: string
+  title: string
+  code: string
+  type: string
+}
+const programOptions = ref<ProgramOption[]>([])
+const loadingPrograms = ref(false)
+
 onMounted(async () => {
+  // Charger les campus
   loadingCampuses.value = true
   try {
     const response = await listCampuses({ page: 1, limit: 100 })
@@ -40,6 +52,22 @@ onMounted(async () => {
     console.error('Erreur lors du chargement des campus')
   } finally {
     loadingCampuses.value = false
+  }
+
+  // Charger les formations
+  loadingPrograms.value = true
+  try {
+    const response = await listPrograms({ page: 1, limit: 100, status: 'published' })
+    programOptions.value = response.items.map(p => ({
+      id: p.id,
+      title: p.title,
+      code: p.code,
+      type: p.type,
+    }))
+  } catch {
+    console.error('Erreur lors du chargement des formations')
+  } finally {
+    loadingPrograms.value = false
   }
 })
 
@@ -63,6 +91,7 @@ const form = ref({
   type: 'application' as CallType,
   status: 'upcoming' as const,
   campus_external_id: '' as string,
+  program_external_id: '' as string,
   opening_date: '',
   deadline: '',
   program_start_date: '',
@@ -220,6 +249,7 @@ const saveForm = async () => {
       type: form.value.type,
       status: form.value.status,
       campus_external_id: form.value.campus_external_id || null,
+      program_external_id: form.value.program_external_id || null,
       opening_date: form.value.opening_date || null,
       deadline: form.value.deadline || null,
       program_start_date: form.value.program_start_date || null,
@@ -454,6 +484,23 @@ const tabs = [
               </option>
             </select>
             <p class="mt-1 text-xs text-gray-500">Laissez vide pour un appel du siège principal</p>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Formation associée
+            </label>
+            <select
+              v-model="form.program_external_id"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              :disabled="loadingPrograms"
+            >
+              <option value="">Aucune formation liée</option>
+              <option v-for="program in programOptions" :key="program.id" :value="program.id">
+                {{ program.title }} ({{ programTypeLabels[program.type as keyof typeof programTypeLabels] }} - {{ program.code }})
+              </option>
+            </select>
+            <p class="mt-1 text-xs text-gray-500">Cette formation sera présélectionnée dans le formulaire de candidature</p>
           </div>
 
           <div>

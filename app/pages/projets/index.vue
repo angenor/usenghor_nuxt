@@ -8,9 +8,14 @@ const { getAllProjects, getFeaturedProjects, getAllProjectCategories } = useMock
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, loadContent } = useEditorialContent('projects')
 
+// Chiffres-clés depuis l'admin
+const { getFigure, loadKeyFigures } = useKeyFigures()
+
 onMounted(() => {
   // Charger les contenus éditoriaux (non-bloquant)
   loadContent()
+  // Charger les chiffres-clés (non-bloquant)
+  loadKeyFigures()
 })
 
 // SEO
@@ -125,11 +130,11 @@ const formatDate = (dateStr: string) => {
   )
 }
 
-// Stats
+// Stats - valeurs depuis l'admin avec fallback (sauf projets actifs = dynamique)
 const stats = computed(() => [
   { value: allProjects.value.filter(p => p.status === 'ongoing').length, label: getContent('projects.intro.stats.projects.label', 'projets.intro.stats.projects') },
-  { value: '15+', label: getContent('projects.intro.stats.countries.label', 'projets.intro.stats.countries') },
-  { value: '10K+', label: getContent('projects.intro.stats.beneficiaries.label', 'projets.intro.stats.beneficiaries') }
+  { value: getFigure('stats_project_countries', '15+'), label: getContent('projects.intro.stats.countries.label', 'projets.intro.stats.countries') },
+  { value: getFigure('stats_project_beneficiaries', '10K+'), label: getContent('projects.intro.stats.beneficiaries.label', 'projets.intro.stats.beneficiaries') }
 ])
 </script>
 

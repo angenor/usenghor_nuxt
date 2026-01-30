@@ -98,11 +98,12 @@ async function loadUserData() {
   isLoading.value = true
   errorMessage.value = null
   try {
-    // Récupérer les données depuis l'API (avec fallback cache dans le store)
+    // Récupérer les données depuis l'API (avec fallback cache cookie dans le store)
     if (authStore.token) {
       await authStore.fetchCurrentUser()
     }
 
+    // Le store aura soit les données fraîches de l'API, soit celles du cache cookie
     const user = authStore.user
     if (user) {
       profileForm.value = {
@@ -126,7 +127,23 @@ async function loadUserData() {
     }
   }
   catch {
-    errorMessage.value = 'Erreur lors du chargement des données du profil'
+    // Même en cas d'erreur, essayer d'utiliser les données en cache du store
+    const user = authStore.user
+    if (user) {
+      profileForm.value = {
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        salutation: user.salutation || null,
+        phone: user.phone || '',
+        phone_whatsapp: user.phone_whatsapp || '',
+        linkedin: user.linkedin || '',
+        city: user.city || '',
+        address: user.address || '',
+      }
+    }
+    else {
+      errorMessage.value = 'Erreur lors du chargement des données du profil'
+    }
   }
   finally {
     isLoading.value = false
@@ -134,7 +151,9 @@ async function loadUserData() {
 }
 
 function loadPreferences() {
-  // Charger depuis localStorage
+  // Charger depuis localStorage (uniquement côté client)
+  if (!import.meta.client) return
+
   const savedTheme = localStorage.getItem('usenghor-theme-preference')
   if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'system') {
     preferencesForm.value.theme = savedTheme

@@ -15,9 +15,14 @@ const {
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, loadContent } = useEditorialContent('alumni')
 
+// Chiffres-clés depuis l'admin
+const { getFigure, loadKeyFigures } = useKeyFigures()
+
 onMounted(() => {
   // Charger les contenus éditoriaux (non-bloquant)
   loadContent()
+  // Charger les chiffres-clés (non-bloquant)
+  loadKeyFigures()
 })
 
 // SEO
@@ -124,12 +129,12 @@ const getDepartmentName = (deptId: string) => {
   return dept.name_fr
 }
 
-// Stats display
+// Stats display - valeurs depuis l'admin avec fallback
 const stats = computed(() => [
-  { value: '4200+', label: getContent('alumni.stats.alumni.label', 'alumni.stats.alumni') },
-  { value: `${alumniStats.value.countries}+`, label: getContent('alumni.stats.countries.label', 'alumni.stats.countries') },
-  { value: `${alumniStats.value.industries}`, label: getContent('alumni.stats.sectors.label', 'alumni.stats.sectors') },
-  { value: '30+', label: getContent('alumni.stats.promotions.label', 'alumni.stats.promotions') }
+  { value: getFigure('stats_alumni', '4200+'), label: getContent('alumni.stats.alumni.label', 'alumni.stats.alumni') },
+  { value: getFigure('stats_alumni_countries', `${alumniStats.value.countries}+`), label: getContent('alumni.stats.countries.label', 'alumni.stats.countries') },
+  { value: getFigure('stats_alumni_sectors', `${alumniStats.value.industries}`), label: getContent('alumni.stats.sectors.label', 'alumni.stats.sectors') },
+  { value: getFigure('stats_promotions', '30+'), label: getContent('alumni.stats.promotions.label', 'alumni.stats.promotions') }
 ])
 
 // Reset filters

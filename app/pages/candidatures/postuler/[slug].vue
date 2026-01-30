@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import type { ApplicationCallPublicWithDetails } from '~/types/api'
+import type { ProgramPublic } from '~/composables/usePublicProgramsApi'
 
 const route = useRoute()
 const { t } = useI18n()
 const localePath = useLocalePath()
 
 const { getCallBySlug } = usePublicCallsApi()
+const { listPrograms, publicProgramTypeLabels } = usePublicProgramsApi()
 
 // State
 const call = ref<ApplicationCallPublicWithDetails | null>(null)
@@ -13,6 +15,10 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 const submitting = ref(false)
 const submitted = ref(false)
+
+// Programs state
+const programs = ref<ProgramPublic[]>([])
+const loadingPrograms = ref(false)
 
 // Get the slug from route
 const slug = computed(() => route.params.slug as string)
@@ -29,6 +35,7 @@ const form = ref({
   city: '',
   country: '',
   motivation: '',
+  program_external_id: '', // Selected formation
   // Documents will be handled separately
 })
 
@@ -50,12 +57,28 @@ async function fetchCall() {
     call.value = await getCallBySlug(slug.value)
     if (!call.value) {
       error.value = t('candidatures.notFound')
+    } else if (call.value.program_external_id) {
+      // Pre-select the linked formation
+      form.value.program_external_id = call.value.program_external_id
     }
   } catch (e) {
     error.value = t('candidatures.notFound')
     console.error('Error fetching call:', e)
   } finally {
     loading.value = false
+  }
+}
+
+// Fetch programs for the selector
+async function fetchPrograms() {
+  loadingPrograms.value = true
+  try {
+    const response = await listPrograms({ limit: 100 })
+    programs.value = response.items
+  } catch (e) {
+    console.error('Error fetching programs:', e)
+  } finally {
+    loadingPrograms.value = false
   }
 }
 
@@ -82,6 +105,7 @@ async function submitApplication() {
 // Initial fetch
 onMounted(() => {
   fetchCall()
+  fetchPrograms()
 })
 
 // Watch for slug changes
@@ -188,6 +212,35 @@ useSeoMeta({
     <!-- Form -->
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <form @submit.prevent="submitApplication" class="space-y-8">
+        <!-- Formation Choice -->
+        <div v-if="programs.length > 0" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+            <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-5 h-5 text-brand-blue-600" />
+            {{ t('candidatures.formationChoice') || "Choix de formation" }}
+          </h2>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              {{ t('candidatures.selectFormation') || "Formation souhaitée" }} *
+            </label>
+            <select
+              v-model="form.program_external_id"
+              required
+              :disabled="loadingPrograms"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-brand-blue-500 focus:outline-none focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">{{ t('candidatures.selectFormationPlaceholder') || "-- Sélectionnez une formation --" }}</option>
+              <option v-for="program in programs" :key="program.id" :value="program.id">
+                {{ program.title }} ({{ publicProgramTypeLabels[program.type] }} - {{ program.code }})
+              </option>
+            </select>
+            <p v-if="call.program_external_id && form.program_external_id === call.program_external_id" class="mt-2 text-sm text-green-600 dark:text-green-400">
+              <font-awesome-icon icon="fa-solid fa-check-circle" class="w-4 h-4 mr-1" />
+              {{ t('candidatures.preselectedFormation') || "Formation présélectionnée pour cet appel" }}
+            </p>
+          </div>
+        </div>
+
         <!-- Personal Information -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
