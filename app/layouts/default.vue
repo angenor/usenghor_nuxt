@@ -16,6 +16,6 @@ const showMainNavbar = computed(() => {
       <slot />
     </main>
     <AppFooter />
-    <EventsWidget />
+    <!-- <EventsWidget /> -->
   </div>
 </template>

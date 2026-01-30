@@ -30,12 +30,17 @@ const breadcrumbs = computed(() => {
 // Menu utilisateur
 const showUserMenu = ref(false)
 
-// TODO: Remplacer par les vraies données utilisateur
-const currentUser = ref({
-  name: 'Admin User',
-  email: 'admin@usenghor.org',
-  avatar: null as string | null
-})
+// Données utilisateur depuis le store (réactif)
+const currentUser = computed(() => ({
+  name: authStore.user
+    ? `${authStore.user.first_name || ''} ${authStore.user.last_name || ''}`.trim() || 'Utilisateur'
+    : 'Utilisateur',
+  email: authStore.user?.email || '',
+  avatar: null as string | null, // TODO: utiliser authStore.user?.photo_external_id
+  initials: authStore.user
+    ? `${authStore.user.first_name?.charAt(0) || ''}${authStore.user.last_name?.charAt(0) || ''}`.toUpperCase() || 'U'
+    : 'U',
+}))
 
 const toggleUserMenu = () => {
   showUserMenu.value = !showUserMenu.value
@@ -169,7 +174,7 @@ onUnmounted(() => {
                      flex items-center justify-center"
             >
               <span class="text-sm font-medium text-brand-blue-700 dark:text-brand-blue-300">
-                {{ currentUser.name.charAt(0).toUpperCase() }}
+                {{ currentUser.initials }}
               </span>
             </div>
             <div class="hidden md:block text-left">

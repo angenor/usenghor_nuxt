@@ -3,6 +3,7 @@ import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({
   layout: 'admin',
+  middleware: 'admin-auth',
 })
 
 // === STORES & COMPOSABLES ===
@@ -95,8 +96,9 @@ onMounted(async () => {
 // === METHODS ===
 async function loadUserData() {
   isLoading.value = true
+  errorMessage.value = null
   try {
-    // Toujours essayer de récupérer les données fraîches depuis l'API
+    // Récupérer les données depuis l'API (avec fallback cache dans le store)
     if (authStore.token) {
       await authStore.fetchCurrentUser()
     }
@@ -114,9 +116,13 @@ async function loadUserData() {
         address: user.address || '',
       }
     }
+    else if (!authStore.token) {
+      // Pas de token = pas connecté
+      errorMessage.value = 'Vous devez être connecté pour accéder à cette page.'
+    }
     else {
-      // Aucune donnée disponible - afficher un message d'erreur
-      errorMessage.value = 'Impossible de charger les données du profil. Vérifiez que le backend est lancé.'
+      // Token présent mais pas de données (backend indisponible et pas de cache)
+      errorMessage.value = 'Impossible de charger les données. Connectez-vous à nouveau ou vérifiez que le backend est lancé.'
     }
   }
   catch {

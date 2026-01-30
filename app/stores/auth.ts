@@ -35,8 +35,26 @@ export const useAuthStore = defineStore('auth', () => {
         headers: { Authorization: `Bearer ${token.value}` },
       })
       user.value = userData
+      // Sauvegarder en localStorage pour le fallback (quand backend indisponible)
+      if (import.meta.client) {
+        localStorage.setItem('usenghor-user-cache', JSON.stringify(userData))
+      }
       return userData
-    } catch {
+    }
+    catch {
+      // Fallback: charger depuis le cache local si le backend n'est pas disponible
+      if (import.meta.client) {
+        const cached = localStorage.getItem('usenghor-user-cache')
+        if (cached) {
+          try {
+            user.value = JSON.parse(cached) as UserMe
+            return user.value
+          }
+          catch {
+            // Ignore parsing errors
+          }
+        }
+      }
       user.value = null
       return null
     }
@@ -73,6 +91,10 @@ export const useAuthStore = defineStore('auth', () => {
     tokenCookie.value = null
     refreshTokenCookie.value = null
     user.value = null
+    // Nettoyer le cache utilisateur
+    if (import.meta.client) {
+      localStorage.removeItem('usenghor-user-cache')
+    }
   }
 
   return {

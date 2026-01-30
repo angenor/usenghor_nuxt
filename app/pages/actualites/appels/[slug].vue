@@ -1,27 +1,12 @@
 <script setup lang="ts">
 import type { ApplicationCallPublicWithDetails, CallType } from '~/types/api'
-import type { Component } from 'vue'
-import ApplicationDetail from '~/components/calls/detail/Application.vue'
-import ScholarshipDetail from '~/components/calls/detail/Scholarship.vue'
-import ProjectDetail from '~/components/calls/detail/Project.vue'
-import RecruitmentDetail from '~/components/calls/detail/Recruitment.vue'
-import TrainingDetail from '~/components/calls/detail/Training.vue'
-import { useCallDetail } from '~/components/calls/composables/useCallDetail'
+import { useCallDetail } from '~/composables/useCallDetail'
 
 const route = useRoute()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const localePath = useLocalePath()
 
 const { getCallBySlug, listOngoingCalls } = usePublicCallsApi()
-
-// Component mapping by call type
-const detailComponents: Record<CallType, Component> = {
-  application: ApplicationDetail,
-  scholarship: ScholarshipDetail,
-  project: ProjectDetail,
-  recruitment: RecruitmentDetail,
-  training: TrainingDetail,
-}
 
 // State
 const call = ref<ApplicationCallPublicWithDetails | null>(null)
@@ -145,7 +130,11 @@ useSeoMeta({
           </div>
 
           <!-- Type-specific detail component -->
-          <component :is="DetailComponent" :call="call" />
+          <CallsDetailApplication v-if="call.type === 'application'" :call="call" />
+          <CallsDetailScholarship v-else-if="call.type === 'scholarship'" :call="call" />
+          <CallsDetailProject v-else-if="call.type === 'project'" :call="call" />
+          <CallsDetailRecruitment v-else-if="call.type === 'recruitment'" :call="call" />
+          <CallsDetailTraining v-else-if="call.type === 'training'" :call="call" />
 
           <!-- Back button -->
           <div class="pt-8 border-t border-gray-200 dark:border-gray-700">

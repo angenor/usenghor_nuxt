@@ -3,8 +3,6 @@ import type { ApplicationCallRead, CallType, CallStatus, PublicationStatus } fro
 import {
   callTypeLabels,
   callTypeColors,
-  callStatusLabels,
-  callStatusColors,
   publicationStatusLabels,
   publicationStatusColors,
 } from '~/composables/useApplicationCallsApi'
@@ -296,6 +294,17 @@ const bulkClose = async () => {
   }
 }
 
+// Changement rapide de statut
+const handleStatusChange = async (call: ApplicationCallRead, newStatus: CallStatus) => {
+  try {
+    await updateCallStatus(call.id, newStatus)
+    await fetchCalls()
+    await fetchStats()
+  } catch {
+    error.value = 'Erreur lors du changement de statut'
+  }
+}
+
 // Formatage
 const formatDate = (dateString?: string | null) => {
   if (!dateString) return '-'
@@ -572,21 +581,21 @@ const isDeadlineSoon = (deadline?: string | null) => {
                   {{ getCampusName(call.campus_external_id) }}
                 </span>
               </td>
-              <td class="px-4 py-3">
-                <span
-                  class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium"
-                  :class="callStatusColors[call.status]"
+              <td class="px-4 py-3" @click.stop>
+                <select
+                  :value="call.status"
+                  class="rounded-lg border border-gray-300 bg-white px-2 py-1 text-xs font-medium focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  :class="{
+                    'text-green-700 dark:text-green-400': call.status === 'ongoing',
+                    'text-yellow-700 dark:text-yellow-400': call.status === 'upcoming',
+                    'text-gray-700 dark:text-gray-400': call.status === 'closed'
+                  }"
+                  @change="handleStatusChange(call, ($event.target as HTMLSelectElement).value as CallStatus)"
                 >
-                  <span
-                    class="h-1.5 w-1.5 rounded-full"
-                    :class="{
-                      'bg-green-500': call.status === 'ongoing',
-                      'bg-yellow-500': call.status === 'upcoming',
-                      'bg-gray-500': call.status === 'closed'
-                    }"
-                  ></span>
-                  {{ callStatusLabels[call.status] }}
-                </span>
+                  <option value="upcoming">À venir</option>
+                  <option value="ongoing">En cours</option>
+                  <option value="closed">Fermé</option>
+                </select>
               </td>
               <td class="px-4 py-3">
                 <div class="text-sm">

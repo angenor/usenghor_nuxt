@@ -555,6 +555,24 @@ const tabs = [
 
           <div>
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Statut de l'appel *
+            </label>
+            <select
+              v-model="form.status"
+              required
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="upcoming">À venir</option>
+              <option value="ongoing">En cours</option>
+              <option value="closed">Fermé</option>
+            </select>
+            <p class="mt-1 text-xs text-gray-500">
+              "En cours" permet aux candidats de postuler
+            </p>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Campus associé
             </label>
             <select
