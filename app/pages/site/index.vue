@@ -578,7 +578,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
                   <font-awesome-icon icon="fa-solid fa-location-dot" class="w-6 h-6 text-brand-blue-600 dark:text-brand-blue-400" />
                 </div>
                 <div>
-                  <h3 class="font-bold text-gray-900 dark:text-white mb-1">{{ t('site.location.address') }}</h3>
+                  <h3 class="font-bold text-gray-900 dark:text-white mb-1">{{ getContent('site.location.address') }}</h3>
                   <p class="text-gray-600 dark:text-gray-400">{{ locationAddress }}</p>
                 </div>
               </div>
@@ -590,7 +590,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
                   <font-awesome-icon icon="fa-solid fa-globe" class="w-6 h-6 text-brand-blue-600 dark:text-brand-blue-400" />
                 </div>
                 <div>
-                  <h3 class="font-bold text-gray-900 dark:text-white mb-1">{{ t('site.location.coordinates') }}</h3>
+                  <h3 class="font-bold text-gray-900 dark:text-white mb-1">{{ getContent('site.location.coordinates') }}</h3>
                   <p class="text-gray-600 dark:text-gray-400">{{ locationCoordinates }}</p>
                 </div>
               </div>
@@ -602,7 +602,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
                   <font-awesome-icon icon="fa-solid fa-phone" class="w-6 h-6 text-brand-blue-600 dark:text-brand-blue-400" />
                 </div>
                 <div>
-                  <h3 class="font-bold text-gray-900 dark:text-white mb-1">{{ t('site.location.phone') }}</h3>
+                  <h3 class="font-bold text-gray-900 dark:text-white mb-1">{{ getContent('site.location.phone') }}</h3>
                   <a :href="`tel:${locationPhone.replace(/\\s/g, '')}`" class="text-gray-600 dark:text-gray-400 hover:text-brand-blue-600 dark:hover:text-brand-blue-400 transition-colors">
                     {{ locationPhone }}
                   </a>
@@ -616,7 +616,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
                   <font-awesome-icon icon="fa-solid fa-envelope" class="w-6 h-6 text-brand-blue-600 dark:text-brand-blue-400" />
                 </div>
                 <div>
-                  <h3 class="font-bold text-gray-900 dark:text-white mb-1">{{ t('site.location.email') }}</h3>
+                  <h3 class="font-bold text-gray-900 dark:text-white mb-1">{{ getContent('site.location.email') }}</h3>
                   <a :href="`mailto:${locationEmail}`" class="text-gray-600 dark:text-gray-400 hover:text-brand-blue-600 dark:hover:text-brand-blue-400 transition-colors">
                     {{ locationEmail }}
                   </a>
@@ -632,17 +632,17 @@ const getNextBgColor = (index: number, isDark: boolean) => {
     <section class="py-16 bg-gradient-to-r from-brand-blue-500 to-brand-blue-600">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl font-bold text-white mb-4">
-          {{ t('site.cta.title') }}
+          {{ getContent('site.cta.title') }}
         </h2>
         <p class="text-lg text-brand-blue-100 mb-8">
-          {{ t('site.cta.description') }}
+          {{ getContent('site.cta.description') }}
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <NuxtLink
             :to="localePath('/contact')"
             class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-brand-blue-600 font-semibold rounded-lg hover:bg-brand-blue-50 transition-colors shadow-lg"
           >
-            {{ t('site.cta.contactButton') }}
+            {{ getContent('site.cta.contactButton') }}
             <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
           </NuxtLink>
         </div>
