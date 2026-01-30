@@ -51,16 +51,8 @@ const isCallOpen = computed(() => {
 
 // Get the linked program details
 const linkedProgram = computed(() => {
-  console.log('[DEBUG] Computing linkedProgram:')
-  console.log('[DEBUG]   - call.program_external_id:', call.value?.program_external_id)
-  console.log('[DEBUG]   - programs.length:', programs.value.length)
-  if (!call.value?.program_external_id || programs.value.length === 0) {
-    console.log('[DEBUG]   - Returning null (missing data)')
-    return null
-  }
-  const found = programs.value.find(p => p.id === call.value!.program_external_id)
-  console.log('[DEBUG]   - Found program:', found?.title || 'NOT FOUND')
-  return found || null
+  if (!call.value?.program_external_id || programs.value.length === 0) return null
+  return programs.value.find(p => p.id === call.value!.program_external_id) || null
 })
 
 // Fetch call data
@@ -68,20 +60,16 @@ async function fetchCall() {
   loading.value = true
   error.value = null
   try {
-    console.log('[DEBUG] Fetching call with slug:', slug.value)
     call.value = await getCallBySlug(slug.value)
-    console.log('[DEBUG] Call response:', call.value)
-    console.log('[DEBUG] Call program_external_id:', call.value?.program_external_id)
     if (!call.value) {
       error.value = t('candidatures.notFound')
     } else if (call.value.program_external_id) {
       // Pre-select the linked formation
       form.value.program_external_id = call.value.program_external_id
-      console.log('[DEBUG] Pre-selected program_external_id:', form.value.program_external_id)
     }
   } catch (e) {
     error.value = t('candidatures.notFound')
-    console.error('[DEBUG] Error fetching call:', e)
+    console.error('Error fetching call:', e)
   } finally {
     loading.value = false
   }
@@ -91,14 +79,10 @@ async function fetchCall() {
 async function fetchPrograms() {
   loadingPrograms.value = true
   try {
-    console.log('[DEBUG] Fetching programs...')
     const response = await listPrograms({ limit: 100 })
-    console.log('[DEBUG] Programs response:', response)
-    console.log('[DEBUG] Programs items:', response.items)
     programs.value = response.items
-    console.log('[DEBUG] programs.value set to:', programs.value.length, 'items')
   } catch (e) {
-    console.error('[DEBUG] Error fetching programs:', e)
+    console.error('Error fetching programs:', e)
   } finally {
     loadingPrograms.value = false
   }
@@ -126,8 +110,6 @@ async function submitApplication() {
 
 // Initial fetch
 onMounted(() => {
-  alert('Page [slug].vue chargée!')
-  console.log('=== PAGE MOUNTED ===')
   fetchCall()
   fetchPrograms()
 })
@@ -137,6 +119,13 @@ watch(slug, () => {
   fetchCall()
 })
 
+// Breadcrumb
+const breadcrumb = computed(() => [
+  { label: t('nav.home') || 'Accueil', to: '/' },
+  { label: t('nav.calls') || 'Appels', to: '/actualites/appels' },
+  { label: call.value?.title || t('candidatures.apply') || 'Postuler' }
+])
+
 // SEO
 useSeoMeta({
   title: () => call.value ? `${t('candidatures.applyTo')} ${call.value.title}` : t('candidatures.apply'),
@@ -145,97 +134,103 @@ useSeoMeta({
 </script>
 
 <template>
-  <!-- Loading -->
-  <div v-if="loading" class="flex items-center justify-center py-32">
-    <div class="h-12 w-12 animate-spin rounded-full border-4 border-brand-blue-600 border-t-transparent"></div>
-  </div>
+  <div>
+    <!-- Hero (shown when call is loaded) -->
+    <PageHero
+      v-if="call && !loading"
+      :title="call.title"
+      :subtitle="t('candidatures.applicationForm') || 'Formulaire de candidature'"
+      image="/images/bg/backgroud_senghor2.jpg"
+      :breadcrumb="breadcrumb"
+    />
 
-  <!-- Error / Not Found -->
-  <div v-else-if="error || !call" class="max-w-2xl mx-auto px-4 py-32 text-center">
-    <div class="mb-6 rounded-full bg-red-100 dark:bg-red-900/30 p-6 inline-block">
-      <font-awesome-icon icon="fa-solid fa-exclamation-triangle" class="w-12 h-12 text-red-500" />
-    </div>
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-      {{ t('candidatures.notFound') || "Appel non trouvé" }}
-    </h1>
-    <p class="text-gray-500 dark:text-gray-400 mb-8">
-      {{ t('candidatures.notFoundDescription') || "L'appel que vous recherchez n'existe pas ou n'est plus disponible." }}
-    </p>
-    <NuxtLink
-      :to="localePath('/actualites/appels')"
-      class="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue-600 text-white font-medium rounded-lg hover:bg-brand-blue-700 transition-colors"
-    >
-      <font-awesome-icon icon="fa-solid fa-arrow-left" class="w-4 h-4" />
-      {{ t('candidatures.backToCalls') || "Retour aux appels" }}
-    </NuxtLink>
-  </div>
+    <!-- Main content area -->
+    <section class="bg-gray-50 dark:bg-gray-900">
+      <!-- Loading -->
+      <div v-if="loading" class="flex items-center justify-center py-32">
+        <div class="h-12 w-12 animate-spin rounded-full border-4 border-brand-blue-600 border-t-transparent"></div>
+      </div>
 
-  <!-- Call is closed -->
-  <div v-else-if="!isCallOpen" class="max-w-2xl mx-auto px-4 py-32 text-center">
-    <div class="mb-6 rounded-full bg-yellow-100 dark:bg-yellow-900/30 p-6 inline-block">
-      <font-awesome-icon icon="fa-solid fa-lock" class="w-12 h-12 text-yellow-500" />
-    </div>
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-      {{ t('candidatures.closed') || "Candidatures fermées" }}
-    </h1>
-    <p class="text-gray-500 dark:text-gray-400 mb-8">
-      {{ t('candidatures.closedDescription') || "Les candidatures pour cet appel sont actuellement fermées." }}
-    </p>
-    <NuxtLink
-      :to="localePath(`/actualites/appels/${call.slug}`)"
-      class="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue-600 text-white font-medium rounded-lg hover:bg-brand-blue-700 transition-colors"
-    >
-      <font-awesome-icon icon="fa-solid fa-arrow-left" class="w-4 h-4" />
-      {{ t('candidatures.backToCall') || "Retour à l'appel" }}
-    </NuxtLink>
-  </div>
+      <!-- Error / Not Found -->
+      <div v-else-if="error || !call" class="py-32">
+        <div class="max-w-2xl mx-auto px-4 text-center">
+          <div class="mb-6 rounded-full bg-red-100 dark:bg-red-900/30 p-6 inline-block">
+            <font-awesome-icon icon="fa-solid fa-exclamation-triangle" class="w-12 h-12 text-red-500" />
+          </div>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            {{ t('candidatures.notFound') || "Appel non trouvé" }}
+          </h1>
+          <p class="text-gray-500 dark:text-gray-400 mb-8">
+            {{ t('candidatures.notFoundDescription') || "L'appel que vous recherchez n'existe pas ou n'est plus disponible." }}
+          </p>
+          <NuxtLink
+            :to="localePath('/actualites/appels')"
+            class="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue-600 text-white font-medium rounded-lg hover:bg-brand-blue-700 transition-colors"
+          >
+            <font-awesome-icon icon="fa-solid fa-arrow-left" class="w-4 h-4" />
+            {{ t('candidatures.backToCalls') || "Retour aux appels" }}
+          </NuxtLink>
+        </div>
+      </div>
 
-  <!-- Submission success -->
-  <div v-else-if="submitted" class="max-w-2xl mx-auto px-4 py-32 text-center">
-    <div class="mb-6 rounded-full bg-green-100 dark:bg-green-900/30 p-6 inline-block">
-      <font-awesome-icon icon="fa-solid fa-check-circle" class="w-12 h-12 text-green-500" />
-    </div>
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-      {{ t('candidatures.submitted') || "Candidature envoyée !" }}
-    </h1>
-    <p class="text-gray-500 dark:text-gray-400 mb-8">
-      {{ t('candidatures.submittedDescription') || "Votre candidature a été soumise avec succès. Vous recevrez un email de confirmation." }}
-    </p>
-    <NuxtLink
-      :to="localePath('/actualites/appels')"
-      class="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue-600 text-white font-medium rounded-lg hover:bg-brand-blue-700 transition-colors"
-    >
-      {{ t('candidatures.browseOtherCalls') || "Voir d'autres appels" }}
-    </NuxtLink>
-  </div>
+      <!-- Call is closed -->
+      <div v-else-if="!isCallOpen" class="py-32">
+        <div class="max-w-2xl mx-auto px-4 text-center">
+          <div class="mb-6 rounded-full bg-yellow-100 dark:bg-yellow-900/30 p-6 inline-block">
+            <font-awesome-icon icon="fa-solid fa-lock" class="w-12 h-12 text-yellow-500" />
+          </div>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            {{ t('candidatures.closed') || "Candidatures fermées" }}
+          </h1>
+          <p class="text-gray-500 dark:text-gray-400 mb-8">
+            {{ t('candidatures.closedDescription') || "Les candidatures pour cet appel sont actuellement fermées." }}
+          </p>
+          <NuxtLink
+            :to="localePath(`/actualites/appels/${call.slug}`)"
+            class="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue-600 text-white font-medium rounded-lg hover:bg-brand-blue-700 transition-colors"
+          >
+            <font-awesome-icon icon="fa-solid fa-arrow-left" class="w-4 h-4" />
+            {{ t('candidatures.backToCall') || "Retour à l'appel" }}
+          </NuxtLink>
+        </div>
+      </div>
 
-  <!-- Application form -->
-  <div v-else class="py-12">
-    <!-- Header -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-      <NuxtLink
-        :to="localePath(`/actualites/appels/${call.slug}`)"
-        class="inline-flex items-center gap-2 text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 font-medium transition-colors mb-4"
-      >
-        <font-awesome-icon icon="fa-solid fa-arrow-left" class="w-4 h-4" />
-        {{ t('candidatures.backToCall') || "Retour à l'appel" }}
-      </NuxtLink>
+      <!-- Submission success -->
+      <div v-else-if="submitted" class="py-32">
+        <div class="max-w-2xl mx-auto px-4 text-center">
+          <div class="mb-6 rounded-full bg-green-100 dark:bg-green-900/30 p-6 inline-block">
+            <font-awesome-icon icon="fa-solid fa-check-circle" class="w-12 h-12 text-green-500" />
+          </div>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            {{ t('candidatures.submitted') || "Candidature envoyée !" }}
+          </h1>
+          <p class="text-gray-500 dark:text-gray-400 mb-8">
+            {{ t('candidatures.submittedDescription') || "Votre candidature a été soumise avec succès. Vous recevrez un email de confirmation." }}
+          </p>
+          <NuxtLink
+            :to="localePath('/actualites/appels')"
+            class="inline-flex items-center gap-2 px-6 py-3 bg-brand-blue-600 text-white font-medium rounded-lg hover:bg-brand-blue-700 transition-colors"
+          >
+            {{ t('candidatures.browseOtherCalls') || "Voir d'autres appels" }}
+          </NuxtLink>
+        </div>
+      </div>
 
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-        {{ t('candidatures.applyTo') || "Postuler à" }} : {{ call.title }}
-      </h1>
-      <p v-if="call.deadline" class="text-gray-500 dark:text-gray-400">
-        <font-awesome-icon icon="fa-solid fa-clock" class="w-4 h-4 mr-1" />
-        {{ t('candidatures.deadline') || "Date limite" }} :
-        <span class="font-medium text-red-600 dark:text-red-400">
-          {{ new Date(call.deadline).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) }}
-        </span>
-      </p>
-    </div>
+      <!-- Application form -->
+      <div v-else class="py-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+          <p v-if="call.deadline" class="text-gray-500 dark:text-gray-400">
+            <font-awesome-icon icon="fa-solid fa-clock" class="w-4 h-4 mr-1" />
+            {{ t('candidatures.deadline') || "Date limite" }} :
+            <span class="font-medium text-red-600 dark:text-red-400">
+              {{ new Date(call.deadline).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) }}
+            </span>
+          </p>
+        </div>
 
-    <!-- Form -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <form @submit.prevent="submitApplication" class="space-y-8">
+        <!-- Form -->
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <form @submit.prevent="submitApplication" class="space-y-8">
         <!-- Formation Choice - Fixed (when linked to call) -->
         <div v-if="call.program_external_id" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
@@ -510,7 +505,9 @@ useSeoMeta({
             {{ submitting ? (t('candidatures.submitting') || 'Envoi...') : (t('candidatures.submit') || 'Soumettre ma candidature') }}
           </button>
         </div>
-      </form>
-    </div>
+          </form>
+        </div>
+      </div>
+    </section>
   </div>
 </template>

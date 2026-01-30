@@ -1,6 +1,7 @@
 {
   "apply": "Postuler",
   "applyTo": "Postuler à",
+  "applicationForm": "Formulaire de candidature",
   "applyDescription": "Soumettez votre candidature à l'Université Senghor",
   "notFound": "Appel non trouvé",
   "notFoundDescription": "L'appel que vous recherchez n'existe pas ou n'est plus disponible.",
