@@ -66,21 +66,9 @@ const activeTab = computed(() => {
     <!-- Tab Content -->
     <div class="bg-gray-50 dark:bg-gray-950 min-h-[400px]">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Partners Tab -->
-        <CampusPartners
-          v-if="activeTab === 'partners'"
-          :campus-id="campus.id"
-        />
-
-        <!-- Team Tab -->
-        <CampusTeam
-          v-else-if="activeTab === 'team'"
-          :campus-id="campus.id"
-        />
-
-        <!-- Calls Tab -->
+        <!-- Calls Tab (default) -->
         <CampusCalls
-          v-else-if="activeTab === 'calls'"
+          v-if="activeTab === 'calls'"
           :campus-id="campus.id"
         />
 
@@ -93,6 +81,18 @@ const activeTab = computed(() => {
         <!-- News Tab -->
         <CampusNews
           v-else-if="activeTab === 'news'"
+          :campus-id="campus.id"
+        />
+
+        <!-- Partners Tab -->
+        <CampusPartners
+          v-else-if="activeTab === 'partners'"
+          :campus-id="campus.id"
+        />
+
+        <!-- Team Tab -->
+        <CampusTeam
+          v-else-if="activeTab === 'team'"
           :campus-id="campus.id"
         />
 

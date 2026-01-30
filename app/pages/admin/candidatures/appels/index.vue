@@ -9,6 +9,8 @@ import {
   publicationStatusColors,
 } from '~/composables/useApplicationCallsApi'
 
+const { listCampuses } = useCampusApi()
+
 definePageMeta({
   layout: 'admin',
   middleware: 'admin-auth',
@@ -58,6 +60,9 @@ const error = ref<string | null>(null)
 // Stats (calculées côté client)
 const stats = ref({ total: 0, published: 0, draft: 0, ongoing: 0, upcoming: 0, closed: 0 })
 
+// Campus map (id -> name)
+const campusMap = ref<Record<string, string>>({})
+
 // === FETCH ===
 let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
@@ -103,6 +108,23 @@ async function fetchStats() {
   }
 }
 
+async function fetchCampuses() {
+  try {
+    const response = await listCampuses({ page: 1, limit: 100 })
+    campusMap.value = response.items.reduce((acc, campus) => {
+      acc[campus.id] = campus.name
+      return acc
+    }, {} as Record<string, string>)
+  } catch {
+    // Non critique
+  }
+}
+
+const getCampusName = (campusId: string | null | undefined) => {
+  if (!campusId) return 'Siège'
+  return campusMap.value[campusId] || 'Siège'
+}
+
 // Watchers pour refetch
 watch([filterType, filterStatus, filterPublicationStatus, sortBy, sortOrder, itemsPerPage], () => {
   currentPage.value = 1
@@ -124,6 +146,7 @@ watch(searchQuery, () => {
 onMounted(() => {
   fetchCalls()
   fetchStats()
+  fetchCampuses()
 })
 
 // === METHODS ===
@@ -481,6 +504,9 @@ const isDeadlineSoon = (deadline?: string | null) => {
                   <font-awesome-icon v-if="sortBy === 'type'" :icon="sortOrder === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down'" class="h-3 w-3 text-blue-600" />
                 </span>
               </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Campus
+              </th>
               <th
                 class="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
                 @click="toggleSort('status')"
@@ -539,6 +565,11 @@ const isDeadlineSoon = (deadline?: string | null) => {
                   :class="callTypeColors[call.type]"
                 >
                   {{ callTypeLabels[call.type] }}
+                </span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="text-sm text-gray-600 dark:text-gray-300">
+                  {{ getCampusName(call.campus_external_id) }}
                 </span>
               </td>
               <td class="px-4 py-3">

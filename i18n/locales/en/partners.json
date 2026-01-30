@@ -76,7 +76,8 @@
           "candidature": "Application",
           "projet": "Call for Projects",
           "bourse": "Scholarship",
-          "recrutement": "Recruitment"
+          "recrutement": "Recruitment",
+          "formation": "Training"
         },
         "showMore": "Show more",
         "showLess": "Show less"

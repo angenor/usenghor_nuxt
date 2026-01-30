@@ -76,7 +76,8 @@
           "candidature": "Candidature",
           "projet": "Appel à projets",
           "bourse": "Bourse",
-          "recrutement": "Recrutement"
+          "recrutement": "Recrutement",
+          "formation": "Formation"
         },
         "showMore": "Voir plus",
         "showLess": "Voir moins"

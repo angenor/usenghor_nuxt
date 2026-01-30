@@ -1,38 +1,63 @@
 <script setup lang="ts">
+import type { ApplicationCallPublic, CallType } from '~/types/api'
 import type { CampusCall } from '~/composables/useMockData'
 
+// Support both API type and mock data type
+type CallData = ApplicationCallPublic | CampusCall
+
 interface Props {
-  call: CampusCall
+  call: CallData
 }
 
 const props = defineProps<Props>()
 const { t, locale } = useI18n()
+const localePath = useLocalePath()
+
+// Helper to check if it's an API call
+const isApiCall = computed(() => 'slug' in props.call)
 
 // Get localized title
 const getLocalizedTitle = computed(() => {
-  if (locale.value === 'en' && props.call.title_en) {
-    return props.call.title_en
+  if (isApiCall.value) {
+    return (props.call as ApplicationCallPublic).title
   }
-  if (locale.value === 'ar' && props.call.title_ar) {
-    return props.call.title_ar
+  const mockCall = props.call as CampusCall
+  if (locale.value === 'en' && mockCall.title_en) {
+    return mockCall.title_en
   }
-  return props.call.title_fr
+  if (locale.value === 'ar' && mockCall.title_ar) {
+    return mockCall.title_ar
+  }
+  return mockCall.title_fr
 })
 
 // Get localized description
 const getLocalizedDescription = computed(() => {
-  if (locale.value === 'en' && props.call.description_en) {
-    return props.call.description_en
+  if (isApiCall.value) {
+    return (props.call as ApplicationCallPublic).description || ''
   }
-  if (locale.value === 'ar' && props.call.description_ar) {
-    return props.call.description_ar
+  const mockCall = props.call as CampusCall
+  if (locale.value === 'en' && mockCall.description_en) {
+    return mockCall.description_en
   }
-  return props.call.description_fr
+  if (locale.value === 'ar' && mockCall.description_ar) {
+    return mockCall.description_ar
+  }
+  return mockCall.description_fr
+})
+
+// Get deadline
+const deadline = computed(() => {
+  if (isApiCall.value) {
+    return (props.call as ApplicationCallPublic).deadline
+  }
+  return (props.call as CampusCall).deadline
 })
 
 // Format deadline date
 const formattedDeadline = computed(() => {
-  const date = new Date(props.call.deadline)
+  if (!deadline.value) return ''
+  const date = new Date(deadline.value)
   return date.toLocaleDateString(
     locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
     { day: 'numeric', month: 'long', year: 'numeric' }
@@ -41,56 +66,117 @@ const formattedDeadline = computed(() => {
 
 // Check if deadline is soon (within 30 days)
 const isDeadlineSoon = computed(() => {
-  const deadline = new Date(props.call.deadline)
+  if (!deadline.value) return false
+  const deadlineDate = new Date(deadline.value)
   const now = new Date()
-  const diffTime = deadline.getTime() - now.getTime()
+  const diffTime = deadlineDate.getTime() - now.getTime()
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
   return diffDays > 0 && diffDays <= 30
 })
 
 // Days remaining
 const daysRemaining = computed(() => {
-  const deadline = new Date(props.call.deadline)
+  if (!deadline.value) return 0
+  const deadlineDate = new Date(deadline.value)
   const now = new Date()
-  const diffTime = deadline.getTime() - now.getTime()
+  const diffTime = deadlineDate.getTime() - now.getTime()
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 })
 
-// Type badge colors
+// Get call type for display
+const callType = computed(() => {
+  if (isApiCall.value) {
+    return (props.call as ApplicationCallPublic).type
+  }
+  return (props.call as CampusCall).type
+})
+
+// Map API types to translation keys
+const apiTypeToKey: Record<CallType, string> = {
+  application: 'candidature',
+  scholarship: 'bourse',
+  project: 'projet',
+  recruitment: 'recrutement',
+  training: 'formation',
+}
+
+// Get type key for translation
+const typeKey = computed(() => {
+  if (isApiCall.value) {
+    return apiTypeToKey[callType.value as CallType] || callType.value
+  }
+  return callType.value
+})
+
+// Type badge colors (support both API and mock types)
 const typeBgColors: Record<string, string> = {
   candidature: 'bg-brand-blue-500',
+  application: 'bg-brand-blue-500',
   projet: 'bg-brand-blue-600',
+  project: 'bg-brand-blue-600',
   bourse: 'bg-brand-red-500',
-  recrutement: 'bg-brand-red-600'
+  scholarship: 'bg-brand-red-500',
+  recrutement: 'bg-brand-red-600',
+  recruitment: 'bg-brand-red-600',
+  training: 'bg-cyan-500',
+  formation: 'bg-cyan-500',
 }
+
+// Get URL
+const callUrl = computed(() => {
+  if (isApiCall.value) {
+    const apiCall = props.call as ApplicationCallPublic
+    // Link to detail page or external URL
+    return apiCall.external_form_url || localePath(`/candidatures/${apiCall.slug}`)
+  }
+  return (props.call as CampusCall).url
+})
+
+// Get image
+const callImage = computed(() => {
+  if (isApiCall.value) {
+    const apiCall = props.call as ApplicationCallPublic
+    // Use placeholder if no cover image
+    return apiCall.cover_image_external_id
+      ? `/api/media/${apiCall.cover_image_external_id}`
+      : 'https://picsum.photos/seed/call/800/600'
+  }
+  return (props.call as CampusCall).image
+})
+
+// Get partner logos (only for mock data)
+const partnerLogos = computed(() => {
+  if (isApiCall.value) {
+    return []
+  }
+  return (props.call as CampusCall).partner_logos || []
+})
 </script>
 
 <template>
   <div
     class="blog-card group relative block w-full h-[380px] bg-cover bg-center bg-no-repeat overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
-    :style="{ backgroundImage: `url(${call.image})` }"
+    :style="{ backgroundImage: `url(${callImage})` }"
   >
     <!-- Content mask (white area on left) - inline-block -->
     <div class="content-mask">
       <!-- Type badge -->
       <span
         class="inline-block px-3 py-1.5 text-xs font-semibold text-white rounded shadow-md tracking-wide my-4"
-        :class="typeBgColors[call.type]"
+        :class="typeBgColors[callType] || 'bg-gray-500'"
       >
-        {{ t(`partners.campus.calls.types.${call.type}`) }}
+        {{ t(`partners.campus.calls.types.${typeKey}`) }}
       </span>
 
       <!-- Title -->
       <h3 class="text-xl lg:text-2xl font-extrabold text-gray-900 dark:text-gray-900 leading-tight mb-2 pb-1 border-b-2 border-gray-300">
-        <a
-          v-if="call.url"
-          :href="call.url"
-          target="_blank"
-          rel="noopener noreferrer"
+        <NuxtLink
+          v-if="callUrl"
+          :to="callUrl"
           class="hover:text-brand-blue-600 transition-colors duration-200"
         >
           {{ getLocalizedTitle }}
-        </a>
+        </NuxtLink>
         <span v-else>{{ getLocalizedTitle }}</span>
       </h3>
 
@@ -100,7 +186,7 @@ const typeBgColors: Record<string, string> = {
       </p>
 
       <!-- Deadline info -->
-      <div class="post-detail">
+      <div v-if="deadline" class="post-detail">
         <font-awesome-icon icon="fa-regular fa-calendar" class="inline-block w-4 h-4 mr-2 align-middle" />
         <span class="text-sm text-gray-600">{{ formattedDeadline }}</span>
         <span v-if="isDeadlineSoon" class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-brand-red-500 text-white text-xs font-medium rounded-full animate-pulse">
@@ -108,16 +194,16 @@ const typeBgColors: Record<string, string> = {
         </span>
       </div>
 
-      <!-- Partner logos -->
-      <div v-if="call.partner_logos && call.partner_logos.length > 0" class="absolute bottom-4 left-8 flex items-center gap-2">
+      <!-- Partner logos (mock data only) -->
+      <div v-if="partnerLogos.length > 0" class="absolute bottom-4 left-8 flex items-center gap-2">
         <div
-          v-for="(logo, index) in call.partner_logos.slice(0, 4)"
+          v-for="(logo, index) in partnerLogos.slice(0, 4)"
           :key="index"
           class="w-12 h-12 rounded-lg bg-white border border-gray-200 overflow-hidden shadow-md -ml-1 first:ml-0"
         >
           <img :src="logo" alt="Partenaire" class="w-full h-full object-contain p-1.5" loading="lazy">
         </div>
-        <span v-if="call.partner_logos.length > 4" class="text-xs text-gray-500 ml-1 font-medium">+{{ call.partner_logos.length - 4 }}</span>
+        <span v-if="partnerLogos.length > 4" class="text-xs text-gray-500 ml-1 font-medium">+{{ partnerLogos.length - 4 }}</span>
       </div>
     </div>
 
@@ -125,16 +211,14 @@ const typeBgColors: Record<string, string> = {
     <div class="horizontal" />
 
     <!-- Apply button (floating on right over image) -->
-    <a
-      v-if="call.url"
-      :href="call.url"
-      target="_blank"
-      rel="noopener noreferrer"
+    <NuxtLink
+      v-if="callUrl"
+      :to="callUrl"
       class="absolute bottom-5 right-5 inline-flex items-center gap-2 px-5 py-2.5 bg-brand-blue-500 hover:bg-brand-blue-600 text-white text-sm font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 z-20"
     >
       <span>{{ t('partners.campus.calls.apply') }}</span>
       <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
-    </a>
+    </NuxtLink>
   </div>
 </template>
 

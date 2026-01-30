@@ -1,11 +1,22 @@
 <script setup lang="ts">
+import type { ApplicationCallPublic } from '~/types/api'
+
 interface Props {
   campusId: string
 }
 
 const props = defineProps<Props>()
 const { t, locale } = useI18n()
-const { getCampusCalls, getCampusFormationsRealisees, getCampusClosedCalls, getCampusRecruitments, getCampusEvents, getCampusNews, getCampusTeam, partenaires } = useMockData()
+const { listPublicCalls } = useApplicationCallsApi()
+const { getCampusEvents, getCampusNews, getCampusTeam, partenaires } = useMockData()
+
+// Fetch calls from API using useLazyAsyncData to avoid SSR issues with v-if
+const { data: callsResponse, pending: loading } = useLazyAsyncData(
+  `campus-calls-${props.campusId}`,
+  () => listPublicCalls({ campus_external_id: props.campusId, limit: 100 })
+)
+
+const allCalls = computed(() => callsResponse.value?.items || [])
 
 // Active filter
 type FilterType = 'all' | 'calls' | 'formations' | 'closed' | 'recruitments'
@@ -38,10 +49,30 @@ const filters = computed(() => {
   return allFilters.filter(f => f.id === 'all' || (f.count && f.count() > 0))
 })
 
-const calls = computed(() => getCampusCalls(props.campusId))
-const formationsRealisees = computed(() => getCampusFormationsRealisees(props.campusId))
-const closedCalls = computed(() => getCampusClosedCalls(props.campusId))
-const recruitments = computed(() => getCampusRecruitments(props.campusId))
+// Appels en cours (ongoing/upcoming, hors recrutements et formations)
+const calls = computed(() => allCalls.value.filter(c =>
+  (c.status === 'ongoing' || c.status === 'upcoming') &&
+  c.type !== 'recruitment' &&
+  c.type !== 'training'
+))
+
+// Formations réalisées (type training, status closed)
+const formationsRealisees = computed(() => allCalls.value.filter(c =>
+  c.type === 'training' && c.status === 'closed'
+))
+
+// Appels clos (tous les types sauf training et recruitment)
+const closedCalls = computed(() => allCalls.value.filter(c =>
+  c.status === 'closed' &&
+  c.type !== 'recruitment' &&
+  c.type !== 'training'
+))
+
+// Recrutements (type recruitment, ongoing/upcoming)
+const recruitments = computed(() => allCalls.value.filter(c =>
+  c.type === 'recruitment' &&
+  (c.status === 'ongoing' || c.status === 'upcoming')
+))
 
 // Displayed items (limited or full based on expanded state)
 const displayedCalls = computed(() =>
@@ -143,8 +174,13 @@ const formatDate = (dateStr: string) => {
 
 <template>
   <div class="py-8">
+    <!-- Loading state -->
+    <div v-if="loading" class="flex items-center justify-center py-16">
+      <div class="h-12 w-12 animate-spin rounded-full border-4 border-brand-blue-500 border-t-transparent"></div>
+    </div>
+
     <!-- Empty state when no data at all -->
-    <div v-if="!hasAnyData" class="text-center py-16">
+    <div v-else-if="!hasAnyData" class="text-center py-16">
       <font-awesome-icon icon="fa-solid fa-bullhorn" class="w-16 h-16 text-gray-300 dark:text-gray-600 mb-6" />
       <p class="text-xl text-gray-500 dark:text-gray-400">{{ t('partners.campus.noCalls') }}</p>
     </div>

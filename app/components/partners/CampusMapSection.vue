@@ -462,7 +462,7 @@ const handleImageError = (e: Event) => {
                   </NuxtLink>
                   <NuxtLink
                     v-else
-                    :to="localePath(`/a-propos/partenaires/campus/${selectedCampus.code.toLowerCase()}`)"
+                    :to="localePath(`/a-propos/partenaires/campus/${selectedCampus.code.toLowerCase()}`) + '#calls'"
                     class="card-cta"
                   >
                     {{ t('partners.campus.viewDetails') }}

@@ -76,7 +76,8 @@
           "candidature": "ترشح",
           "projet": "دعوة لتقديم المشاريع",
           "bourse": "منحة",
-          "recrutement": "توظيف"
+          "recrutement": "توظيف",
+          "formation": "تدريب"
         },
         "showMore": "عرض المزيد",
         "showLess": "عرض أقل"

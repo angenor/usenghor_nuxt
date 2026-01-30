@@ -1,5 +1,7 @@
 import type {
   ApplicationCallCreatePayload,
+  ApplicationCallPublic,
+  ApplicationCallPublicWithDetails,
   ApplicationCallRead,
   ApplicationCallUpdatePayload,
   ApplicationCallWithDetails,
@@ -76,6 +78,7 @@ export function useApplicationCallsApi() {
     call_type?: CallType | 'all'
     call_status?: CallStatus | 'all'
     publication_status?: PublicationStatus | 'all'
+    campus_external_id?: string
   } = {}): Promise<PaginatedResponse<ApplicationCallRead>> {
     return apiFetch<PaginatedResponse<ApplicationCallRead>>('/api/admin/application-calls', {
       query: {
@@ -87,8 +90,32 @@ export function useApplicationCallsApi() {
         call_type: params.call_type !== 'all' ? params.call_type : undefined,
         call_status: params.call_status !== 'all' ? params.call_status : undefined,
         publication_status: params.publication_status !== 'all' ? params.publication_status : undefined,
+        campus_external_id: params.campus_external_id || undefined,
       },
     })
+  }
+
+  // API publique (sans authentification admin)
+  async function listPublicCalls(params: {
+    page?: number
+    limit?: number
+    call_type?: CallType | 'all'
+    call_status?: CallStatus | 'all'
+    campus_external_id?: string
+  } = {}): Promise<PaginatedResponse<ApplicationCallPublic>> {
+    return apiFetch<PaginatedResponse<ApplicationCallPublic>>('/api/public/application-calls', {
+      query: {
+        page: params.page || 1,
+        limit: params.limit || 20,
+        call_type: params.call_type !== 'all' ? params.call_type : undefined,
+        call_status: params.call_status !== 'all' ? params.call_status : undefined,
+        campus_external_id: params.campus_external_id || undefined,
+      },
+    })
+  }
+
+  async function getPublicCallBySlug(slug: string): Promise<ApplicationCallPublicWithDetails> {
+    return apiFetch<ApplicationCallPublicWithDetails>(`/api/public/application-calls/${slug}`)
   }
 
   async function getCallById(id: string): Promise<ApplicationCallWithDetails> {
@@ -197,7 +224,7 @@ export function useApplicationCallsApi() {
   }
 
   return {
-    // CRUD principal
+    // CRUD principal (admin)
     listCalls,
     getCallById,
     createCall,
@@ -205,6 +232,10 @@ export function useApplicationCallsApi() {
     deleteCall,
     togglePublication,
     updateCallStatus,
+
+    // API publique (front-office)
+    listPublicCalls,
+    getPublicCallBySlug,
 
     // Sous-entités
     addCriterion,
