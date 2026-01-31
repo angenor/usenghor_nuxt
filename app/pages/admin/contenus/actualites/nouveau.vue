@@ -19,6 +19,8 @@ const {
   slugify,
 } = useAdminNewsApi()
 
+const { uploadMedia, getMediaUrl } = useMediaApi()
+
 // Données de référence depuis le backend
 const {
   getCampuses,
@@ -154,14 +156,46 @@ function removeTag(tagId: string) {
   }
 }
 
+// État pour l'éditeur d'image de couverture
+const showCoverEditor = ref(false)
+const pendingCoverFile = ref<File | null>(null)
+const isUploadingCover = ref(false)
+
 function handleCoverImageUpload(event: Event) {
   const input = event.target as HTMLInputElement
   if (input.files && input.files[0]) {
-    // Créer un aperçu local de l'image
-    form.cover_image = URL.createObjectURL(input.files[0])
-    // Générer un nouvel UUID pour cette image
-    // NOTE: Dans un système complet, cet UUID serait généré par le serveur lors de l'upload
-    form.cover_image_external_id = crypto.randomUUID()
+    // Stocker le fichier et ouvrir l'éditeur
+    pendingCoverFile.value = input.files[0]
+    showCoverEditor.value = true
+    input.value = ''
+  }
+}
+
+function cancelCoverEditor() {
+  showCoverEditor.value = false
+  pendingCoverFile.value = null
+}
+
+async function saveEditedCover(blob: Blob) {
+  showCoverEditor.value = false
+  isUploadingCover.value = true
+
+  try {
+    // Convertir le blob en File pour l'upload
+    const file = new File([blob], pendingCoverFile.value?.name || 'cover.jpg', {
+      type: blob.type
+    })
+    const response = await uploadMedia(file, { folder: 'news/covers' })
+    // Stocker l'ID et créer un aperçu local temporaire du blob
+    form.cover_image_external_id = response.id
+    form.cover_image = URL.createObjectURL(blob)
+  }
+  catch (err) {
+    console.error('Erreur upload image de couverture:', err)
+  }
+  finally {
+    isUploadingCover.value = false
+    pendingCoverFile.value = null
   }
 }
 
@@ -376,8 +410,19 @@ async function createTag() {
             <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Image de couverture
             </label>
+            <!-- Loading state -->
             <div
-              v-if="form.cover_image"
+              v-if="isUploadingCover"
+              class="mb-4 flex h-48 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-700"
+            >
+              <div class="text-center">
+                <font-awesome-icon icon="fa-solid fa-spinner" class="mb-2 h-8 w-8 animate-spin text-blue-500" />
+                <p class="text-sm text-gray-500 dark:text-gray-400">Téléversement en cours...</p>
+              </div>
+            </div>
+            <!-- Image preview -->
+            <div
+              v-else-if="form.cover_image"
               class="relative mb-4"
             >
               <img
@@ -396,6 +441,7 @@ async function createTag() {
             <div class="flex items-center gap-4">
               <label
                 class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                :class="{ 'pointer-events-none opacity-50': isUploadingCover }"
               >
                 <font-awesome-icon icon="fa-solid fa-upload" class="h-4 w-4" />
                 Télécharger une image
@@ -403,6 +449,7 @@ async function createTag() {
                   type="file"
                   accept="image/*"
                   class="hidden"
+                  :disabled="isUploadingCover"
                   @change="handleCoverImageUpload"
                 />
               </label>
@@ -726,6 +773,26 @@ async function createTag() {
             >
               Créer
             </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Image Editor Modal for Cover Image -->
+    <Teleport to="body">
+      <div
+        v-if="showCoverEditor && pendingCoverFile"
+        class="fixed inset-0 z-50 overflow-y-auto"
+      >
+        <div class="flex min-h-full items-center justify-center p-4">
+          <div class="fixed inset-0 bg-black/70 transition-opacity" />
+          <div class="relative w-full max-w-4xl transform transition-all">
+            <MediaImageEditor
+              :image-file="pendingCoverFile"
+              :aspect-ratio="16/9"
+              @save="saveEditedCover"
+              @cancel="cancelCoverEditor"
+            />
           </div>
         </div>
       </div>

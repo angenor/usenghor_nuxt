@@ -285,6 +285,7 @@ const openAddModal = () => {
     existing_campus_ids: [],
     existing_project_ids: [],
   }
+  logoPreviewUrl.value = null
   showAddModal.value = true
 }
 
@@ -312,6 +313,7 @@ const openEditModal = async (partner: PartnerDisplay) => {
     existing_campus_ids: existingCampusIds,
     existing_project_ids: existingProjectIds,
   }
+  logoPreviewUrl.value = null
   showEditModal.value = true
 }
 
@@ -536,17 +538,43 @@ const hasActiveFilters = computed(() => {
   return searchQuery.value || filterType.value || filterCountry.value || filterActive.value !== undefined
 })
 
-// Upload du logo
+// Upload du logo avec éditeur d'image
 const isUploadingLogo = ref(false)
-async function handleLogoUpload(event: Event) {
+const showLogoEditor = ref(false)
+const pendingLogoFile = ref<File | null>(null)
+
+function handleLogoUpload(event: Event) {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
 
+  // Stocker le fichier et ouvrir l'éditeur
+  pendingLogoFile.value = file
+  showLogoEditor.value = true
+  input.value = ''
+}
+
+function cancelLogoEditor() {
+  showLogoEditor.value = false
+  pendingLogoFile.value = null
+}
+
+// Stocker le blob URL temporaire pour l'aperçu immédiat
+const logoPreviewUrl = ref<string | null>(null)
+
+async function saveEditedLogo(blob: Blob) {
+  showLogoEditor.value = false
   isUploadingLogo.value = true
+
   try {
+    // Convertir le blob en File pour l'upload
+    const file = new File([blob], pendingLogoFile.value?.name || 'logo.jpg', {
+      type: blob.type
+    })
     const response = await uploadMedia(file, { folder: 'partners/logos' })
     newPartner.value.logo_external_id = response.id
+    // Créer un aperçu local temporaire du blob (évite les URLs mock picsum)
+    logoPreviewUrl.value = URL.createObjectURL(blob)
   }
   catch (err) {
     console.error('Erreur upload logo:', err)
@@ -554,7 +582,7 @@ async function handleLogoUpload(event: Event) {
   }
   finally {
     isUploadingLogo.value = false
-    input.value = ''
+    pendingLogoFile.value = null
   }
 }
 </script>
@@ -1201,10 +1229,10 @@ async function handleLogoUpload(event: Event) {
                     <div v-if="isUploadingLogo" class="h-full w-full flex items-center justify-center">
                       <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
                     </div>
-                    <!-- Image -->
+                    <!-- Image (utiliser l'aperçu local si disponible, sinon l'URL du média) -->
                     <img
                       v-else-if="newPartner.logo_external_id"
-                      :src="getMediaUrl(newPartner.logo_external_id) || ''"
+                      :src="logoPreviewUrl || getMediaUrl(newPartner.logo_external_id) || ''"
                       alt="Logo"
                       class="h-full w-full object-contain p-1"
                     />
@@ -1228,7 +1256,7 @@ async function handleLogoUpload(event: Event) {
                       v-if="newPartner.logo_external_id && !isUploadingLogo"
                       type="button"
                       class="text-xs text-red-600 hover:text-red-500 dark:text-red-400"
-                      @click="newPartner.logo_external_id = ''"
+                      @click="newPartner.logo_external_id = ''; logoPreviewUrl = null"
                     >
                       Supprimer
                     </button>
@@ -1518,6 +1546,26 @@ async function handleLogoUpload(event: Event) {
                 Fermer
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Image Editor Modal for Logo -->
+    <Teleport to="body">
+      <div
+        v-if="showLogoEditor && pendingLogoFile"
+        class="fixed inset-0 z-50 overflow-y-auto"
+      >
+        <div class="flex min-h-full items-center justify-center p-4">
+          <div class="fixed inset-0 bg-black/70 transition-opacity" />
+          <div class="relative w-full max-w-4xl transform transition-all">
+            <MediaImageEditor
+              :image-file="pendingLogoFile"
+              :aspect-ratio="1"
+              @save="saveEditedLogo"
+              @cancel="cancelLogoEditor"
+            />
           </div>
         </div>
       </div>

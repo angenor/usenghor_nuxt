@@ -24,6 +24,16 @@ const {
   slugify,
 } = useAdminNewsApi()
 
+const { getMediaUrl } = useMediaApi()
+
+// Helper pour obtenir l'URL de l'image de couverture (préfère l'ID externe pour éviter les URLs mock)
+function getCoverImageUrl(newsItem: NewsDisplay): string | null {
+  if (newsItem.cover_image_external_id) {
+    return getMediaUrl(newsItem.cover_image_external_id)
+  }
+  return newsItem.cover_image || null
+}
+
 const { departments } = useMockData()
 const { getCampuses, getUsers, campuses: campusesCache } = useReferenceData()
 
@@ -674,8 +684,8 @@ const truncate = (text: string, length: number) => {
               <td class="px-4 py-3">
                 <div class="h-12 w-16 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700">
                   <img
-                    v-if="newsItem.cover_image"
-                    :src="newsItem.cover_image"
+                    v-if="getCoverImageUrl(newsItem)"
+                    :src="getCoverImageUrl(newsItem)!"
                     :alt="newsItem.title"
                     class="h-full w-full object-cover"
                   />

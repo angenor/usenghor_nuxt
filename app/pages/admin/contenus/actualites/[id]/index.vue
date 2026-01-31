@@ -23,6 +23,17 @@ const {
   slugify,
 } = useAdminNewsApi()
 
+const { getMediaUrl } = useMediaApi()
+
+// Helper pour obtenir l'URL de l'image de couverture (préfère l'ID externe pour éviter les URLs mock)
+const coverImageUrl = computed(() => {
+  if (!newsItem.value) return null
+  if (newsItem.value.cover_image_external_id) {
+    return getMediaUrl(newsItem.value.cover_image_external_id)
+  }
+  return newsItem.value.cover_image || null
+})
+
 // === STATE ===
 const showDeleteModal = ref(false)
 const isLoading = ref(true)
@@ -320,9 +331,9 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
       <div class="space-y-6 lg:col-span-2">
         <!-- Image de couverture -->
         <div class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
-          <div v-if="newsItem.cover_image" class="relative">
+          <div v-if="coverImageUrl" class="relative">
             <img
-              :src="newsItem.cover_image"
+              :src="coverImageUrl"
               :alt="newsItem.cover_image_alt || newsItem.title"
               class="h-64 w-full object-cover"
             />
