@@ -263,17 +263,134 @@ onBeforeUnmount(() => {
   destroy()
 })
 
+// Fonctions pour insérer des blocs
+async function insertBlock(type: string, data: Record<string, unknown> = {}) {
+  if (!editorInstance.value || !isReady.value) return
+
+  try {
+    const currentIndex = editorInstance.value.blocks.getCurrentBlockIndex()
+    const insertIndex = currentIndex >= 0 ? currentIndex + 1 : 0
+
+    editorInstance.value.blocks.insert(type, data, undefined, insertIndex, true, false)
+
+    // Focus sur le nouveau bloc après un court délai
+    setTimeout(() => {
+      if (editorInstance.value) {
+        editorInstance.value.caret.setToBlock(insertIndex, 'start')
+      }
+    }, 10)
+  } catch (err) {
+    console.error('Error inserting block:', err)
+  }
+}
+
+async function insertHeading(level: number) {
+  if (!editorInstance.value || !isReady.value) return
+
+  try {
+    const currentIndex = editorInstance.value.blocks.getCurrentBlockIndex()
+    const insertIndex = currentIndex >= 0 ? currentIndex + 1 : 0
+
+    // Insérer le header avec les bonnes données
+    editorInstance.value.blocks.insert('header', { text: '', level }, undefined, insertIndex, true, false)
+
+    // Focus et placement du curseur
+    setTimeout(() => {
+      if (editorInstance.value) {
+        editorInstance.value.caret.setToBlock(insertIndex, 'start')
+      }
+    }, 10)
+  } catch (err) {
+    console.error('Error inserting heading:', err)
+  }
+}
+
+function insertParagraph() {
+  insertBlock('paragraph', { text: '' })
+}
+
+function insertList(style: 'unordered' | 'ordered' = 'unordered') {
+  insertBlock('list', { style, items: [''] })
+}
+
+function insertChecklist() {
+  insertBlock('checklist', { items: [{ text: '', checked: false }] })
+}
+
+function insertQuote() {
+  insertBlock('quote', { text: '', caption: '' })
+}
+
+function insertTable() {
+  insertBlock('table', { withHeadings: true, content: [['', ''], ['', '']] })
+}
+
+function insertImage() {
+  insertBlock('image', {})
+}
+
+function insertDelimiter() {
+  insertBlock('delimiter', {})
+}
+
 defineExpose({
   save,
   clear,
   destroy,
   isReady,
   editor: editorInstance,
+  insertBlock,
+  insertHeading,
 })
 </script>
 
 <template>
   <div class="editor-js-wrapper">
+    <!-- Toolbar fixe -->
+    <div v-if="!readOnly" class="editor-toolbar">
+      <span class="toolbar-label">Insérer :</span>
+      <div class="toolbar-buttons">
+        <button type="button" class="toolbar-btn" title="Titre 1" @click="insertHeading(1)">
+          <span class="font-bold">H1</span>
+        </button>
+        <button type="button" class="toolbar-btn" title="Titre 2" @click="insertHeading(2)">
+          <span class="font-bold">H2</span>
+        </button>
+        <button type="button" class="toolbar-btn" title="Titre 3" @click="insertHeading(3)">
+          <span class="font-bold">H3</span>
+        </button>
+        <button type="button" class="toolbar-btn" title="Titre 4" @click="insertHeading(4)">
+          <span class="font-bold">H4</span>
+        </button>
+        <span class="toolbar-separator" />
+        <button type="button" class="toolbar-btn" title="Paragraphe" @click="insertParagraph">
+          <font-awesome-icon icon="fa-solid fa-paragraph" />
+        </button>
+        <button type="button" class="toolbar-btn" title="Liste à puces" @click="insertList('unordered')">
+          <font-awesome-icon icon="fa-solid fa-list-ul" />
+        </button>
+        <button type="button" class="toolbar-btn" title="Liste numérotée" @click="insertList('ordered')">
+          <font-awesome-icon icon="fa-solid fa-list-ol" />
+        </button>
+        <button type="button" class="toolbar-btn" title="Liste de tâches" @click="insertChecklist">
+          <font-awesome-icon icon="fa-solid fa-list-check" />
+        </button>
+        <span class="toolbar-separator" />
+        <button type="button" class="toolbar-btn" title="Tableau" @click="insertTable">
+          <font-awesome-icon icon="fa-solid fa-table" />
+        </button>
+        <button type="button" class="toolbar-btn" title="Image" @click="insertImage">
+          <font-awesome-icon icon="fa-solid fa-image" />
+        </button>
+        <button type="button" class="toolbar-btn" title="Citation" @click="insertQuote">
+          <font-awesome-icon icon="fa-solid fa-quote-left" />
+        </button>
+        <button type="button" class="toolbar-btn" title="Séparateur" @click="insertDelimiter">
+          <font-awesome-icon icon="fa-solid fa-minus" />
+        </button>
+      </div>
+    </div>
+    <!-- Éditeur -->
     <div
       ref="editorContainer"
       class="editor-js-container prose prose-lg dark:prose-invert max-w-none"
@@ -289,6 +406,36 @@ defineExpose({
 
 .editor-js-container {
   @apply p-4;
+}
+
+/* Toolbar styles */
+.editor-toolbar {
+  @apply flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex-wrap;
+}
+
+.toolbar-label {
+  @apply text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap;
+}
+
+.toolbar-buttons {
+  @apply flex flex-wrap gap-1;
+}
+
+.toolbar-btn {
+  @apply inline-flex items-center justify-center px-2 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500;
+  min-width: 32px;
+}
+
+.toolbar-btn:active {
+  @apply bg-gray-200 dark:bg-gray-600;
+}
+
+.toolbar-btn svg {
+  @apply w-3.5 h-3.5;
+}
+
+.toolbar-separator {
+  @apply w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1;
 }
 
 /* EditorJS styling overrides */
@@ -343,7 +490,24 @@ defineExpose({
 }
 
 .ce-header {
-  @apply text-gray-900 dark:text-gray-100;
+  @apply text-gray-900 dark:text-gray-100 font-bold;
+}
+
+/* Styles pour les différents niveaux de titre */
+h1.ce-header {
+  @apply text-3xl mt-6 mb-4;
+}
+
+h2.ce-header {
+  @apply text-2xl mt-5 mb-3;
+}
+
+h3.ce-header {
+  @apply text-xl mt-4 mb-2;
+}
+
+h4.ce-header {
+  @apply text-lg mt-3 mb-2;
 }
 
 .cdx-quote__text {
