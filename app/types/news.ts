@@ -226,6 +226,11 @@ export interface NewsDuplicatePayload {
 // Statistics
 // ============================================================================
 
+export interface NewsTimelineDataPoint {
+  period: string
+  count: number
+}
+
 export interface NewsStats {
   total: number
   published: number
@@ -233,6 +238,7 @@ export interface NewsStats {
   archived: number
   headline: number
   featured: number
+  timeline?: NewsTimelineDataPoint[]
 }
 
 // ============================================================================

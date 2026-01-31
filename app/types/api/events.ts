@@ -162,3 +162,23 @@ export interface EventUpdatePayload {
   max_attendees?: number | null
   status?: PublicationStatus
 }
+
+// ============================================================================
+// Event Statistics
+// ============================================================================
+
+export interface EventTimelineDataPoint {
+  period: string
+  count: number
+}
+
+export interface EventStatistics {
+  total: number
+  published: number
+  draft: number
+  archived: number
+  upcoming: number
+  past: number
+  by_type: Record<EventType, number>
+  timeline: EventTimelineDataPoint[]
+}

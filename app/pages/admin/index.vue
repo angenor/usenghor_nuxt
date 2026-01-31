@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import type { ApplicationRead, ApplicationStatistics, EventRead, AuditLogWithUser } from '~/types/api'
+import type { ApplicationRead, ApplicationStatistics, EventStatistics, ExtendedApplicationStatistics } from '~/types/api'
+import type { AuditLogWithUser } from '~/types/api'
+import type { EventRead } from '~/types/api'
 import type { NewsDisplay, NewsStats } from '~/types/news'
 
 definePageMeta({
@@ -7,8 +9,8 @@ definePageMeta({
 })
 
 // APIs
-const { listApplications, getStatistics, applicationStatusLabels } = useApplicationsApi()
-const { listEvents, getEventsStats } = useEventsApi()
+const { listApplications, getStatistics, getExtendedStatistics, applicationStatusLabels } = useApplicationsApi()
+const { listEvents, getEventsStats, eventTypeLabels } = useEventsApi()
 const { listNews, getNewsStats } = useAdminNewsApi()
 const { listAuditLogs, enrichLog, auditActionLabels, getTableLabel: getAuditTableLabel } = useAuditApi()
 
@@ -33,6 +35,8 @@ const applicationStats = ref<ApplicationStatistics>({
   waitlisted: 0,
   incomplete: 0,
 })
+const extendedAppStats = ref<ExtendedApplicationStatistics | null>(null)
+const eventStats = ref<EventStatistics | null>(null)
 const newsStats = ref<NewsStats>({
   total: 0,
   published: 0,
@@ -98,6 +102,8 @@ async function fetchDashboardData() {
     // Fetch all data in parallel
     const [
       appStatsResult,
+      extendedAppStatsResult,
+      eventStatsResult,
       newsStatsResult,
       applicationsResult,
       upcomingEventsResult,
@@ -105,7 +111,9 @@ async function fetchDashboardData() {
       auditResult,
     ] = await Promise.all([
       getStatistics().catch(() => applicationStats.value),
-      getNewsStats().catch(() => newsStats.value),
+      getExtendedStatistics({ granularity: 'month' }).catch(() => null),
+      getEventsStats(12).catch(() => null),
+      getNewsStats(6).catch(() => newsStats.value),
       listApplications({ limit: 5, sort_by: 'submitted_at', sort_order: 'desc' }).catch(() => ({ items: [], total: 0 })),
       listEvents({ limit: 5, from_date: new Date().toISOString(), sort_by: 'start_date', sort_order: 'asc' }).catch(() => ({ items: [], total: 0 })),
       listNews({ limit: 5, sort_by: 'updated_at', sort_order: 'desc' }).catch(() => ({ items: [], total: 0 })),
@@ -114,8 +122,10 @@ async function fetchDashboardData() {
 
     // Update stats
     applicationStats.value = appStatsResult
+    extendedAppStats.value = extendedAppStatsResult
+    eventStats.value = eventStatsResult
     newsStats.value = newsStatsResult
-    upcomingEventsCount.value = upcomingEventsResult.total
+    upcomingEventsCount.value = eventStatsResult?.upcoming ?? upcomingEventsResult.total
 
     // Update lists
     recentApplications.value = applicationsResult.items
@@ -123,7 +133,7 @@ async function fetchDashboardData() {
     recentNewsList.value = newsResult.items
     recentActivity.value = auditResult.items.map(enrichLog)
 
-    // Generate chart data from stats
+    // Generate chart data from real stats
     generateChartData()
   } catch (e) {
     console.error('Error fetching dashboard data:', e)
@@ -133,9 +143,9 @@ async function fetchDashboardData() {
   }
 }
 
-// Generate chart data from application stats
+// Generate chart data from real statistics
 function generateChartData() {
-  // Application status distribution - use real data or demo data
+  // Application status distribution - use real data
   const realStatusData = [
     { category: 'Soumises', value: applicationStats.value.submitted, color: '#3B82F6' },
     { category: 'En révision', value: applicationStats.value.under_review, color: '#F59E0B' },
@@ -145,42 +155,39 @@ function generateChartData() {
     { category: 'Incomplètes', value: applicationStats.value.incomplete, color: '#6B7280' }
   ].filter(d => d.value > 0)
 
-  // Use demo data if no real data available
-  applicationStatusData.value = realStatusData.length > 0 ? realStatusData : [
-    { category: 'Soumises', value: 45, color: '#3B82F6' },
-    { category: 'En révision', value: 23, color: '#F59E0B' },
-    { category: 'Acceptées', value: 67, color: '#10B981' },
-    { category: 'Refusées', value: 12, color: '#EF4444' },
-    { category: 'Liste d\'attente', value: 8, color: '#F97316' }
-  ]
+  applicationStatusData.value = realStatusData
 
-  // Generate mock trend data for last 12 months
-  const now = new Date()
-  applicationTrendData.value = Array.from({ length: 12 }, (_, i) => {
-    const date = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1)
-    return {
-      date: date.toISOString(),
-      value: Math.floor(Math.random() * 50) + 10 + (i * 5)
-    }
-  })
+  // Application trend data from extended statistics
+  if (extendedAppStats.value?.timeline && extendedAppStats.value.timeline.length > 0) {
+    applicationTrendData.value = extendedAppStats.value.timeline.map(point => ({
+      date: `${point.period}-01`,
+      value: point.count
+    }))
+  } else {
+    applicationTrendData.value = []
+  }
 
-  // Mock event type distribution
-  eventTypeData.value = [
-    { category: 'Conférences', value: 12 },
-    { category: 'Ateliers', value: 8 },
-    { category: 'Séminaires', value: 15 },
-    { category: 'Cérémonies', value: 4 },
-    { category: 'Autres', value: 6 }
-  ]
+  // Event type distribution from real statistics
+  if (eventStats.value?.by_type) {
+    eventTypeData.value = Object.entries(eventStats.value.by_type)
+      .filter(([_, count]) => count > 0)
+      .map(([type, count]) => ({
+        category: eventTypeLabels[type as keyof typeof eventTypeLabels] || type,
+        value: count
+      }))
+  } else {
+    eventTypeData.value = []
+  }
 
-  // Mock news publication trend
-  newsPublicationData.value = Array.from({ length: 6 }, (_, i) => {
-    const date = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1)
-    return {
-      date: date.toISOString(),
-      value: Math.floor(Math.random() * 10) + 2
-    }
-  })
+  // News publication trend from real statistics
+  if (newsStats.value.timeline && newsStats.value.timeline.length > 0) {
+    newsPublicationData.value = newsStats.value.timeline.map(point => ({
+      date: `${point.period}-01`,
+      value: point.count
+    }))
+  } else {
+    newsPublicationData.value = []
+  }
 }
 
 // Load data on mount
@@ -384,8 +391,12 @@ const formatDate = (dateString: string) => {
           color="#3B82F6"
           :gradient-fill="true"
         />
-        <div v-else class="h-[250px] flex items-center justify-center text-gray-500">
+        <div v-else-if="isLoading" class="h-[250px] flex items-center justify-center text-gray-500">
+          <font-awesome-icon icon="fa-solid fa-spinner" class="w-5 h-5 animate-spin mr-2" />
           Chargement...
+        </div>
+        <div v-else class="h-[250px] flex items-center justify-center text-gray-500 dark:text-gray-400">
+          Aucune donnée disponible
         </div>
       </div>
 
@@ -403,8 +414,12 @@ const formatDate = (dateString: string) => {
           center-label="Total"
           :show-legend="true"
         />
-        <div v-else class="h-[250px] flex items-center justify-center text-gray-500">
+        <div v-else-if="isLoading" class="h-[250px] flex items-center justify-center text-gray-500">
+          <font-awesome-icon icon="fa-solid fa-spinner" class="w-5 h-5 animate-spin mr-2" />
           Chargement...
+        </div>
+        <div v-else class="h-[250px] flex items-center justify-center text-gray-500 dark:text-gray-400">
+          Aucune candidature
         </div>
       </div>
 
@@ -418,8 +433,12 @@ const formatDate = (dateString: string) => {
           :data="eventTypeData"
           height="250px"
         />
-        <div v-else class="h-[250px] flex items-center justify-center text-gray-500">
+        <div v-else-if="isLoading" class="h-[250px] flex items-center justify-center text-gray-500">
+          <font-awesome-icon icon="fa-solid fa-spinner" class="w-5 h-5 animate-spin mr-2" />
           Chargement...
+        </div>
+        <div v-else class="h-[250px] flex items-center justify-center text-gray-500 dark:text-gray-400">
+          Aucun événement publié
         </div>
       </div>
 
@@ -433,8 +452,12 @@ const formatDate = (dateString: string) => {
           :data="newsPublicationData"
           height="250px"
         />
-        <div v-else class="h-[250px] flex items-center justify-center text-gray-500">
+        <div v-else-if="isLoading" class="h-[250px] flex items-center justify-center text-gray-500">
+          <font-awesome-icon icon="fa-solid fa-spinner" class="w-5 h-5 animate-spin mr-2" />
           Chargement...
+        </div>
+        <div v-else class="h-[250px] flex items-center justify-center text-gray-500 dark:text-gray-400">
+          Aucune publication
         </div>
       </div>
     </div>

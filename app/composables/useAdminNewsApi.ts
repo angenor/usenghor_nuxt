@@ -465,30 +465,12 @@ export function useAdminNewsApi() {
   // =========================================================================
 
   /**
-   * Calcule les statistiques des actualités.
-   * Note: Le backend n'a pas d'endpoint dédié, on calcule côté client.
+   * Récupère les statistiques des actualités depuis le backend.
    */
-  async function getNewsStats(): Promise<NewsStats> {
-    // Récupérer toutes les actualités pour calculer les stats
-    const [allNews, publishedNews, draftNews, archivedNews] = await Promise.all([
-      listNews({ limit: 1 }),
-      listNews({ status: 'published', limit: 1 }),
-      listNews({ status: 'draft', limit: 1 }),
-      listNews({ status: 'archived', limit: 1 }),
-    ])
-
-    // Pour headline et featured, on filtre parmi les publiées
-    const featuredNews = await listNews({ status: 'published', highlight_status: 'featured', limit: 1 })
-    const headlineNews = await listNews({ status: 'published', highlight_status: 'headline', limit: 1 })
-
-    return {
-      total: allNews.total,
-      published: publishedNews.total,
-      draft: draftNews.total,
-      archived: archivedNews.total,
-      headline: headlineNews.total,
-      featured: featuredNews.total,
-    }
+  async function getNewsStats(months: number = 6): Promise<NewsStats> {
+    return apiFetch<NewsStats>('/api/admin/news/statistics', {
+      query: { months },
+    })
   }
 
   // =========================================================================

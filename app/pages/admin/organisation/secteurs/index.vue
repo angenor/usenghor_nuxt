@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { SectorDisplay, SectorUsage } from '~/composables/useSectorsApi'
+import type { OutputData } from '@editorjs/editorjs'
 
 definePageMeta({
   layout: 'admin'
@@ -42,11 +43,18 @@ const error = ref<string | null>(null)
 // Form state
 // Note: icon_external_id et cover_image_external_id sont des UUID pour le service MEDIA
 // La sélection d'icônes FontAwesome n'est pas disponible dans ce schéma
-const newSector = ref({
+const newSector = ref<{
+  name: string
+  code: string
+  description: OutputData | undefined
+  mission: OutputData | undefined
+  head_id: string
+  active: boolean
+}>({
   name: '',
   code: '',
-  description: '',
-  mission: '',
+  description: undefined,
+  mission: undefined,
   head_id: '',
   active: true
 })
@@ -200,12 +208,34 @@ const openAddModal = () => {
   newSector.value = {
     name: '',
     code: '',
-    description: '',
-    mission: '',
+    description: undefined,
+    mission: undefined,
     head_id: '',
     active: true
   }
   showAddModal.value = true
+}
+
+// Convertir une string (potentiellement JSON ou texte brut) en OutputData
+const parseEditorContent = (content: string | null | undefined): OutputData | undefined => {
+  if (!content) return undefined
+  try {
+    const parsed = JSON.parse(content)
+    // Vérifier que c'est bien un OutputData valide
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
+      return parsed as OutputData
+    }
+  } catch {
+    // Si ce n'est pas du JSON valide, créer un bloc paragraphe avec le texte
+    if (content.trim()) {
+      return {
+        time: Date.now(),
+        blocks: [{ type: 'paragraph', data: { text: content } }],
+        version: '2.28.0'
+      }
+    }
+  }
+  return undefined
 }
 
 const openEditModal = (sector: SectorDisplay) => {
@@ -213,8 +243,8 @@ const openEditModal = (sector: SectorDisplay) => {
   newSector.value = {
     name: sector.name,
     code: sector.code,
-    description: sector.description || '',
-    mission: sector.mission || '',
+    description: parseEditorContent(sector.description),
+    mission: parseEditorContent(sector.mission),
     head_id: sector.head_external_id || '',
     active: sector.active
   }
@@ -244,11 +274,19 @@ const saveSector = async () => {
   error.value = null
 
   try {
+    // Convertir les OutputData en JSON string pour l'API
+    const descriptionJson = newSector.value.description && newSector.value.description.blocks?.length
+      ? JSON.stringify(newSector.value.description)
+      : null
+    const missionJson = newSector.value.mission && newSector.value.mission.blocks?.length
+      ? JSON.stringify(newSector.value.mission)
+      : null
+
     const payload = {
       code: newSector.value.code,
       name: newSector.value.name,
-      description: newSector.value.description || null,
-      mission: newSector.value.mission || null,
+      description: descriptionJson,
+      mission: missionJson,
       head_external_id: newSector.value.head_id || null,
       active: newSector.value.active,
     }
@@ -765,12 +803,13 @@ const goToServices = (sectorId: string) => {
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Description
               </label>
-              <textarea
-                v-model="newSector.description"
-                rows="3"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent"
-                placeholder="Description courte du secteur..."
-              />
+              <ClientOnly>
+                <EditorJS
+                  v-model="newSector.description"
+                  placeholder="Description courte du secteur..."
+                  :min-height="150"
+                />
+              </ClientOnly>
             </div>
 
             <!-- Mission -->
@@ -778,12 +817,13 @@ const goToServices = (sectorId: string) => {
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Mission
               </label>
-              <textarea
-                v-model="newSector.mission"
-                rows="4"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent"
-                placeholder="Mission et objectifs du secteur..."
-              />
+              <ClientOnly>
+                <EditorJS
+                  v-model="newSector.mission"
+                  placeholder="Mission et objectifs du secteur..."
+                  :min-height="200"
+                />
+              </ClientOnly>
             </div>
 
             <!-- Responsable -->

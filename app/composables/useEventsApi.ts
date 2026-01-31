@@ -8,6 +8,7 @@
 import type {
   EventCreatePayload,
   EventRead,
+  EventStatistics,
   EventType,
   EventUpdatePayload,
   EventWithRegistrations,
@@ -158,6 +159,19 @@ export function useEventsApi() {
   }
 
   // =========================================================================
+  // Statistics
+  // =========================================================================
+
+  /**
+   * Récupère les statistiques des événements.
+   */
+  async function getEventsStats(months: number = 12): Promise<EventStatistics> {
+    return apiFetch<EventStatistics>('/api/admin/events/statistics', {
+      query: { months },
+    })
+  }
+
+  // =========================================================================
   // Media Library
   // =========================================================================
 
@@ -252,6 +266,9 @@ export function useEventsApi() {
     publishEvent,
     cancelEvent,
     duplicateEvent,
+
+    // Statistics
+    getEventsStats,
 
     // Media Library
     getEventAlbums,
