@@ -68,7 +68,6 @@ const form = reactive({
   project_id: '',
   status: 'draft' as NewsStatus,
   highlight_status: 'standard' as NewsHighlightStatus,
-  published_at: '',
   visible_from: ''
 })
 
@@ -228,6 +227,9 @@ async function submitForm() {
   error.value = null
 
   try {
+    // Définir automatiquement published_at si statut = published
+    const publishedAt = form.status === 'published' ? new Date().toISOString() : null
+
     await apiCreateNews({
       title: form.title,
       slug: form.slug,
@@ -246,7 +248,7 @@ async function submitForm() {
       project_external_id: toUUIDOrNull(form.project_id),
       author_external_id: toUUIDOrNull(form.author_id),
       status: form.status,
-      published_at: form.published_at || null,
+      published_at: publishedAt,
       visible_from: form.visible_from || null,
       tag_ids: form.tags,
     })
@@ -680,22 +682,6 @@ async function createTag() {
             </select>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Limite : 1 seule "À la une", 3-5 "Mises en avant"
-            </p>
-          </div>
-
-          <!-- Date de publication -->
-          <div>
-            <label for="published_at" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Date de publication
-            </label>
-            <input
-              id="published_at"
-              v-model="form.published_at"
-              type="datetime-local"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            />
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Laisser vide pour publier immédiatement
             </p>
           </div>
 
