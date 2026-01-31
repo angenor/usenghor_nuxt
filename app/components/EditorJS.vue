@@ -43,6 +43,7 @@ async function initEditor() {
     { default: InlineCode },
     { default: Marker },
     { default: LinkTool },
+    { default: Checklist },
   ] = await Promise.all([
     import('@editorjs/editorjs'),
     import('@editorjs/header'),
@@ -56,6 +57,7 @@ async function initEditor() {
     import('@editorjs/inline-code'),
     import('@editorjs/marker'),
     import('@editorjs/link'),
+    import('@editorjs/checklist'),
   ])
 
   editorInstance.value = new EditorJS({
@@ -64,6 +66,73 @@ async function initEditor() {
     placeholder: props.placeholder,
     readOnly: props.readOnly,
     minHeight: props.minHeight,
+    i18n: {
+      messages: {
+        ui: {
+          blockTunes: {
+            toggler: {
+              'Click to tune': 'Cliquez pour configurer',
+              'or drag to move': 'ou glissez pour déplacer',
+            },
+          },
+          inlineToolbar: {
+            converter: {
+              'Convert to': 'Convertir en',
+            },
+          },
+          toolbar: {
+            toolbox: {
+              Add: 'Ajouter',
+            },
+          },
+        },
+        toolNames: {
+          Text: 'Texte',
+          Heading: 'Titre',
+          List: 'Liste',
+          Checklist: 'Liste de tâches',
+          Quote: 'Citation',
+          Delimiter: 'Séparateur',
+          Table: 'Tableau',
+          Image: 'Image',
+          Embed: 'Vidéo intégrée',
+          Link: 'Lien',
+        },
+        tools: {
+          header: {
+            'Heading 1': 'Titre 1 (H1)',
+            'Heading 2': 'Titre 2 (H2)',
+            'Heading 3': 'Titre 3 (H3)',
+            'Heading 4': 'Titre 4 (H4)',
+          },
+          list: {
+            Unordered: 'Liste à puces',
+            Ordered: 'Liste numérotée',
+          },
+          table: {
+            'Add row above': 'Ajouter une ligne au-dessus',
+            'Add row below': 'Ajouter une ligne en-dessous',
+            'Delete row': 'Supprimer la ligne',
+            'Add column to left': 'Ajouter une colonne à gauche',
+            'Add column to right': 'Ajouter une colonne à droite',
+            'Delete column': 'Supprimer la colonne',
+            'With headings': 'Avec en-têtes',
+            'Without headings': 'Sans en-têtes',
+          },
+        },
+        blockTunes: {
+          delete: {
+            Delete: 'Supprimer',
+          },
+          moveUp: {
+            'Move up': 'Déplacer vers le haut',
+          },
+          moveDown: {
+            'Move down': 'Déplacer vers le bas',
+          },
+        },
+      },
+    },
     tools: {
       header: {
         class: Header,
@@ -134,6 +203,10 @@ async function initEditor() {
       delimiter: Delimiter,
       inlineCode: InlineCode,
       marker: Marker,
+      checklist: {
+        class: Checklist,
+        inlineToolbar: true,
+      },
       linkTool: {
         class: LinkTool,
         config: {
@@ -229,6 +302,40 @@ defineExpose({
 
 .ce-toolbar__content {
   @apply max-w-none;
+}
+
+/* Toolbar - icônes + et engrenage */
+.ce-toolbar {
+  z-index: 10;
+}
+
+.ce-toolbar__actions {
+  position: absolute;
+  left: -36px;
+  opacity: 1 !important;
+}
+
+.ce-toolbar__plus,
+.ce-toolbar__settings-btn {
+  @apply text-gray-500 bg-gray-100 dark:bg-gray-700 dark:text-gray-400 rounded;
+  width: 28px;
+  height: 28px;
+}
+
+.ce-toolbar__plus {
+  @apply bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 font-bold;
+}
+
+.ce-toolbar__plus:hover {
+  @apply bg-green-200 text-green-700 dark:bg-green-900/50 dark:text-green-300;
+}
+
+.ce-toolbar__settings-btn:hover {
+  @apply bg-gray-200 dark:bg-gray-600;
+}
+
+.codex-editor__redactor {
+  padding-left: 50px !important;
 }
 
 .ce-paragraph {

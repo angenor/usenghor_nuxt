@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { OutputData } from '@editorjs/editorjs'
 import type { CallType, PublicationStatus, CallEligibilityCriteriaCreate, CallCoverageCreate, CallRequiredDocumentCreate, CallScheduleCreate } from '~/types/api'
 
 definePageMeta({
@@ -86,7 +87,7 @@ const genKey = () => ++nextKey
 const form = ref({
   title: '',
   slug: '',
-  description: '',
+  description: undefined as OutputData | undefined,
   type: 'application' as CallType,
   status: 'upcoming' as const,
   campus_external_id: '' as string,
@@ -244,7 +245,7 @@ const saveForm = async () => {
     const result = await apiCreateCall({
       title: form.value.title,
       slug: form.value.slug,
-      description: form.value.description || null,
+      description: form.value.description ? JSON.stringify(form.value.description) : null,
       type: form.value.type,
       status: form.value.status,
       campus_external_id: form.value.campus_external_id || null,
@@ -337,7 +338,7 @@ const tabs = [
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 pb-32">
     <!-- Error -->
     <div v-if="error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400">
       {{ error }}
@@ -402,7 +403,7 @@ const tabs = [
     </div>
 
     <!-- Contenu des onglets -->
-    <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+    <div class="overflow-visible rounded-lg bg-white p-6 shadow dark:bg-gray-800">
       <!-- Onglet: Informations générales -->
       <div v-show="activeTab === 'general'" class="space-y-6">
         <div class="grid gap-6 sm:grid-cols-2">
@@ -515,15 +516,22 @@ const tabs = [
           </div>
 
           <div class="sm:col-span-2">
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Description
             </label>
-            <textarea
-              v-model="form.description"
-              rows="5"
-              placeholder="Description détaillée de l'appel..."
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            />
+            <ClientOnly>
+              <AdminRichTextEditor
+                v-model="form.description"
+                :show-card="false"
+                placeholder="Description détaillée de l'appel..."
+                :min-height="200"
+              />
+              <template #fallback>
+                <div class="flex h-[200px] items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
+                  <font-awesome-icon icon="fa-solid fa-spinner" class="h-6 w-6 animate-spin text-gray-400" />
+                </div>
+              </template>
+            </ClientOnly>
           </div>
         </div>
       </div>
