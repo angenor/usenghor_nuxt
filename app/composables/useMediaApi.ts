@@ -45,6 +45,7 @@ export function useMediaApi() {
       alt_text?: string
       credits?: string
       description?: string
+      base_filename?: string
     } = {},
   ): Promise<MediaUploadResponse> {
     const formData = new FormData()
@@ -54,6 +55,7 @@ export function useMediaApi() {
     if (options.alt_text) formData.append('alt_text', options.alt_text)
     if (options.credits) formData.append('credits', options.credits)
     if (options.description) formData.append('description', options.description)
+    if (options.base_filename) formData.append('base_filename', options.base_filename)
 
     return apiFetch<MediaUploadResponse>('/api/admin/media/upload', {
       method: 'POST',
@@ -305,7 +307,7 @@ export function useMediaApi() {
 
   /**
    * Construit l'URL d'une variante d'image à partir de l'URL originale
-   * Convention: uploads/folder/image.jpg -> uploads/folder/low/image_low.jpg
+   * Utilise le paramètre query ?variant= pour que le backend serve la bonne version
    */
   function getImageVariantUrl(
     originalUrl: string,
@@ -313,18 +315,9 @@ export function useMediaApi() {
   ): string {
     if (variant === 'original' || !originalUrl) return originalUrl
 
-    const parts = originalUrl.split('/')
-    const filename = parts.pop()!
-    const lastDotIndex = filename.lastIndexOf('.')
-
-    if (lastDotIndex === -1) {
-      // Pas d'extension, ajouter simplement le suffixe
-      return [...parts, variant, `${filename}_${variant}`].join('/')
-    }
-
-    const name = filename.substring(0, lastDotIndex)
-    const ext = filename.substring(lastDotIndex + 1)
-    return [...parts, variant, `${name}_${variant}.${ext}`].join('/')
+    // Ajouter le paramètre variant à l'URL
+    const separator = originalUrl.includes('?') ? '&' : '?'
+    return `${originalUrl}${separator}variant=${variant}`
   }
 
   /**
@@ -342,6 +335,10 @@ export function useMediaApi() {
 
   /**
    * Upload les 3 versions d'une image (low, medium, original)
+   *
+   * L'upload est séquentiel: l'original est uploadé en premier pour
+   * obtenir son nom de fichier unique, puis les variantes utilisent
+   * ce nom comme base pour maintenir la cohérence.
    */
   async function uploadMediaVariants(
     variants: ImageVariants,
@@ -356,18 +353,39 @@ export function useMediaApi() {
     const ext = getExtensionFromMime(variants.original.type)
     const baseFolder = options.folder || 'uploads'
 
-    const [low, medium, original] = await Promise.all([
+    // 1. Upload l'original en premier pour obtenir son nom unique
+    const original = await uploadMedia(
+      new File([variants.original], `${baseName}.${ext}`, { type: variants.original.type }),
+      { ...options, folder: baseFolder },
+    )
+
+    // 2. Extraire le nom de base du fichier original depuis son URL
+    // URL format: /uploads/folder/20240115_143022_basename_a1b2c3d4.jpg
+    const originalUrl = original.url
+    const urlParts = originalUrl.split('/')
+    const originalFilename = urlParts[urlParts.length - 1] // 20240115_143022_basename_a1b2c3d4.jpg
+    const lastDotIndex = originalFilename.lastIndexOf('.')
+    const originalStem = lastDotIndex > -1
+      ? originalFilename.substring(0, lastDotIndex)
+      : originalFilename // 20240115_143022_basename_a1b2c3d4
+
+    // 3. Upload les variantes avec le même nom de base + suffixe
+    const [low, medium] = await Promise.all([
       uploadMedia(
         new File([variants.low], `${baseName}_low.${ext}`, { type: variants.low.type }),
-        { ...options, folder: `${baseFolder}/low` },
+        {
+          ...options,
+          folder: `${baseFolder}/low`,
+          base_filename: `${originalStem}_low`,
+        },
       ),
       uploadMedia(
         new File([variants.medium], `${baseName}_medium.${ext}`, { type: variants.medium.type }),
-        { ...options, folder: `${baseFolder}/medium` },
-      ),
-      uploadMedia(
-        new File([variants.original], `${baseName}.${ext}`, { type: variants.original.type }),
-        { ...options, folder: baseFolder },
+        {
+          ...options,
+          folder: `${baseFolder}/medium`,
+          base_filename: `${originalStem}_medium`,
+        },
       ),
     ])
 
