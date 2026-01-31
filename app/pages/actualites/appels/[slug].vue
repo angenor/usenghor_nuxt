@@ -2,6 +2,28 @@
 import type { ApplicationCallPublicWithDetails, CallType } from '~/types/api'
 import { useCallDetail } from '~/composables/useCallDetail'
 
+// Extraire le texte brut d'un contenu EditorJS (pour le SEO)
+const extractPlainText = (content: string | null | undefined): string => {
+  if (!content) return ''
+  try {
+    const parsed = JSON.parse(content)
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
+      return parsed.blocks
+        .map((block: { type: string; data: { text?: string } }) => {
+          if (block.data?.text) {
+            return block.data.text.replace(/<[^>]*>/g, '')
+          }
+          return ''
+        })
+        .filter(Boolean)
+        .join(' ')
+    }
+  } catch {
+    return content
+  }
+  return content
+}
+
 const route = useRoute()
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
@@ -73,7 +95,7 @@ watch(slug, () => {
 // SEO
 useSeoMeta({
   title: () => call.value ? `${call.value.title} | ${t('actualites.calls.title')}` : t('actualites.calls.title'),
-  description: () => call.value?.description || t('actualites.calls.subtitle'),
+  description: () => extractPlainText(call.value?.description) || t('actualites.calls.subtitle'),
   ogImage: () => call.value?.cover_image_external_id
     ? `https://picsum.photos/seed/${call.value.id}/1200/630`
     : 'https://picsum.photos/seed/og-call/1200/630'

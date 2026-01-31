@@ -8,6 +8,27 @@ import type {
   CallRequiredDocumentRead,
   CallScheduleRead,
 } from '~/types/api'
+import type { OutputData } from '@editorjs/editorjs'
+
+// Parser le contenu JSON EditorJS
+const parseEditorContent = (content: string | null | undefined): OutputData | undefined => {
+  if (!content) return undefined
+  try {
+    const parsed = JSON.parse(content)
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
+      return parsed as OutputData
+    }
+  } catch {
+    if (content.trim()) {
+      return {
+        time: Date.now(),
+        blocks: [{ type: 'paragraph', data: { text: content } }],
+        version: '2.28.0'
+      }
+    }
+  }
+  return undefined
+}
 
 definePageMeta({
   layout: 'admin',
@@ -134,7 +155,7 @@ const genKey = () => ++nextKey
 const form = ref({
   title: '',
   slug: '',
-  description: '',
+  description: undefined as OutputData | undefined,
   type: 'application' as CallType,
   status: 'upcoming' as const,
   campus_external_id: '' as string,
@@ -169,7 +190,7 @@ async function fetchCall() {
     form.value = {
       title: call.title,
       slug: call.slug,
-      description: call.description || '',
+      description: parseEditorContent(call.description),
       type: call.type,
       status: call.status,
       campus_external_id: call.campus_external_id || '',
@@ -350,11 +371,16 @@ const saveForm = async () => {
   error.value = null
 
   try {
+    // Sérialiser la description EditorJS
+    const descriptionJson = form.value.description && form.value.description.blocks?.length
+      ? JSON.stringify(form.value.description)
+      : null
+
     // 1) PUT les données de base
     await apiUpdateCall(callId, {
       title: form.value.title,
       slug: form.value.slug,
-      description: form.value.description || null,
+      description: descriptionJson,
       type: form.value.type,
       status: form.value.status,
       campus_external_id: form.value.campus_external_id || null,
@@ -652,12 +678,13 @@ const tabs = [
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Description
             </label>
-            <textarea
-              v-model="form.description"
-              rows="5"
-              placeholder="Description détaillée de l'appel..."
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            />
+            <ClientOnly>
+              <EditorJS
+                v-model="form.description"
+                placeholder="Description détaillée de l'appel..."
+                :min-height="200"
+              />
+            </ClientOnly>
           </div>
         </div>
       </div>

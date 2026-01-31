@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ApplicationCallWithDetails } from '~/types/api'
+import type { OutputData } from '@editorjs/editorjs'
 import {
   callTypeLabels,
   callTypeColors,
@@ -8,6 +9,27 @@ import {
   publicationStatusLabels,
   publicationStatusColors,
 } from '~/composables/useApplicationCallsApi'
+
+// Parser le contenu JSON EditorJS
+const parseEditorContent = (content: string | null | undefined): OutputData | null => {
+  if (!content) return null
+  try {
+    const parsed = JSON.parse(content)
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
+      return parsed as OutputData
+    }
+  } catch {
+    // Si ce n'est pas du JSON valide, créer un bloc paragraphe
+    if (content.trim()) {
+      return {
+        time: Date.now(),
+        blocks: [{ type: 'paragraph', data: { text: content } }],
+        version: '2.28.0'
+      }
+    }
+  }
+  return null
+}
 
 definePageMeta({
   layout: 'admin',
@@ -156,6 +178,9 @@ const reopenCall = async () => {
     actionLoading.value = false
   }
 }
+
+// Parser la description pour EditorJSRenderer
+const parsedDescription = computed(() => parseEditorContent(call.value?.description))
 </script>
 
 <template>
@@ -237,11 +262,12 @@ const reopenCall = async () => {
           <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
             Description
           </h2>
-          <div class="prose prose-sm max-w-none dark:prose-invert">
-            <p class="whitespace-pre-line text-gray-600 dark:text-gray-300">
-              {{ call.description || 'Aucune description.' }}
-            </p>
+          <div v-if="parsedDescription">
+            <EditorJSRenderer :data="parsedDescription" />
           </div>
+          <p v-else class="text-sm italic text-gray-400 dark:text-gray-500">
+            Aucune description.
+          </p>
         </div>
 
         <!-- Critères d'éligibilité -->

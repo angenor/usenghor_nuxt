@@ -2,6 +2,30 @@
 import type { ApplicationCallPublic, CallType, CallStatus } from '~/types/api'
 import { callTypeLabels, callStatusLabels } from '~/composables/usePublicCallsApi'
 
+// Extraire le texte brut d'un contenu EditorJS
+const extractPlainText = (content: string | null | undefined): string => {
+  if (!content) return ''
+  try {
+    const parsed = JSON.parse(content)
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
+      return parsed.blocks
+        .map((block: { type: string; data: { text?: string } }) => {
+          if (block.data?.text) {
+            // Supprimer les balises HTML éventuelles
+            return block.data.text.replace(/<[^>]*>/g, '')
+          }
+          return ''
+        })
+        .filter(Boolean)
+        .join(' ')
+    }
+  } catch {
+    // Si ce n'est pas du JSON valide, retourner tel quel
+    return content
+  }
+  return content
+}
+
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const route = useRoute()
@@ -313,7 +337,7 @@ const getCallImage = (call: ApplicationCallPublic) => {
                       class="mt-3 line-clamp-3"
                       :class="call.status === 'closed' ? 'text-gray-500 dark:text-gray-500' : 'text-gray-600 dark:text-gray-400'"
                     >
-                      {{ call.description }}
+                      {{ extractPlainText(call.description) }}
                     </p>
 
                     <div class="flex items-center justify-between mt-6 pt-4 border-t" :class="call.status === 'closed' ? 'border-gray-300 dark:border-gray-600' : 'border-gray-200 dark:border-gray-700'">
