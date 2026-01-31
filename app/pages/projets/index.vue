@@ -8,6 +8,15 @@ const {
   listProjects,
   getCategories,
 } = usePublicProjectsApi()
+const { getMediaUrl } = useMediaApi()
+
+// Helper pour obtenir l'URL de l'image de couverture (préfère l'ID externe pour les images de la BD)
+function getCoverImageUrl(project: ProjectPublicDisplay): string {
+  if ((project as any).cover_image_external_id) {
+    return getMediaUrl((project as any).cover_image_external_id) || 'https://picsum.photos/seed/project/1200/600'
+  }
+  return project.cover_image || 'https://picsum.photos/seed/project/1200/600'
+}
 
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, loadContent } = useEditorialContent('projects')
@@ -254,7 +263,7 @@ const stats = computed(() => [
             >
               <div class="aspect-video overflow-hidden">
                 <img
-                  :src="project.cover_image || 'https://picsum.photos/seed/project/1200/600'"
+                  :src="getCoverImageUrl(project)"
                   :alt="getLocalizedTitle(project)"
                   class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"

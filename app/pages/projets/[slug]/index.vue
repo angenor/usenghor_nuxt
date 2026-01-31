@@ -11,6 +11,15 @@ const {
   formatBudget,
   projectCallStatusLabels,
 } = usePublicProjectsApi()
+const { getMediaUrl } = useMediaApi()
+
+// Helper pour obtenir l'URL de l'image de couverture (préfère l'ID externe pour les images de la BD)
+function getCoverImageUrl(project: ProjectPublicDisplay): string {
+  if ((project as any).cover_image_external_id) {
+    return getMediaUrl((project as any).cover_image_external_id) || 'https://picsum.photos/seed/project/1200/600'
+  }
+  return project.cover_image || 'https://picsum.photos/seed/project/1200/600'
+}
 
 // ============================================================================
 // État
@@ -102,7 +111,7 @@ const getLocalizedSummary = computed(() => {
 useSeoMeta({
   title: () => `${getLocalizedTitle.value} | ${t('projets.hero.title')}`,
   description: () => getLocalizedSummary.value,
-  ogImage: () => project.value?.cover_image || 'https://picsum.photos/seed/og-project/1200/630',
+  ogImage: () => project.value ? getCoverImageUrl(project.value) : 'https://picsum.photos/seed/og-project/1200/630',
 })
 
 // First category name
@@ -196,7 +205,7 @@ const breadcrumb = computed(() => [
               <div class="mb-8">
                 <div class="relative h-56 md:h-64 lg:h-72 rounded-2xl overflow-hidden shadow-lg">
                   <img
-                    :src="project.cover_image || 'https://picsum.photos/seed/project/1200/600'"
+                    :src="getCoverImageUrl(project)"
                     :alt="getLocalizedTitle"
                     class="w-full h-full object-cover"
                   >

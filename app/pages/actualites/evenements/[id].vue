@@ -6,6 +6,15 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getEventBySlug, getUpcomingEvents } = usePublicEventsApi()
 const { getCampusById, getFlagEmoji } = useMockData()
+const { getMediaUrl } = useMediaApi()
+
+// Helper pour obtenir l'URL de l'image de couverture (préfère l'ID externe pour les images de la BD)
+function getCoverImageUrl(item: EventPublic): string {
+  if ((item as any).cover_image_external_id) {
+    return getMediaUrl((item as any).cover_image_external_id)
+  }
+  return item.cover_image || 'https://picsum.photos/seed/default-event/600/400'
+}
 
 // Get the event
 const slug = computed(() => route.params.id as string)
@@ -62,7 +71,7 @@ const getLocalizedLocation = computed(() => {
 useSeoMeta({
   title: () => `${getLocalizedTitle.value} | ${t('actualites.events.title')}`,
   description: () => event.value?.description || '',
-  ogImage: () => event.value?.cover_image || 'https://picsum.photos/seed/og-event/1200/630'
+  ogImage: () => event.value ? getCoverImageUrl(event.value) : 'https://picsum.photos/seed/og-event/1200/630'
 })
 
 // Format date
@@ -136,7 +145,7 @@ const formatShortDate = (dateStr: string | null | undefined) => {
       <!-- Background Image -->
       <div class="absolute inset-0">
         <img
-          :src="event.cover_image || 'https://picsum.photos/seed/event-hero/1920/600'"
+          :src="getCoverImageUrl(event)"
           :alt="getLocalizedTitle"
           class="w-full h-full object-cover"
         >
@@ -210,7 +219,7 @@ const formatShortDate = (dateStr: string | null | undefined) => {
           <!-- Featured image -->
           <div class="overflow-hidden rounded-xl mb-8 shadow-lg">
             <img
-              :src="event.cover_image || 'https://picsum.photos/seed/event-detail/800/450'"
+              :src="getCoverImageUrl(event)"
               :alt="getLocalizedTitle"
               class="w-full h-auto object-cover"
             >
@@ -317,7 +326,7 @@ const formatShortDate = (dateStr: string | null | undefined) => {
                 <NuxtLink :to="localePath(`/actualites/evenements/${item.slug}`)">
                   <!-- Background image -->
                   <img
-                    :src="item.cover_image || 'https://picsum.photos/seed/related-event/400/300'"
+                    :src="getCoverImageUrl(item)"
                     :alt="getLocalizedTitleFor(item)"
                     class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"

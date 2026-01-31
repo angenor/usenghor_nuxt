@@ -7,6 +7,15 @@ const localePath = useLocalePath()
 const { getAllPublishedNews } = usePublicNewsApi()
 const { getUpcomingEvents: getApiUpcomingEvents } = usePublicEventsApi()
 const { listOngoingCalls } = usePublicCallsApi()
+const { getMediaUrl } = useMediaApi()
+
+// Helper pour obtenir l'URL de l'image de couverture (préfère l'ID externe pour les images de la BD)
+function getCoverImageUrl(item: NewsDisplay | any): string {
+  if (item.cover_image_external_id) {
+    return getMediaUrl(item.cover_image_external_id)
+  }
+  return item.cover_image || 'https://picsum.photos/seed/default/800/500'
+}
 
 // SEO
 useSeoMeta({
@@ -188,7 +197,7 @@ const getEventTitle = (event: any) => {
               <NuxtLink v-if="featuredNews" :to="localePath(`/actualites/${featuredNews.slug}`)" class="md:w-3/5 group block">
                 <div class="overflow-hidden rounded-xl">
                   <img
-                    :src="featuredNews.cover_image || 'https://picsum.photos/seed/default/800/500'"
+                    :src="getCoverImageUrl(featuredNews)"
                     :alt="getLocalizedTitle(featuredNews)"
                     class="w-full h-64 md:h-80 object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
@@ -227,7 +236,7 @@ const getEventTitle = (event: any) => {
                 >
                   <div class="overflow-hidden rounded-lg mb-3">
                     <img
-                      :src="item.cover_image || 'https://picsum.photos/seed/default/400/250'"
+                      :src="getCoverImageUrl(item)"
                       :alt="getLocalizedTitle(item)"
                       class="w-full h-32 object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
@@ -271,7 +280,7 @@ const getEventTitle = (event: any) => {
           >
             <div class="overflow-hidden rounded-xl">
               <img
-                :src="item.cover_image || 'https://picsum.photos/seed/default/400/300'"
+                :src="getCoverImageUrl(item)"
                 :alt="getLocalizedTitle(item)"
                 class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
@@ -342,7 +351,7 @@ const getEventTitle = (event: any) => {
           >
             <!-- Background image -->
             <img
-              :src="event.cover_image || 'https://picsum.photos/seed/default-event/600/400'"
+              :src="getCoverImageUrl(event)"
               :alt="getEventTitle(event)"
               class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               loading="lazy"

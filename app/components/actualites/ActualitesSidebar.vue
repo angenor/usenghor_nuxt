@@ -20,6 +20,15 @@ const localePath = useLocalePath()
 const { getUpcomingEvents } = usePublicEventsApi()
 const { getAllPublishedNews } = usePublicNewsApi()
 const { listOngoingCalls } = usePublicCallsApi()
+const { getMediaUrl } = useMediaApi()
+
+// Helper pour obtenir l'URL de l'image de couverture (préfère l'ID externe pour les images de la BD)
+function getCoverImageUrl(item: any): string {
+  if (item.cover_image_external_id) {
+    return getMediaUrl(item.cover_image_external_id) || `https://picsum.photos/seed/${item.slug}/100/100`
+  }
+  return item.cover_image || `https://picsum.photos/seed/${item.slug}/100/100`
+}
 
 // Mapping des types API vers les clés i18n
 const typeToI18nKey: Record<CallType, string> = {
@@ -159,7 +168,7 @@ const typeColors: Record<string, string> = {
             <!-- Thumbnail -->
             <div class="flex-shrink-0 w-16 h-16 overflow-hidden rounded-lg">
               <img
-                :src="news.cover_image || `https://picsum.photos/seed/${news.slug}/100/100`"
+                :src="getCoverImageUrl(news)"
                 :alt="news.title"
                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                 loading="lazy"

@@ -4,6 +4,15 @@ import type { EventPublic, EventType } from '~/composables/usePublicEventsApi'
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getUpcomingEvents: getApiUpcomingEvents, getPastEvents: getApiPastEvents } = usePublicEventsApi()
+const { getMediaUrl } = useMediaApi()
+
+// Helper pour obtenir l'URL de l'image de couverture (préfère l'ID externe pour les images de la BD)
+function getCoverImageUrl(item: EventPublic): string {
+  if ((item as any).cover_image_external_id) {
+    return getMediaUrl((item as any).cover_image_external_id)
+  }
+  return item.cover_image || 'https://picsum.photos/seed/default-event/600/400'
+}
 
 // SEO
 useSeoMeta({
@@ -164,7 +173,7 @@ const typeColors: Record<string, string> = {
           >
             <!-- Background image -->
             <img
-              :src="event.cover_image || 'https://picsum.photos/seed/default-event/600/400'"
+              :src="getCoverImageUrl(event)"
               :alt="getLocalizedTitle(event)"
               class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               loading="lazy"
@@ -231,7 +240,7 @@ const typeColors: Record<string, string> = {
                 <!-- Thumbnail -->
                 <div class="md:w-1/4 overflow-hidden rounded-lg">
                   <img
-                    :src="event.cover_image || 'https://picsum.photos/seed/default-event/600/400'"
+                    :src="getCoverImageUrl(event)"
                     :alt="getLocalizedTitle(event)"
                     class="w-full h-40 md:h-32 object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"

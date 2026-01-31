@@ -6,6 +6,15 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getNewsBySlug: getPublicNewsBySlug, getAllPublishedNews } = usePublicNewsApi()
 const { getCampusById, getFlagEmoji } = useMockData()
+const { getMediaUrl } = useMediaApi()
+
+// Helper pour obtenir l'URL de l'image de couverture (préfère l'ID externe pour les images de la BD)
+function getCoverImageUrl(item: NewsDisplay): string {
+  if (item.cover_image_external_id) {
+    return getMediaUrl(item.cover_image_external_id)
+  }
+  return item.cover_image || 'https://picsum.photos/seed/default/800/500'
+}
 
 // Get the news item
 const slug = computed(() => route.params.slug as string)
@@ -70,7 +79,7 @@ const getLocalizedExcerpt = computed(() => {
 useSeoMeta({
   title: () => `${getLocalizedTitle.value} | ${t('actualites.seo.title')}`,
   description: () => getLocalizedExcerpt.value,
-  ogImage: () => news.value?.cover_image || 'https://picsum.photos/seed/og-news/1200/630'
+  ogImage: () => news.value ? getCoverImageUrl(news.value) : 'https://picsum.photos/seed/og-news/1200/630'
 })
 
 // Format date
@@ -108,7 +117,7 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
         <!-- Background Image -->
         <div class="absolute inset-0">
           <img
-            :src="news.cover_image || 'https://picsum.photos/seed/news-hero/1920/600'"
+            :src="getCoverImageUrl(news)"
             :alt="getLocalizedTitle"
             class="w-full h-full object-cover"
           >
@@ -169,7 +178,7 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
           <!-- Featured image -->
           <div class="overflow-hidden rounded-xl mb-8 shadow-lg">
             <img
-              :src="news.cover_image || 'https://picsum.photos/seed/news-detail/800/450'"
+              :src="getCoverImageUrl(news)"
               :alt="getLocalizedTitle"
               class="w-full h-auto object-cover"
             >
@@ -224,7 +233,7 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
                 <NuxtLink :to="localePath(`/actualites/${item.slug}`)">
                   <div class="overflow-hidden rounded-lg mb-3">
                     <img
-                      :src="item.cover_image || 'https://picsum.photos/seed/related/400/250'"
+                      :src="getCoverImageUrl(item)"
                       :alt="getLocalizedTitleFor(item)"
                       class="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"

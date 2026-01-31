@@ -9,6 +9,7 @@ const props = defineProps<Props>()
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { listPublishedNews } = usePublicNewsApi()
+const { getMediaUrl } = useMediaApi()
 
 // Fetch news from API
 const { data: newsResponse, pending } = await useAsyncData(
@@ -33,8 +34,11 @@ const getNewsUrl = (item: NewsDisplay) => {
   return localePath(`/actualites/${item.slug}`)
 }
 
-// Get cover image URL
+// Get cover image URL (préfère l'ID externe pour les images de la BD)
 const getCoverImage = (item: NewsDisplay) => {
+  if ((item as any).cover_image_external_id) {
+    return getMediaUrl((item as any).cover_image_external_id) || `https://picsum.photos/seed/news-${item.id}/800/500`
+  }
   return item.cover_image || `https://picsum.photos/seed/news-${item.id}/800/500`
 }
 
