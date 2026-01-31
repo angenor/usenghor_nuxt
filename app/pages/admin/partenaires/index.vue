@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PartnerType } from '~/types/api'
+import type { PartnerType, ImageVariants } from '~/types/api'
 import type { PartnerDisplay, PartnerAssociations } from '~/composables/usePartnersApi'
 
 definePageMeta({
@@ -20,7 +20,7 @@ const {
 } = usePartnersApi()
 
 const { apiFetch } = useApi()
-const { getMediaUrl, uploadMedia } = useMediaApi()
+const { getMediaUrl, uploadMedia, uploadMediaVariants } = useMediaApi()
 
 // API pour les associations campus et projets
 const { getAllCampuses, addCampusPartner, removeCampusPartner } = useCampusApi()
@@ -562,19 +562,22 @@ function cancelLogoEditor() {
 // Stocker le blob URL temporaire pour l'aperçu immédiat
 const logoPreviewUrl = ref<string | null>(null)
 
-async function saveEditedLogo(blob: Blob) {
+async function saveEditedLogo(variants: ImageVariants) {
   showLogoEditor.value = false
   isUploadingLogo.value = true
 
   try {
-    // Convertir le blob en File pour l'upload
-    const file = new File([blob], pendingLogoFile.value?.name || 'logo.jpg', {
-      type: blob.type
-    })
-    const response = await uploadMedia(file, { folder: 'partners/logos' })
-    newPartner.value.logo_external_id = response.id
-    // Créer un aperçu local temporaire du blob (évite les URLs mock picsum)
-    logoPreviewUrl.value = URL.createObjectURL(blob)
+    // Extraire le nom de base du fichier original
+    const originalName = pendingLogoFile.value?.name || 'logo.jpg'
+    const baseName = originalName.replace(/\.[^.]+$/, '')
+
+    // Upload les 3 versions (low, medium, original)
+    const response = await uploadMediaVariants(variants, baseName, { folder: 'partners/logos' })
+
+    // Stocker l'ID de l'original (les autres URLs sont déduites par convention)
+    newPartner.value.logo_external_id = response.original.id
+    // Créer un aperçu local temporaire avec la version medium
+    logoPreviewUrl.value = URL.createObjectURL(variants.medium)
   }
   catch (err) {
     console.error('Erreur upload logo:', err)

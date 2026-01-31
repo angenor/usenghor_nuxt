@@ -20,12 +20,13 @@ const localePath = useLocalePath()
 const { getUpcomingEvents } = usePublicEventsApi()
 const { getAllPublishedNews } = usePublicNewsApi()
 const { listOngoingCalls } = usePublicCallsApi()
-const { getMediaUrl } = useMediaApi()
+const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
-// Helper pour obtenir l'URL de l'image de couverture (préfère l'ID externe pour les images de la BD)
+// Helper pour obtenir l'URL de l'image de couverture (utilise la variante low pour les miniatures)
 function getCoverImageUrl(item: any): string {
   if (item.cover_image_external_id) {
-    return getMediaUrl(item.cover_image_external_id) || `https://picsum.photos/seed/${item.slug}/100/100`
+    const originalUrl = getMediaUrl(item.cover_image_external_id)
+    return originalUrl ? getImageVariantUrl(originalUrl, 'low') : `https://picsum.photos/seed/${item.slug}/100/100`
   }
   return item.cover_image || `https://picsum.photos/seed/${item.slug}/100/100`
 }

@@ -6,12 +6,13 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getEventBySlug, getUpcomingEvents } = usePublicEventsApi()
 const { getCampusById, getFlagEmoji } = useMockData()
-const { getMediaUrl } = useMediaApi()
+const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
-// Helper pour obtenir l'URL de l'image de couverture (préfère l'ID externe pour les images de la BD)
-function getCoverImageUrl(item: EventPublic): string {
+// Helper pour obtenir l'URL de l'image de couverture selon la variante souhaitée
+function getCoverImageUrl(item: EventPublic, variant: 'low' | 'medium' | 'original' = 'medium'): string {
   if ((item as any).cover_image_external_id) {
-    return getMediaUrl((item as any).cover_image_external_id)
+    const originalUrl = getMediaUrl((item as any).cover_image_external_id)
+    return originalUrl ? getImageVariantUrl(originalUrl, variant) : 'https://picsum.photos/seed/default-event/600/400'
   }
   return item.cover_image || 'https://picsum.photos/seed/default-event/600/400'
 }
@@ -145,7 +146,7 @@ const formatShortDate = (dateStr: string | null | undefined) => {
       <!-- Background Image -->
       <div class="absolute inset-0">
         <img
-          :src="getCoverImageUrl(event)"
+          :src="getCoverImageUrl(event, 'original')"
           :alt="getLocalizedTitle"
           class="w-full h-full object-cover"
         >
@@ -219,7 +220,7 @@ const formatShortDate = (dateStr: string | null | undefined) => {
           <!-- Featured image -->
           <div class="overflow-hidden rounded-xl mb-8 shadow-lg">
             <img
-              :src="getCoverImageUrl(event)"
+              :src="getCoverImageUrl(event, 'medium')"
               :alt="getLocalizedTitle"
               class="w-full h-auto object-cover"
             >
@@ -326,7 +327,7 @@ const formatShortDate = (dateStr: string | null | undefined) => {
                 <NuxtLink :to="localePath(`/actualites/evenements/${item.slug}`)">
                   <!-- Background image -->
                   <img
-                    :src="getCoverImageUrl(item)"
+                    :src="getCoverImageUrl(item, 'low')"
                     :alt="getLocalizedTitleFor(item)"
                     class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { NewsStatus, NewsHighlightStatus, TagRead } from '~/types/news'
 import type { OutputData } from '@editorjs/editorjs'
+import type { ImageVariants } from '~/types/api'
 import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({
@@ -19,7 +20,7 @@ const {
   slugify,
 } = useAdminNewsApi()
 
-const { uploadMedia, getMediaUrl } = useMediaApi()
+const { uploadMedia, uploadMediaVariants, getMediaUrl } = useMediaApi()
 
 // Données de référence depuis le backend
 const {
@@ -176,19 +177,22 @@ function cancelCoverEditor() {
   pendingCoverFile.value = null
 }
 
-async function saveEditedCover(blob: Blob) {
+async function saveEditedCover(variants: ImageVariants) {
   showCoverEditor.value = false
   isUploadingCover.value = true
 
   try {
-    // Convertir le blob en File pour l'upload
-    const file = new File([blob], pendingCoverFile.value?.name || 'cover.jpg', {
-      type: blob.type
-    })
-    const response = await uploadMedia(file, { folder: 'news/covers' })
-    // Stocker l'ID et créer un aperçu local temporaire du blob
-    form.cover_image_external_id = response.id
-    form.cover_image = URL.createObjectURL(blob)
+    // Extraire le nom de base du fichier original
+    const originalName = pendingCoverFile.value?.name || 'cover.jpg'
+    const baseName = originalName.replace(/\.[^.]+$/, '')
+
+    // Upload les 3 versions (low, medium, original)
+    const response = await uploadMediaVariants(variants, baseName, { folder: 'news/covers' })
+
+    // Stocker l'ID de l'original (les autres URLs sont déduites par convention)
+    form.cover_image_external_id = response.original.id
+    // Créer un aperçu local temporaire avec la version medium
+    form.cover_image = URL.createObjectURL(variants.medium)
   }
   catch (err) {
     console.error('Erreur upload image de couverture:', err)

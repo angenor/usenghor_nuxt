@@ -4,10 +4,12 @@
  */
 
 import type {
+  ImageVariants,
   MediaRead,
   MediaType,
   MediaUpdatePayload,
   MediaUploadResponse,
+  MediaUploadVariantsResponse,
   MessageResponse,
   PaginatedResponse,
 } from '~/types/api'
@@ -301,15 +303,88 @@ export function useMediaApi() {
     return `/api/admin/media/${mediaId}/download`
   }
 
+  /**
+   * Construit l'URL d'une variante d'image à partir de l'URL originale
+   * Convention: uploads/folder/image.jpg -> uploads/folder/low/image_low.jpg
+   */
+  function getImageVariantUrl(
+    originalUrl: string,
+    variant: 'low' | 'medium' | 'original',
+  ): string {
+    if (variant === 'original' || !originalUrl) return originalUrl
+
+    const parts = originalUrl.split('/')
+    const filename = parts.pop()!
+    const lastDotIndex = filename.lastIndexOf('.')
+
+    if (lastDotIndex === -1) {
+      // Pas d'extension, ajouter simplement le suffixe
+      return [...parts, variant, `${filename}_${variant}`].join('/')
+    }
+
+    const name = filename.substring(0, lastDotIndex)
+    const ext = filename.substring(lastDotIndex + 1)
+    return [...parts, variant, `${name}_${variant}.${ext}`].join('/')
+  }
+
+  /**
+   * Récupère l'extension d'un fichier depuis son type MIME
+   */
+  function getExtensionFromMime(mimeType: string): string {
+    const mimeToExt: Record<string, string> = {
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/webp': 'webp',
+      'image/gif': 'gif',
+    }
+    return mimeToExt[mimeType] || 'jpg'
+  }
+
+  /**
+   * Upload les 3 versions d'une image (low, medium, original)
+   */
+  async function uploadMediaVariants(
+    variants: ImageVariants,
+    baseName: string,
+    options: {
+      folder?: string
+      alt_text?: string
+      credits?: string
+      description?: string
+    } = {},
+  ): Promise<MediaUploadVariantsResponse> {
+    const ext = getExtensionFromMime(variants.original.type)
+    const baseFolder = options.folder || 'uploads'
+
+    const [low, medium, original] = await Promise.all([
+      uploadMedia(
+        new File([variants.low], `${baseName}_low.${ext}`, { type: variants.low.type }),
+        { ...options, folder: `${baseFolder}/low` },
+      ),
+      uploadMedia(
+        new File([variants.medium], `${baseName}_medium.${ext}`, { type: variants.medium.type }),
+        { ...options, folder: `${baseFolder}/medium` },
+      ),
+      uploadMedia(
+        new File([variants.original], `${baseName}.${ext}`, { type: variants.original.type }),
+        { ...options, folder: baseFolder },
+      ),
+    ])
+
+    return { low, medium, original }
+  }
+
   return {
     uploadMedia,
     uploadMultipleMedia,
+    uploadMediaVariants,
     getMediaById,
     listMedia,
     updateMedia,
     deleteMedia,
     getMediaUrl,
     getMediaUrlById,
+    getImageVariantUrl,
     validateFile,
     getMediaTypeFromMime,
     formatFileSize,

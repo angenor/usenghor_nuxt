@@ -9,7 +9,7 @@ const props = defineProps<Props>()
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { listPublishedNews } = usePublicNewsApi()
-const { getMediaUrl } = useMediaApi()
+const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
 // Fetch news from API
 const { data: newsResponse, pending } = await useAsyncData(
@@ -34,10 +34,11 @@ const getNewsUrl = (item: NewsDisplay) => {
   return localePath(`/actualites/${item.slug}`)
 }
 
-// Get cover image URL (préfère l'ID externe pour les images de la BD)
-const getCoverImage = (item: NewsDisplay) => {
+// Get cover image URL selon la variante souhaitée
+const getCoverImage = (item: NewsDisplay, variant: 'low' | 'medium' | 'original' = 'low') => {
   if ((item as any).cover_image_external_id) {
-    return getMediaUrl((item as any).cover_image_external_id) || `https://picsum.photos/seed/news-${item.id}/800/500`
+    const originalUrl = getMediaUrl((item as any).cover_image_external_id)
+    return originalUrl ? getImageVariantUrl(originalUrl, variant) : `https://picsum.photos/seed/news-${item.id}/800/500`
   }
   return item.cover_image || `https://picsum.photos/seed/news-${item.id}/800/500`
 }
@@ -77,7 +78,7 @@ const formatDate = (dateStr: string | null | undefined) => {
             <!-- Hero image -->
             <div class="overflow-hidden rounded-xl">
               <img
-                :src="getCoverImage(featuredNews)"
+                :src="getCoverImage(featuredNews, 'medium')"
                 :alt="featuredNews.title"
                 class="w-full h-64 md:h-80 object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"

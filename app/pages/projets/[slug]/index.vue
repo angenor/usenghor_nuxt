@@ -11,12 +11,13 @@ const {
   formatBudget,
   projectCallStatusLabels,
 } = usePublicProjectsApi()
-const { getMediaUrl } = useMediaApi()
+const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
-// Helper pour obtenir l'URL de l'image de couverture (préfère l'ID externe pour les images de la BD)
-function getCoverImageUrl(project: ProjectPublicDisplay): string {
+// Helper pour obtenir l'URL de l'image de couverture selon la variante souhaitée
+function getCoverImageUrl(project: ProjectPublicDisplay, variant: 'low' | 'medium' | 'original' = 'medium'): string {
   if ((project as any).cover_image_external_id) {
-    return getMediaUrl((project as any).cover_image_external_id) || 'https://picsum.photos/seed/project/1200/600'
+    const originalUrl = getMediaUrl((project as any).cover_image_external_id)
+    return originalUrl ? getImageVariantUrl(originalUrl, variant) : 'https://picsum.photos/seed/project/1200/600'
   }
   return project.cover_image || 'https://picsum.photos/seed/project/1200/600'
 }

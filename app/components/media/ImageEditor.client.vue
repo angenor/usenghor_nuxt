@@ -1,19 +1,28 @@
 <script setup lang="ts">
+import type { ImageVariants } from '~/types/api'
+
 interface Props {
   imageFile: File
   aspectRatio?: number | null
   maxFileSize?: number
   minQuality?: number
+  defaultLowWidth?: number
+  defaultMediumWidth?: number
+  generateVariants?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   aspectRatio: null,
   maxFileSize: 0, // Pas de limite (0 = illimité)
-  minQuality: 10
+  minQuality: 10,
+  defaultLowWidth: 480,
+  defaultMediumWidth: 1200,
+  generateVariants: true,
 })
 
 const emit = defineEmits<{
-  (e: 'save', blob: Blob): void
+  (e: 'save', variants: ImageVariants): void
+  (e: 'saveBlob', blob: Blob): void
   (e: 'cancel'): void
 }>()
 
@@ -52,6 +61,16 @@ const canvasOffset = ref({ x: 0, y: 0 })
 // Computed values
 const estimatedSize = ref(0)
 const isProcessing = ref(false)
+
+// Multi-resolution settings
+const lowWidth = ref(props.defaultLowWidth)
+const mediumWidth = ref(props.defaultMediumWidth)
+const showAdvancedSettings = ref(false)
+
+// Estimated sizes for each variant
+const estimatedLowSize = ref(0)
+const estimatedMediumSize = ref(0)
+const estimatedOriginalSize = ref(0)
 
 const sizeWarning = computed(() => {
   // Pas de limite si maxFileSize = 0
@@ -262,6 +281,57 @@ async function updatePreview() {
   await calculateSize()
 }
 
+/**
+ * Génère un blob redimensionné à partir des paramètres de crop
+ */
+function generateResizedBlob(
+  img: HTMLImageElement,
+  cropParams: { x: number; y: number; width: number; height: number },
+  targetWidth: number | null,
+  format: 'jpeg' | 'png' | 'webp',
+  qualityPercent: number,
+): Promise<{ blob: Blob; width: number; height: number }> {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      resolve({ blob: new Blob(), width: 0, height: 0 })
+      return
+    }
+
+    let outputWidth = cropParams.width
+    let outputHeight = cropParams.height
+
+    // Redimensionner si targetWidth est spécifié et plus petit que l'original
+    if (targetWidth && cropParams.width > targetWidth) {
+      const ratio = targetWidth / cropParams.width
+      outputWidth = targetWidth
+      outputHeight = Math.round(cropParams.height * ratio)
+    }
+
+    canvas.width = outputWidth
+    canvas.height = outputHeight
+
+    ctx.drawImage(
+      img,
+      cropParams.x, cropParams.y, cropParams.width, cropParams.height,
+      0, 0, outputWidth, outputHeight,
+    )
+
+    const mimeType = format === 'png' ? 'image/png' :
+                     format === 'webp' ? 'image/webp' : 'image/jpeg'
+    const qualityValue = format === 'png' ? undefined : qualityPercent / 100
+
+    canvas.toBlob((blob) => {
+      resolve({
+        blob: blob || new Blob(),
+        width: outputWidth,
+        height: outputHeight,
+      })
+    }, mimeType, qualityValue)
+  })
+}
+
 async function calculateSize() {
   const params = getDisplayParams()
   if (!params || !originalImage.value) return
@@ -269,33 +339,37 @@ async function calculateSize() {
   const { scale } = params
   const img = originalImage.value
 
-  const tempCanvas = document.createElement('canvas')
-  const ctx = tempCanvas.getContext('2d')
-  if (!ctx) return
-
   const actualCropX = cropX.value / scale
   const actualCropY = cropY.value / scale
   const actualCropWidth = cropWidth.value / scale
   const actualCropHeight = cropHeight.value / scale
 
-  tempCanvas.width = actualCropWidth
-  tempCanvas.height = actualCropHeight
+  const cropParams = {
+    x: actualCropX,
+    y: actualCropY,
+    width: actualCropWidth,
+    height: actualCropHeight,
+  }
 
-  ctx.drawImage(
-    img,
-    actualCropX, actualCropY, actualCropWidth, actualCropHeight,
-    0, 0, actualCropWidth, actualCropHeight
-  )
+  if (props.generateVariants) {
+    // Calculer les tailles pour les 3 versions en parallèle
+    const [lowResult, mediumResult, originalResult] = await Promise.all([
+      generateResizedBlob(img, cropParams, lowWidth.value, outputFormat.value, quality.value),
+      generateResizedBlob(img, cropParams, mediumWidth.value, outputFormat.value, quality.value),
+      generateResizedBlob(img, cropParams, null, outputFormat.value, quality.value),
+    ])
 
-  const mimeType = outputFormat.value === 'png' ? 'image/png' :
-                   outputFormat.value === 'webp' ? 'image/webp' : 'image/jpeg'
-  const qualityValue = outputFormat.value === 'png' ? undefined : quality.value / 100
-
-  tempCanvas.toBlob((blob) => {
-    if (blob) {
-      estimatedSize.value = blob.size
-    }
-  }, mimeType, qualityValue)
+    estimatedLowSize.value = lowResult.blob.size
+    estimatedMediumSize.value = mediumResult.blob.size
+    estimatedOriginalSize.value = originalResult.blob.size
+    estimatedSize.value = lowResult.blob.size + mediumResult.blob.size + originalResult.blob.size
+  }
+  else {
+    // Mode simple : une seule version
+    const result = await generateResizedBlob(img, cropParams, null, outputFormat.value, quality.value)
+    estimatedSize.value = result.blob.size
+    estimatedOriginalSize.value = result.blob.size
+  }
 }
 
 // Detect which handle or area the mouse is over
@@ -483,7 +557,7 @@ function handleMouseUp() {
   resizeHandle.value = null
 }
 
-watch([quality, outputFormat], () => {
+watch([quality, outputFormat, lowWidth, mediumWidth], () => {
   updatePreview()
 })
 
@@ -502,31 +576,44 @@ async function save() {
     const actualCropWidth = cropWidth.value / scale
     const actualCropHeight = cropHeight.value / scale
 
-    const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    const cropParams = {
+      x: actualCropX,
+      y: actualCropY,
+      width: actualCropWidth,
+      height: actualCropHeight,
+    }
 
-    canvas.width = actualCropWidth
-    canvas.height = actualCropHeight
+    if (props.generateVariants) {
+      // Générer les 3 versions en parallèle
+      const [lowResult, mediumResult, originalResult] = await Promise.all([
+        generateResizedBlob(img, cropParams, lowWidth.value, outputFormat.value, quality.value),
+        generateResizedBlob(img, cropParams, mediumWidth.value, outputFormat.value, quality.value),
+        generateResizedBlob(img, cropParams, null, outputFormat.value, quality.value),
+      ])
 
-    ctx.drawImage(
-      img,
-      actualCropX, actualCropY, actualCropWidth, actualCropHeight,
-      0, 0, actualCropWidth, actualCropHeight
-    )
-
-    const mimeType = outputFormat.value === 'png' ? 'image/png' :
-                     outputFormat.value === 'webp' ? 'image/webp' : 'image/jpeg'
-    const qualityValue = outputFormat.value === 'png' ? undefined : quality.value / 100
-
-    canvas.toBlob((blob) => {
-      if (blob) {
-        emit('save', blob)
+      const variants: ImageVariants = {
+        low: lowResult.blob,
+        medium: mediumResult.blob,
+        original: originalResult.blob,
+        dimensions: {
+          low: { width: lowResult.width, height: lowResult.height },
+          medium: { width: mediumResult.width, height: mediumResult.height },
+          original: { width: originalResult.width, height: originalResult.height },
+        },
       }
-      isProcessing.value = false
-    }, mimeType, qualityValue)
-  } catch (error) {
+
+      emit('save', variants)
+    }
+    else {
+      // Mode rétrocompatible : un seul blob
+      const result = await generateResizedBlob(img, cropParams, null, outputFormat.value, quality.value)
+      emit('saveBlob', result.blob)
+    }
+  }
+  catch (error) {
     console.error('Error saving image:', error)
+  }
+  finally {
     isProcessing.value = false
   }
 }
@@ -693,14 +780,99 @@ function setAspectRatio(ratio: number | null) {
         <!-- File size -->
         <div>
           <h4 class="text-sm font-medium text-white mb-2">Taille estimée</h4>
-          <div
-            class="text-lg font-mono"
-            :class="[sizeWarning ? 'text-red-400' : 'text-green-400']"
-          >
-            {{ formatSize(estimatedSize) }}
+          <div v-if="generateVariants" class="space-y-1">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-400">Low ({{ lowWidth }}px)</span>
+              <span class="font-mono text-green-400">{{ formatSize(estimatedLowSize) }}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-400">Medium ({{ mediumWidth }}px)</span>
+              <span class="font-mono text-green-400">{{ formatSize(estimatedMediumSize) }}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-400">Original</span>
+              <span class="font-mono text-green-400">{{ formatSize(estimatedOriginalSize) }}</span>
+            </div>
+            <div class="pt-2 border-t border-gray-700 mt-2">
+              <div class="flex justify-between text-sm font-medium">
+                <span class="text-white">Total</span>
+                <span
+                  class="font-mono"
+                  :class="[sizeWarning ? 'text-red-400' : 'text-green-400']"
+                >
+                  {{ formatSize(estimatedSize) }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div v-else>
+            <div
+              class="text-lg font-mono"
+              :class="[sizeWarning ? 'text-red-400' : 'text-green-400']"
+            >
+              {{ formatSize(estimatedSize) }}
+            </div>
           </div>
           <div v-if="maxFileSize > 0" class="text-xs text-gray-500 mt-1">
             Maximum: {{ formatSize(maxFileSize) }}
+          </div>
+        </div>
+
+        <!-- Advanced Settings (variants dimensions) -->
+        <div v-if="generateVariants" class="border-t border-gray-700 pt-4">
+          <button
+            type="button"
+            class="flex items-center justify-between w-full text-sm text-gray-400 hover:text-white transition-colors"
+            @click="showAdvancedSettings = !showAdvancedSettings"
+          >
+            <span>Paramètres de redimensionnement</span>
+            <font-awesome-icon
+              :icon="['fas', 'chevron-down']"
+              class="transition-transform"
+              :class="{ 'rotate-180': showAdvancedSettings }"
+            />
+          </button>
+
+          <div v-if="showAdvancedSettings" class="space-y-4 mt-4">
+            <!-- Low width slider -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-sm text-gray-400">Miniature (low)</label>
+                <span class="text-sm text-white font-mono">{{ lowWidth }}px</span>
+              </div>
+              <input
+                v-model="lowWidth"
+                type="range"
+                min="100"
+                max="800"
+                step="20"
+                class="w-full accent-primary-600"
+              />
+              <div class="flex justify-between text-xs text-gray-500 mt-1">
+                <span>100px</span>
+                <span>800px</span>
+              </div>
+            </div>
+
+            <!-- Medium width slider -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-sm text-gray-400">Medium</label>
+                <span class="text-sm text-white font-mono">{{ mediumWidth }}px</span>
+              </div>
+              <input
+                v-model="mediumWidth"
+                type="range"
+                min="400"
+                max="2000"
+                step="50"
+                class="w-full accent-primary-600"
+              />
+              <div class="flex justify-between text-xs text-gray-500 mt-1">
+                <span>400px</span>
+                <span>2000px</span>
+              </div>
+            </div>
           </div>
         </div>
 

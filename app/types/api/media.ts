@@ -52,3 +52,29 @@ export interface MediaUpdatePayload {
   alt_text?: string | null
   credits?: string | null
 }
+
+// ============================================================================
+// Image Variants (multi-resolution)
+// ============================================================================
+
+export interface ImageDimensions {
+  width: number
+  height: number
+}
+
+export interface ImageVariants {
+  low: Blob
+  medium: Blob
+  original: Blob
+  dimensions: {
+    low: ImageDimensions
+    medium: ImageDimensions
+    original: ImageDimensions
+  }
+}
+
+export interface MediaUploadVariantsResponse {
+  low: MediaUploadResponse
+  medium: MediaUploadResponse
+  original: MediaUploadResponse
+}
