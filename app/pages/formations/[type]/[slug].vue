@@ -1,5 +1,51 @@
 <script setup lang="ts">
 import type { ProgramPublic, ProgramPublicWithDetails } from '~/composables/usePublicProgramsApi'
+import type { OutputData } from '@editorjs/editorjs'
+
+// Parser le contenu JSON EditorJS
+const parseEditorContent = (content: string | null | undefined): OutputData | null => {
+  if (!content) return null
+  try {
+    const parsed = JSON.parse(content)
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
+      return parsed as OutputData
+    }
+  } catch {
+    // Si ce n'est pas du JSON valide, créer un bloc paragraphe
+    if (content.trim()) {
+      return {
+        time: Date.now(),
+        blocks: [{ type: 'paragraph', data: { text: content } }],
+        version: '2.28.0'
+      }
+    }
+  }
+  return null
+}
+
+// Extraire le texte brut d'un contenu EditorJS (pour les aperçus)
+const extractPlainText = (content: string | null | undefined): string => {
+  if (!content) return ''
+  try {
+    const parsed = JSON.parse(content)
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
+      return parsed.blocks
+        .map((block: { type: string; data: { text?: string } }) => {
+          if (block.data?.text) {
+            // Supprimer les balises HTML éventuelles
+            return block.data.text.replace(/<[^>]*>/g, '')
+          }
+          return ''
+        })
+        .filter(Boolean)
+        .join(' ')
+    }
+  } catch {
+    // Si ce n'est pas du JSON valide, retourner tel quel
+    return content
+  }
+  return content
+}
 
 const route = useRoute()
 const { t, locale } = useI18n()
@@ -107,10 +153,14 @@ const getLocalizedTitle = computed(() => {
   return program.value.title
 })
 
+// Texte brut pour SEO et aperçus
 const getLocalizedDescription = computed(() => {
   if (!program.value) return ''
-  return program.value.description || ''
+  return extractPlainText(program.value.description)
 })
+
+// Description parsée pour EditorJSRenderer
+const parsedDescription = computed(() => parseEditorContent(program.value?.description))
 
 const getLocalizedDuration = computed(() => {
   if (!program.value) return ''
@@ -240,9 +290,9 @@ const toggleSemester = (num: number) => {
               </div>
 
               <!-- Description -->
-              <p v-if="getLocalizedDescription" class="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed">
-                {{ getLocalizedDescription }}
-              </p>
+              <div v-if="parsedDescription" class="mt-6">
+                <EditorJSRenderer :data="parsedDescription" />
+              </div>
             </div>
 
             <!-- Info cards -->

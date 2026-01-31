@@ -1,6 +1,30 @@
 <script setup lang="ts">
 import type { ProgramPublic } from '~/composables/usePublicProgramsApi'
 
+// Extraire le texte brut d'un contenu EditorJS (pour les aperçus)
+const extractPlainText = (content: string | null | undefined): string => {
+  if (!content) return ''
+  try {
+    const parsed = JSON.parse(content)
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
+      return parsed.blocks
+        .map((block: { type: string; data: { text?: string } }) => {
+          if (block.data?.text) {
+            // Supprimer les balises HTML éventuelles
+            return block.data.text.replace(/<[^>]*>/g, '')
+          }
+          return ''
+        })
+        .filter(Boolean)
+        .join(' ')
+    }
+  } catch {
+    // Si ce n'est pas du JSON valide, retourner tel quel
+    return content
+  }
+  return content
+}
+
 const route = useRoute()
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -248,7 +272,7 @@ const typeConfig = computed(() => {
                   </h3>
 
                   <p v-if="program.description" class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                    {{ program.description }}
+                    {{ extractPlainText(program.description) }}
                   </p>
 
                   <!-- Meta info -->
