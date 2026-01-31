@@ -93,6 +93,26 @@ const stats = computed(() => [
   }
 ])
 
+// === CHART DATA AVAILABILITY ===
+const hasApplicationTrendData = computed(() =>
+  applicationTrendData.value.some(d => d.value > 0)
+)
+const hasApplicationStatusData = computed(() =>
+  applicationStatusData.value.length > 0
+)
+const hasEventTypeData = computed(() =>
+  eventTypeData.value.some(d => d.value > 0)
+)
+const hasNewsPublicationData = computed(() =>
+  newsPublicationData.value.some(d => d.value > 0)
+)
+const hasAnyChartData = computed(() =>
+  hasApplicationTrendData.value ||
+  hasApplicationStatusData.value ||
+  hasEventTypeData.value ||
+  hasNewsPublicationData.value
+)
+
 // === FETCH DATA ===
 async function fetchDashboardData() {
   isLoading.value = true
@@ -377,36 +397,33 @@ const formatDate = (dateString: string) => {
       </div>
     </div>
 
-    <!-- Charts section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Charts section - affiché uniquement si au moins un graphique a des données -->
+    <div v-if="hasAnyChartData" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Application trend chart -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+      <div
+        v-if="hasApplicationTrendData"
+        class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6"
+      >
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Tendance des candidatures
         </h3>
         <ChartsAmAreaChart
-          v-if="applicationTrendData.length > 0"
           :data="applicationTrendData"
           height="250px"
           color="#3B82F6"
           :gradient-fill="true"
         />
-        <div v-else-if="isLoading" class="h-[250px] flex items-center justify-center text-gray-500">
-          <font-awesome-icon icon="fa-solid fa-spinner" class="w-5 h-5 animate-spin mr-2" />
-          Chargement...
-        </div>
-        <div v-else class="h-[250px] flex items-center justify-center text-gray-500 dark:text-gray-400">
-          Aucune donnée disponible
-        </div>
       </div>
 
       <!-- Application status donut -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+      <div
+        v-if="hasApplicationStatusData"
+        class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6"
+      >
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Répartition par statut
         </h3>
         <ChartsAmDonutChart
-          v-if="applicationStatusData.length > 0"
           :data="applicationStatusData"
           height="250px"
           :inner-radius="50"
@@ -414,51 +431,34 @@ const formatDate = (dateString: string) => {
           center-label="Total"
           :show-legend="true"
         />
-        <div v-else-if="isLoading" class="h-[250px] flex items-center justify-center text-gray-500">
-          <font-awesome-icon icon="fa-solid fa-spinner" class="w-5 h-5 animate-spin mr-2" />
-          Chargement...
-        </div>
-        <div v-else class="h-[250px] flex items-center justify-center text-gray-500 dark:text-gray-400">
-          Aucune candidature
-        </div>
       </div>
 
       <!-- Event types chart -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+      <div
+        v-if="hasEventTypeData"
+        class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6"
+      >
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Événements par type
         </h3>
         <ChartsAmBarChart
-          v-if="eventTypeData.length > 0"
           :data="eventTypeData"
           height="250px"
         />
-        <div v-else-if="isLoading" class="h-[250px] flex items-center justify-center text-gray-500">
-          <font-awesome-icon icon="fa-solid fa-spinner" class="w-5 h-5 animate-spin mr-2" />
-          Chargement...
-        </div>
-        <div v-else class="h-[250px] flex items-center justify-center text-gray-500 dark:text-gray-400">
-          Aucun événement publié
-        </div>
       </div>
 
       <!-- News publication trend -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+      <div
+        v-if="hasNewsPublicationData"
+        class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6"
+      >
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Publications par mois
         </h3>
         <ChartsAmLineChart
-          v-if="newsPublicationData.length > 0"
           :data="newsPublicationData"
           height="250px"
         />
-        <div v-else-if="isLoading" class="h-[250px] flex items-center justify-center text-gray-500">
-          <font-awesome-icon icon="fa-solid fa-spinner" class="w-5 h-5 animate-spin mr-2" />
-          Chargement...
-        </div>
-        <div v-else class="h-[250px] flex items-center justify-center text-gray-500 dark:text-gray-400">
-          Aucune publication
-        </div>
       </div>
     </div>
 
