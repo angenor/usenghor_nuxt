@@ -1,5 +1,26 @@
 <script setup lang="ts">
 import type { ProgramType, ProgramWithDetails, PublicationStatus, ProgramSkillRead, ProgramCareerOpportunityRead } from '~/types/api'
+import type { OutputData } from '@editorjs/editorjs'
+
+// Convertir une string (potentiellement JSON ou texte brut) en OutputData
+const parseEditorContent = (content: string | null | undefined): OutputData | undefined => {
+  if (!content) return undefined
+  try {
+    const parsed = JSON.parse(content)
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
+      return parsed as OutputData
+    }
+  } catch {
+    if (content.trim()) {
+      return {
+        time: Date.now(),
+        blocks: [{ type: 'paragraph', data: { text: content } }],
+        version: '2.28.0'
+      }
+    }
+  }
+  return undefined
+}
 
 definePageMeta({
   layout: 'admin'
@@ -37,19 +58,33 @@ const isSubmitting = ref(false)
 const program = ref<ProgramWithDetails | null>(null)
 
 // État du formulaire
-const form = ref({
+const form = ref<{
+  code: string
+  title: string
+  subtitle: string
+  slug: string
+  description: OutputData | undefined
+  teaching_methods: string
+  type: ProgramType
+  duration_months: number | null
+  credits: number | null
+  degree_awarded: string
+  required_degree: string
+  status: PublicationStatus
+  is_featured: boolean
+}>({
   code: '',
   title: '',
   subtitle: '',
   slug: '',
-  description: '',
+  description: undefined,
   teaching_methods: '',
-  type: 'master' as ProgramType,
-  duration_months: null as number | null,
-  credits: null as number | null,
+  type: 'master',
+  duration_months: null,
+  credits: null,
   degree_awarded: '',
   required_degree: '',
-  status: 'draft' as PublicationStatus,
+  status: 'draft',
   is_featured: false,
 })
 
@@ -88,7 +123,7 @@ async function loadProgram() {
       title: program.value.title,
       subtitle: program.value.subtitle || '',
       slug: program.value.slug,
-      description: program.value.description || '',
+      description: parseEditorContent(program.value.description),
       teaching_methods: program.value.teaching_methods || '',
       type: program.value.type,
       duration_months: program.value.duration_months,
@@ -414,12 +449,17 @@ const submitForm = async () => {
 
   isSubmitting.value = true
   try {
+    // Convertir la description OutputData en JSON string pour l'API
+    const descriptionJson = form.value.description && form.value.description.blocks?.length
+      ? JSON.stringify(form.value.description)
+      : null
+
     await updateProgram(program.value.id, {
       code: form.value.code,
       title: form.value.title,
       subtitle: form.value.subtitle || null,
       slug: form.value.slug,
-      description: form.value.description || null,
+      description: descriptionJson,
       teaching_methods: form.value.teaching_methods || null,
       type: form.value.type,
       duration_months: form.value.duration_months,
@@ -647,16 +687,13 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
             <label for="description" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Description complète
             </label>
-            <textarea
-              id="description"
-              v-model="form.description"
-              rows="6"
-              placeholder="Décrivez le programme en détail..."
-              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            />
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              {{ form.description.length }} caractères
-            </p>
+            <ClientOnly>
+              <EditorJS
+                v-model="form.description"
+                placeholder="Décrivez le programme en détail..."
+                :min-height="200"
+              />
+            </ClientOnly>
           </div>
 
           <div>
