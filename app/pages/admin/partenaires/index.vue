@@ -1118,7 +1118,7 @@ async function saveEditedLogo(variants: ImageVariants) {
               </button>
             </div>
 
-            <form @submit.prevent="showEditModal ? handleEditPartner() : handleAddPartner()" class="p-6 space-y-4 overflow-y-auto flex-1">
+            <form @submit.prevent="showEditModal ? handleEditPartner() : handleAddPartner()" class="admin-scrollbar p-6 space-y-4 overflow-y-auto flex-1" data-lenis-prevent>
               <!-- Nom -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

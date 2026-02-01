@@ -681,7 +681,7 @@ onMounted(() => {
           </div>
 
           <!-- Body -->
-          <div class="max-h-[70vh] overflow-y-auto p-4">
+          <div class="admin-scrollbar max-h-[70vh] overflow-y-auto p-4" data-lenis-prevent>
             <!-- Warning for system roles -->
             <div
               v-if="isEditing && editingRole?.is_system"

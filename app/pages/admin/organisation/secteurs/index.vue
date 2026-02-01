@@ -784,7 +784,7 @@ const goToServices = (sectorId: string) => {
         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
         @click.self="closeModals"
       >
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div class="admin-scrollbar bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" data-lenis-prevent>
           <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ editingSector ? 'Modifier le secteur' : 'Nouveau secteur' }}

@@ -1173,7 +1173,7 @@ onMounted(() => {
           </div>
 
           <!-- Body -->
-          <form class="max-h-[60vh] overflow-y-auto p-4" @submit.prevent="saveUser">
+          <form class="admin-scrollbar max-h-[60vh] overflow-y-auto p-4" @submit.prevent="saveUser" data-lenis-prevent>
             <!-- General error -->
             <div v-if="formErrors.general" class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
               {{ formErrors.general }}
