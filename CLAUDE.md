@@ -77,10 +77,38 @@ const {
 
 ## EditorJS Integration
 
-Rich text content uses EditorJS:
-- `EditorJS.vue` - Editor component with configured tools (header, list, quote, embed, image, table, etc.)
-- `EditorJSRenderer.vue` - Renders EditorJS JSON blocks to HTML
-- `useEditorJS` composable for programmatic control
+Rich text content uses EditorJS avec deux composants distincts :
+
+### Quand utiliser quel composant ?
+
+| Composant | Usage | Contexte |
+|-----------|-------|----------|
+| `EditorJS.vue` | **Édition** de contenu | Pages admin (création/modification) |
+| `EditorJSRenderer.vue` | **Affichage** de contenu | Pages publiques (lecture seule) |
+
+### `EditorJS.vue` - Éditeur (admin)
+
+Composant d'édition avec toolbar et tous les outils configurés (header, list, quote, embed, image, table, etc.). Utilisé dans l'espace admin pour créer/modifier du contenu.
+
+```vue
+<!-- Dans une page admin d'édition -->
+<EditorJS
+  v-model="content"
+  placeholder="Commencez à écrire..."
+  :min-height="300"
+/>
+```
+
+### `EditorJSRenderer.vue` - Rendu (public)
+
+Composant de rendu HTML pour afficher le contenu EditorJS en lecture seule sur les pages publiques.
+
+```vue
+<!-- Dans une page publique d'affichage -->
+<EditorJSRenderer v-if="article.content" :data="article.content" />
+```
+
+**Important :** Toujours utiliser `EditorJSRenderer` pour afficher du contenu EditorJS sur les pages publiques. 
 
 ## Admin Rich Text Editor
 
