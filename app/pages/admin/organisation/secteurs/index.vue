@@ -338,7 +338,10 @@ const duplicateSectorItem = async (sector: SectorDisplay) => {
   error.value = null
 
   try {
-    const newCode = `${sector.code}-copie-${Date.now()}`
+    // Code max 20 chars: préfixe tronqué + suffixe aléatoire
+    const suffix = Math.random().toString(36).substring(2, 6).toUpperCase()
+    const prefix = sector.code.slice(0, 14)
+    const newCode = `${prefix}-${suffix}`
     await apiDuplicateSector(sector.id, newCode)
     await loadSectors()
     enrichSectorsWithHeads()
