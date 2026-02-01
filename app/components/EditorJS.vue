@@ -27,6 +27,39 @@ const editorContainer = ref<HTMLElement>()
 const editorInstance = shallowRef<InstanceType<typeof import('@editorjs/editorjs').default> | null>(null)
 const isReady = ref(false)
 
+/**
+ * Migre les données de l'ancien format @editorjs/list v1.x vers le nouveau format v2.x
+ * Ancien: items: ["Item 1", "Item 2"]
+ * Nouveau: items: [{ content: "Item 1", items: [] }, { content: "Item 2", items: [] }]
+ */
+function migrateListData(data: OutputData | undefined): OutputData | undefined {
+  if (!data?.blocks) return data
+
+  return {
+    ...data,
+    blocks: data.blocks.map((block) => {
+      if (block.type === 'list' && Array.isArray(block.data?.items)) {
+        // Vérifier si c'est l'ancien format (items est un tableau de strings)
+        const firstItem = block.data.items[0]
+        if (typeof firstItem === 'string') {
+          // Migration vers le nouveau format
+          return {
+            ...block,
+            data: {
+              ...block.data,
+              items: block.data.items.map((item: string) => ({
+                content: item,
+                items: [],
+              })),
+            },
+          }
+        }
+      }
+      return block
+    }),
+  }
+}
+
 async function initEditor() {
   if (!editorContainer.value || import.meta.server) return
 
@@ -62,7 +95,7 @@ async function initEditor() {
 
   editorInstance.value = new EditorJS({
     holder: editorContainer.value,
-    data: props.modelValue,
+    data: migrateListData(props.modelValue),
     placeholder: props.placeholder,
     readOnly: props.readOnly,
     minHeight: props.minHeight,
