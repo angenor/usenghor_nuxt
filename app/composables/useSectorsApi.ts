@@ -289,6 +289,16 @@ export function useSectorsApi() {
     })
   }
 
+  /**
+   * Duplique un secteur avec un nouveau code.
+   */
+  async function duplicateSector(id: string, newCode: string): Promise<IdResponse> {
+    return apiFetch<IdResponse>(`/api/admin/sectors/${id}/duplicate`, {
+      method: 'POST',
+      query: { new_code: newCode },
+    })
+  }
+
   // =========================================================================
   // Services
   // =========================================================================
@@ -423,6 +433,7 @@ export function useSectorsApi() {
     createSector,
     updateSector,
     deleteSector,
+    duplicateSector,
     toggleSectorActive,
     reorderSectors,
 

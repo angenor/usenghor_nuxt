@@ -13,6 +13,7 @@ const {
   createSector,
   updateSector,
   deleteSector: apiDeleteDepartment,
+  duplicateSector: apiDuplicateSector,
   toggleSectorActive: apiToggleDepartmentActive,
   reorderSectors,
   generateSectorCode,
@@ -326,6 +327,25 @@ const deleteSector = async () => {
   catch (err: any) {
     console.error('Erreur suppression secteur:', err)
     error.value = err.message || 'Erreur lors de la suppression du secteur'
+  }
+  finally {
+    isSaving.value = false
+  }
+}
+
+const duplicateSectorItem = async (sector: SectorDisplay) => {
+  isSaving.value = true
+  error.value = null
+
+  try {
+    const newCode = `${sector.code}-copie-${Date.now()}`
+    await apiDuplicateSector(sector.id, newCode)
+    await loadSectors()
+    enrichSectorsWithHeads()
+  }
+  catch (err: any) {
+    console.error('Erreur duplication secteur:', err)
+    error.value = err.message || 'Erreur lors de la duplication du secteur'
   }
   finally {
     isSaving.value = false
@@ -709,6 +729,13 @@ const goToServices = (sectorId: string) => {
               <!-- Actions -->
               <td class="px-4 py-3 text-right">
                 <div class="flex items-center justify-end gap-2">
+                  <button
+                    class="p-2 text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors"
+                    title="Dupliquer"
+                    @click="duplicateSectorItem(sector)"
+                  >
+                    <font-awesome-icon :icon="['fas', 'copy']" class="w-4 h-4" />
+                  </button>
                   <button
                     class="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                     title="Modifier"

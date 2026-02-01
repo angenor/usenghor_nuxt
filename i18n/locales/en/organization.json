@@ -40,6 +40,9 @@
       "no_programs": "Programs coming soon",
       "programs_count": "{count} program | {count} programs"
     },
+    "departments": {
+      "view_programs": "View details"
+    },
     "services": {
       "title": "Services",
       "subtitle": "Dedicated teams for support",

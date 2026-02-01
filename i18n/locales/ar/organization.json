@@ -40,6 +40,9 @@
       "no_programs": "البرامج قريباً",
       "programs_count": "{count} برنامج | {count} برامج"
     },
+    "departments": {
+      "view_programs": "عرض التفاصيل"
+    },
     "services": {
       "title": "الخدمات",
       "subtitle": "فرق مخصصة للدعم",

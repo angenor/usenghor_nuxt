@@ -525,6 +525,16 @@ export function useServicesApi() {
     })
   }
 
+  /**
+   * Duplique un service avec un nouveau nom.
+   */
+  async function duplicateService(id: string, newName: string): Promise<IdResponse> {
+    return apiFetch<IdResponse>(`/api/admin/services/${id}/duplicate`, {
+      method: 'POST',
+      query: { new_name: newName },
+    })
+  }
+
   // =========================================================================
   // Objectives
   // =========================================================================
@@ -930,6 +940,7 @@ export function useServicesApi() {
     createService,
     updateService,
     deleteService,
+    duplicateService,
     toggleServiceActive,
     reorderServices,
 

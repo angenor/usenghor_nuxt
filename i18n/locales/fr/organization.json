@@ -40,6 +40,9 @@
       "no_programs": "Formations à venir",
       "programs_count": "{count} formation | {count} formations"
     },
+    "departments": {
+      "view_programs": "Voir les détails"
+    },
     "services": {
       "title": "Services",
       "subtitle": "Des équipes dédiées à l'accompagnement",

@@ -20,6 +20,7 @@ const {
   createService: apiCreateService,
   updateService: apiUpdateService,
   deleteService: apiDeleteService,
+  duplicateService: apiDuplicateService,
   toggleServiceActive: apiToggleServiceActive,
   generateServiceId
 } = useServicesApi()
@@ -389,6 +390,22 @@ const toggleServiceActive = async (service: ServiceDisplay) => {
   }
   catch (error) {
     console.error('Erreur lors du basculement:', error)
+  }
+}
+
+const duplicateServiceItem = async (service: ServiceDisplay) => {
+  isSaving.value = true
+  try {
+    const newName = `${service.name} (copie)`
+    await apiDuplicateService(service.id, newName)
+    await loadData()
+    enrichServicesWithHeads()
+  }
+  catch (error) {
+    console.error('Erreur lors de la duplication:', error)
+  }
+  finally {
+    isSaving.value = false
   }
 }
 
@@ -770,6 +787,13 @@ const clearSectorFilter = () => {
                     <font-awesome-icon :icon="['fas', 'eye']" class="w-4 h-4" />
                   </button>
                   <button
+                    class="p-2 text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg transition-colors"
+                    title="Dupliquer"
+                    @click="duplicateServiceItem(service)"
+                  >
+                    <font-awesome-icon :icon="['fas', 'copy']" class="w-4 h-4" />
+                  </button>
+                  <button
                     class="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                     title="Modifier"
                     @click="openEditModal(service)"
@@ -919,6 +943,13 @@ const clearSectorFilter = () => {
                 >
                   {{ service.active ? 'Actif' : 'Inactif' }}
                 </span>
+                <button
+                  class="p-2 text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg transition-colors"
+                  title="Dupliquer"
+                  @click.stop="duplicateServiceItem(service)"
+                >
+                  <font-awesome-icon :icon="['fas', 'copy']" class="w-4 h-4" />
+                </button>
                 <button
                   class="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                   title="Modifier"
