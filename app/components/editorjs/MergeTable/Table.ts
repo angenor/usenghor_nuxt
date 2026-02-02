@@ -15,6 +15,13 @@ export class Table {
   private selectionManager: SelectionManager
   private onChange: () => void
 
+  // Système d'historique pour Undo/Redo
+  private history: string[] = []
+  private historyIndex = -1
+  private maxHistorySize = 50
+  private isUndoRedo = false
+  private saveHistoryTimeout: ReturnType<typeof setTimeout> | null = null
+
   constructor(
     data: MergeTableData,
     config: MergeTableConfig,
@@ -27,6 +34,15 @@ export class Table {
     this.onChange = onChange
     this.selectionManager = new SelectionManager()
     this.wrapper = this.createWrapper()
+
+    // Sauvegarder l'état initial
+    this.saveToHistory()
+
+    // Écouter les raccourcis clavier pour Undo/Redo
+    if (!readOnly) {
+      this.handleKeyDown = this.handleKeyDown.bind(this)
+      document.addEventListener('keydown', this.handleKeyDown)
+    }
   }
 
   /**
@@ -48,8 +64,10 @@ export class Table {
    * Définit l'état des en-têtes
    */
   setWithHeadings(value: boolean): void {
+    this.saveToHistory()
     this.data.withHeadings = value
     this.render()
+    this.saveToHistory()
     this.onChange()
   }
 
@@ -59,6 +77,111 @@ export class Table {
   destroy(): void {
     this.selectionManager.detach()
     this.removeToolbar()
+    document.removeEventListener('keydown', this.handleKeyDown)
+    if (this.saveHistoryTimeout) {
+      clearTimeout(this.saveHistoryTimeout)
+    }
+  }
+
+  /**
+   * Gère les raccourcis clavier (Undo/Redo)
+   */
+  private handleKeyDown(event: KeyboardEvent): void {
+    // Vérifier si le focus est dans ce tableau
+    if (!this.wrapper.contains(document.activeElement) && !this.wrapper.contains(event.target as Node)) {
+      return
+    }
+
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
+    const isUndo = (isMac ? event.metaKey : event.ctrlKey) && event.key === 'z' && !event.shiftKey
+    const isRedo = (isMac ? event.metaKey : event.ctrlKey) && ((event.key === 'z' && event.shiftKey) || event.key === 'y')
+
+    if (isUndo) {
+      event.preventDefault()
+      event.stopPropagation()
+      this.undo()
+    } else if (isRedo) {
+      event.preventDefault()
+      event.stopPropagation()
+      this.redo()
+    }
+  }
+
+  /**
+   * Sauvegarde l'état actuel dans l'historique
+   */
+  private saveToHistory(): void {
+    if (this.isUndoRedo) return
+
+    // Synchroniser les données depuis le DOM avant de sauvegarder
+    this.syncDataFromDOM()
+
+    const state = JSON.stringify(this.data)
+
+    // Ne pas sauvegarder si c'est identique au dernier état
+    if (this.history[this.historyIndex] === state) return
+
+    // Supprimer les états après l'index actuel (si on a fait des undo)
+    this.history = this.history.slice(0, this.historyIndex + 1)
+
+    // Ajouter le nouvel état
+    this.history.push(state)
+    this.historyIndex = this.history.length - 1
+
+    // Limiter la taille de l'historique
+    if (this.history.length > this.maxHistorySize) {
+      this.history.shift()
+      this.historyIndex--
+    }
+  }
+
+  /**
+   * Annule la dernière action (Undo)
+   */
+  private undo(): void {
+    if (this.historyIndex <= 0) return
+
+    this.isUndoRedo = true
+    this.historyIndex--
+    this.restoreFromHistory()
+    this.isUndoRedo = false
+  }
+
+  /**
+   * Rétablit l'action annulée (Redo)
+   */
+  private redo(): void {
+    if (this.historyIndex >= this.history.length - 1) return
+
+    this.isUndoRedo = true
+    this.historyIndex++
+    this.restoreFromHistory()
+    this.isUndoRedo = false
+  }
+
+  /**
+   * Restaure l'état depuis l'historique
+   */
+  private restoreFromHistory(): void {
+    const state = this.history[this.historyIndex]
+    if (!state) return
+
+    this.data = JSON.parse(state)
+    this.render()
+    this.onChange()
+  }
+
+  /**
+   * Sauvegarde l'historique avec un délai (debounce)
+   */
+  private debounceSaveHistory(): void {
+    if (this.saveHistoryTimeout) {
+      clearTimeout(this.saveHistoryTimeout)
+    }
+    this.saveHistoryTimeout = setTimeout(() => {
+      this.saveToHistory()
+      this.saveHistoryTimeout = null
+    }, 500)
   }
 
   /**
@@ -72,6 +195,9 @@ export class Table {
       console.warn('Sélection invalide pour la fusion')
       return
     }
+
+    // Sauvegarder l'état avant modification
+    this.saveToHistory()
 
     // La cellule en haut à gauche devient la cellule fusionnée
     const masterCell = this.data.content[rect.minRow][rect.minCol]
@@ -109,6 +235,7 @@ export class Table {
 
     this.selectionManager.clearSelection()
     this.render()
+    this.saveToHistory()
     this.onChange()
   }
 
@@ -127,6 +254,9 @@ export class Table {
       }
     }
 
+    // Sauvegarder l'état avant modification
+    this.saveToHistory()
+
     const colspan = masterCell.colspan || 1
     const rowspan = masterCell.rowspan || 1
 
@@ -144,6 +274,7 @@ export class Table {
 
     this.selectionManager.clearSelection()
     this.render()
+    this.saveToHistory()
     this.onChange()
   }
 
@@ -151,6 +282,7 @@ export class Table {
    * Ajoute une ligne à l'index spécifié
    */
   addRow(index: number): void {
+    this.saveToHistory()
     const colCount = this.getColumnCount()
     const newRow: MergeTableCell[] = []
 
@@ -191,6 +323,7 @@ export class Table {
     }
 
     this.render()
+    this.saveToHistory()
     this.onChange()
   }
 
@@ -200,6 +333,7 @@ export class Table {
   deleteRow(index: number): void {
     if (this.data.content.length <= 1) return
 
+    this.saveToHistory()
     const colCount = this.getColumnCount()
 
     // Gérer les cellules fusionnées
@@ -240,6 +374,7 @@ export class Table {
     }
 
     this.render()
+    this.saveToHistory()
     this.onChange()
   }
 
@@ -247,6 +382,7 @@ export class Table {
    * Ajoute une colonne à l'index spécifié
    */
   addColumn(index: number): void {
+    this.saveToHistory()
     for (let row = 0; row < this.data.content.length; row++) {
       // Vérifier si une cellule à gauche a un colspan qui couvre cette colonne
       let cellLeft: MergeTableCell | null = null
@@ -282,6 +418,7 @@ export class Table {
     }
 
     this.render()
+    this.saveToHistory()
     this.onChange()
   }
 
@@ -291,6 +428,7 @@ export class Table {
   deleteColumn(index: number): void {
     if (this.getColumnCount() <= 1) return
 
+    this.saveToHistory()
     for (let row = 0; row < this.data.content.length; row++) {
       const cell = this.data.content[row][index]
 
@@ -328,6 +466,7 @@ export class Table {
     }
 
     this.render()
+    this.saveToHistory()
     this.onChange()
   }
 
@@ -383,8 +522,14 @@ export class Table {
 
         if (!this.readOnly) {
           cell.contentEditable = 'true'
-          cell.addEventListener('input', () => this.onChange())
+          cell.addEventListener('input', () => {
+            this.onChange()
+            // Sauvegarder l'historique après un délai (debounce)
+            this.debounceSaveHistory()
+          })
           cell.addEventListener('paste', (e) => this.handlePaste(e, cell))
+          // Sauvegarder avant de commencer à éditer
+          cell.addEventListener('focus', () => this.saveToHistory())
         }
 
         cell.innerHTML = cellData.content || ''
