@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import World from '@svg-maps/world'
 import type { CampusPublic } from '~/composables/usePublicCampusApi'
+import type { OutputData } from '@editorjs/editorjs'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
@@ -280,9 +281,29 @@ const getCampusLocationText = (campus: CampusItem): string => {
   return parts.join(', ')
 }
 
-// Helper pour obtenir la description du campus
-const getCampusDescription = (campus: CampusItem): string => {
-  return campus.description || ''
+// Convertir une string (potentiellement JSON ou texte brut) en OutputData
+const parseEditorContent = (content: string | null | undefined): OutputData | undefined => {
+  if (!content) return undefined
+  try {
+    const parsed = JSON.parse(content)
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
+      return parsed as OutputData
+    }
+  } catch {
+    if (content.trim()) {
+      return {
+        time: Date.now(),
+        blocks: [{ type: 'paragraph', data: { text: content } }],
+        version: '2.28.0'
+      }
+    }
+  }
+  return undefined
+}
+
+// Helper pour obtenir la description du campus parsée
+const getCampusDescriptionData = (campus: CampusItem): OutputData | undefined => {
+  return parseEditorContent(campus.description)
 }
 
 // Fallback image handler
@@ -453,9 +474,9 @@ const handleImageError = (e: Event) => {
                   <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">
                     {{ getCampusName(selectedCampus) }}
                   </h3>
-                  <p v-if="getCampusDescription(selectedCampus)" class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-5">
-                    {{ getCampusDescription(selectedCampus) }}
-                  </p>
+                  <div v-if="getCampusDescriptionData(selectedCampus)" class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-5">
+                    <EditorJSRenderer :data="getCampusDescriptionData(selectedCampus)" />
+                  </div>
 
                   <!-- CTA -->
                   <NuxtLink

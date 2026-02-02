@@ -296,13 +296,35 @@ const collapseAllSectors = () => {
   expandedSectors.value.clear()
 }
 
+// Convertir une string (potentiellement JSON ou texte brut) en OutputData
+const parseEditorContent = (content: string | null | undefined): OutputData | undefined => {
+  if (!content) return undefined
+  try {
+    const parsed = JSON.parse(content)
+    // Vérifier que c'est bien un OutputData valide
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
+      return parsed as OutputData
+    }
+  } catch {
+    // Si ce n'est pas du JSON valide, créer un bloc paragraphe avec le texte
+    if (content.trim()) {
+      return {
+        time: Date.now(),
+        blocks: [{ type: 'paragraph', data: { text: content } }],
+        version: '2.28.0'
+      }
+    }
+  }
+  return undefined
+}
+
 // Modals
 const openAddModal = () => {
   newService.value = {
     name: '',
     sector_id: filterSector.value || '',
-    description: '',
-    mission: '',
+    description: undefined,
+    mission: undefined,
     head_external_id: '',
     email: '',
     phone: '',
@@ -316,8 +338,8 @@ const openEditModal = (service: ServiceDisplay) => {
   newService.value = {
     name: service.name,
     sector_id: service.sector_id || '',
-    description: service.description || '',
-    mission: service.mission || '',
+    description: parseEditorContent(service.description),
+    mission: parseEditorContent(service.mission),
     head_external_id: service.head_external_id || '',
     email: service.email || '',
     phone: service.phone || '',
@@ -345,11 +367,19 @@ const closeModals = () => {
 const saveService = async () => {
   isSaving.value = true
   try {
+    // Convertir les OutputData en JSON string pour l'API
+    const descriptionJson = newService.value.description && newService.value.description.blocks?.length
+      ? JSON.stringify(newService.value.description)
+      : null
+    const missionJson = newService.value.mission && newService.value.mission.blocks?.length
+      ? JSON.stringify(newService.value.mission)
+      : null
+
     const serviceData = {
       name: newService.value.name,
       sector_id: newService.value.sector_id || null,
-      description: newService.value.description || null,
-      mission: newService.value.mission || null,
+      description: descriptionJson,
+      mission: missionJson,
       head_external_id: newService.value.head_external_id || null,
       email: newService.value.email || null,
       phone: newService.value.phone || null,
@@ -1052,12 +1082,13 @@ const clearSectorFilter = () => {
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Description
               </label>
-              <textarea
-                v-model="newService.description"
-                rows="3"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent"
-                placeholder="Description du service..."
-              />
+              <ClientOnly>
+                <EditorJS
+                  v-model="newService.description"
+                  placeholder="Description du service..."
+                  :min-height="150"
+                />
+              </ClientOnly>
             </div>
 
             <!-- Mission -->
@@ -1065,12 +1096,13 @@ const clearSectorFilter = () => {
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Mission
               </label>
-              <textarea
-                v-model="newService.mission"
-                rows="4"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent"
-                placeholder="Mission et objectifs du service..."
-              />
+              <ClientOnly>
+                <EditorJS
+                  v-model="newService.mission"
+                  placeholder="Mission et objectifs du service..."
+                  :min-height="200"
+                />
+              </ClientOnly>
             </div>
 
             <!-- Responsable -->
