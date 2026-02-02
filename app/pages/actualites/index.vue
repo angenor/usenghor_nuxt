@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import type { NewsDisplay } from '~/types/news'
-import type { ApplicationCallPublic, CallType } from '~/types/api'
+import type { ApplicationCallPublic, CallType, SectorPublic, ServicePublic } from '~/types/api'
+import type { ProjectRead } from '~/types/api/projects'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
-const { getAllPublishedNews } = usePublicNewsApi()
+const { getAllPublishedNews, listPublishedNews } = usePublicNewsApi()
 const { getUpcomingEvents: getApiUpcomingEvents } = usePublicEventsApi()
 const { listOngoingCalls } = usePublicCallsApi()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
+const { listSectors, listServices } = usePublicOrganizationApi()
+const { listProjects } = usePublicProjectsApi()
 
 // Helper pour obtenir l'URL de l'image de couverture selon la variante souhaitée
 function getCoverImageUrl(item: NewsDisplay | any, variant: 'low' | 'medium' | 'original' = 'medium'): string {
@@ -39,17 +42,80 @@ const upcomingEventsData = ref<any[]>([])
 const openCallsData = ref<ApplicationCallPublic[]>([])
 const isLoading = ref(true)
 
-// Charger les actualités, événements et appels depuis l'API
+// Données de référence pour les filtres
+const sectors = ref<SectorPublic[]>([])
+const services = ref<ServicePublic[]>([])
+const projects = ref<ProjectRead[]>([])
+
+// Filtres actifs
+const selectedSector = ref<string | null>(null)
+const selectedService = ref<string | null>(null)
+const selectedProject = ref<string | null>(null)
+
+// Services filtrés par secteur sélectionné
+const filteredServices = computed(() => {
+  if (!selectedSector.value) return services.value
+  return services.value.filter(s => s.sector_id === selectedSector.value)
+})
+
+// Fonction pour charger les actualités avec les filtres
+async function loadNews() {
+  isLoading.value = true
+  try {
+    const news = await getAllPublishedNews({
+      sector_id: selectedSector.value || undefined,
+      service_id: selectedService.value || undefined,
+      project_id: selectedProject.value || undefined,
+    })
+    allNews.value = news
+  } catch (error) {
+    console.error('Erreur lors du chargement des actualités:', error)
+    allNews.value = []
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Réinitialiser le service sélectionné quand le secteur change
+watch(selectedSector, () => {
+  selectedService.value = null
+  loadNews()
+})
+
+// Recharger les actualités quand service ou projet change
+watch([selectedService, selectedProject], () => {
+  loadNews()
+})
+
+// Réinitialiser tous les filtres
+function resetFilters() {
+  selectedSector.value = null
+  selectedService.value = null
+  selectedProject.value = null
+}
+
+// Vérifier si des filtres sont actifs
+const hasActiveFilters = computed(() =>
+  selectedSector.value || selectedService.value || selectedProject.value
+)
+
+// Charger les actualités, événements, appels et données de référence depuis l'API
 onMounted(async () => {
   try {
-    const [news, events, calls] = await Promise.all([
+    const [news, events, calls, sectorsData, servicesData, projectsData] = await Promise.all([
       getAllPublishedNews(),
       getApiUpcomingEvents(4),
-      listOngoingCalls()
+      listOngoingCalls(),
+      listSectors(),
+      listServices(),
+      listProjects({ limit: 50 }).then(r => r.items)
     ])
     allNews.value = news
     upcomingEventsData.value = events
     openCallsData.value = calls.slice(0, 3)
+    sectors.value = sectorsData
+    services.value = servicesData
+    projects.value = projectsData
   } catch (error) {
     console.error('Erreur lors du chargement des données:', error)
     allNews.value = []
@@ -161,6 +227,11 @@ const typeColors: Record<string, string> = {
 const getEventTitle = (event: any) => {
   return event.title
 }
+
+// Vérifier si une actualité a des associations
+const hasAssociations = (item: NewsDisplay) => {
+  return item.sector_name || item.service_name || item.project_name
+}
 </script>
 
 <template>
@@ -173,6 +244,110 @@ const getEventTitle = (event: any) => {
     />
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <!-- Section Filtres -->
+      <section v-if="sectors.length > 0 || projects.length > 0" class="mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <font-awesome-icon icon="fa-solid fa-filter" class="w-4 h-4 text-brand-blue-500" />
+              {{ t('actualites.filters.title', 'Filtrer par') }}
+            </h3>
+            <button
+              v-if="hasActiveFilters"
+              @click="resetFilters"
+              class="text-sm text-brand-blue-600 hover:text-brand-blue-700 dark:text-brand-blue-400 dark:hover:text-brand-blue-300 flex items-center gap-1"
+            >
+              <font-awesome-icon icon="fa-solid fa-times" class="w-3 h-3" />
+              {{ t('actualites.filters.reset', 'Réinitialiser') }}
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Filtre par secteur -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                {{ t('actualites.filters.sector', 'Secteur') }}
+              </label>
+              <select
+                v-model="selectedSector"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-brand-blue-500"
+              >
+                <option :value="null">{{ t('actualites.filters.allSectors', 'Tous les secteurs') }}</option>
+                <option v-for="sector in sectors" :key="sector.id" :value="sector.id">
+                  {{ sector.name }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Filtre par service -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                {{ t('actualites.filters.service', 'Service') }}
+              </label>
+              <select
+                v-model="selectedService"
+                :disabled="filteredServices.length === 0"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-brand-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option :value="null">{{ t('actualites.filters.allServices', 'Tous les services') }}</option>
+                <option v-for="service in filteredServices" :key="service.id" :value="service.id">
+                  {{ service.name }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Filtre par projet -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                {{ t('actualites.filters.project', 'Projet') }}
+              </label>
+              <select
+                v-model="selectedProject"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-blue-500 focus:border-brand-blue-500"
+              >
+                <option :value="null">{{ t('actualites.filters.allProjects', 'Tous les projets') }}</option>
+                <option v-for="project in projects" :key="project.id" :value="project.id">
+                  {{ project.title }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Indicateur de filtres actifs -->
+          <div v-if="hasActiveFilters" class="mt-4 flex flex-wrap gap-2">
+            <span
+              v-if="selectedSector"
+              class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-sm rounded-full"
+            >
+              <font-awesome-icon icon="fa-solid fa-building" class="w-3 h-3" />
+              {{ sectors.find(s => s.id === selectedSector)?.name }}
+              <button @click="selectedSector = null" class="ml-1 hover:text-blue-600">
+                <font-awesome-icon icon="fa-solid fa-times" class="w-3 h-3" />
+              </button>
+            </span>
+            <span
+              v-if="selectedService"
+              class="inline-flex items-center gap-1 px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-sm rounded-full"
+            >
+              <font-awesome-icon icon="fa-solid fa-cogs" class="w-3 h-3" />
+              {{ services.find(s => s.id === selectedService)?.name }}
+              <button @click="selectedService = null" class="ml-1 hover:text-green-600">
+                <font-awesome-icon icon="fa-solid fa-times" class="w-3 h-3" />
+              </button>
+            </span>
+            <span
+              v-if="selectedProject"
+              class="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 text-sm rounded-full"
+            >
+              <font-awesome-icon icon="fa-solid fa-project-diagram" class="w-3 h-3" />
+              {{ projects.find(p => p.id === selectedProject)?.title }}
+              <button @click="selectedProject = null" class="ml-1 hover:text-purple-600">
+                <font-awesome-icon icon="fa-solid fa-times" class="w-3 h-3" />
+              </button>
+            </span>
+          </div>
+        </div>
+      </section>
       <!-- Section 1: Featured + Side news + Sidebar -->
       <section class="mb-16">
         <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-8">
@@ -206,9 +381,31 @@ const getEventTitle = (event: any) => {
                 </div>
 
                 <div class="mt-5">
-                  <div class="flex items-center gap-2 mb-3">
+                  <div class="flex items-center flex-wrap gap-2 mb-3">
                     <span class="inline-block px-3 py-1 text-xs font-semibold text-white bg-brand-blue-600 rounded uppercase tracking-wide">
                       {{ t('actualites.sections.featured') }}
+                    </span>
+                    <!-- Badges d'association -->
+                    <span
+                      v-if="featuredNews.sector_name"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 rounded-full"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-building" class="w-2.5 h-2.5" />
+                      {{ featuredNews.sector_name }}
+                    </span>
+                    <span
+                      v-if="featuredNews.service_name"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-cogs" class="w-2.5 h-2.5" />
+                      {{ featuredNews.service_name }}
+                    </span>
+                    <span
+                      v-if="featuredNews.project_name"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 rounded-full"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-project-diagram" class="w-2.5 h-2.5" />
+                      {{ featuredNews.project_name }}
                     </span>
                   </div>
 
@@ -247,6 +444,28 @@ const getEventTitle = (event: any) => {
                   <h4 class="text-lg font-bold text-gray-900 dark:text-white leading-tight group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                     {{ getLocalizedTitle(item) }}
                   </h4>
+
+                  <!-- Badges d'association pour les cartes latérales -->
+                  <div v-if="hasAssociations(item)" class="flex flex-wrap gap-1 mt-2">
+                    <span
+                      v-if="item.sector_name"
+                      class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 rounded-full"
+                    >
+                      {{ item.sector_name }}
+                    </span>
+                    <span
+                      v-if="item.service_name"
+                      class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
+                    >
+                      {{ item.service_name }}
+                    </span>
+                    <span
+                      v-if="item.project_name"
+                      class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 rounded-full"
+                    >
+                      {{ item.project_name }}
+                    </span>
+                  </div>
 
                   <div class="flex items-center gap-2 mt-2">
                     <span class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(item.published_at) }}</span>
@@ -292,6 +511,28 @@ const getEventTitle = (event: any) => {
               <h3 class="text-lg font-bold text-gray-900 dark:text-white leading-tight line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                 {{ getLocalizedTitle(item) }}
               </h3>
+
+              <!-- Badges d'association pour les cartes Latest News -->
+              <div v-if="hasAssociations(item)" class="flex flex-wrap gap-1 mt-2">
+                <span
+                  v-if="item.sector_name"
+                  class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 rounded-full"
+                >
+                  {{ item.sector_name }}
+                </span>
+                <span
+                  v-if="item.service_name"
+                  class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
+                >
+                  {{ item.service_name }}
+                </span>
+                <span
+                  v-if="item.project_name"
+                  class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 rounded-full"
+                >
+                  {{ item.project_name }}
+                </span>
+              </div>
 
               <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
                 {{ getLocalizedExcerpt(item) }}

@@ -7,6 +7,7 @@ import type {
   ServiceAchievementRead,
   ServiceProjectRead,
 } from '~/composables/useServicesApi'
+import type { ImageVariants } from '~/types/api'
 
 definePageMeta({
   layout: 'admin'
@@ -28,15 +29,7 @@ const {
   projectStatusColors,
 } = useServicesApi()
 
-const { getMediaUrl } = useMediaApi()
-
-// Helper pour construire l'URL de téléchargement d'un média
-const config = useRuntimeConfig()
-const getMediaDownloadUrl = (mediaId: string | null): string | null => {
-  if (!mediaId) return null
-  const baseUrl = config.public.apiBase || 'http://localhost:8000'
-  return `${baseUrl}/api/admin/media/${mediaId}/download`
-}
+const { getMediaUrl, uploadMediaVariants } = useMediaApi()
 
 // Types de réalisations (libre-texte côté backend, mais liste prédéfinie côté UI)
 const achievementTypes = [
@@ -79,8 +72,14 @@ const achievementForm = ref({
   description: '',
   type: '',
   cover_image_external_id: null as string | null,
+  cover_image_preview: '' as string,
   achievement_date: ''
 })
+
+// État pour l'éditeur d'image de couverture
+const showImageEditor = ref(false)
+const pendingImageFile = ref<File | null>(null)
+const isUploadingImage = ref(false)
 
 const projectForm = ref({
   title: '',
@@ -279,6 +278,7 @@ const openAchievementModal = (achievement?: ServiceAchievementRead) => {
       description: achievement.description || '',
       type: achievement.type || '',
       cover_image_external_id: achievement.cover_image_external_id || null,
+      cover_image_preview: achievement.cover_image_external_id ? getMediaUrl(achievement.cover_image_external_id) || '' : '',
       achievement_date: achievement.achievement_date || ''
     }
   } else {
@@ -288,10 +288,51 @@ const openAchievementModal = (achievement?: ServiceAchievementRead) => {
       description: '',
       type: '',
       cover_image_external_id: null,
+      cover_image_preview: '',
       achievement_date: new Date().toISOString().split('T')[0]
     }
   }
   showAchievementModal.value = true
+}
+
+// Gestion de l'image de couverture des réalisations
+function handleAchievementImageUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files[0]) {
+    pendingImageFile.value = input.files[0]
+    showImageEditor.value = true
+    input.value = ''
+  }
+}
+
+function cancelImageEditor() {
+  showImageEditor.value = false
+  pendingImageFile.value = null
+}
+
+async function saveEditedImage(variants: ImageVariants) {
+  showImageEditor.value = false
+  isUploadingImage.value = true
+
+  try {
+    const originalName = pendingImageFile.value?.name || 'achievement.jpg'
+    const baseName = originalName.replace(/\.[^.]+$/, '')
+
+    const response = await uploadMediaVariants(variants, baseName, { folder: 'achievements' })
+
+    achievementForm.value.cover_image_external_id = response.original.id
+    achievementForm.value.cover_image_preview = URL.createObjectURL(variants.medium)
+  } catch (err) {
+    console.error('Erreur upload image de couverture:', err)
+  } finally {
+    isUploadingImage.value = false
+    pendingImageFile.value = null
+  }
+}
+
+function removeAchievementImage() {
+  achievementForm.value.cover_image_external_id = null
+  achievementForm.value.cover_image_preview = ''
 }
 
 const saveAchievement = async () => {
@@ -836,7 +877,7 @@ const handleDrop = (event: DragEvent, targetIndex: number) => {
             <!-- Image de couverture -->
             <div v-if="achievement.cover_image_external_id" class="aspect-video w-full overflow-hidden bg-gray-100 dark:bg-gray-700">
               <img
-                :src="getMediaDownloadUrl(achievement.cover_image_external_id) ?? undefined"
+                :src="getMediaUrl(achievement.cover_image_external_id) ?? undefined"
                 :alt="achievement.title"
                 class="h-full w-full object-cover"
                 @error="($event.target as HTMLImageElement).parentElement!.style.display = 'none'"
@@ -1088,14 +1129,59 @@ const handleDrop = (event: DragEvent, targetIndex: number) => {
                 />
               </div>
             </div>
-            <FormsImageUpload
-              v-model="achievementForm.cover_image_external_id"
-              label="Image de couverture"
-              hint="Cette image sera affichée sur la carte de la réalisation"
-              folder="achievements"
-              :max-size-mb="5"
-              aspect-ratio="16/9"
-            />
+            <!-- Image de couverture -->
+            <div>
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Image de couverture
+              </label>
+              <!-- Loading state -->
+              <div
+                v-if="isUploadingImage"
+                class="mb-4 flex h-40 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-700"
+              >
+                <div class="text-center">
+                  <font-awesome-icon :icon="['fas', 'spinner']" class="mb-2 h-8 w-8 animate-spin text-brand-red-500" />
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Téléversement en cours...</p>
+                </div>
+              </div>
+              <!-- Image preview -->
+              <div
+                v-else-if="achievementForm.cover_image_preview"
+                class="relative mb-4"
+              >
+                <img
+                  :src="achievementForm.cover_image_preview"
+                  alt="Image de couverture"
+                  class="h-40 w-full rounded-lg object-cover"
+                />
+                <button
+                  type="button"
+                  class="absolute right-2 top-2 rounded-full bg-red-600 p-1.5 text-white transition-colors hover:bg-red-700"
+                  @click="removeAchievementImage"
+                >
+                  <font-awesome-icon :icon="['fas', 'xmark']" class="h-4 w-4" />
+                </button>
+              </div>
+              <!-- Upload button -->
+              <div v-if="!achievementForm.cover_image_preview && !isUploadingImage">
+                <label
+                  class="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-4 py-6 transition-colors hover:border-brand-red-400 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:border-brand-red-500 dark:hover:bg-gray-600"
+                >
+                  <font-awesome-icon :icon="['fas', 'cloud-upload-alt']" class="mb-2 h-8 w-8 text-gray-400" />
+                  <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Cliquer pour télécharger</span>
+                  <span class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG, JPG jusqu'à 5 Mo</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    class="hidden"
+                    @change="handleAchievementImageUpload"
+                  />
+                </label>
+              </div>
+              <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                Cette image sera affichée sur la carte de la réalisation (ratio 16:9 recommandé)
+              </p>
+            </div>
           </div>
           <div class="flex items-center justify-end gap-3 border-t border-gray-200 p-4 dark:border-gray-700">
             <button
@@ -1261,6 +1347,26 @@ const handleDrop = (event: DragEvent, targetIndex: number) => {
               </span>
               <span v-else>Supprimer</span>
             </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Modal: Éditeur d'image -->
+    <Teleport to="body">
+      <div
+        v-if="showImageEditor && pendingImageFile"
+        class="fixed inset-0 z-50 overflow-y-auto"
+      >
+        <div class="flex min-h-full items-center justify-center p-4">
+          <div class="fixed inset-0 bg-black/70 transition-opacity" />
+          <div class="relative w-full max-w-4xl transform transition-all">
+            <MediaImageEditor
+              :image-file="pendingImageFile"
+              :aspect-ratio="16/9"
+              @save="saveEditedImage"
+              @cancel="cancelImageEditor"
+            />
           </div>
         </div>
       </div>

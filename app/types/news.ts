@@ -94,6 +94,19 @@ export interface NewsWithTags extends NewsRead {
   tags: TagRead[]
 }
 
+/**
+ * Format enrichi du backend avec les noms des entités associées résolus
+ * Correspond au schéma Pydantic NewsPublicEnriched
+ */
+export interface NewsPublicEnriched extends NewsWithTags {
+  campus_name: string | null
+  sector_name: string | null
+  service_name: string | null
+  project_name: string | null
+  event_name: string | null
+  author_name: string | null
+}
+
 // ============================================================================
 // News Display (format frontend enrichi)
 // ============================================================================
@@ -253,6 +266,9 @@ export interface NewsFilters {
   author_id?: string
   campus_id?: string
   sector_id?: string
+  service_id?: string
+  project_id?: string
+  event_id?: string
   from_date?: string
   to_date?: string
 }
@@ -290,4 +306,5 @@ export const highlightStatusColors: Record<NewsHighlightStatus, string> = {
 // ============================================================================
 
 export type PaginatedNewsResponse = PaginatedResponse<NewsWithTags>
+export type PaginatedNewsEnrichedResponse = PaginatedResponse<NewsPublicEnriched>
 export type PaginatedTagsResponse = PaginatedResponse<TagRead>

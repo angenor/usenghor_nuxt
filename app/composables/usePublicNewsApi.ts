@@ -8,12 +8,10 @@
 
 import type { PaginatedResponse } from '~/types/api'
 import type {
-  EditorJSContent,
   MultilingualContent,
   NewsDisplay,
   NewsHighlightStatus,
-  NewsTag,
-  NewsWithTags,
+  NewsPublicEnriched,
 } from '~/types/news'
 
 // ============================================================================
@@ -56,9 +54,10 @@ export function usePublicNewsApi() {
   }
 
   /**
-   * Transforme NewsWithTags (backend) vers NewsDisplay (frontend).
+   * Transforme NewsPublicEnriched (backend) vers NewsDisplay (frontend).
+   * Le backend retourne maintenant les noms des entités associées.
    */
-  function transformToDisplay(news: NewsWithTags): NewsDisplay {
+  function transformToDisplay(news: NewsPublicEnriched): NewsDisplay {
     const multilingual = parseMultilingualContent(news.content)
 
     return {
@@ -77,9 +76,9 @@ export function usePublicNewsApi() {
         : null, // TODO: Résoudre via API Media
       cover_image_alt: news.title,
       cover_image_external_id: news.cover_image_external_id,
-      // Auteur (à résoudre si nécessaire)
+      // Auteur (résolu depuis le backend)
       author: news.author_external_id
-        ? { id: news.author_external_id, name: 'Auteur', role: '' }
+        ? { id: news.author_external_id, name: news.author_name || 'Auteur', role: '' }
         : null,
       author_external_id: news.author_external_id,
       // Tags
@@ -91,17 +90,17 @@ export function usePublicNewsApi() {
       })),
       // Médias additionnels (à implémenter)
       media: [],
-      // Associations
+      // Associations (noms résolus par le backend)
       campus_id: news.campus_external_id,
-      campus_name: null, // TODO: Résoudre via API
+      campus_name: news.campus_name,
       sector_id: news.sector_external_id,
-      sector_name: null,
+      sector_name: news.sector_name,
       service_id: news.service_external_id,
-      service_name: null,
+      service_name: news.service_name,
       event_id: news.event_external_id,
-      event_name: null,
+      event_name: news.event_name,
       project_id: news.project_external_id,
-      project_name: null,
+      project_name: news.project_name,
       // Statuts
       status: news.status,
       highlight_status: news.highlight_status,
@@ -138,12 +137,17 @@ export function usePublicNewsApi() {
 
   /**
    * Liste les actualités publiées avec pagination et filtres.
+   * Le backend retourne les actualités enrichies avec les noms des entités associées.
    */
   async function listPublishedNews(params: {
     page?: number
     limit?: number
     tag_id?: string
     campus_id?: string
+    sector_id?: string
+    service_id?: string
+    project_id?: string
+    event_id?: string
     highlight_status?: NewsHighlightStatus
   } = {}): Promise<PaginatedResponse<NewsDisplay>> {
     const query: Record<string, string> = {
@@ -153,16 +157,19 @@ export function usePublicNewsApi() {
 
     if (params.tag_id) query.tag_id = params.tag_id
     if (params.campus_id) query.campus_id = params.campus_id
-    // Note: L'API publique ne supporte pas le filtre highlight_status directement
-    // On filtrera côté client si nécessaire
+    if (params.sector_id) query.sector_id = params.sector_id
+    if (params.service_id) query.service_id = params.service_id
+    if (params.project_id) query.project_id = params.project_id
+    if (params.event_id) query.event_id = params.event_id
 
-    const response = await $fetch<PaginatedResponse<NewsWithTags>>(`${baseURL}/api/public/news`, {
+    const response = await $fetch<PaginatedResponse<NewsPublicEnriched>>(`${baseURL}/api/public/news`, {
       query,
     })
 
     let items = response.items.map(transformToDisplay)
 
     // Filtrer par highlight_status côté client si nécessaire
+    // (le backend ne supporte pas ce filtre directement sur la route publique)
     if (params.highlight_status) {
       items = items.filter(item => item.highlight_status === params.highlight_status)
     }
@@ -170,16 +177,17 @@ export function usePublicNewsApi() {
     return {
       ...response,
       items,
-      total: items.length, // Ajusté après filtre
+      total: params.highlight_status ? items.length : response.total,
     }
   }
 
   /**
    * Récupère une actualité publiée par son slug.
+   * Le backend retourne l'actualité enrichie avec les noms des entités associées.
    */
   async function getNewsBySlug(slug: string): Promise<NewsDisplay | null> {
     try {
-      const news = await $fetch<NewsWithTags>(`${baseURL}/api/public/news/${slug}`)
+      const news = await $fetch<NewsPublicEnriched>(`${baseURL}/api/public/news/${slug}`)
       return transformToDisplay(news)
     }
     catch (error) {
@@ -206,10 +214,27 @@ export function usePublicNewsApi() {
 
   /**
    * Récupère toutes les actualités publiées (sans pagination).
+   * Accepte des filtres optionnels pour secteur, service, projet, etc.
    * Note: Limité à un maximum raisonnable pour éviter les problèmes de performance.
    */
-  async function getAllPublishedNews(maxLimit: number = 100): Promise<NewsDisplay[]> {
-    const response = await listPublishedNews({ limit: maxLimit })
+  async function getAllPublishedNews(params: {
+    limit?: number
+    sector_id?: string
+    service_id?: string
+    project_id?: string
+    event_id?: string
+    campus_id?: string
+    tag_id?: string
+  } = {}): Promise<NewsDisplay[]> {
+    const response = await listPublishedNews({
+      limit: params.limit || 100,
+      sector_id: params.sector_id,
+      service_id: params.service_id,
+      project_id: params.project_id,
+      event_id: params.event_id,
+      campus_id: params.campus_id,
+      tag_id: params.tag_id,
+    })
     return response.items
   }
 

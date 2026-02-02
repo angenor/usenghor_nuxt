@@ -8,6 +8,8 @@ import type {
   ServiceTeamMemberPublic,
 } from '~/composables/usePublicOrganizationApi'
 import type { OutputData } from '@editorjs/editorjs'
+import type { NewsDisplay } from '~/types/news'
+import type { AlbumWithMedia } from '~/types/api/media'
 
 const route = useRoute()
 const { t, locale } = useI18n()
@@ -17,6 +19,9 @@ const {
   findServiceBySlug,
   slugify,
 } = usePublicOrganizationApi()
+const { listPublishedNews, formatNewsDate } = usePublicNewsApi()
+const { getMediaUrl, getImageVariantUrl } = useMediaApi()
+const { getAlbumById: getPublicAlbumById } = usePublicAlbumsApi()
 
 // Scroll detection for sticky title
 const heroRef = ref<HTMLElement | null>(null)
@@ -55,6 +60,8 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 const sector = ref<SectorPublicWithServices | null>(null)
 const service = ref<ServicePublicWithDetails | null>(null)
+const relatedNews = ref<NewsDisplay[]>([])
+const serviceAlbum = ref<AlbumWithMedia | null>(null)
 
 // Fetch entity data
 const fetchEntity = async () => {
@@ -79,8 +86,48 @@ const fetchEntity = async () => {
   }
 }
 
+// Fetch related news for this entity
+const fetchRelatedNews = async () => {
+  try {
+    if (entityType === 'secteur' && sector.value) {
+      const response = await listPublishedNews({ sector_id: sector.value.id, limit: 6 })
+      relatedNews.value = response.items
+    }
+    else if (entityType === 'service' && service.value) {
+      const response = await listPublishedNews({ service_id: service.value.id, limit: 6 })
+      relatedNews.value = response.items
+    }
+  }
+  catch (err) {
+    console.error('Error fetching related news:', err)
+    relatedNews.value = []
+  }
+}
+
+// Fetch service album (media library)
+const fetchServiceAlbum = async () => {
+  if (entityType !== 'service' || !service.value?.album_external_id) {
+    serviceAlbum.value = null
+    return
+  }
+
+  try {
+    serviceAlbum.value = await getPublicAlbumById(service.value.album_external_id)
+  }
+  catch (err) {
+    console.error('Error fetching service album:', err)
+    serviceAlbum.value = null
+  }
+}
+
 // Fetch on mount
-onMounted(fetchEntity)
+onMounted(async () => {
+  await fetchEntity()
+  await Promise.all([
+    fetchRelatedNews(),
+    fetchServiceAlbum(),
+  ])
+})
 
 // SSR data
 const { data: entityData } = await useAsyncData(
@@ -110,6 +157,11 @@ if (entityData.value) {
     service.value = entityData.value.data as ServicePublicWithDetails
   }
   loading.value = false
+  // Charger les actualités et l'album associés (côté client)
+  if (import.meta.client) {
+    fetchRelatedNews()
+    fetchServiceAlbum()
+  }
 }
 
 // Computed: current entity (sector or service)
@@ -282,18 +334,21 @@ const breadcrumb = computed(() => [
 const activeTab = ref('missions')
 const tabs = computed(() => {
   if (entityType === 'secteur') {
-    // Secteurs: services list only
+    // Secteurs: services list + actualités
     return [
       { key: 'missions', icon: 'fa-solid fa-bullseye' },
       { key: 'services', icon: 'fa-solid fa-building' },
+      { key: 'news', icon: 'fa-solid fa-newspaper' },
     ]
   }
-  // Services: full tabs
+  // Services: full tabs + actualités + médiathèque
   return [
     { key: 'missions', icon: 'fa-solid fa-bullseye' },
     { key: 'team', icon: 'fa-solid fa-users' },
     { key: 'achievements', icon: 'fa-solid fa-trophy' },
     { key: 'projects', icon: 'fa-solid fa-diagram-project' },
+    { key: 'news', icon: 'fa-solid fa-newspaper' },
+    { key: 'media', icon: 'fa-solid fa-images' },
   ]
 })
 
@@ -344,6 +399,15 @@ const formatDate = (dateStr: string | null) => {
 // Get service URL
 const getServiceUrl = (svc: { name: string }) => {
   return localePath(`/a-propos/organisation/service/${slugify(svc.name)}`)
+}
+
+// Helper pour obtenir l'URL de l'image de couverture d'une actualité
+const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'original' = 'low'): string => {
+  if (news.cover_image_external_id) {
+    const originalUrl = getMediaUrl(news.cover_image_external_id)
+    return originalUrl ? getImageVariantUrl(originalUrl, variant) : `https://picsum.photos/seed/${news.id}/800/500`
+  }
+  return news.cover_image || `https://picsum.photos/seed/${news.id}/800/500`
 }
 </script>
 
@@ -764,6 +828,187 @@ const getServiceUrl = (svc: { name: string }) => {
             <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">
               <font-awesome-icon icon="fa-solid fa-diagram-project" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
               <p class="text-gray-500 dark:text-gray-400 text-lg">{{ t('organizationDetail.projects.empty') || 'Aucun projet en cours' }}</p>
+            </div>
+          </div>
+
+          <!-- News Tab (for both sectors and services) -->
+          <div v-if="activeTab === 'news'" class="animate__animated animate__fadeIn">
+            <div class="mb-8">
+              <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                {{ t('organizationDetail.news.title') || 'Actualités' }}
+              </h2>
+              <p class="text-gray-600 dark:text-gray-400">
+                {{ t('organizationDetail.news.subtitle', { name: entityName }) || `Actualités liées à ${entityName}` }}
+              </p>
+            </div>
+
+            <div v-if="relatedNews.length > 0" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <NuxtLink
+                v-for="news in relatedNews"
+                :key="news.id"
+                :to="localePath(`/actualites/${news.slug}`)"
+                class="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300"
+              >
+                <!-- Image -->
+                <div class="relative h-48 overflow-hidden">
+                  <img
+                    :src="getNewsCoverImageUrl(news, 'low')"
+                    :alt="news.title"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    loading="lazy"
+                  />
+                  <!-- Badge highlight status -->
+                  <div v-if="news.highlight_status !== 'standard'" class="absolute top-4 left-4">
+                    <span
+                      class="px-2 py-1 rounded-full text-xs font-semibold text-white"
+                      :class="news.highlight_status === 'headline' ? 'bg-brand-blue-600' : 'bg-purple-600'"
+                    >
+                      {{ news.highlight_status === 'headline' ? t('actualites.sections.featured') : t('actualites.sections.featured') }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Content -->
+                <div class="p-5">
+                  <h3 class="font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
+                    {{ news.title }}
+                  </h3>
+                  <p v-if="news.summary" class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+                    {{ news.summary }}
+                  </p>
+
+                  <!-- Tags -->
+                  <div v-if="news.tags && news.tags.length > 0" class="flex flex-wrap gap-1 mb-3">
+                    <span
+                      v-for="tag in news.tags.slice(0, 2)"
+                      :key="tag.id"
+                      class="px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
+                    >
+                      {{ tag.name }}
+                    </span>
+                  </div>
+
+                  <!-- Date -->
+                  <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                    <font-awesome-icon icon="fa-solid fa-calendar" class="w-3 h-3" />
+                    <span>{{ formatNewsDate(news.published_at) }}</span>
+                  </div>
+                </div>
+              </NuxtLink>
+            </div>
+
+            <!-- Empty state -->
+            <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">
+              <font-awesome-icon icon="fa-solid fa-newspaper" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
+              <p class="text-gray-500 dark:text-gray-400 text-lg">
+                {{ t('organizationDetail.news.empty') || 'Aucune actualité pour le moment' }}
+              </p>
+            </div>
+
+            <!-- View all news link -->
+            <div v-if="relatedNews.length > 0" class="mt-8 text-center">
+              <NuxtLink
+                :to="localePath('/actualites')"
+                class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                :class="`${colorClasses.bgLight} ${colorClasses.text}`"
+              >
+                <span>{{ t('organizationDetail.news.viewAll') || 'Voir toutes les actualités' }}</span>
+                <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
+              </NuxtLink>
+            </div>
+          </div>
+
+          <!-- Media Tab (for services only) -->
+          <div v-if="activeTab === 'media' && entityType === 'service'" class="animate__animated animate__fadeIn">
+            <div class="mb-8">
+              <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                {{ t('organizationDetail.media.title') }}
+              </h2>
+              <p class="text-gray-600 dark:text-gray-400">
+                {{ t('organizationDetail.media.subtitle') }}
+              </p>
+            </div>
+
+            <!-- Album content -->
+            <div v-if="serviceAlbum && serviceAlbum.media_items.length > 0">
+              <!-- Album info -->
+              <div v-if="serviceAlbum.title || serviceAlbum.description" class="mb-6 p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+                <h3 v-if="serviceAlbum.title" class="font-semibold text-gray-900 dark:text-white mb-2">
+                  {{ serviceAlbum.title }}
+                </h3>
+                <p v-if="serviceAlbum.description" class="text-sm text-gray-600 dark:text-gray-400">
+                  {{ serviceAlbum.description }}
+                </p>
+              </div>
+
+              <!-- Media grid -->
+              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div
+                  v-for="media in serviceAlbum.media_items"
+                  :key="media.id"
+                  class="group relative aspect-square overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800"
+                >
+                  <!-- Image -->
+                  <img
+                    v-if="media.type === 'image'"
+                    :src="getImageVariantUrl(getMediaUrl(media.id) || '', 'medium')"
+                    :alt="media.alt_text || media.name"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    loading="lazy"
+                  />
+
+                  <!-- Video placeholder -->
+                  <div
+                    v-else-if="media.type === 'video'"
+                    class="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-play-circle" class="w-12 h-12 text-gray-400" />
+                  </div>
+
+                  <!-- Document placeholder -->
+                  <div
+                    v-else
+                    class="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-file" class="w-12 h-12 text-gray-400" />
+                  </div>
+
+                  <!-- Overlay with info -->
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div class="absolute bottom-0 left-0 right-0 p-3">
+                      <p class="text-white text-sm font-medium truncate">
+                        {{ media.name }}
+                      </p>
+                      <p v-if="media.credits" class="text-white/70 text-xs truncate">
+                        © {{ media.credits }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Download link -->
+                  <a
+                    :href="getMediaUrl(media.id) || ''"
+                    target="_blank"
+                    class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white dark:hover:bg-gray-700"
+                    :title="t('organizationDetail.media.download')"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-download" class="w-4 h-4" />
+                  </a>
+                </div>
+              </div>
+
+              <!-- Media count -->
+              <p class="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+                {{ serviceAlbum.media_items.length }} {{ serviceAlbum.media_items.length > 1 ? 'médias' : 'média' }}
+              </p>
+            </div>
+
+            <!-- Empty state -->
+            <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">
+              <font-awesome-icon icon="fa-solid fa-images" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
+              <p class="text-gray-500 dark:text-gray-400 text-lg">
+                {{ t('organizationDetail.media.empty') }}
+              </p>
             </div>
           </div>
         </div>

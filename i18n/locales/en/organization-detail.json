@@ -53,9 +53,10 @@
     },
     "news": {
       "title": "News",
-      "subtitle": "Latest updates",
+      "subtitle": "News related to {name}",
       "readMore": "Read more",
       "publishedOn": "Published on",
+      "viewAll": "View all news",
       "empty": "No news at the moment."
     },
     "media": {

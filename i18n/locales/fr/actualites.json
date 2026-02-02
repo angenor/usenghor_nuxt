@@ -21,6 +21,16 @@
       "loadMore": "Afficher plus",
       "showLess": "Afficher moins"
     },
+    "filters": {
+      "title": "Filtrer par",
+      "reset": "Réinitialiser",
+      "sector": "Secteur",
+      "service": "Service",
+      "project": "Projet",
+      "allSectors": "Tous les secteurs",
+      "allServices": "Tous les services",
+      "allProjects": "Tous les projets"
+    },
     "calls": {
       "title": "Appels à candidatures",
       "subtitle": "Postulez aux programmes de formation, bourses et projets de recherche",

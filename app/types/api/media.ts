@@ -78,3 +78,22 @@ export interface MediaUploadVariantsResponse {
   medium: MediaUploadResponse
   original: MediaUploadResponse
 }
+
+// ============================================================================
+// Albums
+// ============================================================================
+
+export type AlbumStatus = 'draft' | 'published' | 'archived'
+
+export interface AlbumRead {
+  id: string
+  title: string
+  description: string | null
+  status: AlbumStatus
+  created_at: string
+  updated_at: string
+}
+
+export interface AlbumWithMedia extends AlbumRead {
+  media_items: MediaRead[]
+}

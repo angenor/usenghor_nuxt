@@ -21,6 +21,16 @@
       "loadMore": "Load more",
       "showLess": "Show less"
     },
+    "filters": {
+      "title": "Filter by",
+      "reset": "Reset",
+      "sector": "Sector",
+      "service": "Service",
+      "project": "Project",
+      "allSectors": "All sectors",
+      "allServices": "All services",
+      "allProjects": "All projects"
+    },
     "calls": {
       "title": "Calls for Applications",
       "subtitle": "Apply to training programs, scholarships and research projects",
