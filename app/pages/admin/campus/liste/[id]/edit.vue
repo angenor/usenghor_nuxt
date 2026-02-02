@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { CampusWithTeam } from '~/composables/useCampusApi'
 import type { CountryRead } from '~/composables/useCountriesApi'
+import type { OutputData } from '@editorjs/editorjs'
+import type { ImageVariants } from '~/types/api'
 
 definePageMeta({
   layout: 'admin'
@@ -16,7 +18,7 @@ const {
 
 const { getAllCountriesPublic, getFlagEmoji } = useCountriesApi()
 const { apiFetch } = useApi()
-const { getMediaUrl } = useMediaApi()
+const { getMediaUrl, uploadMediaVariants } = useMediaApi()
 
 // Données de référence
 const countries = ref<CountryRead[]>([])
@@ -72,7 +74,8 @@ const activeTab = ref<'general' | 'location' | 'contact' | 'settings'>('general'
 const form = reactive({
   code: '',
   name: '',
-  description: '',
+  description: undefined as OutputData | undefined,
+  cover_image: '', // URL d'aperçu local
   cover_image_external_id: '' as string | null,
   country_external_id: '' as string | null,
   city: '',
@@ -92,8 +95,21 @@ const loadCampusData = () => {
   if (originalCampus.value) {
     form.code = originalCampus.value.code
     form.name = originalCampus.value.name
-    form.description = originalCampus.value.description || ''
+    // Parser la description JSON si elle existe
+    if (originalCampus.value.description) {
+      try {
+        form.description = JSON.parse(originalCampus.value.description) as OutputData
+      } catch {
+        form.description = undefined
+      }
+    } else {
+      form.description = undefined
+    }
     form.cover_image_external_id = originalCampus.value.cover_image_external_id || ''
+    // Initialiser l'aperçu de l'image si elle existe
+    if (originalCampus.value.cover_image_external_id) {
+      form.cover_image = getMediaUrl(originalCampus.value.cover_image_external_id) || ''
+    }
     form.country_external_id = originalCampus.value.country_external_id || ''
     form.city = originalCampus.value.city || ''
     form.address = originalCampus.value.address || ''
@@ -198,10 +214,15 @@ const submitForm = async () => {
   submitError.value = null
 
   try {
+    // Convertir les OutputData en JSON string pour l'API
+    const descriptionJson = form.description && form.description.blocks?.length
+      ? JSON.stringify(form.description)
+      : null
+
     const campusData = {
       code: form.code,
       name: form.name,
-      description: form.description || null,
+      description: descriptionJson,
       cover_image_external_id: form.cover_image_external_id || null,
       country_external_id: form.country_external_id || null,
       city: form.city || null,
@@ -245,12 +266,54 @@ const tabs = [
   { id: 'settings', label: 'Paramètres', icon: 'cog' }
 ]
 
-// Gestion de l'upload d'image
-const handleImageUpload = (mediaId: string) => {
-  form.cover_image_external_id = mediaId
+// État pour l'éditeur d'image de couverture
+const showCoverEditor = ref(false)
+const pendingCoverFile = ref<File | null>(null)
+const isUploadingCover = ref(false)
+
+function handleCoverImageUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files[0]) {
+    // Stocker le fichier et ouvrir l'éditeur
+    pendingCoverFile.value = input.files[0]
+    showCoverEditor.value = true
+    input.value = ''
+  }
 }
 
-const handleImageRemove = () => {
+function cancelCoverEditor() {
+  showCoverEditor.value = false
+  pendingCoverFile.value = null
+}
+
+async function saveEditedCover(variants: ImageVariants) {
+  showCoverEditor.value = false
+  isUploadingCover.value = true
+
+  try {
+    // Extraire le nom de base du fichier original
+    const originalName = pendingCoverFile.value?.name || 'cover.jpg'
+    const baseName = originalName.replace(/\.[^.]+$/, '')
+
+    // Upload les 3 versions (low, medium, original)
+    const response = await uploadMediaVariants(variants, baseName, { folder: 'campuses/covers' })
+
+    // Stocker l'ID de l'original (les autres URLs sont déduites par convention)
+    form.cover_image_external_id = response.original.id
+    // Créer un aperçu local temporaire avec la version medium
+    form.cover_image = URL.createObjectURL(variants.medium)
+  }
+  catch (err) {
+    console.error('Erreur upload image de couverture:', err)
+  }
+  finally {
+    isUploadingCover.value = false
+    pendingCoverFile.value = null
+  }
+}
+
+function removeCoverImage() {
+  form.cover_image = ''
   form.cover_image_external_id = null
 }
 </script>
@@ -386,12 +449,13 @@ const handleImageRemove = () => {
           <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
             Description
           </label>
-          <textarea
-            v-model="form.description"
-            rows="4"
-            placeholder="Description du campus..."
-            class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-          />
+          <ClientOnly>
+            <EditorJS
+              v-model="form.description"
+              placeholder="Description du campus..."
+              :min-height="150"
+            />
+          </ClientOnly>
         </div>
 
         <!-- Image de couverture -->
@@ -399,13 +463,53 @@ const handleImageRemove = () => {
           <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
             Image de couverture
           </label>
-          <FormsImageUpload
-            :model-value="form.cover_image_external_id || undefined"
-            label="Image de couverture"
-            :preview-url="form.cover_image_external_id ? getMediaUrl(form.cover_image_external_id) ?? undefined : undefined"
-            @update:model-value="handleImageUpload"
-            @remove="handleImageRemove"
-          />
+          <!-- Loading state -->
+          <div
+            v-if="isUploadingCover"
+            class="mb-4 flex h-48 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-700"
+          >
+            <div class="text-center">
+              <font-awesome-icon :icon="['fas', 'spinner']" class="mb-2 h-8 w-8 animate-spin text-blue-500" />
+              <p class="text-sm text-gray-500 dark:text-gray-400">Téléversement en cours...</p>
+            </div>
+          </div>
+          <!-- Image preview -->
+          <div
+            v-else-if="form.cover_image"
+            class="relative mb-4"
+          >
+            <img
+              :src="form.cover_image"
+              alt="Image de couverture"
+              class="h-48 w-full rounded-lg object-cover"
+            />
+            <button
+              type="button"
+              class="absolute right-2 top-2 rounded-full bg-red-600 p-1.5 text-white transition-colors hover:bg-red-700"
+              @click="removeCoverImage"
+            >
+              <font-awesome-icon :icon="['fas', 'xmark']" class="h-4 w-4" />
+            </button>
+          </div>
+          <div class="flex items-center gap-4">
+            <label
+              class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              :class="{ 'pointer-events-none opacity-50': isUploadingCover }"
+            >
+              <font-awesome-icon :icon="['fas', 'upload']" class="h-4 w-4" />
+              Télécharger une image
+              <input
+                type="file"
+                accept="image/*"
+                class="hidden"
+                :disabled="isUploadingCover"
+                @change="handleCoverImageUpload"
+              />
+            </label>
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+              Image principale affichée sur la page du campus
+            </span>
+          </div>
         </div>
       </div>
 
@@ -652,4 +756,24 @@ const handleImageRemove = () => {
       Retour à la liste
     </NuxtLink>
   </div>
+
+  <!-- Image Editor Modal for Cover Image -->
+  <Teleport to="body">
+    <div
+      v-if="showCoverEditor && pendingCoverFile"
+      class="fixed inset-0 z-50 overflow-y-auto"
+    >
+      <div class="flex min-h-full items-center justify-center p-4">
+        <div class="fixed inset-0 bg-black/70 transition-opacity" />
+        <div class="relative w-full max-w-4xl transform transition-all">
+          <MediaImageEditor
+            :image-file="pendingCoverFile"
+            :aspect-ratio="16/9"
+            @save="saveEditedCover"
+            @cancel="cancelCoverEditor"
+          />
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>

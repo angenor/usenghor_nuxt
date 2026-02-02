@@ -338,6 +338,8 @@ const newScheduleItem = ref({
   end_date: '',
   description: '',
 })
+const showScheduleModal = ref(false)
+const editingScheduleIndex = ref<number | null>(null)
 
 const addScheduleItemLocal = () => {
   if (!newScheduleItem.value.step.trim()) return
@@ -350,6 +352,39 @@ const addScheduleItemLocal = () => {
     display_order: scheduleItems.value.length + 1,
   })
   newScheduleItem.value = { step: '', start_date: '', end_date: '', description: '' }
+}
+
+const openEditScheduleModal = (index: number) => {
+  const item = scheduleItems.value[index]
+  if (!item) return
+  editingScheduleIndex.value = index
+  newScheduleItem.value = {
+    step: item.step,
+    start_date: item.start_date || '',
+    end_date: item.end_date || '',
+    description: item.description || '',
+  }
+  showScheduleModal.value = true
+}
+
+const closeScheduleModal = () => {
+  showScheduleModal.value = false
+  editingScheduleIndex.value = null
+  newScheduleItem.value = { step: '', start_date: '', end_date: '', description: '' }
+}
+
+const saveScheduleItem = () => {
+  if (!newScheduleItem.value.step.trim()) return
+  if (editingScheduleIndex.value === null) return
+
+  const item = scheduleItems.value[editingScheduleIndex.value]
+  if (item) {
+    item.step = newScheduleItem.value.step
+    item.start_date = newScheduleItem.value.start_date || null
+    item.end_date = newScheduleItem.value.end_date || null
+    item.description = newScheduleItem.value.description || null
+  }
+  closeScheduleModal()
 }
 
 const removeScheduleItem = (index: number) => {
@@ -1023,12 +1058,22 @@ const tabs = [
                 </div>
                 <p v-if="item.description" class="text-sm text-gray-500 dark:text-gray-400">{{ item.description }}</p>
               </div>
-              <button
-                class="text-red-500 hover:text-red-700"
-                @click="removeScheduleItem(index)"
-              >
-                <font-awesome-icon icon="fa-solid fa-trash" class="h-4 w-4" />
-              </button>
+              <div class="flex gap-2">
+                <button
+                  class="text-blue-500 hover:text-blue-700"
+                  title="Modifier"
+                  @click="openEditScheduleModal(index)"
+                >
+                  <font-awesome-icon icon="fa-solid fa-pen" class="h-4 w-4" />
+                </button>
+                <button
+                  class="text-red-500 hover:text-red-700"
+                  title="Supprimer"
+                  @click="removeScheduleItem(index)"
+                >
+                  <font-awesome-icon icon="fa-solid fa-trash" class="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1164,4 +1209,97 @@ const tabs = [
       </div>
     </div>
   </div>
+
+  <!-- Modal d'édition d'une étape du calendrier -->
+  <Teleport to="body">
+    <div
+      v-if="showScheduleModal"
+      class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4"
+      @click.self="closeScheduleModal"
+    >
+      <div class="w-full max-w-lg rounded-lg bg-white shadow-xl dark:bg-gray-800">
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+            Modifier l'étape
+          </h3>
+          <button
+            type="button"
+            class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+            @click="closeScheduleModal"
+          >
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div class="space-y-4 p-4">
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Nom de l'étape <span class="text-red-500">*</span>
+            </label>
+            <input
+              v-model="newScheduleItem.step"
+              type="text"
+              placeholder="Nom de l'étape"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Date de début
+              </label>
+              <input
+                v-model="newScheduleItem.start_date"
+                type="date"
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Date de fin
+              </label>
+              <input
+                v-model="newScheduleItem.end_date"
+                type="date"
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+          </div>
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Description
+            </label>
+            <input
+              v-model="newScheduleItem.description"
+              type="text"
+              placeholder="Description (optionnel)"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex justify-end gap-3 border-t border-gray-200 p-4 dark:border-gray-700">
+          <button
+            type="button"
+            class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+            @click="closeScheduleModal"
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            @click="saveScheduleItem"
+          >
+            Enregistrer
+          </button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
