@@ -13,24 +13,40 @@ const slidesConfig = [
     editorialTitleKey: 'hero.slide1.title',
     editorialSubtitleKey: 'hero.slide1.subtitle',
     editorialImageKey: 'hero.slide1.image',
+    editorialCta1TextKey: 'hero.slide1.cta1.text',
+    editorialCta1LinkKey: 'hero.slide1.cta1.link',
+    editorialCta2TextKey: 'hero.slide1.cta2.text',
+    editorialCta2LinkKey: 'hero.slide1.cta2.link',
     fallbackImage: '/images/bg/backgroud_senghor1.jpg',
   },
   {
     editorialTitleKey: 'hero.slide2.title',
     editorialSubtitleKey: 'hero.slide2.subtitle',
     editorialImageKey: 'hero.slide2.image',
+    editorialCta1TextKey: 'hero.slide2.cta1.text',
+    editorialCta1LinkKey: 'hero.slide2.cta1.link',
+    editorialCta2TextKey: 'hero.slide2.cta2.text',
+    editorialCta2LinkKey: 'hero.slide2.cta2.link',
     fallbackImage: '/images/bg/backgroud_senghor2.jpg',
   },
   {
     editorialTitleKey: 'hero.slide3.title',
     editorialSubtitleKey: 'hero.slide3.subtitle',
     editorialImageKey: 'hero.slide3.image',
+    editorialCta1TextKey: 'hero.slide3.cta1.text',
+    editorialCta1LinkKey: 'hero.slide3.cta1.link',
+    editorialCta2TextKey: 'hero.slide3.cta2.text',
+    editorialCta2LinkKey: 'hero.slide3.cta2.link',
     fallbackImage: '/images/bg/backgroud_senghor3.jpg',
   },
   {
     editorialTitleKey: 'hero.slide4.title',
     editorialSubtitleKey: 'hero.slide4.subtitle',
     editorialImageKey: 'hero.slide4.image',
+    editorialCta1TextKey: 'hero.slide4.cta1.text',
+    editorialCta1LinkKey: 'hero.slide4.cta1.link',
+    editorialCta2TextKey: 'hero.slide4.cta2.text',
+    editorialCta2LinkKey: 'hero.slide4.cta2.link',
     fallbackImage: '/images/bg/backgroud_senghor4.jpg',
   },
 ]
@@ -45,6 +61,10 @@ const slides = computed(() => {
       image: imageMediaId ? getMediaUrl(imageMediaId) : config.fallbackImage,
       editorialTitleKey: config.editorialTitleKey,
       editorialSubtitleKey: config.editorialSubtitleKey,
+      editorialCta1TextKey: config.editorialCta1TextKey,
+      editorialCta1LinkKey: config.editorialCta1LinkKey,
+      editorialCta2TextKey: config.editorialCta2TextKey,
+      editorialCta2LinkKey: config.editorialCta2LinkKey,
     }
   })
 })
@@ -53,7 +73,7 @@ const currentSlide = ref(0)
 const isTransitioning = ref(false)
 let slideInterval: ReturnType<typeof setInterval> | null = null
 
-const currentSlideData = computed(() => slides[currentSlide.value])
+const currentSlideData = computed(() => slides.value[currentSlide.value])
 
 // Titre et sous-titre du slide courant (avec fallback i18n)
 const currentTitle = computed(() => {
@@ -65,9 +85,31 @@ const currentSubtitle = computed(() => {
   return slide ? getContent(slide.editorialSubtitleKey) : ''
 })
 
-// Textes des boutons CTA
-const ctaDiscover = computed(() => getContent('hero.cta.discover'))
-const ctaContact = computed(() => getContent('hero.cta.contact'))
+// Boutons CTA du slide courant (0, 1 ou 2 boutons par slide)
+// Utilise getRawContent (sans fallback i18n) - un bouton ne s'affiche que s'il est défini dans l'admin
+const currentCta1Text = computed(() => {
+  const slide = currentSlideData.value
+  return slide ? getRawContent(slide.editorialCta1TextKey) : null
+})
+const currentCta1Link = computed(() => {
+  const slide = currentSlideData.value
+  return slide ? getRawContent(slide.editorialCta1LinkKey) : null
+})
+const currentCta2Text = computed(() => {
+  const slide = currentSlideData.value
+  return slide ? getRawContent(slide.editorialCta2TextKey) : null
+})
+const currentCta2Link = computed(() => {
+  const slide = currentSlideData.value
+  return slide ? getRawContent(slide.editorialCta2LinkKey) : null
+})
+
+// Vérifie si au moins un bouton est présent pour ce slide (texte ET lien définis)
+const hasButtons = computed(() => {
+  const hasCta1 = !!(currentCta1Text.value && currentCta1Link.value)
+  const hasCta2 = !!(currentCta2Text.value && currentCta2Link.value)
+  return hasCta1 || hasCta2
+})
 
 const goToSlide = (index: number, resetTimer = false) => {
   if (isTransitioning.value || index === currentSlide.value) return
@@ -75,7 +117,7 @@ const goToSlide = (index: number, resetTimer = false) => {
   currentSlide.value = index
   if (resetTimer && slideInterval) {
     clearInterval(slideInterval)
-    slideInterval = setInterval(() => goToSlide((currentSlide.value + 1) % slides.length), 6000)
+    slideInterval = setInterval(() => goToSlide((currentSlide.value + 1) % slides.value.length), 6000)
   }
   setTimeout(() => {
     isTransitioning.value = false
@@ -83,11 +125,11 @@ const goToSlide = (index: number, resetTimer = false) => {
 }
 
 const nextSlide = () => {
-  goToSlide((currentSlide.value + 1) % slides.length, true)
+  goToSlide((currentSlide.value + 1) % slides.value.length, true)
 }
 
 const prevSlide = () => {
-  goToSlide((currentSlide.value - 1 + slides.length) % slides.length, true)
+  goToSlide((currentSlide.value - 1 + slides.value.length) % slides.value.length, true)
 }
 
 onMounted(() => {
@@ -95,7 +137,7 @@ onMounted(() => {
   loadContent()
 
   // Démarrer le carrousel
-  slideInterval = setInterval(() => goToSlide((currentSlide.value + 1) % slides.length), 6000)
+  slideInterval = setInterval(() => goToSlide((currentSlide.value + 1) % slides.value.length), 6000)
 })
 
 onUnmounted(() => {
@@ -150,20 +192,28 @@ onUnmounted(() => {
             {{ currentSubtitle }}
           </p>
 
-          <!-- CTA Buttons -->
-          <div class="flex flex-wrap gap-4 animate__animated animate__fadeInUp animate__delay-2s">
+          <!-- CTA Buttons (0, 1 ou 2 boutons par slide) - affichés uniquement si définis dans l'admin -->
+          <div
+            v-if="hasButtons"
+            :key="currentSlide + '-buttons'"
+            class="flex flex-wrap gap-4 animate__animated animate__fadeInUp animate__delay-2s"
+          >
+            <!-- Bouton primaire (style bleu) - affiché si texte ET lien définis -->
             <NuxtLink
-              :to="localePath('/formations')"
+              v-if="currentCta1Text && currentCta1Link"
+              :to="localePath(currentCta1Link)"
               class="group relative inline-flex items-center px-8 py-4 bg-brand-blue-500 text-white font-semibold rounded-full overflow-hidden transition-all duration-300 hover:bg-brand-blue-600 hover:shadow-2xl hover:shadow-brand-blue-500/30 hover:-translate-y-1"
             >
-              <span class="relative z-10">{{ ctaDiscover }}</span>
+              <span class="relative z-10">{{ currentCta1Text }}</span>
               <font-awesome-icon icon="fa-solid fa-arrow-right" class="relative z-10 w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
             </NuxtLink>
+            <!-- Bouton secondaire (style transparent) - affiché si texte ET lien définis -->
             <NuxtLink
-              :to="localePath('/contact')"
+              v-if="currentCta2Text && currentCta2Link"
+              :to="localePath(currentCta2Link)"
               class="group inline-flex items-center px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-full border border-white/30 transition-all duration-300 hover:bg-white/20 hover:-translate-y-1"
             >
-              <span>{{ ctaContact }}</span>
+              <span>{{ currentCta2Text }}</span>
             </NuxtLink>
           </div>
         </div>

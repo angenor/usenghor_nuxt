@@ -31,14 +31,30 @@ const EDITORIAL_TO_I18N_MAP: Partial<Record<string, string>> = {
   // Hero slides (homepage)
   'hero.slide1.title': 'hero.slides.slide1.title',
   'hero.slide1.subtitle': 'hero.slides.slide1.subtitle',
+  'hero.slide1.cta1.text': 'hero.slides.slide1.cta1.text',
+  'hero.slide1.cta1.link': 'hero.slides.slide1.cta1.link',
+  'hero.slide1.cta2.text': 'hero.slides.slide1.cta2.text',
+  'hero.slide1.cta2.link': 'hero.slides.slide1.cta2.link',
   'hero.slide2.title': 'hero.slides.slide2.title',
   'hero.slide2.subtitle': 'hero.slides.slide2.subtitle',
+  'hero.slide2.cta1.text': 'hero.slides.slide2.cta1.text',
+  'hero.slide2.cta1.link': 'hero.slides.slide2.cta1.link',
+  'hero.slide2.cta2.text': 'hero.slides.slide2.cta2.text',
+  'hero.slide2.cta2.link': 'hero.slides.slide2.cta2.link',
   'hero.slide3.title': 'hero.slides.slide3.title',
   'hero.slide3.subtitle': 'hero.slides.slide3.subtitle',
+  'hero.slide3.cta1.text': 'hero.slides.slide3.cta1.text',
+  'hero.slide3.cta1.link': 'hero.slides.slide3.cta1.link',
+  'hero.slide3.cta2.text': 'hero.slides.slide3.cta2.text',
+  'hero.slide3.cta2.link': 'hero.slides.slide3.cta2.link',
   'hero.slide4.title': 'hero.slides.slide4.title',
   'hero.slide4.subtitle': 'hero.slides.slide4.subtitle',
+  'hero.slide4.cta1.text': 'hero.slides.slide4.cta1.text',
+  'hero.slide4.cta1.link': 'hero.slides.slide4.cta1.link',
+  'hero.slide4.cta2.text': 'hero.slides.slide4.cta2.text',
+  'hero.slide4.cta2.link': 'hero.slides.slide4.cta2.link',
 
-  // Hero CTA
+  // Hero CTA (legacy)
   'hero.cta.discover': 'hero.cta.discover',
   'hero.cta.contact': 'hero.cta.contact',
 
