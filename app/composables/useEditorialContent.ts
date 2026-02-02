@@ -227,6 +227,18 @@ export function useEditorialContent(pageId: string, options: UseEditorialContent
     return content?.value !== null && content?.value !== undefined
   }
 
+  /**
+   * Récupère la valeur brute d'un contenu éditorial (sans fallback i18n)
+   * Utile pour les IDs de médias ou autres valeurs non-textuelles
+   *
+   * @param editorialKey - Clé éditoriale (ex: 'hero.slide1.image')
+   * @returns La valeur brute ou null si non définie
+   */
+  function getRawContent(editorialKey: string): string | null {
+    const content = store.getContent(editorialKey)
+    return content?.value ?? null
+  }
+
   // ==========================================================================
   // LIFECYCLE
   // ==========================================================================
@@ -247,6 +259,7 @@ export function useEditorialContent(pageId: string, options: UseEditorialContent
     // Méthodes
     loadContent,
     getContent,
+    getRawContent,
     getHtmlContent,
     hasEditorialContent,
     getI18nKey,

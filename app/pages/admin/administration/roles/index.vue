@@ -1,42 +1,51 @@
 <script setup lang="ts">
-import type {
-  RoleWithDetails,
-  RoleWithPermissions,
-  RoleUser,
-  RoleFilters,
-  RoleStats,
-  PermissionCategoryGroup,
-  Permission
-} from '~/composables/useMockData'
+import {
+  useAdminRolesApi,
+  getHierarchyLevelLabel,
+  getHierarchyLevelColor,
+  isSystemRole,
+  type RoleWithDetails,
+  type RoleWithPermissions,
+  type RoleUser,
+  type RoleFilters,
+  type RoleStats,
+  type PermissionCategoryGroup,
+} from '~/composables/useAdminRolesApi'
+import { useAdminPermissionsApi, type Permission } from '~/composables/useAdminPermissionsApi'
 
 definePageMeta({
   layout: 'admin'
 })
 
+// Composables
 const {
-  getAllRolesWithDetails,
-  getRoleWithPermissions,
-  getUsersByRole,
-  getPermissionsByCategoryForRole,
-  getRoleStats,
-  isRoleCodeAvailable,
+  getAllRoles,
+  getRoleById,
+  createRole,
+  updateRole,
+  deleteRole,
+  duplicateRole,
+  toggleRoleActive,
+  updateRolePermissions,
+  getRoleUsers,
+  enrichRolesWithDetails,
+  calculateStats,
+  groupPermissionsByCategory,
   validateRoleCode,
   validateRoleName,
   validateHierarchyLevel,
+  isCodeAvailable,
   canDeleteRole,
   canModifyRole,
-  duplicateRole,
-  hierarchyLevelLabels,
-  getHierarchyLevelLabel,
-  getHierarchyLevelColor,
-  isSystemRole,
-  generateRoleId
-} = useMockData()
+} = useAdminRolesApi()
+
+const { getAllPermissions } = useAdminPermissionsApi()
 
 // === STATE ===
 const isLoading = ref(true)
 const isSaving = ref(false)
 const roles = ref<RoleWithDetails[]>([])
+const allPermissions = ref<Permission[]>([])
 const stats = ref<RoleStats | null>(null)
 
 // Filters
@@ -82,7 +91,56 @@ const formErrors = ref<Record<string, string>>({})
 
 // === COMPUTED ===
 const filteredRoles = computed(() => {
-  return getAllRolesWithDetails(filters.value)
+  let result = [...roles.value]
+
+  // Filter by search
+  if (filters.value.search) {
+    const search = filters.value.search.toLowerCase()
+    result = result.filter(r =>
+      r.code.toLowerCase().includes(search) ||
+      r.name_fr.toLowerCase().includes(search)
+    )
+  }
+
+  // Filter by active status
+  if (filters.value.active !== undefined) {
+    result = result.filter(r => r.active === filters.value.active)
+  }
+
+  // Sort
+  if (filters.value.sort_by) {
+    result.sort((a, b) => {
+      let aVal: number | string
+      let bVal: number | string
+
+      switch (filters.value.sort_by) {
+        case 'hierarchy_level':
+          aVal = a.hierarchy_level
+          bVal = b.hierarchy_level
+          break
+        case 'name_fr':
+          aVal = a.name_fr.toLowerCase()
+          bVal = b.name_fr.toLowerCase()
+          break
+        case 'code':
+          aVal = a.code.toLowerCase()
+          bVal = b.code.toLowerCase()
+          break
+        case 'users_count':
+          aVal = a.users_count
+          bVal = b.users_count
+          break
+        default:
+          return 0
+      }
+
+      if (aVal < bVal) return filters.value.sort_order === 'asc' ? -1 : 1
+      if (aVal > bVal) return filters.value.sort_order === 'asc' ? 1 : -1
+      return 0
+    })
+  }
+
+  return result
 })
 
 const hasActiveFilters = computed(() => {
@@ -108,10 +166,22 @@ const canSubmitForm = computed(() => {
 const loadData = async () => {
   isLoading.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 300))
-    roles.value = getAllRolesWithDetails(filters.value)
-    stats.value = getRoleStats()
-  } finally {
+    // Charger les rôles et les permissions en parallèle
+    const [rolesResponse, permsData] = await Promise.all([
+      getAllRoles(),
+      getAllPermissions(),
+    ])
+
+    allPermissions.value = permsData
+
+    // Enrichir les rôles avec les détails
+    roles.value = await enrichRolesWithDetails(rolesResponse)
+    stats.value = calculateStats(roles.value)
+  }
+  catch (error) {
+    console.error('Erreur lors du chargement:', error)
+  }
+  finally {
     isLoading.value = false
   }
 }
@@ -136,32 +206,44 @@ const openCreateModal = () => {
     permission_ids: []
   }
   formErrors.value = {}
-  permissionCategories.value = getPermissionsByCategoryForRole()
+  permissionCategories.value = groupPermissionsByCategory(allPermissions.value, [])
   showModal.value = true
 }
 
-const openEditModal = (role: RoleWithDetails) => {
-  const check = canModifyRole(role.id)
+const openEditModal = async (role: RoleWithDetails) => {
+  const check = canModifyRole(role)
   if (!check.canModify) {
     alert(check.warning || 'Ce rôle ne peut pas être modifié')
     return
   }
 
-  const roleWithPerms = getRoleWithPermissions(role.id)
-  if (!roleWithPerms) return
+  isSaving.value = true
+  try {
+    const roleWithPerms = await getRoleById(role.id)
 
-  editingRole.value = roleWithPerms
-  form.value = {
-    code: roleWithPerms.code,
-    name_fr: roleWithPerms.name_fr,
-    description: roleWithPerms.description || '',
-    hierarchy_level: roleWithPerms.hierarchy_level,
-    active: roleWithPerms.active,
-    permission_ids: [...roleWithPerms.permission_ids]
+    editingRole.value = roleWithPerms
+    form.value = {
+      code: roleWithPerms.code,
+      name_fr: roleWithPerms.name_fr,
+      description: roleWithPerms.description || '',
+      hierarchy_level: roleWithPerms.hierarchy_level,
+      active: roleWithPerms.active,
+      permission_ids: roleWithPerms.permissions.map(p => p.id)
+    }
+    formErrors.value = {}
+    permissionCategories.value = groupPermissionsByCategory(
+      allPermissions.value,
+      roleWithPerms.permissions.map(p => p.id)
+    )
+    showModal.value = true
   }
-  formErrors.value = {}
-  permissionCategories.value = getPermissionsByCategoryForRole(role.id)
-  showModal.value = true
+  catch (error) {
+    console.error('Erreur lors du chargement du rôle:', error)
+    alert('Erreur lors du chargement du rôle')
+  }
+  finally {
+    isSaving.value = false
+  }
 }
 
 const closeModal = () => {
@@ -174,7 +256,8 @@ const validateForm = () => {
 
   if (!validateRoleCode(form.value.code)) {
     formErrors.value.code = 'Le code doit être en snake_case (2-50 caractères, lettres minuscules, chiffres et underscores)'
-  } else if (!isRoleCodeAvailable(form.value.code, editingRole.value?.id)) {
+  }
+  else if (!isCodeAvailable(form.value.code, roles.value, editingRole.value?.id)) {
     formErrors.value.code = 'Ce code est déjà utilisé'
   }
 
@@ -194,23 +277,53 @@ const saveRole = async () => {
 
   isSaving.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 500))
+    if (isEditing.value && editingRole.value) {
+      // Mise à jour
+      await updateRole(editingRole.value.id, {
+        code: form.value.code,
+        name_fr: form.value.name_fr,
+        description: form.value.description || null,
+        hierarchy_level: form.value.hierarchy_level,
+        active: form.value.active,
+      })
 
-    if (isEditing.value) {
-      console.log('Mise à jour du rôle:', { id: editingRole.value?.id, ...form.value })
-    } else {
-      console.log('Création du rôle:', { id: generateRoleId(), ...form.value })
+      // Mettre à jour les permissions
+      await updateRolePermissions(editingRole.value.id, {
+        permission_ids: form.value.permission_ids,
+      })
+    }
+    else {
+      // Création
+      const result = await createRole({
+        code: form.value.code,
+        name_fr: form.value.name_fr,
+        description: form.value.description || null,
+        hierarchy_level: form.value.hierarchy_level,
+        active: form.value.active,
+      })
+
+      // Ajouter les permissions au nouveau rôle
+      if (form.value.permission_ids.length > 0) {
+        await updateRolePermissions(result.id, {
+          permission_ids: form.value.permission_ids,
+        })
+      }
     }
 
     closeModal()
     await loadData()
-  } finally {
+  }
+  catch (error) {
+    console.error('Erreur lors de la sauvegarde:', error)
+    alert('Erreur lors de la sauvegarde du rôle')
+  }
+  finally {
     isSaving.value = false
   }
 }
 
 const openDeleteModal = (role: RoleWithDetails) => {
-  const check = canDeleteRole(role.id)
+  const check = canDeleteRole(role)
   if (!check.canDelete) {
     alert(check.reason || 'Ce rôle ne peut pas être supprimé')
     return
@@ -224,12 +337,16 @@ const confirmDelete = async () => {
 
   isSaving.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 500))
-    console.log('Suppression du rôle:', selectedRole.value.id)
+    await deleteRole(selectedRole.value.id)
     showDeleteModal.value = false
     selectedRole.value = null
     await loadData()
-  } finally {
+  }
+  catch (error) {
+    console.error('Erreur lors de la suppression:', error)
+    alert('Erreur lors de la suppression du rôle')
+  }
+  finally {
     isSaving.value = false
   }
 }
@@ -251,25 +368,31 @@ const confirmDuplicate = async () => {
     return
   }
 
-  if (!isRoleCodeAvailable(duplicateForm.value.code)) {
+  if (!isCodeAvailable(duplicateForm.value.code, roles.value)) {
     alert('Ce code est déjà utilisé')
     return
   }
 
   isSaving.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 500))
-    const newRole = duplicateRole(selectedRole.value.id, duplicateForm.value.code, duplicateForm.value.name_fr)
-    console.log('Duplication du rôle:', newRole)
+    await duplicateRole(selectedRole.value.id, {
+      new_code: duplicateForm.value.code,
+      new_name: duplicateForm.value.name_fr,
+    })
     showDuplicateModal.value = false
     selectedRole.value = null
     await loadData()
-  } finally {
+  }
+  catch (error) {
+    console.error('Erreur lors de la duplication:', error)
+    alert('Erreur lors de la duplication du rôle')
+  }
+  finally {
     isSaving.value = false
   }
 }
 
-const toggleRoleActive = async (role: RoleWithDetails) => {
+const handleToggleRoleActive = async (role: RoleWithDetails) => {
   if (role.code === 'super_admin') {
     alert('Le super administrateur ne peut pas être désactivé')
     return
@@ -277,33 +400,46 @@ const toggleRoleActive = async (role: RoleWithDetails) => {
 
   isSaving.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 300))
-    console.log('Toggle active pour le rôle:', role.id, !role.active)
+    await toggleRoleActive(role.id)
     await loadData()
-  } finally {
+  }
+  catch (error) {
+    console.error('Erreur lors du changement de statut:', error)
+    alert('Erreur lors du changement de statut')
+  }
+  finally {
     isSaving.value = false
   }
 }
 
-const openUsersModal = (role: RoleWithDetails) => {
+const openUsersModal = async (role: RoleWithDetails) => {
   selectedRole.value = role
   roleUsersPage.value = 1
-  loadRoleUsers()
+  await loadRoleUsers()
   showUsersModal.value = true
 }
 
-const loadRoleUsers = () => {
+const loadRoleUsers = async () => {
   if (!selectedRole.value) return
-  const result = getUsersByRole(selectedRole.value.id, roleUsersPage.value, 10)
-  roleUsers.value = result.users
-  roleUsersTotal.value = result.total
+
+  try {
+    const users = await getRoleUsers(selectedRole.value.id)
+    roleUsers.value = users
+    roleUsersTotal.value = users.length
+  }
+  catch (error) {
+    console.error('Erreur lors du chargement des utilisateurs:', error)
+    roleUsers.value = []
+    roleUsersTotal.value = 0
+  }
 }
 
 const togglePermission = (permissionId: string) => {
   const index = form.value.permission_ids.indexOf(permissionId)
   if (index === -1) {
     form.value.permission_ids.push(permissionId)
-  } else {
+  }
+  else {
     form.value.permission_ids.splice(index, 1)
   }
   updateCategoryCounts()
@@ -315,8 +451,9 @@ const toggleCategory = (category: PermissionCategoryGroup) => {
 
   if (allSelected) {
     form.value.permission_ids = form.value.permission_ids.filter(id => !categoryPermIds.includes(id))
-  } else {
-    categoryPermIds.forEach(id => {
+  }
+  else {
+    categoryPermIds.forEach((id) => {
       if (!form.value.permission_ids.includes(id)) {
         form.value.permission_ids.push(id)
       }
@@ -349,11 +486,6 @@ const formatDate = (dateString: string) => {
   })
 }
 
-// Watch filters
-watch(filters, () => {
-  roles.value = getAllRolesWithDetails(filters.value)
-}, { deep: true })
-
 // Watch users page
 watch(roleUsersPage, () => {
   loadRoleUsers()
@@ -380,14 +512,19 @@ onMounted(() => {
         class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
         @click="openCreateModal"
       >
-        <font-awesome-icon :icon="['fas', 'plus']" class="h-4 w-4" />
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
         Nouveau rôle
       </button>
     </div>
 
     <!-- Loading -->
     <div v-if="isLoading" class="flex items-center justify-center py-12">
-      <font-awesome-icon :icon="['fas', 'spinner']" class="h-8 w-8 animate-spin text-gray-400" />
+      <svg class="animate-spin h-8 w-8 text-primary-600" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+      </svg>
     </div>
 
     <template v-else>
@@ -396,7 +533,9 @@ onMounted(() => {
         <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
           <div class="flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
-              <font-awesome-icon :icon="['fas', 'user-shield']" class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <svg class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
             </div>
             <div>
               <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</p>
@@ -408,7 +547,9 @@ onMounted(() => {
         <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
           <div class="flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30">
-              <font-awesome-icon :icon="['fas', 'check-circle']" class="h-5 w-5 text-green-600 dark:text-green-400" />
+              <svg class="h-5 w-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             </div>
             <div>
               <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.active }}</p>
@@ -420,7 +561,9 @@ onMounted(() => {
         <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
           <div class="flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30">
-              <font-awesome-icon :icon="['fas', 'lock']" class="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              <svg class="h-5 w-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
             </div>
             <div>
               <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.system }}</p>
@@ -432,7 +575,9 @@ onMounted(() => {
         <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
           <div class="flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/30">
-              <font-awesome-icon :icon="['fas', 'users']" class="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              <svg class="h-5 w-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
             </div>
             <div>
               <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total_users_with_roles }}</p>
@@ -486,10 +631,22 @@ onMounted(() => {
             class="rounded-lg border border-gray-300 p-2 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
             @click="filters.sort_order = filters.sort_order === 'asc' ? 'desc' : 'asc'"
           >
-            <font-awesome-icon
-              :icon="['fas', filters.sort_order === 'asc' ? 'sort-amount-up' : 'sort-amount-down']"
-              class="h-4 w-4 text-gray-500 dark:text-gray-400"
-            />
+            <svg class="h-4 w-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                v-if="filters.sort_order === 'asc'"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
+              />
+              <path
+                v-else
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"
+              />
+            </svg>
           </button>
 
           <!-- Clear filters -->
@@ -552,7 +709,9 @@ onMounted(() => {
                       class="flex h-10 w-10 items-center justify-center rounded-lg"
                       :class="getHierarchyLevelColor(role.hierarchy_level)"
                     >
-                      <font-awesome-icon :icon="['fas', 'user-shield']" class="h-5 w-5" />
+                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
                     </div>
                     <div>
                       <p class="font-medium text-gray-900 dark:text-white">
@@ -561,7 +720,9 @@ onMounted(() => {
                           v-if="role.is_system"
                           class="ml-2 inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-800 dark:bg-purple-900/30 dark:text-purple-400"
                         >
-                          <font-awesome-icon :icon="['fas', 'lock']" class="mr-1 h-2.5 w-2.5" />
+                          <svg class="mr-1 h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                          </svg>
                           Système
                         </span>
                       </p>
@@ -596,7 +757,9 @@ onMounted(() => {
                     class="inline-flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400"
                     @click="openUsersModal(role)"
                   >
-                    <font-awesome-icon :icon="['fas', 'users']" class="h-3 w-3" />
+                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
                     {{ role.users_count }}
                   </button>
                   <span v-else class="text-sm text-gray-500 dark:text-gray-400">0</span>
@@ -609,9 +772,24 @@ onMounted(() => {
                       ? 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50'
                       : 'bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600'"
                     :disabled="role.code === 'super_admin'"
-                    @click="toggleRoleActive(role)"
+                    @click="handleToggleRoleActive(role)"
                   >
-                    <font-awesome-icon :icon="['fas', role.active ? 'check-circle' : 'times-circle']" class="h-3 w-3" />
+                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        v-if="role.active"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                      <path
+                        v-else
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
                     {{ role.active ? 'Actif' : 'Inactif' }}
                   </button>
                 </td>
@@ -624,7 +802,9 @@ onMounted(() => {
                       :disabled="role.code === 'super_admin'"
                       @click="openEditModal(role)"
                     >
-                      <font-awesome-icon :icon="['fas', 'edit']" class="h-4 w-4" />
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
                     </button>
                     <button
                       type="button"
@@ -632,7 +812,9 @@ onMounted(() => {
                       title="Dupliquer"
                       @click="openDuplicateModal(role)"
                     >
-                      <font-awesome-icon :icon="['fas', 'copy']" class="h-4 w-4" />
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
                     </button>
                     <button
                       type="button"
@@ -641,14 +823,18 @@ onMounted(() => {
                       :disabled="role.is_system || role.users_count > 0"
                       @click="openDeleteModal(role)"
                     >
-                      <font-awesome-icon :icon="['fas', 'trash']" class="h-4 w-4" />
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
                     </button>
                   </div>
                 </td>
               </tr>
               <tr v-if="filteredRoles.length === 0">
                 <td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-                  <font-awesome-icon :icon="['fas', 'inbox']" class="mb-2 h-8 w-8" />
+                  <svg class="mx-auto mb-2 h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                  </svg>
                   <p>Aucun rôle trouvé</p>
                 </td>
               </tr>
@@ -676,7 +862,9 @@ onMounted(() => {
               class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
               @click="closeModal"
             >
-              <font-awesome-icon :icon="['fas', 'xmark']" class="h-5 w-5" />
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           </div>
 
@@ -684,11 +872,13 @@ onMounted(() => {
           <div class="admin-scrollbar max-h-[70vh] overflow-y-auto p-4" data-lenis-prevent>
             <!-- Warning for system roles -->
             <div
-              v-if="isEditing && editingRole?.is_system"
+              v-if="isEditing && editingRole && isSystemRole(editingRole.code)"
               class="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900/50 dark:bg-yellow-900/20"
             >
               <div class="flex items-start gap-3">
-                <font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                <svg class="h-5 w-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
                 <div>
                   <p class="font-medium text-yellow-800 dark:text-yellow-200">Rôle système</p>
                   <p class="text-sm text-yellow-700 dark:text-yellow-300">
@@ -714,7 +904,7 @@ onMounted(() => {
                     placeholder="ex: content_manager"
                     class="w-full rounded-lg border px-3 py-2 text-sm focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                     :class="formErrors.code ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
-                    :disabled="isEditing && editingRole?.is_system"
+                    :disabled="isEditing && editingRole && isSystemRole(editingRole.code)"
                     @blur="validateForm"
                   />
                   <p v-if="formErrors.code" class="mt-1 text-sm text-red-500">{{ formErrors.code }}</p>
@@ -874,7 +1064,10 @@ onMounted(() => {
               :disabled="!canSubmitForm || isSaving"
               @click="saveRole"
             >
-              <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
+              <svg v-if="isSaving" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
               {{ isEditing ? 'Enregistrer' : 'Créer' }}
             </button>
           </div>
@@ -892,7 +1085,9 @@ onMounted(() => {
         <div class="w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-gray-800">
           <div class="p-6 text-center">
             <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-              <font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="h-7 w-7 text-red-600 dark:text-red-400" />
+              <svg class="h-7 w-7 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
             </div>
             <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
               Supprimer le rôle
@@ -915,7 +1110,10 @@ onMounted(() => {
                 :disabled="isSaving"
                 @click="confirmDelete"
               >
-                <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
+                <svg v-if="isSaving" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
                 Supprimer
               </button>
             </div>
@@ -976,8 +1174,13 @@ onMounted(() => {
               :disabled="isSaving"
               @click="confirmDuplicate"
             >
-              <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
-              <font-awesome-icon v-else :icon="['fas', 'copy']" class="h-4 w-4" />
+              <svg v-if="isSaving" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
               Dupliquer
             </button>
           </div>
@@ -1003,7 +1206,9 @@ onMounted(() => {
                 class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
                 @click="showUsersModal = false"
               >
-                <font-awesome-icon :icon="['fas', 'xmark']" class="h-5 w-5" />
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
             <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -1018,7 +1223,9 @@ onMounted(() => {
                 class="flex items-center gap-3 rounded-lg border border-gray-200 p-3 dark:border-gray-700"
               >
                 <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700">
-                  <font-awesome-icon :icon="['fas', 'user']" class="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                  <svg class="h-5 w-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                 </div>
                 <div class="flex-1">
                   <p class="font-medium text-gray-900 dark:text-white">{{ user.full_name }}</p>

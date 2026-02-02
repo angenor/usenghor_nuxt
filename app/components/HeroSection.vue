@@ -2,31 +2,52 @@
 const localePath = useLocalePath()
 
 // Contenus éditoriaux avec fallback sur i18n
-const { getContent, loadContent } = useEditorialContent('homepage')
+const { getContent, getRawContent, loadContent } = useEditorialContent('homepage')
 
-// Configuration des slides avec clés éditoriales
-const slides = [
+// API Media pour résoudre les URLs des images
+const { getMediaUrl } = useMediaApi()
+
+// Configuration des slides avec clés éditoriales et images de fallback
+const slidesConfig = [
   {
-    image: '/images/bg/backgroud_senghor1.jpg',
     editorialTitleKey: 'hero.slide1.title',
     editorialSubtitleKey: 'hero.slide1.subtitle',
+    editorialImageKey: 'hero.slide1.image',
+    fallbackImage: '/images/bg/backgroud_senghor1.jpg',
   },
   {
-    image: '/images/bg/backgroud_senghor2.jpg',
     editorialTitleKey: 'hero.slide2.title',
     editorialSubtitleKey: 'hero.slide2.subtitle',
+    editorialImageKey: 'hero.slide2.image',
+    fallbackImage: '/images/bg/backgroud_senghor2.jpg',
   },
   {
-    image: '/images/bg/backgroud_senghor3.jpg',
     editorialTitleKey: 'hero.slide3.title',
     editorialSubtitleKey: 'hero.slide3.subtitle',
+    editorialImageKey: 'hero.slide3.image',
+    fallbackImage: '/images/bg/backgroud_senghor3.jpg',
   },
   {
-    image: '/images/bg/backgroud_senghor4.jpg',
     editorialTitleKey: 'hero.slide4.title',
     editorialSubtitleKey: 'hero.slide4.subtitle',
+    editorialImageKey: 'hero.slide4.image',
+    fallbackImage: '/images/bg/backgroud_senghor4.jpg',
   },
 ]
+
+// Computed pour résoudre les images depuis l'éditorial avec fallback
+const slides = computed(() => {
+  return slidesConfig.map((config) => {
+    // Récupérer l'ID du media depuis le contenu éditorial (valeur brute, pas de fallback i18n)
+    const imageMediaId = getRawContent(config.editorialImageKey)
+
+    return {
+      image: imageMediaId ? getMediaUrl(imageMediaId) : config.fallbackImage,
+      editorialTitleKey: config.editorialTitleKey,
+      editorialSubtitleKey: config.editorialSubtitleKey,
+    }
+  })
+})
 
 const currentSlide = ref(0)
 const isTransitioning = ref(false)

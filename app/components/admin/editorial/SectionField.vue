@@ -55,7 +55,21 @@ function cancel() {
 </script>
 
 <template>
-  <div class="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 overflow-hidden">
+  <!-- Pour les champs image, utiliser le composant dédié -->
+  <AdminEditorialImageField
+    v-if="field.type === 'image'"
+    :field="field"
+    :value="value"
+    :is-editing="isEditing"
+    :is-saving="isSaving"
+    @edit="emit('edit')"
+    @save="(mediaId: string, valueType: 'text' | 'number' | 'html') => emit('save', mediaId, valueType)"
+    @cancel="emit('cancel')"
+    @history="emit('history')"
+  />
+
+  <!-- Pour les autres types, garder le comportement actuel -->
+  <div v-else class="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 overflow-hidden">
     <!-- Field header -->
     <div class="flex items-center justify-between p-3 border-b border-gray-100 dark:border-gray-700">
       <div class="flex items-center gap-2">
