@@ -25,6 +25,7 @@ const emit = defineEmits<Emits>()
 
 const editorContainer = ref<HTMLElement>()
 const editorInstance = shallowRef<InstanceType<typeof import('@editorjs/editorjs').default> | null>(null)
+const undoInstance = shallowRef<InstanceType<typeof import('editorjs-undo').default> | null>(null)
 const isReady = ref(false)
 
 /**
@@ -77,6 +78,7 @@ async function initEditor() {
     { default: Marker },
     { default: LinkTool },
     { default: Checklist },
+    { default: Undo },
   ] = await Promise.all([
     import('@editorjs/editorjs'),
     import('@editorjs/header'),
@@ -91,6 +93,7 @@ async function initEditor() {
     import('@editorjs/marker'),
     import('@editorjs/link'),
     import('@editorjs/checklist'),
+    import('editorjs-undo'),
   ])
 
   editorInstance.value = new EditorJS({
@@ -255,6 +258,8 @@ async function initEditor() {
     onReady: () => {
       isReady.value = true
       if (editorInstance.value) {
+        // Initialiser le plugin Undo pour Ctrl+Z / Cmd+Z
+        undoInstance.value = new Undo({ editor: editorInstance.value })
         emit('ready', editorInstance.value as unknown as API)
       }
     },

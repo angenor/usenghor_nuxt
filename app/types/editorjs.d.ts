@@ -114,3 +114,33 @@ declare module '@editorjs/link' {
     }
   }
 }
+
+declare module '@editorjs/checklist' {
+  import { BlockTool, BlockToolConstructorOptions } from '@editorjs/editorjs'
+  export default class Checklist implements BlockTool {
+    constructor(config: BlockToolConstructorOptions)
+    render(): HTMLElement
+    save(block: HTMLElement): {
+      items: Array<{ text: string; checked: boolean }>
+    }
+  }
+}
+
+declare module 'editorjs-undo' {
+  import type EditorJS from '@editorjs/editorjs'
+
+  interface UndoConfig {
+    editor: EditorJS
+    maxLength?: number
+    onUpdate?: () => void
+  }
+
+  export default class Undo {
+    constructor(config: UndoConfig)
+    initialize(data: unknown): void
+    undo(): void
+    redo(): void
+    registerChange(): void
+    clear(): void
+  }
+}

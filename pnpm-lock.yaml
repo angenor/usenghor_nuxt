@@ -101,6 +101,9 @@ importers:
       better-sqlite3:
         specifier: ^12.5.0
         version: 12.5.0
+      editorjs-undo:
+        specifier: ^2.0.28
+        version: 2.0.28
       eslint:
         specifier: ^9.39.2
         version: 9.39.2(jiti@2.6.1)
@@ -3838,6 +3841,9 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
 
+  editorjs-undo@2.0.28:
+    resolution: {integrity: sha512-7MiLdjIsPOXn8+cHDeAt2HapVklg4vcLWWkd2eMMlGI6UVtwYSjdQquDSv9752B/fOEP1C3NMF2sdiCoZV3tTA==}
+
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
 
@@ -6720,6 +6726,9 @@ packages:
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
+
+  vanilla-caret-js@1.1.0:
+    resolution: {integrity: sha512-vl3R4Xjqb+xnM0gYyg+wcqWGYwKKnkz58Yj29/FQB+w+yP7R8IR1DGoJnDIs05moEZiGlQUTabPMoEtnQNcrpQ==}
 
   vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
@@ -11120,6 +11129,10 @@ snapshots:
       minimatch: 9.0.1
       semver: 7.7.3
 
+  editorjs-undo@2.0.28:
+    dependencies:
+      vanilla-caret-js: 1.1.0
+
   ee-first@1.1.1: {}
 
   electron-to-chromium@1.5.267: {}
@@ -14902,6 +14915,8 @@ snapshots:
       punycode: 2.3.1
 
   util-deprecate@1.0.2: {}
+
+  vanilla-caret-js@1.1.0: {}
 
   vary@1.1.2: {}
 
