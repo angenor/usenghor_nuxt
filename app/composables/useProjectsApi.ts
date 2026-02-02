@@ -437,6 +437,36 @@ export function useProjectsApi() {
   }
 
   // =========================================================================
+  // Countries
+  // =========================================================================
+
+  /**
+   * Liste les pays d'un projet.
+   */
+  async function listProjectCountries(projectId: string): Promise<Array<{ project_id: string; country_external_id: string }>> {
+    return apiFetch<Array<{ project_id: string; country_external_id: string }>>(`/api/admin/projects/${projectId}/countries`)
+  }
+
+  /**
+   * Ajoute un pays à un projet.
+   */
+  async function addProjectCountry(projectId: string, countryExternalId: string): Promise<{ project_id: string; country_external_id: string }> {
+    return apiFetch<{ project_id: string; country_external_id: string }>(`/api/admin/projects/${projectId}/countries`, {
+      method: 'POST',
+      body: { country_external_id: countryExternalId },
+    })
+  }
+
+  /**
+   * Retire un pays d'un projet.
+   */
+  async function removeProjectCountry(projectId: string, countryExternalId: string): Promise<MessageResponse> {
+    return apiFetch<MessageResponse>(`/api/admin/projects/${projectId}/countries/${countryExternalId}`, {
+      method: 'DELETE',
+    })
+  }
+
+  // =========================================================================
   // Media Library
   // =========================================================================
 
@@ -572,6 +602,11 @@ export function useProjectsApi() {
     createProjectCall,
     updateCall,
     deleteCall,
+
+    // Countries
+    listProjectCountries,
+    addProjectCountry,
+    removeProjectCountry,
 
     // Media Library
     listProjectMedia,

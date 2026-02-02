@@ -22,7 +22,11 @@ const {
   formatBudget,
 } = useProjectsApi()
 
+const { getUserById, getFullName } = useUsersApi()
 const { sectors } = useReferenceData()
+
+// Données du manager
+const managerName = ref<string | null>(null)
 
 // État
 const project = ref<ProjectDisplay | null>(null)
@@ -36,6 +40,17 @@ const projectId = computed(() => route.params.id as string)
 onMounted(async () => {
   try {
     project.value = await getProjectById(projectId.value)
+
+    // Charger le nom du manager si défini
+    if (project.value?.manager_external_id) {
+      try {
+        const manager = await getUserById(project.value.manager_external_id)
+        managerName.value = getFullName(manager)
+      }
+      catch {
+        // Ignorer si le manager n'existe pas
+      }
+    }
   }
   catch (err: any) {
     console.error('Erreur chargement projet:', err)
@@ -220,6 +235,15 @@ const parsedDescription = computed<OutputData | null>(() => {
           </h2>
           <p class="text-gray-600 dark:text-gray-300">{{ project.beneficiaries }}</p>
         </div>
+
+        <!-- Partenaires -->
+        <AdminProjetsProjectPartnersSection :project-id="project.id" />
+
+        <!-- Pays concernés -->
+        <AdminProjetsProjectCountriesSection :project-id="project.id" />
+
+        <!-- Médiathèque -->
+        <AdminProjetsProjectMediaSection :project-id="project.id" />
       </div>
 
       <!-- Sidebar -->
@@ -263,6 +287,13 @@ const parsedDescription = computed<OutputData | null>(() => {
               <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Secteur</dt>
               <dd class="mt-1 text-sm text-gray-900 dark:text-white">
                 {{ getSectorName(project.sector_external_id) }}
+              </dd>
+            </div>
+            <div v-if="managerName">
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Responsable</dt>
+              <dd class="mt-1 flex items-center gap-2 text-sm text-gray-900 dark:text-white">
+                <font-awesome-icon :icon="['fas', 'user-tie']" class="h-4 w-4 text-indigo-500" />
+                {{ managerName }}
               </dd>
             </div>
           </dl>

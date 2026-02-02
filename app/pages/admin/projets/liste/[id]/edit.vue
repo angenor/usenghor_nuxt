@@ -19,10 +19,12 @@ const {
   publicationStatusLabels,
 } = useProjectsApi()
 
+const { getUsersForSelect, getFullName } = useUsersApi()
 const { sectors } = useReferenceData()
 
 // Données de référence
 const categories = ref<ProjectCategoryRead[]>([])
+const usersForSelect = ref<Array<{ id: string; email: string; full_name: string }>>([])
 
 // Onglet actif
 const activeTab = ref<'general' | 'classification' | 'dates' | 'publication'>('general')
@@ -56,10 +58,13 @@ const projectId = computed(() => route.params.id as string)
 
 onMounted(async () => {
   try {
-    const [categoriesData, project] = await Promise.all([
+    const [categoriesData, project, users] = await Promise.all([
       getAllCategories(),
       getProjectById(projectId.value),
+      getUsersForSelect(),
     ])
+
+    usersForSelect.value = users
 
     categories.value = categoriesData
 
@@ -392,6 +397,25 @@ const tabs = [
               {{ sec.name }}
             </option>
           </select>
+        </div>
+
+        <!-- Responsable du projet -->
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Responsable du projet
+          </label>
+          <select
+            v-model="form.manager_external_id"
+            class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          >
+            <option :value="null">Sélectionnez un responsable</option>
+            <option v-for="user in usersForSelect" :key="user.id" :value="user.id">
+              {{ user.full_name }} ({{ user.email }})
+            </option>
+          </select>
+          <p class="mt-1 text-xs text-gray-500">
+            La personne en charge de la coordination du projet
+          </p>
         </div>
       </div>
 
