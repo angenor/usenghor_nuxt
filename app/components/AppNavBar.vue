@@ -3,6 +3,9 @@ const { t, locale, setLocale } = useI18n()
 const localePath = useLocalePath()
 const { isDark, toggle: originalToggleDarkMode } = useDarkMode()
 
+// Contenus éditoriaux pour les éléments globaux
+const { getContent, getRawContent, loadContent } = useEditorialContent('global')
+
 const isScrolled = ref(false)
 const showModeToast = ref(false)
 let toastTimeout: ReturnType<typeof setTimeout> | null = null
@@ -191,9 +194,14 @@ const isMobileSubmenuExpanded = (key: string) => {
   return expandedMobileMenus.value.includes(key)
 }
 
+// Bouton Candidater - valeurs éditables avec fallback
+const applyButtonText = computed(() => getContent('navbar.apply.text'))
+const applyButtonLink = computed(() => getRawContent('navbar.apply.link') || '/carrieres')
+
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
   handleScroll()
+  loadContent()
 })
 
 onUnmounted(() => {
@@ -547,7 +555,7 @@ onUnmounted(() => {
 
           <!-- CTA Button -->
           <NuxtLink
-            :to="localePath('/carrieres')"
+            :to="localePath(applyButtonLink)"
             class="group relative inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl overflow-hidden transition-all duration-300 ml-2"
             :class="[
               isScrolled
@@ -556,7 +564,7 @@ onUnmounted(() => {
             ]"
           >
             <font-awesome-icon icon="fa-solid fa-paper-plane" class="w-4 h-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-            <span>{{ t('nav.apply') }}</span>
+            <span>{{ applyButtonText }}</span>
           </NuxtLink>
         </div>
 
@@ -722,12 +730,12 @@ onUnmounted(() => {
 
           <!-- CTA Button Mobile -->
           <NuxtLink
-            :to="localePath('/carrieres')"
+            :to="localePath(applyButtonLink)"
             class="flex items-center justify-center gap-2 w-full px-4 py-4 mt-3 text-center bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-300 shadow-lg"
             @click="isMobileMenuOpen = false"
           >
             <font-awesome-icon icon="fa-solid fa-paper-plane" class="text-gray-400 dark:text-gray-500" />
-            <span>{{ t('nav.apply') }}</span>
+            <span>{{ applyButtonText }}</span>
           </NuxtLink>
         </div>
       </div>

@@ -521,6 +521,9 @@ export type ValueSectionKey =
   | 'historypage.legacy.title'
   | 'historypage.legacy.description'
   | 'historypage.legacy.tags'
+  // Éléments globaux - Navbar
+  | 'navbar.apply.text'
+  | 'navbar.apply.link'
 
 export interface ValueSection {
   id: string

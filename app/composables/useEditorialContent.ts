@@ -140,6 +140,10 @@ const EDITORIAL_TO_I18N_MAP: Partial<Record<string, string>> = {
   'governance.badge': 'governance.badge',
   'governance.title': 'governance.title',
   'governance.subtitle': 'governance.subtitle',
+
+  // Navbar (éléments globaux)
+  'navbar.apply.text': 'nav.apply',
+  'navbar.apply.link': 'nav.applyLink',
 }
 
 // ============================================================================

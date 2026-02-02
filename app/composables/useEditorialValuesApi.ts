@@ -1059,8 +1059,35 @@ export const historyPageSections: PageSection[] = [
   },
 ]
 
+// ============================================================================
+// DÉFINITION DES ÉLÉMENTS GLOBAUX (NAVBAR, FOOTER, etc.)
+// ============================================================================
+
+export const globalElementsSections: PageSection[] = [
+  {
+    id: 'navbar',
+    name: 'Barre de navigation',
+    description: 'Éléments de la barre de navigation principale',
+    icon: 'bars',
+    color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
+    editorialKeys: ['navbar.apply.text', 'navbar.apply.link'],
+    fields: [
+      { key: 'navbar.apply.text', label: 'Bouton Candidater - Texte', description: 'Texte affiché sur le bouton principal de candidature', type: 'text', editorialKey: 'navbar.apply.text', editable: true },
+      { key: 'navbar.apply.link', label: 'Bouton Candidater - Lien', description: 'URL de destination du bouton (ex: /carrieres, /formations/postuler)', type: 'text', editorialKey: 'navbar.apply.link', editable: true },
+    ],
+  },
+]
+
 // Pages du front-office
 export const frontOfficePages: FrontOfficePage[] = [
+  {
+    id: 'global',
+    name: 'Éléments globaux',
+    slug: '*',
+    description: 'Éléments communs à toutes les pages : navigation, pied de page',
+    icon: 'globe',
+    sections: globalElementsSections,
+  },
   {
     id: 'homepage',
     name: 'Page d\'accueil',
