@@ -870,4 +870,82 @@ h4.ce-header {
 .mt-cell--selection-start {
   animation: mt-selection-pulse 1.5s ease-in-out infinite;
 }
+
+/* ===== Redimensionnement des colonnes ===== */
+
+/* Conteneur des poignées de redimensionnement */
+.mt-resize-handles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Poignée de redimensionnement */
+.mt-resize-handle {
+  position: absolute;
+  width: 7px;
+  cursor: col-resize;
+  pointer-events: auto;
+  background-color: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.mt-resize-handle:hover {
+  background-color: rgba(59, 130, 246, 0.3);
+}
+
+.mt-resize-handle::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background-color: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.mt-resize-handle:hover::after {
+  background-color: #3b82f6;
+}
+
+/* Poignée active pendant le redimensionnement */
+.mt-resize-handle--active {
+  background-color: rgba(59, 130, 246, 0.4) !important;
+}
+
+.mt-resize-handle--active::after {
+  background-color: #3b82f6 !important;
+}
+
+/* Style global pendant le redimensionnement */
+body.mt-resizing {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+body.mt-resizing * {
+  cursor: col-resize !important;
+}
+
+/* Dark mode pour les poignées */
+.dark .mt-resize-handle:hover {
+  background-color: rgba(96, 165, 250, 0.3);
+}
+
+.dark .mt-resize-handle:hover::after {
+  background-color: #60a5fa;
+}
+
+.dark .mt-resize-handle--active {
+  background-color: rgba(96, 165, 250, 0.4) !important;
+}
+
+.dark .mt-resize-handle--active::after {
+  background-color: #60a5fa !important;
+}
 </style>

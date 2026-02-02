@@ -12,6 +12,7 @@ MergeTable est un plugin EditorJS personnalisé qui étend les fonctionnalités 
 - **Undo/Redo** : Support complet de Ctrl+Z / Cmd+Z pour annuler les actions
 - **Sélection multi-cellules** : Sélection par clic-glisser ou Shift+Clic
 - **Rétrocompatibilité** : Migration automatique des anciens tableaux vers le nouveau format
+- **Redimensionnement des colonnes** : Ajuster la largeur des colonnes par glisser-déposer
 - **Mode sombre** : Support complet du dark mode via Tailwind CSS
 - **i18n** : Interface en français
 
@@ -27,6 +28,7 @@ app/components/editorjs/MergeTable/
 ├── MergeTable.ts         # Classe Block Tool EditorJS
 ├── Table.ts              # Gestion du tableau, fusion, historique
 ├── SelectionManager.ts   # Sélection multi-cellules
+├── ResizeManager.ts      # Redimensionnement des colonnes
 ├── types.ts              # Interfaces TypeScript
 ├── icons.ts              # Icônes SVG
 └── styles.css            # Styles CSS (également dans EditorJS.vue)
@@ -94,6 +96,7 @@ interface MergeTableData {
   withHeadings: boolean   // Première ligne = en-tête
   content: MergeTableCell[][]
   stretched?: boolean     // Étirer sur toute la largeur
+  columnWidths?: number[] // Largeurs des colonnes en pixels
 }
 ```
 
@@ -176,6 +179,16 @@ L'historique conserve jusqu'à 50 états et inclut :
 - Ajout/Suppression de lignes et colonnes
 - Modification du contenu des cellules
 - Toggle des en-têtes
+- Redimensionnement des colonnes
+
+### Redimensionner les colonnes
+
+1. Survoler la bordure entre deux colonnes (le curseur change en `col-resize`)
+2. Cliquer et maintenir sur la bordure
+3. Glisser horizontalement pour ajuster la largeur
+4. Relâcher pour valider
+
+> **Note** : La largeur minimale d'une colonne est de 50 pixels. Les largeurs sont sauvegardées avec le tableau.
 
 ## Rendu dans EditorJSRenderer
 
@@ -210,6 +223,10 @@ Les styles sont définis dans `EditorJS.vue` avec les classes suivantes :
 | `.mt-toolbar` | Barre d'outils flottante |
 | `.mt-toolbar-btn` | Boutons de la toolbar |
 | `.mt-add-row`, `.mt-add-col` | Boutons d'ajout ligne/colonne |
+| `.mt-resize-handles` | Conteneur des poignées de redimensionnement |
+| `.mt-resize-handle` | Poignée de redimensionnement de colonne |
+| `.mt-resize-handle--active` | Poignée active pendant le glisser |
+| `.mt-resizing` | Classe ajoutée au body pendant le redimensionnement |
 
 ## Architecture technique
 
@@ -278,12 +295,33 @@ class SelectionManager {
 }
 ```
 
+### Classe ResizeManager
+
+```typescript
+class ResizeManager {
+  // Configuration
+  private minColumnWidth = 50  // Largeur minimale en pixels
+
+  // Méthodes publiques
+  attach(table: HTMLTableElement, initialWidths: number[] | undefined, onResize: callback)
+  detach()
+  getColumnWidths(): number[]
+  setColumnWidths(widths: number[])
+  refresh()  // Recalcule les poignées après changement de structure
+
+  // Méthodes privées
+  private createResizeHandles()
+  private handleMouseDown/Move/Up()
+  private applyWidths()  // Applique via colgroup
+  private updateHandlePositions()
+}
+```
+
 ## Limitations connues
 
-1. **Pas de redimensionnement des colonnes** : Les colonnes ont une largeur automatique
-2. **Sélection rectangulaire uniquement** : Impossible de sélectionner des cellules non adjacentes
-3. **Pas d'import Excel/CSV** : Le collage fonctionne uniquement avec du HTML
-4. **Pas de couleurs de cellules** : Pas de personnalisation des couleurs
+1. **Sélection rectangulaire uniquement** : Impossible de sélectionner des cellules non adjacentes
+2. **Pas d'import Excel/CSV** : Le collage fonctionne uniquement avec du HTML
+3. **Pas de couleurs de cellules** : Pas de personnalisation des couleurs
 
 ## Dépendances
 
