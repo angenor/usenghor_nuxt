@@ -5,6 +5,7 @@ import type {
   ServiceStats,
   ServicesBySector,
 } from '~/composables/useServicesApi'
+import type { OutputData } from '@editorjs/editorjs'
 
 definePageMeta({
   layout: 'admin'
@@ -68,11 +69,20 @@ interface HeadCandidate {
 const headCandidates = ref<HeadCandidate[]>([])
 
 // Form state
-const newService = ref({
+const newService = ref<{
+  name: string
+  sector_id: string
+  description: OutputData | undefined
+  mission: OutputData | undefined
+  head_external_id: string
+  email: string
+  phone: string
+  active: boolean
+}>({
   name: '',
   sector_id: '',
-  description: '',
-  mission: '',
+  description: undefined,
+  mission: undefined,
   head_external_id: '',
   email: '',
   phone: '',
