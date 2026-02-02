@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { NewsDisplay, NewsHighlightStatus, EditorJSContent, EditorJSBlock } from '~/types/news'
+import type { NewsDisplay, NewsHighlightStatus } from '~/types/news'
 
 definePageMeta({
   layout: 'admin'
@@ -153,59 +153,13 @@ function formatDate(dateString?: string | null) {
   return formatNewsDateTime(dateString)
 }
 
-// Convertir le contenu EditorJS en HTML
-function editorJsToHtml(content: EditorJSContent | null | undefined): string {
-  if (!content || !content.blocks || content.blocks.length === 0) {
-    return '<p class="text-gray-500 italic">Aucun contenu</p>'
+// Contenu EditorJS formaté pour le composant renderer
+const editorContent = computed(() => {
+  if (!newsItem.value?.content || !newsItem.value.content.blocks || newsItem.value.content.blocks.length === 0) {
+    return null
   }
-
-  return content.blocks.map((block: EditorJSBlock) => {
-    switch (block.type) {
-      case 'paragraph':
-        return `<p>${block.data.text || ''}</p>`
-
-      case 'header':
-        const level = block.data.level || 2
-        return `<h${level}>${block.data.text || ''}</h${level}>`
-
-      case 'list':
-        const listTag = block.data.style === 'ordered' ? 'ol' : 'ul'
-        const items = (block.data.items as string[] || [])
-          .map(item => `<li>${item}</li>`)
-          .join('')
-        return `<${listTag}>${items}</${listTag}>`
-
-      case 'quote':
-        const caption = block.data.caption ? `<cite>${block.data.caption}</cite>` : ''
-        return `<blockquote><p>${block.data.text || ''}</p>${caption}</blockquote>`
-
-      case 'image':
-        const alt = block.data.caption || 'Image'
-        return `<figure><img src="${block.data.file?.url || block.data.url || ''}" alt="${alt}" />${block.data.caption ? `<figcaption>${block.data.caption}</figcaption>` : ''}</figure>`
-
-      case 'delimiter':
-        return '<hr />'
-
-      case 'code':
-        return `<pre><code>${block.data.code || ''}</code></pre>`
-
-      case 'table':
-        const rows = (block.data.content as string[][] || [])
-          .map((row, i) => {
-            const cells = row.map(cell => i === 0 && block.data.withHeadings ? `<th>${cell}</th>` : `<td>${cell}</td>`).join('')
-            return `<tr>${cells}</tr>`
-          })
-          .join('')
-        return `<table>${rows}</table>`
-
-      default:
-        return `<p>${JSON.stringify(block.data)}</p>`
-    }
-  }).join('\n')
-}
-
-// Contenu HTML calculé
-const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
+  return newsItem.value.content
+})
 </script>
 
 <template>
@@ -362,10 +316,13 @@ const contentHtml = computed(() => editorJsToHtml(newsItem.value?.content))
           <h2 class="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
             Contenu
           </h2>
-          <div
-            class="prose prose-sm max-w-none dark:prose-invert"
-            v-html="contentHtml"
+          <EditorJSRenderer
+            v-if="editorContent"
+            :data="editorContent"
           />
+          <p v-else class="text-gray-500 italic dark:text-gray-400">
+            Aucun contenu
+          </p>
         </div>
 
         <!-- Vidéo -->

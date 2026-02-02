@@ -191,9 +191,18 @@ function renderNestedList(items: ListItem[], tag: string): string {
   return `<${tag} class="ml-4">${listItems}</${tag}>`
 }
 
+/**
+ * Traite le HTML pour ajouter target="_blank" et rel="noopener noreferrer" à tous les liens
+ */
+function processLinks(html: string): string {
+  // Regex pour trouver les balises <a> qui n'ont pas déjà target="_blank"
+  return html.replace(/<a\s+(?![^>]*target=)([^>]*href="[^"]*"[^>]*)>/gi, '<a $1 target="_blank" rel="noopener noreferrer">')
+}
+
 const renderedHtml = computed(() => {
   if (!props.data?.blocks) return ''
-  return props.data.blocks.map((block) => renderBlock(block.type, block.data as BlockData)).join('')
+  const html = props.data.blocks.map((block) => renderBlock(block.type, block.data as BlockData)).join('')
+  return processLinks(html)
 })
 </script>
 
