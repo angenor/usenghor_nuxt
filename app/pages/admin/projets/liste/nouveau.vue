@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { OutputData } from '@editorjs/editorjs'
-import type { ProjectCategoryRead, ProjectStatus, PublicationStatus } from '~/types/api'
+import type { ImageVariants, ProjectCategoryRead, ProjectStatus, PublicationStatus } from '~/types/api'
 
 definePageMeta({
   layout: 'admin'
@@ -16,17 +16,25 @@ const {
   publicationStatusLabels,
 } = useProjectsApi()
 
+const { getUsersForSelect } = useUsersApi()
+const { uploadMediaVariants } = useMediaApi()
 const { sectors } = useReferenceData()
 
 // Données de référence
 const categories = ref<ProjectCategoryRead[]>([])
+const usersForSelect = ref<Array<{ id: string; email: string; full_name: string }>>([])
 
 onMounted(async () => {
-  categories.value = await getAllCategories()
+  const [categoriesData, users] = await Promise.all([
+    getAllCategories(),
+    getUsersForSelect(),
+  ])
+  categories.value = categoriesData
+  usersForSelect.value = users
 })
 
 // Onglet actif
-const activeTab = ref<'general' | 'classification' | 'dates' | 'publication'>('general')
+const activeTab = ref<'general' | 'classification' | 'dates' | 'associations' | 'publication'>('general')
 
 // État du formulaire (aligné sur le schéma backend)
 const form = reactive({
@@ -65,6 +73,57 @@ const toggleCategory = (categoryId: string) => {
   else {
     form.category_ids.splice(index, 1)
   }
+}
+
+// === GESTION DE L'IMAGE DE COUVERTURE ===
+const showCoverEditor = ref(false)
+const pendingCoverFile = ref<File | null>(null)
+const isUploadingCover = ref(false)
+const coverImagePreview = ref<string | null>(null)
+
+function handleCoverImageUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files[0]) {
+    pendingCoverFile.value = input.files[0]
+    showCoverEditor.value = true
+    input.value = ''
+  }
+}
+
+function cancelCoverEditor() {
+  showCoverEditor.value = false
+  pendingCoverFile.value = null
+}
+
+async function saveEditedCover(variants: ImageVariants) {
+  showCoverEditor.value = false
+  isUploadingCover.value = true
+
+  try {
+    const originalName = pendingCoverFile.value?.name || 'project-cover.jpg'
+    const baseName = originalName.replace(/\.[^.]+$/, '')
+
+    // Upload les 3 versions (low, medium, original)
+    const response = await uploadMediaVariants(variants, baseName, { folder: 'projects/covers' })
+
+    // Stocker l'ID de l'original
+    form.cover_image_external_id = response.original.id
+    // Créer un aperçu local temporaire avec la version medium
+    coverImagePreview.value = URL.createObjectURL(variants.medium)
+  }
+  catch (err) {
+    console.error('Erreur upload image de couverture:', err)
+    alert('Erreur lors de l\'upload de l\'image')
+  }
+  finally {
+    isUploadingCover.value = false
+    pendingCoverFile.value = null
+  }
+}
+
+function removeCoverImage() {
+  form.cover_image_external_id = null
+  coverImagePreview.value = null
 }
 
 // === SAUVEGARDE ===
@@ -137,6 +196,7 @@ const tabs = [
   { id: 'general', label: 'Général', icon: 'fa-solid fa-info-circle' },
   { id: 'classification', label: 'Classification', icon: 'fa-solid fa-tags' },
   { id: 'dates', label: 'Dates & Budget', icon: 'fa-solid fa-calendar' },
+  { id: 'associations', label: 'Associations', icon: 'fa-solid fa-link' },
   { id: 'publication', label: 'Publication', icon: 'fa-solid fa-eye' },
 ]
 </script>
@@ -244,6 +304,60 @@ const tabs = [
               @input="slugManuallyEdited = true"
             />
             <p class="mt-1 text-xs text-gray-500">Auto-généré à partir du titre. URL: /projets/{{ form.slug || 'slug' }}</p>
+          </div>
+
+          <!-- Image de couverture -->
+          <div class="sm:col-span-2">
+            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Image de couverture
+            </label>
+            <!-- Loading state -->
+            <div
+              v-if="isUploadingCover"
+              class="mb-4 flex h-48 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-700"
+            >
+              <div class="text-center">
+                <font-awesome-icon :icon="['fas', 'spinner']" class="mb-2 h-8 w-8 animate-spin text-blue-500" />
+                <p class="text-sm text-gray-500 dark:text-gray-400">Téléversement en cours...</p>
+              </div>
+            </div>
+            <!-- Image preview -->
+            <div
+              v-else-if="coverImagePreview"
+              class="relative mb-4"
+            >
+              <img
+                :src="coverImagePreview"
+                alt="Image de couverture"
+                class="h-48 w-full rounded-lg object-cover"
+              />
+              <button
+                type="button"
+                class="absolute right-2 top-2 rounded-full bg-red-600 p-1.5 text-white transition-colors hover:bg-red-700"
+                @click="removeCoverImage"
+              >
+                <font-awesome-icon :icon="['fas', 'xmark']" class="h-4 w-4" />
+              </button>
+            </div>
+            <div class="flex items-center gap-4">
+              <label
+                class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                :class="{ 'pointer-events-none opacity-50': isUploadingCover }"
+              >
+                <font-awesome-icon :icon="['fas', 'upload']" class="h-4 w-4" />
+                {{ coverImagePreview ? 'Changer l\'image' : 'Télécharger une image' }}
+                <input
+                  type="file"
+                  accept="image/*"
+                  class="hidden"
+                  :disabled="isUploadingCover"
+                  @change="handleCoverImageUpload"
+                />
+              </label>
+              <span class="text-xs text-gray-500 dark:text-gray-400">
+                Format 16:9 recommandé (1200x675)
+              </span>
+            </div>
           </div>
 
           <!-- Résumé -->
@@ -388,6 +502,36 @@ const tabs = [
         </div>
       </div>
 
+      <!-- Onglet Associations -->
+      <div v-show="activeTab === 'associations'" class="space-y-6">
+        <div class="rounded-lg border border-amber-200 bg-amber-50 p-6 dark:border-amber-800 dark:bg-amber-900/20">
+          <div class="flex items-start gap-4">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-800">
+              <font-awesome-icon :icon="['fas', 'info-circle']" class="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div>
+              <h3 class="font-medium text-amber-800 dark:text-amber-200">
+                Associations disponibles après création
+              </h3>
+              <p class="mt-1 text-sm text-amber-700 dark:text-amber-300">
+                Vous pourrez associer des <strong>partenaires</strong> et des <strong>albums de la médiathèque</strong>
+                à ce projet après l'avoir créé. Enregistrez d'abord le projet, puis revenez sur cette page pour gérer les associations.
+              </p>
+              <div class="mt-4 flex flex-wrap gap-4">
+                <div class="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
+                  <font-awesome-icon :icon="['fas', 'handshake']" class="h-4 w-4" />
+                  <span>Partenaires</span>
+                </div>
+                <div class="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
+                  <font-awesome-icon :icon="['fas', 'images']" class="h-4 w-4" />
+                  <span>Albums médiathèque</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Onglet Publication -->
       <div v-show="activeTab === 'publication'" class="space-y-6">
         <div class="grid gap-6 sm:grid-cols-2">
@@ -451,5 +595,25 @@ const tabs = [
         </button>
       </div>
     </div>
+
+    <!-- Image Editor Modal for Cover Image -->
+    <Teleport to="body">
+      <div
+        v-if="showCoverEditor && pendingCoverFile"
+        class="fixed inset-0 z-50 overflow-y-auto"
+      >
+        <div class="flex min-h-full items-center justify-center p-4">
+          <div class="fixed inset-0 bg-black/70 transition-opacity" />
+          <div class="relative w-full max-w-4xl transform transition-all">
+            <MediaImageEditor
+              :image-file="pendingCoverFile"
+              :aspect-ratio="16 / 9"
+              @save="saveEditedCover"
+              @cancel="cancelCoverEditor"
+            />
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>

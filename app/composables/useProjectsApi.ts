@@ -113,6 +113,7 @@ export const projectCallStatusColors: Record<ProjectCallStatus, string> = {
 
 export function useProjectsApi() {
   const { apiFetch } = useApi()
+  const { getMediaUrl } = useMediaApi()
 
   // =========================================================================
   // Transformations
@@ -125,7 +126,7 @@ export function useProjectsApi() {
     return {
       ...project,
       cover_image: project.cover_image_external_id
-        ? `https://picsum.photos/seed/${project.cover_image_external_id}/1200/600`
+        ? getMediaUrl(project.cover_image_external_id)
         : null,
     }
   }
@@ -137,7 +138,7 @@ export function useProjectsApi() {
     return {
       ...project,
       cover_image: project.cover_image_external_id
-        ? `https://picsum.photos/seed/${project.cover_image_external_id}/1200/600`
+        ? getMediaUrl(project.cover_image_external_id)
         : null,
       categories: [],
     }

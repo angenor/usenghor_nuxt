@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { OutputData } from '@editorjs/editorjs'
-import type { ProjectCallType, ProjectCallStatus } from '~/types/api'
+import type { ImageVariants, ProjectCallType, ProjectCallStatus } from '~/types/api'
 
 definePageMeta({
   layout: 'admin'
@@ -14,6 +14,8 @@ const {
   projectCallTypeLabels,
   projectCallStatusLabels,
 } = useProjectsApi()
+
+const { uploadMediaVariants } = useMediaApi()
 
 // Projets disponibles pour le select
 const projects = ref<{ id: string; title: string }[]>([])
@@ -33,6 +35,57 @@ const form = reactive({
   status: 'upcoming' as ProjectCallStatus,
   deadline: '',
 })
+
+// === GESTION DE L'IMAGE DE COUVERTURE ===
+const showCoverEditor = ref(false)
+const pendingCoverFile = ref<File | null>(null)
+const isUploadingCover = ref(false)
+const coverImagePreview = ref<string | null>(null)
+
+function handleCoverImageUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files[0]) {
+    pendingCoverFile.value = input.files[0]
+    showCoverEditor.value = true
+    input.value = ''
+  }
+}
+
+function cancelCoverEditor() {
+  showCoverEditor.value = false
+  pendingCoverFile.value = null
+}
+
+async function saveEditedCover(variants: ImageVariants) {
+  showCoverEditor.value = false
+  isUploadingCover.value = true
+
+  try {
+    const originalName = pendingCoverFile.value?.name || 'call-cover.jpg'
+    const baseName = originalName.replace(/\.[^.]+$/, '')
+
+    // Upload les 3 versions (low, medium, original)
+    const response = await uploadMediaVariants(variants, baseName, { folder: 'project-calls' })
+
+    // Stocker l'ID de l'original
+    form.cover_image_external_id = response.original.id
+    // Créer un aperçu local temporaire avec la version medium
+    coverImagePreview.value = URL.createObjectURL(variants.medium)
+  }
+  catch (err) {
+    console.error('Erreur upload image de couverture:', err)
+    alert('Erreur lors de l\'upload de l\'image')
+  }
+  finally {
+    isUploadingCover.value = false
+    pendingCoverFile.value = null
+  }
+}
+
+function removeCoverImage() {
+  form.cover_image_external_id = null
+  coverImagePreview.value = null
+}
 
 // Charger les projets
 onMounted(async () => {
@@ -238,14 +291,59 @@ const goBack = () => {
 
         <!-- Image de couverture -->
         <div class="sm:col-span-2">
-          <FormsImageUpload
-            v-model="form.cover_image_external_id"
-            label="Image de couverture"
-            hint="Cette image sera affichée sur la page de l'appel"
-            folder="project-calls"
-            :max-size-mb="5"
-            aspect-ratio="16/9"
-          />
+          <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Image de couverture
+          </label>
+          <!-- Loading state -->
+          <div
+            v-if="isUploadingCover"
+            class="mb-4 flex h-48 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-700"
+          >
+            <div class="text-center">
+              <font-awesome-icon :icon="['fas', 'spinner']" class="mb-2 h-8 w-8 animate-spin text-blue-500" />
+              <p class="text-sm text-gray-500 dark:text-gray-400">Téléversement en cours...</p>
+            </div>
+          </div>
+          <!-- Image preview -->
+          <div
+            v-else-if="coverImagePreview"
+            class="relative mb-4"
+          >
+            <img
+              :src="coverImagePreview"
+              alt="Image de couverture"
+              class="h-48 w-full rounded-lg object-cover"
+            />
+            <button
+              type="button"
+              class="absolute right-2 top-2 rounded-full bg-red-600 p-1.5 text-white transition-colors hover:bg-red-700"
+              @click="removeCoverImage"
+            >
+              <font-awesome-icon :icon="['fas', 'xmark']" class="h-4 w-4" />
+            </button>
+          </div>
+          <div class="flex items-center gap-4">
+            <label
+              class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              :class="{ 'pointer-events-none opacity-50': isUploadingCover }"
+            >
+              <font-awesome-icon :icon="['fas', 'upload']" class="h-4 w-4" />
+              {{ coverImagePreview ? 'Changer l\'image' : 'Télécharger une image' }}
+              <input
+                type="file"
+                accept="image/*"
+                class="hidden"
+                :disabled="isUploadingCover"
+                @change="handleCoverImageUpload"
+              />
+            </label>
+            <span class="text-xs text-gray-500 dark:text-gray-400">
+              Format 16:9 recommandé (1200x675)
+            </span>
+          </div>
+          <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            Cette image sera affichée sur la page de l'appel
+          </p>
         </div>
       </div>
     </div>
@@ -292,5 +390,25 @@ const goBack = () => {
         </button>
       </div>
     </div>
+
+    <!-- Image Editor Modal for Cover Image -->
+    <Teleport to="body">
+      <div
+        v-if="showCoverEditor && pendingCoverFile"
+        class="fixed inset-0 z-50 overflow-y-auto"
+      >
+        <div class="flex min-h-full items-center justify-center p-4">
+          <div class="fixed inset-0 bg-black/70 transition-opacity" />
+          <div class="relative w-full max-w-4xl transform transition-all">
+            <MediaImageEditor
+              :image-file="pendingCoverFile"
+              :aspect-ratio="16 / 9"
+              @save="saveEditedCover"
+              @cancel="cancelCoverEditor"
+            />
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
