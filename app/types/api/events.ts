@@ -73,7 +73,7 @@ export interface EventRead {
   cover_image_external_id: string | null
   country_external_id: string | null
   campus_external_id: string | null
-  sector_external_id: string | null
+  service_external_id: string | null
   project_external_id: string | null
   organizer_external_id: string | null
   album_external_id: string | null
@@ -113,7 +113,7 @@ export interface EventCreatePayload {
   cover_image_external_id?: string | null
   country_external_id?: string | null
   campus_external_id?: string | null
-  sector_external_id?: string | null
+  service_external_id?: string | null
   project_external_id?: string | null
   organizer_external_id?: string | null
   album_external_id?: string | null
@@ -142,7 +142,7 @@ export interface EventUpdatePayload {
   cover_image_external_id?: string | null
   country_external_id?: string | null
   campus_external_id?: string | null
-  sector_external_id?: string | null
+  service_external_id?: string | null
   project_external_id?: string | null
   organizer_external_id?: string | null
   album_external_id?: string | null

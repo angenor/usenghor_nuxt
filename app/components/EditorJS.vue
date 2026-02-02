@@ -91,7 +91,7 @@ async function initEditor() {
     { default: Image },
     { default: Quote },
     { default: Embed },
-    { default: Table },
+    { MergeTable },
     { default: Delimiter },
     { default: InlineCode },
     { default: Marker },
@@ -106,7 +106,7 @@ async function initEditor() {
     import('@editorjs/image'),
     import('@editorjs/quote'),
     import('@editorjs/embed'),
-    import('@editorjs/table'),
+    import('~/components/editorjs/MergeTable'),
     import('@editorjs/delimiter'),
     import('@editorjs/inline-code'),
     import('@editorjs/marker'),
@@ -248,7 +248,7 @@ async function initEditor() {
         },
       },
       table: {
-        class: Table,
+        class: MergeTable,
         inlineToolbar: true,
         config: {
           rows: 2,
@@ -469,7 +469,14 @@ function insertQuote() {
 }
 
 function insertTable() {
-  insertBlock('table', { withHeadings: true, content: [['', ''], ['', '']] })
+  // Format MergeTable : content est un tableau 2D d'objets MergeTableCell
+  insertBlock('table', {
+    withHeadings: true,
+    content: [
+      [{ content: '', colspan: 1, rowspan: 1 }, { content: '', colspan: 1, rowspan: 1 }, { content: '', colspan: 1, rowspan: 1 }],
+      [{ content: '', colspan: 1, rowspan: 1 }, { content: '', colspan: 1, rowspan: 1 }, { content: '', colspan: 1, rowspan: 1 }],
+    ],
+  })
 }
 
 function insertImage() {
@@ -703,5 +710,164 @@ h4.ce-header {
 
 .ce-popover-item__title {
   @apply text-gray-900 dark:text-gray-100;
+}
+
+/* ===== MergeTable Plugin Styles ===== */
+
+/* Wrapper du tableau */
+.mt-wrap {
+  position: relative;
+  width: 100%;
+  margin: 1rem 0;
+  overflow: visible;
+  padding-top: 50px; /* Espace pour la toolbar flottante */
+}
+
+/* Tableau principal */
+.mt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Cellules */
+.mt-cell {
+  min-width: 80px;
+  min-height: 40px;
+  vertical-align: top;
+  outline: none;
+  word-break: break-word;
+}
+
+.mt-cell:focus {
+  box-shadow: inset 0 0 0 2px #3b82f6;
+}
+
+/* Sélection de cellules */
+.mt-cell--selected {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+.dark .mt-cell--selected {
+  background-color: rgba(59, 130, 246, 0.25) !important;
+}
+
+.mt-cell--selection-start {
+  box-shadow: inset 0 0 0 2px #3b82f6 !important;
+}
+
+/* Barre d'outils flottante */
+.mt-toolbar {
+  position: absolute;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 100;
+  white-space: nowrap;
+}
+
+.dark .mt-toolbar {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.mt-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #374151;
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dark .mt-toolbar-btn {
+  color: #d1d5db;
+  background-color: #374151;
+  border-color: #4b5563;
+}
+
+.mt-toolbar-btn:hover:not(:disabled) {
+  background-color: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.dark .mt-toolbar-btn:hover:not(:disabled) {
+  background-color: #4b5563;
+  border-color: #6b7280;
+}
+
+.mt-toolbar-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mt-toolbar-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Boutons d'ajout ligne/colonne */
+.mt-add-row,
+.mt-add-col {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.5rem;
+  margin-top: 0.5rem;
+  margin-right: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  background-color: transparent;
+  border: 1px dashed #d1d5db;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dark .mt-add-row,
+.dark .mt-add-col {
+  color: #9ca3af;
+  border-color: #4b5563;
+}
+
+.mt-add-row:hover,
+.mt-add-col:hover {
+  color: #3b82f6;
+  border-color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.dark .mt-add-row:hover,
+.dark .mt-add-col:hover {
+  color: #60a5fa;
+  border-color: #60a5fa;
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Animation de sélection */
+@keyframes mt-selection-pulse {
+  0%, 100% {
+    box-shadow: inset 0 0 0 2px #3b82f6;
+  }
+  50% {
+    box-shadow: inset 0 0 0 3px #3b82f6;
+  }
+}
+
+.mt-cell--selection-start {
+  animation: mt-selection-pulse 1.5s ease-in-out infinite;
 }
 </style>

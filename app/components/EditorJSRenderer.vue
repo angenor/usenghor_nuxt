@@ -7,6 +7,14 @@ interface Props {
 
 const props = defineProps<Props>()
 
+interface MergeTableCell {
+  content: string
+  colspan?: number
+  rowspan?: number
+  merged?: boolean
+  mergedBy?: { row: number; col: number }
+}
+
 interface BlockData {
   text?: string
   level?: number
@@ -24,7 +32,8 @@ interface BlockData {
   embed?: string
   width?: number
   height?: number
-  content?: string[][]
+  content?: string[][] | MergeTableCell[][]
+  withHeadings?: boolean
   link?: string
   meta?: {
     title?: string
@@ -103,12 +112,47 @@ function renderBlock(type: string, data: BlockData): string {
 
     case 'table':
       const rows = data.content || []
+      const withHeadings = data.withHeadings ?? true
+
+      // Vérifier si c'est le nouveau format (cellules sont des objets)
+      const isNewFormat = rows.length > 0 && rows[0]?.length > 0 && typeof rows[0][0] === 'object' && 'content' in (rows[0][0] as MergeTableCell)
+
       const tableRows = rows
-        .map(
-          (row, index) =>
-            `<tr>${row.map((cell) => (index === 0 ? `<th class="border border-gray-300 dark:border-gray-600 px-4 py-2 bg-gray-50 dark:bg-gray-700">${cell}</th>` : `<td class="border border-gray-300 dark:border-gray-600 px-4 py-2">${cell}</td>`)).join('')}</tr>`
-        )
+        .map((row, rowIndex) => {
+          const cells = (row as (string | MergeTableCell)[])
+            .map((cell, colIndex) => {
+              if (isNewFormat) {
+                const cellData = cell as MergeTableCell
+                // Ignorer les cellules fusionnées (couvertes par une autre)
+                if (cellData.merged) return ''
+
+                const isHeader = withHeadings && rowIndex === 0
+                const tag = isHeader ? 'th' : 'td'
+                const headerClass = isHeader ? 'bg-gray-50 dark:bg-gray-700 font-semibold' : ''
+                const attrs: string[] = []
+
+                if (cellData.colspan && cellData.colspan > 1) {
+                  attrs.push(`colspan="${cellData.colspan}"`)
+                }
+                if (cellData.rowspan && cellData.rowspan > 1) {
+                  attrs.push(`rowspan="${cellData.rowspan}"`)
+                }
+
+                return `<${tag} class="border border-gray-300 dark:border-gray-600 px-4 py-2 ${headerClass}" ${attrs.join(' ')}>${cellData.content || ''}</${tag}>`
+              } else {
+                // Ancien format (string)
+                const isHeader = withHeadings && rowIndex === 0
+                const tag = isHeader ? 'th' : 'td'
+                const headerClass = isHeader ? 'bg-gray-50 dark:bg-gray-700 font-semibold' : ''
+                return `<${tag} class="border border-gray-300 dark:border-gray-600 px-4 py-2 ${headerClass}">${cell}</${tag}>`
+              }
+            })
+            .join('')
+
+          return `<tr>${cells}</tr>`
+        })
         .join('')
+
       return `<table class="w-full border-collapse">${tableRows}</table>`
 
     case 'linkTool':

@@ -59,8 +59,10 @@ export interface Event {
   // Associations
   campus_id?: string
   campus_name?: string
-  department_id?: string
-  department_name?: string
+  sector_id?: string
+  sector_name?: string
+  service_id?: string
+  service_name?: string
   project_id?: string
   project_name?: string
   organizer_id?: string
@@ -155,8 +157,8 @@ export const mockEvents: Event[] = [
     registrations_count: 187,
     campus_id: 'siege',
     campus_name: 'Siège - Alexandrie',
-    department_id: 'dept-francophonie',
-    department_name: 'Francophonie et Mondialisation',
+    service_id: 'dept-francophonie',
+    service_name: 'Francophonie et Mondialisation',
     organizer_id: 'user-1',
     organizer_name: 'Dr. Amadou Diallo',
     status: 'published',
@@ -240,8 +242,8 @@ export const mockEvents: Event[] = [
     registrations_count: 67,
     campus_id: 'siege',
     campus_name: 'Siège - Alexandrie',
-    department_id: 'dept-gouvernance',
-    department_name: 'Gouvernance et Management Public',
+    service_id: 'dept-gouvernance',
+    service_name: 'Gouvernance et Management Public',
     status: 'published',
     created_at: '2025-12-10T10:00:00Z',
     updated_at: '2026-01-05T09:00:00Z'
@@ -289,8 +291,8 @@ export const mockEvents: Event[] = [
     registrations_count: 45,
     campus_id: 'campus-abidjan',
     campus_name: 'Campus Abidjan',
-    department_id: 'dept-culture',
-    department_name: 'Culture et Patrimoine',
+    service_id: 'dept-culture',
+    service_name: 'Culture et Patrimoine',
     status: 'published',
     created_at: '2026-01-05T11:00:00Z',
     updated_at: '2026-01-18T15:00:00Z'
@@ -420,7 +422,8 @@ export interface EventFilters {
   status?: EventStatus
   period?: 'upcoming' | 'past' | 'all'
   campus_id?: string
-  department_id?: string
+  sector_id?: string
+  service_id?: string
   project_id?: string
   search?: string
 }
@@ -447,8 +450,12 @@ export const getFilteredEvents = (filters?: EventFilters) => {
     result = result.filter(e => e.campus_id === filters.campus_id)
   }
 
-  if (filters?.department_id) {
-    result = result.filter(e => e.department_id === filters.department_id)
+  if (filters?.sector_id) {
+    result = result.filter(e => e.sector_id === filters.sector_id)
+  }
+
+  if (filters?.service_id) {
+    result = result.filter(e => e.service_id === filters.service_id)
   }
 
   if (filters?.project_id) {

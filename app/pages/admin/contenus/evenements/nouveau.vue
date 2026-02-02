@@ -17,13 +17,16 @@ const {
 } = useEventsApi()
 
 const {
-  departments,
   getAllProjects,
 } = useMockData()
 
 const {
   getCampuses,
+  getSectors,
+  getServices,
   campuses: allCampuses,
+  sectors: allSectors,
+  services: allServices,
 } = useReferenceData()
 
 // Onglet actif
@@ -62,7 +65,8 @@ const form = ref({
   registration_link: '',
   max_attendees: undefined as number | undefined,
   campus_external_id: '',
-  sector_external_id: '',
+  sector_id: '',  // UI only - pour filtrer les services
+  service_external_id: '',
   project_external_id: '',
   organizer_external_id: '',
   album_external_id: '',
@@ -128,17 +132,24 @@ function removeCoverImage() {
 
 // Charger les données de référence au montage
 onMounted(async () => {
-  await getCampuses()
+  await Promise.all([getCampuses(), getSectors(), getServices()])
 })
 
 // === LISTES DE RÉFÉRENCE ===
-const departmentList = computed(() =>
-  departments.value.map(d => ({ id: d.id, name: d.name_fr }))
-)
-
 const projectList = computed(() =>
   getAllProjects().map(p => ({ id: p.id, name: p.title_fr }))
 )
+
+// Services filtrés par secteur sélectionné
+const filteredServices = computed(() => {
+  if (!form.value.sector_id) return []
+  return allServices.value.filter(s => s.sector_id === form.value.sector_id)
+})
+
+// Réinitialiser le service quand le secteur change
+watch(() => form.value.sector_id, () => {
+  form.value.service_external_id = ''
+})
 
 // === SAUVEGARDE ===
 const isSaving = ref(false)
@@ -185,7 +196,7 @@ const saveForm = async () => {
       cover_image_external_id: toUuidOrNull(form.value.cover_image_external_id),
       country_external_id: toUuidOrNull(form.value.country_external_id),
       campus_external_id: toUuidOrNull(form.value.campus_external_id),
-      sector_external_id: toUuidOrNull(form.value.sector_external_id),
+      service_external_id: toUuidOrNull(form.value.service_external_id),
       project_external_id: toUuidOrNull(form.value.project_external_id),
       organizer_external_id: toUuidOrNull(form.value.organizer_external_id),
       album_external_id: toUuidOrNull(form.value.album_external_id),
@@ -623,17 +634,34 @@ const tabs = [
 
           <div>
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Département
+              Secteur
             </label>
             <select
-              v-model="form.sector_external_id"
+              v-model="form.sector_id"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             >
-              <option value="">Aucun département</option>
-              <option v-for="dept in departmentList" :key="dept.id" :value="dept.id">
-                {{ dept.name }}
+              <option value="">Aucun secteur</option>
+              <option v-for="sector in allSectors" :key="sector.id" :value="sector.id">
+                {{ sector.name }}
               </option>
             </select>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Service
+            </label>
+            <select
+              v-model="form.service_external_id"
+              :disabled="!form.sector_id"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">Aucun service</option>
+              <option v-for="service in filteredServices" :key="service.id" :value="service.id">
+                {{ service.name }}
+              </option>
+            </select>
+            <p v-if="!form.sector_id" class="mt-1 text-xs text-gray-500">Sélectionnez d'abord un secteur</p>
           </div>
 
           <div>
