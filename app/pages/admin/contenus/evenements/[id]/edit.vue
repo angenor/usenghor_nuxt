@@ -149,14 +149,10 @@ onMounted(async () => {
 
     // Extraire le sector_id du service chargé (pour pré-remplir le dropdown secteur)
     // On utilise directement le tableau services retourné par getServices() pour éviter les problèmes de timing avec le cache réactif
-    console.log('[DEBUG] event.service_external_id:', event.service_external_id)
-    console.log('[DEBUG] services loaded:', services.length, services)
     if (event.service_external_id && services.length > 0) {
       const service = services.find(s => s.id === event.service_external_id)
-      console.log('[DEBUG] service found:', service)
       if (service && service.sector_id) {
         form.value.sector_id = service.sector_id
-        console.log('[DEBUG] sector_id set to:', service.sector_id)
       }
     }
 
@@ -269,11 +265,6 @@ const saveForm = async () => {
   error.value = null
 
   try {
-    // DEBUG: Voir les valeurs avant sauvegarde
-    console.log('[DEBUG SAVE] form.sector_id:', form.value.sector_id)
-    console.log('[DEBUG SAVE] form.service_external_id:', form.value.service_external_id)
-    console.log('[DEBUG SAVE] toUuidOrNull result:', toUuidOrNull(form.value.service_external_id))
-
     // Préparer les données pour l'API
     // Note: Les champs *_external_id doivent être des UUIDs valides ou null
     const eventData: EventUpdatePayload = {
