@@ -5,6 +5,7 @@ const { isDark, toggle: originalToggleDarkMode } = useDarkMode()
 
 // Contenus éditoriaux pour les éléments globaux
 const { getContent, getRawContent, loadContent } = useEditorialContent('global')
+const editorialStore = useEditorialContentStore()
 
 const isScrolled = ref(false)
 const showModeToast = ref(false)
@@ -195,13 +196,39 @@ const isMobileSubmenuExpanded = (key: string) => {
 }
 
 // Bouton Candidater - valeurs éditables avec fallback
-const applyButtonText = computed(() => getContent('navbar.apply.text'))
-const applyButtonLink = computed(() => getRawContent('navbar.apply.link') || '/carrieres')
+const applyButtonText = ref(t('nav.apply'))
+const applyButtonLink = ref('/carrieres')
 
-onMounted(() => {
+// Fonction pour mettre à jour les valeurs depuis le store
+function updateApplyButtonValues() {
+  const textValue = getRawContent('navbar.apply.text')
+  const linkValue = getRawContent('navbar.apply.link')
+  if (textValue) applyButtonText.value = textValue
+  if (linkValue) applyButtonLink.value = linkValue
+}
+
+// Mise à jour quand le chargement se termine
+watch(() => editorialStore.isLoading, (loading, wasLoading) => {
+  if (wasLoading && !loading) {
+    updateApplyButtonValues()
+  }
+})
+
+onMounted(async () => {
   window.addEventListener('scroll', handleScroll)
   handleScroll()
-  loadContent()
+  await loadContent()
+  updateApplyButtonValues()
+
+  // Debug: afficher les valeurs chargées
+  if (import.meta.dev) {
+    console.log('[Navbar Editorial] Contenus chargés:', {
+      'navbar.apply.text': getRawContent('navbar.apply.text'),
+      'navbar.apply.link': getRawContent('navbar.apply.link'),
+      'applyButtonText': applyButtonText.value,
+      'applyButtonLink': applyButtonLink.value,
+    })
+  }
 })
 
 onUnmounted(() => {
