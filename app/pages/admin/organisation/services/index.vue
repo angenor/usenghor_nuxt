@@ -318,6 +318,28 @@ const parseEditorContent = (content: string | null | undefined): OutputData | un
   return undefined
 }
 
+// Extraire le texte brut d'un contenu EditorJS (string JSON) pour l'affichage dans la liste
+const getPlainText = (content: string | null | undefined): string => {
+  if (!content) return ''
+  try {
+    const parsed = JSON.parse(content)
+    if (parsed && Array.isArray(parsed.blocks)) {
+      return parsed.blocks
+        .filter((block: { type: string; data?: { text?: string } }) => block.type === 'paragraph' && block.data?.text)
+        .map((block: { data: { text: string } }) => {
+          // Supprimer les balises HTML du texte
+          return block.data.text.replace(/<[^>]*>/g, '')
+        })
+        .join(' ')
+        .slice(0, 200) // Limiter à 200 caractères
+    }
+  } catch {
+    // Si ce n'est pas du JSON, retourner le texte tel quel
+    return content.slice(0, 200)
+  }
+  return ''
+}
+
 // Modals
 const openAddModal = () => {
   newService.value = {
@@ -709,8 +731,8 @@ const clearSectorFilter = () => {
                   <p class="font-medium text-gray-900 dark:text-white">
                     {{ service.name }}
                   </p>
-                  <p v-if="service.description" class="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
-                    {{ service.description }}
+                  <p v-if="getPlainText(service.description)" class="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
+                    {{ getPlainText(service.description) }}
                   </p>
                 </div>
               </td>
