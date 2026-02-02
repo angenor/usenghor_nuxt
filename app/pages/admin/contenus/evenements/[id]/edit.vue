@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import type { EventType, EventUpdatePayload, PublicationStatus } from '~/types/api'
+import type { EventType, EventUpdatePayload, PublicationStatus, ImageVariants } from '~/types/api'
 import type { OutputData } from '@editorjs/editorjs'
+
+const { uploadMediaVariants, getMediaUrl } = useMediaApi()
 
 definePageMeta({
   layout: 'admin'
@@ -38,6 +40,12 @@ const contentAr = ref<OutputData | undefined>(undefined)
 // Onglet actif
 const activeTab = ref<'general' | 'datetime' | 'location' | 'registration' | 'associations' | 'options'>('general')
 
+// État pour l'éditeur d'image de couverture
+const showCoverEditor = ref(false)
+const pendingCoverFile = ref<File | null>(null)
+const isUploadingCover = ref(false)
+const coverImagePreview = ref('')
+
 // État du formulaire - aligné sur le schéma backend
 const form = ref({
   id: '',
@@ -46,7 +54,7 @@ const form = ref({
   type: 'conference' as EventType,
   type_other: '',
   description: '',
-  cover_image_external_id: '',
+  cover_image_external_id: '' as string | null,
   start_date: '',
   end_date: '',
   is_online: false,
@@ -127,6 +135,11 @@ onMounted(async () => {
       }
     }
 
+    // Charger l'aperçu de l'image de couverture si elle existe
+    if (event.cover_image_external_id) {
+      coverImagePreview.value = getMediaUrl(event.cover_image_external_id)
+    }
+
     // Marquer le formulaire comme initialisé (après chargement des données)
     formInitialized.value = true
   } catch (e) {
@@ -151,6 +164,48 @@ watch(() => form.value.title, (newTitle) => {
 // Navigation
 const goBack = () => {
   router.push('/admin/contenus/evenements')
+}
+
+// === GESTION IMAGE DE COUVERTURE ===
+function handleCoverImageUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files[0]) {
+    pendingCoverFile.value = input.files[0]
+    showCoverEditor.value = true
+    input.value = ''
+  }
+}
+
+function cancelCoverEditor() {
+  showCoverEditor.value = false
+  pendingCoverFile.value = null
+}
+
+async function saveEditedCover(variants: ImageVariants) {
+  showCoverEditor.value = false
+  isUploadingCover.value = true
+
+  try {
+    const originalName = pendingCoverFile.value?.name || 'cover.jpg'
+    const baseName = originalName.replace(/\.[^.]+$/, '')
+
+    const response = await uploadMediaVariants(variants, baseName, { folder: 'events/covers' })
+
+    form.value.cover_image_external_id = response.original.id
+    coverImagePreview.value = URL.createObjectURL(variants.medium)
+  }
+  catch (err) {
+    console.error('Erreur upload image de couverture:', err)
+  }
+  finally {
+    isUploadingCover.value = false
+    pendingCoverFile.value = null
+  }
+}
+
+function removeCoverImage() {
+  coverImagePreview.value = ''
+  form.value.cover_image_external_id = null
 }
 
 // === LISTES DE RÉFÉRENCE ===
@@ -431,15 +486,59 @@ const tabs = [
               />
             </div>
 
+            <!-- Image de couverture -->
             <div class="sm:col-span-2">
-              <FormsImageUpload
-                v-model="form.cover_image_external_id"
-                label="Image de couverture"
-                hint="Cette image sera affichée sur la page de l'événement"
-                folder="events"
-                :max-size-mb="5"
-                aspect-ratio="16/9"
-              />
+              <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Image de couverture
+              </label>
+              <!-- Loading state -->
+              <div
+                v-if="isUploadingCover"
+                class="mb-4 flex h-48 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-700"
+              >
+                <div class="text-center">
+                  <font-awesome-icon icon="fa-solid fa-spinner" class="mb-2 h-8 w-8 animate-spin text-blue-500" />
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Téléversement en cours...</p>
+                </div>
+              </div>
+              <!-- Image preview -->
+              <div
+                v-else-if="coverImagePreview"
+                class="relative mb-4"
+              >
+                <img
+                  :src="coverImagePreview"
+                  alt="Image de couverture"
+                  class="h-48 w-full rounded-lg object-cover"
+                />
+                <button
+                  type="button"
+                  class="absolute right-2 top-2 rounded-full bg-red-600 p-1.5 text-white transition-colors hover:bg-red-700"
+                  @click="removeCoverImage"
+                >
+                  <font-awesome-icon icon="fa-solid fa-xmark" class="h-4 w-4" />
+                </button>
+              </div>
+              <!-- Upload button -->
+              <div class="flex items-center gap-4">
+                <label
+                  class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                  :class="{ 'pointer-events-none opacity-50': isUploadingCover }"
+                >
+                  <font-awesome-icon icon="fa-solid fa-upload" class="h-4 w-4" />
+                  Télécharger une image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    class="hidden"
+                    :disabled="isUploadingCover"
+                    @change="handleCoverImageUpload"
+                  />
+                </label>
+                <span class="text-sm text-gray-500 dark:text-gray-400">
+                  Cette image sera affichée sur la page de l'événement
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -800,6 +899,26 @@ const tabs = [
           </button>
         </div>
       </div>
+
+      <!-- Image Editor Modal for Cover Image -->
+      <Teleport to="body">
+        <div
+          v-if="showCoverEditor && pendingCoverFile"
+          class="fixed inset-0 z-50 overflow-y-auto"
+        >
+          <div class="flex min-h-full items-center justify-center p-4">
+            <div class="fixed inset-0 bg-black/70 transition-opacity" />
+            <div class="relative w-full max-w-4xl transform transition-all">
+              <MediaImageEditor
+                :image-file="pendingCoverFile"
+                :aspect-ratio="16/9"
+                @save="saveEditedCover"
+                @cancel="cancelCoverEditor"
+              />
+            </div>
+          </div>
+        </div>
+      </Teleport>
     </template>
   </div>
 </template>

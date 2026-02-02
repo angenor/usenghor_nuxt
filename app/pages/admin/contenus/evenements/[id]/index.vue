@@ -17,31 +17,25 @@ const {
   eventStatusLabels,
 } = useEventsApi()
 
-const { getMediaById, getMediaUrl } = useMediaApi()
+const { getMediaUrl } = useMediaApi()
 
 // État
 const event = ref<EventRead | null>(null)
-const coverImageUrl = ref<string | null>(null)
 const isLoading = ref(true)
 const notFound = ref(false)
 const isDeleting = ref(false)
 const showDeleteModal = ref(false)
 
+// Helper pour obtenir l'URL de l'image de couverture
+const coverImageUrl = computed(() => {
+  if (!event.value?.cover_image_external_id) return null
+  return getMediaUrl(event.value.cover_image_external_id)
+})
+
 // Charger l'événement
 onMounted(async () => {
   try {
     event.value = await getEventById(eventId.value)
-
-    // Charger l'image de couverture si elle existe
-    if (event.value.cover_image_external_id) {
-      try {
-        const media = await getMediaById(event.value.cover_image_external_id)
-        coverImageUrl.value = getMediaUrl(media)
-      } catch (mediaError) {
-        console.error('Error loading cover image:', mediaError)
-        // L'image n'existe pas ou n'est plus accessible
-      }
-    }
   } catch (e) {
     console.error('Error loading event:', e)
     notFound.value = true
