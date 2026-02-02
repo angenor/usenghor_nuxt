@@ -323,7 +323,114 @@ onBeforeUnmount(() => {
   destroy()
 })
 
-// Fonctions pour insérer des blocs
+// Fonctions pour convertir ou insérer des blocs
+// Ces fonctions convertissent le bloc actuel s'il est vide ou de type paragraphe,
+// sinon elles insèrent un nouveau bloc après
+
+async function convertOrInsertBlock(type: string, data: Record<string, unknown> = {}) {
+  if (!editorInstance.value || !isReady.value) return
+
+  try {
+    const currentIndex = editorInstance.value.blocks.getCurrentBlockIndex()
+
+    if (currentIndex >= 0) {
+      // Récupérer le bloc actuel
+      const currentBlock = editorInstance.value.blocks.getBlockByIndex(currentIndex)
+
+      if (currentBlock) {
+        // Sauvegarder les données du bloc actuel
+        const savedData = await currentBlock.save()
+        const currentText = savedData?.data?.text || ''
+
+        // Si le bloc est un paragraphe, le convertir
+        if (currentBlock.name === 'paragraph') {
+          // Supprimer le bloc actuel
+          editorInstance.value.blocks.delete(currentIndex)
+
+          // Insérer le nouveau bloc avec le texte existant
+          const newData = { ...data }
+          if ('text' in newData || type === 'header' || type === 'paragraph') {
+            newData.text = currentText
+          }
+          else if ('content' in newData || type === 'list') {
+            // Pour les listes, mettre le texte dans le premier item
+            if (currentText && Array.isArray(newData.items)) {
+              newData.items = [{ content: currentText, items: [] }]
+            }
+          }
+
+          editorInstance.value.blocks.insert(type, newData, undefined, currentIndex, true, false)
+
+          // Focus sur le bloc converti
+          setTimeout(() => {
+            if (editorInstance.value) {
+              editorInstance.value.caret.setToBlock(currentIndex, 'end')
+            }
+          }, 10)
+          return
+        }
+      }
+    }
+
+    // Sinon, insérer un nouveau bloc après
+    const insertIndex = currentIndex >= 0 ? currentIndex + 1 : 0
+    editorInstance.value.blocks.insert(type, data, undefined, insertIndex, true, false)
+
+    setTimeout(() => {
+      if (editorInstance.value) {
+        editorInstance.value.caret.setToBlock(insertIndex, 'start')
+      }
+    }, 10)
+  }
+  catch (err) {
+    console.error('Error converting/inserting block:', err)
+  }
+}
+
+async function insertHeading(level: number) {
+  if (!editorInstance.value || !isReady.value) return
+
+  try {
+    const currentIndex = editorInstance.value.blocks.getCurrentBlockIndex()
+
+    if (currentIndex >= 0) {
+      const currentBlock = editorInstance.value.blocks.getBlockByIndex(currentIndex)
+
+      if (currentBlock) {
+        const savedData = await currentBlock.save()
+        const currentText = savedData?.data?.text || ''
+
+        // Si c'est un paragraphe ou un autre header, le convertir
+        if (currentBlock.name === 'paragraph' || currentBlock.name === 'header') {
+          editorInstance.value.blocks.delete(currentIndex)
+          editorInstance.value.blocks.insert('header', { text: currentText, level }, undefined, currentIndex, true, false)
+
+          setTimeout(() => {
+            if (editorInstance.value) {
+              editorInstance.value.caret.setToBlock(currentIndex, 'end')
+            }
+          }, 10)
+          return
+        }
+      }
+    }
+
+    // Sinon, insérer un nouveau header après
+    const insertIndex = currentIndex >= 0 ? currentIndex + 1 : 0
+    editorInstance.value.blocks.insert('header', { text: '', level }, undefined, insertIndex, true, false)
+
+    setTimeout(() => {
+      if (editorInstance.value) {
+        editorInstance.value.caret.setToBlock(insertIndex, 'start')
+      }
+    }, 10)
+  }
+  catch (err) {
+    console.error('Error inserting heading:', err)
+  }
+}
+
+// Fonction legacy pour insérer sans conversion (utilisée par certains types de blocs)
 async function insertBlock(type: string, data: Record<string, unknown> = {}) {
   if (!editorInstance.value || !isReady.value) return
 
@@ -333,45 +440,24 @@ async function insertBlock(type: string, data: Record<string, unknown> = {}) {
 
     editorInstance.value.blocks.insert(type, data, undefined, insertIndex, true, false)
 
-    // Focus sur le nouveau bloc après un court délai
     setTimeout(() => {
       if (editorInstance.value) {
         editorInstance.value.caret.setToBlock(insertIndex, 'start')
       }
     }, 10)
-  } catch (err) {
+  }
+  catch (err) {
     console.error('Error inserting block:', err)
   }
 }
 
-async function insertHeading(level: number) {
-  if (!editorInstance.value || !isReady.value) return
-
-  try {
-    const currentIndex = editorInstance.value.blocks.getCurrentBlockIndex()
-    const insertIndex = currentIndex >= 0 ? currentIndex + 1 : 0
-
-    // Insérer le header avec les bonnes données
-    editorInstance.value.blocks.insert('header', { text: '', level }, undefined, insertIndex, true, false)
-
-    // Focus et placement du curseur
-    setTimeout(() => {
-      if (editorInstance.value) {
-        editorInstance.value.caret.setToBlock(insertIndex, 'start')
-      }
-    }, 10)
-  } catch (err) {
-    console.error('Error inserting heading:', err)
-  }
-}
-
 function insertParagraph() {
-  insertBlock('paragraph', { text: '' })
+  convertOrInsertBlock('paragraph', { text: '' })
 }
 
 function insertList(style: 'unordered' | 'ordered' = 'unordered') {
   // Format v2.x de @editorjs/list : items est un tableau d'objets { content, items }
-  insertBlock('list', { style, items: [{ content: '', items: [] }] })
+  convertOrInsertBlock('list', { style, items: [{ content: '', items: [] }] })
 }
 
 function insertChecklist() {
