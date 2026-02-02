@@ -68,6 +68,13 @@ interface HeadCandidate {
 }
 const headCandidates = ref<HeadCandidate[]>([])
 
+// Albums disponibles pour association
+interface AlbumOption {
+  id: string
+  title: string
+}
+const availableAlbums = ref<AlbumOption[]>([])
+
 // Form state
 const newService = ref<{
   name: string
@@ -75,6 +82,7 @@ const newService = ref<{
   description: OutputData | undefined
   mission: OutputData | undefined
   head_external_id: string
+  album_external_id: string
   email: string
   phone: string
   active: boolean
@@ -84,12 +92,37 @@ const newService = ref<{
   description: undefined,
   mission: undefined,
   head_external_id: '',
+  album_external_id: '',
   email: '',
   phone: '',
   active: true
 })
 
 // === CHARGEMENT DES DONNÉES ===
+async function loadAvailableAlbums() {
+  try {
+    const response = await apiFetch<{
+      items: Array<{
+        id: string
+        title: string
+        status: string
+      }>
+    }>('/api/admin/albums', {
+      query: { limit: 100 },
+    })
+    // Ne garder que les albums publiés
+    availableAlbums.value = response.items
+      .filter(album => album.status === 'published')
+      .map(album => ({
+        id: album.id,
+        title: album.title,
+      }))
+  }
+  catch (err) {
+    console.error('Erreur chargement des albums:', err)
+  }
+}
+
 async function loadHeadCandidates() {
   try {
     const response = await apiFetch<{
@@ -186,7 +219,7 @@ function enrichServicesWithHeads() {
 
 // Charger les données au montage
 onMounted(async () => {
-  await Promise.all([loadData(), loadHeadCandidates()])
+  await Promise.all([loadData(), loadHeadCandidates(), loadAvailableAlbums()])
   enrichServicesWithHeads()
   if (filterSector.value) {
     expandedSectors.value.add(filterSector.value)
@@ -348,6 +381,7 @@ const openAddModal = () => {
     description: undefined,
     mission: undefined,
     head_external_id: '',
+    album_external_id: '',
     email: '',
     phone: '',
     active: true
@@ -363,6 +397,7 @@ const openEditModal = (service: ServiceDisplay) => {
     description: parseEditorContent(service.description),
     mission: parseEditorContent(service.mission),
     head_external_id: service.head_external_id || '',
+    album_external_id: service.album_external_id || '',
     email: service.email || '',
     phone: service.phone || '',
     active: service.active
@@ -403,6 +438,7 @@ const saveService = async () => {
       description: descriptionJson,
       mission: missionJson,
       head_external_id: newService.value.head_external_id || null,
+      album_external_id: newService.value.album_external_id || null,
       email: newService.value.email || null,
       phone: newService.value.phone || null,
       active: newService.value.active
@@ -1143,6 +1179,25 @@ const clearSectorFilter = () => {
               </select>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 Le responsable sera chargé depuis le service Identité
+              </p>
+            </div>
+
+            <!-- Album / Médiathèque -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Album médiathèque
+              </label>
+              <select
+                v-model="newService.album_external_id"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent"
+              >
+                <option value="">Aucun album</option>
+                <option v-for="album in availableAlbums" :key="album.id" :value="album.id">
+                  {{ album.title }}
+                </option>
+              </select>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                L'album sera affiché dans l'onglet "Médiathèque" de la page publique du service
               </p>
             </div>
 
