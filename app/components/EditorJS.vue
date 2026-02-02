@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { OutputData, API } from '@editorjs/editorjs'
+import { toRaw } from 'vue'
 
 interface Props {
   modelValue?: OutputData
@@ -34,26 +35,44 @@ const isReady = ref(false)
  * Nouveau: items: [{ content: "Item 1", items: [] }, { content: "Item 2", items: [] }]
  */
 function migrateListData(data: OutputData | undefined): OutputData | undefined {
+  // DEBUG: Afficher les données brutes pour diagnostiquer
+  console.log('[EditorJS] Données reçues:', data)
+
   if (!data?.blocks) return data
 
+  // Convertir les données réactives Vue (Proxy) en objets JavaScript purs
+  // pour éviter l'erreur "structuredClone cannot clone Proxy"
+  const rawData: OutputData = JSON.parse(JSON.stringify(toRaw(data)))
+
   return {
-    ...data,
-    blocks: data.blocks.map((block) => {
+    ...rawData,
+    blocks: rawData.blocks.map((block) => {
       if (block.type === 'list' && Array.isArray(block.data?.items)) {
-        // Vérifier si c'est l'ancien format (items est un tableau de strings)
-        const firstItem = block.data.items[0]
-        if (typeof firstItem === 'string') {
-          // Migration vers le nouveau format
-          return {
-            ...block,
-            data: {
-              ...block.data,
-              items: block.data.items.map((item: string) => ({
-                content: item,
-                items: [],
-              })),
-            },
+        // Migrer chaque item individuellement pour gérer les formats mixtes
+        const migratedItems = block.data.items.map((item: unknown) => {
+          // Si c'est une string (ancien format v1.x)
+          if (typeof item === 'string') {
+            return { content: item, items: [] }
           }
+          // Si c'est un objet mais sans la propriété 'items' (format intermédiaire)
+          if (typeof item === 'object' && item !== null) {
+            const obj = item as Record<string, unknown>
+            // S'assurer que 'content' existe et que 'items' est un tableau
+            return {
+              content: obj.content ?? obj.text ?? '',
+              items: Array.isArray(obj.items) ? obj.items : [],
+            }
+          }
+          // Fallback pour tout autre cas
+          return { content: '', items: [] }
+        })
+
+        return {
+          ...block,
+          data: {
+            ...block.data,
+            items: migratedItems,
+          },
         }
       }
       return block
@@ -252,14 +271,17 @@ async function initEditor() {
     },
     onChange: async (api) => {
       const data = await api.saver.save()
+      // DEBUG: Afficher les données sauvegardées
+      console.log('[EditorJS] Données sauvegardées:', data)
       emit('update:modelValue', data)
       emit('change', api)
     },
     onReady: () => {
       isReady.value = true
       if (editorInstance.value) {
-        // Initialiser le plugin Undo pour Ctrl+Z / Cmd+Z
-        undoInstance.value = new Undo({ editor: editorInstance.value })
+        // TODO: Le plugin editorjs-undo cause une erreur DataCloneError avec les listes
+        // car structuredClone() ne peut pas cloner les objets Vue réactifs
+        // undoInstance.value = new Undo({ editor: editorInstance.value })
         emit('ready', editorInstance.value as unknown as API)
       }
     },
@@ -348,7 +370,8 @@ function insertParagraph() {
 }
 
 function insertList(style: 'unordered' | 'ordered' = 'unordered') {
-  insertBlock('list', { style, items: [''] })
+  // Format v2.x de @editorjs/list : items est un tableau d'objets { content, items }
+  insertBlock('list', { style, items: [{ content: '', items: [] }] })
 }
 
 function insertChecklist() {

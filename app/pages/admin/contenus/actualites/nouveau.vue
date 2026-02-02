@@ -39,6 +39,17 @@ const {
 } = useReferenceData()
 
 // === STATE ===
+// Formater la date courante pour le champ datetime-local (YYYY-MM-DDTHH:mm)
+function getCurrentDateTimeLocal(): string {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  const hours = String(now.getHours()).padStart(2, '0')
+  const minutes = String(now.getMinutes()).padStart(2, '0')
+  return `${year}-${month}-${day}T${hours}:${minutes}`
+}
+
 const isSubmitting = ref(false)
 const isLoadingTags = ref(false)
 const showTagModal = ref(false)
@@ -68,7 +79,7 @@ const form = reactive({
   project_id: '',
   status: 'draft' as NewsStatus,
   highlight_status: 'standard' as NewsHighlightStatus,
-  visible_from: ''
+  visible_from: getCurrentDateTimeLocal()
 })
 
 // Tags from API
