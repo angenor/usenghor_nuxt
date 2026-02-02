@@ -29,6 +29,8 @@ export interface MergeTableData extends BlockToolData {
   content: MergeTableCell[][]
   /** Étirer le tableau sur toute la largeur */
   stretched?: boolean
+  /** Largeurs des colonnes en pixels ou pourcentage */
+  columnWidths?: number[]
 }
 
 /**

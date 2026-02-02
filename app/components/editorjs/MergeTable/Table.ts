@@ -1,5 +1,6 @@
 import type { MergeTableData, MergeTableCell, MergeTableConfig, SelectionRect } from './types'
 import { SelectionManager } from './SelectionManager'
+import { ResizeManager } from './ResizeManager'
 import { IconMerge, IconUnmerge, IconAddRow, IconDeleteRow, IconAddColumn, IconDeleteColumn } from './icons'
 
 /**
@@ -13,6 +14,7 @@ export class Table {
   private tableElement: HTMLTableElement | null = null
   private toolbar: HTMLElement | null = null
   private selectionManager: SelectionManager
+  private resizeManager: ResizeManager
   private onChange: () => void
 
   // Système d'historique pour Undo/Redo
@@ -33,6 +35,7 @@ export class Table {
     this.readOnly = readOnly
     this.onChange = onChange
     this.selectionManager = new SelectionManager()
+    this.resizeManager = new ResizeManager()
     this.wrapper = this.createWrapper()
 
     // Sauvegarder l'état initial
@@ -76,6 +79,7 @@ export class Table {
    */
   destroy(): void {
     this.selectionManager.detach()
+    this.resizeManager.detach()
     this.removeToolbar()
     document.removeEventListener('keydown', this.handleKeyDown)
     if (this.saveHistoryTimeout) {
@@ -417,6 +421,12 @@ export class Table {
       }
     }
 
+    // Ajouter une largeur par défaut pour la nouvelle colonne
+    if (this.data.columnWidths) {
+      const defaultWidth = this.data.columnWidths[Math.max(0, index - 1)] || 100
+      this.data.columnWidths.splice(index, 0, defaultWidth)
+    }
+
     this.render()
     this.saveToHistory()
     this.onChange()
@@ -465,6 +475,11 @@ export class Table {
       }
     }
 
+    // Supprimer la largeur de la colonne supprimée
+    if (this.data.columnWidths && this.data.columnWidths.length > index) {
+      this.data.columnWidths.splice(index, 1)
+    }
+
     this.render()
     this.saveToHistory()
     this.onChange()
@@ -496,7 +511,29 @@ export class Table {
 
     if (!this.readOnly) {
       this.selectionManager.attach(this.tableElement, (rect) => this.onSelectionChange(rect))
+
+      // Attacher le gestionnaire de redimensionnement après un court délai
+      // pour s'assurer que le tableau est bien rendu dans le DOM
+      setTimeout(() => {
+        if (this.tableElement) {
+          this.resizeManager.attach(
+            this.tableElement,
+            this.data.columnWidths,
+            (widths) => this.onColumnResize(widths)
+          )
+        }
+      }, 0)
     }
+  }
+
+  /**
+   * Gère le redimensionnement des colonnes
+   */
+  private onColumnResize(widths: number[]): void {
+    this.saveToHistory()
+    this.data.columnWidths = widths
+    this.saveToHistory()
+    this.onChange()
   }
 
   private createTable(): HTMLTableElement {

@@ -34,6 +34,7 @@ interface BlockData {
   height?: number
   content?: string[][] | MergeTableCell[][]
   withHeadings?: boolean
+  columnWidths?: number[]
   link?: string
   meta?: {
     title?: string
@@ -113,9 +114,17 @@ function renderBlock(type: string, data: BlockData): string {
     case 'table':
       const rows = data.content || []
       const withHeadings = data.withHeadings ?? true
+      const columnWidths = data.columnWidths || []
 
       // Vérifier si c'est le nouveau format (cellules sont des objets)
       const isNewFormat = rows.length > 0 && rows[0]?.length > 0 && typeof rows[0][0] === 'object' && 'content' in (rows[0][0] as MergeTableCell)
+
+      // Générer le colgroup si des largeurs sont définies
+      let colgroup = ''
+      if (columnWidths.length > 0) {
+        const cols = columnWidths.map((w) => `<col style="width: ${w}px">`).join('')
+        colgroup = `<colgroup>${cols}</colgroup>`
+      }
 
       const tableRows = rows
         .map((row, rowIndex) => {
@@ -153,7 +162,9 @@ function renderBlock(type: string, data: BlockData): string {
         })
         .join('')
 
-      return `<table class="w-full border-collapse">${tableRows}</table>`
+      // Ajouter table-layout: fixed si des largeurs sont définies
+      const tableStyle = columnWidths.length > 0 ? 'style="table-layout: fixed;"' : ''
+      return `<table class="w-full border-collapse" ${tableStyle}>${colgroup}${tableRows}</table>`
 
     case 'linkTool':
       return `
