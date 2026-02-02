@@ -35,6 +35,26 @@ export interface ServiceProjectPublic {
   updated_at: string
 }
 
+export interface ServiceTeamMemberPublic {
+  id: string
+  service_id: string
+  user_external_id: string
+  position: string
+  display_order: number
+  start_date: string | null
+  end_date: string | null
+  active: boolean
+  created_at: string
+  // Données enrichies depuis IDENTITY
+  user?: {
+    id: string
+    first_name: string
+    last_name: string
+    email: string
+    photo_external_id: string | null
+  }
+}
+
 export interface SectorPublic {
   id: string
   code: string
@@ -63,6 +83,7 @@ export interface ServicePublicWithDetails extends ServicePublic {
   objectives: ServiceObjectivePublic[]
   achievements: ServiceAchievementPublic[]
   projects: ServiceProjectPublic[]
+  team: ServiceTeamMemberPublic[]
 }
 
 export interface SectorPublicWithServices extends SectorPublic {

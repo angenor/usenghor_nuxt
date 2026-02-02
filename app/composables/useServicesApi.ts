@@ -72,6 +72,7 @@ export interface ServiceWithDetails extends ServiceRead {
   objectives: ServiceObjectiveRead[]
   achievements: ServiceAchievementRead[]
   projects: ServiceProjectRead[]
+  team: ServiceTeamMemberRead[]
 }
 
 export interface ServiceCreate {
@@ -148,6 +149,45 @@ export interface ServiceProjectUpdate {
   expected_end_date?: string | null
 }
 
+// Types pour l'équipe d'un service
+export interface ServiceTeamMemberRead {
+  id: string
+  service_id: string
+  user_external_id: string
+  position: string
+  display_order: number
+  start_date: string | null
+  end_date: string | null
+  active: boolean
+  created_at: string
+  // Données enrichies depuis IDENTITY
+  user?: {
+    id: string
+    first_name: string
+    last_name: string
+    email: string
+    photo_external_id: string | null
+  }
+}
+
+export interface ServiceTeamMemberCreate {
+  user_external_id: string
+  position: string
+  display_order?: number
+  start_date?: string | null
+  end_date?: string | null
+  active?: boolean
+}
+
+export interface ServiceTeamMemberUpdate {
+  user_external_id?: string
+  position?: string
+  display_order?: number
+  start_date?: string | null
+  end_date?: string | null
+  active?: boolean
+}
+
 export interface ServiceReorder {
   service_ids: string[]
 }
@@ -171,6 +211,7 @@ export interface ServiceDisplay extends ServiceRead {
   objectives_count: number
   achievements_count: number
   projects_count: number
+  team_count: number
 }
 
 export interface ServiceStats {
@@ -313,6 +354,7 @@ export function useServicesApi() {
       objectives_count: details?.objectives ?? 0,
       achievements_count: details?.achievements ?? 0,
       projects_count: details?.projects ?? 0,
+      team_count: details?.team ?? 0,
     }
   }
 
@@ -338,6 +380,7 @@ export function useServicesApi() {
       objectives_count: service.objectives?.length ?? 0,
       achievements_count: service.achievements?.length ?? 0,
       projects_count: service.projects?.length ?? 0,
+      team_count: service.team?.length ?? 0,
     }
   }
 
@@ -376,6 +419,7 @@ export function useServicesApi() {
       objectives_count: service.objectives_count,
       achievements_count: service.achievements_count,
       projects_count: service.projects_count,
+      team_count: 0,
       created_at: service.created_at,
       updated_at: service.updated_at,
     }
@@ -739,6 +783,63 @@ export function useServicesApi() {
   }
 
   // =========================================================================
+  // Team Members
+  // =========================================================================
+
+  /**
+   * Récupère les membres de l'équipe d'un service.
+   */
+  async function getServiceTeamMembers(serviceId: string): Promise<ServiceTeamMemberRead[]> {
+    try {
+      return await apiFetch<ServiceTeamMemberRead[]>(`/api/admin/services/${serviceId}/team`)
+    }
+    catch {
+      // Fallback : retourner un tableau vide
+      console.warn('[useServicesApi] API unavailable for team members')
+      return []
+    }
+  }
+
+  /**
+   * Ajoute un membre à l'équipe d'un service.
+   */
+  async function addServiceTeamMember(
+    serviceId: string,
+    data: ServiceTeamMemberCreate,
+  ): Promise<IdResponse> {
+    return apiFetch<IdResponse>(`/api/admin/services/${serviceId}/team`, {
+      method: 'POST',
+      body: data,
+    })
+  }
+
+  /**
+   * Met à jour un membre de l'équipe.
+   */
+  async function updateServiceTeamMember(
+    serviceId: string,
+    memberId: string,
+    data: ServiceTeamMemberUpdate,
+  ): Promise<MessageResponse> {
+    return apiFetch<MessageResponse>(`/api/admin/services/${serviceId}/team/${memberId}`, {
+      method: 'PUT',
+      body: data,
+    })
+  }
+
+  /**
+   * Supprime un membre de l'équipe.
+   */
+  async function deleteServiceTeamMember(
+    serviceId: string,
+    memberId: string,
+  ): Promise<MessageResponse> {
+    return apiFetch<MessageResponse>(`/api/admin/services/${serviceId}/team/${memberId}`, {
+      method: 'DELETE',
+    })
+  }
+
+  // =========================================================================
   // Statistics & Utilities
   // =========================================================================
 
@@ -966,6 +1067,12 @@ export function useServicesApi() {
     getServiceAlbums,
     addAlbumToService,
     removeAlbumFromService,
+
+    // Team Members
+    getServiceTeamMembers,
+    addServiceTeamMember,
+    updateServiceTeamMember,
+    deleteServiceTeamMember,
 
     // Statistics & Utilities
     getServicesStats,

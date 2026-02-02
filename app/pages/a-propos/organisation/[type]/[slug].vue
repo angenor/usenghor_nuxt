@@ -5,6 +5,7 @@ import type {
   ServiceObjectivePublic,
   ServiceAchievementPublic,
   ServiceProjectPublic,
+  ServiceTeamMemberPublic,
 } from '~/composables/usePublicOrganizationApi'
 
 const route = useRoute()
@@ -167,6 +168,14 @@ const projects = computed<ServiceProjectPublic[]>(() => {
   return []
 })
 
+// Team (only for services)
+const team = computed<ServiceTeamMemberPublic[]>(() => {
+  if (entityType === 'service' && service.value) {
+    return service.value.team || []
+  }
+  return []
+})
+
 // Services (only for sectors)
 const sectorServices = computed(() => {
   if (entityType === 'secteur' && sector.value) {
@@ -234,6 +243,7 @@ const tabs = computed(() => {
   // Services: full tabs
   return [
     { key: 'missions', icon: 'fa-solid fa-bullseye' },
+    { key: 'team', icon: 'fa-solid fa-users' },
     { key: 'achievements', icon: 'fa-solid fa-trophy' },
     { key: 'projects', icon: 'fa-solid fa-diagram-project' },
   ]
@@ -451,6 +461,83 @@ const getServiceUrl = (svc: { name: string }) => {
             <div v-else-if="entityType === 'service'" class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">
               <font-awesome-icon icon="fa-solid fa-bullseye" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
               <p class="text-gray-500 dark:text-gray-400 text-lg">{{ t('organizationDetail.missions.noObjectives') || 'Aucun objectif défini' }}</p>
+            </div>
+
+            <!-- Next Tab Button -->
+            <div v-if="nextTab" class="mt-12 flex justify-end">
+              <button
+                type="button"
+                class="group inline-flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                :class="`${colorClasses.bgLight} ${colorClasses.text}`"
+                @click="goToNextTab"
+              >
+                <span>{{ t(`organizationDetail.tabs.${nextTab.key}`) }}</span>
+                <font-awesome-icon :icon="nextTab.icon" class="w-5 h-5 transition-transform group-hover:translate-x-1" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Team Tab (for services only) -->
+          <div v-if="activeTab === 'team' && entityType === 'service'" class="animate__animated animate__fadeIn">
+            <div class="mb-8">
+              <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                {{ t('organizationDetail.team.title') }}
+              </h2>
+              <p class="text-gray-600 dark:text-gray-400">
+                {{ t('organizationDetail.team.subtitle', { type: t('organizationDetail.types.service') }) }}
+              </p>
+            </div>
+
+            <div v-if="team.length > 0" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div
+                v-for="member in team"
+                :key="member.id"
+                class="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 group text-center"
+              >
+                <!-- Photo -->
+                <div class="relative mx-auto w-24 h-24 mb-4">
+                  <div
+                    v-if="member.user?.photo_external_id"
+                    class="w-24 h-24 rounded-full overflow-hidden ring-4 ring-white dark:ring-gray-800 shadow-lg"
+                  >
+                    <img
+                      :src="`/api/media/${member.user.photo_external_id}`"
+                      :alt="`${member.user.first_name} ${member.user.last_name}`"
+                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  </div>
+                  <div
+                    v-else
+                    class="w-24 h-24 rounded-full flex items-center justify-center ring-4 ring-white dark:ring-gray-800 shadow-lg"
+                    :class="colorClasses.bgLight"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-user" class="w-10 h-10" :class="colorClasses.text" />
+                  </div>
+                </div>
+
+                <!-- Info -->
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-1">
+                  {{ member.user ? `${member.user.first_name} ${member.user.last_name}` : t('organizationDetail.team.members') }}
+                </h4>
+                <p class="text-sm font-medium mb-2" :class="colorClasses.text">
+                  {{ member.position }}
+                </p>
+
+                <!-- Email -->
+                <a
+                  v-if="member.user?.email"
+                  :href="`mailto:${member.user.email}`"
+                  class="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                >
+                  <font-awesome-icon icon="fa-solid fa-envelope" class="w-3 h-3" />
+                  <span class="truncate max-w-[150px]">{{ member.user.email }}</span>
+                </a>
+              </div>
+            </div>
+
+            <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">
+              <font-awesome-icon icon="fa-solid fa-users" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
+              <p class="text-gray-500 dark:text-gray-400 text-lg">{{ t('organizationDetail.team.empty') }}</p>
             </div>
 
             <!-- Next Tab Button -->
