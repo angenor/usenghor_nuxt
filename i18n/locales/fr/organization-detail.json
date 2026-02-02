@@ -3,15 +3,19 @@
     "seo": {
       "titleDepartment": "{name} | Département | Université Senghor",
       "titleService": "{name} | Service | Université Senghor",
+      "titleSector": "{name} | Secteur | Université Senghor",
       "description": "Découvrez les missions, l'équipe et les projets du {type} {name} de l'Université Senghor."
     },
+    "notFound": "Entité non trouvée",
     "breadcrumb": {
       "department": "Département",
-      "service": "Service"
+      "service": "Service",
+      "sector": "Secteur"
     },
     "tabs": {
       "missions": "Missions",
       "team": "Équipe",
+      "services": "Services",
       "achievements": "Réalisations",
       "projects": "Projets",
       "news": "Actualités",
@@ -20,6 +24,7 @@
     "missions": {
       "title": "Nos missions",
       "subtitle": "Objectifs et engagements",
+      "description": "Description",
       "objectives": "Objectifs principaux",
       "values": "Nos valeurs",
       "empty": "Les missions seront bientôt détaillées."
@@ -32,6 +37,11 @@
       "contact": "Contacter",
       "empty": "Aucun membre affiché pour le moment.",
       "viewProfile": "Voir le profil"
+    },
+    "services": {
+      "title": "Services",
+      "subtitle": "Services rattachés à ce secteur",
+      "empty": "Aucun service dans ce secteur"
     },
     "achievements": {
       "title": "Nos réalisations",
@@ -46,8 +56,12 @@
       "status": {
         "ongoing": "En cours",
         "completed": "Terminé",
-        "planned": "Planifié"
+        "planned": "Planifié",
+        "suspended": "Suspendu"
       },
+      "startDate": "Début",
+      "endDate": "Fin prévue",
+      "progress": "Progression",
       "viewMore": "En savoir plus",
       "empty": "Aucun projet affiché pour le moment."
     },
@@ -78,7 +92,8 @@
     },
     "types": {
       "department": "département",
-      "service": "service"
+      "service": "service",
+      "sector": "secteur"
     }
   }
 }

@@ -3,15 +3,19 @@
     "seo": {
       "titleDepartment": "{name} | Department | Senghor University",
       "titleService": "{name} | Service | Senghor University",
+      "titleSector": "{name} | Sector | Senghor University",
       "description": "Discover the missions, team and projects of the {type} {name} at Senghor University."
     },
+    "notFound": "Entity not found",
     "breadcrumb": {
       "department": "Department",
-      "service": "Service"
+      "service": "Service",
+      "sector": "Sector"
     },
     "tabs": {
       "missions": "Missions",
       "team": "Team",
+      "services": "Services",
       "achievements": "Achievements",
       "projects": "Projects",
       "news": "News",
@@ -20,6 +24,7 @@
     "missions": {
       "title": "Our missions",
       "subtitle": "Objectives and commitments",
+      "description": "Description",
       "objectives": "Main objectives",
       "values": "Our values",
       "empty": "Missions will be detailed soon."
@@ -32,6 +37,11 @@
       "contact": "Contact",
       "empty": "No members displayed at the moment.",
       "viewProfile": "View profile"
+    },
+    "services": {
+      "title": "Services",
+      "subtitle": "Services attached to this sector",
+      "empty": "No services in this sector"
     },
     "achievements": {
       "title": "Our achievements",
@@ -46,8 +56,12 @@
       "status": {
         "ongoing": "Ongoing",
         "completed": "Completed",
-        "planned": "Planned"
+        "planned": "Planned",
+        "suspended": "Suspended"
       },
+      "startDate": "Start",
+      "endDate": "Expected end",
+      "progress": "Progress",
       "viewMore": "Learn more",
       "empty": "No projects displayed at the moment."
     },
@@ -78,7 +92,8 @@
     },
     "types": {
       "department": "department",
-      "service": "service"
+      "service": "service",
+      "sector": "sector"
     }
   }
 }

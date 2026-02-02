@@ -3,15 +3,19 @@
     "seo": {
       "titleDepartment": "{name} | قسم | جامعة سنغور",
       "titleService": "{name} | خدمة | جامعة سنغور",
+      "titleSector": "{name} | قطاع | جامعة سنغور",
       "description": "اكتشف مهام وفريق ومشاريع {type} {name} في جامعة سنغور."
     },
+    "notFound": "الكيان غير موجود",
     "breadcrumb": {
       "department": "قسم",
-      "service": "خدمة"
+      "service": "خدمة",
+      "sector": "قطاع"
     },
     "tabs": {
       "missions": "المهام",
       "team": "الفريق",
+      "services": "الخدمات",
       "achievements": "الإنجازات",
       "projects": "المشاريع",
       "news": "الأخبار",
@@ -20,6 +24,7 @@
     "missions": {
       "title": "مهامنا",
       "subtitle": "الأهداف والالتزامات",
+      "description": "الوصف",
       "objectives": "الأهداف الرئيسية",
       "values": "قيمنا",
       "empty": "سيتم تفصيل المهام قريباً."
@@ -32,6 +37,11 @@
       "contact": "اتصل",
       "empty": "لا يوجد أعضاء معروضون حالياً.",
       "viewProfile": "عرض الملف الشخصي"
+    },
+    "services": {
+      "title": "الخدمات",
+      "subtitle": "الخدمات المرتبطة بهذا القطاع",
+      "empty": "لا توجد خدمات في هذا القطاع"
     },
     "achievements": {
       "title": "إنجازاتنا",
@@ -46,8 +56,12 @@
       "status": {
         "ongoing": "جارٍ",
         "completed": "مكتمل",
-        "planned": "مخطط"
+        "planned": "مخطط",
+        "suspended": "معلق"
       },
+      "startDate": "البداية",
+      "endDate": "النهاية المتوقعة",
+      "progress": "التقدم",
       "viewMore": "اعرف المزيد",
       "empty": "لا توجد مشاريع معروضة حالياً."
     },
@@ -78,7 +92,8 @@
     },
     "types": {
       "department": "قسم",
-      "service": "خدمة"
+      "service": "خدمة",
+      "sector": "قطاع"
     }
   }
 }
