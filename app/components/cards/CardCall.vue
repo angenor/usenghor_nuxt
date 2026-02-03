@@ -31,19 +31,45 @@ const getLocalizedTitle = computed(() => {
   return mockCall.title_fr
 })
 
+// Extract plain text from EditorJS JSON or return as-is
+const extractPlainText = (content: string): string => {
+  if (!content) return ''
+  try {
+    const parsed = JSON.parse(content)
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
+      // Extract text from paragraph and header blocks
+      return parsed.blocks
+        .filter((block: { type: string }) => block.type === 'paragraph' || block.type === 'header')
+        .map((block: { data: { text: string } }) => {
+          // Remove HTML tags from text
+          const text = block.data?.text || ''
+          return text.replace(/<[^>]*>/g, '')
+        })
+        .join(' ')
+        .trim()
+    }
+  } catch {
+    // Not JSON, return as-is
+  }
+  return content
+}
+
 // Get localized description
 const getLocalizedDescription = computed(() => {
+  let rawDescription = ''
   if (isApiCall.value) {
-    return (props.call as ApplicationCallPublic).description || ''
+    rawDescription = (props.call as ApplicationCallPublic).description || ''
+  } else {
+    const mockCall = props.call as CampusCall
+    if (locale.value === 'en' && mockCall.description_en) {
+      rawDescription = mockCall.description_en
+    } else if (locale.value === 'ar' && mockCall.description_ar) {
+      rawDescription = mockCall.description_ar
+    } else {
+      rawDescription = mockCall.description_fr
+    }
   }
-  const mockCall = props.call as CampusCall
-  if (locale.value === 'en' && mockCall.description_en) {
-    return mockCall.description_en
-  }
-  if (locale.value === 'ar' && mockCall.description_ar) {
-    return mockCall.description_ar
-  }
-  return mockCall.description_fr
+  return extractPlainText(rawDescription)
 })
 
 // Get deadline

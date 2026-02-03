@@ -25,7 +25,9 @@
       "title": "Nos missions",
       "subtitle": "Objectifs et engagements",
       "description": "Description",
+      "mission": "Mission",
       "objectives": "Objectifs principaux",
+      "noObjectives": "Aucun objectif défini pour le moment.",
       "values": "Nos valeurs",
       "empty": "Les missions seront bientôt détaillées."
     },

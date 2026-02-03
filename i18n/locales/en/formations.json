@@ -156,7 +156,8 @@
         "badge": "Programs"
       },
       "browseByType": "Browse by Program Type",
-      "viewAll": "View All Programs"
+      "viewAll": "View All Programs",
+      "noFeatured": "No featured programs at the moment."
     },
     "empty": {
       "title": "No programs found",

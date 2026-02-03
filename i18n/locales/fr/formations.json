@@ -156,7 +156,8 @@
         "badge": "Formations"
       },
       "browseByType": "Explorer par type de formation",
-      "viewAll": "Voir toutes les formations"
+      "viewAll": "Voir toutes les formations",
+      "noFeatured": "Aucune formation à la une pour le moment."
     },
     "empty": {
       "title": "Aucune formation trouvée",
