@@ -22,8 +22,8 @@ export const useEditorialContentStore = defineStore('editorialContent', () => {
   // Timestamp du dernier chargement
   const lastFetchTime = ref<number | null>(null)
 
-  // État de chargement
-  const isLoading = ref(false)
+  // Pages en cours de chargement (pour éviter les doublons par page)
+  const loadingPages = ref<Set<string>>(new Set())
 
   // Erreur éventuelle
   const error = ref<string | null>(null)
@@ -86,18 +86,27 @@ export const useEditorialContentStore = defineStore('editorialContent', () => {
    * Charge les contenus pour une page via l'API
    */
   async function loadPageContents(pageId: string, keys: string[]): Promise<void> {
-    // Éviter les chargements multiples simultanés
-    if (isLoading.value) return
+    // Éviter les chargements multiples simultanés pour LA MÊME page
+    if (loadingPages.value.has(pageId)) {
+      console.log('[EditorialStore] Chargement déjà en cours pour:', pageId)
+      return
+    }
 
     // Vérifier si la page est déjà chargée avec un cache valide
-    if (isPageLoaded(pageId)) return
+    if (isPageLoaded(pageId)) {
+      console.log('[EditorialStore] Page déjà en cache:', pageId)
+      return
+    }
 
-    isLoading.value = true
+    console.log('[EditorialStore] Chargement des contenus pour:', pageId, 'clés:', keys.length)
+    loadingPages.value.add(pageId)
     error.value = null
 
     try {
       const { getContentsByKeys } = usePublicEditorialApi()
       const loadedContents = await getContentsByKeys(keys)
+
+      console.log('[EditorialStore] Contenus chargés pour', pageId, ':', loadedContents.length, loadedContents)
 
       setContents(loadedContents)
       markPageLoaded(pageId)
@@ -107,7 +116,7 @@ export const useEditorialContentStore = defineStore('editorialContent', () => {
       error.value = 'Erreur lors du chargement des contenus'
     }
     finally {
-      isLoading.value = false
+      loadingPages.value.delete(pageId)
     }
   }
 
@@ -126,6 +135,9 @@ export const useEditorialContentStore = defineStore('editorialContent', () => {
   function invalidatePage(pageId: string): void {
     loadedPages.value.delete(pageId)
   }
+
+  // Getter pour compatibilité - true si au moins une page est en chargement
+  const isLoading = computed(() => loadingPages.value.size > 0)
 
   return {
     // State

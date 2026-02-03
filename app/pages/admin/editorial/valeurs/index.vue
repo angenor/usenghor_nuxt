@@ -21,6 +21,9 @@ const {
   frontOfficePages,
 } = useEditorialValuesApi()
 
+// Store du front-office pour invalider le cache après sauvegarde
+const editorialContentStore = useEditorialContentStore()
+
 // === STATE ===
 const isLoading = ref(true)
 const isSaving = ref(false)
@@ -149,6 +152,10 @@ async function handleSaveField(key: string, value: string, valueType: 'text' | '
     }
 
     globalStats.value = await getValuesStats()
+
+    // Invalider le cache du front-office pour que les modifications soient visibles immédiatement
+    editorialContentStore.invalidateCache()
+
     showSuccess('Champ enregistré avec succès')
   }
   catch (err) {
