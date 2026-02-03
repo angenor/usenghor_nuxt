@@ -177,6 +177,12 @@ const closeModals = () => {
   pageHistory.value = []
   resetForm()
 }
+
+// Obtenir un aperçu du contenu (évite le warning ?? avec substring)
+const getContentPreview = (content: string | undefined | null): string => {
+  if (!content) return ''
+  return content.substring(0, 300) + '...'
+}
 </script>
 
 <template>
@@ -306,7 +312,7 @@ const closeModals = () => {
 
         <!-- Contenu aperçu -->
         <div class="p-5">
-          <div class="prose prose-sm dark:prose-invert max-w-none line-clamp-4 text-gray-600 dark:text-gray-400" v-html="page.content.substring(0, 300) + '...'" />
+          <div class="prose prose-sm dark:prose-invert max-w-none line-clamp-4 text-gray-600 dark:text-gray-400" v-html="getContentPreview(page.content)" />
         </div>
 
         <!-- Footer -->
