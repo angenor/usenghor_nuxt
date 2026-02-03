@@ -6,6 +6,30 @@ import type { ProjectRead } from '~/types/api/projects'
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getAllPublishedNews, listPublishedNews } = usePublicNewsApi()
+
+// Extraire le texte brut d'un contenu EditorJS
+const extractPlainText = (content: string | null | undefined): string => {
+  if (!content) return ''
+  try {
+    const parsed = JSON.parse(content)
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
+      return parsed.blocks
+        .map((block: { type: string; data: { text?: string } }) => {
+          if (block.data?.text) {
+            // Supprimer les balises HTML éventuelles
+            return block.data.text.replace(/<[^>]*>/g, '')
+          }
+          return ''
+        })
+        .filter(Boolean)
+        .join(' ')
+    }
+  } catch {
+    // Si ce n'est pas du JSON valide, retourner tel quel
+    return content
+  }
+  return content
+}
 const { getUpcomingEvents: getApiUpcomingEvents } = usePublicEventsApi()
 const { listOngoingCalls } = usePublicCallsApi()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
@@ -566,8 +590,11 @@ const hasAssociations = (item: NewsDisplay) => {
         </div>
       </section>
 
-      <!-- Section 3: Upcoming Events -->
-      <section v-if="upcomingEvents.length > 0" class="mb-16">
+    </div>
+
+    <!-- Section 3: Upcoming Events (fond bleu) -->
+    <section v-if="upcomingEvents.length > 0" class="bg-brand-blue-50 dark:bg-brand-blue-950/30 py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-8">
           <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
             <span class="relative inline-block">
@@ -626,9 +653,11 @@ const hasAssociations = (item: NewsDisplay) => {
             </div>
           </NuxtLink>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- Section 4: Open Calls -->
+    <!-- Section 4: Open Calls (fond blanc) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <section v-if="openCalls.length > 0">
         <div class="flex items-center justify-between mb-8">
           <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
@@ -676,7 +705,7 @@ const hasAssociations = (item: NewsDisplay) => {
               </h3>
 
               <p v-if="call.description" class="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                {{ call.description }}
+                {{ extractPlainText(call.description) }}
               </p>
 
               <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">

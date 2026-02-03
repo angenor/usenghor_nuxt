@@ -176,11 +176,7 @@ const breadcrumb = computed(() => [
             </div>
 
             <!-- Description -->
-            <div v-if="call.description" class="prose prose-lg dark:prose-invert max-w-none mb-8">
-              <p class="text-gray-600 dark:text-gray-300 text-lg leading-relaxed whitespace-pre-wrap">
-                {{ call.description }}
-              </p>
-            </div>
+            <CallsDescriptionSection v-if="call.description" :description="call.description" />
 
             <!-- Details cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
