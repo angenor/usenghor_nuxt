@@ -414,7 +414,7 @@ const handleImageError = (e: Event) => {
             <div class="map-container relative" @mousemove="handleMouseMove">
               <!-- ViewBox ajusté pour afficher Europe, Afrique, Asie, Océanie (sans Amériques) -->
               <svg
-                viewBox="440 60 560 500"
+                viewBox="420 55 590 540"
                 class="world-map w-full h-auto"
                 xmlns="http://www.w3.org/2000/svg"
               >
