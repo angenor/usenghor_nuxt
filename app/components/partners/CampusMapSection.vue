@@ -28,6 +28,25 @@ const campusCardRef = ref<HTMLElement | null>(null)
 // World map data
 const map = World
 
+// Countries to exclude (Americas + Greenland)
+const excludedCountries = new Set([
+  // Greenland
+  'gl',
+  // North America
+  'us', 'ca', 'mx',
+  // Central America
+  'gt', 'bz', 'hn', 'sv', 'ni', 'cr', 'pa',
+  // Caribbean
+  'cu', 'jm', 'ht', 'do', 'pr', 'bs', 'tt', 'bb', 'gd', 'vc', 'lc', 'dm', 'ag', 'kn',
+  // South America
+  'br', 'ar', 'co', 'pe', 've', 'cl', 'ec', 'bo', 'py', 'uy', 'gy', 'sr', 'gf',
+])
+
+// Filtered map locations (without Americas and Greenland)
+const filteredLocations = computed(() => {
+  return map.locations.filter(location => !excludedCountries.has(location.id.toLowerCase()))
+})
+
 // === CHARGEMENT DES DONNÉES ===
 onMounted(async () => {
   try {
@@ -393,13 +412,14 @@ const handleImageError = (e: Event) => {
           <div class="relative flex-1 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-3xl p-4 lg:p-8 border border-gray-200/50 dark:border-gray-700/50 shadow-xl ltr:lg:mr-[-80px] rtl:lg:ml-[-80px] z-10">
             <!-- Map -->
             <div class="map-container relative" @mousemove="handleMouseMove">
+              <!-- ViewBox ajusté pour afficher Europe, Afrique, Asie, Océanie (sans Amériques) -->
               <svg
-                :viewBox="map.viewBox"
+                viewBox="440 60 560 500"
                 class="world-map w-full h-auto"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  v-for="location in map.locations"
+                  v-for="location in filteredLocations"
                   :key="location.id"
                   :d="location.path"
                   :fill="getColor(location.id)"
