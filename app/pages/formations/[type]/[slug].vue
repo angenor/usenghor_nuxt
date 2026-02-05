@@ -582,7 +582,12 @@ const toggleSemester = (num: number) => {
                       v-for="call in associatedCalls"
                       :key="call.id"
                       :to="localePath(`/actualites/appels/${call.slug}`)"
-                      class="block p-3 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-brand-blue-500 dark:hover:border-brand-blue-500 transition-colors group"
+                      class="call-card-link block p-3 bg-white dark:bg-gray-900 rounded-lg border-2 transition-all duration-300 group"
+                      :class="[
+                        call.status === 'ongoing'
+                          ? 'border-brand-blue-400 dark:border-brand-blue-500 animate-border-pulse'
+                          : 'border-amber-300 dark:border-amber-500 animate-border-pulse-amber'
+                      ]"
                     >
                       <div class="flex items-center gap-2 mb-2">
                         <span
@@ -591,11 +596,17 @@ const toggleSemester = (num: number) => {
                         >
                           {{ t(`formations.detail.callStatus.${call.status}`) }}
                         </span>
+                        <font-awesome-icon
+                          v-if="call.status === 'ongoing'"
+                          icon="fa-solid fa-arrow-right"
+                          class="w-3 h-3 text-brand-blue-500 animate-bounce-x"
+                        />
                       </div>
                       <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors line-clamp-2">
                         {{ call.title }}
                       </p>
-                      <p v-if="call.deadline" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      <p v-if="call.deadline" class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+                        <font-awesome-icon icon="fa-solid fa-clock" class="w-3 h-3" />
                         {{ t('formations.detail.deadline') }}: {{ new Date(call.deadline).toLocaleDateString(locale) }}
                       </p>
                     </NuxtLink>
@@ -637,3 +648,79 @@ const toggleSemester = (num: number) => {
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Animation de pulsation pour les bordures - appels en cours (bleu) */
+@keyframes border-pulse {
+  0%, 100% {
+    border-color: rgb(96 165 250); /* brand-blue-400 */
+    box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.4);
+  }
+  50% {
+    border-color: rgb(59 130 246); /* brand-blue-500 */
+    box-shadow: 0 0 8px 2px rgba(59, 130, 246, 0.3);
+  }
+}
+
+.animate-border-pulse {
+  animation: border-pulse 2s ease-in-out infinite;
+}
+
+.animate-border-pulse:hover {
+  animation: none;
+  border-color: rgb(37 99 235) !important; /* brand-blue-600 */
+  box-shadow: 0 0 12px 4px rgba(59, 130, 246, 0.4);
+}
+
+/* Animation de pulsation pour les bordures - appels à venir (amber) */
+@keyframes border-pulse-amber {
+  0%, 100% {
+    border-color: rgb(252 211 77); /* amber-300 */
+    box-shadow: 0 0 0 0 rgba(252, 211, 77, 0.4);
+  }
+  50% {
+    border-color: rgb(245 158 11); /* amber-500 */
+    box-shadow: 0 0 8px 2px rgba(245, 158, 11, 0.3);
+  }
+}
+
+.animate-border-pulse-amber {
+  animation: border-pulse-amber 2.5s ease-in-out infinite;
+}
+
+.animate-border-pulse-amber:hover {
+  animation: none;
+  border-color: rgb(217 119 6) !important; /* amber-600 */
+  box-shadow: 0 0 12px 4px rgba(245, 158, 11, 0.4);
+}
+
+/* Animation de flèche rebondissante horizontale */
+@keyframes bounce-x {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+.animate-bounce-x {
+  animation: bounce-x 1s ease-in-out infinite;
+}
+
+/* Dark mode adjustments */
+:deep(.dark) .animate-border-pulse {
+  animation-name: border-pulse-dark;
+}
+
+@keyframes border-pulse-dark {
+  0%, 100% {
+    border-color: rgb(59 130 246); /* brand-blue-500 */
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    border-color: rgb(96 165 250); /* brand-blue-400 */
+    box-shadow: 0 0 10px 3px rgba(96, 165, 250, 0.25);
+  }
+}
+</style>
