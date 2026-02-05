@@ -1,30 +1,105 @@
 <script setup lang="ts">
 import type { CampusFormationRealisee } from '~/composables/useMockData'
+import type { ApplicationCallPublic } from '~/types/api'
+
+// Support both mock data type and API type
+type FormationData = CampusFormationRealisee | ApplicationCallPublic
 
 interface Props {
-  formation: CampusFormationRealisee
+  formation: FormationData
 }
 
 const props = defineProps<Props>()
 const { t, locale } = useI18n()
 
+// Helper to check if it's an API call
+const isApiCall = computed(() => 'slug' in props.formation && 'cover_image_external_id' in props.formation)
+
 // Get localized title
 const getLocalizedTitle = computed(() => {
-  if (locale.value === 'en' && props.formation.title_en) {
-    return props.formation.title_en
+  if (isApiCall.value) {
+    return (props.formation as ApplicationCallPublic).title
   }
-  if (locale.value === 'ar' && props.formation.title_ar) {
-    return props.formation.title_ar
+  const mockFormation = props.formation as CampusFormationRealisee
+  if (locale.value === 'en' && mockFormation.title_en) {
+    return mockFormation.title_en
   }
-  return props.formation.title_fr
+  if (locale.value === 'ar' && mockFormation.title_ar) {
+    return mockFormation.title_ar
+  }
+  return mockFormation.title_fr
 })
+
+// Extract plain text from EditorJS JSON or return as-is
+const extractPlainText = (content: string | null | undefined): string => {
+  if (!content) return ''
+  try {
+    const parsed = JSON.parse(content)
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
+      return parsed.blocks
+        .filter((block: { type: string }) => block.type === 'paragraph' || block.type === 'header')
+        .map((block: { data: { text: string } }) => {
+          const text = block.data?.text || ''
+          return text.replace(/<[^>]*>/g, '')
+        })
+        .join(' ')
+        .trim()
+    }
+  } catch {
+    // Not JSON, return as-is
+  }
+  return content
+}
 
 // Get localized description
 const getLocalizedDescription = computed(() => {
-  if (locale.value === 'en' && props.formation.description_en) {
-    return props.formation.description_en
+  if (isApiCall.value) {
+    return extractPlainText((props.formation as ApplicationCallPublic).description)
   }
-  return props.formation.description_fr
+  const mockFormation = props.formation as CampusFormationRealisee
+  if (locale.value === 'en' && mockFormation.description_en) {
+    return mockFormation.description_en
+  }
+  return mockFormation.description_fr
+})
+
+// Get image URL (supports both mock and API data)
+const formationImage = computed(() => {
+  if (isApiCall.value) {
+    const apiCall = props.formation as ApplicationCallPublic
+    return apiCall.cover_image_external_id
+      ? `/api/media/${apiCall.cover_image_external_id}`
+      : `https://picsum.photos/seed/${apiCall.slug}/800/600`
+  }
+  const mockFormation = props.formation as CampusFormationRealisee
+  return mockFormation.image || `https://picsum.photos/seed/${mockFormation.id}/800/600`
+})
+
+// Get formation type
+const formationType = computed(() => {
+  if (isApiCall.value) {
+    // API calls of type 'training' map to 'certifiante' for display
+    return 'certifiante'
+  }
+  return (props.formation as CampusFormationRealisee).formation_type
+})
+
+// Get promotion info (only for mock data)
+const promotion = computed(() => {
+  if (isApiCall.value) return null
+  return (props.formation as CampusFormationRealisee).promotion
+})
+
+// Get graduates count (only for mock data)
+const graduatesCount = computed(() => {
+  if (isApiCall.value) return null
+  return (props.formation as CampusFormationRealisee).graduates_count
+})
+
+// Get partner logos (only for mock data)
+const partnerLogos = computed(() => {
+  if (isApiCall.value) return []
+  return (props.formation as CampusFormationRealisee).partner_logos || []
 })
 
 // Type badge colors
@@ -45,16 +120,16 @@ const typeLabels: Record<string, string> = {
 <template>
   <div
     class="blog-card group relative block w-full h-[380px] bg-cover bg-center bg-no-repeat overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
-    :style="{ backgroundImage: `url(${formation.image})` }"
+    :style="{ backgroundImage: `url(${formationImage})` }"
   >
     <!-- Content mask (white area on left) - inline-block -->
     <div class="content-mask">
       <!-- Type badge -->
       <span
         class="inline-block px-3 py-1.5 text-xs font-semibold text-white rounded shadow-md tracking-wide my-4"
-        :class="typeBgColors[formation.formation_type]"
+        :class="typeBgColors[formationType]"
       >
-        {{ typeLabels[formation.formation_type] }}
+        {{ typeLabels[formationType] }}
       </span>
 
       <!-- Title -->
@@ -67,26 +142,26 @@ const typeLabels: Record<string, string> = {
         {{ getLocalizedDescription }}
       </p>
 
-      <!-- Promotion & Graduates info -->
-      <div class="post-detail">
+      <!-- Promotion & Graduates info (only for mock data) -->
+      <div v-if="promotion && graduatesCount" class="post-detail">
         <font-awesome-icon icon="fa-solid fa-calendar-check" class="inline-block w-4 h-4 mr-2 align-middle" />
-        <span class="text-sm text-gray-600">{{ formation.promotion }}</span>
+        <span class="text-sm text-gray-600">{{ promotion }}</span>
         <span class="mx-2 text-gray-400">•</span>
         <font-awesome-icon icon="fa-solid fa-user-graduate" class="inline-block w-4 h-4 mr-1 align-middle text-brand-red-500" />
-        <span class="text-sm font-semibold text-gray-700">{{ formation.graduates_count }}</span>
+        <span class="text-sm font-semibold text-gray-700">{{ graduatesCount }}</span>
         <span class="text-sm text-gray-600 ml-1">{{ t('partners.campus.formations.graduates') }}</span>
       </div>
 
-      <!-- Partner logos -->
-      <div v-if="formation.partner_logos && formation.partner_logos.length > 0" class="absolute bottom-4 left-8 flex items-center gap-2">
+      <!-- Partner logos (only for mock data) -->
+      <div v-if="partnerLogos.length > 0" class="absolute bottom-4 left-8 flex items-center gap-2">
         <div
-          v-for="(logo, index) in formation.partner_logos.slice(0, 4)"
+          v-for="(logo, index) in partnerLogos.slice(0, 4)"
           :key="index"
           class="w-12 h-12 rounded-lg bg-white border border-gray-200 overflow-hidden shadow-md -ml-1 first:ml-0"
         >
           <img :src="logo" alt="Partenaire" class="w-full h-full object-contain p-1.5" loading="lazy">
         </div>
-        <span v-if="formation.partner_logos.length > 4" class="text-xs text-gray-500 ml-1 font-medium">+{{ formation.partner_logos.length - 4 }}</span>
+        <span v-if="partnerLogos.length > 4" class="text-xs text-gray-500 ml-1 font-medium">+{{ partnerLogos.length - 4 }}</span>
       </div>
     </div>
 

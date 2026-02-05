@@ -73,17 +73,17 @@ export function useCallDetail(call: Ref<ApplicationCallPublicWithDetails | null>
     return t(`actualites.calls.filters.${key}`)
   }
 
-  // Get placeholder image
+  // Get call image from media service or fallback to placeholder
   const getCallImage = (callData: ApplicationCallPublicWithDetails) => {
     if (callData.cover_image_external_id) {
-      return `https://picsum.photos/seed/${callData.id}/800/450`
+      return `/api/media/${callData.cover_image_external_id}`
     }
     return `https://picsum.photos/seed/${callData.slug}/800/450`
   }
 
   const getHeroImage = (callData: ApplicationCallPublicWithDetails) => {
     if (callData.cover_image_external_id) {
-      return `https://picsum.photos/seed/${callData.id}/1920/600`
+      return `/api/media/${callData.cover_image_external_id}`
     }
     return `https://picsum.photos/seed/${callData.slug}-hero/1920/600`
   }

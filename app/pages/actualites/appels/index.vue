@@ -174,11 +174,10 @@ const getTypeLabel = (type: CallType) => {
   return t(`actualites.calls.filters.${key}`)
 }
 
-// Get placeholder image
+// Get call image from media service or fallback to placeholder
 const getCallImage = (call: ApplicationCallPublic) => {
   if (call.cover_image_external_id) {
-    // TODO: Construct actual image URL from media service
-    return `https://picsum.photos/seed/${call.id}/800/400`
+    return `/api/media/${call.cover_image_external_id}`
   }
   return `https://picsum.photos/seed/${call.slug}/800/400`
 }
