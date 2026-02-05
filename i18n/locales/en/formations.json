@@ -71,7 +71,16 @@
       "skills": "Skills Acquired",
       "careerOpportunities": "Career Opportunities",
       "teachingMethods": "Teaching Methods",
-      "requiredDegree": "Prerequisites"
+      "requiredDegree": "Prerequisites",
+      "associatedCalls": "Application Calls",
+      "callStatus": {
+        "ongoing": "Ongoing",
+        "upcoming": "Upcoming",
+        "closed": "Closed"
+      },
+      "deadline": "Deadline",
+      "noOpenCalls": "No open calls for this program",
+      "viewAllCalls": "View all calls"
     },
     "candidature": {
       "seo": {

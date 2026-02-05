@@ -71,7 +71,16 @@
       "skills": "المهارات المكتسبة",
       "careerOpportunities": "الفرص المهنية",
       "teachingMethods": "طرق التدريس",
-      "requiredDegree": "المتطلبات الأساسية"
+      "requiredDegree": "المتطلبات الأساسية",
+      "associatedCalls": "إعلانات التقديم",
+      "callStatus": {
+        "ongoing": "جارٍ",
+        "upcoming": "قادم",
+        "closed": "مغلق"
+      },
+      "deadline": "الموعد النهائي",
+      "noOpenCalls": "لا توجد إعلانات مفتوحة لهذا البرنامج",
+      "viewAllCalls": "عرض جميع الإعلانات"
     },
     "candidature": {
       "seo": {

@@ -71,7 +71,16 @@
       "skills": "Compétences acquises",
       "careerOpportunities": "Débouchés professionnels",
       "teachingMethods": "Méthodes pédagogiques",
-      "requiredDegree": "Prérequis"
+      "requiredDegree": "Prérequis",
+      "associatedCalls": "Appels à candidatures",
+      "callStatus": {
+        "ongoing": "En cours",
+        "upcoming": "À venir",
+        "closed": "Fermé"
+      },
+      "deadline": "Date limite",
+      "noOpenCalls": "Aucun appel ouvert pour cette formation",
+      "viewAllCalls": "Voir tous les appels"
     },
     "candidature": {
       "seo": {

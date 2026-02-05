@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ProgramPublic, ProgramPublicWithDetails } from '~/composables/usePublicProgramsApi'
+import type { ApplicationCallPublic } from '~/types/api'
 import type { OutputData } from '@editorjs/editorjs'
 
 // Parser le contenu JSON EditorJS
@@ -59,6 +60,11 @@ const {
   publicProgramTypeColors,
 } = usePublicProgramsApi()
 
+const {
+  listCalls,
+  callStatusColors,
+} = usePublicCallsApi()
+
 // Valid URL types
 const validTypes = ['masters', 'doctorats', 'diplomes-universitaires', 'certifiantes']
 
@@ -70,6 +76,7 @@ const isValidType = computed(() => validTypes.includes(typeSlug.value))
 // State
 const program = ref<ProgramPublicWithDetails | null>(null)
 const relatedPrograms = ref<ProgramPublic[]>([])
+const associatedCalls = ref<ApplicationCallPublic[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 
@@ -101,6 +108,22 @@ const fetchProgram = async () => {
 
     // Fetch related programs
     relatedPrograms.value = await getRelatedPrograms(data, 3)
+
+    // Fetch associated application calls (only ongoing or upcoming)
+    try {
+      const callsResponse = await listCalls({
+        program_id: data.id,
+        limit: 5,
+      })
+      // Filter to show only ongoing and upcoming calls
+      associatedCalls.value = callsResponse.items.filter(
+        call => call.status === 'ongoing' || call.status === 'upcoming'
+      )
+    }
+    catch (callErr) {
+      console.warn('Could not fetch associated calls:', callErr)
+      associatedCalls.value = []
+    }
   }
   catch (err: unknown) {
     const fetchError = err as { statusCode?: number; statusMessage?: string; message?: string }
@@ -547,14 +570,50 @@ const toggleSemester = (num: number) => {
                   </div>
                 </div>
 
-                <!-- Apply button (can be connected to application calls later) -->
-                <div class="mt-6">
-                  <NuxtLink
-                    :to="localePath('/candidatures') + `?program=${program.slug}`"
-                    class="block w-full text-center px-4 py-3 bg-brand-blue-600 hover:bg-brand-blue-700 text-white font-medium rounded-lg transition-colors"
-                  >
-                    {{ t('formations.detail.apply') }}
-                  </NuxtLink>
+                <!-- Associated application calls -->
+                <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                  <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                    {{ t('formations.detail.associatedCalls') }}
+                  </h4>
+
+                  <!-- Show calls if any -->
+                  <div v-if="associatedCalls.length > 0" class="space-y-3">
+                    <NuxtLink
+                      v-for="call in associatedCalls"
+                      :key="call.id"
+                      :to="localePath(`/actualites/appels/${call.slug}`)"
+                      class="block p-3 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-brand-blue-500 dark:hover:border-brand-blue-500 transition-colors group"
+                    >
+                      <div class="flex items-center gap-2 mb-2">
+                        <span
+                          class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full"
+                          :class="callStatusColors[call.status]"
+                        >
+                          {{ t(`formations.detail.callStatus.${call.status}`) }}
+                        </span>
+                      </div>
+                      <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors line-clamp-2">
+                        {{ call.title }}
+                      </p>
+                      <p v-if="call.deadline" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {{ t('formations.detail.deadline') }}: {{ new Date(call.deadline).toLocaleDateString(locale) }}
+                      </p>
+                    </NuxtLink>
+                  </div>
+
+                  <!-- No calls message -->
+                  <div v-else class="text-center py-4">
+                    <font-awesome-icon icon="fa-solid fa-calendar-xmark" class="w-8 h-8 text-gray-300 dark:text-gray-600 mb-2" />
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      {{ t('formations.detail.noOpenCalls') }}
+                    </p>
+                    <NuxtLink
+                      :to="localePath('/actualites/appels')"
+                      class="inline-block mt-2 text-sm text-brand-blue-600 dark:text-brand-blue-400 hover:underline"
+                    >
+                      {{ t('formations.detail.viewAllCalls') }}
+                    </NuxtLink>
+                  </div>
                 </div>
               </div>
 
