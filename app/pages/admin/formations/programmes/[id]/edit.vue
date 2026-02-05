@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProgramType, ProgramWithDetails, PublicationStatus, ProgramSkillRead, ProgramCareerOpportunityRead } from '~/types/api'
+import type { ProgramType, ProgramWithDetails, PublicationStatus, ProgramSkillRead, ProgramCareerOpportunityRead, ImageVariants } from '~/types/api'
 import type { OutputData } from '@editorjs/editorjs'
 
 // Convertir une string (potentiellement JSON ou texte brut) en OutputData
@@ -52,6 +52,11 @@ const {
   reorderCareerOpportunities,
 } = useCareerOpportunitiesApi()
 
+const {
+  uploadMediaVariants,
+  getMediaUrl,
+} = useMediaApi()
+
 // États
 const loading = ref(true)
 const isSubmitting = ref(false)
@@ -65,6 +70,8 @@ const form = ref<{
   slug: string
   description: OutputData | undefined
   teaching_methods: string
+  cover_image: string
+  cover_image_external_id: string | null
   type: ProgramType
   duration_months: number | null
   credits: number | null
@@ -79,6 +86,8 @@ const form = ref<{
   slug: '',
   description: undefined,
   teaching_methods: '',
+  cover_image: '',
+  cover_image_external_id: null,
   type: 'master',
   duration_months: null,
   credits: null,
@@ -87,6 +96,11 @@ const form = ref<{
   status: 'draft',
   is_featured: false,
 })
+
+// État de l'upload d'image
+const pendingCoverFile = ref<File | null>(null)
+const showCoverEditor = ref(false)
+const isUploadingCover = ref(false)
 
 // État des compétences
 const skills = ref<ProgramSkillRead[]>([])
@@ -125,6 +139,10 @@ async function loadProgram() {
       slug: program.value.slug,
       description: parseEditorContent(program.value.description),
       teaching_methods: program.value.teaching_methods || '',
+      cover_image_external_id: program.value.cover_image_external_id || null,
+      cover_image: program.value.cover_image_external_id
+        ? (getMediaUrl(program.value.cover_image_external_id) || '')
+        : '',
       type: program.value.type,
       duration_months: program.value.duration_months,
       credits: program.value.credits,
@@ -424,6 +442,49 @@ const onCareerOpportunityDragEnd = () => {
   draggedCareerOpportunityIndex.value = null
 }
 
+// === GESTION DE L'IMAGE DE COUVERTURE ===
+function handleCoverImageUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files[0]) {
+    pendingCoverFile.value = input.files[0]
+    showCoverEditor.value = true
+  }
+  // Reset input pour permettre de resélectionner le même fichier
+  input.value = ''
+}
+
+async function saveEditedCover(variants: ImageVariants) {
+  isUploadingCover.value = true
+  try {
+    const originalName = pendingCoverFile.value?.name || 'cover.jpg'
+    const baseName = originalName.replace(/\.[^.]+$/, '')
+
+    const response = await uploadMediaVariants(variants, baseName, {
+      folder: 'programs/covers',
+    })
+
+    form.value.cover_image_external_id = response.original.id
+    form.value.cover_image = URL.createObjectURL(variants.medium)
+    showCoverEditor.value = false
+    pendingCoverFile.value = null
+  } catch (e) {
+    console.error('Erreur lors de l\'upload de l\'image:', e)
+    alert('Erreur lors de l\'upload de l\'image')
+  } finally {
+    isUploadingCover.value = false
+  }
+}
+
+function cancelCoverEditor() {
+  showCoverEditor.value = false
+  pendingCoverFile.value = null
+}
+
+function removeCoverImage() {
+  form.value.cover_image = ''
+  form.value.cover_image_external_id = null
+}
+
 // Génération de slug
 const generateSlug = (title: string) => {
   return title
@@ -461,6 +522,7 @@ const submitForm = async () => {
       slug: form.value.slug,
       description: descriptionJson,
       teaching_methods: form.value.teaching_methods || null,
+      cover_image_external_id: form.value.cover_image_external_id,
       type: form.value.type,
       duration_months: form.value.duration_months,
       credits: form.value.credits,
@@ -671,6 +733,72 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
                 {{ pt.label }}
               </option>
             </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image de couverture -->
+      <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+        <h2 class="mb-6 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+          <font-awesome-icon icon="fa-solid fa-image" class="w-5 h-5 text-indigo-500" />
+          Image de couverture
+        </h2>
+
+        <div class="space-y-4">
+          <!-- Prévisualisation -->
+          <div v-if="form.cover_image" class="relative">
+            <img
+              :src="form.cover_image"
+              alt="Image de couverture"
+              class="h-48 w-full rounded-lg object-cover"
+            />
+            <div class="absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity hover:opacity-100">
+              <label class="cursor-pointer rounded-lg bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100">
+                <font-awesome-icon icon="fa-solid fa-pen" class="mr-2 h-4 w-4" />
+                Modifier
+                <input
+                  type="file"
+                  accept="image/*"
+                  class="hidden"
+                  @change="handleCoverImageUpload"
+                />
+              </label>
+              <button
+                type="button"
+                class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+                @click="removeCoverImage"
+              >
+                <font-awesome-icon icon="fa-solid fa-trash" class="mr-2 h-4 w-4" />
+                Supprimer
+              </button>
+            </div>
+          </div>
+
+          <!-- Upload -->
+          <div v-else class="relative">
+            <label
+              class="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-8 transition-colors hover:border-indigo-400 hover:bg-indigo-50 dark:border-gray-600 dark:bg-gray-700/50 dark:hover:border-indigo-500 dark:hover:bg-indigo-900/20"
+            >
+              <font-awesome-icon icon="fa-solid fa-cloud-upload-alt" class="mb-3 h-10 w-10 text-gray-400" />
+              <p class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                Cliquez pour télécharger une image
+              </p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                PNG, JPG ou WebP (recommandé : 1200x675px, ratio 16:9)
+              </p>
+              <input
+                type="file"
+                accept="image/*"
+                class="hidden"
+                @change="handleCoverImageUpload"
+              />
+            </label>
+          </div>
+
+          <!-- Indicateur de chargement -->
+          <div v-if="isUploadingCover" class="flex items-center gap-2 text-sm text-gray-500">
+            <font-awesome-icon icon="fa-solid fa-spinner" class="h-4 w-4 animate-spin" />
+            Upload en cours...
           </div>
         </div>
       </div>
@@ -1492,6 +1620,21 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
             </button>
           </div>
         </div>
+      </div>
+    </Teleport>
+
+    <!-- Modal Éditeur d'image -->
+    <Teleport to="body">
+      <div
+        v-if="showCoverEditor && pendingCoverFile"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+      >
+        <MediaImageEditor
+          :image-file="pendingCoverFile"
+          :aspect-ratio="16/9"
+          @save="saveEditedCover"
+          @cancel="cancelCoverEditor"
+        />
       </div>
     </Teleport>
   </div>

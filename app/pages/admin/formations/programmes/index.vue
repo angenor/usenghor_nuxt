@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProgramCreatePayload, ProgramRead, ProgramType, PublicationStatus } from '~/types/api'
+import type { ProgramCreatePayload, ProgramRead, ProgramType, PublicationStatus, ImageVariants } from '~/types/api'
 
 definePageMeta({
   layout: 'admin',
@@ -17,6 +17,10 @@ const {
   formatDuration,
   isPublished,
 } = useProgramsApi()
+
+const {
+  uploadMediaVariants,
+} = useMediaApi()
 
 // === STATE ===
 const loading = ref(true)
@@ -62,7 +66,14 @@ const programForm = ref({
   required_degree: '',
   status: 'draft' as PublicationStatus,
   is_featured: false,
+  cover_image: '',
+  cover_image_external_id: null as string | null,
 })
+
+// État de l'upload d'image
+const pendingCoverFile = ref<File | null>(null)
+const showCoverEditor = ref(false)
+const isUploadingCover = ref(false)
 
 // === DATA LOADING ===
 async function loadPrograms() {
@@ -224,12 +235,59 @@ function openCreateModal() {
     required_degree: 'Bac+4 minimum',
     status: 'draft',
     is_featured: false,
+    cover_image: '',
+    cover_image_external_id: null,
   }
+  pendingCoverFile.value = null
   showCreateModal.value = true
 }
 
 function closeCreateModal() {
   showCreateModal.value = false
+  pendingCoverFile.value = null
+}
+
+// === GESTION DE L'IMAGE DE COUVERTURE ===
+function handleCoverImageUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files[0]) {
+    pendingCoverFile.value = input.files[0]
+    showCoverEditor.value = true
+  }
+  // Reset input pour permettre de resélectionner le même fichier
+  input.value = ''
+}
+
+async function saveEditedCover(variants: ImageVariants) {
+  isUploadingCover.value = true
+  try {
+    const originalName = pendingCoverFile.value?.name || 'cover.jpg'
+    const baseName = originalName.replace(/\.[^.]+$/, '')
+
+    const response = await uploadMediaVariants(variants, baseName, {
+      folder: 'programs/covers',
+    })
+
+    programForm.value.cover_image_external_id = response.original.id
+    programForm.value.cover_image = URL.createObjectURL(variants.medium)
+    showCoverEditor.value = false
+    pendingCoverFile.value = null
+  } catch (e) {
+    console.error('Erreur lors de l\'upload de l\'image:', e)
+    alert('Erreur lors de l\'upload de l\'image')
+  } finally {
+    isUploadingCover.value = false
+  }
+}
+
+function cancelCoverEditor() {
+  showCoverEditor.value = false
+  pendingCoverFile.value = null
+}
+
+function removeCoverImage() {
+  programForm.value.cover_image = ''
+  programForm.value.cover_image_external_id = null
 }
 
 function openDeleteModal(program: ProgramRead) {
@@ -268,6 +326,7 @@ async function handleCreateProgram() {
       required_degree: programForm.value.required_degree || null,
       status: programForm.value.status,
       is_featured: programForm.value.is_featured,
+      cover_image_external_id: programForm.value.cover_image_external_id,
     }
     const result = await createProgram(payload)
     closeCreateModal()
@@ -859,6 +918,67 @@ async function bulkDelete() {
               </div>
             </div>
 
+            <!-- Image de couverture -->
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Image de couverture
+              </label>
+              <div class="space-y-2">
+                <!-- Prévisualisation -->
+                <div v-if="programForm.cover_image" class="relative">
+                  <img
+                    :src="programForm.cover_image"
+                    alt="Image de couverture"
+                    class="h-32 w-full rounded-lg object-cover"
+                  />
+                  <div class="absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity hover:opacity-100">
+                    <label class="cursor-pointer rounded bg-white px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100">
+                      Modifier
+                      <input
+                        type="file"
+                        accept="image/*"
+                        class="hidden"
+                        @change="handleCoverImageUpload"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      class="rounded bg-red-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-red-700"
+                      @click="removeCoverImage"
+                    >
+                      Supprimer
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Upload -->
+                <label
+                  v-else
+                  class="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-4 transition-colors hover:border-blue-400 hover:bg-blue-50 dark:border-gray-600 dark:bg-gray-700/50 dark:hover:border-blue-500"
+                >
+                  <font-awesome-icon icon="fa-solid fa-cloud-upload-alt" class="mb-2 h-6 w-6 text-gray-400" />
+                  <p class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Cliquez pour télécharger
+                  </p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    PNG, JPG ou WebP (ratio 16:9)
+                  </p>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    class="hidden"
+                    @change="handleCoverImageUpload"
+                  />
+                </label>
+
+                <!-- Indicateur de chargement -->
+                <div v-if="isUploadingCover" class="flex items-center gap-2 text-xs text-gray-500">
+                  <font-awesome-icon icon="fa-solid fa-spinner" class="h-3 w-3 animate-spin" />
+                  Upload en cours...
+                </div>
+              </div>
+            </div>
+
             <!-- Description -->
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -972,6 +1092,21 @@ async function bulkDelete() {
             </button>
           </div>
         </div>
+      </div>
+    </Teleport>
+
+    <!-- Modal Éditeur d'image -->
+    <Teleport to="body">
+      <div
+        v-if="showCoverEditor && pendingCoverFile"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+      >
+        <MediaImageEditor
+          :image-file="pendingCoverFile"
+          :aspect-ratio="16/9"
+          @save="saveEditedCover"
+          @cancel="cancelCoverEditor"
+        />
       </div>
     </Teleport>
   </div>

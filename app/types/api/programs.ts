@@ -101,6 +101,7 @@ export interface ProgramCreatePayload {
   slug: string
   description?: string | null
   teaching_methods?: string | null
+  cover_image_external_id?: string | null
   sector_external_id?: string | null
   type: ProgramType
   duration_months?: number | null
@@ -119,6 +120,7 @@ export interface ProgramUpdatePayload {
   slug?: string
   description?: string | null
   teaching_methods?: string | null
+  cover_image_external_id?: string | null
   sector_external_id?: string | null
   type?: ProgramType
   duration_months?: number | null

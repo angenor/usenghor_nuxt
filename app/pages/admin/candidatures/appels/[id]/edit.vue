@@ -7,6 +7,7 @@ import type {
   CallCoverageRead,
   CallRequiredDocumentRead,
   CallScheduleRead,
+  ImageVariants,
 } from '~/types/api'
 import type { OutputData } from '@editorjs/editorjs'
 
@@ -52,6 +53,11 @@ const {
 
 const { listCampuses } = useCampusApi()
 const { listPrograms, programTypeLabels } = useProgramsApi()
+
+const {
+  uploadMediaVariants,
+  getMediaUrl,
+} = useMediaApi()
 
 // Charger les campus pour le sélecteur
 interface CampusOption {
@@ -170,7 +176,14 @@ const form = ref({
   use_internal_form: true,
   external_form_url: '',
   publication_status: 'draft' as PublicationStatus,
+  cover_image: '',
+  cover_image_external_id: null as string | null,
 })
+
+// État de l'upload d'image
+const pendingCoverFile = ref<File | null>(null)
+const showCoverEditor = ref(false)
+const isUploadingCover = ref(false)
 
 // Sous-entités locales
 const criteria = ref<LocalCriterion[]>([])
@@ -205,6 +218,10 @@ async function fetchCall() {
       use_internal_form: call.use_internal_form,
       external_form_url: call.external_form_url || '',
       publication_status: call.publication_status,
+      cover_image_external_id: call.cover_image_external_id || null,
+      cover_image: call.cover_image_external_id
+        ? (getMediaUrl(call.cover_image_external_id) || '')
+        : '',
     }
 
     // Peupler les sous-entités
@@ -391,6 +408,48 @@ const removeScheduleItem = (index: number) => {
   scheduleItems.value.splice(index, 1)
 }
 
+// === GESTION DE L'IMAGE DE COUVERTURE ===
+function handleCoverImageUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files[0]) {
+    pendingCoverFile.value = input.files[0]
+    showCoverEditor.value = true
+  }
+  input.value = ''
+}
+
+async function saveEditedCover(variants: ImageVariants) {
+  isUploadingCover.value = true
+  try {
+    const originalName = pendingCoverFile.value?.name || 'cover.jpg'
+    const baseName = originalName.replace(/\.[^.]+$/, '')
+
+    const response = await uploadMediaVariants(variants, baseName, {
+      folder: 'calls/covers',
+    })
+
+    form.value.cover_image_external_id = response.original.id
+    form.value.cover_image = URL.createObjectURL(variants.medium)
+    showCoverEditor.value = false
+    pendingCoverFile.value = null
+  } catch (e) {
+    console.error('Erreur lors de l\'upload de l\'image:', e)
+    alert('Erreur lors de l\'upload de l\'image')
+  } finally {
+    isUploadingCover.value = false
+  }
+}
+
+function cancelCoverEditor() {
+  showCoverEditor.value = false
+  pendingCoverFile.value = null
+}
+
+function removeCoverImage() {
+  form.value.cover_image = ''
+  form.value.cover_image_external_id = null
+}
+
 // === SAUVEGARDE ===
 const isSaving = ref(false)
 const callId = route.params.id as string
@@ -420,6 +479,7 @@ const saveForm = async () => {
       status: form.value.status,
       campus_external_id: form.value.campus_external_id || null,
       program_external_id: form.value.program_external_id || null,
+      cover_image_external_id: form.value.cover_image_external_id,
       opening_date: form.value.opening_date || null,
       deadline: form.value.deadline || null,
       program_start_date: form.value.program_start_date || null,
@@ -707,6 +767,69 @@ const tabs = [
               placeholder="Ex: Cadres africains titulaires d'un Bac+4"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
+          </div>
+
+          <!-- Image de couverture -->
+          <div class="sm:col-span-2">
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Image de couverture
+            </label>
+            <div class="space-y-2">
+              <!-- Prévisualisation -->
+              <div v-if="form.cover_image" class="relative">
+                <img
+                  :src="form.cover_image"
+                  alt="Image de couverture"
+                  class="h-40 w-full rounded-lg object-cover"
+                />
+                <div class="absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity hover:opacity-100">
+                  <label class="cursor-pointer rounded-lg bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100">
+                    <font-awesome-icon icon="fa-solid fa-pen" class="mr-2 h-4 w-4" />
+                    Modifier
+                    <input
+                      type="file"
+                      accept="image/*"
+                      class="hidden"
+                      @change="handleCoverImageUpload"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+                    @click="removeCoverImage"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-trash" class="mr-2 h-4 w-4" />
+                    Supprimer
+                  </button>
+                </div>
+              </div>
+
+              <!-- Upload -->
+              <label
+                v-else
+                class="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6 transition-colors hover:border-blue-400 hover:bg-blue-50 dark:border-gray-600 dark:bg-gray-700/50 dark:hover:border-blue-500"
+              >
+                <font-awesome-icon icon="fa-solid fa-cloud-upload-alt" class="mb-2 h-8 w-8 text-gray-400" />
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Cliquez pour télécharger une image
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  PNG, JPG ou WebP (recommandé : 1200x675px, ratio 16:9)
+                </p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  class="hidden"
+                  @change="handleCoverImageUpload"
+                />
+              </label>
+
+              <!-- Indicateur de chargement -->
+              <div v-if="isUploadingCover" class="flex items-center gap-2 text-sm text-gray-500">
+                <font-awesome-icon icon="fa-solid fa-spinner" class="h-4 w-4 animate-spin" />
+                Upload en cours...
+              </div>
+            </div>
           </div>
 
           <div class="sm:col-span-2">
@@ -1300,6 +1423,21 @@ const tabs = [
           </button>
         </div>
       </div>
+    </div>
+  </Teleport>
+
+  <!-- Modal Éditeur d'image -->
+  <Teleport to="body">
+    <div
+      v-if="showCoverEditor && pendingCoverFile"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+    >
+      <MediaImageEditor
+        :image-file="pendingCoverFile"
+        :aspect-ratio="16/9"
+        @save="saveEditedCover"
+        @cancel="cancelCoverEditor"
+      />
     </div>
   </Teleport>
 </template>

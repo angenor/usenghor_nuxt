@@ -582,33 +582,30 @@ const toggleSemester = (num: number) => {
                       v-for="call in associatedCalls"
                       :key="call.id"
                       :to="localePath(`/actualites/appels/${call.slug}`)"
-                      class="call-card-link block p-3 bg-white dark:bg-gray-900 rounded-lg border-2 transition-all duration-300 group"
-                      :class="[
-                        call.status === 'ongoing'
-                          ? 'border-brand-blue-400 dark:border-brand-blue-500 animate-border-pulse'
-                          : 'border-amber-300 dark:border-amber-500 animate-border-pulse-amber'
-                      ]"
+                      class="call-card-animated group"
                     >
-                      <div class="flex items-center gap-2 mb-2">
-                        <span
-                          class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full"
-                          :class="callStatusColors[call.status]"
-                        >
-                          {{ t(`formations.detail.callStatus.${call.status}`) }}
-                        </span>
-                        <font-awesome-icon
-                          v-if="call.status === 'ongoing'"
-                          icon="fa-solid fa-arrow-right"
-                          class="w-3 h-3 text-brand-blue-500 animate-bounce-x"
-                        />
+                      <div class="call-card-content">
+                        <div class="flex items-center gap-2 mb-2">
+                          <span
+                            class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full"
+                            :class="callStatusColors[call.status]"
+                          >
+                            {{ t(`formations.detail.callStatus.${call.status}`) }}
+                          </span>
+                          <font-awesome-icon
+                            v-if="call.status === 'ongoing'"
+                            icon="fa-solid fa-arrow-right"
+                            class="w-3 h-3 text-brand-blue-500 animate-bounce-x"
+                          />
+                        </div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors line-clamp-2">
+                          {{ call.title }}
+                        </p>
+                        <p v-if="call.deadline" class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+                          <font-awesome-icon icon="fa-solid fa-clock" class="w-3 h-3" />
+                          {{ t('formations.detail.deadline') }}: {{ new Date(call.deadline).toLocaleDateString(locale) }}
+                        </p>
                       </div>
-                      <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors line-clamp-2">
-                        {{ call.title }}
-                      </p>
-                      <p v-if="call.deadline" class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
-                        <font-awesome-icon icon="fa-solid fa-clock" class="w-3 h-3" />
-                        {{ t('formations.detail.deadline') }}: {{ new Date(call.deadline).toLocaleDateString(locale) }}
-                      </p>
                     </NuxtLink>
                   </div>
 
@@ -650,48 +647,93 @@ const toggleSemester = (num: number) => {
 </template>
 
 <style scoped>
-/* Animation de pulsation pour les bordures - appels en cours (bleu) */
-@keyframes border-pulse {
-  0%, 100% {
-    border-color: rgb(96 165 250); /* brand-blue-400 */
-    box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.4);
+/* Carte d'appel avec bordure animée gradient */
+.call-card-animated {
+  position: relative;
+  display: block;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  isolation: isolate;
+}
+
+.call-card-animated::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg,
+    #1e40af,
+    #3b82f6,
+    #dc2626,
+    #ef4444,
+    #1e40af,
+    #3b82f6,
+    #dc2626,
+    #ef4444
+  );
+  background-size: 400%;
+  border-radius: 0.5rem;
+  animation: gradient-flow 8s linear infinite;
+  z-index: 0;
+}
+
+.call-card-animated::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  background: linear-gradient(
+    45deg,
+    #1e40af,
+    #3b82f6,
+    #dc2626,
+    #ef4444,
+    #1e40af,
+    #3b82f6,
+    #dc2626,
+    #ef4444
+  );
+  background-size: 400%;
+  border-radius: 0.75rem;
+  animation: gradient-flow 8s linear infinite;
+  filter: blur(12px);
+  opacity: 0.5;
+  z-index: -1;
+}
+
+.call-card-animated:hover::before,
+.call-card-animated:hover::after {
+  animation-duration: 3s;
+}
+
+.call-card-animated:hover::after {
+  filter: blur(16px);
+  opacity: 0.7;
+}
+
+@keyframes gradient-flow {
+  0% {
+    background-position: 0 0;
   }
   50% {
-    border-color: rgb(59 130 246); /* brand-blue-500 */
-    box-shadow: 0 0 8px 2px rgba(59, 130, 246, 0.3);
+    background-position: 400% 0;
+  }
+  100% {
+    background-position: 0 0;
   }
 }
 
-.animate-border-pulse {
-  animation: border-pulse 2s ease-in-out infinite;
+.call-card-content {
+  position: relative;
+  background: white;
+  border-radius: calc(0.5rem - 2px);
+  padding: 0.75rem;
+  margin: 2px;
+  z-index: 1;
+  transition: background-color 0.3s ease;
 }
 
-.animate-border-pulse:hover {
-  animation: none;
-  border-color: rgb(37 99 235) !important; /* brand-blue-600 */
-  box-shadow: 0 0 12px 4px rgba(59, 130, 246, 0.4);
-}
-
-/* Animation de pulsation pour les bordures - appels à venir (amber) */
-@keyframes border-pulse-amber {
-  0%, 100% {
-    border-color: rgb(252 211 77); /* amber-300 */
-    box-shadow: 0 0 0 0 rgba(252, 211, 77, 0.4);
-  }
-  50% {
-    border-color: rgb(245 158 11); /* amber-500 */
-    box-shadow: 0 0 8px 2px rgba(245, 158, 11, 0.3);
-  }
-}
-
-.animate-border-pulse-amber {
-  animation: border-pulse-amber 2.5s ease-in-out infinite;
-}
-
-.animate-border-pulse-amber:hover {
-  animation: none;
-  border-color: rgb(217 119 6) !important; /* amber-600 */
-  box-shadow: 0 0 12px 4px rgba(245, 158, 11, 0.4);
+.dark .call-card-content {
+  background: rgb(17 24 39);
 }
 
 /* Animation de flèche rebondissante horizontale */
@@ -706,21 +748,5 @@ const toggleSemester = (num: number) => {
 
 .animate-bounce-x {
   animation: bounce-x 1s ease-in-out infinite;
-}
-
-/* Dark mode adjustments */
-:deep(.dark) .animate-border-pulse {
-  animation-name: border-pulse-dark;
-}
-
-@keyframes border-pulse-dark {
-  0%, 100% {
-    border-color: rgb(59 130 246); /* brand-blue-500 */
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
-  }
-  50% {
-    border-color: rgb(96 165 250); /* brand-blue-400 */
-    box-shadow: 0 0 10px 3px rgba(96, 165, 250, 0.25);
-  }
 }
 </style>
