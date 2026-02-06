@@ -1,7 +1,10 @@
 import { useAuthStore } from '~/stores/auth'
 
 export default defineNuxtRouteMiddleware(async (to) => {
-  if (!to.path.startsWith('/admin') || to.path === '/admin/login') {
+  // Routes publiques de l'admin (pas besoin d'authentification)
+  const publicAdminRoutes = ['/admin/login', '/admin/register']
+
+  if (!to.path.startsWith('/admin') || publicAdminRoutes.includes(to.path)) {
     return
   }
 

@@ -89,6 +89,13 @@ async function handleLogin() {
             <span v-if="loading">Connexion en cours...</span>
             <span v-else>Se connecter</span>
           </button>
+
+          <p class="text-center text-sm text-gray-600 dark:text-gray-400">
+            Pas encore de compte ?
+            <NuxtLink to="/admin/register" class="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400">
+              S'inscrire
+            </NuxtLink>
+          </p>
         </form>
       </div>
     </div>
