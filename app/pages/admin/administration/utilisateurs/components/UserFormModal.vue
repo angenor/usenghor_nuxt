@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { UserFormData } from '../composables/useUsersManagement'
+import type { UserFormData, SectorOption, ServiceOption, CampusOption } from '../composables/useUsersManagement'
 import type { ImageVariants } from '~/types/api'
 
 interface RoleOption {
@@ -27,6 +27,10 @@ const props = defineProps<{
   showPhotoEditor: boolean
   isUploadingPhoto: boolean
   photoPreviewUrl: string | null
+  // Affectation props
+  sectorOptions: SectorOption[]
+  filteredServiceOptions: ServiceOption[]
+  campusOptions: CampusOption[]
 }>()
 
 const emit = defineEmits<{
@@ -290,6 +294,99 @@ const localFormData = computed({
                   rows="2"
                   class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
+              </div>
+            </div>
+          </div>
+
+          <!-- Affectation organisationnelle -->
+          <div class="mb-6">
+            <h4 class="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              Affectation organisationnelle
+              <span class="ml-2 text-xs font-normal normal-case text-gray-400">(optionnel)</span>
+            </h4>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <!-- Secteur -->
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Secteur</label>
+                <select
+                  v-model="localFormData.affectation.sector_id"
+                  class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  @change="localFormData.affectation.service_id = null"
+                >
+                  <option :value="null">
+                    Aucun secteur
+                  </option>
+                  <option v-for="sector in sectorOptions" :key="sector.id" :value="sector.id">
+                    {{ sector.name }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Service (Département) -->
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Département / Service
+                </label>
+                <select
+                  v-model="localFormData.affectation.service_id"
+                  class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  :disabled="filteredServiceOptions.length === 0"
+                >
+                  <option :value="null">
+                    Aucun département
+                  </option>
+                  <option v-for="service in filteredServiceOptions" :key="service.id" :value="service.id">
+                    {{ service.name }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Position Service -->
+              <div v-if="localFormData.affectation.service_id">
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Poste dans le département
+                </label>
+                <input
+                  v-model="localFormData.affectation.service_position"
+                  type="text"
+                  placeholder="Ex: Responsable, Membre, Assistant..."
+                  class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                />
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Laisser vide pour "Membre" par défaut
+                </p>
+              </div>
+
+              <!-- Campus -->
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Campus</label>
+                <select
+                  v-model="localFormData.affectation.campus_id"
+                  class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                >
+                  <option :value="null">
+                    Aucun campus
+                  </option>
+                  <option v-for="campus in campusOptions" :key="campus.id" :value="campus.id">
+                    {{ campus.name }} ({{ campus.code }})
+                  </option>
+                </select>
+              </div>
+
+              <!-- Position Campus -->
+              <div v-if="localFormData.affectation.campus_id">
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Poste dans le campus
+                </label>
+                <input
+                  v-model="localFormData.affectation.campus_position"
+                  type="text"
+                  placeholder="Ex: Directeur, Personnel, Enseignant..."
+                  class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                />
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Laisser vide pour "Membre" par défaut
+                </p>
               </div>
             </div>
           </div>

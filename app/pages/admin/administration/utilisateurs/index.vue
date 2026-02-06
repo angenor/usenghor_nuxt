@@ -47,6 +47,11 @@ const {
   hasActiveFilters,
   allSelected,
   someSelected,
+  filteredServiceOptions,
+
+  // Affectation options
+  sectorOptions,
+  campusOptions,
 
   // Methods
   loadData,
@@ -265,6 +270,9 @@ onMounted(() => {
       :show-photo-editor="showPhotoEditor"
       :is-uploading-photo="isUploadingPhoto"
       :photo-preview-url="photoPreviewUrl"
+      :sector-options="sectorOptions"
+      :filtered-service-options="filteredServiceOptions"
+      :campus-options="campusOptions"
       @close="showCreateModal = false"
       @save="saveUser"
       @update:form-data="formData = $event"

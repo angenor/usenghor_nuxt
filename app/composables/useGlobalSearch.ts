@@ -23,6 +23,43 @@ export interface SearchResult {
   score: number
 }
 
+// Extrait le texte brut d'un contenu EditorJS (JSON)
+function extractTextFromEditorJS(content: string | null | undefined): string {
+  if (!content) return ''
+
+  // Si c'est déjà du texte simple (pas de JSON)
+  if (!content.trim().startsWith('{')) {
+    return content
+  }
+
+  try {
+    const parsed = JSON.parse(content)
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
+      return parsed.blocks
+        .map((block: { type: string; data: { text?: string; items?: Array<{ content?: string }> } }) => {
+          // Paragraphes et headers
+          if (block.data?.text) {
+            return block.data.text.replace(/<[^>]*>/g, '') // Supprimer les balises HTML
+          }
+          // Listes
+          if (block.data?.items) {
+            return block.data.items
+              .map((item: { content?: string }) => item.content || '')
+              .join(' ')
+          }
+          return ''
+        })
+        .filter(Boolean)
+        .join(' ')
+        .trim()
+    }
+  } catch {
+    // Si le parsing échoue, retourner tel quel ou vide
+    return content.startsWith('{') ? '' : content
+  }
+  return ''
+}
+
 // Normalise le texte pour la recherche (supprime accents, met en minuscules)
 function normalizeText(text: string): string {
   return text
@@ -361,7 +398,7 @@ export function useGlobalSearch() {
         type: 'formation',
         title: program.title,
         subtitle: `${typeLabels.formation} • ${duration}`,
-        description: program.description || program.subtitle || '',
+        description: extractTextFromEditorJS(program.description) || program.subtitle || '',
         icon: formationIcons[program.type] || 'fa-solid fa-graduation-cap',
         route: `/formations/${typeSlug}/${program.slug}`,
         image: program.cover_image_external_id
@@ -378,7 +415,7 @@ export function useGlobalSearch() {
         type: 'event',
         title: event.title,
         subtitle: `${typeLabels.event} • ${new Date(event.start_date).toLocaleDateString('fr-FR')}`,
-        description: event.description || '',
+        description: extractTextFromEditorJS(event.description),
         icon: eventIcons[event.type] || 'fa-solid fa-calendar-days',
         route: `/actualites/evenements/${event.slug}`,
         image: event.cover_image || undefined,
@@ -394,7 +431,7 @@ export function useGlobalSearch() {
         type: 'call',
         title: call.title,
         subtitle: `${typeLabels.call} • ${call.deadline ? `Date limite: ${new Date(call.deadline).toLocaleDateString('fr-FR')}` : 'En cours'}`,
-        description: call.description || '',
+        description: extractTextFromEditorJS(call.description),
         icon: callIcons[call.type] || 'fa-solid fa-bullhorn',
         route: `/actualites/appels/${call.slug}`,
         date: call.deadline || undefined,
@@ -409,7 +446,7 @@ export function useGlobalSearch() {
         type: 'news',
         title: newsItem.title,
         subtitle: `${typeLabels.news} • ${new Date(newsItem.published_at || newsItem.created_at).toLocaleDateString('fr-FR')}`,
-        description: newsItem.summary || '',
+        description: extractTextFromEditorJS(newsItem.summary) || '',
         icon: 'fa-solid fa-newspaper',
         route: `/actualites/${newsItem.slug}`,
         image: newsItem.cover_image || undefined,

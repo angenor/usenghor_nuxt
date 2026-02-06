@@ -126,6 +126,24 @@ export function useUsersManagement() {
     getMediaUrl,
   } = useMediaApi()
 
+  const { getSectorsForSelect } = useSectorsApi()
+
+  const {
+    getAllServices,
+    addServiceTeamMember,
+    updateServiceTeamMember,
+    deleteServiceTeamMember,
+    getUserServiceAffectation,
+  } = useServicesApi()
+
+  const {
+    getAllCampuses,
+    addCampusTeamMember,
+    updateCampusTeamMember,
+    deleteCampusTeamMember,
+    getUserCampusAffectation,
+  } = useCampusApi()
+
   // === STATE ===
   const isLoading = ref(true)
   const users = ref<UserWithRoles[]>([])
@@ -174,6 +192,12 @@ export function useUsersManagement() {
   // Selection
   const selectedUserIds = ref<string[]>([])
 
+  // Affectation options
+  const sectorOptions = ref<SectorOption[]>([])
+  const serviceOptions = ref<ServiceOption[]>([])
+  const campusOptions = ref<CampusOption[]>([])
+  const currentUserAffectation = ref<UserAffectation>({ service: null, campus: null })
+
   // === COMPUTED ===
   const statistics = computed(() => computeStats(users.value, roles.value))
 
@@ -193,11 +217,53 @@ export function useUsersManagement() {
     return selectedUserIds.value.length > 0 && !allSelected.value
   })
 
+  // Services filtrés par secteur sélectionné
+  const filteredServiceOptions = computed(() => {
+    const sectorId = formData.value.affectation.sector_id
+    if (!sectorId) return serviceOptions.value
+    return serviceOptions.value.filter(s => s.sector_id === sectorId)
+  })
+
   // === METHODS ===
+  const loadAffectationOptions = async () => {
+    try {
+      // Charger secteurs, services et campus en parallèle
+      const [sectorsData, servicesData, campusesData] = await Promise.all([
+        getSectorsForSelect(),
+        getAllServices(),
+        getAllCampuses(),
+      ])
+
+      sectorOptions.value = sectorsData.map(s => ({
+        id: s.id,
+        code: s.code,
+        name: s.name,
+      }))
+
+      serviceOptions.value = servicesData.map(s => ({
+        id: s.id,
+        name: s.name,
+        sector_id: s.sector_id,
+      }))
+
+      campusOptions.value = campusesData.items.map(c => ({
+        id: c.id,
+        code: c.code,
+        name: c.name,
+      }))
+    }
+    catch (error) {
+      console.error('Erreur lors du chargement des options d\'affectation:', error)
+    }
+  }
+
   const loadData = async () => {
     isLoading.value = true
     try {
-      const rolesData = await getRolesForSelect()
+      const [rolesData] = await Promise.all([
+        getRolesForSelect(),
+        loadAffectationOptions(),
+      ])
       roleOptions.value = rolesData.map(r => ({ id: r.id, code: r.code, name_fr: r.name_fr }))
       roles.value = rolesData as unknown as RoleRead[]
 
@@ -246,16 +312,36 @@ export function useUsersManagement() {
   const openCreateModal = () => {
     isEditing.value = false
     editingUserId.value = null
-    formData.value = { ...defaultFormData }
+    formData.value = { ...defaultFormData, affectation: { ...defaultAffectation } }
     formErrors.value = {}
     photoPreviewUrl.value = null
     pendingPhotoFile.value = null
+    currentUserAffectation.value = { service: null, campus: null }
     showCreateModal.value = true
   }
 
-  const openEditModal = (user: UserWithRoles) => {
+  const openEditModal = async (user: UserWithRoles) => {
     isEditing.value = true
     editingUserId.value = user.id
+
+    // Charger les affectations existantes en parallèle
+    const [serviceAffectation, campusAffectation] = await Promise.all([
+      getUserServiceAffectation(user.id),
+      getUserCampusAffectation(user.id),
+    ])
+
+    currentUserAffectation.value = {
+      service: serviceAffectation,
+      campus: campusAffectation,
+    }
+
+    // Trouver le secteur du service si affectation service existe
+    let sectorId: string | null = null
+    if (serviceAffectation) {
+      const service = serviceOptions.value.find(s => s.id === serviceAffectation.service_id)
+      sectorId = service?.sector_id || null
+    }
+
     formData.value = {
       email: user.email,
       password: '',
@@ -271,6 +357,13 @@ export function useUsersManagement() {
       role_ids: user.roles.map(r => r.id),
       active: user.active,
       photo_external_id: user.photo_external_id || null,
+      affectation: {
+        sector_id: sectorId,
+        service_id: serviceAffectation?.service_id || null,
+        service_position: serviceAffectation?.position || '',
+        campus_id: campusAffectation?.campus_id || null,
+        campus_position: campusAffectation?.position || '',
+      },
     }
     selectedUser.value = user
     formErrors.value = {}
@@ -317,12 +410,83 @@ export function useUsersManagement() {
     return Object.keys(formErrors.value).length === 0
   }
 
+  const saveAffectations = async (userId: string) => {
+    const { affectation } = formData.value
+    const existingService = currentUserAffectation.value.service
+    const existingCampus = currentUserAffectation.value.campus
+
+    // Gestion de l'affectation service
+    if (affectation.service_id) {
+      const position = affectation.service_position || 'Membre'
+      if (existingService) {
+        // Mise à jour ou changement de service
+        if (existingService.service_id !== affectation.service_id) {
+          // Supprimer l'ancienne affectation et créer la nouvelle
+          await deleteServiceTeamMember(existingService.service_id, existingService.id)
+          await addServiceTeamMember(affectation.service_id, {
+            user_external_id: userId,
+            position,
+          })
+        }
+        else if (existingService.position !== position) {
+          // Même service, mise à jour de la position
+          await updateServiceTeamMember(existingService.service_id, existingService.id, { position })
+        }
+      }
+      else {
+        // Nouvelle affectation
+        await addServiceTeamMember(affectation.service_id, {
+          user_external_id: userId,
+          position,
+        })
+      }
+    }
+    else if (existingService) {
+      // Suppression de l'affectation service
+      await deleteServiceTeamMember(existingService.service_id, existingService.id)
+    }
+
+    // Gestion de l'affectation campus
+    if (affectation.campus_id) {
+      const position = affectation.campus_position || 'Membre'
+      if (existingCampus) {
+        // Mise à jour ou changement de campus
+        if (existingCampus.campus_id !== affectation.campus_id) {
+          // Supprimer l'ancienne affectation et créer la nouvelle
+          await deleteCampusTeamMember(existingCampus.campus_id, existingCampus.id)
+          await addCampusTeamMember(affectation.campus_id, {
+            user_external_id: userId,
+            position,
+          })
+        }
+        else if (existingCampus.position !== position) {
+          // Même campus, mise à jour de la position
+          await updateCampusTeamMember(existingCampus.campus_id, existingCampus.id, { position })
+        }
+      }
+      else {
+        // Nouvelle affectation
+        await addCampusTeamMember(affectation.campus_id, {
+          user_external_id: userId,
+          position,
+        })
+      }
+    }
+    else if (existingCampus) {
+      // Suppression de l'affectation campus
+      await deleteCampusTeamMember(existingCampus.campus_id, existingCampus.id)
+    }
+  }
+
   const saveUser = async () => {
     if (!validateForm()) return
 
     isSaving.value = true
     try {
+      let userId: string
+
       if (isEditing.value && editingUserId.value) {
+        userId = editingUserId.value
         const updateData: UserUpdatePayload = {
           email: formData.value.email,
           last_name: formData.value.last_name,
@@ -337,8 +501,8 @@ export function useUsersManagement() {
           active: formData.value.active,
           photo_external_id: formData.value.photo_external_id,
         }
-        await updateUser(editingUserId.value, updateData)
-        await updateUserRoles(editingUserId.value, formData.value.role_ids)
+        await updateUser(userId, updateData)
+        await updateUserRoles(userId, formData.value.role_ids)
       }
       else {
         const createData: UserCreatePayload = {
@@ -356,14 +520,19 @@ export function useUsersManagement() {
           photo_external_id: formData.value.photo_external_id,
         }
         const result = await createUser(createData)
+        userId = result.id
         if (formData.value.role_ids.length > 0) {
-          await updateUserRoles(result.id, formData.value.role_ids)
+          await updateUserRoles(userId, formData.value.role_ids)
         }
       }
+
+      // Sauvegarder les affectations
+      await saveAffectations(userId)
 
       showCreateModal.value = false
       photoPreviewUrl.value = null
       pendingPhotoFile.value = null
+      currentUserAffectation.value = { service: null, campus: null }
       loadData()
     }
     catch (error) {
@@ -623,6 +792,12 @@ export function useUsersManagement() {
     hasActiveFilters,
     allSelected,
     someSelected,
+    filteredServiceOptions,
+
+    // Affectation options
+    sectorOptions,
+    serviceOptions,
+    campusOptions,
 
     // Methods
     loadData,
