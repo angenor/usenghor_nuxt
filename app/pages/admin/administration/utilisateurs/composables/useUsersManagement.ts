@@ -6,7 +6,40 @@ import type {
   RoleRead,
 } from '~/composables/useUsersApi'
 import type { ImageVariants } from '~/types/api'
+import type { ServiceTeamMemberRead } from '~/composables/useServicesApi'
+import type { CampusTeamRead } from '~/composables/useCampusApi'
 import { useDebounceFn } from '@vueuse/core'
+
+export interface AffectationFormData {
+  sector_id: string | null
+  service_id: string | null
+  service_position: string
+  campus_id: string | null
+  campus_position: string
+}
+
+export interface SectorOption {
+  id: string
+  code: string
+  name: string
+}
+
+export interface ServiceOption {
+  id: string
+  name: string
+  sector_id: string | null
+}
+
+export interface CampusOption {
+  id: string
+  code: string
+  name: string
+}
+
+export interface UserAffectation {
+  service: ServiceTeamMemberRead | null
+  campus: CampusTeamRead | null
+}
 
 export interface UserFilters {
   search: string
@@ -31,6 +64,16 @@ export interface UserFormData {
   role_ids: string[]
   active: boolean
   photo_external_id: string | null
+  // Affectation organisationnelle
+  affectation: AffectationFormData
+}
+
+const defaultAffectation: AffectationFormData = {
+  sector_id: null,
+  service_id: null,
+  service_position: '',
+  campus_id: null,
+  campus_position: '',
 }
 
 const defaultFormData: UserFormData = {
@@ -48,6 +91,7 @@ const defaultFormData: UserFormData = {
   role_ids: [],
   active: true,
   photo_external_id: null,
+  affectation: { ...defaultAffectation },
 }
 
 export function useUsersManagement() {

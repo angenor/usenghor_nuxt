@@ -839,6 +839,19 @@ export function useServicesApi() {
     })
   }
 
+  /**
+   * Récupère l'affectation service d'un utilisateur.
+   */
+  async function getUserServiceAffectation(userId: string): Promise<ServiceTeamMemberRead | null> {
+    try {
+      const response = await apiFetch<ServiceTeamMemberRead[]>(`/api/admin/services/team/user/${userId}`)
+      return response.length > 0 ? (response[0] ?? null) : null
+    }
+    catch {
+      return null
+    }
+  }
+
   // =========================================================================
   // Statistics & Utilities
   // =========================================================================
@@ -1073,6 +1086,7 @@ export function useServicesApi() {
     addServiceTeamMember,
     updateServiceTeamMember,
     deleteServiceTeamMember,
+    getUserServiceAffectation,
 
     // Statistics & Utilities
     getServicesStats,

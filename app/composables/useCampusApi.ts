@@ -250,6 +250,58 @@ export function useCampusApi() {
     })
   }
 
+  /**
+   * Ajoute un membre à l'équipe d'un campus.
+   */
+  async function addCampusTeamMember(
+    campusId: string,
+    data: Omit<CampusTeamCreate, 'campus_id'>,
+  ): Promise<IdResponse> {
+    return apiFetch<IdResponse>(`/api/admin/campuses/${campusId}/team`, {
+      method: 'POST',
+      body: { ...data, campus_id: campusId },
+    })
+  }
+
+  /**
+   * Met à jour un membre de l'équipe d'un campus.
+   */
+  async function updateCampusTeamMember(
+    campusId: string,
+    memberId: string,
+    data: CampusTeamUpdate,
+  ): Promise<MessageResponse> {
+    return apiFetch<MessageResponse>(`/api/admin/campuses/${campusId}/team/${memberId}`, {
+      method: 'PUT',
+      body: data,
+    })
+  }
+
+  /**
+   * Supprime un membre de l'équipe d'un campus.
+   */
+  async function deleteCampusTeamMember(
+    campusId: string,
+    memberId: string,
+  ): Promise<MessageResponse> {
+    return apiFetch<MessageResponse>(`/api/admin/campuses/${campusId}/team/${memberId}`, {
+      method: 'DELETE',
+    })
+  }
+
+  /**
+   * Récupère l'affectation campus d'un utilisateur.
+   */
+  async function getUserCampusAffectation(userId: string): Promise<CampusTeamRead | null> {
+    try {
+      const response = await apiFetch<CampusTeamRead[]>(`/api/admin/campuses/team/user/${userId}`)
+      return response.length > 0 ? (response[0] ?? null) : null
+    }
+    catch {
+      return null
+    }
+  }
+
   // =========================================================================
   // Campus Partners
   // =========================================================================
@@ -384,6 +436,10 @@ export function useCampusApi() {
 
     // Team
     getCampusTeam,
+    addCampusTeamMember,
+    updateCampusTeamMember,
+    deleteCampusTeamMember,
+    getUserCampusAffectation,
 
     // Partners
     getCampusPartners,
