@@ -812,6 +812,28 @@ h4.ce-header {
   cursor: not-allowed;
 }
 
+.mt-toolbar-btn--danger {
+  color: #dc2626;
+  background-color: #fef2f2;
+  border-color: #fecaca;
+}
+
+.dark .mt-toolbar-btn--danger {
+  color: #f87171;
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.mt-toolbar-btn--danger:hover:not(:disabled) {
+  background-color: #fee2e2;
+  border-color: #f87171;
+}
+
+.dark .mt-toolbar-btn--danger:hover:not(:disabled) {
+  background-color: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
 .mt-toolbar-btn svg {
   width: 16px;
   height: 16px;

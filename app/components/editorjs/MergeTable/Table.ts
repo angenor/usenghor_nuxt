@@ -648,6 +648,38 @@ export class Table {
       toolbar.appendChild(unmergeBtn)
     }
 
+    // Séparateur
+    const separator = document.createElement('span')
+    separator.className = 'mt-toolbar-separator'
+    separator.style.cssText = 'width: 1px; height: 24px; background-color: #d1d5db; margin: 0 4px;'
+    toolbar.appendChild(separator)
+
+    // Bouton Supprimer ligne
+    const deleteRowBtn = document.createElement('button')
+    deleteRowBtn.type = 'button'
+    deleteRowBtn.className = 'mt-toolbar-btn mt-toolbar-btn--danger'
+    deleteRowBtn.innerHTML = `${IconDeleteRow} <span>Suppr. ligne</span>`
+    deleteRowBtn.title = 'Supprimer la ligne'
+    deleteRowBtn.disabled = this.data.content.length <= 1
+    deleteRowBtn.addEventListener('click', () => {
+      this.deleteRow(rect.minRow)
+      this.removeToolbar()
+    })
+    toolbar.appendChild(deleteRowBtn)
+
+    // Bouton Supprimer colonne
+    const deleteColBtn = document.createElement('button')
+    deleteColBtn.type = 'button'
+    deleteColBtn.className = 'mt-toolbar-btn mt-toolbar-btn--danger'
+    deleteColBtn.innerHTML = `${IconDeleteColumn} <span>Suppr. colonne</span>`
+    deleteColBtn.title = 'Supprimer la colonne'
+    deleteColBtn.disabled = this.getColumnCount() <= 1
+    deleteColBtn.addEventListener('click', () => {
+      this.deleteColumn(rect.minCol)
+      this.removeToolbar()
+    })
+    toolbar.appendChild(deleteColBtn)
+
     // Positionner la toolbar
     this.positionToolbar(toolbar, rect)
     this.wrapper.appendChild(toolbar)
