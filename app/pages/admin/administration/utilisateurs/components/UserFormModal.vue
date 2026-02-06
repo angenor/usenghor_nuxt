@@ -346,7 +346,8 @@ const localFormData = computed({
         <div class="flex justify-end gap-2 border-t border-gray-200 p-4 dark:border-gray-700">
           <button
             type="button"
-            class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+            class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 disabled:opacity-50"
+            :disabled="isUploadingPhoto"
             @click="emit('close')"
           >
             Annuler
@@ -354,7 +355,7 @@ const localFormData = computed({
           <button
             type="button"
             class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
-            :disabled="isSaving"
+            :disabled="isSaving || isUploadingPhoto"
             @click="emit('save')"
           >
             <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
