@@ -50,7 +50,7 @@ const localFormData = computed({
     <div
       v-if="show"
       class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4"
-      @click.self="emit('close')"
+      @click.self="!showPhotoEditor && !isUploadingPhoto && emit('close')"
     >
       <div class="w-full max-w-3xl rounded-lg bg-white shadow-xl dark:bg-gray-800">
         <!-- Header -->
@@ -60,7 +60,8 @@ const localFormData = computed({
           </h3>
           <button
             type="button"
-            class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+            class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 disabled:opacity-50"
+            :disabled="isUploadingPhoto"
             @click="emit('close')"
           >
             <font-awesome-icon :icon="['fas', 'xmark']" class="h-5 w-5" />
@@ -369,15 +370,19 @@ const localFormData = computed({
     <div
       v-if="showPhotoEditor && pendingPhotoFile"
       class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4"
+      @click.stop
+      @mousedown.stop
     >
-      <MediaImageEditor
-        :image-file="pendingPhotoFile"
-        :aspect-ratio="1"
-        :default-low-width="150"
-        :default-medium-width="400"
-        @save="emit('photo-save', $event)"
-        @cancel="emit('photo-cancel')"
-      />
+      <div @click.stop @mousedown.stop>
+        <MediaImageEditor
+          :image-file="pendingPhotoFile"
+          :aspect-ratio="1"
+          :default-low-width="150"
+          :default-medium-width="400"
+          @save="emit('photo-save', $event)"
+          @cancel="emit('photo-cancel')"
+        />
+      </div>
     </div>
   </Teleport>
 </template>

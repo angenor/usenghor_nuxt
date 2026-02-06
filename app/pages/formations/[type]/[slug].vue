@@ -573,7 +573,7 @@ const toggleSemester = (num: number) => {
                 <!-- Associated application calls -->
                 <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                   <h4 class="flex items-center gap-2 text-base font-bold text-brand-red-600 dark:text-brand-red-400 mb-4">
-                    <font-awesome-icon icon="fa-solid fa-paper-plane" class="w-5 h-5" />
+                    <font-awesome-icon icon="fa-solid fa-arrow-down" class="w-5 h-5 animate-bounce" />
                     {{ t('formations.detail.associatedCalls') }}
                   </h4>
 

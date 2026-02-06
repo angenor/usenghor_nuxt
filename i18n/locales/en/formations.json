@@ -40,7 +40,15 @@
       "campus": "Campus",
       "department": "Department",
       "applicationOpen": "Applications Open",
-      "viewPartners": "View our partners"
+      "viewPartners": "View our partners",
+      "searchPlaceholder": "Search for a program...",
+      "duration": "Duration",
+      "durationShort": "≤ 12 months",
+      "durationLong": "> 12 months",
+      "reset": "Reset",
+      "resultsCount": "{count} program(s) found",
+      "noResults": "No results",
+      "noResultsDescription": "No programs match your search criteria. Try adjusting your filters."
     },
     "card": {
       "duration": "Duration",

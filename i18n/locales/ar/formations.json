@@ -40,7 +40,15 @@
       "campus": "الحرم الجامعي",
       "department": "القسم",
       "applicationOpen": "التقديم مفتوح",
-      "viewPartners": "عرض شركائنا"
+      "viewPartners": "عرض شركائنا",
+      "searchPlaceholder": "البحث عن برنامج...",
+      "duration": "المدة",
+      "durationShort": "≤ 12 شهراً",
+      "durationLong": "> 12 شهراً",
+      "reset": "إعادة تعيين",
+      "resultsCount": "تم العثور على {count} برنامج(s)",
+      "noResults": "لا توجد نتائج",
+      "noResultsDescription": "لا توجد برامج تطابق معايير البحث. حاول تعديل الفلاتر."
     },
     "card": {
       "duration": "المدة",

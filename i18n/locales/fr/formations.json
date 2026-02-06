@@ -36,11 +36,19 @@
       "en_ligne": "Formation en ligne"
     },
     "filters": {
-      "all": "Toutes",
+      "all": "Tous",
       "campus": "Campus",
       "department": "Département",
       "applicationOpen": "Candidatures ouvertes",
-      "viewPartners": "Voir nos partenaires"
+      "viewPartners": "Voir nos partenaires",
+      "searchPlaceholder": "Rechercher une formation...",
+      "duration": "Durée",
+      "durationShort": "≤ 12 mois",
+      "durationLong": "> 12 mois",
+      "reset": "Réinitialiser",
+      "resultsCount": "{count} formation(s) trouvée(s)",
+      "noResults": "Aucun résultat",
+      "noResultsDescription": "Aucune formation ne correspond à vos critères de recherche. Essayez de modifier vos filtres."
     },
     "card": {
       "duration": "Durée",

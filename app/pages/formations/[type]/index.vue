@@ -48,6 +48,56 @@ const programs = ref<ProgramPublic[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 
+// Search and filters state
+const searchQuery = ref('')
+const selectedDuration = ref<'all' | 'short' | 'long'>('all')
+
+// Duration filter options
+const durationFilters = [
+  { value: 'all' as const, labelKey: 'formations.filters.all' },
+  { value: 'short' as const, labelKey: 'formations.filters.durationShort' },
+  { value: 'long' as const, labelKey: 'formations.filters.durationLong' },
+]
+
+// Filtered programs based on search and filters
+const filteredPrograms = computed(() => {
+  let result = programs.value
+
+  // Search filter (title + description)
+  if (searchQuery.value.trim()) {
+    const query = searchQuery.value.toLowerCase().trim()
+    result = result.filter((program) => {
+      const title = program.title?.toLowerCase() || ''
+      const description = extractPlainText(program.description).toLowerCase()
+      const subtitle = program.subtitle?.toLowerCase() || ''
+      return title.includes(query) || description.includes(query) || subtitle.includes(query)
+    })
+  }
+
+  // Duration filter
+  if (selectedDuration.value !== 'all') {
+    result = result.filter((program) => {
+      if (!program.duration_months) return selectedDuration.value === 'all'
+      if (selectedDuration.value === 'short') return program.duration_months <= 12
+      if (selectedDuration.value === 'long') return program.duration_months > 12
+      return true
+    })
+  }
+
+  return result
+})
+
+// Check if any filters are active
+const hasActiveFilters = computed(() => {
+  return searchQuery.value.trim() !== '' || selectedDuration.value !== 'all'
+})
+
+// Reset all filters
+const resetFilters = () => {
+  searchQuery.value = ''
+  selectedDuration.value = 'all'
+}
+
 // Other types data for sidebar
 const otherTypesData = ref<Record<string, ProgramPublic[]>>({})
 
@@ -232,10 +282,74 @@ const typeConfig = computed(() => {
         <div class="flex flex-col lg:flex-row gap-8">
           <!-- Main Content -->
           <div class="flex-1">
+            <!-- Search and Filters -->
+            <div class="mb-8 space-y-4">
+              <!-- Search bar -->
+              <div class="relative">
+                <font-awesome-icon
+                  icon="fa-solid fa-magnifying-glass"
+                  class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+                />
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  :placeholder="t('formations.filters.searchPlaceholder')"
+                  class="w-full pl-12 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent transition-all"
+                >
+                <button
+                  v-if="searchQuery"
+                  type="button"
+                  class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  @click="searchQuery = ''"
+                >
+                  <font-awesome-icon icon="fa-solid fa-xmark" class="w-4 h-4" />
+                </button>
+              </div>
+
+              <!-- Filter buttons -->
+              <div class="flex flex-wrap items-center gap-3">
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  {{ t('formations.filters.duration') }} :
+                </span>
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    v-for="filter in durationFilters"
+                    :key="filter.value"
+                    type="button"
+                    class="px-4 py-2 text-sm font-medium rounded-full transition-all"
+                    :class="selectedDuration === filter.value
+                      ? 'bg-brand-blue-600 text-white shadow-md'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
+                    @click="selectedDuration = filter.value"
+                  >
+                    {{ t(filter.labelKey) }}
+                  </button>
+                </div>
+
+                <!-- Reset button -->
+                <button
+                  v-if="hasActiveFilters"
+                  type="button"
+                  class="ml-auto flex items-center gap-2 px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                  @click="resetFilters"
+                >
+                  <font-awesome-icon icon="fa-solid fa-rotate-left" class="w-3 h-3" />
+                  {{ t('formations.filters.reset') }}
+                </button>
+              </div>
+
+              <!-- Results count -->
+              <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                <span>
+                  {{ t('formations.filters.resultsCount', { count: filteredPrograms.length }) }}
+                </span>
+              </div>
+            </div>
+
             <!-- Programs Grid -->
-            <div v-if="programs.length > 0" class="grid md:grid-cols-2 gap-6">
+            <div v-if="filteredPrograms.length > 0" class="grid md:grid-cols-2 gap-6">
               <NuxtLink
-                v-for="program in programs"
+                v-for="program in filteredPrograms"
                 :key="program.id"
                 :to="getProgramUrl(program)"
                 class="group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700"
@@ -290,7 +404,25 @@ const typeConfig = computed(() => {
               </NuxtLink>
             </div>
 
-            <!-- Empty state -->
+            <!-- Empty state - No search results -->
+            <div v-else-if="programs.length > 0 && filteredPrograms.length === 0" class="text-center py-16 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+              <font-awesome-icon icon="fa-solid fa-magnifying-glass" class="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" />
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                {{ t('formations.filters.noResults') }}
+              </h3>
+              <p class="text-gray-500 dark:text-gray-400 mb-6">
+                {{ t('formations.filters.noResultsDescription') }}
+              </p>
+              <button
+                type="button"
+                class="px-6 py-3 bg-brand-blue-600 hover:bg-brand-blue-700 text-white font-medium rounded-lg transition-colors"
+                @click="resetFilters"
+              >
+                {{ t('formations.filters.reset') }}
+              </button>
+            </div>
+
+            <!-- Empty state - No programs at all -->
             <div v-else class="text-center py-16 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
               <font-awesome-icon icon="fa-solid fa-folder-open" class="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" />
               <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
