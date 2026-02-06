@@ -1,12 +1,12 @@
 /**
  * Composable de recherche globale pour le front-office
- * Agrège toutes les sources de données et fournit une recherche flexible
+ * Agrège toutes les sources de données (API backend) et fournit une recherche flexible
  */
 
-import { mockFormations } from '@bank/mock-data/formations'
-import { mockEvents } from '@bank/mock-data/events'
-import { mockApplicationCalls } from '@bank/mock-data/application-calls'
-import { mockNews } from '@bank/mock-data/news'
+import type { ProgramPublic } from '~/composables/usePublicProgramsApi'
+import type { EventPublic } from '~/composables/usePublicEventsApi'
+import type { ApplicationCallPublic } from '~/types/api'
+import type { NewsDisplay } from '~/types/news'
 
 export type SearchResultType = 'formation' | 'event' | 'call' | 'news' | 'page'
 
@@ -252,12 +252,20 @@ const staticPages: SearchResult[] = [
   }
 ]
 
-// Icônes par type de formation
+// Icônes par type de formation (correspond aux types backend)
 const formationIcons: Record<string, string> = {
   master: 'fa-solid fa-graduation-cap',
-  doctorat: 'fa-solid fa-book-open',
-  du: 'fa-solid fa-award',
-  certifiante: 'fa-solid fa-certificate'
+  doctorate: 'fa-solid fa-book-open',
+  university_diploma: 'fa-solid fa-award',
+  certificate: 'fa-solid fa-certificate'
+}
+
+// Mapping des types de programme vers les slugs URL
+const programTypeToUrlSlug: Record<string, string> = {
+  master: 'masters',
+  doctorate: 'doctorats',
+  university_diploma: 'diplomes-universitaires',
+  certificate: 'certifiantes'
 }
 
 // Icônes par type d'événement
@@ -288,90 +296,124 @@ const typeLabels: Record<SearchResultType, string> = {
   page: 'Page'
 }
 
+// Labels de durée par type
+const programTypeDurationLabels: Record<string, string> = {
+  master: '2 ans',
+  doctorate: '3-4 ans',
+  university_diploma: '6 mois',
+  certificate: '3 mois'
+}
+
 export function useGlobalSearch() {
-  const { locale } = useI18n()
+  // State pour stocker les données chargées depuis les APIs
+  const programs = ref<ProgramPublic[]>([])
+  const events = ref<EventPublic[]>([])
+  const calls = ref<ApplicationCallPublic[]>([])
+  const news = ref<NewsDisplay[]>([])
+  const isLoaded = ref(false)
+  const isLoading = ref(false)
+
+  // Charger les données depuis les APIs backend
+  async function loadSearchData() {
+    if (isLoaded.value || isLoading.value) return
+
+    isLoading.value = true
+
+    try {
+      const { listPrograms } = usePublicProgramsApi()
+      const { getAllPublishedEvents } = usePublicEventsApi()
+      const { listCalls } = usePublicCallsApi()
+      const { getAllPublishedNews } = usePublicNewsApi()
+
+      // Charger toutes les données en parallèle
+      const [programsData, eventsData, callsData, newsData] = await Promise.all([
+        listPrograms({ limit: 100 }).catch(() => ({ items: [] })),
+        getAllPublishedEvents(100).catch(() => []),
+        listCalls({ limit: 100 }).catch(() => ({ items: [] })),
+        getAllPublishedNews({ limit: 100 }).catch(() => [])
+      ])
+
+      programs.value = programsData.items || []
+      events.value = eventsData || []
+      calls.value = callsData.items || []
+      news.value = newsData || []
+      isLoaded.value = true
+    } catch (error) {
+      console.error('[GlobalSearch] Erreur lors du chargement des données:', error)
+    } finally {
+      isLoading.value = false
+    }
+  }
 
   // Construit tous les résultats searchables
   const allSearchableItems = computed<SearchResult[]>(() => {
     const items: SearchResult[] = []
 
-    // 1. Formations (publiées uniquement)
-    for (const formation of mockFormations.filter(f => f.is_published)) {
-      const title = locale.value === 'en' && formation.title_en
-        ? formation.title_en
-        : formation.title_fr
-      const description = locale.value === 'en' && formation.short_description_en
-        ? formation.short_description_en
-        : formation.short_description_fr
-
-      // Construire la route selon le type
-      let route = '/formations'
-      if (formation.formation_type === 'master') {
-        route = `/formations/masters/${formation.slug}`
-      } else if (formation.formation_type === 'doctorat') {
-        route = `/formations/doctorats/${formation.slug}`
-      } else if (formation.formation_type === 'du') {
-        route = `/formations/diplomes-universitaires/${formation.slug}`
-      } else if (formation.formation_type === 'certifiante') {
-        route = `/formations/certifiantes/${formation.slug}`
-      }
+    // 1. Formations (programmes) depuis l'API
+    for (const program of programs.value) {
+      const typeSlug = programTypeToUrlSlug[program.type] || 'masters'
+      const duration = program.duration_months
+        ? `${Math.floor(program.duration_months / 12)} an${program.duration_months >= 24 ? 's' : ''}`
+        : programTypeDurationLabels[program.type] || ''
 
       items.push({
-        id: formation.id,
+        id: program.id,
         type: 'formation',
-        title,
-        subtitle: `${typeLabels.formation} • ${formation.duration_fr}`,
-        description,
-        icon: formationIcons[formation.formation_type] || 'fa-solid fa-graduation-cap',
-        route,
-        image: formation.image,
+        title: program.title,
+        subtitle: `${typeLabels.formation} • ${duration}`,
+        description: program.description || program.subtitle || '',
+        icon: formationIcons[program.type] || 'fa-solid fa-graduation-cap',
+        route: `/formations/${typeSlug}/${program.slug}`,
+        image: program.cover_image_external_id
+          ? `https://picsum.photos/seed/${program.cover_image_external_id}/400/300`
+          : undefined,
         score: 0
       })
     }
 
-    // 2. Événements (publiés uniquement)
-    for (const event of mockEvents.filter(e => e.status === 'published')) {
+    // 2. Événements depuis l'API
+    for (const event of events.value) {
       items.push({
         id: event.id,
         type: 'event',
         title: event.title,
         subtitle: `${typeLabels.event} • ${new Date(event.start_date).toLocaleDateString('fr-FR')}`,
-        description: event.description,
+        description: event.description || '',
         icon: eventIcons[event.type] || 'fa-solid fa-calendar-days',
         route: `/actualites/evenements/${event.slug}`,
-        image: event.cover_image,
+        image: event.cover_image || undefined,
         date: event.start_date,
         score: 0
       })
     }
 
-    // 3. Appels à candidatures (publiés uniquement)
-    for (const call of mockApplicationCalls.filter(c => c.publication_status === 'published')) {
+    // 3. Appels à candidatures depuis l'API
+    for (const call of calls.value) {
       items.push({
         id: call.id,
         type: 'call',
         title: call.title,
         subtitle: `${typeLabels.call} • ${call.deadline ? `Date limite: ${new Date(call.deadline).toLocaleDateString('fr-FR')}` : 'En cours'}`,
-        description: call.description,
+        description: call.description || '',
         icon: callIcons[call.type] || 'fa-solid fa-bullhorn',
         route: `/actualites/appels/${call.slug}`,
-        date: call.deadline,
+        date: call.deadline || undefined,
         score: 0
       })
     }
 
-    // 4. Actualités (publiées uniquement)
-    for (const news of mockNews.filter(n => n.status === 'published')) {
+    // 4. Actualités depuis l'API
+    for (const newsItem of news.value) {
       items.push({
-        id: news.id,
+        id: newsItem.id,
         type: 'news',
-        title: news.title,
-        subtitle: `${typeLabels.news} • ${new Date(news.published_at || news.created_at).toLocaleDateString('fr-FR')}`,
-        description: news.summary,
+        title: newsItem.title,
+        subtitle: `${typeLabels.news} • ${new Date(newsItem.published_at || newsItem.created_at).toLocaleDateString('fr-FR')}`,
+        description: newsItem.summary || '',
         icon: 'fa-solid fa-newspaper',
-        route: `/actualites/${news.slug}`,
-        image: news.cover_image,
-        date: news.published_at || news.created_at,
+        route: `/actualites/${newsItem.slug}`,
+        image: newsItem.cover_image || undefined,
+        date: newsItem.published_at || newsItem.created_at,
         score: 0
       })
     }
@@ -422,6 +464,9 @@ export function useGlobalSearch() {
 
   return {
     search,
+    loadSearchData,
+    isLoaded,
+    isLoading,
     allSearchableItems,
     popularSuggestions
   }

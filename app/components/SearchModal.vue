@@ -3,7 +3,7 @@ import { refDebounced } from '@vueuse/core'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
-const { search, popularSuggestions } = useGlobalSearch()
+const { search, loadSearchData, isLoaded, isLoading, popularSuggestions } = useGlobalSearch()
 
 const props = defineProps<{
   isOpen: boolean
@@ -81,8 +81,10 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
 }
 
-watch(() => props.isOpen, (isOpen) => {
+watch(() => props.isOpen, async (isOpen) => {
   if (isOpen) {
+    // Charger les données de recherche si pas encore fait
+    await loadSearchData()
     nextTick(() => searchInputRef.value?.focus())
   } else {
     searchQuery.value = ''
@@ -242,6 +244,17 @@ watch(filteredResults, () => {
                     </span>
                   </p>
                 </div>
+              </div>
+
+              <!-- Loading State -->
+              <div v-else-if="isLoading" class="text-center py-12 px-4">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                  <div class="w-8 h-8 border-4 border-brand-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+                <p class="text-gray-900 dark:text-white font-medium mb-1">Chargement...</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  Préparation de la recherche
+                </p>
               </div>
 
               <!-- No Results -->
