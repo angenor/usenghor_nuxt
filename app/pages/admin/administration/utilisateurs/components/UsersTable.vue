@@ -11,6 +11,7 @@ defineProps<{
   getFullName: (user: UserWithRoles) => string
   formatLastLogin: (date: string | null) => string
   getRoleColor: (code: string) => string
+  getMediaUrl: (mediaId: string) => string | null
   userStatusColors: Record<string, string>
   verificationColors: Record<string, string>
 }>()
@@ -78,11 +79,21 @@ const emit = defineEmits<{
             <td class="px-4 py-3">
               <div class="flex items-center gap-3">
                 <div class="relative h-10 w-10 flex-shrink-0">
+                  <!-- Photo de profil -->
+                  <img
+                    v-if="user.photo_external_id && getMediaUrl(user.photo_external_id)"
+                    :src="getMediaUrl(user.photo_external_id)!"
+                    :alt="getFullName(user)"
+                    class="h-10 w-10 rounded-full object-cover"
+                  />
+                  <!-- Avatar par défaut -->
                   <div
+                    v-else
                     class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
                   >
                     <font-awesome-icon :icon="['fas', 'user']" class="h-5 w-5" />
                   </div>
+                  <!-- Indicateur en ligne -->
                   <span
                     v-if="user.active && user.last_login_at && new Date(user.last_login_at) > new Date(Date.now() - 15 * 60 * 1000)"
                     class="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-400 dark:border-gray-800"

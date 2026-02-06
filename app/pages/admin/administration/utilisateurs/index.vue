@@ -78,6 +78,9 @@ const {
   salutationOptions,
   userStatusColors,
   verificationColors,
+
+  // From useMediaApi
+  getMediaUrl,
 } = useUsersManagement()
 
 onMounted(() => {
@@ -221,6 +224,7 @@ onMounted(() => {
         :get-full-name="getFullName"
         :format-last-login="formatLastLogin"
         :get-role-color="getRoleColor"
+        :get-media-url="getMediaUrl"
         :user-status-colors="userStatusColors"
         :verification-colors="verificationColors"
         @toggle-select-all="toggleSelectAll"

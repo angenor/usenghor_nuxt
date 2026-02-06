@@ -614,5 +614,8 @@ export function useUsersManagement() {
     salutationOptions,
     userStatusColors,
     verificationColors,
+
+    // From useMediaApi
+    getMediaUrl,
   }
 }
