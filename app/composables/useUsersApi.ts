@@ -77,6 +77,7 @@ export interface UserCreatePayload {
   linkedin?: string | null
   city?: string | null
   address?: string | null
+  photo_external_id?: string | null
 }
 
 export interface UserUpdatePayload {
@@ -91,6 +92,7 @@ export interface UserUpdatePayload {
   city?: string | null
   address?: string | null
   active?: boolean
+  photo_external_id?: string | null
 }
 
 export interface UserRolesUpdatePayload {
