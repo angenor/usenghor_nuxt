@@ -46,9 +46,30 @@ const getLocalizedTitle = (program: ProgramPublic) => {
   return program.title
 }
 
+// Extract plain text from EditorJS JSON
+const extractPlainText = (content: string | null | undefined): string => {
+  if (!content) return ''
+  try {
+    const parsed = JSON.parse(content)
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
+      return parsed.blocks
+        .filter((block: { type: string }) => block.type === 'paragraph' || block.type === 'header')
+        .map((block: { data: { text: string } }) => {
+          const text = block.data?.text || ''
+          return text.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ')
+        })
+        .join(' ')
+        .trim()
+    }
+  } catch {
+    // Not JSON, return as-is
+  }
+  return content
+}
+
 // Get localized description
 const getLocalizedDescription = (program: ProgramPublic) => {
-  return program.description || ''
+  return extractPlainText(program.description)
 }
 
 // Get localized duration
@@ -64,7 +85,9 @@ const getDetailUrl = (program: ProgramPublic) => {
 
 // Image URL with fallback
 const getImageUrl = (program: ProgramPublic) => {
-  // Pour l'instant, utiliser picsum comme fallback
+  if (program.cover_image_external_id) {
+    return `/api/public/media/${program.cover_image_external_id}/download`
+  }
   return `https://picsum.photos/seed/${program.slug}/800/600`
 }
 </script>

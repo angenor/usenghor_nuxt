@@ -164,7 +164,7 @@ const callImage = computed(() => {
     const apiCall = props.call as ApplicationCallPublic
     // Use placeholder if no cover image
     return apiCall.cover_image_external_id
-      ? `/api/media/${apiCall.cover_image_external_id}`
+      ? `/api/public/media/${apiCall.cover_image_external_id}/download`
       : 'https://picsum.photos/seed/call/800/600'
   }
   return (props.call as CampusCall).image

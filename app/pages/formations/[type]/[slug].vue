@@ -195,7 +195,7 @@ useSeoMeta({
   title: () => `${getLocalizedTitle.value} | ${t('formations.hero.title')}`,
   description: () => getLocalizedDescription.value,
   ogImage: () => program.value?.cover_image_external_id
-    ? `/api/media/${program.value.cover_image_external_id}`
+    ? `/api/public/media/${program.value.cover_image_external_id}/download`
     : 'https://picsum.photos/seed/og-formation/1200/630',
 })
 
@@ -291,7 +291,7 @@ const toggleSemester = (num: number) => {
               <div class="relative h-56 md:h-64 lg:h-72 rounded-2xl overflow-hidden shadow-lg">
                 <img
                   :src="program.cover_image_external_id
-                    ? `/api/media/${program.cover_image_external_id}`
+                    ? `/api/public/media/${program.cover_image_external_id}/download`
                     : `https://picsum.photos/seed/${program.slug}/1920/1080`"
                   :alt="getLocalizedTitle"
                   class="w-full h-full object-cover"
@@ -520,7 +520,7 @@ const toggleSemester = (num: number) => {
                   <div class="overflow-hidden h-32">
                     <img
                       :src="related.cover_image_external_id
-                        ? `/api/media/${related.cover_image_external_id}`
+                        ? `/api/public/media/${related.cover_image_external_id}/download`
                         : `https://picsum.photos/seed/${related.slug}/400/200`"
                       :alt="getLocalizedTitleFor(related)"
                       class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"

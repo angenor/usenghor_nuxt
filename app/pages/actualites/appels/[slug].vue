@@ -97,7 +97,7 @@ useSeoMeta({
   title: () => call.value ? `${call.value.title} | ${t('actualites.calls.title')}` : t('actualites.calls.title'),
   description: () => extractPlainText(call.value?.description) || t('actualites.calls.subtitle'),
   ogImage: () => call.value?.cover_image_external_id
-    ? `/api/media/${call.value.cover_image_external_id}`
+    ? `/api/public/media/${call.value.cover_image_external_id}/download`
     : 'https://picsum.photos/seed/og-call/1200/630'
 })
 </script>
