@@ -717,15 +717,27 @@ onUnmounted(() => {
           <!-- Divider -->
           <div class="my-4 border-t border-gray-100 dark:border-gray-800"></div>
 
-          <!-- Dark Mode Toggle Mobile -->
-          <button
-            @click="toggleDarkMode"
-            class="flex items-center justify-center gap-3 w-full px-4 py-3 text-gray-600 dark:text-gray-300 font-medium rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
-          >
-            <font-awesome-icon v-if="isDark" icon="fa-solid fa-sun" class="w-4 h-4 text-brand-blue-400" />
-            <font-awesome-icon v-else icon="fa-solid fa-moon" class="w-4 h-4 text-gray-400" />
-            <span>{{ isDark ? t('theme.lightMode') : t('theme.darkMode') }}</span>
-          </button>
+          <!-- Search & Dark Mode Toggle Mobile -->
+          <div class="grid grid-cols-2 gap-2">
+            <!-- Search Button Mobile -->
+            <button
+              @click="toggleSearch(); isMobileMenuOpen = false"
+              class="flex items-center justify-center gap-2 px-4 py-3 text-gray-600 dark:text-gray-300 font-medium rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+            >
+              <font-awesome-icon icon="fa-solid fa-magnifying-glass" class="w-4 h-4 text-brand-blue-500" />
+              <span>{{ t('nav.search') }}</span>
+            </button>
+
+            <!-- Dark Mode Toggle Mobile -->
+            <button
+              @click="toggleDarkMode"
+              class="flex items-center justify-center gap-2 px-4 py-3 text-gray-600 dark:text-gray-300 font-medium rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+            >
+              <font-awesome-icon v-if="isDark" icon="fa-solid fa-sun" class="w-4 h-4 text-brand-blue-400" />
+              <font-awesome-icon v-else icon="fa-solid fa-moon" class="w-4 h-4 text-gray-400" />
+              <span>{{ isDark ? t('theme.light') : t('theme.dark') }}</span>
+            </button>
+          </div>
 
           <!-- Language Selection Mobile -->
           <div class="mt-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700">

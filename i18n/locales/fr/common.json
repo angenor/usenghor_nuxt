@@ -9,7 +9,9 @@
   },
   "theme": {
     "darkMode": "Mode sombre activé",
-    "lightMode": "Mode clair activé"
+    "lightMode": "Mode clair activé",
+    "dark": "Sombre",
+    "light": "Clair"
   },
   "common": {
     "save": "Enregistrer",

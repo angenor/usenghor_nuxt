@@ -9,7 +9,9 @@
   },
   "theme": {
     "darkMode": "Dark mode enabled",
-    "lightMode": "Light mode enabled"
+    "lightMode": "Light mode enabled",
+    "dark": "Dark",
+    "light": "Light"
   },
   "common": {
     "save": "Save",
