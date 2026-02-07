@@ -39,6 +39,24 @@ const {
   removePhoto,
 } = useAdminRegistration()
 
+// Biographie avec EditorJS
+const biographyData = computed({
+  get: () => {
+    if (!formData.value.biography) {
+      return { time: Date.now(), blocks: [], version: '2.28.0' }
+    }
+    try {
+      return JSON.parse(formData.value.biography)
+    }
+    catch {
+      return { time: Date.now(), blocks: [], version: '2.28.0' }
+    }
+  },
+  set: (value: { time: number, blocks: unknown[], version: string }) => {
+    formData.value.biography = JSON.stringify(value)
+  },
+})
+
 onMounted(() => {
   loadOptions()
 })
@@ -336,16 +354,16 @@ async function handleSubmit() {
             <div class="space-y-4">
               <!-- Biographie -->
               <div>
-                <label for="biography" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Biographie
                 </label>
-                <textarea
-                  id="biography"
-                  v-model="formData.biography"
-                  rows="3"
-                  class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  placeholder="Quelques mots sur vous..."
-                />
+                <div class="rounded-lg border border-gray-300 dark:border-gray-600">
+                  <EditorJS
+                    v-model="biographyData"
+                    placeholder="Quelques mots sur vous..."
+                    :min-height="120"
+                  />
+                </div>
               </div>
 
               <!-- LinkedIn -->

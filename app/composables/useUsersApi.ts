@@ -49,6 +49,8 @@ export interface UserRead {
   phone: string | null
   phone_whatsapp: string | null
   linkedin: string | null
+  facebook: string | null
+  biography: string | null
   city: string | null
   address: string | null
   active: boolean
@@ -75,6 +77,8 @@ export interface UserCreatePayload {
   phone?: string | null
   phone_whatsapp?: string | null
   linkedin?: string | null
+  facebook?: string | null
+  biography?: string | null
   city?: string | null
   address?: string | null
   photo_external_id?: string | null
@@ -89,6 +93,8 @@ export interface UserUpdatePayload {
   phone?: string | null
   phone_whatsapp?: string | null
   linkedin?: string | null
+  facebook?: string | null
+  biography?: string | null
   city?: string | null
   address?: string | null
   active?: boolean

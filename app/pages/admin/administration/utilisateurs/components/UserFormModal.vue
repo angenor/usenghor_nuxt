@@ -47,6 +47,27 @@ const localFormData = computed({
   get: () => props.formData,
   set: (value) => emit('update:formData', value),
 })
+
+// Biographie avec EditorJS
+const biographyData = computed({
+  get: () => {
+    if (!props.formData.biography) {
+      return { time: Date.now(), blocks: [], version: '2.28.0' }
+    }
+    try {
+      return JSON.parse(props.formData.biography)
+    }
+    catch {
+      return { time: Date.now(), blocks: [], version: '2.28.0' }
+    }
+  },
+  set: (value: { time: number, blocks: unknown[], version: string }) => {
+    localFormData.value = {
+      ...props.formData,
+      biography: JSON.stringify(value),
+    }
+  },
+})
 </script>
 
 <template>
@@ -279,13 +300,28 @@ const localFormData = computed({
                 />
               </div>
               <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">LinkedIn</label>
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <font-awesome-icon :icon="['fab', 'linkedin']" class="mr-1 text-[#0A66C2]" />
+                  LinkedIn
+                </label>
                 <input
                   v-model="localFormData.linkedin"
                   type="url"
                   placeholder="https://linkedin.com/in/..."
                   class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                >
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <font-awesome-icon :icon="['fab', 'facebook']" class="mr-1 text-[#1877F2]" />
+                  Facebook
+                </label>
+                <input
+                  v-model="localFormData.facebook"
+                  type="url"
+                  placeholder="https://facebook.com/..."
+                  class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                >
               </div>
               <div class="sm:col-span-2">
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Adresse</label>
@@ -295,6 +331,20 @@ const localFormData = computed({
                   class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
               </div>
+            </div>
+          </div>
+
+          <!-- Biographie -->
+          <div class="mb-6">
+            <h4 class="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              Biographie
+            </h4>
+            <div class="rounded-lg border border-gray-300 dark:border-gray-600">
+              <EditorJS
+                v-model="biographyData"
+                placeholder="Quelques mots sur vous..."
+                :min-height="150"
+              />
             </div>
           </div>
 
