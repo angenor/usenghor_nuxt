@@ -61,7 +61,7 @@ const primaryNavItems = [
     },
     children: [
       { key: 'callsForApplications', route: '/actualites/appels', icon: 'fa-solid fa-bullhorn' },
-      { key: 'recruitment', route: '/actualites/appels?type=recrutement', icon: 'fa-solid fa-briefcase' },
+      { key: 'recruitment', route: '/actualites/appels?type=recruitment', icon: 'fa-solid fa-briefcase' },
       { key: 'events', route: '/actualites/evenements', icon: 'fa-solid fa-calendar-days' }
     ]
   }

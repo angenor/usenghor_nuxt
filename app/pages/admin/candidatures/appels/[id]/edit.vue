@@ -875,7 +875,7 @@ const tabs = [
 
           <div>
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Date de début du programme
+              {{ ['recruitment', 'project'].includes(form.type) ? 'Date de démarrage de la mission' : 'Date de début du programme' }}
             </label>
             <input
               v-model="form.program_start_date"
@@ -886,7 +886,7 @@ const tabs = [
 
           <div>
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Date de fin du programme
+              {{ ['recruitment', 'project'].includes(form.type) ? 'Date de fin de la mission' : 'Date de fin du programme' }}
             </label>
             <input
               v-model="form.program_end_date"
