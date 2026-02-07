@@ -1,4 +1,5 @@
 import type { UserSalutation } from '~/composables/useUsersApi'
+import type { ImageVariants } from '~/types/api/media'
 
 export interface AffectationFormData {
   sector_id: string | null
@@ -14,6 +15,8 @@ export interface RegisterFormData {
   last_name: string
   first_name: string
   affectation: AffectationFormData
+  photo_external_id: string | null
+  photo_base64: string | null
 }
 
 export interface RegisterResponse {
@@ -54,13 +57,31 @@ const defaultFormData: RegisterFormData = {
   last_name: '',
   first_name: '',
   affectation: { ...defaultAffectation },
+  photo_external_id: null,
+  photo_base64: null,
+}
+
+// Types pour les réponses des endpoints publics
+interface PublicSector {
+  id: string
+  code: string
+  name: string
+}
+
+interface PublicService {
+  id: string
+  name: string
+  sector_id: string | null
+}
+
+interface PublicCampus {
+  id: string
+  code: string
+  name: string
 }
 
 export function useAdminRegistration() {
   const { validateEmail, validatePassword, salutationOptions } = useUsersApi()
-  const { getSectorsForSelect } = useSectorsApi()
-  const { getAllServices } = useServicesApi()
-  const { getAllCampuses } = useCampusApi()
 
   // State
   const isLoading = ref(true)
@@ -69,6 +90,12 @@ export function useAdminRegistration() {
   const formData = ref<RegisterFormData>({ ...defaultFormData, affectation: { ...defaultAffectation } })
   const formErrors = ref<Record<string, string>>({})
   const serverError = ref<string | null>(null)
+
+  // Photo upload state
+  const pendingPhotoFile = ref<File | null>(null)
+  const showPhotoEditor = ref(false)
+  const isUploadingPhoto = ref(false)
+  const photoPreviewUrl = ref<string | null>(null)
 
   // Options
   const sectorOptions = ref<SectorOption[]>([])
@@ -82,14 +109,14 @@ export function useAdminRegistration() {
     return serviceOptions.value.filter(s => s.sector_id === sectorId)
   })
 
-  // Load options
+  // Load options from public endpoints (no auth required)
   const loadOptions = async () => {
     isLoading.value = true
     try {
       const [sectorsData, servicesData, campusesData] = await Promise.all([
-        getSectorsForSelect(),
-        getAllServices(),
-        getAllCampuses(),
+        $fetch<PublicSector[]>('/api/public/sectors'),
+        $fetch<PublicService[]>('/api/public/services'),
+        $fetch<PublicCampus[]>('/api/public/campuses/all'),
       ])
 
       sectorOptions.value = sectorsData.map(s => ({
@@ -104,7 +131,7 @@ export function useAdminRegistration() {
         sector_id: s.sector_id,
       }))
 
-      campusOptions.value = campusesData.items.map(c => ({
+      campusOptions.value = campusesData.map(c => ({
         id: c.id,
         code: c.code,
         name: c.name,
@@ -116,6 +143,53 @@ export function useAdminRegistration() {
     finally {
       isLoading.value = false
     }
+  }
+
+  // Photo upload handlers
+  const handlePhotoUpload = (event: Event) => {
+    const input = event.target as HTMLInputElement
+    if (input.files && input.files[0]) {
+      pendingPhotoFile.value = input.files[0]
+      showPhotoEditor.value = true
+    }
+    input.value = ''
+  }
+
+  const saveEditedPhoto = async (variants: ImageVariants) => {
+    isUploadingPhoto.value = true
+    try {
+      // Convertir le blob medium en base64 pour l'envoyer avec le formulaire
+      const reader = new FileReader()
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = reject
+      })
+      reader.readAsDataURL(variants.medium)
+      const base64 = await base64Promise
+
+      formData.value.photo_base64 = base64
+      photoPreviewUrl.value = URL.createObjectURL(variants.medium)
+      showPhotoEditor.value = false
+      pendingPhotoFile.value = null
+    }
+    catch (e) {
+      console.error('Erreur lors du traitement de la photo:', e)
+      formErrors.value.photo = 'Erreur lors du traitement de la photo'
+    }
+    finally {
+      isUploadingPhoto.value = false
+    }
+  }
+
+  const cancelPhotoEditor = () => {
+    showPhotoEditor.value = false
+    pendingPhotoFile.value = null
+  }
+
+  const removePhoto = () => {
+    formData.value.photo_external_id = null
+    formData.value.photo_base64 = null
+    photoPreviewUrl.value = null
   }
 
   // Validation
@@ -196,6 +270,7 @@ export function useAdminRegistration() {
           sector_id: formData.value.affectation.sector_id,
           service_id: formData.value.affectation.service_id,
           campus_id: formData.value.affectation.campus_id,
+          photo_base64: formData.value.photo_base64,
         },
       })
 
@@ -218,6 +293,8 @@ export function useAdminRegistration() {
     formErrors.value = {}
     serverError.value = null
     isSuccess.value = false
+    photoPreviewUrl.value = null
+    pendingPhotoFile.value = null
   }
 
   // Reset service when sector changes
@@ -234,6 +311,12 @@ export function useAdminRegistration() {
     formErrors,
     serverError,
 
+    // Photo upload state
+    pendingPhotoFile,
+    showPhotoEditor,
+    isUploadingPhoto,
+    photoPreviewUrl,
+
     // Options
     salutationOptions,
     sectorOptions,
@@ -247,5 +330,11 @@ export function useAdminRegistration() {
     submitRegistration,
     resetForm,
     onSectorChange,
+
+    // Photo upload methods
+    handlePhotoUpload,
+    saveEditedPhoto,
+    cancelPhotoEditor,
+    removePhoto,
   }
 }

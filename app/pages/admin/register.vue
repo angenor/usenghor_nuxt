@@ -28,6 +28,15 @@ const {
   loadOptions,
   submitRegistration,
   onSectorChange,
+  // Photo upload
+  pendingPhotoFile,
+  showPhotoEditor,
+  isUploadingPhoto,
+  photoPreviewUrl,
+  handlePhotoUpload,
+  saveEditedPhoto,
+  cancelPhotoEditor,
+  removePhoto,
 } = useAdminRegistration()
 
 onMounted(() => {
@@ -92,6 +101,69 @@ async function handleSubmit() {
           <div class="rounded-lg bg-blue-50 p-3 text-sm text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
             <font-awesome-icon :icon="['fas', 'info-circle']" class="mr-2" />
             Votre compte devra être validé par un administrateur avant de pouvoir vous connecter.
+          </div>
+
+          <!-- Photo de profil -->
+          <div class="flex flex-col items-center gap-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Photo de profil
+            </label>
+            <div class="flex items-center gap-6">
+              <!-- Avatar preview -->
+              <div class="relative">
+                <div class="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
+                  <img
+                    v-if="photoPreviewUrl"
+                    :src="photoPreviewUrl"
+                    alt="Photo de profil"
+                    class="h-full w-full object-cover"
+                  >
+                  <font-awesome-icon
+                    v-else
+                    :icon="['fas', 'user']"
+                    class="h-12 w-12 text-gray-400"
+                  />
+                </div>
+                <!-- Delete button -->
+                <button
+                  v-if="photoPreviewUrl"
+                  type="button"
+                  class="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-md hover:bg-red-600"
+                  title="Supprimer la photo"
+                  @click="removePhoto"
+                >
+                  <font-awesome-icon :icon="['fas', 'times']" class="h-3 w-3" />
+                </button>
+              </div>
+
+              <!-- Upload button -->
+              <div class="flex flex-col gap-2">
+                <label
+                  class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                  :class="{ 'cursor-not-allowed opacity-50': isUploadingPhoto }"
+                >
+                  <font-awesome-icon
+                    :icon="isUploadingPhoto ? ['fas', 'spinner'] : ['fas', 'camera']"
+                    class="h-4 w-4"
+                    :class="{ 'animate-spin': isUploadingPhoto }"
+                  />
+                  {{ photoPreviewUrl ? 'Changer' : 'Ajouter une photo' }}
+                  <input
+                    type="file"
+                    class="hidden"
+                    accept="image/*"
+                    :disabled="isUploadingPhoto"
+                    @change="handlePhotoUpload"
+                  >
+                </label>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  JPG, PNG ou WebP
+                </p>
+              </div>
+            </div>
+            <p v-if="formErrors.photo" class="text-sm text-red-500">
+              {{ formErrors.photo }}
+            </p>
           </div>
 
           <!-- Civilité -->
@@ -321,5 +393,24 @@ async function handleSubmit() {
         </form>
       </div>
     </div>
+
+    <!-- Image Editor Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showPhotoEditor && pendingPhotoFile"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      >
+        <div class="max-h-[90vh] w-full max-w-4xl overflow-auto rounded-xl bg-white shadow-2xl dark:bg-gray-800">
+          <MediaImageEditor
+            :image-file="pendingPhotoFile"
+            :aspect-ratio="1"
+            :default-low-width="150"
+            :default-medium-width="400"
+            @save="saveEditedPhoto"
+            @cancel="cancelPhotoEditor"
+          />
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
