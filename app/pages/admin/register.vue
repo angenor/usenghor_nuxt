@@ -327,6 +327,59 @@ async function handleSubmit() {
             </div>
           </div>
 
+          <!-- Informations complémentaires (optionnel) -->
+          <div class="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+            <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              Informations complémentaires
+              <span class="ml-1 text-xs font-normal normal-case">(optionnel)</span>
+            </h3>
+            <div class="space-y-4">
+              <!-- Biographie -->
+              <div>
+                <label for="biography" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Biographie
+                </label>
+                <textarea
+                  id="biography"
+                  v-model="formData.biography"
+                  rows="3"
+                  class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  placeholder="Quelques mots sur vous..."
+                />
+              </div>
+
+              <!-- LinkedIn -->
+              <div>
+                <label for="linkedin_url" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <font-awesome-icon :icon="['fab', 'linkedin']" class="mr-1 text-[#0A66C2]" />
+                  LinkedIn
+                </label>
+                <input
+                  id="linkedin_url"
+                  v-model="formData.linkedin_url"
+                  type="url"
+                  class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  placeholder="https://linkedin.com/in/votre-profil"
+                >
+              </div>
+
+              <!-- Facebook -->
+              <div>
+                <label for="facebook_url" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <font-awesome-icon :icon="['fab', 'facebook']" class="mr-1 text-[#1877F2]" />
+                  Facebook
+                </label>
+                <input
+                  id="facebook_url"
+                  v-model="formData.facebook_url"
+                  type="url"
+                  class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  placeholder="https://facebook.com/votre-profil"
+                >
+              </div>
+            </div>
+          </div>
+
           <!-- Password -->
           <div>
             <label for="password" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">

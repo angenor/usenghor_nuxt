@@ -17,6 +17,9 @@ export interface RegisterFormData {
   affectation: AffectationFormData
   photo_external_id: string | null
   photo_base64: string | null
+  biography: string
+  linkedin_url: string
+  facebook_url: string
 }
 
 export interface RegisterResponse {
@@ -59,6 +62,9 @@ const defaultFormData: RegisterFormData = {
   affectation: { ...defaultAffectation },
   photo_external_id: null,
   photo_base64: null,
+  biography: '',
+  linkedin_url: '',
+  facebook_url: '',
 }
 
 // Types pour les réponses des endpoints publics
@@ -271,6 +277,9 @@ export function useAdminRegistration() {
           service_id: formData.value.affectation.service_id,
           campus_id: formData.value.affectation.campus_id,
           photo_base64: formData.value.photo_base64,
+          biography: formData.value.biography || null,
+          linkedin_url: formData.value.linkedin_url || null,
+          facebook_url: formData.value.facebook_url || null,
         },
       })
 
