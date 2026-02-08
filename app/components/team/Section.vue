@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import type { CampusTeamMemberDisplay, CampusForSelect } from '~/composables/useCampusTeamApi'
+import type { PublicCampusTeamMember, PublicCampusForSelect } from '~/composables/usePublicCampusTeamApi'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
 
 const {
-  getAllTeamMembers,
-  getCampusesForSelect,
+  fetchAllTeamData,
   getFullName,
   getFlagEmoji,
-} = useCampusTeamApi()
+} = usePublicCampusTeamApi()
 
 // === STATE ===
 const isLoading = ref(true)
@@ -17,8 +16,8 @@ const selectedCampusId = ref<string>('')
 const searchQuery = ref('')
 
 // Données
-const allMembers = ref<CampusTeamMemberDisplay[]>([])
-const campuses = ref<CampusForSelect[]>([])
+const allMembers = ref<PublicCampusTeamMember[]>([])
+const campuses = ref<PublicCampusForSelect[]>([])
 
 // Map pour compter les membres par campus
 const memberCountByCampus = ref<Map<string, number>>(new Map())
@@ -27,16 +26,12 @@ const memberCountByCampus = ref<Map<string, number>>(new Map())
 async function loadData() {
   isLoading.value = true
   try {
-    const [membersData, campusesData] = await Promise.all([
-      getAllTeamMembers(),
-      getCampusesForSelect(),
-    ])
+    const { members, campuses: campusesData } = await fetchAllTeamData()
 
-    // Ne garder que les membres actifs pour le front-office
-    allMembers.value = membersData.filter(m => m.active)
+    allMembers.value = members
     campuses.value = campusesData
 
-    // Pré-calculer les compteurs par campus (membres actifs uniquement)
+    // Pré-calculer les compteurs par campus
     memberCountByCampus.value.clear()
     for (const campus of campusesData) {
       const count = allMembers.value.filter(m => m.campus_id === campus.id).length
@@ -115,7 +110,7 @@ const campusColors: Record<string, { border: string; badge: string }> = {
   RBA: { border: 'border-cyan-200 dark:border-cyan-800', badge: 'bg-cyan-500' },
 }
 
-function getCampusColors(member: CampusTeamMemberDisplay) {
+function getCampusColors(member: PublicCampusTeamMember) {
   const code = member.campus_code || ''
   return campusColors[code] || { border: 'border-gray-200 dark:border-gray-700', badge: 'bg-gray-500' }
 }
@@ -124,7 +119,7 @@ function getCampusMemberCount(campusId: string): number {
   return memberCountByCampus.value.get(campusId) || 0
 }
 
-function getCampusCountryCode(campus: CampusForSelect): string {
+function getCampusCountryCode(campus: PublicCampusForSelect): string {
   const codeToCountry: Record<string, string> = {
     ALX: 'EG',
     ABJ: 'CI',
