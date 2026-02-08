@@ -11,6 +11,19 @@ interface Props {
 
 const props = defineProps<Props>()
 const { t } = useI18n()
+
+// Résoudre le nom du pays à partir de l'ID
+const { getCountryById } = useCountriesApi()
+const countryName = ref<string | null>(null)
+
+watch(() => props.call.country_external_id, async (id) => {
+  if (!id) {
+    countryName.value = null
+    return
+  }
+  const country = await getCountryById(id)
+  countryName.value = country?.name_fr || null
+}, { immediate: true })
 </script>
 
 <template>
@@ -52,8 +65,21 @@ const { t } = useI18n()
       </div>
     </div>
 
-    <!-- Type -->
-    <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+    <!-- Lieu -->
+    <div v-if="countryName || call.location_address" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+      <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
+        <font-awesome-icon icon="fa-solid fa-map-marker-alt" class="w-4 h-4" />
+        {{ t('actualites.detail.call.location') || 'Lieu' }}
+      </div>
+      <div class="font-bold text-gray-900 dark:text-white">
+        {{ countryName }}
+      </div>
+      <div v-if="call.location_address" class="text-xs mt-1 text-gray-500 dark:text-gray-400">
+        {{ call.location_address }}
+      </div>
+    </div>
+    <!-- Type (fallback si pas de lieu renseigné) -->
+    <div v-else class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
       <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
         <font-awesome-icon icon="fa-solid fa-tag" class="w-4 h-4" />
         {{ t('actualites.detail.call.type') }}

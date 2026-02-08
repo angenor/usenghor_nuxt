@@ -41,11 +41,13 @@ const breadcrumb = computed(() => [
     <!-- Tabs Navigation -->
     <SectionAboutTabsNav />
 
+    <!-- Tous les partenaires (avec filtres) -->
+    <PartnersUnifiedPartnersSection />
+
     <!-- Campus externalisés (carte interactive) -->
     <PartnersCampusMapSection />
 
-    <!-- Tous les partenaires (avec filtres) -->
-    <PartnersUnifiedPartnersSection />
+    
 
     
   </div>
