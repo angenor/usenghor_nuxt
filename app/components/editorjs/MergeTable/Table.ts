@@ -613,8 +613,14 @@ export class Table {
   }
 
   private onSelectionChange(rect: SelectionRect | null): void {
-    if (rect && this.selectionManager.getSelectedCellCount() >= 2) {
-      this.showToolbar(rect)
+    if (rect) {
+      const cell = this.data.content[rect.minRow]?.[rect.minCol]
+      const isMergedCell = cell && ((cell.colspan && cell.colspan > 1) || (cell.rowspan && cell.rowspan > 1))
+      if (this.selectionManager.getSelectedCellCount() >= 2 || isMergedCell) {
+        this.showToolbar(rect)
+      } else {
+        this.removeToolbar()
+      }
     } else {
       this.removeToolbar()
     }
