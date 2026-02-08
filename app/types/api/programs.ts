@@ -58,6 +58,34 @@ export interface ProgramCareerOpportunityRead {
 }
 
 // ============================================================================
+// Program Field (Champs disciplinaires)
+// ============================================================================
+
+export interface ProgramFieldRead {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  display_order: number
+  created_at: string
+  updated_at: string
+}
+
+export interface ProgramFieldCreatePayload {
+  name: string
+  slug: string
+  description?: string | null
+  display_order?: number
+}
+
+export interface ProgramFieldUpdatePayload {
+  name?: string
+  slug?: string
+  description?: string | null
+  display_order?: number
+}
+
+// ============================================================================
 // Program Read
 // ============================================================================
 
@@ -72,6 +100,7 @@ export interface ProgramRead {
   cover_image_external_id: string | null
   sector_external_id: string | null
   coordinator_external_id: string | null
+  field_id: string | null
   type: ProgramType
   duration_months: number | null
   credits: number | null
@@ -103,6 +132,7 @@ export interface ProgramCreatePayload {
   teaching_methods?: string | null
   cover_image_external_id?: string | null
   sector_external_id?: string | null
+  field_id?: string | null
   type: ProgramType
   duration_months?: number | null
   credits?: number | null
@@ -122,6 +152,7 @@ export interface ProgramUpdatePayload {
   teaching_methods?: string | null
   cover_image_external_id?: string | null
   sector_external_id?: string | null
+  field_id?: string | null
   type?: ProgramType
   duration_months?: number | null
   credits?: number | null

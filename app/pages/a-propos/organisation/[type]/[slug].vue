@@ -609,11 +609,11 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                 <!-- Photo -->
                 <div class="relative mx-auto w-24 h-24 mb-4">
                   <div
-                    v-if="member.user?.photo_external_id"
+                    v-if="member.user?.photo_url"
                     class="w-24 h-24 rounded-full overflow-hidden ring-4 ring-white dark:ring-gray-800 shadow-lg"
                   >
                     <img
-                      :src="getMediaUrl(member.user.photo_external_id) ?? undefined"
+                      :src="member.user.photo_url"
                       :alt="`${member.user.first_name} ${member.user.last_name}`"
                       class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />

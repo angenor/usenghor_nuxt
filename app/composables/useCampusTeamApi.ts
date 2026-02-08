@@ -191,7 +191,7 @@ export function useCampusTeamApi() {
         first_name: string
         last_name: string
         email: string
-        photo_url?: string | null
+        photo_external_id?: string | null
         salutation?: string | null
       }>>('/api/admin/users', {
         query: { limit: 200, active: true },
@@ -203,7 +203,9 @@ export function useCampusTeamApi() {
             first_name: user.first_name,
             last_name: user.last_name,
             email: user.email,
-            photo_url: user.photo_url,
+            photo_url: user.photo_external_id
+              ? `/api/public/media/${user.photo_external_id}/download`
+              : null,
             salutation: user.salutation,
           })
         }
@@ -252,7 +254,7 @@ export function useCampusTeamApi() {
         first_name: string
         last_name: string
         email: string
-        photo_url?: string | null
+        photo_external_id?: string | null
         salutation?: string | null
       }>>('/api/admin/users', {
         query: { search: query, limit: 10, active: true },
@@ -263,7 +265,9 @@ export function useCampusTeamApi() {
         first_name: user.first_name,
         last_name: user.last_name,
         email: user.email,
-        photo_url: user.photo_url,
+        photo_url: user.photo_external_id
+          ? `/api/public/media/${user.photo_external_id}/download`
+          : null,
         salutation: user.salutation,
       }))
     }

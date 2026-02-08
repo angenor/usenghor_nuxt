@@ -80,6 +80,14 @@ export function useAdminSidebar() {
           route: '/admin/formations/debouches',
           permissions: ['programs.view'],
           description: 'Opportunités de carrière par formation'
+        },
+        {
+          id: 'program-fields',
+          label: 'Champs',
+          icon: 'fa-solid fa-layer-group',
+          route: '/admin/formations/champs',
+          permissions: ['programs.view'],
+          description: 'Champs disciplinaires des certificats'
         }
       ]
     },

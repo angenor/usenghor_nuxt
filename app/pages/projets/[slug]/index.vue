@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { OutputData } from '@editorjs/editorjs'
 import type { ProjectCallRead } from '~/types/api'
 import type { ProjectPublicDisplay } from '~/composables/usePublicProjectsApi'
 
@@ -101,6 +102,17 @@ const getLocalizedTitle = computed(() => {
 const getLocalizedDescription = computed(() => {
   if (!project.value) return ''
   return project.value.description || project.value.summary || ''
+})
+
+// Parser la description EditorJS
+const parsedDescription = computed<OutputData | null>(() => {
+  if (!project.value?.description) return null
+  try {
+    return JSON.parse(project.value.description) as OutputData
+  }
+  catch {
+    return null
+  }
 })
 
 const getLocalizedSummary = computed(() => {
@@ -282,7 +294,8 @@ const breadcrumb = computed(() => [
 
               <!-- Content -->
               <div v-if="project.description" class="prose prose-lg dark:prose-invert max-w-none mb-8">
-                <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                <EditorJSRenderer v-if="parsedDescription" :data="parsedDescription" />
+                <p v-else class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
                   {{ project.description }}
                 </p>
               </div>

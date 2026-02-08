@@ -44,14 +44,14 @@ export interface ServiceTeamMemberPublic {
   start_date: string | null
   end_date: string | null
   active: boolean
-  created_at: string
+  created_at?: string
   // Données enrichies depuis IDENTITY
   user?: {
     id: string
     first_name: string
     last_name: string
-    email: string
-    photo_external_id: string | null
+    email: string | null
+    photo_url: string | null
   }
 }
 

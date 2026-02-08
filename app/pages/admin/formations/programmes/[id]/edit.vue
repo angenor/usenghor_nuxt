@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProgramType, ProgramWithDetails, PublicationStatus, ProgramSkillRead, ProgramCareerOpportunityRead, ImageVariants } from '~/types/api'
+import type { ProgramType, ProgramWithDetails, ProgramFieldRead, PublicationStatus, ProgramSkillRead, ProgramCareerOpportunityRead, ImageVariants } from '~/types/api'
 import type { OutputData } from '@editorjs/editorjs'
 
 // Convertir une string (potentiellement JSON ou texte brut) en OutputData
@@ -57,6 +57,25 @@ const {
   getMediaUrl,
 } = useMediaApi()
 
+const {
+  listFields,
+} = useProgramFieldsApi()
+
+// Champs disciplinaires (pour les certificats)
+const programFields = ref<ProgramFieldRead[]>([])
+
+async function loadProgramFields() {
+  try {
+    const response = await listFields({ limit: 100 })
+    programFields.value = response.items.sort((a, b) => a.display_order - b.display_order)
+  }
+  catch (e) {
+    console.error('Erreur chargement champs:', e)
+  }
+}
+
+onMounted(loadProgramFields)
+
 // États
 const loading = ref(true)
 const isSubmitting = ref(false)
@@ -72,6 +91,7 @@ const form = ref<{
   teaching_methods: string
   cover_image: string
   cover_image_external_id: string | null
+  field_id: string | null
   type: ProgramType
   duration_months: number | null
   credits: number | null
@@ -88,6 +108,7 @@ const form = ref<{
   teaching_methods: '',
   cover_image: '',
   cover_image_external_id: null,
+  field_id: null,
   type: 'master',
   duration_months: null,
   credits: null,
@@ -143,6 +164,7 @@ async function loadProgram() {
       cover_image: program.value.cover_image_external_id
         ? (getMediaUrl(program.value.cover_image_external_id) || '')
         : '',
+      field_id: program.value.field_id || null,
       type: program.value.type,
       duration_months: program.value.duration_months,
       credits: program.value.credits,
@@ -523,6 +545,7 @@ const submitForm = async () => {
       description: descriptionJson,
       teaching_methods: form.value.teaching_methods || null,
       cover_image_external_id: form.value.cover_image_external_id,
+      field_id: form.value.type === 'certificate' ? form.value.field_id : null,
       type: form.value.type,
       duration_months: form.value.duration_months,
       credits: form.value.credits,
@@ -733,6 +756,26 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
                 {{ pt.label }}
               </option>
             </select>
+          </div>
+
+          <!-- Champ disciplinaire (certificats uniquement) -->
+          <div v-if="form.type === 'certificate'" class="sm:max-w-xs">
+            <label for="field_id" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Champ disciplinaire
+            </label>
+            <select
+              id="field_id"
+              v-model="form.field_id"
+              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            >
+              <option :value="null">-- Aucun --</option>
+              <option v-for="field in programFields" :key="field.id" :value="field.id">
+                {{ field.name }}
+              </option>
+            </select>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Domaine thématique du certificat
+            </p>
           </div>
         </div>
       </div>

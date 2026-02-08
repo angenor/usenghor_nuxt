@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProgramCreatePayload, ProgramRead, ProgramType, PublicationStatus, ImageVariants } from '~/types/api'
+import type { ProgramCreatePayload, ProgramRead, ProgramType, ProgramFieldRead, PublicationStatus, ImageVariants } from '~/types/api'
 
 definePageMeta({
   layout: 'admin',
@@ -21,6 +21,25 @@ const {
 const {
   uploadMediaVariants,
 } = useMediaApi()
+
+const {
+  listFields,
+} = useProgramFieldsApi()
+
+// Champs disciplinaires (pour les certificats)
+const programFields = ref<ProgramFieldRead[]>([])
+
+async function loadProgramFields() {
+  try {
+    const response = await listFields({ limit: 100 })
+    programFields.value = response.items.sort((a, b) => a.display_order - b.display_order)
+  }
+  catch (e) {
+    console.error('Erreur chargement champs:', e)
+  }
+}
+
+onMounted(loadProgramFields)
 
 // === STATE ===
 const loading = ref(true)
@@ -68,6 +87,7 @@ const programForm = ref({
   is_featured: false,
   cover_image: '',
   cover_image_external_id: null as string | null,
+  field_id: null as string | null,
 })
 
 // État de l'upload d'image
@@ -177,6 +197,13 @@ watch(() => programForm.value.title, (newTitle) => {
   programForm.value.code = generateCode(newTitle)
 })
 
+// Réinitialiser field_id si le type change (hors certificat)
+watch(() => programForm.value.type, (newType) => {
+  if (newType !== 'certificate') {
+    programForm.value.field_id = null
+  }
+})
+
 // Gestion de la sélection
 function toggleSelectAll() {
   if (selectAll.value) {
@@ -237,6 +264,7 @@ function openCreateModal() {
     is_featured: false,
     cover_image: '',
     cover_image_external_id: null,
+    field_id: null,
   }
   pendingCoverFile.value = null
   showCreateModal.value = true
@@ -327,6 +355,7 @@ async function handleCreateProgram() {
       status: programForm.value.status,
       is_featured: programForm.value.is_featured,
       cover_image_external_id: programForm.value.cover_image_external_id,
+      field_id: programForm.value.type === 'certificate' ? programForm.value.field_id : null,
     }
     const result = await createProgram(payload)
     closeCreateModal()
@@ -849,6 +878,23 @@ async function bulkDelete() {
                 <option value="university_diploma">Diplôme d'Université (DU)</option>
                 <option value="certificate">Certificat</option>
               </select>
+            </div>
+
+            <!-- Champ disciplinaire (certificats uniquement) -->
+            <div v-if="programForm.type === 'certificate'">
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Champ disciplinaire
+              </label>
+              <select
+                v-model="programForm.field_id"
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              >
+                <option :value="null">-- Aucun --</option>
+                <option v-for="field in programFields" :key="field.id" :value="field.id">
+                  {{ field.name }}
+                </option>
+              </select>
+              <p class="mt-1 text-xs text-gray-500">Domaine thématique du certificat</p>
             </div>
 
             <!-- Sous-titre -->
