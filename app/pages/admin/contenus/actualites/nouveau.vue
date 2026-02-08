@@ -30,12 +30,14 @@ const {
   getUsers,
   getProjects,
   getEvents,
+  getCalls,
   campuses: allCampuses,
   departments: allDepartments,
   services: allServices,
   users: allAuthors,
   projects: allProjects,
   events: allEvents,
+  calls: allCalls,
 } = useReferenceData()
 
 // === STATE ===
@@ -77,6 +79,7 @@ const form = reactive({
   service_id: '',
   event_id: '',
   project_id: '',
+  call_id: '',
   status: 'draft' as NewsStatus,
   highlight_status: 'standard' as NewsHighlightStatus,
   visible_from: getCurrentDateTimeLocal()
@@ -98,6 +101,7 @@ onMounted(async () => {
       getUsers(),
       getProjects(),
       getEvents(),
+      getCalls(),
     ])
 
     allTags.value = tagsData
@@ -257,6 +261,7 @@ async function submitForm() {
       service_external_id: toUUIDOrNull(form.service_id),
       event_external_id: toUUIDOrNull(form.event_id),
       project_external_id: toUUIDOrNull(form.project_id),
+      call_external_id: toUUIDOrNull(form.call_id),
       author_external_id: toUUIDOrNull(form.author_id),
       status: form.status,
       published_at: publishedAt,
@@ -582,6 +587,23 @@ async function createTag() {
               <option value="">Aucun</option>
               <option v-for="project in allProjects" :key="project.id" :value="project.id">
                 {{ project.title }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Appel lié -->
+          <div>
+            <label for="call_id" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Appel lié
+            </label>
+            <select
+              id="call_id"
+              v-model="form.call_id"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">Aucun</option>
+              <option v-for="call in allCalls" :key="call.id" :value="call.id">
+                {{ call.title }}
               </option>
             </select>
           </div>

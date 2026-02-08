@@ -21,7 +21,8 @@
       "email": "Envoyer un email",
       "linkedin": "Voir le profil LinkedIn",
       "department": "Département",
-      "service": "Service"
+      "service": "Service",
+      "profile": "Voir le profil"
     },
     "stats": {
       "total": "membre | membres",
@@ -31,6 +32,36 @@
       "title": "Rejoignez notre équipe",
       "text": "Vous souhaitez contribuer à la formation des cadres africains de demain ?",
       "button": "Voir les opportunités"
+    },
+    "profile": {
+      "seo": {
+        "title": "{name} | Équipe - Université Senghor",
+        "description": "Profil de {name}, membre de l'équipe de l'Université Senghor d'Alexandrie."
+      },
+      "sections": {
+        "biography": "Biographie",
+        "contact": "Contact",
+        "socialLinks": "Réseaux sociaux",
+        "campusAffiliations": "Affiliations campus",
+        "serviceAffiliations": "Affiliations services"
+      },
+      "labels": {
+        "email": "Adresse email",
+        "phone": "Téléphone",
+        "city": "Ville",
+        "nationality": "Nationalité",
+        "position": "Poste",
+        "linkedin": "Profil LinkedIn",
+        "facebook": "Profil Facebook"
+      },
+      "empty": {
+        "biography": "Aucune biographie disponible pour le moment.",
+        "affiliations": "Aucune affiliation enregistrée."
+      },
+      "error": {
+        "notFound": "Profil introuvable",
+        "backToTeam": "Retour à l'équipe"
+      }
     }
   }
 }

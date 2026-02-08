@@ -601,10 +601,11 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
             </div>
 
             <div v-if="team.length > 0" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              <div
+              <NuxtLink
                 v-for="member in team"
                 :key="member.id"
-                class="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 group text-center"
+                :to="localePath(`/a-propos/equipe/${member.user_external_id}`)"
+                class="block bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 group text-center cursor-pointer hover:-translate-y-1"
               >
                 <!-- Photo -->
                 <div class="relative mx-auto w-24 h-24 mb-4">
@@ -640,11 +641,12 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                   v-if="member.user?.email"
                   :href="`mailto:${member.user.email}`"
                   class="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                  @click.stop
                 >
                   <font-awesome-icon icon="fa-solid fa-envelope" class="w-3 h-3" />
                   <span class="truncate max-w-[150px]">{{ member.user.email }}</span>
                 </a>
-              </div>
+              </NuxtLink>
             </div>
 
             <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">

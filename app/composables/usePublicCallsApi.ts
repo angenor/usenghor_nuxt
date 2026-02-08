@@ -111,12 +111,28 @@ export function usePublicCallsApi() {
     return publicFetch<ApplicationCallPublicWithDetails>(`/api/public/application-calls/${slug}`)
   }
 
+  /**
+   * Récupère les actualités associées à un appel
+   */
+  async function getCallNews(slug: string): Promise<unknown[]> {
+    return publicFetch<unknown[]>(`/api/public/application-calls/${slug}/news`)
+  }
+
+  /**
+   * Récupère les IDs des albums de la médiathèque d'un appel
+   */
+  async function getCallAlbums(slug: string): Promise<string[]> {
+    return publicFetch<string[]>(`/api/public/application-calls/${slug}/media-library`)
+  }
+
   return {
     listCalls,
     listOngoingCalls,
     listUpcomingCalls,
     listCallsByType,
     getCallBySlug,
+    getCallNews,
+    getCallAlbums,
     // Labels / couleurs UI
     callTypeLabels,
     callTypeColors,

@@ -21,7 +21,8 @@
       "email": "إرسال بريد إلكتروني",
       "linkedin": "عرض الملف الشخصي على LinkedIn",
       "department": "القسم",
-      "service": "الخدمة"
+      "service": "الخدمة",
+      "profile": "عرض الملف الشخصي"
     },
     "stats": {
       "total": "عضو | أعضاء",
@@ -31,6 +32,36 @@
       "title": "انضم إلى فريقنا",
       "text": "هل تريد المساهمة في تدريب قادة أفريقيا في المستقبل؟",
       "button": "عرض الفرص"
+    },
+    "profile": {
+      "seo": {
+        "title": "{name} | الفريق - جامعة سنغور",
+        "description": "ملف {name}، عضو فريق جامعة سنغور في الإسكندرية."
+      },
+      "sections": {
+        "biography": "السيرة الذاتية",
+        "contact": "الاتصال",
+        "socialLinks": "الشبكات الاجتماعية",
+        "campusAffiliations": "الانتماءات الجامعية",
+        "serviceAffiliations": "الانتماءات الخدمية"
+      },
+      "labels": {
+        "email": "البريد الإلكتروني",
+        "phone": "الهاتف",
+        "city": "المدينة",
+        "nationality": "الجنسية",
+        "position": "المنصب",
+        "linkedin": "ملف LinkedIn",
+        "facebook": "ملف Facebook"
+      },
+      "empty": {
+        "biography": "لا توجد سيرة ذاتية متاحة حالياً.",
+        "affiliations": "لا توجد انتماءات مسجلة."
+      },
+      "error": {
+        "notFound": "الملف الشخصي غير موجود",
+        "backToTeam": "العودة إلى الفريق"
+      }
     }
   }
 }

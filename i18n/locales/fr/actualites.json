@@ -133,7 +133,14 @@
         "programEnd": "Fin du programme",
         "whatsIncluded": "Ce qui est inclus",
         "notFound": "Appel non trouvé",
-        "notFoundDescription": "L'appel que vous recherchez n'existe pas ou a été supprimé."
+        "notFoundDescription": "L'appel que vous recherchez n'existe pas ou a été supprimé.",
+        "tabs": {
+          "presentation": "Présentation",
+          "actualites": "Actualités",
+          "mediatheque": "Médiathèque"
+        },
+        "noNews": "Aucune actualité associée à cet appel pour le moment.",
+        "noMedia": "Aucun média associé à cet appel pour le moment."
       },
       "event": {
         "breadcrumb": "Événement",

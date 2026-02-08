@@ -81,6 +81,7 @@ export interface NewsRead {
   service_external_id: string | null
   event_external_id: string | null
   project_external_id: string | null
+  call_external_id: string | null
   author_external_id: string | null
   highlight_status: NewsHighlightStatus
   status: NewsStatus
@@ -103,6 +104,7 @@ export interface NewsPublicEnriched extends NewsWithTags {
   sector_name: string | null
   service_name: string | null
   project_name: string | null
+  call_name: string | null
   event_name: string | null
   author_name: string | null
 }
@@ -147,6 +149,8 @@ export interface NewsDisplay {
   event_name: string | null
   project_id: string | null
   project_name: string | null
+  call_id: string | null
+  call_name: string | null
   // Statuts
   status: NewsStatus
   highlight_status: NewsHighlightStatus
@@ -200,6 +204,7 @@ export interface NewsCreatePayload {
   service_external_id?: string | null
   event_external_id?: string | null
   project_external_id?: string | null
+  call_external_id?: string | null
   author_external_id?: string | null
   status?: NewsStatus
   published_at?: string | null
@@ -220,6 +225,7 @@ export interface NewsUpdatePayload {
   service_external_id?: string | null
   event_external_id?: string | null
   project_external_id?: string | null
+  call_external_id?: string | null
   author_external_id?: string | null
   status?: NewsStatus
   published_at?: string | null
@@ -269,6 +275,7 @@ export interface NewsFilters {
   service_id?: string
   project_id?: string
   event_id?: string
+  call_id?: string
   from_date?: string
   to_date?: string
 }

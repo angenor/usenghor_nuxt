@@ -35,6 +35,7 @@ const { listCampuses, addCampusAlbum, getCampusAlbums } = useCampusApi()
 const { getAllServices, addAlbumToService, getServiceAlbums } = useServicesApi()
 const { listEvents, addEventAlbum, getEventAlbums } = useEventsApi()
 const { listProjects, addProjectAlbum, listProjectMedia } = useProjectsApi()
+const { listCalls: listAdminCalls, getCallAlbums, addCallAlbum } = useApplicationCallsApi()
 
 // Constantes
 const mediaTypeLabels: Record<string, string> = {
@@ -112,7 +113,7 @@ const showAlbumDetailModal = ref(false)
 const showLinkEntityModal = ref(false)
 
 // Types d'entités pour l'association
-type EntityType = 'campus' | 'service' | 'event' | 'project'
+type EntityType = 'campus' | 'service' | 'event' | 'project' | 'call'
 interface EntityOption {
   id: string
   name: string
@@ -660,14 +661,16 @@ const entityTypeLabels: Record<EntityType, string> = {
   campus: 'Campus',
   service: 'Service',
   event: 'Événement',
-  project: 'Projet'
+  project: 'Projet',
+  call: 'Appel'
 }
 
 const entityTypeIcons: Record<EntityType, string> = {
   campus: 'fa-building-columns',
   service: 'fa-cogs',
   event: 'fa-calendar-alt',
-  project: 'fa-diagram-project'
+  project: 'fa-diagram-project',
+  call: 'fa-solid fa-bullhorn'
 }
 
 async function loadEntities() {
@@ -749,6 +752,28 @@ async function loadEntities() {
       results.push(...projectResults)
     }
 
+    if (linkEntityType.value === 'all' || linkEntityType.value === 'call') {
+      try {
+        const callsResponse = await listAdminCalls({ limit: 100 })
+        const callItems = callsResponse.items || []
+        const callResults = await Promise.all(
+          callItems.map(async (call) => {
+            let isLinked = false
+            if (albumId) {
+              try {
+                const albums = await getCallAlbums(call.id)
+                isLinked = albums.includes(albumId)
+              } catch { /* ignore */ }
+            }
+            return { id: call.id, name: call.title, type: 'call' as EntityType, isLinked }
+          })
+        )
+        results.push(...callResults)
+      } catch (e) {
+        console.error('Erreur chargement appels:', e)
+      }
+    }
+
     // Trier: entités liées d'abord, puis non liées
     entityOptions.value = results.sort((a, b) => {
       if (a.isLinked === b.isLinked) return a.name.localeCompare(b.name)
@@ -789,6 +814,7 @@ const handleLinkToEntity = async (entity: EntityOption) => {
     service: 'au service',
     event: 'à l\'événement',
     project: 'au projet',
+    call: 'à l\'appel',
   }[entity.type]
 
   try {
@@ -804,6 +830,9 @@ const handleLinkToEntity = async (entity: EntityOption) => {
         break
       case 'project':
         await addProjectAlbum(entity.id, albumToLink.value.id)
+        break
+      case 'call':
+        await addCallAlbum(entity.id, albumToLink.value.id)
         break
     }
     alert(`Album "${albumToLink.value.title}" associé ${entityTypeLabel} "${entity.name}" avec succès.`)
@@ -2226,6 +2255,7 @@ const handleLinkToEntity = async (entity: EntityOption) => {
                   { value: 'service', label: 'Services', icon: 'fa-cogs' },
                   { value: 'event', label: 'Événements', icon: 'fa-calendar' },
                   { value: 'project', label: 'Projets', icon: 'fa-project-diagram' },
+                  { value: 'call', label: 'Appels', icon: 'fa-bullhorn' },
                 ]"
                 :key="typeOption.value"
                 :class="[

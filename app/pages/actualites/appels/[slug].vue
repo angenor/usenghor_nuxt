@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ApplicationCallPublicWithDetails, CallType } from '~/types/api'
+import type { ApplicationCallPublicWithDetails } from '~/types/api'
 import { useCallDetail } from '~/composables/useCallDetail'
 
 // Extraire le texte brut d'un contenu EditorJS (pour le SEO)
@@ -30,6 +30,15 @@ const localePath = useLocalePath()
 
 const { getCallBySlug, listOngoingCalls } = usePublicCallsApi()
 
+// Active tab from hash (default to 'presentation')
+const activeTab = ref('presentation')
+
+const updateTabFromHash = () => {
+  const hash = route.hash?.replace('#', '') || 'presentation'
+  const validTabs = ['presentation', 'actualites', 'mediatheque']
+  activeTab.value = validTabs.includes(hash) ? hash : 'presentation'
+}
+
 // State
 const call = ref<ApplicationCallPublicWithDetails | null>(null)
 const relatedCalls = ref<ApplicationCallPublicWithDetails[]>([])
@@ -47,12 +56,6 @@ const {
   getCallImage,
   getHeroImage,
 } = useCallDetail(call)
-
-// Computed component based on call type
-const DetailComponent = computed(() => {
-  if (!call.value) return null
-  return detailComponents[call.value.type]
-})
 
 // Fetch call data
 async function fetchCall() {
@@ -82,6 +85,7 @@ async function fetchRelatedCalls() {
 
 // Initial fetch
 onMounted(() => {
+  updateTabFromHash()
   fetchCall()
   fetchRelatedCalls()
 })
@@ -90,6 +94,11 @@ onMounted(() => {
 watch(slug, () => {
   fetchCall()
   fetchRelatedCalls()
+})
+
+// Watch route hash changes
+watch(() => route.hash, () => {
+  updateTabFromHash()
 })
 
 // SEO
@@ -137,29 +146,49 @@ useSeoMeta({
       :hero-image="getHeroImage(call)"
     />
 
+    <!-- Tabs Navigation -->
+    <CallsCallTabs :active-tab="activeTab" />
+
     <!-- Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div class="flex flex-col lg:flex-row gap-12">
         <!-- Main content -->
         <article class="lg:w-2/3">
-          <!-- Featured image -->
-          <div class="overflow-hidden rounded-xl mb-8 shadow-lg">
-            <img
-              :src="getCallImage(call)"
-              :alt="call.title"
-              class="w-full h-auto object-cover"
-            >
+          <!-- Tab: Présentation -->
+          <div v-if="activeTab === 'presentation'">
+            <!-- Featured image -->
+            <div class="overflow-hidden rounded-xl mb-8 shadow-lg">
+              <img
+                :src="getCallImage(call)"
+                :alt="call.title"
+                class="w-full h-auto object-cover"
+              >
+            </div>
+
+            <!-- Type-specific detail component -->
+            <CallsDetailApplication v-if="call.type === 'application'" :call="call" />
+            <CallsDetailScholarship v-else-if="call.type === 'scholarship'" :call="call" />
+            <CallsDetailProject v-else-if="call.type === 'project'" :call="call" />
+            <CallsDetailRecruitment v-else-if="call.type === 'recruitment'" :call="call" />
+            <CallsDetailTraining v-else-if="call.type === 'training'" :call="call" />
+
+            <!-- Related calls -->
+            <CallsRelatedSection
+              :related-calls="relatedCalls"
+              :type-badge-colors="typeBadgeColors"
+              :get-type-label="getTypeLabel"
+              :format-short-date="formatShortDate"
+            />
           </div>
 
-          <!-- Type-specific detail component -->
-          <CallsDetailApplication v-if="call.type === 'application'" :call="call" />
-          <CallsDetailScholarship v-else-if="call.type === 'scholarship'" :call="call" />
-          <CallsDetailProject v-else-if="call.type === 'project'" :call="call" />
-          <CallsDetailRecruitment v-else-if="call.type === 'recruitment'" :call="call" />
-          <CallsDetailTraining v-else-if="call.type === 'training'" :call="call" />
+          <!-- Tab: Actualités -->
+          <CallsCallActualites v-if="activeTab === 'actualites'" :call-slug="slug" />
+
+          <!-- Tab: Médiathèque -->
+          <CallsCallMediatheque v-if="activeTab === 'mediatheque'" :call-slug="slug" />
 
           <!-- Back button -->
-          <div class="pt-8 border-t border-gray-200 dark:border-gray-700">
+          <div class="pt-8 border-t border-gray-200 dark:border-gray-700 mt-8">
             <NuxtLink
               :to="localePath('/actualites/appels')"
               class="inline-flex items-center gap-2 text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 font-medium transition-colors"
@@ -168,14 +197,6 @@ useSeoMeta({
               {{ t('actualites.detail.call.backToCalls') }}
             </NuxtLink>
           </div>
-
-          <!-- Related calls -->
-          <CallsRelatedSection
-            :related-calls="relatedCalls"
-            :type-badge-colors="typeBadgeColors"
-            :get-type-label="getTypeLabel"
-            :format-short-date="formatShortDate"
-          />
         </article>
 
         <!-- Sidebar -->

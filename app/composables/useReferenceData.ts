@@ -58,6 +58,12 @@ export interface EventRef {
   start_date: string
 }
 
+export interface CallRef {
+  id: string
+  title: string
+  status: string
+}
+
 // ============================================================================
 // Composable
 // ============================================================================
@@ -72,6 +78,7 @@ export function useReferenceData() {
   const usersCache = ref<UserRef[]>([])
   const projectsCache = ref<ProjectRef[]>([])
   const eventsCache = ref<EventRef[]>([])
+  const callsCache = ref<CallRef[]>([])
 
   /**
    * Récupère la liste des campus.
@@ -285,6 +292,36 @@ export function useReferenceData() {
   }
 
   /**
+   * Récupère la liste des appels à candidature.
+   */
+  async function getCalls(forceRefresh = false): Promise<CallRef[]> {
+    if (callsCache.value.length > 0 && !forceRefresh) {
+      return callsCache.value
+    }
+
+    try {
+      const response = await apiFetch<PaginatedResponse<{
+        id: string
+        title: string
+        status: string
+      }>>('/api/admin/application-calls', {
+        query: { limit: 100 },
+      })
+
+      callsCache.value = response.items.map(c => ({
+        id: c.id,
+        title: c.title,
+        status: c.status,
+      }))
+
+      return callsCache.value
+    } catch (e) {
+      console.error('Erreur chargement appels:', e)
+      return []
+    }
+  }
+
+  /**
    * Récupère les services filtrés par secteur.
    */
   function getServicesBySector(sectorId: string): ServiceRef[] {
@@ -313,6 +350,7 @@ export function useReferenceData() {
     usersCache.value = []
     projectsCache.value = []
     eventsCache.value = []
+    callsCache.value = []
   }
 
   return {
@@ -324,6 +362,7 @@ export function useReferenceData() {
     getUsers,
     getProjects,
     getEvents,
+    getCalls,
     getServicesBySector,
 
     // Utilitaires
@@ -338,5 +377,6 @@ export function useReferenceData() {
     users: usersCache,
     projects: projectsCache,
     events: eventsCache,
+    calls: callsCache,
   }
 }

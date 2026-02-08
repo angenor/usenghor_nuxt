@@ -223,6 +223,27 @@ export function useApplicationCallsApi() {
     })
   }
 
+  // =========================================================================
+  // MEDIA LIBRARY
+  // =========================================================================
+
+  async function getCallAlbums(callId: string): Promise<string[]> {
+    return apiFetch<string[]>(`/api/admin/application-calls/${callId}/media-library`)
+  }
+
+  async function addCallAlbum(callId: string, albumId: string): Promise<MessageResponse> {
+    return apiFetch<MessageResponse>(`/api/admin/application-calls/${callId}/media-library`, {
+      method: 'POST',
+      query: { album_external_id: albumId },
+    })
+  }
+
+  async function removeCallAlbum(callId: string, albumId: string): Promise<MessageResponse> {
+    return apiFetch<MessageResponse>(`/api/admin/application-calls/${callId}/media-library/${albumId}`, {
+      method: 'DELETE',
+    })
+  }
+
   return {
     // CRUD principal (admin)
     listCalls,
@@ -246,6 +267,11 @@ export function useApplicationCallsApi() {
     deleteRequiredDocument,
     addScheduleItem,
     deleteScheduleItem,
+
+    // Médiathèque
+    getCallAlbums,
+    addCallAlbum,
+    removeCallAlbum,
 
     // Labels / couleurs UI
     callTypeLabels,

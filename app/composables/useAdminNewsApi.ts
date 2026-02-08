@@ -170,6 +170,8 @@ export function useAdminNewsApi() {
       event_name: null,
       project_id: news.project_external_id,
       project_name: null,
+      call_id: news.call_external_id,
+      call_name: null,
       // Statuts
       status: news.status,
       highlight_status: news.highlight_status,

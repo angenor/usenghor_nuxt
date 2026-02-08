@@ -21,7 +21,8 @@
       "email": "Send an email",
       "linkedin": "View LinkedIn profile",
       "department": "Department",
-      "service": "Service"
+      "service": "Service",
+      "profile": "View profile"
     },
     "stats": {
       "total": "member | members",
@@ -31,6 +32,36 @@
       "title": "Join our team",
       "text": "Do you want to contribute to training tomorrow's African leaders?",
       "button": "View opportunities"
+    },
+    "profile": {
+      "seo": {
+        "title": "{name} | Team - Senghor University",
+        "description": "Profile of {name}, member of the Senghor University team in Alexandria."
+      },
+      "sections": {
+        "biography": "Biography",
+        "contact": "Contact",
+        "socialLinks": "Social networks",
+        "campusAffiliations": "Campus affiliations",
+        "serviceAffiliations": "Service affiliations"
+      },
+      "labels": {
+        "email": "Email address",
+        "phone": "Phone",
+        "city": "City",
+        "nationality": "Nationality",
+        "position": "Position",
+        "linkedin": "LinkedIn profile",
+        "facebook": "Facebook profile"
+      },
+      "empty": {
+        "biography": "No biography available at the moment.",
+        "affiliations": "No affiliations recorded."
+      },
+      "error": {
+        "notFound": "Profile not found",
+        "backToTeam": "Back to team"
+      }
     }
   }
 }

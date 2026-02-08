@@ -2,6 +2,7 @@
 import type { CampusTeamMemberDisplay, CampusForSelect } from '~/composables/useCampusTeamApi'
 
 const { t } = useI18n()
+const localePath = useLocalePath()
 
 const {
   getAllTeamMembers,
@@ -253,11 +254,12 @@ watch(filteredMembers, () => {
           ref="cardsRef"
           class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
         >
-          <div
+          <NuxtLink
             v-for="member in filteredMembers"
             :key="member.id"
+            :to="localePath(`/a-propos/equipe/${member.user.id}`)"
             data-card
-            class="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border-2 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 opacity-0"
+            class="group block bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border-2 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 opacity-0 cursor-pointer"
             :class="getCampusColors(member).border"
           >
             <!-- Photo -->
@@ -310,13 +312,20 @@ watch(filteredMembers, () => {
                   :href="`mailto:${member.user.email}`"
                   :title="t('team.card.email')"
                   class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-brand-blue-100 hover:text-brand-blue-600 dark:hover:bg-brand-blue-900/30 dark:hover:text-brand-blue-400 transition-colors duration-300"
+                  @click.stop
                 >
                   <font-awesome-icon icon="fa-solid fa-envelope" class="w-4 h-4" />
                   <span class="text-sm font-medium">{{ t('team.card.email') }}</span>
                 </a>
+                <span
+                  class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-brand-blue-50 dark:bg-brand-blue-900/20 text-brand-blue-600 dark:text-brand-blue-400 transition-colors duration-300"
+                >
+                  <font-awesome-icon icon="fa-solid fa-user" class="w-4 h-4" />
+                  <span class="text-sm font-medium">{{ t('team.card.profile') }}</span>
+                </span>
               </div>
             </div>
-          </div>
+          </NuxtLink>
         </div>
 
         <!-- Message si aucun résultat -->
