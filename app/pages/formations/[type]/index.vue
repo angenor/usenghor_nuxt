@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProgramPublic } from '~/composables/usePublicProgramsApi'
+import type { ProgramFieldPublic, ProgramPublic } from '~/composables/usePublicProgramsApi'
 
 // Extraire le texte brut d'un contenu EditorJS (pour les aperçus)
 const extractPlainText = (content: string | null | undefined): string => {
@@ -30,6 +30,7 @@ const { t } = useI18n()
 const localePath = useLocalePath()
 const {
   listProgramsByType,
+  listPublicFields,
   urlSlugToProgramType,
   programTypeToUrlSlug,
   publicProgramTypeColors,
@@ -48,9 +49,16 @@ const programs = ref<ProgramPublic[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 
+// Est-ce le type certifiantes ?
+const isCertificate = computed(() => typeSlug.value === 'certifiantes')
+
+// Champs disciplinaires (pour filtre certificats)
+const programFields = ref<ProgramFieldPublic[]>([])
+
 // Search and filters state
 const searchQuery = ref('')
 const selectedDuration = ref<'all' | 'short' | 'long'>('all')
+const selectedFieldId = ref<string>('all')
 
 // Duration filter options
 const durationFilters = [
@@ -84,18 +92,24 @@ const filteredPrograms = computed(() => {
     })
   }
 
+  // Field filter (certificats uniquement)
+  if (isCertificate.value && selectedFieldId.value !== 'all') {
+    result = result.filter(program => program.field_id === selectedFieldId.value)
+  }
+
   return result
 })
 
 // Check if any filters are active
 const hasActiveFilters = computed(() => {
-  return searchQuery.value.trim() !== '' || selectedDuration.value !== 'all'
+  return searchQuery.value.trim() !== '' || selectedDuration.value !== 'all' || selectedFieldId.value !== 'all'
 })
 
 // Reset all filters
 const resetFilters = () => {
   searchQuery.value = ''
   selectedDuration.value = 'all'
+  selectedFieldId.value = 'all'
 }
 
 // Other types data for sidebar
@@ -118,6 +132,16 @@ const fetchPrograms = async () => {
 
   try {
     programs.value = await listProgramsByType(programType.value)
+
+    // Charger les champs disciplinaires si on affiche les certificats
+    if (isCertificate.value) {
+      try {
+        programFields.value = await listPublicFields()
+      }
+      catch (e) {
+        console.error('Erreur chargement champs disciplinaires:', e)
+      }
+    }
 
     // Fetch other types for sidebar
     for (const slug of validTypes) {
@@ -336,6 +360,37 @@ const typeConfig = computed(() => {
                   <font-awesome-icon icon="fa-solid fa-rotate-left" class="w-3 h-3" />
                   {{ t('formations.filters.reset') }}
                 </button>
+              </div>
+
+              <!-- Field filter (certificats uniquement) -->
+              <div v-if="isCertificate && programFields.length > 0" class="flex flex-wrap items-center gap-3">
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  {{ t('formations.filters.field') }} :
+                </span>
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    class="px-4 py-2 text-sm font-medium rounded-full transition-all"
+                    :class="selectedFieldId === 'all'
+                      ? 'bg-rose-500 text-white shadow-md'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
+                    @click="selectedFieldId = 'all'"
+                  >
+                    {{ t('formations.filters.allFields') }}
+                  </button>
+                  <button
+                    v-for="field in programFields"
+                    :key="field.id"
+                    type="button"
+                    class="px-4 py-2 text-sm font-medium rounded-full transition-all"
+                    :class="selectedFieldId === field.id
+                      ? 'bg-rose-500 text-white shadow-md'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
+                    @click="selectedFieldId = field.id"
+                  >
+                    {{ field.name }}
+                  </button>
+                </div>
               </div>
 
               <!-- Results count -->

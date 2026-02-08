@@ -45,6 +45,8 @@
       "duration": "Duration",
       "durationShort": "≤ 12 months",
       "durationLong": "> 12 months",
+      "field": "Disciplinary field",
+      "allFields": "All fields",
       "reset": "Reset",
       "resultsCount": "{count} program(s) found",
       "noResults": "No results",

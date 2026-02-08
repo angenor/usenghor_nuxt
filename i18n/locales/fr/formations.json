@@ -45,6 +45,8 @@
       "duration": "Durée",
       "durationShort": "≤ 12 mois",
       "durationLong": "> 12 mois",
+      "field": "Champ disciplinaire",
+      "allFields": "Tous les champs",
       "reset": "Réinitialiser",
       "resultsCount": "{count} formation(s) trouvée(s)",
       "noResults": "Aucun résultat",

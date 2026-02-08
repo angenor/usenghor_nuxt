@@ -20,12 +20,21 @@ export interface ProgramPublic {
   teaching_methods: string | null
   cover_image_external_id: string | null
   sector_external_id: string | null
+  field_id: string | null
   type: ProgramType
   duration_months: number | null
   credits: number | null
   degree_awarded: string | null
   required_degree: string | null
   is_featured: boolean
+}
+
+export interface ProgramFieldPublic {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  display_order: number
 }
 
 export interface ProgramPublicWithDetails extends ProgramPublic {
@@ -178,6 +187,13 @@ export function usePublicProgramsApi() {
   }
 
   /**
+   * Liste les champs disciplinaires (pour filtrage des certificats)
+   */
+  async function listPublicFields(): Promise<ProgramFieldPublic[]> {
+    return publicFetch<ProgramFieldPublic[]>('/api/public/program-fields')
+  }
+
+  /**
    * Formatage de la durée en mois
    */
   function formatDuration(months: number | null, locale: string = 'fr'): string {
@@ -207,6 +223,7 @@ export function usePublicProgramsApi() {
     listProgramsByDepartment,
     listFeaturedPrograms,
     getRelatedPrograms,
+    listPublicFields,
 
     // Helpers
     formatDuration,

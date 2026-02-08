@@ -45,6 +45,8 @@
       "duration": "المدة",
       "durationShort": "≤ 12 شهراً",
       "durationLong": "> 12 شهراً",
+      "field": "المجال التخصصي",
+      "allFields": "جميع المجالات",
       "reset": "إعادة تعيين",
       "resultsCount": "تم العثور على {count} برنامج(s)",
       "noResults": "لا توجد نتائج",
