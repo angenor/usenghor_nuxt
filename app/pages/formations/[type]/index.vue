@@ -362,8 +362,8 @@ const typeConfig = computed(() => {
                 </button>
               </div>
 
-              <!-- Field filter (certificats uniquement) -->
-              <div v-if="isCertificate && programFields.length > 0" class="flex flex-wrap items-center gap-3">
+              <!-- Field filter (certificats uniquement, si au moins 2 champs) -->
+              <div v-if="isCertificate && programFields.length >= 2" class="flex flex-wrap items-center gap-3">
                 <span class="text-sm font-medium text-gray-600 dark:text-gray-400">
                   {{ t('formations.filters.field') }} :
                 </span>

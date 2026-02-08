@@ -21,6 +21,7 @@ export interface ProgramPublic {
   cover_image_external_id: string | null
   sector_external_id: string | null
   field_id: string | null
+  field_name: string | null
   type: ProgramType
   duration_months: number | null
   credits: number | null
