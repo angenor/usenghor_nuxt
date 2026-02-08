@@ -48,6 +48,8 @@ export interface UserMe {
   phone: string | null
   phone_whatsapp: string | null
   linkedin: string | null
+  facebook: string | null
+  biography: string | null
   city: string | null
   address: string | null
   active: boolean
