@@ -53,6 +53,7 @@ const {
 
 const { listCampuses } = useCampusApi()
 const { listPrograms, programTypeLabels } = useProgramsApi()
+const { getCountriesForSelect } = useCountriesApi()
 
 const {
   uploadMediaVariants,
@@ -77,6 +78,15 @@ interface ProgramOption {
 }
 const programOptions = ref<ProgramOption[]>([])
 const loadingPrograms = ref(false)
+
+// Charger les pays pour le sélecteur
+interface CountryOption {
+  id: string
+  iso_code: string
+  name: string
+}
+const countryOptions = ref<CountryOption[]>([])
+const loadingCountries = ref(false)
 
 async function loadCampuses() {
   loadingCampuses.value = true
@@ -108,6 +118,17 @@ async function loadPrograms() {
     console.error('Erreur lors du chargement des formations')
   } finally {
     loadingPrograms.value = false
+  }
+}
+
+async function loadCountries() {
+  loadingCountries.value = true
+  try {
+    countryOptions.value = await getCountriesForSelect()
+  } catch {
+    console.error('Erreur lors du chargement des pays')
+  } finally {
+    loadingCountries.value = false
   }
 }
 
@@ -166,6 +187,8 @@ const form = ref({
   status: 'upcoming' as const,
   campus_external_id: '' as string,
   program_external_id: '' as string,
+  country_external_id: '' as string,
+  location_address: '',
   opening_date: '',
   deadline: '',
   program_start_date: '',
@@ -208,6 +231,8 @@ async function fetchCall() {
       status: call.status,
       campus_external_id: call.campus_external_id || '',
       program_external_id: call.program_external_id || '',
+      country_external_id: call.country_external_id || '',
+      location_address: call.location_address || '',
       opening_date: call.opening_date?.split('T')[0] || '',
       deadline: call.deadline?.split('T')[0] || '',
       program_start_date: call.program_start_date?.split('T')[0] || '',
@@ -272,6 +297,7 @@ onMounted(() => {
   fetchCall()
   loadCampuses()
   loadPrograms()
+  loadCountries()
 })
 
 // Navigation
@@ -479,6 +505,8 @@ const saveForm = async () => {
       status: form.value.status,
       campus_external_id: form.value.campus_external_id || null,
       program_external_id: form.value.program_external_id || null,
+      country_external_id: form.value.country_external_id || null,
+      location_address: form.value.location_address || null,
       cover_image_external_id: form.value.cover_image_external_id,
       opening_date: form.value.opening_date || null,
       deadline: form.value.deadline || null,
@@ -767,6 +795,36 @@ const tabs = [
               placeholder="Ex: Cadres africains titulaires d'un Bac+4"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Pays du lieu
+            </label>
+            <select
+              v-model="form.country_external_id"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              :disabled="loadingCountries"
+            >
+              <option value="">Aucun pays sélectionné</option>
+              <option v-for="country in countryOptions" :key="country.id" :value="country.id">
+                {{ country.name }}
+              </option>
+            </select>
+            <p class="mt-1 text-xs text-gray-500">Pays où se déroule la formation ou l'exercice</p>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Adresse exacte du lieu
+            </label>
+            <input
+              v-model="form.location_address"
+              type="text"
+              placeholder="Ex: Campus principal, 1 Place Ahmed Orabi, Alexandrie"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            />
+            <p class="mt-1 text-xs text-gray-500">Adresse complète du lieu de formation ou d'exercice</p>
           </div>
 
           <!-- Image de couverture -->

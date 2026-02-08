@@ -12,6 +12,13 @@ defineProps<Props>()
 
 const { t } = useI18n()
 const localePath = useLocalePath()
+
+const getCallImage = (call: ApplicationCallPublicWithDetails) => {
+  if (call.cover_image_external_id) {
+    return `/api/public/media/${call.cover_image_external_id}/download`
+  }
+  return `https://picsum.photos/seed/${call.slug}/400/200`
+}
 </script>
 
 <template>
@@ -32,7 +39,7 @@ const localePath = useLocalePath()
         <NuxtLink :to="localePath(`/actualites/appels/${item.slug}`)">
           <div class="overflow-hidden h-32">
             <img
-              :src="`https://picsum.photos/seed/${item.slug}/400/200`"
+              :src="getCallImage(item)"
               :alt="item.title"
               class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
