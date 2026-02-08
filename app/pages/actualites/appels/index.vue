@@ -89,6 +89,26 @@ const totalPages = ref(0)
 const loading = ref(false)
 const error = ref<string | null>(null)
 
+// Tri des appels : en cours/à venir d'abord (par deadline imminente), puis clos
+const sortCalls = (items: ApplicationCallPublic[]): ApplicationCallPublic[] => {
+  return [...items].sort((a, b) => {
+    // Priorité par statut : ongoing/upcoming avant closed
+    const statusOrder: Record<string, number> = { ongoing: 0, upcoming: 1, closed: 2 }
+    const statusDiff = (statusOrder[a.status] ?? 2) - (statusOrder[b.status] ?? 2)
+    if (statusDiff !== 0) return statusDiff
+
+    // Pour les appels en cours/à venir : trier par deadline croissante (le plus imminent en premier)
+    // Pour les appels clos : trier par deadline décroissante (le plus récent en premier)
+    const aDeadline = a.deadline ? new Date(a.deadline).getTime() : Infinity
+    const bDeadline = b.deadline ? new Date(b.deadline).getTime() : Infinity
+
+    if (a.status === 'closed') {
+      return bDeadline - aDeadline // Décroissant pour les clos
+    }
+    return aDeadline - bDeadline // Croissant pour les en cours/à venir
+  })
+}
+
 // Fetch calls from API
 async function fetchCalls() {
   loading.value = true
@@ -100,7 +120,7 @@ async function fetchCalls() {
       call_type: selectedType.value,
       call_status: selectedStatus.value,
     })
-    calls.value = response.items
+    calls.value = sortCalls(response.items)
     totalCalls.value = response.total
     totalPages.value = response.pages
   } catch (e) {
