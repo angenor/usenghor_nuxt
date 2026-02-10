@@ -148,7 +148,7 @@ const fundraisingProjects = computed(() => [
       :cta-title="getContent('strategy.fundraising.cta.title')"
       :cta-text="getContent('strategy.fundraising.cta.text')"
       :cta-button="getContent('strategy.fundraising.cta.button')"
-      cta-link="/contact"
+      cta-link="/carrieres#partenaires"
     />
   </div>
 </template>

@@ -124,3 +124,34 @@ export interface PartnerUpdate {
 export interface PartnerReorder {
   partner_ids: string[]
 }
+
+// ============================================================================
+// Partnership Requests
+// ============================================================================
+
+export type PartnershipRequestType = 'academic' | 'institutional' | 'business' | 'other'
+export type PartnershipRequestStatus = 'pending' | 'approved' | 'rejected'
+
+export interface PartnershipRequestRead {
+  id: string
+  contact_name: string
+  email: string
+  organization: string
+  type: PartnershipRequestType
+  message: string | null
+  status: PartnershipRequestStatus
+  rejection_reason: string | null
+  reviewed_by_external_id: string | null
+  reviewed_at: string | null
+  partner_external_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface PartnershipRequestSubmit {
+  contact_name: string
+  email: string
+  organization: string
+  type: PartnershipRequestType
+  message?: string
+}

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useFooterDataStore } from '~/stores/footerData'
+
 const { t } = useI18n()
 const localePath = useLocalePath()
 
@@ -29,13 +31,60 @@ const handleNewsletterSubmit = async () => {
   }
 }
 
-const socialLinks = [
+// Données dynamiques du footer (réseaux sociaux, contact)
+const footerStore = useFooterDataStore()
+
+// Fallback statique pour les réseaux sociaux
+const fallbackSocialLinks = [
   { name: 'facebook', icon: 'fa-brands fa-facebook-f', url: 'https://facebook.com/usenghor' },
   { name: 'twitter', icon: 'fa-brands fa-x-twitter', url: 'https://twitter.com/usenghor' },
   { name: 'linkedin', icon: 'fa-brands fa-linkedin-in', url: 'https://linkedin.com/school/usenghor' },
   { name: 'youtube', icon: 'fa-brands fa-youtube', url: 'https://youtube.com/usenghor' },
-  { name: 'instagram', icon: 'fa-brands fa-instagram', url: 'https://instagram.com/usenghor' }
+  { name: 'instagram', icon: 'fa-brands fa-instagram', url: 'https://instagram.com/usenghor' },
 ]
+
+// Réseaux sociaux : API si disponibles, sinon fallback
+const socialLinks = computed(() => {
+  if (footerStore.socialLinks.length > 0) {
+    const result = []
+    for (const link of footerStore.socialLinks) {
+      result.push({ name: link.platform, icon: link.icon, url: link.url })
+    }
+    return result
+  }
+  return fallbackSocialLinks
+})
+
+// Contact : API si disponible, sinon fallback i18n
+const contactAddressText = computed(() => {
+  const addr = footerStore.contactAddress
+  if (addr) return `${addr.street}, ${addr.postal_code ? addr.postal_code + ' ' : ''}${addr.city}, ${addr.country}`
+  return t('footer.contact.address')
+})
+
+const contactPhone = computed(() => {
+  return footerStore.contactPhones?.main || t('footer.contact.phone')
+})
+
+const contactPhoneHref = computed(() => {
+  const phone = footerStore.contactPhones?.main
+  if (phone) return `tel:${phone.replace(/\s/g, '')}`
+  return 'tel:+20348435044'
+})
+
+const contactEmail = computed(() => {
+  return footerStore.contactEmails?.general || t('footer.contact.email')
+})
+
+const contactEmailHref = computed(() => {
+  const addr = footerStore.contactEmails?.general
+  if (addr) return `mailto:${addr}`
+  return 'mailto:info@usenghor.org'
+})
+
+onMounted(() => {
+  footerStore.fetchData()
+})
 </script>
 
 <template>
@@ -294,7 +343,7 @@ const socialLinks = [
               </div>
               <div>
                 <h5 class="text-sm font-medium text-white mb-1">{{ t('footer.contact.addressTitle') }}</h5>
-                <p class="text-sm text-gray-400">{{ t('footer.contact.address') }}</p>
+                <p class="text-sm text-gray-400">{{ contactAddressText }}</p>
               </div>
             </div>
             <div class="flex items-start gap-3">
@@ -303,8 +352,8 @@ const socialLinks = [
               </div>
               <div>
                 <h5 class="text-sm font-medium text-white mb-1">{{ t('footer.contact.phoneTitle') }}</h5>
-                <a href="tel:+20348435044" class="text-sm text-gray-400 hover:text-brand-blue-400 transition-colors">
-                  {{ t('footer.contact.phone') }}
+                <a :href="contactPhoneHref" class="text-sm text-gray-400 hover:text-brand-blue-400 transition-colors">
+                  {{ contactPhone }}
                 </a>
               </div>
             </div>
@@ -314,8 +363,8 @@ const socialLinks = [
               </div>
               <div>
                 <h5 class="text-sm font-medium text-white mb-1">Email</h5>
-                <a href="mailto:info@usenghor.org" class="text-sm text-gray-400 hover:text-brand-blue-400 transition-colors">
-                  {{ t('footer.contact.email') }}
+                <a :href="contactEmailHref" class="text-sm text-gray-400 hover:text-brand-blue-400 transition-colors">
+                  {{ contactEmail }}
                 </a>
               </div>
             </div>

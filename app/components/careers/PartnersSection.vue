@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const { t, tm } = useI18n()
 const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.1 })
+const { submitRequest } = usePartnershipRequestsApi()
 
 // Get translated arrays
 const partnerTypes = computed(() => tm('careers.partners.types.items') as any[])
@@ -11,7 +12,7 @@ const form = reactive({
   email: '',
   organization: '',
   type: '',
-  message: ''
+  message: '',
 })
 
 const isSubmitting = ref(false)
@@ -23,11 +24,13 @@ const handleSubmit = async () => {
   submitStatus.value = 'idle'
 
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    // In production, you would send the form data to your API
-    console.log('Form submitted:', form)
+    await submitRequest({
+      contact_name: form.name,
+      email: form.email,
+      organization: form.organization,
+      type: form.type as 'academic' | 'institutional' | 'business' | 'other',
+      message: form.message || undefined,
+    })
 
     submitStatus.value = 'success'
     // Reset form
@@ -36,9 +39,12 @@ const handleSubmit = async () => {
     form.organization = ''
     form.type = ''
     form.message = ''
-  } catch (error) {
+  }
+  catch (error) {
     submitStatus.value = 'error'
-  } finally {
+    console.error('Erreur soumission demande de partenariat:', error)
+  }
+  finally {
     isSubmitting.value = false
   }
 }

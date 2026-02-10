@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import type { PartnerType, ImageVariants } from '~/types/api'
+import type { PartnerType, PartnershipRequestStatus, PartnershipRequestType, PartnershipRequestRead, ImageVariants } from '~/types/api'
 import type { PartnerDisplay, PartnerAssociations } from '~/composables/usePartnersApi'
+import type { PartnershipRequestStatsData } from '~/composables/usePartnershipRequestsApi'
+import { requestTypeLabels, requestTypeColors, requestStatusLabels, requestStatusColors } from '~/composables/usePartnershipRequestsApi'
 
 definePageMeta({
   layout: 'admin'
@@ -22,9 +24,21 @@ const {
 const { apiFetch } = useApi()
 const { getMediaUrl, uploadMedia, uploadMediaVariants } = useMediaApi()
 
+const {
+  listRequests,
+  getRequestStats,
+  approveRequest,
+  rejectRequest,
+  deleteRequest: apiDeleteRequest,
+  formatRequestDate,
+} = usePartnershipRequestsApi()
+
 // API pour les associations campus et projets
 const { getAllCampuses, addCampusPartner, removeCampusPartner } = useCampusApi()
 const { listProjects, addProjectPartner, removeProjectPartner } = useProjectsApi()
+
+// === TAB ===
+const activeTab = ref<'partners' | 'requests'>('partners')
 
 // === STATE ===
 const searchQuery = ref('')
@@ -189,9 +203,35 @@ function enrichPartnersWithCountries() {
   })
 }
 
+// === PARTNERSHIP REQUESTS STATE ===
+const requests = ref<PartnershipRequestRead[]>([])
+const requestStats = ref<PartnershipRequestStatsData>({ total: 0, pending: 0, approved: 0, rejected: 0 })
+const requestsLoading = ref(false)
+const requestsError = ref<string | null>(null)
+const requestFilterStatus = ref<PartnershipRequestStatus | ''>('')
+const requestFilterType = ref<PartnershipRequestType | ''>('')
+const requestSearchQuery = ref('')
+const requestPage = ref(1)
+const requestTotalPages = ref(1)
+
+// Modals demandes
+const showApproveModal = ref(false)
+const showRejectModal = ref(false)
+const showRequestDetailModal = ref(false)
+const selectedRequest = ref<PartnershipRequestRead | null>(null)
+const rejectReason = ref('')
+const approveOverrides = ref({ partner_type: '', partner_name: '' })
+const isProcessingRequest = ref(false)
+
 // Chargement initial
 onMounted(async () => {
-  await Promise.all([loadPartners(), loadCountries(), loadCampuses(), loadProjects()])
+  await Promise.all([
+    loadPartners(),
+    loadCountries(),
+    loadCampuses(),
+    loadProjects(),
+    getRequestStats().then((s) => { requestStats.value = s }).catch(() => {}),
+  ])
   enrichPartnersWithCountries()
 })
 
@@ -588,6 +628,126 @@ async function saveEditedLogo(variants: ImageVariants) {
     pendingLogoFile.value = null
   }
 }
+
+// === PARTNERSHIP REQUESTS METHODS ===
+async function loadRequests() {
+  requestsLoading.value = true
+  requestsError.value = null
+  try {
+    const [response, statsData] = await Promise.all([
+      listRequests({
+        page: requestPage.value,
+        limit: 20,
+        search: requestSearchQuery.value || undefined,
+        status: requestFilterStatus.value || undefined,
+        type: requestFilterType.value || undefined,
+      }),
+      getRequestStats(),
+    ])
+    requests.value = response.items
+    requestTotalPages.value = response.pages
+    requestStats.value = statsData
+  }
+  catch (err: any) {
+    requestsError.value = err.message || 'Erreur lors du chargement des demandes'
+  }
+  finally {
+    requestsLoading.value = false
+  }
+}
+
+// Chargement lazy des demandes au premier accès
+const requestsLoaded = ref(false)
+watch(activeTab, (tab) => {
+  if (tab === 'requests' && !requestsLoaded.value) {
+    requestsLoaded.value = true
+    loadRequests()
+  }
+})
+
+function openApproveModal(request: PartnershipRequestRead) {
+  selectedRequest.value = request
+  approveOverrides.value = { partner_type: '', partner_name: '' }
+  showApproveModal.value = true
+}
+
+function openRejectModal(request: PartnershipRequestRead) {
+  selectedRequest.value = request
+  rejectReason.value = ''
+  showRejectModal.value = true
+}
+
+function openRequestDetail(request: PartnershipRequestRead) {
+  selectedRequest.value = request
+  showRequestDetailModal.value = true
+}
+
+function closeRequestModals() {
+  showApproveModal.value = false
+  showRejectModal.value = false
+  showRequestDetailModal.value = false
+  selectedRequest.value = null
+}
+
+async function handleApproveRequest() {
+  if (!selectedRequest.value) return
+  isProcessingRequest.value = true
+  try {
+    await approveRequest(selectedRequest.value.id, {
+      partner_type: approveOverrides.value.partner_type || undefined,
+      partner_name: approveOverrides.value.partner_name || undefined,
+    })
+    closeRequestModals()
+    await Promise.all([loadRequests(), loadPartners()])
+    enrichPartnersWithCountries()
+  }
+  catch (err: any) {
+    requestsError.value = err.message || 'Erreur lors de l\'approbation'
+  }
+  finally {
+    isProcessingRequest.value = false
+  }
+}
+
+async function handleRejectRequest() {
+  if (!selectedRequest.value) return
+  isProcessingRequest.value = true
+  try {
+    await rejectRequest(selectedRequest.value.id, rejectReason.value || undefined)
+    closeRequestModals()
+    await loadRequests()
+  }
+  catch (err: any) {
+    requestsError.value = err.message || 'Erreur lors du rejet'
+  }
+  finally {
+    isProcessingRequest.value = false
+  }
+}
+
+async function handleDeleteRequest(request: PartnershipRequestRead) {
+  if (!confirm('Supprimer cette demande ?')) return
+  try {
+    await apiDeleteRequest(request.id)
+    await loadRequests()
+  }
+  catch (err: any) {
+    requestsError.value = err.message || 'Erreur lors de la suppression'
+  }
+}
+
+function handleRequestFilterChange() {
+  requestPage.value = 1
+  loadRequests()
+}
+
+// Mapping des types demande → types partenaire pour l'affichage
+const requestTypeToPartnerType: Record<string, string> = {
+  academic: 'program_partner',
+  institutional: 'charter_operator',
+  business: 'project_partner',
+  other: 'other',
+}
 </script>
 
 <template>
@@ -599,16 +759,62 @@ async function saveEditedLogo(variants: ImageVariants) {
           Partenaires
         </h1>
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Gestion des partenaires institutionnels, académiques et de projets
+          Gestion des partenaires et des demandes de partenariat
         </p>
       </div>
       <button
+        v-if="activeTab === 'partners'"
         @click="openAddModal"
         class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
       >
         <font-awesome-icon :icon="['fas', 'plus']" class="h-4 w-4" />
         Ajouter un partenaire
       </button>
+    </div>
+
+    <!-- Tab bar -->
+    <div class="border-b border-gray-200 dark:border-gray-700">
+      <nav class="-mb-px flex space-x-8">
+        <button
+          @click="activeTab = 'partners'"
+          :class="[
+            'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors',
+            activeTab === 'partners'
+              ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400'
+          ]"
+        >
+          <font-awesome-icon :icon="['fas', 'handshake']" class="h-4 w-4 mr-2" />
+          Partenaires
+          <span class="ml-2 rounded-full bg-gray-100 dark:bg-gray-700 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:text-gray-300">
+            {{ stats.total }}
+          </span>
+        </button>
+        <button
+          @click="activeTab = 'requests'"
+          :class="[
+            'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors',
+            activeTab === 'requests'
+              ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400'
+          ]"
+        >
+          <font-awesome-icon :icon="['fas', 'envelope-open-text']" class="h-4 w-4 mr-2" />
+          Demandes
+          <span
+            v-if="requestStats.pending > 0"
+            class="ml-2 rounded-full bg-yellow-100 dark:bg-yellow-900/30 px-2.5 py-0.5 text-xs font-medium text-yellow-800 dark:text-yellow-400"
+          >
+            {{ requestStats.pending }}
+          </span>
+          <span
+            v-else
+            class="ml-2 rounded-full bg-gray-100 dark:bg-gray-700 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:text-gray-300"
+          >
+            {{ requestStats.total }}
+          </span>
+        </button>
+      </nav>
     </div>
 
     <!-- Loading state -->
@@ -628,6 +834,8 @@ async function saveEditedLogo(variants: ImageVariants) {
     </div>
 
     <template v-else>
+      <!-- ========== TAB: PARTENAIRES ========== -->
+      <div v-show="activeTab === 'partners'">
       <!-- Stats Cards -->
       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
@@ -1093,6 +1301,245 @@ async function saveEditedLogo(variants: ImageVariants) {
           </p>
         </div>
       </div>
+      </div><!-- fin tab partenaires -->
+
+      <!-- ========== TAB: DEMANDES ========== -->
+      <div v-show="activeTab === 'requests'" class="space-y-6">
+        <!-- Request Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                <font-awesome-icon :icon="['fas', 'envelope']" class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ requestStats.total }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Total</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-100 dark:bg-yellow-900/30">
+                <font-awesome-icon :icon="['fas', 'clock']" class="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+              </div>
+              <div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ requestStats.pending }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">En attente</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30">
+                <font-awesome-icon :icon="['fas', 'check-circle']" class="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ requestStats.approved }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Approuvées</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
+                <font-awesome-icon :icon="['fas', 'times-circle']" class="h-5 w-5 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ requestStats.rejected }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Rejetées</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+          <div class="flex flex-col lg:flex-row gap-4">
+            <div class="flex-1">
+              <div class="relative">
+                <font-awesome-icon :icon="['fas', 'search']" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  v-model="requestSearchQuery"
+                  type="text"
+                  placeholder="Rechercher par nom, email ou organisation..."
+                  class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-500 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+                  @input="handleRequestFilterChange"
+                />
+              </div>
+            </div>
+            <div class="w-full lg:w-44">
+              <select
+                v-model="requestFilterStatus"
+                class="w-full rounded-lg border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                @change="handleRequestFilterChange"
+              >
+                <option value="">Tous les statuts</option>
+                <option value="pending">En attente</option>
+                <option value="approved">Approuvées</option>
+                <option value="rejected">Rejetées</option>
+              </select>
+            </div>
+            <div class="w-full lg:w-44">
+              <select
+                v-model="requestFilterType"
+                class="w-full rounded-lg border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                @change="handleRequestFilterChange"
+              >
+                <option value="">Tous les types</option>
+                <option value="academic">Académique</option>
+                <option value="institutional">Institutionnel</option>
+                <option value="business">Entreprise</option>
+                <option value="other">Autre</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div v-if="requestsError" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <div class="flex items-center gap-3">
+            <font-awesome-icon :icon="['fas', 'exclamation-circle']" class="h-5 w-5 text-red-600 dark:text-red-400" />
+            <p class="text-sm text-red-800 dark:text-red-300">{{ requestsError }}</p>
+            <button class="ml-auto text-sm text-red-600 dark:text-red-400 hover:underline" @click="loadRequests">
+              Réessayer
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div v-if="requestsLoading" class="flex items-center justify-center py-12">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" />
+        </div>
+
+        <!-- Table -->
+        <div v-else class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead class="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Contact
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Organisation
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Type
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Statut
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tr v-for="req in requests" :key="req.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    {{ formatRequestDate(req.created_at) }}
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ req.contact_name }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ req.email }}</div>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                    {{ req.organization }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span
+                      :class="[
+                        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+                        requestTypeColors[req.type]
+                      ]"
+                    >
+                      {{ requestTypeLabels[req.type] }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span
+                      :class="[
+                        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+                        requestStatusColors[req.status]
+                      ]"
+                    >
+                      {{ requestStatusLabels[req.status] }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div class="flex items-center justify-end gap-1">
+                      <button
+                        class="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                        title="Voir le détail"
+                        @click="openRequestDetail(req)"
+                      >
+                        <font-awesome-icon :icon="['fas', 'eye']" class="h-4 w-4" />
+                      </button>
+                      <button
+                        v-if="req.status === 'pending'"
+                        class="p-2 text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+                        title="Approuver"
+                        @click="openApproveModal(req)"
+                      >
+                        <font-awesome-icon :icon="['fas', 'check']" class="h-4 w-4" />
+                      </button>
+                      <button
+                        v-if="req.status === 'pending'"
+                        class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                        title="Rejeter"
+                        @click="openRejectModal(req)"
+                      >
+                        <font-awesome-icon :icon="['fas', 'times']" class="h-4 w-4" />
+                      </button>
+                      <button
+                        class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                        title="Supprimer"
+                        @click="handleDeleteRequest(req)"
+                      >
+                        <font-awesome-icon :icon="['fas', 'trash']" class="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty state -->
+          <div v-if="requests.length === 0 && !requestsLoading" class="text-center py-12">
+            <font-awesome-icon :icon="['fas', 'envelope-open-text']" class="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <h3 class="text-sm font-medium text-gray-900 dark:text-white">Aucune demande trouvée</h3>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Les demandes soumises via le formulaire "Devenir partenaire" apparaîtront ici.
+            </p>
+          </div>
+
+          <!-- Pagination -->
+          <div v-if="requestTotalPages > 1" class="flex items-center justify-between px-6 py-3 border-t border-gray-200 dark:border-gray-700">
+            <button
+              :disabled="requestPage <= 1"
+              class="px-3 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded disabled:opacity-50"
+              @click="requestPage--; loadRequests()"
+            >
+              Précédent
+            </button>
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+              Page {{ requestPage }} / {{ requestTotalPages }}
+            </span>
+            <button
+              :disabled="requestPage >= requestTotalPages"
+              class="px-3 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded disabled:opacity-50"
+              @click="requestPage++; loadRequests()"
+            >
+              Suivant
+            </button>
+          </div>
+        </div>
+      </div><!-- fin tab demandes -->
     </template>
 
     <!-- Add/Edit Modal -->
@@ -1569,6 +2016,279 @@ async function saveEditedLogo(variants: ImageVariants) {
               @save="saveEditedLogo"
               @cancel="cancelLogoEditor"
             />
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- ========== REQUEST MODALS ========== -->
+
+    <!-- Approve Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showApproveModal && selectedRequest"
+        class="fixed inset-0 z-50 overflow-y-auto"
+        @click.self="closeRequestModals"
+      >
+        <div class="flex min-h-full items-center justify-center p-4">
+          <div class="fixed inset-0 bg-black/50 transition-opacity" @click="closeRequestModals" />
+
+          <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md transform transition-all">
+            <div class="p-6">
+              <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30">
+                <font-awesome-icon :icon="['fas', 'check']" class="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
+
+              <h3 class="text-lg font-semibold text-center text-gray-900 dark:text-white mb-2">
+                Approuver la demande
+              </h3>
+
+              <p class="text-sm text-center text-gray-500 dark:text-gray-400 mb-4">
+                Un partenaire sera automatiquement créé à partir de cette demande.
+              </p>
+
+              <!-- Résumé -->
+              <div class="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 text-sm space-y-1">
+                <p><span class="font-medium text-gray-700 dark:text-gray-300">Contact :</span> {{ selectedRequest.contact_name }}</p>
+                <p><span class="font-medium text-gray-700 dark:text-gray-300">Email :</span> {{ selectedRequest.email }}</p>
+                <p><span class="font-medium text-gray-700 dark:text-gray-300">Organisation :</span> {{ selectedRequest.organization }}</p>
+                <p>
+                  <span class="font-medium text-gray-700 dark:text-gray-300">Type :</span>
+                  <span :class="['ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium', requestTypeColors[selectedRequest.type]]">
+                    {{ requestTypeLabels[selectedRequest.type] }}
+                  </span>
+                </p>
+              </div>
+
+              <!-- Overrides -->
+              <div class="space-y-3 mb-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Nom du partenaire
+                  </label>
+                  <input
+                    v-model="approveOverrides.partner_name"
+                    type="text"
+                    :placeholder="selectedRequest.organization"
+                    class="w-full rounded-lg border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
+                  />
+                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Laisser vide pour utiliser le nom de l'organisation</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Type de partenaire
+                  </label>
+                  <select
+                    v-model="approveOverrides.partner_type"
+                    class="w-full rounded-lg border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  >
+                    <option value="">Par défaut ({{ partnerTypeLabels[requestTypeToPartnerType[selectedRequest.type] as PartnerType] }})</option>
+                    <option v-for="pt in partnerTypes" :key="pt.value" :value="pt.value">
+                      {{ pt.label }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-center gap-3">
+                <button
+                  class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  @click="closeRequestModals"
+                >
+                  Annuler
+                </button>
+                <button
+                  :disabled="isProcessingRequest"
+                  class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-500 rounded-lg transition-colors disabled:opacity-50"
+                  @click="handleApproveRequest"
+                >
+                  <span v-if="isProcessingRequest" class="flex items-center gap-2">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                    Approbation...
+                  </span>
+                  <span v-else>Approuver et créer le partenaire</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Reject Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showRejectModal && selectedRequest"
+        class="fixed inset-0 z-50 overflow-y-auto"
+        @click.self="closeRequestModals"
+      >
+        <div class="flex min-h-full items-center justify-center p-4">
+          <div class="fixed inset-0 bg-black/50 transition-opacity" @click="closeRequestModals" />
+
+          <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md transform transition-all">
+            <div class="p-6">
+              <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/30">
+                <font-awesome-icon :icon="['fas', 'times']" class="h-6 w-6 text-red-600 dark:text-red-400" />
+              </div>
+
+              <h3 class="text-lg font-semibold text-center text-gray-900 dark:text-white mb-2">
+                Rejeter la demande
+              </h3>
+
+              <p class="text-sm text-center text-gray-500 dark:text-gray-400 mb-4">
+                Demande de <span class="font-medium text-gray-900 dark:text-white">{{ selectedRequest.organization }}</span>
+              </p>
+
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Motif du rejet (optionnel)
+                </label>
+                <textarea
+                  v-model="rejectReason"
+                  rows="3"
+                  placeholder="Expliquer le motif du rejet..."
+                  class="w-full rounded-lg border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
+                />
+              </div>
+
+              <div class="flex items-center justify-center gap-3">
+                <button
+                  class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  @click="closeRequestModals"
+                >
+                  Annuler
+                </button>
+                <button
+                  :disabled="isProcessingRequest"
+                  class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-500 rounded-lg transition-colors disabled:opacity-50"
+                  @click="handleRejectRequest"
+                >
+                  <span v-if="isProcessingRequest" class="flex items-center gap-2">
+                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                    Rejet...
+                  </span>
+                  <span v-else>Rejeter</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Request Detail Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showRequestDetailModal && selectedRequest"
+        class="fixed inset-0 z-50 overflow-y-auto"
+        @click.self="closeRequestModals"
+      >
+        <div class="flex min-h-full items-center justify-center p-4">
+          <div class="fixed inset-0 bg-black/50 transition-opacity" @click="closeRequestModals" />
+
+          <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg transform transition-all">
+            <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                  Détail de la demande
+                </h3>
+                <span
+                  :class="[
+                    'mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+                    requestStatusColors[selectedRequest.status]
+                  ]"
+                >
+                  {{ requestStatusLabels[selectedRequest.status] }}
+                </span>
+              </div>
+              <button
+                class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                @click="closeRequestModals"
+              >
+                <font-awesome-icon :icon="['fas', 'times']" class="h-5 w-5" />
+              </button>
+            </div>
+
+            <div class="p-6 space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Contact</p>
+                  <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ selectedRequest.contact_name }}</p>
+                </div>
+                <div>
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Email</p>
+                  <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ selectedRequest.email }}</p>
+                </div>
+                <div>
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Organisation</p>
+                  <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ selectedRequest.organization }}</p>
+                </div>
+                <div>
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Type</p>
+                  <span
+                    :class="[
+                      'mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+                      requestTypeColors[selectedRequest.type]
+                    ]"
+                  >
+                    {{ requestTypeLabels[selectedRequest.type] }}
+                  </span>
+                </div>
+              </div>
+
+              <div v-if="selectedRequest.message">
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Message</p>
+                <p class="mt-1 text-sm text-gray-900 dark:text-white whitespace-pre-wrap">{{ selectedRequest.message }}</p>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+                <div>
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Soumise le</p>
+                  <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ formatRequestDate(selectedRequest.created_at) }}</p>
+                </div>
+                <div v-if="selectedRequest.reviewed_at">
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Traitée le</p>
+                  <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ formatRequestDate(selectedRequest.reviewed_at) }}</p>
+                </div>
+              </div>
+
+              <div v-if="selectedRequest.rejection_reason" class="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                <p class="text-xs font-medium text-red-800 dark:text-red-300 uppercase mb-1">Motif du rejet</p>
+                <p class="text-sm text-red-700 dark:text-red-400">{{ selectedRequest.rejection_reason }}</p>
+              </div>
+
+              <div v-if="selectedRequest.partner_external_id" class="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                <p class="text-xs font-medium text-green-800 dark:text-green-300 uppercase mb-1">Partenaire créé</p>
+                <p class="text-sm text-green-700 dark:text-green-400">
+                  Un partenaire a été créé automatiquement lors de l'approbation.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700">
+              <div class="flex gap-2">
+                <button
+                  v-if="selectedRequest.status === 'pending'"
+                  class="px-3 py-1.5 text-sm font-medium text-white bg-green-600 hover:bg-green-500 rounded-lg transition-colors"
+                  @click="closeRequestModals(); openApproveModal(selectedRequest)"
+                >
+                  Approuver
+                </button>
+                <button
+                  v-if="selectedRequest.status === 'pending'"
+                  class="px-3 py-1.5 text-sm font-medium text-white bg-red-600 hover:bg-red-500 rounded-lg transition-colors"
+                  @click="closeRequestModals(); openRejectModal(selectedRequest)"
+                >
+                  Rejeter
+                </button>
+              </div>
+              <button
+                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                @click="closeRequestModals"
+              >
+                Fermer
+              </button>
+            </div>
           </div>
         </div>
       </div>
