@@ -195,6 +195,20 @@ export function usePublicProgramsApi() {
   }
 
   /**
+   * Récupère les actualités associées à un programme
+   */
+  async function getProgramNews(slug: string): Promise<unknown[]> {
+    return publicFetch<unknown[]>(`/api/public/programs/${slug}/news`)
+  }
+
+  /**
+   * Récupère les IDs des albums de la médiathèque d'un programme
+   */
+  async function getProgramAlbums(slug: string): Promise<string[]> {
+    return publicFetch<string[]>(`/api/public/programs/${slug}/media-library`)
+  }
+
+  /**
    * Formatage de la durée en mois
    */
   function formatDuration(months: number | null, locale: string = 'fr'): string {
@@ -225,6 +239,8 @@ export function usePublicProgramsApi() {
     listFeaturedPrograms,
     getRelatedPrograms,
     listPublicFields,
+    getProgramNews,
+    getProgramAlbums,
 
     // Helpers
     formatDuration,

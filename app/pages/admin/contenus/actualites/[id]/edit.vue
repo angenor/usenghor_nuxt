@@ -33,6 +33,7 @@ const {
   getProjects,
   getEvents,
   getCalls,
+  getPrograms,
   campuses: allCampuses,
   departments: allDepartments,
   services: allServices,
@@ -40,6 +41,7 @@ const {
   projects: allProjects,
   events: allEvents,
   calls: allCalls,
+  programs: allPrograms,
 } = useReferenceData()
 
 // === STATE ===
@@ -82,6 +84,7 @@ const form = reactive({
   event_id: '',
   project_id: '',
   call_id: '',
+  program_id: '',
   status: 'draft' as NewsStatus,
   highlight_status: 'standard' as NewsHighlightStatus,
   published_at: '',
@@ -111,6 +114,7 @@ onMounted(async () => {
       getProjects(),
       getEvents(),
       getCalls(),
+      getPrograms(),
     ])
 
     originalNews.value = newsData
@@ -137,6 +141,7 @@ onMounted(async () => {
       form.event_id = newsData.event_id || ''
       form.project_id = newsData.project_id || ''
       form.call_id = newsData.call_external_id || ''
+      form.program_id = newsData.program_id || ''
       form.status = newsData.status || 'draft'
       form.highlight_status = newsData.highlight_status || 'standard'
       form.published_at = newsData.published_at ? newsData.published_at.slice(0, 16) : ''
@@ -325,6 +330,7 @@ async function submitForm() {
       event_external_id: toUUIDOrNull(form.event_id),
       project_external_id: toUUIDOrNull(form.project_id),
       call_external_id: toUUIDOrNull(form.call_id),
+      program_external_id: toUUIDOrNull(form.program_id),
       author_external_id: toUUIDOrNull(form.author_id),
       status: form.status,
       published_at: publishedAt,
@@ -695,6 +701,23 @@ async function createTag() {
               <option value="">Aucun</option>
               <option v-for="call in allCalls" :key="call.id" :value="call.id">
                 {{ call.title }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Programme lié -->
+          <div>
+            <label for="program_id" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Programme lié
+            </label>
+            <select
+              id="program_id"
+              v-model="form.program_id"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">Aucun</option>
+              <option v-for="program in allPrograms" :key="program.id" :value="program.id">
+                {{ program.title }}
               </option>
             </select>
           </div>

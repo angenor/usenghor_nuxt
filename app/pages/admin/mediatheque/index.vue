@@ -36,6 +36,7 @@ const { getAllServices, addAlbumToService, getServiceAlbums } = useServicesApi()
 const { listEvents, addEventAlbum, getEventAlbums } = useEventsApi()
 const { listProjects, addProjectAlbum, listProjectMedia } = useProjectsApi()
 const { listCalls: listAdminCalls, getCallAlbums, addCallAlbum } = useApplicationCallsApi()
+const { listPrograms: listAdminPrograms, getProgramAlbums, addProgramAlbum } = useProgramsApi()
 
 // Constantes
 const mediaTypeLabels: Record<string, string> = {
@@ -113,7 +114,7 @@ const showAlbumDetailModal = ref(false)
 const showLinkEntityModal = ref(false)
 
 // Types d'entités pour l'association
-type EntityType = 'campus' | 'service' | 'event' | 'project' | 'call'
+type EntityType = 'campus' | 'service' | 'event' | 'project' | 'call' | 'program'
 interface EntityOption {
   id: string
   name: string
@@ -662,7 +663,8 @@ const entityTypeLabels: Record<EntityType, string> = {
   service: 'Service',
   event: 'Événement',
   project: 'Projet',
-  call: 'Appel'
+  call: 'Appel',
+  program: 'Programme',
 }
 
 const entityTypeIcons: Record<EntityType, string> = {
@@ -670,7 +672,8 @@ const entityTypeIcons: Record<EntityType, string> = {
   service: 'fa-cogs',
   event: 'fa-calendar-alt',
   project: 'fa-diagram-project',
-  call: 'fa-solid fa-bullhorn'
+  call: 'fa-solid fa-bullhorn',
+  program: 'fa-graduation-cap',
 }
 
 async function loadEntities() {
@@ -774,6 +777,28 @@ async function loadEntities() {
       }
     }
 
+    if (linkEntityType.value === 'all' || linkEntityType.value === 'program') {
+      try {
+        const programsResponse = await listAdminPrograms({ limit: 100 })
+        const programItems = programsResponse.items || []
+        const programResults = await Promise.all(
+          programItems.map(async (program) => {
+            let isLinked = false
+            if (albumId) {
+              try {
+                const albums = await getProgramAlbums(program.id)
+                isLinked = albums.includes(albumId)
+              } catch { /* ignore */ }
+            }
+            return { id: program.id, name: program.title, type: 'program' as EntityType, isLinked }
+          })
+        )
+        results.push(...programResults)
+      } catch (e) {
+        console.error('Erreur chargement programmes:', e)
+      }
+    }
+
     // Trier: entités liées d'abord, puis non liées
     entityOptions.value = results.sort((a, b) => {
       if (a.isLinked === b.isLinked) return a.name.localeCompare(b.name)
@@ -815,6 +840,7 @@ const handleLinkToEntity = async (entity: EntityOption) => {
     event: 'à l\'événement',
     project: 'au projet',
     call: 'à l\'appel',
+    program: 'au programme',
   }[entity.type]
 
   try {
@@ -833,6 +859,9 @@ const handleLinkToEntity = async (entity: EntityOption) => {
         break
       case 'call':
         await addCallAlbum(entity.id, albumToLink.value.id)
+        break
+      case 'program':
+        await addProgramAlbum(entity.id, albumToLink.value.id)
         break
     }
     alert(`Album "${albumToLink.value.title}" associé ${entityTypeLabel} "${entity.name}" avec succès.`)
@@ -2256,6 +2285,7 @@ const handleLinkToEntity = async (entity: EntityOption) => {
                   { value: 'event', label: 'Événements', icon: 'fa-calendar' },
                   { value: 'project', label: 'Projets', icon: 'fa-project-diagram' },
                   { value: 'call', label: 'Appels', icon: 'fa-bullhorn' },
+                  { value: 'program', label: 'Programmes', icon: 'fa-graduation-cap' },
                 ]"
                 :key="typeOption.value"
                 :class="[
@@ -2304,7 +2334,8 @@ const handleLinkToEntity = async (entity: EntityOption) => {
                     :icon="`fa-solid ${
                       entity.type === 'campus' ? 'fa-university' :
                       entity.type === 'service' ? 'fa-cogs' :
-                      entity.type === 'event' ? 'fa-calendar' : 'fa-project-diagram'
+                      entity.type === 'event' ? 'fa-calendar' :
+                      entity.type === 'program' ? 'fa-graduation-cap' : 'fa-project-diagram'
                     }`"
                     :class="[
                       'h-5 w-5',
@@ -2326,7 +2357,8 @@ const handleLinkToEntity = async (entity: EntityOption) => {
                     {{
                       entity.type === 'campus' ? 'Campus' :
                       entity.type === 'service' ? 'Service' :
-                      entity.type === 'event' ? 'Événement' : 'Projet'
+                      entity.type === 'event' ? 'Événement' :
+                      entity.type === 'program' ? 'Programme' : 'Projet'
                     }}
                     <span v-if="entity.isLinked" class="ml-1 font-medium">• Déjà associé</span>
                   </p>

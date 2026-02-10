@@ -64,6 +64,12 @@ export interface CallRef {
   status: string
 }
 
+export interface ProgramRef {
+  id: string
+  title: string
+  type: string
+}
+
 // ============================================================================
 // Composable
 // ============================================================================
@@ -79,6 +85,7 @@ export function useReferenceData() {
   const projectsCache = ref<ProjectRef[]>([])
   const eventsCache = ref<EventRef[]>([])
   const callsCache = ref<CallRef[]>([])
+  const programsCache = ref<ProgramRef[]>([])
 
   /**
    * Récupère la liste des campus.
@@ -322,6 +329,36 @@ export function useReferenceData() {
   }
 
   /**
+   * Récupère la liste des programmes.
+   */
+  async function getPrograms(forceRefresh = false): Promise<ProgramRef[]> {
+    if (programsCache.value.length > 0 && !forceRefresh) {
+      return programsCache.value
+    }
+
+    try {
+      const response = await apiFetch<PaginatedResponse<{
+        id: string
+        title: string
+        type: string
+      }>>('/api/admin/programs', {
+        query: { limit: 100 },
+      })
+
+      programsCache.value = response.items.map(p => ({
+        id: p.id,
+        title: p.title,
+        type: p.type,
+      }))
+
+      return programsCache.value
+    } catch (e) {
+      console.error('Erreur chargement programmes:', e)
+      return []
+    }
+  }
+
+  /**
    * Récupère les services filtrés par secteur.
    */
   function getServicesBySector(sectorId: string): ServiceRef[] {
@@ -351,6 +388,7 @@ export function useReferenceData() {
     projectsCache.value = []
     eventsCache.value = []
     callsCache.value = []
+    programsCache.value = []
   }
 
   return {
@@ -363,6 +401,7 @@ export function useReferenceData() {
     getProjects,
     getEvents,
     getCalls,
+    getPrograms,
     getServicesBySector,
 
     // Utilitaires
@@ -378,5 +417,6 @@ export function useReferenceData() {
     projects: projectsCache,
     events: eventsCache,
     calls: callsCache,
+    programs: programsCache,
   }
 }

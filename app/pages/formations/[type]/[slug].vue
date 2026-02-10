@@ -142,7 +142,10 @@ const fetchProgram = async () => {
 }
 
 // Fetch on mount
-onMounted(fetchProgram)
+onMounted(() => {
+  fetchProgram()
+  updateTabFromHash()
+})
 
 // Also use useAsyncData for SSR
 const { data: programData } = await useAsyncData(
@@ -224,6 +227,20 @@ const getLocalizedTitleFor = (p: ProgramPublic) => {
   return p.title
 }
 
+// Tab navigation via hash
+const activeTab = ref('presentation')
+
+const updateTabFromHash = () => {
+  const hash = route.hash?.replace('#', '')
+  if (hash && ['presentation', 'actualites', 'mediatheque'].includes(hash)) {
+    activeTab.value = hash
+  } else {
+    activeTab.value = 'presentation'
+  }
+}
+
+watch(() => route.hash, updateTabFromHash)
+
 // Accordion state for semesters
 const openSemesters = ref<Set<number>>(new Set([1])) // Open first semester by default
 
@@ -281,8 +298,21 @@ const toggleSemester = (num: number) => {
         :breadcrumb="breadcrumb"
       />
 
-      <!-- Content -->
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <!-- Tabs -->
+      <ProgramsProgramTabs :active-tab="activeTab" />
+
+      <!-- Tab: Actualités -->
+      <div v-if="activeTab === 'actualites'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ProgramsProgramActualites :program-slug="slug" />
+      </div>
+
+      <!-- Tab: Médiathèque -->
+      <div v-if="activeTab === 'mediatheque'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ProgramsProgramMediatheque :program-slug="slug" />
+      </div>
+
+      <!-- Tab: Présentation (existing content) -->
+      <div v-if="activeTab === 'presentation'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="flex flex-col lg:flex-row gap-12">
           <!-- Main content -->
           <article class="lg:w-2/3">

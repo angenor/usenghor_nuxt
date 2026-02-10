@@ -118,6 +118,27 @@ export function useProgramsApi() {
   }
 
   // =========================================================================
+  // Media Library
+  // =========================================================================
+
+  async function getProgramAlbums(programId: string): Promise<string[]> {
+    return apiFetch<string[]>(`/api/admin/programs/${programId}/media-library`)
+  }
+
+  async function addProgramAlbum(programId: string, albumId: string): Promise<MessageResponse> {
+    return apiFetch<MessageResponse>(`/api/admin/programs/${programId}/media-library`, {
+      method: 'POST',
+      query: { album_external_id: albumId },
+    })
+  }
+
+  async function removeProgramAlbum(programId: string, albumId: string): Promise<MessageResponse> {
+    return apiFetch<MessageResponse>(`/api/admin/programs/${programId}/media-library/${albumId}`, {
+      method: 'DELETE',
+    })
+  }
+
+  // =========================================================================
   // Helpers
   // =========================================================================
 
@@ -147,6 +168,11 @@ export function useProgramsApi() {
     // Relations
     getSkillsByProgram,
     getCareerOpportunitiesByProgram,
+
+    // Media Library
+    getProgramAlbums,
+    addProgramAlbum,
+    removeProgramAlbum,
 
     // Helpers
     formatDuration,

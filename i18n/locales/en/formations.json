@@ -91,7 +91,14 @@
       },
       "deadline": "Deadline",
       "noOpenCalls": "No open calls for this program",
-      "viewAllCalls": "View all calls"
+      "viewAllCalls": "View all calls",
+      "tabs": {
+        "presentation": "Overview",
+        "actualites": "News",
+        "mediatheque": "Media Library"
+      },
+      "noNews": "No news associated with this program yet.",
+      "noMedia": "No albums associated with this program yet."
     },
     "candidature": {
       "seo": {

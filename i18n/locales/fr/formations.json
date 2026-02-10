@@ -91,7 +91,14 @@
       },
       "deadline": "Date limite",
       "noOpenCalls": "Aucun appel ouvert pour cette formation",
-      "viewAllCalls": "Voir tous les appels"
+      "viewAllCalls": "Voir tous les appels",
+      "tabs": {
+        "presentation": "Présentation",
+        "actualites": "Actualités",
+        "mediatheque": "Médiathèque"
+      },
+      "noNews": "Aucune actualité associée à ce programme pour le moment.",
+      "noMedia": "Aucun album associé à ce programme pour le moment."
     },
     "candidature": {
       "seo": {

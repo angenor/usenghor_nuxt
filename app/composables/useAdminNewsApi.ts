@@ -172,6 +172,8 @@ export function useAdminNewsApi() {
       project_name: null,
       call_id: news.call_external_id,
       call_name: null,
+      program_id: news.program_external_id,
+      program_name: null,
       // Statuts
       status: news.status,
       highlight_status: news.highlight_status,
@@ -275,6 +277,8 @@ export function useAdminNewsApi() {
     service_external_id?: string | null
     event_external_id?: string | null
     project_external_id?: string | null
+    call_external_id?: string | null
+    program_external_id?: string | null
     author_external_id?: string | null
     status?: NewsStatus
     published_at?: string | null
@@ -298,6 +302,8 @@ export function useAdminNewsApi() {
       service_external_id: data.service_external_id,
       event_external_id: data.event_external_id,
       project_external_id: data.project_external_id,
+      call_external_id: data.call_external_id,
+      program_external_id: data.program_external_id,
       author_external_id: data.author_external_id,
       status: data.status || 'draft',
       published_at: data.published_at,
@@ -329,6 +335,8 @@ export function useAdminNewsApi() {
     service_external_id?: string | null
     event_external_id?: string | null
     project_external_id?: string | null
+    call_external_id?: string | null
+    program_external_id?: string | null
     author_external_id?: string | null
     status?: NewsStatus
     published_at?: string | null
@@ -349,6 +357,8 @@ export function useAdminNewsApi() {
     if (data.service_external_id !== undefined) payload.service_external_id = data.service_external_id
     if (data.event_external_id !== undefined) payload.event_external_id = data.event_external_id
     if (data.project_external_id !== undefined) payload.project_external_id = data.project_external_id
+    if (data.call_external_id !== undefined) payload.call_external_id = data.call_external_id
+    if (data.program_external_id !== undefined) payload.program_external_id = data.program_external_id
     if (data.author_external_id !== undefined) payload.author_external_id = data.author_external_id
     if (data.status !== undefined) payload.status = data.status
     if (data.published_at !== undefined) payload.published_at = data.published_at
