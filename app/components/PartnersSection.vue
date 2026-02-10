@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { t } = useI18n()
+const localePath = useLocalePath()
 
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, loadContent } = useEditorialContent('homepage')
@@ -140,6 +141,17 @@ onMounted(() => {
               {{ country.name }}
             </span>
           </div>
+        </div>
+
+        <!-- CTA Button -->
+        <div class="text-center mt-12">
+          <NuxtLink
+            :to="localePath('/a-propos/gouvernance')"
+            class="group inline-flex items-center gap-2 px-8 py-4 bg-brand-blue-500 text-white font-semibold rounded-full transition-all duration-300 hover:bg-brand-blue-600 hover:shadow-xl hover:shadow-brand-blue-500/30 hover:-translate-y-1"
+          >
+            <span>{{ t('governance.cta') }}</span>
+            <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+          </NuxtLink>
         </div>
       </div>
     </div>

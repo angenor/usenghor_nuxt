@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { t } = useI18n()
+const localePath = useLocalePath()
 
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, loadContent } = useEditorialContent('homepage')
@@ -215,20 +216,13 @@ onMounted(() => {
                   {{ getContent('history.legacy.description') }}
                 </p>
 
-                <div class="flex flex-wrap justify-center gap-4">
-                  <div class="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10">
-                    <font-awesome-icon icon="fa-solid fa-globe-africa" class="w-4 h-4 text-brand-blue-400" />
-                    <span class="text-sm text-white">{{ t('history.legacy.tag1') }}</span>
-                  </div>
-                  <div class="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10">
-                    <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-4 h-4 text-brand-blue-400" />
-                    <span class="text-sm text-white">{{ t('history.legacy.tag2') }}</span>
-                  </div>
-                  <div class="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10">
-                    <font-awesome-icon icon="fa-solid fa-handshake-angle" class="w-4 h-4 text-brand-blue-400" />
-                    <span class="text-sm text-white">{{ t('history.legacy.tag3') }}</span>
-                  </div>
-                </div>
+                <NuxtLink
+                  :to="localePath('/a-propos/histoire')"
+                  class="group inline-flex items-center gap-2 px-8 py-4 bg-brand-blue-500 text-white font-semibold rounded-full transition-all duration-300 hover:bg-brand-blue-600 hover:shadow-xl hover:shadow-brand-blue-500/30 hover:-translate-y-1"
+                >
+                  <span>{{ t('history.legacy.cta') }}</span>
+                  <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </NuxtLink>
               </div>
             </div>
           </div>
