@@ -241,15 +241,15 @@ onUnmounted(() => {
             <div class="flex flex-wrap gap-4 mb-8">
               <div class="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10">
                 <font-awesome-icon icon="fa-solid fa-briefcase" class="w-4 h-4 text-brand-blue-400" />
-                <span class="text-sm text-white">{{ t('mission.experience.features.immersion') }}</span>
+                <span class="text-sm text-white">{{ getContent('experience.features.immersion', 'mission.experience.features.immersion') }}</span>
               </div>
               <div class="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10">
                 <font-awesome-icon icon="fa-solid fa-lightbulb" class="w-4 h-4 text-brand-blue-400" />
-                <span class="text-sm text-white">{{ t('mission.experience.features.creativity') }}</span>
+                <span class="text-sm text-white">{{ getContent('experience.features.creativity', 'mission.experience.features.creativity') }}</span>
               </div>
               <div class="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/10">
                 <font-awesome-icon icon="fa-solid fa-users" class="w-4 h-4 text-brand-blue-400" />
-                <span class="text-sm text-white">{{ t('mission.experience.features.network') }}</span>
+                <span class="text-sm text-white">{{ getContent('experience.features.network', 'mission.experience.features.network') }}</span>
               </div>
             </div>
 

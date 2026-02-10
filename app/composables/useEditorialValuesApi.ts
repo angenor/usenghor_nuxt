@@ -151,6 +151,7 @@ export const homepageSections: PageSection[] = [
     color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
     editorialKeys: [
       'experience.badge', 'experience.title', 'experience.description', 'experience.cta',
+      'experience.features.immersion', 'experience.features.creativity', 'experience.features.network',
       'experience.stats.countries', 'experience.stats.graduates', 'experience.stats.years',
     ],
     fields: [
@@ -158,6 +159,9 @@ export const homepageSections: PageSection[] = [
       { key: 'experience.title', label: 'Titre Expérience', description: 'Titre du bloc', type: 'text', editorialKey: 'experience.title', editable: true },
       { key: 'experience.description', label: 'Description', description: 'Texte descriptif', type: 'textarea', editorialKey: 'experience.description', editable: true },
       { key: 'experience.cta', label: 'Bouton CTA', description: 'Texte du bouton d\'action', type: 'text', editorialKey: 'experience.cta', editable: true },
+      { key: 'experience.features.immersion', label: 'Badge Immersion', description: 'Texte du badge Immersion professionnelle', type: 'text', editorialKey: 'experience.features.immersion', editable: true },
+      { key: 'experience.features.creativity', label: 'Badge Créativité', description: 'Texte du badge Projets créatifs', type: 'text', editorialKey: 'experience.features.creativity', editable: true },
+      { key: 'experience.features.network', label: 'Badge Réseau', description: 'Texte du badge Réseau international', type: 'text', editorialKey: 'experience.features.network', editable: true },
       { key: 'experience.stats.countries', label: 'Stat Pays - Libellé', description: 'Libellé de la statistique pays', type: 'text', editorialKey: 'experience.stats.countries', editable: true },
       { key: 'experience.stats.graduates', label: 'Stat Diplômés - Libellé', description: 'Libellé de la statistique diplômés', type: 'text', editorialKey: 'experience.stats.graduates', editable: true },
       { key: 'experience.stats.years', label: 'Stat Années - Libellé', description: 'Libellé de la statistique années', type: 'text', editorialKey: 'experience.stats.years', editable: true },
