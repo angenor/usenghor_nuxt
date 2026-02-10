@@ -105,7 +105,10 @@ const getImageUrl = (program: ProgramPublic) => {
           {{ getContent('formations.badge', 'formations.index.featured.badge') }}
         </NuxtLink>
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-          {{ getContent('formations.title', 'formations.index.featured.title') }}
+          <span class="relative inline-block">
+            {{ getContent('formations.title', 'formations.index.featured.title') }}
+            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-red-500 to-brand-red-300 rounded-full"></span>
+          </span>
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
           {{ getContent('formations.subtitle', 'formations.index.subtitle') }}

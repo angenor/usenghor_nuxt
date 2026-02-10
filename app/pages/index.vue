@@ -10,5 +10,6 @@
     <HistorySection />
     <PartnersSection />
     <PartnersCampusMapSection />
+    <PartnersUnifiedPartnersSection variant="marquee" />
   </div>
 </template>

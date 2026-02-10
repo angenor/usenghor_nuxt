@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import type { PartnerPublic } from '~/composables/usePublicPartnersApi'
 
+const props = withDefaults(defineProps<{
+  variant?: 'full' | 'marquee'
+}>(), {
+  variant: 'full',
+})
+
 const { t } = useI18n()
+const localePath = useLocalePath()
 const {
   getAllPartners,
   getPartnerLogoUrl,
@@ -86,7 +93,107 @@ const uniqueCountriesCount = computed(() => {
 </script>
 
 <template>
-  <section ref="sectionRef" class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-950">
+  <!-- ==================== VARIANT: MARQUEE (Homepage) ==================== -->
+  <section v-if="variant === 'marquee'" ref="sectionRef" class="py-16 lg:py-24 bg-white dark:bg-gray-900 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
+      <!-- Section Header -->
+      <div class="text-center">
+        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 mb-4">
+          <font-awesome-icon icon="fa-solid fa-handshake" class="w-3.5 h-3.5 mr-2" />
+          {{ t('partners.campus.badge') }}
+        </span>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          <span class="relative inline-block">
+            {{ t('partners.hero.title') }}
+            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-red-500 to-brand-red-300 rounded-full"></span>
+          </span>
+        </h2>
+        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          {{ t('partners.hero.subtitle') }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div v-if="loading" class="flex items-center justify-center py-12">
+      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-blue-600"></div>
+    </div>
+
+    <!-- Marquee -->
+    <div v-else-if="allPartners.length > 0" class="marquee-container group/marquee">
+      <div class="marquee-track">
+        <div
+          v-for="partner in allPartners"
+          :key="`a-${partner.id}`"
+          class="marquee-item"
+        >
+          <a
+            :href="partner.website || undefined"
+            :target="partner.website ? '_blank' : undefined"
+            :rel="partner.website ? 'noopener noreferrer' : undefined"
+            class="group flex flex-col items-center p-4 rounded-xl border bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:shadow-md hover:border-brand-blue-300 dark:hover:border-brand-blue-700 transition-all duration-300"
+            :class="partner.website ? 'cursor-pointer' : 'cursor-default'"
+          >
+            <div class="w-16 h-16 mb-2 flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 p-2">
+              <img
+                :src="getPartnerLogoUrl(partner)"
+                :alt="partner.name"
+                class="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-110"
+                loading="lazy"
+                @error="($event.target as HTMLImageElement).src = `https://picsum.photos/seed/${partner.id}/200/200`"
+              >
+            </div>
+            <span class="text-xs font-medium text-gray-700 dark:text-gray-300 text-center line-clamp-2 w-28">
+              {{ partner.name }}
+            </span>
+          </a>
+        </div>
+        <!-- Duplication pour boucle infinie -->
+        <div
+          v-for="partner in allPartners"
+          :key="`b-${partner.id}`"
+          class="marquee-item"
+          aria-hidden="true"
+        >
+          <a
+            :href="partner.website || undefined"
+            :target="partner.website ? '_blank' : undefined"
+            :rel="partner.website ? 'noopener noreferrer' : undefined"
+            class="group flex flex-col items-center p-4 rounded-xl border bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:shadow-md hover:border-brand-blue-300 dark:hover:border-brand-blue-700 transition-all duration-300"
+            :class="partner.website ? 'cursor-pointer' : 'cursor-default'"
+            tabindex="-1"
+          >
+            <div class="w-16 h-16 mb-2 flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 p-2">
+              <img
+                :src="getPartnerLogoUrl(partner)"
+                :alt="partner.name"
+                class="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-110"
+                loading="lazy"
+                @error="($event.target as HTMLImageElement).src = `https://picsum.photos/seed/${partner.id}/200/200`"
+              >
+            </div>
+            <span class="text-xs font-medium text-gray-700 dark:text-gray-300 text-center line-clamp-2 w-28">
+              {{ partner.name }}
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lien vers page partenaires -->
+    <div v-if="!loading && allPartners.length > 0" class="text-center mt-8">
+      <NuxtLink
+        :to="localePath('/a-propos/partenaires')"
+        class="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 transition-colors"
+      >
+        {{ t('partners.hero.title') }}
+        <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3.5 h-3.5" />
+      </NuxtLink>
+    </div>
+  </section>
+
+  <!-- ==================== VARIANT: FULL (Partners page) ==================== -->
+  <section v-else ref="sectionRef" class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-950">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Section Header -->
       <div class="text-center mb-12">
@@ -253,5 +360,44 @@ const uniqueCountriesCount = computed(() => {
 
 .list-move {
   transition: transform 0.3s ease;
+}
+
+/* Marquee */
+.marquee-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+.marquee-track {
+  display: flex;
+  gap: 1rem;
+  width: max-content;
+  animation: marquee-scroll 40s linear infinite;
+}
+
+.marquee-item {
+  flex-shrink: 0;
+}
+
+.group\/marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation-play-state: paused;
+  }
 }
 </style>
