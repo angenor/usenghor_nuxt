@@ -235,11 +235,12 @@ const validateForm = (): boolean => {
     formErrors.value.key = 'La clé doit commencer par une lettre et ne contenir que des lettres minuscules, chiffres et underscores'
   }
 
-  if (!formData.value.value.trim()) {
+  const valueStr = String(formData.value.value).trim()
+  if (!valueStr) {
     formErrors.value.value = 'La valeur est requise'
   }
   else {
-    const num = Number.parseFloat(formData.value.value)
+    const num = Number.parseFloat(valueStr)
     if (Number.isNaN(num)) {
       formErrors.value.value = 'La valeur doit être un nombre valide'
     }
