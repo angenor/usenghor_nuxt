@@ -37,9 +37,6 @@ const breadcrumb = computed(() => [
     <!-- Sticky Tabs Navigation -->
     <SectionAboutTabsNav />
 
-    <!-- Introduction -->
-    <CareersIntroSection />
-
     <!-- Opportunities Cards -->
     <CareersOpportunitiesSection />
 

@@ -4,6 +4,17 @@ const { t } = useI18n()
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, loadContent } = useEditorialContent('homepage')
 
+// Chiffres clés depuis la BDD (avec fallback hardcodé)
+const keyFiguresStore = useKeyFiguresStore()
+
+const fallbackStats = { countries: 54, graduates: 5000, years: 30 }
+
+const targetStats = computed(() => ({
+  countries: Number(keyFiguresStore.getFigure('stats_countries')) || fallbackStats.countries,
+  graduates: Number(keyFiguresStore.getFigure('stats_graduates')) || fallbackStats.graduates,
+  years: Number(keyFiguresStore.getFigure('stats_years')) || fallbackStats.years,
+}))
+
 const { elementRef: headerRef } = useScrollAnimation({ animation: 'fadeInDown' })
 const { elementRef: missionCardRef } = useScrollAnimation({ animation: 'fadeInLeft', threshold: 0.2 })
 const { elementRef: visionCardRef } = useScrollAnimation({ animation: 'fadeInRight', threshold: 0.2 })
@@ -16,12 +27,6 @@ const animatedStats = ref({
   graduates: 0,
   years: 0,
 })
-
-const targetStats = {
-  countries: 54,
-  graduates: 5000,
-  years: 30,
-}
 
 const animateValue = (key: keyof typeof animatedStats.value, target: number, duration = 2000) => {
   const startTime = performance.now()
@@ -40,16 +45,17 @@ const animateValue = (key: keyof typeof animatedStats.value, target: number, dur
 const startAnimation = () => {
   if (hasAnimated.value) return
   hasAnimated.value = true
-  animateValue('countries', targetStats.countries, 1500)
-  setTimeout(() => animateValue('graduates', targetStats.graduates, 2000), 200)
-  setTimeout(() => animateValue('years', targetStats.years, 1500), 400)
+  animateValue('countries', targetStats.value.countries, 1500)
+  setTimeout(() => animateValue('graduates', targetStats.value.graduates, 2000), 200)
+  setTimeout(() => animateValue('years', targetStats.value.years, 1500), 400)
 }
 
 let observer: IntersectionObserver | null = null
 
-onMounted(() => {
-  // Charger les contenus éditoriaux (non-bloquant)
+onMounted(async () => {
+  // Charger les contenus éditoriaux et les chiffres clés en parallèle (non-bloquant)
   loadContent()
+  keyFiguresStore.fetchFigures()
 
   observer = new IntersectionObserver(
     (entries) => {
