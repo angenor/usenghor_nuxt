@@ -4,32 +4,63 @@ const { conseilAdministration, getTextesFondateurs, getCAPresident } = useMockDa
 const { paysBailleurs, egypte, northernFounders, africanFounders, laterMembers } = usePaysBailleursData()
 const { selectedPays, openDrawer, closeDrawer } = useCountryDrawer()
 
+// Contenus éditoriaux avec fallback i18n
+const { getContent, getRawContent, loadContent } = useEditorialContent('governance')
+
+onMounted(() => {
+  loadContent()
+})
+
 // SEO
 useSeoMeta({
-  title: () => t('governance.title'),
-  description: () => t('governance.subtitle'),
-  ogTitle: () => t('governance.title'),
-  ogDescription: () => t('governance.subtitle')
+  title: () => getContent('governance.title'),
+  description: () => getContent('governance.subtitle'),
+  ogTitle: () => getContent('governance.title'),
+  ogDescription: () => getContent('governance.subtitle'),
 })
 
 // Breadcrumb
 const breadcrumb = computed(() => [
   { label: t('nav.home'), to: '/' },
   { label: t('nav.about'), to: '/a-propos' },
-  { label: t('governance.badge') }
+  { label: getContent('governance.badge') },
 ])
 
-// Données
-const foundingTexts = computed(() => getTextesFondateurs())
+// Documents fondateurs : éditorial (JSON) → fallback mock
+const foundingTexts = computed(() => {
+  const rawDocs = getRawContent('governance.foundingTexts.documents')
+  if (rawDocs) {
+    try {
+      const parsed = JSON.parse(rawDocs)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed
+      }
+    }
+    catch {
+      // Fallback vers mock data
+    }
+  }
+  return getTextesFondateurs()
+})
+
+// Titre et description des sections (éditorial avec fallback i18n)
+const foundingTextsTitle = computed(() => getContent('governance.foundingTexts.title'))
+const foundingTextsDescription = computed(() => getContent('governance.foundingTexts.description'))
+const donorCountriesTitle = computed(() => getContent('governance.donorCountries.title'))
+const donorCountriesDescription = computed(() => getContent('governance.donorCountries.description'))
+const boardTitle = computed(() => getContent('governance.board.title'))
+const boardDescription = computed(() => getContent('governance.board.description'))
+
+// Conseil d'Administration
 const president = computed(() => getCAPresident())
 const members = computed(() =>
-  conseilAdministration.value.filter(m => m.ca_role === 'membre')
+  conseilAdministration.value.filter(m => m.ca_role === 'membre'),
 )
 const vicePresidents = computed(() =>
-  conseilAdministration.value.filter(m => m.ca_role === 'vice_president')
+  conseilAdministration.value.filter(m => m.ca_role === 'vice_president'),
 )
 const observers = computed(() =>
-  conseilAdministration.value.filter(m => m.ca_role === 'observateur')
+  conseilAdministration.value.filter(m => m.ca_role === 'observateur'),
 )
 </script>
 
@@ -37,8 +68,8 @@ const observers = computed(() =>
   <div>
     <!-- Hero -->
     <PageHero
-      :title="t('governance.badge')"
-      :subtitle="t('governance.subtitle')"
+      :title="getContent('governance.badge')"
+      :subtitle="getContent('governance.subtitle')"
       image="/images/bg/backgroud_senghor3.jpg"
       :breadcrumb="breadcrumb"
     />
@@ -47,7 +78,11 @@ const observers = computed(() =>
     <SectionAboutTabsNav />
 
     <!-- Section 1: Textes Fondateurs -->
-    <GovernanceFoundingTextsSection :documents="foundingTexts" />
+    <GovernanceFoundingTextsSection
+      :documents="foundingTexts"
+      :title="foundingTextsTitle"
+      :description="foundingTextsDescription"
+    />
 
     <!-- Section 2: Pays Bailleurs -->
     <GovernanceDonorCountriesSection
@@ -55,6 +90,8 @@ const observers = computed(() =>
       :egypte="egypte"
       :northern-founders="northernFounders"
       :african-founders="africanFounders"
+      :title="donorCountriesTitle"
+      :description="donorCountriesDescription"
       @open-drawer="openDrawer"
     />
 
@@ -77,6 +114,8 @@ const observers = computed(() =>
       :vice-presidents="vicePresidents"
       :members="members"
       :observers="observers"
+      :title="boardTitle"
+      :description="boardDescription"
     />
   </div>
 </template>

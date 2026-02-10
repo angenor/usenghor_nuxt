@@ -1,8 +1,21 @@
 <script setup lang="ts">
-import type { Document } from '@bank/mock-data/documents'
+interface FoundingDocument {
+  id: string
+  title_fr: string
+  description_fr?: string
+  file_url: string
+  file_size?: number
+  year?: number
+  cover_image?: string
+  // Champs du mock data compatibles
+  document_category?: string
+  sort_order?: number
+}
 
 interface Props {
-  documents: Document[]
+  documents: FoundingDocument[]
+  title?: string
+  description?: string
 }
 
 const props = defineProps<Props>()
@@ -10,7 +23,11 @@ const props = defineProps<Props>()
 const { t } = useI18n()
 const { elementRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.2 })
 
-const formatFileSize = (bytes: number) => {
+const sectionTitle = computed(() => props.title || t('governance.foundingTexts.title'))
+const sectionDescription = computed(() => props.description || t('governance.foundingTexts.description'))
+
+const formatFileSize = (bytes?: number) => {
+  if (!bytes) return ''
   if (bytes < 1024) return bytes + ' B'
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
@@ -39,12 +56,12 @@ const formatFileSize = (bytes: number) => {
         <div class="px-4 sm:px-6 lg:pl-8 xl:pl-[max(2rem,calc((100vw-80rem)/2+2rem))] lg:pr-12">
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
             <span class="relative inline-block">
-              {{ t('governance.foundingTexts.title') }}
+              {{ sectionTitle }}
               <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-red-500 to-brand-red-300 rounded-full"></span>
             </span>
           </h2>
           <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-            {{ t('governance.foundingTexts.description') }}
+            {{ sectionDescription }}
           </p>
         </div>
 
@@ -98,7 +115,7 @@ const formatFileSize = (bytes: number) => {
                       <font-awesome-icon icon="fa-solid fa-download" />
                       Télécharger
                     </a>
-                    <p class="text-white/50 text-xs mt-3">{{ formatFileSize(doc.file_size) }}</p>
+                    <p v-if="doc.file_size" class="text-white/50 text-xs mt-3">{{ formatFileSize(doc.file_size) }}</p>
                   </div>
                 </div>
               </div>

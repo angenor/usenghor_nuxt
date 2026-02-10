@@ -6,6 +6,8 @@ interface Props {
   egypte: PaysBailleur | undefined
   northernFounders: PaysBailleur[]
   africanFounders: PaysBailleur[]
+  title?: string
+  description?: string
 }
 
 const props = defineProps<Props>()
@@ -16,6 +18,9 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const { getFlagEmoji } = useMockData()
 const { elementRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.2 })
+
+const sectionTitle = computed(() => props.title || t('governance.donorCountries.title'))
+const sectionDescription = computed(() => props.description || t('governance.donorCountries.description'))
 </script>
 
 <template>
@@ -37,10 +42,10 @@ const { elementRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.
       <!-- Header avec stats -->
       <div class="text-center mb-16">
         <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-          {{ t('governance.donorCountries.title') }}
+          {{ sectionTitle }}
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-          {{ t('governance.donorCountries.description') }}
+          {{ sectionDescription }}
         </p>
 
         <!-- Stats animées -->

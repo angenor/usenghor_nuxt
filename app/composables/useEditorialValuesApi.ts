@@ -46,7 +46,7 @@ export interface PageSectionField {
   key: string
   label: string
   description: string
-  type: 'text' | 'textarea' | 'number' | 'html' | 'image' | 'list'
+  type: 'text' | 'textarea' | 'number' | 'html' | 'image' | 'list' | 'documents'
   i18nKey?: string // Clé i18n si le champ utilise les traductions
   editorialKey?: ValueSectionKey // Clé éditoriale si éditable via le backend
   editable: boolean
@@ -1070,6 +1070,69 @@ export const historyPageSections: PageSection[] = [
 ]
 
 // ============================================================================
+// DÉFINITION DE LA PAGE GOUVERNANCE
+// ============================================================================
+
+export const governancePageSections: PageSection[] = [
+  {
+    id: 'governance-hero',
+    name: 'Hero Gouvernance',
+    description: 'Bannière principale de la page Gouvernance',
+    icon: 'landmark',
+    color: 'bg-gradient-to-r from-brand-blue-500 to-brand-red-500 text-white',
+    editorialKeys: ['governance.badge', 'governance.title', 'governance.subtitle'],
+    fields: [
+      { key: 'governance.badge', label: 'Badge', description: 'Texte du badge (ex: Notre structure)', type: 'text', editorialKey: 'governance.badge', editable: true },
+      { key: 'governance.title', label: 'Titre', description: 'Titre principal du hero', type: 'text', editorialKey: 'governance.title', editable: true },
+      { key: 'governance.subtitle', label: 'Sous-titre', description: 'Sous-titre du hero', type: 'textarea', editorialKey: 'governance.subtitle', editable: true },
+    ],
+  },
+  {
+    id: 'governance-founding-texts',
+    name: 'Section Textes Fondateurs',
+    description: 'Introduction et liste dynamique des textes fondateurs (documents PDF)',
+    icon: 'file-alt',
+    color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+    editorialKeys: [
+      'governance.foundingTexts.badge',
+      'governance.foundingTexts.title',
+      'governance.foundingTexts.description',
+      'governance.foundingTexts.documents',
+    ],
+    fields: [
+      { key: 'governance.foundingTexts.badge', label: 'Badge', description: 'Texte du badge de la section', type: 'text', editorialKey: 'governance.foundingTexts.badge', editable: true },
+      { key: 'governance.foundingTexts.title', label: 'Titre', description: 'Titre de la section textes fondateurs', type: 'text', editorialKey: 'governance.foundingTexts.title', editable: true },
+      { key: 'governance.foundingTexts.description', label: 'Description', description: 'Texte de présentation des textes fondateurs', type: 'html', editorialKey: 'governance.foundingTexts.description', editable: true },
+      { key: 'governance.foundingTexts.documents', label: 'Documents fondateurs', description: 'Liste dynamique des documents (PDF, chartes, conventions). Ajoutez, modifiez ou supprimez les documents.', type: 'documents', editorialKey: 'governance.foundingTexts.documents', editable: true },
+    ],
+  },
+  {
+    id: 'governance-donor-countries',
+    name: 'Section Pays Bailleurs',
+    description: 'Introduction de la section des pays bailleurs (la liste des pays est gérée séparément)',
+    icon: 'globe-africa',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    editorialKeys: ['governance.donorCountries.title', 'governance.donorCountries.description'],
+    fields: [
+      { key: 'governance.donorCountries.title', label: 'Titre', description: 'Titre de la section pays bailleurs', type: 'text', editorialKey: 'governance.donorCountries.title', editable: true },
+      { key: 'governance.donorCountries.description', label: 'Description', description: 'Texte de présentation des pays bailleurs', type: 'textarea', editorialKey: 'governance.donorCountries.description', editable: true },
+    ],
+  },
+  {
+    id: 'governance-board',
+    name: 'Section Conseil d\'Administration',
+    description: 'Introduction du Conseil d\'Administration (les membres sont gérés via la BDD)',
+    icon: 'users',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    editorialKeys: ['governance.board.title', 'governance.board.description'],
+    fields: [
+      { key: 'governance.board.title', label: 'Titre', description: 'Titre de la section Conseil d\'Administration', type: 'text', editorialKey: 'governance.board.title', editable: true },
+      { key: 'governance.board.description', label: 'Description', description: 'Texte de présentation du Conseil', type: 'textarea', editorialKey: 'governance.board.description', editable: true },
+    ],
+  },
+]
+
+// ============================================================================
 // DÉFINITION DES ÉLÉMENTS GLOBAUX (NAVBAR, FOOTER, etc.)
 // ============================================================================
 
@@ -1153,6 +1216,14 @@ export const frontOfficePages: FrontOfficePage[] = [
     description: 'Timeline historique de l\'université avec les étapes clés et les dirigeants',
     icon: 'landmark',
     sections: historyPageSections,
+  },
+  {
+    id: 'governance',
+    name: 'Page Gouvernance',
+    slug: '/a-propos/gouvernance',
+    description: 'Textes fondateurs, pays bailleurs et Conseil d\'Administration',
+    icon: 'landmark',
+    sections: governancePageSections,
   },
   {
     id: 'careers',

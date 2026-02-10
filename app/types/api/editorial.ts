@@ -200,15 +200,21 @@ export type ValueSectionKey =
   | 'history.timeline.2020.title'
   | 'history.timeline.2020.description'
   | 'history.timeline.2020.phase'
-  // Partners/Governance section
+  // Page Gouvernance - Hero
   | 'governance.badge'
   | 'governance.title'
   | 'governance.subtitle'
+  // Page Gouvernance - Textes fondateurs
   | 'governance.foundingTexts.badge'
   | 'governance.foundingTexts.title'
   | 'governance.foundingTexts.description'
+  | 'governance.foundingTexts.documents'
+  // Page Gouvernance - Pays bailleurs
   | 'governance.donorCountries.title'
   | 'governance.donorCountries.description'
+  // Page Gouvernance - Conseil d'Administration
+  | 'governance.board.title'
+  | 'governance.board.description'
   // Page À propos - Hero
   | 'about.hero.title'
   | 'about.hero.subtitle'

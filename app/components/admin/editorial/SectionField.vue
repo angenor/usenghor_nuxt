@@ -68,6 +68,19 @@ function cancel() {
     @history="emit('history')"
   />
 
+  <!-- Pour les champs documents (liste dynamique JSON), utiliser le composant dédié -->
+  <AdminEditorialDocumentsField
+    v-else-if="field.type === 'documents'"
+    :field="field"
+    :value="value"
+    :is-editing="isEditing"
+    :is-saving="isSaving"
+    @edit="emit('edit')"
+    @save="(val: string, valueType: 'text' | 'number' | 'html') => emit('save', val, valueType)"
+    @cancel="emit('cancel')"
+    @history="emit('history')"
+  />
+
   <!-- Pour les autres types, garder le comportement actuel -->
   <div v-else class="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 overflow-hidden">
     <!-- Field header -->

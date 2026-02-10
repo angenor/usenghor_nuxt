@@ -6,12 +6,17 @@ interface Props {
   vicePresidents: CAMember[]
   members: CAMember[]
   observers: CAMember[]
+  title?: string
+  description?: string
 }
 
 const props = defineProps<Props>()
 
 const { t } = useI18n()
 const { getFlagEmoji } = useMockData()
+
+const sectionTitle = computed(() => props.title || t('governance.board.title'))
+const sectionDescription = computed(() => props.description || t('governance.board.description'))
 const { elementRef: headerRef } = useScrollAnimation({ animation: 'fadeInDown' })
 const { elementRef: orgChartRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.1 })
 
@@ -140,13 +145,13 @@ watch([() => props.vicePresidents, () => props.members], () => {
       <div ref="headerRef" class="text-center mb-16 lg:mb-20">
         <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 mb-4">
           <font-awesome-icon icon="fa-solid fa-landmark" class="w-3.5 h-3.5 mr-2" />
-          {{ t('governance.board.title') }}
+          {{ sectionTitle }}
         </span>
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-          {{ t('governance.board.title') }}
+          {{ sectionTitle }}
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          {{ t('governance.board.description') }}
+          {{ sectionDescription }}
         </p>
       </div>
 

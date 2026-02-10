@@ -143,10 +143,17 @@ const EDITORIAL_TO_I18N_MAP: Partial<Record<string, string>> = {
   'strategy.hero.title': 'strategy.hero.title',
   'strategy.hero.subtitle': 'strategy.hero.subtitle',
 
-  // Governance / Partners section
+  // Page Gouvernance
   'governance.badge': 'governance.badge',
   'governance.title': 'governance.title',
   'governance.subtitle': 'governance.subtitle',
+  'governance.foundingTexts.badge': 'governance.foundingTexts.badge',
+  'governance.foundingTexts.title': 'governance.foundingTexts.title',
+  'governance.foundingTexts.description': 'governance.foundingTexts.description',
+  'governance.donorCountries.title': 'governance.donorCountries.title',
+  'governance.donorCountries.description': 'governance.donorCountries.description',
+  'governance.board.title': 'governance.board.title',
+  'governance.board.description': 'governance.board.description',
 
   // Navbar (éléments globaux)
   'navbar.apply.text': 'nav.apply',
