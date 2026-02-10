@@ -34,14 +34,10 @@ const programs = [
   }
 ]
 
-// Gallery images
-const galleryImages = [
-  { src: '/images/bg/backgroud_senghor1.jpg', alt: 'Remise de diplômes Senghor' },
-  { src: '/images/bg/backgroud_senghor2.jpg', alt: 'Campus Alexandrie' },
-  { src: '/images/bg/backgroud_senghor3.jpg', alt: 'Étudiants Senghor' },
-  { src: '/images/bg/bg_mission_section.jpeg', alt: 'Université Senghor' },
-  { src: '/images/bg/bg_stats_section.jpeg', alt: 'Vie universitaire' }
-]
+// Images
+const heroImage = { src: '/images/bg/backgroud_senghor1.jpg', alt: 'Remise de diplômes Senghor' }
+const ctaImage = '/images/bg/bg_stats_section.jpeg'
+const bottomImage = '/images/bg/bg_mission_section.jpeg'
 </script>
 
 <template>
@@ -51,7 +47,7 @@ const galleryImages = [
     class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-900 transition-colors duration-300 scroll-mt-20 overflow-hidden"
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Header with Image Bento Grid -->
+      <!-- Header -->
       <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mb-16">
         <!-- Text Content -->
         <div class="order-2 lg:order-1">
@@ -98,47 +94,15 @@ const galleryImages = [
           </div>
         </div>
 
-        <!-- Bento Image Grid -->
+        <!-- Image -->
         <div class="order-1 lg:order-2 relative">
-          <div class="bento-grid">
-            <!-- Main large image -->
-            <div class="bento-item bento-item--large">
-              <img
-                :src="galleryImages[0].src"
-                :alt="galleryImages[0].alt"
-                class="w-full h-full object-cover"
-              />
-              <div class="absolute inset-0 bg-gradient-to-t from-brand-blue-600/40 to-transparent"></div>
-            </div>
-
-            <!-- Top right -->
-            <div class="bento-item bento-item--medium">
-              <img
-                :src="galleryImages[1].src"
-                :alt="galleryImages[1].alt"
-                class="w-full h-full object-cover"
-              />
-              <div class="absolute inset-0 bg-gradient-to-br from-purple-600/30 to-transparent"></div>
-            </div>
-
-            <!-- Bottom left small -->
-            <div class="bento-item bento-item--small">
-              <img
-                :src="galleryImages[2].src"
-                :alt="galleryImages[2].alt"
-                class="w-full h-full object-cover"
-              />
-            </div>
-
-            <!-- Bottom right -->
-            <div class="bento-item bento-item--accent">
-              <div class="w-full h-full bg-gradient-to-br from-brand-blue-500 to-brand-blue-600 flex items-center justify-center p-4">
-                <div class="text-center text-white">
-                  <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-8 h-8 mb-2" />
-                  <p class="text-sm font-medium">Alexandrie, Égypte</p>
-                </div>
-              </div>
-            </div>
+          <div class="relative rounded-2xl overflow-hidden shadow-xl">
+            <img
+              :src="heroImage.src"
+              :alt="heroImage.alt"
+              class="w-full h-72 sm:h-80 lg:h-full lg:min-h-[400px] object-cover"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-brand-blue-600/30 to-transparent"></div>
           </div>
 
           <!-- Decorative elements -->
@@ -176,7 +140,7 @@ const galleryImages = [
           <!-- CTA Card with Image Background -->
           <div class="relative overflow-hidden rounded-2xl">
             <img
-              :src="galleryImages[4].src"
+              :src="ctaImage"
               alt="Campus"
               class="absolute inset-0 w-full h-full object-cover"
             />
@@ -247,7 +211,7 @@ const galleryImages = [
           <!-- Bottom image accent -->
           <div class="mt-8 relative rounded-2xl overflow-hidden shadow-lg">
             <img
-              :src="galleryImages[3].src"
+              :src="bottomImage"
               alt="Bibliothèque"
               class="w-full h-40 object-cover"
             />
@@ -266,55 +230,6 @@ const galleryImages = [
 </template>
 
 <style scoped>
-/* Bento Grid */
-.bento-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 100px);
-  gap: 1rem;
-  position: relative;
-  z-index: 1;
-}
-
-@media (min-width: 640px) {
-  .bento-grid {
-    grid-template-rows: repeat(3, 120px);
-  }
-}
-
-.bento-item {
-  position: relative;
-  border-radius: 1rem;
-  overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.bento-item:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-.bento-item--large {
-  grid-column: 1 / 2;
-  grid-row: 1 / 4;
-}
-
-.bento-item--medium {
-  grid-column: 2 / 4;
-  grid-row: 1 / 3;
-}
-
-.bento-item--small {
-  grid-column: 2 / 3;
-  grid-row: 3 / 4;
-}
-
-.bento-item--accent {
-  grid-column: 3 / 4;
-  grid-row: 3 / 4;
-}
-
 /* Infographic */
 .infographic-container {
   display: flex;
@@ -479,30 +394,6 @@ const galleryImages = [
 
 /* Responsive - Mobile */
 @media (max-width: 640px) {
-  .bento-grid {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 120px);
-  }
-
-  .bento-item--large {
-    grid-column: 1 / 2;
-    grid-row: 1 / 3;
-  }
-
-  .bento-item--medium {
-    grid-column: 2 / 3;
-    grid-row: 1 / 2;
-  }
-
-  .bento-item--small {
-    display: none;
-  }
-
-  .bento-item--accent {
-    grid-column: 2 / 3;
-    grid-row: 2 / 3;
-  }
-
   .infographic-container {
     padding-left: 1rem;
     padding-right: 1rem;

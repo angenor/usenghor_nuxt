@@ -171,8 +171,8 @@ onMounted(() => {
                       <font-awesome-icon icon="fa-solid fa-door-open" class="w-5 h-5 text-brand-red-600 dark:text-brand-red-400" />
                     </div>
                     <div>
-                      <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('history.usenghor.milestone1.title') }}</p>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('history.usenghor.milestone1.desc') }}</p>
+                      <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ getContent('history.usenghor.milestone1.title') }}</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">{{ getContent('history.usenghor.milestone1.desc') }}</p>
                     </div>
                   </div>
                   <div class="flex items-center gap-4 p-3 bg-brand-red-50 dark:bg-brand-red-900/20 rounded-xl">
@@ -180,8 +180,8 @@ onMounted(() => {
                       <font-awesome-icon icon="fa-solid fa-award" class="w-5 h-5 text-brand-red-600 dark:text-brand-red-400" />
                     </div>
                     <div>
-                      <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('history.usenghor.milestone2.title') }}</p>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('history.usenghor.milestone2.desc') }}</p>
+                      <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ getContent('history.usenghor.milestone2.title') }}</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">{{ getContent('history.usenghor.milestone2.desc') }}</p>
                     </div>
                   </div>
                 </div>
