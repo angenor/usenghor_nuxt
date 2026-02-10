@@ -34,10 +34,8 @@ const programs = [
   }
 ]
 
-// Images
+// Image
 const heroImage = { src: '/images/bg/backgroud_senghor1.jpg', alt: 'Remise de diplômes Senghor' }
-const ctaImage = '/images/bg/bg_stats_section.jpeg'
-const bottomImage = '/images/bg/bg_mission_section.jpeg'
 </script>
 
 <template>
@@ -136,31 +134,6 @@ const bottomImage = '/images/bg/bg_mission_section.jpeg'
               </div>
             </div>
           </div>
-
-          <!-- CTA Card with Image Background -->
-          <div class="relative overflow-hidden rounded-2xl">
-            <img
-              :src="ctaImage"
-              alt="Campus"
-              class="absolute inset-0 w-full h-full object-cover"
-            />
-            <div class="absolute inset-0 bg-gradient-to-r from-brand-blue-600/95 to-brand-blue-500/90"></div>
-            <div class="relative p-8 text-white">
-              <h4 class="text-xl font-bold mb-2">
-                {{ t('careers.students.cta.title') }}
-              </h4>
-              <p class="text-brand-blue-100 mb-6">
-                {{ t('careers.students.cta.text') }}
-              </p>
-              <NuxtLink
-                :to="localePath('/inscription')"
-                class="inline-flex items-center gap-2 px-6 py-3 bg-white text-brand-blue-600 font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-              >
-                <font-awesome-icon icon="fa-solid fa-file-pen" class="w-4 h-4" />
-                {{ t('careers.students.cta.button') }}
-              </NuxtLink>
-            </div>
-          </div>
         </div>
 
         <!-- Right: Programs Infographic -->
@@ -206,22 +179,6 @@ const bottomImage = '/images/bg/bg_mission_section.jpeg'
                 <font-awesome-icon :icon="program.icon" />
               </div>
             </NuxtLink>
-          </div>
-
-          <!-- Bottom image accent -->
-          <div class="mt-8 relative rounded-2xl overflow-hidden shadow-lg">
-            <img
-              :src="bottomImage"
-              alt="Bibliothèque"
-              class="w-full h-40 object-cover"
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent"></div>
-            <div class="absolute bottom-4 left-4 right-4 text-white">
-              <p class="text-sm font-medium flex items-center gap-2">
-                <font-awesome-icon icon="fa-solid fa-location-dot" class="w-3 h-3" />
-                Campus moderne à Alexandrie
-              </p>
-            </div>
           </div>
         </div>
       </div>
