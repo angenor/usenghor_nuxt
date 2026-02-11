@@ -46,8 +46,11 @@ const imageUrl = computed(() => props.image || 'https://picsum.photos/seed/teach
           </span>
 
           <!-- Title -->
-          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            {{ t('careers.teachers.title') }}
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            <span class="relative inline-block">
+              {{ t('careers.teachers.title') }}
+              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
+            </span>
           </h2>
 
           <!-- Subtitle -->

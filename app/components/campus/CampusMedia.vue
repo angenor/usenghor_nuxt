@@ -76,7 +76,7 @@ function getImageCount(album: AlbumPublicWithMedia): number {
     <h2 class="mb-6 text-3xl font-bold text-gray-900 sm:text-4xl lg:text-5xl dark:text-white">
       <span class="relative inline-block">
         {{ t('partners.campus.media.title') }}
-        <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-brand-red-500 to-brand-red-300"></span>
+        <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-brand-blue-500 to-brand-blue-300"></span>
       </span>
     </h2>
 

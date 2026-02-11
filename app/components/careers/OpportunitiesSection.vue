@@ -59,8 +59,11 @@ const scrollToAnchor = (anchor: string) => {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="text-center mb-12">
-        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-          {{ t('careers.opportunities.title') }}
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          <span class="relative inline-block">
+            {{ t('careers.opportunities.title') }}
+            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
+          </span>
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-300">
           {{ t('careers.opportunities.subtitle') }}

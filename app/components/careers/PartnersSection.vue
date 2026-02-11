@@ -63,8 +63,11 @@ const handleSubmit = async () => {
           <font-awesome-icon icon="fa-solid fa-handshake" class="w-3.5 h-3.5 mr-2" />
           {{ t('careers.opportunities.partners.title') }}
         </span>
-        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-          {{ t('careers.partners.title') }}
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          <span class="relative inline-block">
+            {{ t('careers.partners.title') }}
+            <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
+          </span>
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-300">
           {{ t('careers.partners.text') }}
