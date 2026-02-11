@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { NewsletterSubscriber } from '~/composables/useMockData'
+import type { SubscriberRead } from '~/composables/useSubscribersApi'
 
 definePageMeta({
   layout: 'admin'
@@ -9,16 +9,17 @@ const router = useRouter()
 const route = useRoute()
 
 const {
-  getSubscriberById,
+  getSubscriber,
+  updateSubscriber,
   sourceLabels,
   sourceColors
-} = useMockData()
+} = useSubscribersApi()
 
 // === STATE ===
 const isLoading = ref(true)
 const isSaving = ref(false)
 const notFound = ref(false)
-const subscriber = ref<NewsletterSubscriber | null>(null)
+const subscriber = ref<SubscriberRead | null>(null)
 
 // Form state
 const form = ref({
@@ -28,22 +29,21 @@ const form = ref({
 })
 
 // Charger les données
-onMounted(() => {
+onMounted(async () => {
   const subscriberId = route.params.id as string
-  const foundSubscriber = getSubscriberById(subscriberId)
-
-  if (foundSubscriber) {
-    subscriber.value = foundSubscriber
+  try {
+    const data = await getSubscriber(subscriberId)
+    subscriber.value = data
     form.value = {
-      first_name: foundSubscriber.first_name || '',
-      last_name: foundSubscriber.last_name || '',
-      active: foundSubscriber.active
+      first_name: data.first_name || '',
+      last_name: data.last_name || '',
+      active: data.active
     }
-  } else {
+  } catch {
     notFound.value = true
+  } finally {
+    isLoading.value = false
   }
-
-  isLoading.value = false
 })
 
 // === COMPUTED ===
@@ -70,21 +70,14 @@ const saveForm = async () => {
 
   isSaving.value = true
   try {
-    const updatedSubscriber = {
-      ...subscriber.value,
+    await updateSubscriber(subscriber.value.id, {
       first_name: form.value.first_name.trim() || null,
       last_name: form.value.last_name.trim() || null,
       active: form.value.active,
-      unsubscribed_at: !form.value.active && subscriber.value.active
-        ? new Date().toISOString()
-        : subscriber.value.unsubscribed_at
-    }
-
-    console.log('Mise à jour de l\'abonné:', updatedSubscriber)
-    // En production: PUT /api/admin/newsletter/subscribers/{id}
-
-    await new Promise(resolve => setTimeout(resolve, 500))
+    })
     router.push('/admin/newsletter/abonnes')
+  } catch (error) {
+    console.error('Erreur mise à jour:', error)
   } finally {
     isSaving.value = false
   }
@@ -261,7 +254,7 @@ const formatDate = (dateString: string) => {
             <span class="text-gray-500 dark:text-gray-400">ID:</span>
             <code class="ml-2 rounded bg-gray-200 px-1 text-xs dark:bg-gray-700">{{ subscriber.id }}</code>
           </div>
-          <div>
+          <div v-if="subscriber.unsubscribe_token">
             <span class="text-gray-500 dark:text-gray-400">Token:</span>
             <code class="ml-2 rounded bg-gray-200 px-1 text-xs dark:bg-gray-700">{{ subscriber.unsubscribe_token.substring(0, 20) }}...</code>
           </div>

@@ -1,10 +1,18 @@
 <script setup lang="ts">
+const props = withDefaults(defineProps<{
+  image?: string | null
+}>(), {
+  image: null,
+})
+
 const { t, tm } = useI18n()
 const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.1 })
 
 // Get translated arrays
 const benefits = computed(() => tm('careers.teachers.benefits.items') as any[])
 const positions = computed(() => tm('careers.teachers.positions.items') as any[])
+
+const imageUrl = computed(() => props.image || 'https://picsum.photos/seed/teachers-career/800/600')
 </script>
 
 <template>
@@ -19,7 +27,7 @@ const positions = computed(() => tm('careers.teachers.positions.items') as any[]
         <div class="relative order-2 lg:order-1">
           <div class="relative rounded-2xl overflow-hidden shadow-2xl">
             <img
-              src="https://picsum.photos/seed/teachers-career/800/600"
+              :src="imageUrl"
               :alt="t('careers.teachers.title')"
               class="w-full h-auto object-cover aspect-[4/3]"
             />

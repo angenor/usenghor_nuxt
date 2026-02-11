@@ -685,7 +685,7 @@ const hasAssociations = (item: NewsDisplay) => {
             <!-- Image -->
             <div class="overflow-hidden h-48">
               <img
-                :src="`https://picsum.photos/seed/${call.slug}/800/400`"
+                :src="getCoverImageUrl(call)"
                 :alt="call.title"
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"

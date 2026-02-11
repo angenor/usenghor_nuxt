@@ -5,12 +5,7 @@ definePageMeta({
 
 const router = useRouter()
 
-const {
-  isSubscriberEmailTaken,
-  validateSubscriberEmail,
-  generateSubscriberId,
-  generateUnsubscribeToken
-} = useMockData()
+const { createSubscriber } = useSubscribersApi()
 
 // === STATE ===
 const isSaving = ref(false)
@@ -26,10 +21,12 @@ const form = ref({
 
 // === COMPUTED ===
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 // Validation du formulaire
 const isFormValid = computed(() => {
   return form.value.email.trim() &&
-    validateSubscriberEmail(form.value.email) &&
+    emailRegex.test(form.value.email) &&
     !emailError.value
 })
 
@@ -44,13 +41,8 @@ const checkEmail = () => {
     return
   }
 
-  if (!validateSubscriberEmail(email)) {
+  if (!emailRegex.test(email)) {
     emailError.value = 'Format d\'email invalide'
-    return
-  }
-
-  if (isSubscriberEmailTaken(email)) {
-    emailError.value = 'Cet email est déjà inscrit'
     return
   }
 }
@@ -61,25 +53,20 @@ const saveForm = async () => {
 
   isSaving.value = true
   try {
-    const newSubscriber = {
-      id: generateSubscriberId(),
+    await createSubscriber({
       email: form.value.email.trim().toLowerCase(),
-      first_name: form.value.first_name.trim() || null,
-      last_name: form.value.last_name.trim() || null,
-      user_external_id: null,
-      active: form.value.active,
-      unsubscribe_token: generateUnsubscribeToken(),
-      source: 'manual' as const,
-      subscribed_at: new Date().toISOString(),
-      unsubscribed_at: null,
-      created_at: new Date().toISOString()
-    }
-
-    console.log('Création de l\'abonné:', newSubscriber)
-    // En production: POST /api/admin/newsletter/subscribers
-
-    await new Promise(resolve => setTimeout(resolve, 500))
+      first_name: form.value.first_name.trim() || undefined,
+      last_name: form.value.last_name.trim() || undefined,
+      source: 'manual',
+    })
     router.push('/admin/newsletter/abonnes')
+  } catch (error) {
+    const fetchError = error as { status?: number }
+    if (fetchError.status === 409 || fetchError.status === 400) {
+      emailError.value = 'Cet email est déjà inscrit'
+    } else {
+      emailError.value = 'Erreur lors de la création'
+    }
   } finally {
     isSaving.value = false
   }

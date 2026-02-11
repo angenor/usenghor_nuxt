@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { NewsletterSubscriber, SubscriberSource, SubscriberFilters } from '~/composables/useMockData'
+import type { SubscriberRead, SubscriberSource } from '~/composables/useSubscribersApi'
 
 definePageMeta({
   layout: 'admin'
@@ -8,26 +8,41 @@ definePageMeta({
 const router = useRouter()
 
 const {
-  getAllSubscribers,
-  getSubscriberStatsAdmin,
+  listSubscribers,
+  deleteSubscriber,
+  unsubscribeSubscriber,
+  updateSubscriber,
+  getNewsletterStats,
   sourceLabels,
   sourceColors,
+  formatDate,
+  getFullName,
   exportSubscribersToCSV
-} = useMockData()
+} = useSubscribersApi()
 
 // === STATE ===
 const isLoading = ref(true)
 const searchQuery = ref('')
-const statusFilter = ref<'all' | boolean>('all')
+const statusFilter = ref<'all' | 'true' | 'false'>('all')
 const sourceFilter = ref<SubscriberSource | 'all'>('all')
-const dateFrom = ref('')
-const dateTo = ref('')
-const sortBy = ref<SubscriberFilters['sort_by']>('subscribed_at')
-const sortOrder = ref<SubscriberFilters['sort_order']>('desc')
+const sortBy = ref<'email' | 'last_name' | 'subscribed_at' | 'source'>('subscribed_at')
+const sortOrder = ref<'asc' | 'desc'>('desc')
 
-// Pagination
+// Pagination (serveur)
 const currentPage = ref(1)
 const itemsPerPage = 20
+const totalCount = ref(0)
+const totalPages = ref(0)
+
+// Données
+const subscribers = ref<SubscriberRead[]>([])
+
+// Statistiques
+const stats = ref({
+  total: 0,
+  active: 0,
+  unsubscribed: 0,
+})
 
 // Sélection pour actions en masse
 const selectedIds = ref<string[]>([])
@@ -35,57 +50,64 @@ const selectAll = ref(false)
 
 // Modal de suppression
 const showDeleteModal = ref(false)
-const subscriberToDelete = ref<NewsletterSubscriber | null>(null)
+const subscriberToDelete = ref<SubscriberRead | null>(null)
 const isBulkDelete = ref(false)
-
-// === COMPUTED ===
-
-// Statistiques
-const stats = computed(() => getSubscriberStatsAdmin())
-
-// Filtres appliqués
-const filters = computed<SubscriberFilters>(() => ({
-  search: searchQuery.value || undefined,
-  active: statusFilter.value === 'all' ? undefined : statusFilter.value,
-  source: sourceFilter.value === 'all' ? undefined : sourceFilter.value,
-  date_from: dateFrom.value || undefined,
-  date_to: dateTo.value || undefined,
-  sort_by: sortBy.value,
-  sort_order: sortOrder.value
-}))
-
-// Liste filtrée
-const filteredSubscribers = computed(() => getAllSubscribers(filters.value))
-
-// Pagination
-const totalPages = computed(() => Math.ceil(filteredSubscribers.value.length / itemsPerPage))
-const paginatedSubscribers = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  return filteredSubscribers.value.slice(start, start + itemsPerPage)
-})
 
 // Sources disponibles
 const availableSources: SubscriberSource[] = ['website_form', 'manual', 'import', 'registration', 'event']
 
-// === METHODS ===
+// === CHARGEMENT ===
 
-// Initialisation
+async function loadSubscribers() {
+  isLoading.value = true
+  try {
+    const response = await listSubscribers({
+      page: currentPage.value,
+      limit: itemsPerPage,
+      search: searchQuery.value || undefined,
+      active: statusFilter.value === 'all' ? undefined : statusFilter.value === 'true',
+      source: sourceFilter.value === 'all' ? undefined : sourceFilter.value,
+      sort_by: sortBy.value,
+      sort_order: sortOrder.value,
+    })
+    subscribers.value = response.items
+    totalCount.value = response.total
+    totalPages.value = response.pages
+  } catch (error) {
+    console.error('Erreur chargement abonnés:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+async function loadStats() {
+  try {
+    const response = await getNewsletterStats()
+    stats.value = {
+      total: response.total_subscribers,
+      active: response.active_subscribers,
+      unsubscribed: response.total_subscribers - response.active_subscribers,
+    }
+  } catch {
+    // Fallback: calculer depuis les données chargées
+  }
+}
+
 onMounted(() => {
-  isLoading.value = false
+  loadSubscribers()
+  loadStats()
 })
 
-// Réinitialiser les filtres
+// === METHODS ===
+
 const resetFilters = () => {
   searchQuery.value = ''
   statusFilter.value = 'all'
   sourceFilter.value = 'all'
-  dateFrom.value = ''
-  dateTo.value = ''
   currentPage.value = 1
 }
 
-// Trier par colonne
-const toggleSort = (column: SubscriberFilters['sort_by']) => {
+const toggleSort = (column: typeof sortBy.value) => {
   if (sortBy.value === column) {
     sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
   } else {
@@ -98,7 +120,7 @@ const toggleSort = (column: SubscriberFilters['sort_by']) => {
 // Sélection
 const toggleSelectAll = () => {
   if (selectAll.value) {
-    selectedIds.value = paginatedSubscribers.value.map(s => s.id)
+    selectedIds.value = subscribers.value.map(s => s.id)
   } else {
     selectedIds.value = []
   }
@@ -111,14 +133,14 @@ const toggleSelect = (id: string) => {
   } else {
     selectedIds.value.splice(index, 1)
   }
-  selectAll.value = selectedIds.value.length === paginatedSubscribers.value.length
+  selectAll.value = selectedIds.value.length === subscribers.value.length
 }
 
 // Exporter la liste
 const exportList = () => {
   const subscribersToExport = selectedIds.value.length > 0
-    ? filteredSubscribers.value.filter(s => selectedIds.value.includes(s.id))
-    : filteredSubscribers.value
+    ? subscribers.value.filter(s => selectedIds.value.includes(s.id))
+    : subscribers.value
 
   const csv = exportSubscribersToCSV(subscribersToExport)
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
@@ -129,7 +151,7 @@ const exportList = () => {
 }
 
 // Suppression
-const confirmDelete = (subscriber: NewsletterSubscriber) => {
+const confirmDelete = (subscriber: SubscriberRead) => {
   subscriberToDelete.value = subscriber
   isBulkDelete.value = false
   showDeleteModal.value = true
@@ -142,60 +164,72 @@ const confirmBulkDelete = () => {
 }
 
 const executeDelete = async () => {
-  if (isBulkDelete.value) {
-    console.log('Suppression en masse:', selectedIds.value)
-    // En production: DELETE /api/admin/newsletter/subscribers/bulk-action
-    selectedIds.value = []
-  } else if (subscriberToDelete.value) {
-    console.log('Suppression:', subscriberToDelete.value.id)
-    // En production: DELETE /api/admin/newsletter/subscribers/{id}
+  try {
+    if (isBulkDelete.value) {
+      for (const id of selectedIds.value) {
+        await deleteSubscriber(id)
+      }
+      selectedIds.value = []
+    } else if (subscriberToDelete.value) {
+      await deleteSubscriber(subscriberToDelete.value.id)
+    }
+    await loadSubscribers()
+    await loadStats()
+  } catch (error) {
+    console.error('Erreur suppression:', error)
   }
   showDeleteModal.value = false
   subscriberToDelete.value = null
 }
 
 // Désabonner
-const unsubscribe = async (subscriber: NewsletterSubscriber) => {
-  console.log('Désabonnement:', subscriber.id)
-  // En production: POST /api/admin/newsletter/subscribers/{id}/unsubscribe
+const unsubscribe = async (subscriber: SubscriberRead) => {
+  try {
+    await unsubscribeSubscriber(subscriber.id)
+    await loadSubscribers()
+    await loadStats()
+  } catch (error) {
+    console.error('Erreur désabonnement:', error)
+  }
 }
 
 const bulkUnsubscribe = async () => {
   if (selectedIds.value.length === 0) return
-  console.log('Désabonnement en masse:', selectedIds.value)
-  // En production: POST /api/admin/newsletter/subscribers/bulk-action { action: 'unsubscribe' }
+  try {
+    for (const id of selectedIds.value) {
+      await unsubscribeSubscriber(id)
+    }
+    selectedIds.value = []
+    await loadSubscribers()
+    await loadStats()
+  } catch (error) {
+    console.error('Erreur désabonnement en masse:', error)
+  }
 }
 
 // Réabonner
-const resubscribe = async (subscriber: NewsletterSubscriber) => {
-  console.log('Réabonnement:', subscriber.id)
-  // En production: POST /api/admin/newsletter/subscribers/{id}/resubscribe
-}
-
-// Format date
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  })
-}
-
-// Nom complet
-const getFullName = (subscriber: NewsletterSubscriber) => {
-  if (subscriber.first_name && subscriber.last_name) {
-    return `${subscriber.first_name} ${subscriber.last_name}`
+const resubscribe = async (subscriber: SubscriberRead) => {
+  try {
+    await updateSubscriber(subscriber.id, { active: true })
+    await loadSubscribers()
+    await loadStats()
+  } catch (error) {
+    console.error('Erreur réabonnement:', error)
   }
-  if (subscriber.first_name) return subscriber.first_name
-  if (subscriber.last_name) return subscriber.last_name
-  return '-'
 }
 
-// Watch pour reset pagination
-watch([searchQuery, statusFilter, sourceFilter, dateFrom, dateTo], () => {
+// Watch pour recharger lors de changement de filtres
+watch([searchQuery, statusFilter, sourceFilter], () => {
   currentPage.value = 1
   selectedIds.value = []
   selectAll.value = false
+  loadSubscribers()
+})
+
+watch([sortBy, sortOrder, currentPage], () => {
+  selectedIds.value = []
+  selectAll.value = false
+  loadSubscribers()
 })
 </script>
 
@@ -230,7 +264,7 @@ watch([searchQuery, statusFilter, sourceFilter, dateFrom, dateTo], () => {
     </div>
 
     <!-- Statistiques -->
-    <div class="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <div class="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-3">
       <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
         <div class="flex items-center gap-3">
           <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
@@ -261,17 +295,6 @@ watch([searchQuery, statusFilter, sourceFilter, dateFrom, dateTo], () => {
           <div>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.unsubscribed }}</p>
             <p class="text-sm text-gray-500 dark:text-gray-400">Désabonnés</p>
-          </div>
-        </div>
-      </div>
-      <div class="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-        <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30">
-            <font-awesome-icon :icon="['fas', 'arrow-trend-up']" class="h-5 w-5 text-purple-600 dark:text-purple-400" />
-          </div>
-          <div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">+{{ stats.growth_last_month }}</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Ce mois</p>
           </div>
         </div>
       </div>
@@ -309,8 +332,8 @@ watch([searchQuery, statusFilter, sourceFilter, dateFrom, dateTo], () => {
             class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           >
             <option value="all">Tous</option>
-            <option :value="true">Actifs</option>
-            <option :value="false">Désabonnés</option>
+            <option value="true">Actifs</option>
+            <option value="false">Désabonnés</option>
           </select>
         </div>
 
@@ -328,30 +351,6 @@ watch([searchQuery, statusFilter, sourceFilter, dateFrom, dateTo], () => {
               {{ sourceLabels[source] }}
             </option>
           </select>
-        </div>
-
-        <!-- Date de début -->
-        <div class="w-40">
-          <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Du
-          </label>
-          <input
-            v-model="dateFrom"
-            type="date"
-            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          />
-        </div>
-
-        <!-- Date de fin -->
-        <div class="w-40">
-          <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Au
-          </label>
-          <input
-            v-model="dateTo"
-            type="date"
-            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-transparent focus:ring-2 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          />
         </div>
 
         <!-- Reset -->
@@ -414,7 +413,7 @@ watch([searchQuery, statusFilter, sourceFilter, dateFrom, dateTo], () => {
                   type="checkbox"
                   class="h-4 w-4 rounded border-gray-300 text-brand-red-600 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700"
                   @change="toggleSelectAll"
-                />
+                >
               </th>
               <th
                 class="cursor-pointer px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white"
@@ -478,7 +477,7 @@ watch([searchQuery, statusFilter, sourceFilter, dateFrom, dateTo], () => {
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
             <tr
-              v-for="subscriber in paginatedSubscribers"
+              v-for="subscriber in subscribers"
               :key="subscriber.id"
               class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
@@ -488,7 +487,7 @@ watch([searchQuery, statusFilter, sourceFilter, dateFrom, dateTo], () => {
                   :checked="selectedIds.includes(subscriber.id)"
                   class="h-4 w-4 rounded border-gray-300 text-brand-red-600 focus:ring-brand-red-500 dark:border-gray-600 dark:bg-gray-700"
                   @change="toggleSelect(subscriber.id)"
-                />
+                >
               </td>
               <td class="px-4 py-3">
                 <span class="text-sm font-medium text-gray-900 dark:text-white">
@@ -508,9 +507,9 @@ watch([searchQuery, statusFilter, sourceFilter, dateFrom, dateTo], () => {
               <td class="px-4 py-3">
                 <span
                   class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
-                  :class="sourceColors[subscriber.source]"
+                  :class="sourceColors[subscriber.source] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'"
                 >
-                  {{ sourceLabels[subscriber.source] }}
+                  {{ sourceLabels[subscriber.source] || subscriber.source }}
                 </span>
               </td>
               <td class="px-4 py-3">
@@ -573,7 +572,7 @@ watch([searchQuery, statusFilter, sourceFilter, dateFrom, dateTo], () => {
 
       <!-- Empty state -->
       <div
-        v-if="paginatedSubscribers.length === 0"
+        v-if="subscribers.length === 0"
         class="py-12 text-center"
       >
         <font-awesome-icon :icon="['fas', 'envelope']" class="mb-4 h-12 w-12 text-gray-300 dark:text-gray-600" />
@@ -592,8 +591,8 @@ watch([searchQuery, statusFilter, sourceFilter, dateFrom, dateTo], () => {
       >
         <p class="text-sm text-gray-500 dark:text-gray-400">
           {{ (currentPage - 1) * itemsPerPage + 1 }} -
-          {{ Math.min(currentPage * itemsPerPage, filteredSubscribers.length) }}
-          sur {{ filteredSubscribers.length }} abonnés
+          {{ Math.min(currentPage * itemsPerPage, totalCount) }}
+          sur {{ totalCount }} abonnés
         </p>
         <div class="flex gap-2">
           <button
@@ -615,13 +614,13 @@ watch([searchQuery, statusFilter, sourceFilter, dateFrom, dateTo], () => {
     </div>
 
     <!-- Export button (si aucune sélection) -->
-    <div v-if="selectedIds.length === 0 && filteredSubscribers.length > 0" class="mt-4 flex justify-end">
+    <div v-if="selectedIds.length === 0 && subscribers.length > 0" class="mt-4 flex justify-end">
       <button
         class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
         @click="exportList"
       >
         <font-awesome-icon :icon="['fas', 'download']" class="h-4 w-4" />
-        Exporter la liste ({{ filteredSubscribers.length }})
+        Exporter la page ({{ subscribers.length }})
       </button>
     </div>
 

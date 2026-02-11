@@ -2,7 +2,8 @@
 const { t } = useI18n()
 
 // Contenus éditoriaux avec fallback sur i18n
-const { getContent, loadContent } = useEditorialContent('careers')
+const { getContent, getRawContent, loadContent } = useEditorialContent('careers')
+const { getMediaUrl } = useMediaApi()
 
 onMounted(() => {
   // Charger les contenus éditoriaux (non-bloquant)
@@ -41,7 +42,7 @@ const breadcrumb = computed(() => [
     <CareersOpportunitiesSection />
 
     <!-- Teachers Section -->
-    <CareersTeachersSection />
+    <CareersTeachersSection :image="getMediaUrl(getRawContent('careers.teachers.image') ?? '') || undefined" />
 
     <!-- Students Section -->
     <CareersStudentsSection />

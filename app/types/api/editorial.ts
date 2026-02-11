@@ -256,6 +256,7 @@ export type ValueSectionKey =
   | 'about.engagements.solidarity.text'
   | 'about.charter.title'
   | 'about.charter.download'
+  | 'about.charter.download_url'
   // Page Stratégie - Hero
   | 'strategy.hero.title'
   | 'strategy.hero.subtitle'
@@ -360,6 +361,7 @@ export type ValueSectionKey =
   | 'careers.teachers.cta.text'
   | 'careers.teachers.cta.email'
   | 'careers.teachers.cta.button'
+  | 'careers.teachers.image'
   // Page Carrières - Étudiants
   | 'careers.students.title'
   | 'careers.students.text'

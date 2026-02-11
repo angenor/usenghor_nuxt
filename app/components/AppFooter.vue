@@ -4,6 +4,8 @@ import { useFooterDataStore } from '~/stores/footerData'
 const { t } = useI18n()
 const localePath = useLocalePath()
 
+const apiBase = useApiBase()
+
 const email = ref('')
 const isSubmitting = ref(false)
 const submitStatus = ref<'success' | 'error' | null>(null)
@@ -17,14 +19,20 @@ const handleNewsletterSubmit = async () => {
   submitStatus.value = null
 
   try {
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    await $fetch(`${apiBase}/api/public/newsletter/subscribe`, {
+      method: 'POST',
+      body: {
+        email: email.value.trim().toLowerCase(),
+        source: 'website_form',
+      },
+    })
     submitStatus.value = 'success'
     email.value = ''
 
     setTimeout(() => {
       submitStatus.value = null
     }, 5000)
-  } catch (error) {
+  } catch {
     submitStatus.value = 'error'
   } finally {
     isSubmitting.value = false

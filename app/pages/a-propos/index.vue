@@ -161,7 +161,7 @@ const breadcrumb = computed(() => [
     <SectionEngagements
       :title="engagementsTitle"
       :values="values"
-      :charter="{ label: charterDownload, url: '/documents/charte-ethique.pdf' }"
+      :charter="{ label: charterDownload, url: getMediaUrl(getRawContent('about.charter.download_url') ?? '') || getRawContent('about.charter.download_url') || '/documents/charte-ethique.pdf' }"
     />
   </div>
 </template>

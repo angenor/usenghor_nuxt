@@ -274,7 +274,7 @@ export const aboutPageSections: PageSection[] = [
       'about.engagements.inclusion.title', 'about.engagements.inclusion.text',
       'about.engagements.innovation.title', 'about.engagements.innovation.text',
       'about.engagements.solidarity.title', 'about.engagements.solidarity.text',
-      'about.charter.title', 'about.charter.download',
+      'about.charter.title', 'about.charter.download', 'about.charter.download_url',
     ],
     fields: [
       { key: 'about.engagements.title', label: 'Titre Section', description: 'Titre de la section engagements', type: 'text', editorialKey: 'about.engagements.title', editable: true },
@@ -296,6 +296,7 @@ export const aboutPageSections: PageSection[] = [
       // Charter
       { key: 'about.charter.title', label: 'Charte - Titre', description: 'Titre de la section charte', type: 'text', editorialKey: 'about.charter.title', editable: true },
       { key: 'about.charter.download', label: 'Charte - Bouton', description: 'Texte du bouton téléchargement', type: 'text', editorialKey: 'about.charter.download', editable: true },
+      { key: 'about.charter.download_url', label: 'Charte - Fichier', description: 'Fichier PDF de la charte éthique (upload ou URL)', type: 'file', editorialKey: 'about.charter.download_url', editable: true },
     ],
   },
 ]
@@ -612,8 +613,10 @@ export const careersPageSections: PageSection[] = [
       'careers.teachers.title', 'careers.teachers.text',
       'careers.teachers.benefits.title', 'careers.teachers.positions.title',
       'careers.teachers.cta.title', 'careers.teachers.cta.text', 'careers.teachers.cta.email', 'careers.teachers.cta.button',
+      'careers.teachers.image',
     ],
     fields: [
+      { key: 'careers.teachers.image', label: 'Image', description: 'Image illustrant la section enseignants (ratio 4:3 recommandé)', type: 'image', editorialKey: 'careers.teachers.image', editable: true },
       { key: 'careers.teachers.title', label: 'Titre', description: 'Titre de la section enseignants', type: 'text', editorialKey: 'careers.teachers.title', editable: true },
       { key: 'careers.teachers.text', label: 'Texte', description: 'Texte de présentation', type: 'textarea', editorialKey: 'careers.teachers.text', editable: true },
       { key: 'careers.teachers.benefits.title', label: 'Titre Avantages', description: 'Titre de la sous-section avantages', type: 'text', editorialKey: 'careers.teachers.benefits.title', editable: true },
