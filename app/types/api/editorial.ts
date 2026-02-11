@@ -216,6 +216,7 @@ export type ValueSectionKey =
   | 'governance.badge'
   | 'governance.title'
   | 'governance.subtitle'
+  | 'governance.hero.image'
   // Page Gouvernance - Textes fondateurs
   | 'governance.foundingTexts.badge'
   | 'governance.foundingTexts.title'
@@ -437,35 +438,42 @@ export type ValueSectionKey =
   | 'site.facility.housing.description'
   | 'site.facility.housing.features'
   | 'site.facility.housing.capacity'
+  | 'site.facility.housing.images'
   // Page Site - Installation: Bibliothèque
   | 'site.facility.library.name'
   | 'site.facility.library.description'
   | 'site.facility.library.features'
   | 'site.facility.library.capacity'
+  | 'site.facility.library.images'
   // Page Site - Installation: Salles de Conférence
   | 'site.facility.conference.name'
   | 'site.facility.conference.description'
   | 'site.facility.conference.features'
   | 'site.facility.conference.capacity'
+  | 'site.facility.conference.images'
   // Page Site - Installation: Espaces Académiques
   | 'site.facility.academic.name'
   | 'site.facility.academic.description'
   | 'site.facility.academic.features'
   | 'site.facility.academic.capacity'
+  | 'site.facility.academic.images'
   // Page Site - Installation: Installations Sportives
   | 'site.facility.sports.name'
   | 'site.facility.sports.description'
   | 'site.facility.sports.features'
+  | 'site.facility.sports.images'
   // Page Site - Installation: Piscine
   | 'site.facility.pool.name'
   | 'site.facility.pool.description'
   | 'site.facility.pool.features'
   | 'site.facility.pool.capacity'
+  | 'site.facility.pool.images'
   // Page Site - Installation: Hôtel
   | 'site.facility.hotel.name'
   | 'site.facility.hotel.description'
   | 'site.facility.hotel.features'
   | 'site.facility.hotel.capacity'
+  | 'site.facility.hotel.images'
   // Page Site - Localisation : utilise les données centralisées de Contact (/admin/editorial/contact)
   // Page Site - CTA
   | 'site.cta.title'

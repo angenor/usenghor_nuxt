@@ -6,6 +6,7 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getAllSiteFacilities } = useMockData()
 const { getContactInfo, getGoogleMapsUrlWithCoords } = useContactApi()
+const { getMediaUrl } = useMediaApi()
 
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, loadContent } = useEditorialContent('site')
@@ -85,15 +86,50 @@ const setActiveImageIndex = (facilityId: string, index: number) => {
 }
 
 const nextImage = (facility: SiteFacility) => {
+  const imgs = getFacilityImages(facility)
   const currentIndex = getActiveImageIndex(facility.id)
-  const nextIndex = (currentIndex + 1) % facility.images.length
+  const nextIndex = (currentIndex + 1) % imgs.length
   setActiveImageIndex(facility.id, nextIndex)
 }
 
 const prevImage = (facility: SiteFacility) => {
+  const imgs = getFacilityImages(facility)
   const currentIndex = getActiveImageIndex(facility.id)
-  const prevIndex = currentIndex === 0 ? facility.images.length - 1 : currentIndex - 1
+  const prevIndex = currentIndex === 0 ? imgs.length - 1 : currentIndex - 1
   setActiveImageIndex(facility.id, prevIndex)
+}
+
+// Mapping facility ID → clé éditoriale pour les images
+const facilityEditorialKeyMap: Record<string, string> = {
+  'facility-housing': 'site.facility.housing.images',
+  'facility-library': 'site.facility.library.images',
+  'facility-conference': 'site.facility.conference.images',
+  'facility-academic': 'site.facility.academic.images',
+  'facility-sports': 'site.facility.sports.images',
+  'facility-pool': 'site.facility.pool.images',
+  'facility-hotel': 'site.facility.hotel.images',
+}
+
+// Récupère les images d'une installation (éditorial avec fallback mock)
+const getFacilityImages = (facility: SiteFacility): string[] => {
+  const editorialKey = facilityEditorialKeyMap[facility.id]
+  if (editorialKey) {
+    const raw = getContent(editorialKey)
+    // getContent retourne la clé i18n en fallback si pas de contenu éditorial
+    // On vérifie que c'est bien du JSON (commence par '[')
+    if (raw && raw.startsWith('[')) {
+      try {
+        const mediaIds: string[] = JSON.parse(raw)
+        if (mediaIds.length > 0) {
+          return mediaIds.map(id => getMediaUrl(id))
+        }
+      }
+      catch {
+        // Fallback sur mock
+      }
+    }
+  }
+  return facility.images
 }
 
 // Localization helpers
@@ -313,7 +349,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
                   >
                     <!-- Images stack -->
                     <div
-                      v-for="(image, imgIndex) in facility.images"
+                      v-for="(image, imgIndex) in getFacilityImages(facility)"
                       :key="imgIndex"
                       class="absolute inset-0 transition-opacity duration-500"
                       :class="getActiveImageIndex(facility.id) === imgIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'"
@@ -344,7 +380,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
                   <!-- Dots indicators -->
                   <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
                     <button
-                      v-for="(_, imgIndex) in facility.images"
+                      v-for="(_, imgIndex) in getFacilityImages(facility)"
                       :key="imgIndex"
                       @click.stop="setActiveImageIndex(facility.id, imgIndex)"
                       class="w-2.5 h-2.5 rounded-full transition-all"
@@ -378,7 +414,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
                 <!-- Thumbnails row -->
                 <div class="flex gap-2 mt-4">
                   <button
-                    v-for="(image, imgIndex) in facility.images"
+                    v-for="(image, imgIndex) in getFacilityImages(facility)"
                     :key="imgIndex"
                     @click="setActiveImageIndex(facility.id, imgIndex)"
                     class="flex-1 aspect-video rounded-lg overflow-hidden transition-all ring-offset-2"

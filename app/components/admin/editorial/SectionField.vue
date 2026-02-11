@@ -107,6 +107,19 @@ function cancel() {
     @history="emit('history')"
   />
 
+  <!-- Pour les galeries d'images (tableau JSON d'IDs media), utiliser le composant dédié -->
+  <AdminEditorialGalleryField
+    v-else-if="field.type === 'gallery'"
+    :field="field"
+    :value="value"
+    :is-editing="isEditing"
+    :is-saving="isSaving"
+    @edit="emit('edit')"
+    @save="(val: string, valueType: 'text' | 'number' | 'html') => emit('save', val, valueType)"
+    @cancel="emit('cancel')"
+    @history="emit('history')"
+  />
+
   <!-- Pour les autres types, garder le comportement actuel -->
   <div v-else class="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 overflow-hidden">
     <!-- Field header -->

@@ -23,7 +23,7 @@ export interface PageSectionField {
   key: string
   label: string
   description: string
-  type: 'text' | 'textarea' | 'number' | 'html' | 'image' | 'file' | 'list' | 'documents' | 'countries'
+  type: 'text' | 'textarea' | 'number' | 'html' | 'image' | 'file' | 'list' | 'documents' | 'countries' | 'gallery'
   i18nKey?: string
   editorialKey?: ValueSectionKey
   editable: boolean
@@ -879,12 +879,13 @@ export const sitePageSections: PageSection[] = [
     description: 'Cité universitaire et résidences étudiantes',
     icon: 'home',
     color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
-    editorialKeys: ['site.facility.housing.name', 'site.facility.housing.description', 'site.facility.housing.features', 'site.facility.housing.capacity'],
+    editorialKeys: ['site.facility.housing.name', 'site.facility.housing.description', 'site.facility.housing.features', 'site.facility.housing.capacity', 'site.facility.housing.images'],
     fields: [
       { key: 'site.facility.housing.name', label: 'Nom', description: 'Nom de l\'installation (ex: Hébergement)', type: 'text', editorialKey: 'site.facility.housing.name', editable: true },
       { key: 'site.facility.housing.description', label: 'Description', description: 'Description détaillée de l\'hébergement', type: 'textarea', editorialKey: 'site.facility.housing.description', editable: true },
       { key: 'site.facility.housing.features', label: 'Caractéristiques', description: 'Liste des caractéristiques (une par ligne)', type: 'list', editorialKey: 'site.facility.housing.features', editable: true },
       { key: 'site.facility.housing.capacity', label: 'Capacité', description: 'Capacité d\'accueil (ex: 200 chambres)', type: 'text', editorialKey: 'site.facility.housing.capacity', editable: true },
+      { key: 'site.facility.housing.images', label: 'Images', description: 'Galerie d\'images de l\'installation (format 4:3 recommandé)', type: 'gallery', editorialKey: 'site.facility.housing.images', editable: true },
     ],
   },
   {
@@ -893,12 +894,13 @@ export const sitePageSections: PageSection[] = [
     description: 'Centre de ressources documentaires',
     icon: 'book',
     color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-    editorialKeys: ['site.facility.library.name', 'site.facility.library.description', 'site.facility.library.features', 'site.facility.library.capacity'],
+    editorialKeys: ['site.facility.library.name', 'site.facility.library.description', 'site.facility.library.features', 'site.facility.library.capacity', 'site.facility.library.images'],
     fields: [
       { key: 'site.facility.library.name', label: 'Nom', description: 'Nom de l\'installation (ex: Bibliothèque)', type: 'text', editorialKey: 'site.facility.library.name', editable: true },
       { key: 'site.facility.library.description', label: 'Description', description: 'Description détaillée de la bibliothèque', type: 'textarea', editorialKey: 'site.facility.library.description', editable: true },
       { key: 'site.facility.library.features', label: 'Caractéristiques', description: 'Liste des caractéristiques (une par ligne)', type: 'list', editorialKey: 'site.facility.library.features', editable: true },
       { key: 'site.facility.library.capacity', label: 'Capacité', description: 'Capacité d\'accueil (ex: 150 places assises)', type: 'text', editorialKey: 'site.facility.library.capacity', editable: true },
+      { key: 'site.facility.library.images', label: 'Images', description: 'Galerie d\'images de l\'installation (format 4:3 recommandé)', type: 'gallery', editorialKey: 'site.facility.library.images', editable: true },
     ],
   },
   {
@@ -907,12 +909,13 @@ export const sitePageSections: PageSection[] = [
     description: 'Espaces événementiels et amphithéâtres',
     icon: 'microphone',
     color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
-    editorialKeys: ['site.facility.conference.name', 'site.facility.conference.description', 'site.facility.conference.features', 'site.facility.conference.capacity'],
+    editorialKeys: ['site.facility.conference.name', 'site.facility.conference.description', 'site.facility.conference.features', 'site.facility.conference.capacity', 'site.facility.conference.images'],
     fields: [
       { key: 'site.facility.conference.name', label: 'Nom', description: 'Nom de l\'installation (ex: Salles de Conférence)', type: 'text', editorialKey: 'site.facility.conference.name', editable: true },
       { key: 'site.facility.conference.description', label: 'Description', description: 'Description détaillée des salles de conférence', type: 'textarea', editorialKey: 'site.facility.conference.description', editable: true },
       { key: 'site.facility.conference.features', label: 'Caractéristiques', description: 'Liste des caractéristiques (une par ligne)', type: 'list', editorialKey: 'site.facility.conference.features', editable: true },
       { key: 'site.facility.conference.capacity', label: 'Capacité', description: 'Capacité totale (ex: 500 places)', type: 'text', editorialKey: 'site.facility.conference.capacity', editable: true },
+      { key: 'site.facility.conference.images', label: 'Images', description: 'Galerie d\'images de l\'installation (format 4:3 recommandé)', type: 'gallery', editorialKey: 'site.facility.conference.images', editable: true },
     ],
   },
   {
@@ -921,12 +924,13 @@ export const sitePageSections: PageSection[] = [
     description: 'Salles de cours et laboratoires',
     icon: 'chalkboard',
     color: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300',
-    editorialKeys: ['site.facility.academic.name', 'site.facility.academic.description', 'site.facility.academic.features', 'site.facility.academic.capacity'],
+    editorialKeys: ['site.facility.academic.name', 'site.facility.academic.description', 'site.facility.academic.features', 'site.facility.academic.capacity', 'site.facility.academic.images'],
     fields: [
       { key: 'site.facility.academic.name', label: 'Nom', description: 'Nom de l\'installation (ex: Espaces Académiques)', type: 'text', editorialKey: 'site.facility.academic.name', editable: true },
       { key: 'site.facility.academic.description', label: 'Description', description: 'Description détaillée des espaces académiques', type: 'textarea', editorialKey: 'site.facility.academic.description', editable: true },
       { key: 'site.facility.academic.features', label: 'Caractéristiques', description: 'Liste des caractéristiques (une par ligne)', type: 'list', editorialKey: 'site.facility.academic.features', editable: true },
       { key: 'site.facility.academic.capacity', label: 'Capacité', description: 'Capacité totale (ex: 600 étudiants)', type: 'text', editorialKey: 'site.facility.academic.capacity', editable: true },
+      { key: 'site.facility.academic.images', label: 'Images', description: 'Galerie d\'images de l\'installation (format 4:3 recommandé)', type: 'gallery', editorialKey: 'site.facility.academic.images', editable: true },
     ],
   },
   {
@@ -935,11 +939,12 @@ export const sitePageSections: PageSection[] = [
     description: 'Équipements sportifs du campus',
     icon: 'futbol',
     color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-    editorialKeys: ['site.facility.sports.name', 'site.facility.sports.description', 'site.facility.sports.features'],
+    editorialKeys: ['site.facility.sports.name', 'site.facility.sports.description', 'site.facility.sports.features', 'site.facility.sports.images'],
     fields: [
       { key: 'site.facility.sports.name', label: 'Nom', description: 'Nom de l\'installation (ex: Installations Sportives)', type: 'text', editorialKey: 'site.facility.sports.name', editable: true },
       { key: 'site.facility.sports.description', label: 'Description', description: 'Description détaillée des installations sportives', type: 'textarea', editorialKey: 'site.facility.sports.description', editable: true },
       { key: 'site.facility.sports.features', label: 'Caractéristiques', description: 'Liste des caractéristiques (une par ligne)', type: 'list', editorialKey: 'site.facility.sports.features', editable: true },
+      { key: 'site.facility.sports.images', label: 'Images', description: 'Galerie d\'images de l\'installation (format 4:3 recommandé)', type: 'gallery', editorialKey: 'site.facility.sports.images', editable: true },
     ],
   },
   {
@@ -948,12 +953,13 @@ export const sitePageSections: PageSection[] = [
     description: 'Piscine semi-olympique du campus',
     icon: 'water-ladder',
     color: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300',
-    editorialKeys: ['site.facility.pool.name', 'site.facility.pool.description', 'site.facility.pool.features', 'site.facility.pool.capacity'],
+    editorialKeys: ['site.facility.pool.name', 'site.facility.pool.description', 'site.facility.pool.features', 'site.facility.pool.capacity', 'site.facility.pool.images'],
     fields: [
       { key: 'site.facility.pool.name', label: 'Nom', description: 'Nom de l\'installation (ex: Piscine)', type: 'text', editorialKey: 'site.facility.pool.name', editable: true },
       { key: 'site.facility.pool.description', label: 'Description', description: 'Description détaillée de la piscine', type: 'textarea', editorialKey: 'site.facility.pool.description', editable: true },
       { key: 'site.facility.pool.features', label: 'Caractéristiques', description: 'Liste des caractéristiques (une par ligne)', type: 'list', editorialKey: 'site.facility.pool.features', editable: true },
       { key: 'site.facility.pool.capacity', label: 'Capacité', description: 'Capacité d\'accueil (ex: 50 nageurs)', type: 'text', editorialKey: 'site.facility.pool.capacity', editable: true },
+      { key: 'site.facility.pool.images', label: 'Images', description: 'Galerie d\'images de l\'installation (format 4:3 recommandé)', type: 'gallery', editorialKey: 'site.facility.pool.images', editable: true },
     ],
   },
   {
@@ -962,12 +968,13 @@ export const sitePageSections: PageSection[] = [
     description: 'Hébergement pour visiteurs et partenaires',
     icon: 'hotel',
     color: 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300',
-    editorialKeys: ['site.facility.hotel.name', 'site.facility.hotel.description', 'site.facility.hotel.features', 'site.facility.hotel.capacity'],
+    editorialKeys: ['site.facility.hotel.name', 'site.facility.hotel.description', 'site.facility.hotel.features', 'site.facility.hotel.capacity', 'site.facility.hotel.images'],
     fields: [
       { key: 'site.facility.hotel.name', label: 'Nom', description: 'Nom de l\'installation (ex: Hôtel)', type: 'text', editorialKey: 'site.facility.hotel.name', editable: true },
       { key: 'site.facility.hotel.description', label: 'Description', description: 'Description détaillée de l\'hôtel', type: 'textarea', editorialKey: 'site.facility.hotel.description', editable: true },
       { key: 'site.facility.hotel.features', label: 'Caractéristiques', description: 'Liste des caractéristiques (une par ligne)', type: 'list', editorialKey: 'site.facility.hotel.features', editable: true },
       { key: 'site.facility.hotel.capacity', label: 'Capacité', description: 'Capacité d\'accueil (ex: 30 chambres)', type: 'text', editorialKey: 'site.facility.hotel.capacity', editable: true },
+      { key: 'site.facility.hotel.images', label: 'Images', description: 'Galerie d\'images de l\'installation (format 4:3 recommandé)', type: 'gallery', editorialKey: 'site.facility.hotel.images', editable: true },
     ],
   },
   // NOTE: La section Localisation utilise les données centralisées de Contact (/admin/editorial/contact)
@@ -1082,11 +1089,12 @@ export const governancePageSections: PageSection[] = [
     description: 'Bannière principale de la page Gouvernance',
     icon: 'landmark',
     color: 'bg-gradient-to-r from-brand-blue-500 to-brand-red-500 text-white',
-    editorialKeys: ['governance.badge', 'governance.title', 'governance.subtitle'],
+    editorialKeys: ['governance.badge', 'governance.title', 'governance.subtitle', 'governance.hero.image'],
     fields: [
       { key: 'governance.badge', label: 'Badge', description: 'Texte du badge (ex: Notre structure)', type: 'text', editorialKey: 'governance.badge', editable: true },
       { key: 'governance.title', label: 'Titre', description: 'Titre principal du hero', type: 'text', editorialKey: 'governance.title', editable: true },
       { key: 'governance.subtitle', label: 'Sous-titre', description: 'Sous-titre du hero', type: 'textarea', editorialKey: 'governance.subtitle', editable: true },
+      { key: 'governance.hero.image', label: 'Image de fond', description: 'Image de fond du hero Gouvernance (ratio 16:9)', type: 'image', editorialKey: 'governance.hero.image', editable: true },
     ],
   },
   {

@@ -9,6 +9,9 @@ const { selectedPays, openDrawer, closeDrawer } = useCountryDrawer()
 // Contenus éditoriaux avec fallback i18n
 const { getContent, getRawContent, loadContent } = useEditorialContent('governance')
 
+// API Media pour résoudre l'URL de l'image hero
+const { getMediaUrl } = useMediaApi()
+
 onMounted(() => {
   loadContent()
 })
@@ -66,6 +69,12 @@ const egypte = computed(() => paysBailleurs.value.find(p => p.code === 'EG'))
 const northernFounders = computed(() => paysBailleurs.value.filter(p => p.code !== 'EG'))
 const africanFounders = computed<PaysBailleur[]>(() => [])
 
+// Image hero (éditorial avec fallback sur image statique)
+const heroImage = computed(() => {
+  const imageMediaId = getRawContent('governance.hero.image')
+  return (imageMediaId ? getMediaUrl(imageMediaId) : null) ?? '/images/bg/backgroud_senghor3.jpg'
+})
+
 // Titre et description des sections (éditorial avec fallback i18n)
 const foundingTextsTitle = computed(() => getContent('governance.foundingTexts.title'))
 const foundingTextsDescription = computed(() => getContent('governance.foundingTexts.description'))
@@ -93,7 +102,7 @@ const observers = computed(() =>
     <PageHero
       :title="getContent('governance.badge')"
       :subtitle="getContent('governance.subtitle')"
-      image="/images/bg/backgroud_senghor3.jpg"
+      :image="heroImage"
       :breadcrumb="breadcrumb"
     />
 
