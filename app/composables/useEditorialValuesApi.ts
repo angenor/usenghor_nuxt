@@ -46,7 +46,7 @@ export interface PageSectionField {
   key: string
   label: string
   description: string
-  type: 'text' | 'textarea' | 'number' | 'html' | 'image' | 'list' | 'documents'
+  type: 'text' | 'textarea' | 'number' | 'html' | 'image' | 'list' | 'documents' | 'countries'
   i18nKey?: string // Clé i18n si le champ utilise les traductions
   editorialKey?: ValueSectionKey // Clé éditoriale si éditable via le backend
   editable: boolean
@@ -1110,13 +1110,14 @@ export const governancePageSections: PageSection[] = [
   {
     id: 'governance-donor-countries',
     name: 'Section Pays Bailleurs',
-    description: 'Introduction de la section des pays bailleurs (la liste des pays est gérée séparément)',
+    description: 'Introduction et liste dynamique des pays fondateurs/bailleurs',
     icon: 'globe-africa',
     color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-    editorialKeys: ['governance.donorCountries.title', 'governance.donorCountries.description'],
+    editorialKeys: ['governance.donorCountries.title', 'governance.donorCountries.description', 'governance.donorCountries.countries'],
     fields: [
       { key: 'governance.donorCountries.title', label: 'Titre', description: 'Titre de la section pays bailleurs', type: 'text', editorialKey: 'governance.donorCountries.title', editable: true },
       { key: 'governance.donorCountries.description', label: 'Description', description: 'Texte de présentation des pays bailleurs', type: 'textarea', editorialKey: 'governance.donorCountries.description', editable: true },
+      { key: 'governance.donorCountries.countries', label: 'Pays fondateurs', description: 'Liste dynamique des pays fondateurs et bailleurs. Ajoutez, modifiez ou supprimez les pays.', type: 'countries', editorialKey: 'governance.donorCountries.countries', editable: true },
     ],
   },
   {

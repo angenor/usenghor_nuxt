@@ -212,6 +212,7 @@ export type ValueSectionKey =
   // Page Gouvernance - Pays bailleurs
   | 'governance.donorCountries.title'
   | 'governance.donorCountries.description'
+  | 'governance.donorCountries.countries'
   // Page Gouvernance - Conseil d'Administration
   | 'governance.board.title'
   | 'governance.board.description'
