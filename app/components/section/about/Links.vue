@@ -49,7 +49,7 @@ const scrollToAnchor = (anchor: string) => {
 <template>
   <section
     ref="sectionRef"
-    class="py-16 lg:py-20 bg-gray-50 dark:bg-gray-800 transition-colors duration-300"
+    class="py-16 lg:py-20 bg-gray-50 dark:bg-gray-800 bg-grid-pattern transition-colors duration-300"
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Section Title -->

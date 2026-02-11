@@ -61,7 +61,7 @@ const imageUrl = computed(() => props.image || '/images/bg/backgroud_senghor1.jp
   <section
     id="etudiants"
     ref="sectionRef"
-    class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-900 transition-colors duration-300 scroll-mt-20 overflow-hidden"
+    class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-900 bg-grid-pattern transition-colors duration-300 scroll-mt-20 overflow-hidden"
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->

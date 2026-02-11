@@ -19,7 +19,7 @@ const imageUrl = computed(() => props.image || 'https://picsum.photos/seed/teach
   <section
     id="enseignants"
     ref="sectionRef"
-    class="py-16 lg:py-24 bg-white dark:bg-gray-900 transition-colors duration-300 scroll-mt-20"
+    class="py-16 lg:py-24 bg-white dark:bg-gray-900 bg-grid-pattern transition-colors duration-300 scroll-mt-20"
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">

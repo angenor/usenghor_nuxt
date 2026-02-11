@@ -94,7 +94,7 @@ const uniqueCountriesCount = computed(() => {
 
 <template>
   <!-- ==================== VARIANT: MARQUEE (Homepage) ==================== -->
-  <section v-if="variant === 'marquee'" ref="sectionRef" class="py-16 lg:py-24 bg-white dark:bg-gray-900 overflow-hidden">
+  <section v-if="variant === 'marquee'" ref="sectionRef" class="py-16 lg:py-24 bg-white dark:bg-gray-900 bg-grid-pattern overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
       <!-- Section Header -->
       <div class="text-center">
@@ -193,7 +193,7 @@ const uniqueCountriesCount = computed(() => {
   </section>
 
   <!-- ==================== VARIANT: FULL (Partners page) ==================== -->
-  <section v-else ref="sectionRef" class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-950">
+  <section v-else ref="sectionRef" class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-950 bg-grid-pattern">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Section Header -->
       <div class="text-center mb-12">

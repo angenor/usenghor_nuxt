@@ -8,7 +8,7 @@ const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', t
   <section
     id="equipe"
     ref="sectionRef"
-    class="py-16 lg:py-20 bg-white dark:bg-gray-900 transition-colors duration-300"
+    class="py-16 lg:py-20 bg-white dark:bg-gray-900 bg-grid-pattern transition-colors duration-300"
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">

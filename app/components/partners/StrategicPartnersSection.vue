@@ -19,7 +19,7 @@ const filteredPartners = computed(() => {
 </script>
 
 <template>
-  <section ref="sectionRef" class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-900">
+  <section ref="sectionRef" class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-900 bg-grid-pattern">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Section Header -->
       <div class="text-center mb-12">
