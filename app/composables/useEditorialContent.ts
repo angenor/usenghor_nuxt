@@ -15,8 +15,8 @@
  * ```
  */
 
-import { frontOfficePages } from '~/composables/useEditorialValuesApi'
-import type { FrontOfficePage, PageSectionField } from '~/composables/useEditorialValuesApi'
+import { frontOfficePages } from '~/composables/editorial-pages-config'
+import type { FrontOfficePage, PageSectionField } from '~/composables/editorial-pages-config'
 import type { ValueSectionKey } from '~/types/api'
 
 // ============================================================================

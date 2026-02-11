@@ -4,7 +4,7 @@ import type {
   EditorialHistoryRead,
   EditorialValuesStats,
 } from '~/types/api'
-import type { PageSectionField } from '~/composables/useEditorialValuesApi'
+import type { PageSectionField } from '~/composables/editorial-pages-config'
 
 definePageMeta({
   layout: 'admin',

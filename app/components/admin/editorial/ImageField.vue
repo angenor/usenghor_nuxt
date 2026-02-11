@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ImageVariants } from '~/components/media/ImageEditor.client.vue'
-import type { PageSectionField } from '~/composables/useEditorialValuesApi'
+import type { PageSectionField } from '~/composables/editorial-pages-config'
 
 const props = defineProps<{
   field: PageSectionField

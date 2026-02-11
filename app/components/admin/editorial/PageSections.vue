@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { EditorialContentRead } from '~/types/api'
-import type { FrontOfficePage, PageSection, PageSectionField } from '~/composables/useEditorialValuesApi'
+import type { FrontOfficePage, PageSection, PageSectionField } from '~/composables/editorial-pages-config'
 
 const props = defineProps<{
   pages: FrontOfficePage[]

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PageSectionField } from '~/composables/useEditorialValuesApi'
+import type { PageSectionField } from '~/composables/editorial-pages-config'
 
 interface DonorCountry {
   id: string
