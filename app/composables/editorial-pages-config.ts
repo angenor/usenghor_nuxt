@@ -637,8 +637,10 @@ export const careersPageSections: PageSection[] = [
       'careers.students.title', 'careers.students.text',
       'careers.students.why.title', 'careers.students.programs.title',
       'careers.students.cta.title', 'careers.students.cta.text', 'careers.students.cta.button',
+      'careers.students.image',
     ],
     fields: [
+      { key: 'careers.students.image', label: 'Image', description: 'Image illustrant la section futurs étudiants (ratio 4:3 recommandé)', type: 'image', editorialKey: 'careers.students.image', editable: true },
       { key: 'careers.students.title', label: 'Titre', description: 'Titre de la section étudiants', type: 'text', editorialKey: 'careers.students.title', editable: true },
       { key: 'careers.students.text', label: 'Texte', description: 'Texte de présentation', type: 'textarea', editorialKey: 'careers.students.text', editable: true },
       { key: 'careers.students.why.title', label: 'Titre "Pourquoi nous"', description: 'Titre de la sous-section pourquoi étudier chez nous', type: 'text', editorialKey: 'careers.students.why.title', editable: true },

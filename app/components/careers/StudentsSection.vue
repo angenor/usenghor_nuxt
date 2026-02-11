@@ -1,4 +1,10 @@
 <script setup lang="ts">
+const props = withDefaults(defineProps<{
+  image?: string | null
+}>(), {
+  image: null,
+})
+
 const { t, tm } = useI18n()
 const localePath = useLocalePath()
 const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.1 })
@@ -48,7 +54,7 @@ const programs = [
 ]
 
 // Image
-const heroImage = { src: '/images/bg/backgroud_senghor1.jpg', alt: 'Remise de diplômes Senghor' }
+const imageUrl = computed(() => props.image || '/images/bg/backgroud_senghor1.jpg')
 </script>
 
 <template>
@@ -109,8 +115,8 @@ const heroImage = { src: '/images/bg/backgroud_senghor1.jpg', alt: 'Remise de di
         <div class="order-1 lg:order-2 relative">
           <div class="relative rounded-2xl overflow-hidden shadow-xl">
             <img
-              :src="heroImage.src"
-              :alt="heroImage.alt"
+              :src="imageUrl"
+              :alt="t('careers.students.title')"
               class="w-full h-72 sm:h-80 lg:h-full lg:min-h-[400px] object-cover"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-brand-blue-600/30 to-transparent"></div>

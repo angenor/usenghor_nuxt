@@ -370,6 +370,7 @@ export type ValueSectionKey =
   | 'careers.students.cta.text'
   | 'careers.students.cta.button'
   | 'careers.students.programs.title'
+  | 'careers.students.image'
   // Page Carrières - Partenaires
   | 'careers.partners.title'
   | 'careers.partners.text'

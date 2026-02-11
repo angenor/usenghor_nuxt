@@ -45,7 +45,7 @@ const breadcrumb = computed(() => [
     <CareersTeachersSection :image="getMediaUrl(getRawContent('careers.teachers.image') ?? '') || undefined" />
 
     <!-- Students Section -->
-    <CareersStudentsSection />
+    <CareersStudentsSection :image="getMediaUrl(getRawContent('careers.students.image') ?? '') || undefined" />
 
     <!-- Partners Section -->
     <CareersPartnersSection />
