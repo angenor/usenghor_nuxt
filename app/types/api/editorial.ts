@@ -221,6 +221,7 @@ export type ValueSectionKey =
   // Page À propos - Mission
   | 'about.mission.title'
   | 'about.mission.content'
+  | 'about.mission.image'
   | 'about.mission.cta.history'
   | 'about.mission.cta.governance'
   // Page À propos - Stats

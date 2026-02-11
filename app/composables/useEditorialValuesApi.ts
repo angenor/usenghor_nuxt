@@ -261,8 +261,9 @@ export const aboutPageSections: PageSection[] = [
     description: 'Présentation de la mission de l\'université',
     icon: 'bullseye',
     color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-    editorialKeys: ['about.mission.title', 'about.mission.content', 'about.mission.cta.history', 'about.mission.cta.governance'],
+    editorialKeys: ['about.mission.title', 'about.mission.content', 'about.mission.image', 'about.mission.cta.history', 'about.mission.cta.governance'],
     fields: [
+      { key: 'about.mission.image', label: 'Image Mission', description: 'Illustration de la section mission (format carré ou portrait recommandé)', type: 'image', editorialKey: 'about.mission.image', editable: true },
       { key: 'about.mission.title', label: 'Titre Mission', description: 'Titre de la section mission', type: 'text', editorialKey: 'about.mission.title', editable: true },
       { key: 'about.mission.content', label: 'Contenu Mission', description: 'Texte de présentation de la mission', type: 'html', editorialKey: 'about.mission.content', editable: true },
       { key: 'about.mission.cta.history', label: 'Lien Histoire', description: 'Libellé du lien vers l\'histoire', type: 'text', editorialKey: 'about.mission.cta.history', editable: true },

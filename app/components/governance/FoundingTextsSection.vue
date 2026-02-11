@@ -105,16 +105,27 @@ const formatFileSize = (bytes?: number) => {
                     <p class="text-white/80 text-sm mb-4 line-clamp-3">
                       {{ doc.description_fr }}
                     </p>
-                    <a
-                      :href="doc.file_url"
-                      download
-                      class="inline-flex items-center gap-2 px-4 py-2 bg-brand-blue-500 hover:bg-brand-blue-600
-                             rounded-lg text-white text-sm font-medium transition-all shadow-lg"
-                      @click.stop
-                    >
-                      <font-awesome-icon icon="fa-solid fa-download" />
-                      Télécharger
-                    </a>
+                    <div class="flex items-center gap-3">
+                      <a
+                        :href="doc.file_url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="w-10 h-10 flex items-center justify-center bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full text-white transition-all"
+                        :title="t('governance.foundingTexts.view')"
+                        @click.stop
+                      >
+                        <font-awesome-icon icon="fa-solid fa-eye" class="w-4 h-4" />
+                      </a>
+                      <a
+                        :href="doc.file_url"
+                        download
+                        class="w-10 h-10 flex items-center justify-center bg-brand-blue-500 hover:bg-brand-blue-600 rounded-full text-white transition-all shadow-lg"
+                        :title="t('governance.foundingTexts.download')"
+                        @click.stop
+                      >
+                        <font-awesome-icon icon="fa-solid fa-download" class="w-4 h-4" />
+                      </a>
+                    </div>
                     <p v-if="doc.file_size" class="text-white/50 text-xs mt-3">{{ formatFileSize(doc.file_size) }}</p>
                   </div>
                 </div>

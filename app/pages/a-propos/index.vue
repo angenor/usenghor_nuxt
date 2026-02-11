@@ -3,7 +3,10 @@ const { t } = useI18n()
 const { listContents } = useEditorialApi()
 
 // Contenus éditoriaux avec fallback sur i18n
-const { getContent, loadContent } = useEditorialContent('about')
+const { getContent, getRawContent, loadContent } = useEditorialContent('about')
+
+// API Media pour résoudre l'URL de l'image mission
+const { getMediaUrl } = useMediaApi()
 
 // SEO
 useSeoMeta({
@@ -106,6 +109,10 @@ const heroSubtitle = computed(() => getContent('about.hero.subtitle'))
 // Mission content
 const missionTitle = computed(() => getContent('about.mission.title'))
 const missionContent = computed(() => getContent('about.mission.content'))
+const missionImage = computed(() => {
+  const imageMediaId = getRawContent('about.mission.image')
+  return imageMediaId ? getMediaUrl(imageMediaId) : undefined
+})
 
 // Engagements title
 const engagementsTitle = computed(() => getContent('about.engagements.title'))
@@ -137,6 +144,7 @@ const breadcrumb = computed(() => [
     <SectionAboutMission
       :title="missionTitle"
       :content="missionContent"
+      :illustration="missionImage || undefined"
       :cta-links="[
         { label: getContent('about.mission.cta.history', 'about.mission.discover.history'), to: '/a-propos/histoire', icon: 'fa-solid fa-landmark' },
         { label: getContent('about.mission.cta.governance', 'about.mission.discover.governance'), to: '/a-propos/gouvernance', icon: 'fa-solid fa-building-columns' }
