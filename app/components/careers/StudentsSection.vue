@@ -3,6 +3,19 @@ const { t, tm } = useI18n()
 const localePath = useLocalePath()
 const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.1 })
 
+// Chiffres clés centralisés (même source que MissionSection)
+const keyFiguresStore = useKeyFiguresStore()
+
+onMounted(() => {
+  keyFiguresStore.fetchFigures()
+})
+
+const stats = computed(() => ({
+  graduates: Number(keyFiguresStore.getFigure('stats_graduates')) || 5000,
+  countries: Number(keyFiguresStore.getFigure('stats_countries')) || 54,
+  years: Number(keyFiguresStore.getFigure('stats_years')) || 30,
+}))
+
 // Get translated array
 const whyItems = computed(() => tm('careers.students.why.items') as string[])
 
@@ -67,8 +80,8 @@ const heroImage = { src: '/images/bg/backgroud_senghor1.jpg', alt: 'Remise de di
                 <font-awesome-icon icon="fa-solid fa-users" class="w-5 h-5 text-white" />
               </div>
               <div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">3500+</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Alumni</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.graduates.toLocaleString() }}+</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('mission.experience.stats.graduates') }}</p>
               </div>
             </div>
             <div class="flex items-center gap-3">
@@ -76,8 +89,8 @@ const heroImage = { src: '/images/bg/backgroud_senghor1.jpg', alt: 'Remise de di
                 <font-awesome-icon icon="fa-solid fa-globe-africa" class="w-5 h-5 text-white" />
               </div>
               <div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">40+</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Pays</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.countries }}+</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('mission.experience.stats.countries') }}</p>
               </div>
             </div>
             <div class="flex items-center gap-3">
@@ -85,8 +98,8 @@ const heroImage = { src: '/images/bg/backgroud_senghor1.jpg', alt: 'Remise de di
                 <font-awesome-icon icon="fa-solid fa-award" class="w-5 h-5 text-white" />
               </div>
               <div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">30+</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Ans</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.years }}+</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('mission.experience.stats.years') }}</p>
               </div>
             </div>
           </div>
