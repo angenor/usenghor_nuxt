@@ -7,12 +7,22 @@ const localePath = useLocalePath()
 const apiBase = useApiBase()
 
 const email = ref('')
+const firstName = ref('')
+const lastName = ref('')
 const isSubmitting = ref(false)
 const submitStatus = ref<'success' | 'error' | null>(null)
+const showNameModal = ref(false)
 
 const currentYear = computed(() => new Date().getFullYear())
 
-const handleNewsletterSubmit = async () => {
+// Étape 1 : l'utilisateur entre son email et clique sur S'abonner → popup
+const handleNewsletterSubmit = () => {
+  if (!email.value || isSubmitting.value) return
+  showNameModal.value = true
+}
+
+// Étape 2 : finaliser l'inscription depuis la popup
+const finalizeSubscription = async () => {
   if (!email.value || isSubmitting.value) return
 
   isSubmitting.value = true
@@ -23,16 +33,22 @@ const handleNewsletterSubmit = async () => {
       method: 'POST',
       body: {
         email: email.value.trim().toLowerCase(),
+        first_name: firstName.value.trim() || undefined,
+        last_name: lastName.value.trim() || undefined,
         source: 'website_form',
       },
     })
+    showNameModal.value = false
     submitStatus.value = 'success'
     email.value = ''
+    firstName.value = ''
+    lastName.value = ''
 
     setTimeout(() => {
       submitStatus.value = null
     }, 5000)
   } catch {
+    showNameModal.value = false
     submitStatus.value = 'error'
   } finally {
     isSubmitting.value = false
@@ -134,25 +150,17 @@ onMounted(() => {
                       :placeholder="t('footer.newsletter.placeholder')"
                       :disabled="isSubmitting"
                       class="w-full px-5 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-blue-500 focus:border-transparent transition-all duration-300 disabled:opacity-50"
-                    />
+                    >
                   </div>
                   <button
                     type="submit"
                     :disabled="isSubmitting"
                     class="group px-8 py-4 bg-gradient-to-r from-brand-blue-500 to-brand-blue-600 text-white font-semibold rounded-xl transition-all duration-300 hover:from-brand-blue-600 hover:to-brand-blue-700 hover:shadow-lg hover:shadow-brand-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    <span v-if="isSubmitting">{{ t('footer.newsletter.subscribing') }}</span>
-                    <span v-else>{{ t('footer.newsletter.subscribe') }}</span>
+                    <span>{{ t('footer.newsletter.subscribe') }}</span>
                     <font-awesome-icon
-                      v-if="!isSubmitting"
                       icon="fa-solid fa-arrow-right"
                       class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
-                    />
-                    <font-awesome-icon
-                      v-else
-                      icon="fa-solid fa-spinner"
-                      spin
-                      class="w-4 h-4"
                     />
                   </button>
                 </div>
@@ -414,4 +422,94 @@ onMounted(() => {
       </div>
     </div>
   </footer>
+
+  <!-- Modal nom/prénom -->
+  <Teleport to="body">
+    <Transition
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="showNameModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+        @click.self="finalizeSubscription"
+      >
+        <Transition
+          enter-active-class="transition duration-300 ease-out"
+          enter-from-class="transform scale-95 opacity-0"
+          enter-to-class="transform scale-100 opacity-100"
+          leave-active-class="transition duration-200 ease-in"
+          leave-from-class="transform scale-100 opacity-100"
+          leave-to-class="transform scale-95 opacity-0"
+        >
+          <div
+            v-if="showNameModal"
+            class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800"
+          >
+            <div class="mb-5 flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-blue-400 to-brand-blue-600">
+                <font-awesome-icon icon="fa-solid fa-user" class="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                  {{ t('footer.newsletter.modalTitle') }}
+                </h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ email }}
+                </p>
+              </div>
+            </div>
+
+            <p class="mb-4 text-sm text-gray-600 dark:text-gray-300">
+              {{ t('footer.newsletter.modalDescription') }}
+            </p>
+
+            <div class="mb-5 space-y-3">
+              <input
+                v-model="firstName"
+                type="text"
+                :placeholder="t('footer.newsletter.firstNamePlaceholder')"
+                :disabled="isSubmitting"
+                class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-blue-500 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
+              >
+              <input
+                v-model="lastName"
+                type="text"
+                :placeholder="t('footer.newsletter.lastNamePlaceholder')"
+                :disabled="isSubmitting"
+                class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-blue-500 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
+              >
+            </div>
+
+            <div class="flex gap-3">
+              <button
+                :disabled="isSubmitting"
+                class="flex-1 rounded-xl border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                @click="finalizeSubscription"
+              >
+                {{ t('footer.newsletter.skipButton') }}
+              </button>
+              <button
+                :disabled="isSubmitting"
+                class="flex-1 rounded-xl bg-gradient-to-r from-brand-blue-500 to-brand-blue-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:from-brand-blue-600 hover:to-brand-blue-700 disabled:opacity-50"
+                @click="finalizeSubscription"
+              >
+                <font-awesome-icon
+                  v-if="isSubmitting"
+                  icon="fa-solid fa-spinner"
+                  spin
+                  class="mr-2 h-4 w-4"
+                />
+                {{ t('footer.newsletter.confirmButton') }}
+              </button>
+            </div>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
+  </Teleport>
 </template>

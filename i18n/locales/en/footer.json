@@ -4,11 +4,17 @@
     "newsletter": {
       "title": "Stay informed",
       "description": "Receive our news, calls for applications and events directly in your inbox.",
+      "firstNamePlaceholder": "First name",
+      "lastNamePlaceholder": "Last name",
       "placeholder": "Your email address",
       "subscribe": "Subscribe",
       "subscribing": "Subscribing...",
       "success": "Thank you for subscribing!",
       "error": "An error occurred. Please try again.",
+      "modalTitle": "Complete your subscription",
+      "modalDescription": "Add your name to personalize our communications (optional).",
+      "skipButton": "Skip",
+      "confirmButton": "Confirm",
       "privacy": "By subscribing, you agree to our privacy policy."
     },
     "programs": {

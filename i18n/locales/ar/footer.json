@@ -4,11 +4,17 @@
     "newsletter": {
       "title": "ابق على اطلاع",
       "description": "تلقَّ أخبارنا ودعوات الترشح والفعاليات مباشرة في بريدك الإلكتروني.",
+      "firstNamePlaceholder": "الاسم الأول",
+      "lastNamePlaceholder": "اسم العائلة",
       "placeholder": "عنوان بريدك الإلكتروني",
       "subscribe": "اشترك",
       "subscribing": "جارٍ الاشتراك...",
       "success": "شكراً على اشتراكك!",
       "error": "حدث خطأ. يرجى المحاولة مرة أخرى.",
+      "modalTitle": "أكمل اشتراكك",
+      "modalDescription": "أضف اسمك لتخصيص رسائلنا (اختياري).",
+      "skipButton": "تخطي",
+      "confirmButton": "تأكيد",
       "privacy": "بالاشتراك، فإنك توافق على سياسة الخصوصية الخاصة بنا."
     },
     "programs": {

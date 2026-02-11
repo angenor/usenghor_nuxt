@@ -4,11 +4,17 @@
     "newsletter": {
       "title": "Restez informé",
       "description": "Recevez nos actualités, appels à candidatures et événements directement dans votre boîte mail.",
+      "firstNamePlaceholder": "Prénom",
+      "lastNamePlaceholder": "Nom",
       "placeholder": "Votre adresse email",
       "subscribe": "S'abonner",
       "subscribing": "Inscription...",
       "success": "Merci pour votre inscription !",
       "error": "Une erreur est survenue. Veuillez réessayer.",
+      "modalTitle": "Finalisez votre inscription",
+      "modalDescription": "Ajoutez votre nom pour personnaliser nos communications (facultatif).",
+      "skipButton": "Passer",
+      "confirmButton": "Confirmer",
       "privacy": "En vous inscrivant, vous acceptez notre politique de confidentialité."
     },
     "programs": {

@@ -547,23 +547,22 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
               <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
                 {{ t('organizationDetail.missions.objectives') }}
               </h3>
-              <div class="grid sm:grid-cols-2 gap-6">
+              <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm divide-y divide-gray-100 dark:divide-gray-800">
                 <div
-                  v-for="objective in objectives"
+                  v-for="(objective, index) in objectives"
                   :key="objective.id"
-                  class="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 group"
+                  class="flex items-start gap-4 p-5 transition-colors duration-200 group"
+                  :class="index === 0 ? 'rounded-t-2xl' : ''"
                 >
-                  <div class="flex items-start gap-4">
-                    <div
-                      class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
-                      :class="colorClasses.bgLight"
-                    >
-                      <font-awesome-icon icon="fa-solid fa-bullseye" class="w-5 h-5" :class="colorClasses.text" />
-                    </div>
-                    <div>
-                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">{{ objective.title }}</h4>
-                      <p v-if="objective.description" class="text-sm text-gray-600 dark:text-gray-400">{{ objective.description }}</p>
-                    </div>
+                  <div
+                    class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110"
+                    :class="colorClasses.bgLight"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-circle-check" class="w-5 h-5" :class="colorClasses.text" />
+                  </div>
+                  <div class="flex-1 min-w-0 pt-1">
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-1">{{ objective.title }}</h4>
+                    <p v-if="objective.description" class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{{ objective.description }}</p>
                   </div>
                 </div>
               </div>

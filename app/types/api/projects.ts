@@ -60,6 +60,8 @@ export interface ProjectRead {
   beneficiaries: string | null
   status: ProjectStatus
   publication_status: PublicationStatus
+  is_fundraising_featured: boolean
+  fundraising_display_order: number
   created_at: string
   updated_at: string
 }
@@ -90,6 +92,8 @@ export interface ProjectCreatePayload {
   publication_status?: PublicationStatus
   category_ids?: string[] | null
   country_ids?: string[] | null
+  is_fundraising_featured?: boolean
+  fundraising_display_order?: number
 }
 
 export interface ProjectUpdatePayload {
@@ -110,6 +114,24 @@ export interface ProjectUpdatePayload {
   publication_status?: PublicationStatus
   category_ids?: string[] | null
   country_ids?: string[] | null
+  is_fundraising_featured?: boolean
+  fundraising_display_order?: number
+}
+
+// ============================================================================
+// Project Fundraising (for public strategy page)
+// ============================================================================
+
+export interface ProjectFundraisingPublic {
+  id: string
+  title: string
+  slug: string
+  summary: string | null
+  cover_image_external_id: string | null
+  budget: number | null
+  currency: string
+  status: ProjectStatus
+  fundraising_display_order: number
 }
 
 // ============================================================================

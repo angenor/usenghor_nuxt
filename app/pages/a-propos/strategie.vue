@@ -1,13 +1,31 @@
 <script setup lang="ts">
+import type { ProjectFundraisingDisplay } from '~/composables/usePublicProjectsApi'
+
 const { t } = useI18n()
 
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, getRawContent, loadContent } = useEditorialContent('strategy')
 const { getMediaUrl } = useMediaApi()
+const { listFundraisingFeaturedProjects } = usePublicProjectsApi()
 
-onMounted(() => {
+// Projets de levée de fonds (depuis l'API)
+const fundraisingProjects = ref<ProjectFundraisingDisplay[]>([])
+const fundraisingLoading = ref(true)
+
+onMounted(async () => {
   // Charger les contenus éditoriaux (non-bloquant)
   loadContent()
+
+  // Charger les projets de levée de fonds
+  try {
+    fundraisingProjects.value = await listFundraisingFeaturedProjects(4)
+  }
+  catch (error) {
+    console.error('Erreur chargement projets levée de fonds:', error)
+  }
+  finally {
+    fundraisingLoading.value = false
+  }
 })
 
 // SEO
@@ -71,37 +89,6 @@ const targetIndicators = computed(() => [
   { value: '90', suffix: '%', label: getContent('strategy.indicators.items.insertion') }
 ])
 
-// Fundraising Projects
-const fundraisingProjects = computed(() => [
-  {
-    id: 'scholarships',
-    icon: 'graduation-cap',
-    title: getContent('strategy.fundraising.projects.scholarships.title'),
-    description: getContent('strategy.fundraising.projects.scholarships.description'),
-    amount: getContent('strategy.fundraising.projects.scholarships.amount')
-  },
-  {
-    id: 'campus',
-    icon: 'building',
-    title: getContent('strategy.fundraising.projects.campus.title'),
-    description: getContent('strategy.fundraising.projects.campus.description'),
-    amount: getContent('strategy.fundraising.projects.campus.amount')
-  },
-  {
-    id: 'research',
-    icon: 'flask',
-    title: getContent('strategy.fundraising.projects.research.title'),
-    description: getContent('strategy.fundraising.projects.research.description'),
-    amount: getContent('strategy.fundraising.projects.research.amount')
-  },
-  {
-    id: 'library',
-    icon: 'book',
-    title: getContent('strategy.fundraising.projects.library.title'),
-    description: getContent('strategy.fundraising.projects.library.description'),
-    amount: getContent('strategy.fundraising.projects.library.amount')
-  }
-])
 </script>
 
 <template>
@@ -146,6 +133,7 @@ const fundraisingProjects = computed(() => [
       :title="getContent('strategy.fundraising.title')"
       :subtitle="getContent('strategy.fundraising.subtitle')"
       :projects="fundraisingProjects"
+      :loading="fundraisingLoading"
       :cta-title="getContent('strategy.fundraising.cta.title')"
       :cta-text="getContent('strategy.fundraising.cta.text')"
       :cta-button="getContent('strategy.fundraising.cta.button')"
