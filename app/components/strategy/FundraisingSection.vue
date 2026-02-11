@@ -18,6 +18,7 @@ interface Props {
   ctaButton: string
   ctaLink: string
   loading?: boolean
+  backgroundImage?: string | null
 }
 
 const props = defineProps<Props>()
@@ -40,9 +41,19 @@ const projectColors = [
 <template>
   <section
     ref="sectionRef"
-    class="py-16 lg:py-24 bg-white dark:bg-gray-900 transition-colors duration-300"
+    class="relative py-16 lg:py-24 bg-white dark:bg-gray-900 transition-colors duration-300"
   >
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Background image -->
+    <div v-if="props.backgroundImage" class="absolute inset-0">
+      <img
+        :src="props.backgroundImage"
+        alt=""
+        class="h-full w-full object-cover"
+      >
+      <div class="absolute inset-0 bg-white/85 dark:bg-gray-900/90" />
+    </div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="text-center mb-12 lg:mb-16">
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">

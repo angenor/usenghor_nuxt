@@ -138,6 +138,7 @@ const targetIndicators = computed(() => [
       :cta-text="getContent('strategy.fundraising.cta.text')"
       :cta-button="getContent('strategy.fundraising.cta.button')"
       cta-link="/carrieres#partenaires"
+      :background-image="getMediaUrl(getRawContent('strategy.fundraising.image') ?? '') || undefined"
     />
   </div>
 </template>

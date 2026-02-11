@@ -312,6 +312,7 @@ export type ValueSectionKey =
   | 'strategy.fundraising.cta.title'
   | 'strategy.fundraising.cta.text'
   | 'strategy.fundraising.cta.button'
+  | 'strategy.fundraising.image'
   // Page Organisation - Hero
   | 'organization.hero.title'
   | 'organization.hero.subtitle'

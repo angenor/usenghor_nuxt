@@ -407,8 +407,10 @@ export const strategyPageSections: PageSection[] = [
       'strategy.fundraising.projects.research.title', 'strategy.fundraising.projects.research.description', 'strategy.fundraising.projects.research.amount',
       'strategy.fundraising.projects.library.title', 'strategy.fundraising.projects.library.description', 'strategy.fundraising.projects.library.amount',
       'strategy.fundraising.cta.title', 'strategy.fundraising.cta.text', 'strategy.fundraising.cta.button',
+      'strategy.fundraising.image',
     ],
     fields: [
+      { key: 'strategy.fundraising.image', label: 'Image de fond', description: 'Image de fond de la section levée de fonds (ratio 16:9 recommandé)', type: 'image', editorialKey: 'strategy.fundraising.image', editable: true },
       { key: 'strategy.fundraising.title', label: 'Titre section', description: 'Titre de la section levée de fonds', type: 'text', editorialKey: 'strategy.fundraising.title', editable: true },
       { key: 'strategy.fundraising.subtitle', label: 'Sous-titre section', description: 'Sous-titre de la section', type: 'text', editorialKey: 'strategy.fundraising.subtitle', editable: true },
       // Projet Bourses
