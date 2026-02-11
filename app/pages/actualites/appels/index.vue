@@ -131,6 +131,19 @@ async function fetchCalls() {
   }
 }
 
+// Synchroniser les filtres quand les query params changent (navigation intra-page)
+watch(() => route.query, (newQuery) => {
+  const newType = (newQuery.type as string) || 'all'
+  const newStatus = (newQuery.status as string) || 'all'
+
+  if (validTypes.includes(newType as typeof validTypes[number]) && newType !== selectedType.value) {
+    selectedType.value = newType as 'all' | CallType
+  }
+  if (validStatuses.includes(newStatus as typeof validStatuses[number]) && newStatus !== selectedStatus.value) {
+    selectedStatus.value = newStatus as 'all' | CallStatus
+  }
+})
+
 // Update URL when filters change
 watch([selectedType, selectedStatus], () => {
   const query: Record<string, string> = {}
