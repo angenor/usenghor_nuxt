@@ -29,7 +29,9 @@
         "jobOffers": "Job Offers",
         "jobOffersDesc": "Professional opportunities within our network",
         "events": "Events",
-        "eventsDesc": "Upcoming conferences, seminars and meetings"
+        "eventsDesc": "Upcoming conferences, seminars and meetings",
+        "allNews": "All News",
+        "allNewsDesc": "Browse all university news"
       },
       "training": {
         "featured": "Programs",

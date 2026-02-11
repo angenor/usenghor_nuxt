@@ -126,17 +126,14 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- Bottom Wave Border -->
+    <!-- Ligne de séparation droite -->
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 1000 100"
+      viewBox="0 0 1200 120"
       class="absolute -bottom-5 left-0 w-full rotate-180"
       preserveAspectRatio="none"
     >
-      <path
-        d="M0 0v80l227.5 18c12.1 1 22.5-8.6 22.5-20.7s10.4-21.8 22.5-20.8l205 16.3c12.1 1 22.5-8.6 22.5-20.8s10.4-21.7 22.5-20.8l205 16.3c12.1 1 22.5-8.6 22.5-20.8S760.4 5 772.5 6L1000 24V0H0Z"
-        class="fill-gray-50 dark:fill-gray-800"
-      />
+      <polygon points="0,40 1200,0 1200,120 0,120" class="fill-gray-50 dark:fill-gray-800" />
     </svg>
   </section>
 </template>

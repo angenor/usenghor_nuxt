@@ -219,7 +219,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
       </div>
       <div class="absolute bottom-0 left-0 right-0">
         <svg class="w-full h-12 md:h-16 text-white dark:text-gray-950" viewBox="0 0 1200 120" preserveAspectRatio="none">
-          <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C57.1,118.92,156.63,69.08,321.39,56.44Z" fill="currentColor"></path>
+          <polygon points="0,40 1200,0 1200,120 0,120" fill="currentColor" />
         </svg>
       </div>
     </section>
@@ -451,7 +451,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
           </div>
         </div>
 
-        <!-- Wave separator (sauf dernier) -->
+        <!-- Séparateur droit (sauf dernier) -->
         <div
           v-if="index < facilities.length - 1"
           class="wave-separator"
@@ -461,34 +461,14 @@ const getNextBgColor = (index: number, isDark: boolean) => {
             class="absolute inset-0 dark:hidden"
             :style="{ backgroundColor: getNextBgColor(index, false) }"
           >
-            <!-- Wave type A (index pair) -->
             <svg
-              v-if="index % 2 === 0"
-              viewBox="0 0 1185 248"
+              viewBox="0 0 1200 120"
               preserveAspectRatio="none"
               class="w-full h-full"
             >
-              <circle cx="76" cy="121.1" r="20" :fill="getCurrentSvgColor(index, false)" />
-              <circle cx="870" cy="201.1" r="11" :fill="getCurrentSvgColor(index, false)" />
-              <circle cx="814.5" cy="165.6" r="24.5" :fill="getCurrentSvgColor(index, false)" />
-              <path
+              <polygon
                 :fill="getCurrentSvgColor(index, false)"
-                d="M0 0v17.7c22.7 14.8 53 31.9 90.7 51.5 150.8 78 322 116.6 424.8 69.3 102.9-47.4 138-69.3 210.8-69.3s118.3 48.6 219.5 38.3 76.3-59.3 188.7-59.3c18.9 0 35.5 2.6 50.5 6.8V0H0z"
-              />
-            </svg>
-            <!-- Wave type B (index impair) -->
-            <svg
-              v-if="index % 2 === 1"
-              viewBox="0 0 1185 248"
-              preserveAspectRatio="none"
-              class="w-full h-full"
-            >
-              <circle cx="1109" cy="126.9" r="20" :fill="getCurrentSvgColor(index, false)" />
-              <circle cx="370.5" cy="82.4" r="24.5" :fill="getCurrentSvgColor(index, false)" />
-              <circle cx="315" cy="46.9" r="11" :fill="getCurrentSvgColor(index, false)" />
-              <path
-                :fill="getCurrentSvgColor(index, false)"
-                d="M50.5 199.8c112.4 0 87.5-49 188.7-59.3s146.7 38.3 219.5 38.3 107.9-21.9 210.8-69.3c102.8-47.3 274-8.7 424.8 69.3 37.7 19.5 68 36.7 90.7 51.5V0H0v193c15 4.2 31.6 6.8 50.5 6.8z"
+                :points="index % 2 === 0 ? '0,0 1200,0 1200,60 0,120' : '0,0 1200,0 1200,120 0,60'"
               />
             </svg>
           </div>
@@ -498,34 +478,14 @@ const getNextBgColor = (index: number, isDark: boolean) => {
             class="absolute inset-0 hidden dark:block"
             :style="{ backgroundColor: getNextBgColor(index, true) }"
           >
-            <!-- Wave type A (index pair) -->
             <svg
-              v-if="index % 2 === 0"
-              viewBox="0 0 1185 248"
+              viewBox="0 0 1200 120"
               preserveAspectRatio="none"
               class="w-full h-full"
             >
-              <circle cx="76" cy="121.1" r="20" :fill="getCurrentSvgColor(index, true)" />
-              <circle cx="870" cy="201.1" r="11" :fill="getCurrentSvgColor(index, true)" />
-              <circle cx="814.5" cy="165.6" r="24.5" :fill="getCurrentSvgColor(index, true)" />
-              <path
+              <polygon
                 :fill="getCurrentSvgColor(index, true)"
-                d="M0 0v17.7c22.7 14.8 53 31.9 90.7 51.5 150.8 78 322 116.6 424.8 69.3 102.9-47.4 138-69.3 210.8-69.3s118.3 48.6 219.5 38.3 76.3-59.3 188.7-59.3c18.9 0 35.5 2.6 50.5 6.8V0H0z"
-              />
-            </svg>
-            <!-- Wave type B (index impair) -->
-            <svg
-              v-if="index % 2 === 1"
-              viewBox="0 0 1185 248"
-              preserveAspectRatio="none"
-              class="w-full h-full"
-            >
-              <circle cx="1109" cy="126.9" r="20" :fill="getCurrentSvgColor(index, true)" />
-              <circle cx="370.5" cy="82.4" r="24.5" :fill="getCurrentSvgColor(index, true)" />
-              <circle cx="315" cy="46.9" r="11" :fill="getCurrentSvgColor(index, true)" />
-              <path
-                :fill="getCurrentSvgColor(index, true)"
-                d="M50.5 199.8c112.4 0 87.5-49 188.7-59.3s146.7 38.3 219.5 38.3 107.9-21.9 210.8-69.3c102.8-47.3 274-8.7 424.8 69.3 37.7 19.5 68 36.7 90.7 51.5V0H0v193c15 4.2 31.6 6.8 50.5 6.8z"
+                :points="index % 2 === 0 ? '0,0 1200,0 1200,60 0,120' : '0,0 1200,0 1200,120 0,60'"
               />
             </svg>
           </div>

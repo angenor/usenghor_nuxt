@@ -33,7 +33,9 @@
         "recruitment": "Recrutements",
         "recruitmentDesc": "Opportunités professionnelles au sein de notre réseau",
         "events": "Événements",
-        "eventsDesc": "Conférences, séminaires et rencontres à venir"
+        "eventsDesc": "Conférences, séminaires et rencontres à venir",
+        "allNews": "Toutes les actualités",
+        "allNewsDesc": "Voir l'ensemble des actualités de l'Université"
       },
       "training": {
         "featured": "Formations",

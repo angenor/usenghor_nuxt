@@ -62,7 +62,8 @@ const primaryNavItems = [
     children: [
       { key: 'callsForApplications', route: '/actualites/appels', icon: 'fa-solid fa-bullhorn' },
       { key: 'recruitment', route: '/actualites/appels?type=recruitment', icon: 'fa-solid fa-briefcase' },
-      { key: 'events', route: '/actualites/evenements', icon: 'fa-solid fa-calendar-days' }
+      { key: 'events', route: '/actualites/evenements', icon: 'fa-solid fa-calendar-days' },
+      { key: 'allNews', route: '/actualites', icon: 'fa-solid fa-newspaper' }
     ]
   }
 ]
@@ -269,8 +270,9 @@ onUnmounted(() => {
             @mouseenter="openDropdown(item.key)"
             @mouseleave="closeDropdown"
           >
-            <button
-              class="group relative flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300"
+            <NuxtLink
+              :to="localePath(item.route)"
+              class="group relative flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 no-underline"
               :class="[
                 isScrolled
                   ? activeDropdown === item.key
@@ -288,7 +290,7 @@ onUnmounted(() => {
                 class="w-3 h-3 transition-transform duration-300 opacity-60"
                 :class="{ 'rotate-180': activeDropdown === item.key }"
               />
-            </button>
+            </NuxtLink>
 
             <!-- Mega Menu Dropdown -->
             <Transition
