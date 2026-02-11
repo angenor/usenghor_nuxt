@@ -40,7 +40,7 @@ const scrollToSection = () => {
   <section
     id="mission"
     ref="sectionRef"
-    class="py-16 lg:py-24 bg-white dark:bg-gray-900 transition-colors duration-300"
+    class="py-16 lg:py-24 bg-white dark:bg-gray-900 transition-colors duration-300 bg-grid-pattern"
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">

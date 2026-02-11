@@ -64,7 +64,7 @@ const activeTab = computed(() => {
     <CampusTabs :active-tab="activeTab" />
 
     <!-- Tab Content -->
-    <div class="bg-gray-50 dark:bg-gray-950 min-h-[400px]">
+    <div class="bg-gray-50 dark:bg-gray-950 min-h-[400px] bg-grid-pattern">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Calls Tab (default) -->
         <CampusCalls

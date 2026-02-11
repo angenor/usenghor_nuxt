@@ -261,7 +261,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
     </section>
 
     <!-- Presentation Section -->
-    <section class="py-16 bg-white dark:bg-gray-950">
+    <section class="py-16 bg-white dark:bg-gray-950 bg-grid-pattern">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
           <!-- Text -->
@@ -300,7 +300,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
     <!-- Facilities Section -->
     <section>
       <!-- Header -->
-      <div class="py-16 lg:py-20 bg-white dark:bg-gray-900 text-center">
+      <div class="py-16 lg:py-20 bg-white dark:bg-gray-900 text-center bg-grid-pattern">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
             <span class="relative inline-block">
@@ -530,7 +530,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
     </section>
 
     <!-- Location Section - Données centralisées depuis /admin/editorial/contact -->
-    <section class="py-16 bg-gray-50 dark:bg-gray-900">
+    <section class="py-16 bg-gray-50 dark:bg-gray-900 bg-grid-pattern">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
