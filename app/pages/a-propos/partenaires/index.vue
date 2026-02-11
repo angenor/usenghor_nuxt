@@ -28,7 +28,7 @@ const breadcrumb = computed(() => [
 </script>
 
 <template>
-  <div>
+  <div class="bg-grid-pattern">
     <!-- Hero Section -->
     <PageHero
       :badge="getContent('partners.hero.badge')"

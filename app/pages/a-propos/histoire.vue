@@ -296,7 +296,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="histoire-page">
+  <div class="histoire-page bg-grid-pattern">
     <!-- Hero Section -->
     <PageHero
       :title="getContent('history.badge')"

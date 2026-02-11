@@ -10,7 +10,7 @@ const showMainNavbar = computed(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-white dark:bg-gray-950">
+  <div class="min-h-screen bg-white dark:bg-gray-950 bg-grid-pattern">
     <AppNavBar v-if="showMainNavbar" />
     <main>
       <slot />

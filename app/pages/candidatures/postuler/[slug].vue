@@ -134,7 +134,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <div>
+  <div class="bg-grid-pattern">
     <!-- Hero (shown when call is loaded) -->
     <PageHero
       v-if="call && !loading"

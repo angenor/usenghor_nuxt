@@ -26,7 +26,7 @@ const breadcrumb = computed(() => [
 </script>
 
 <template>
-  <div>
+  <div class="bg-grid-pattern">
     <!-- Hero -->
     <PageHero
       :title="getContent('careers.hero.title')"

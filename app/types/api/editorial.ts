@@ -216,7 +216,7 @@ export type ValueSectionKey =
   | 'governance.badge'
   | 'governance.title'
   | 'governance.subtitle'
-  | 'governance.hero.image'
+  | 'governance.image'
   // Page Gouvernance - Textes fondateurs
   | 'governance.foundingTexts.badge'
   | 'governance.foundingTexts.title'

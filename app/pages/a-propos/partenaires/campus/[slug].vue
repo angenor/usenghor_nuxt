@@ -50,7 +50,7 @@ const activeTab = computed(() => {
 </script>
 
 <template>
-  <div v-if="campus">
+  <div v-if="campus" class="bg-grid-pattern">
     <!-- Campus NavBar -->
     <CampusNavBar
       :campus-name="campus.name"

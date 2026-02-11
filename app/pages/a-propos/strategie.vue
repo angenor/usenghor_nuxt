@@ -92,7 +92,7 @@ const targetIndicators = computed(() => [
 </script>
 
 <template>
-  <div>
+  <div class="bg-grid-pattern">
     <!-- Hero -->
     <PageHero
       :title="getContent('strategy.hero.title')"

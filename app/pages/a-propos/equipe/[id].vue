@@ -133,7 +133,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+  <div class="min-h-screen bg-gray-50 bg-grid-pattern dark:bg-gray-950 transition-colors duration-300">
     <!-- Loading -->
     <div v-if="isLoading" class="flex items-center justify-center min-h-[60vh]">
       <font-awesome-icon :icon="['fas', 'spinner']" class="h-8 w-8 animate-spin text-gray-400" />

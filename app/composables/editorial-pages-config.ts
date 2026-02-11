@@ -198,7 +198,7 @@ export const homepageSections: PageSection[] = [
     icon: 'handshake',
     color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
     editorialKeys: [
-      'governance.badge', 'governance.title', 'governance.subtitle',
+      'governance.badge', 'governance.title', 'governance.subtitle', 'governance.image',
       'governance.foundingTexts.badge', 'governance.foundingTexts.title', 'governance.foundingTexts.description',
       'governance.donorCountries.title', 'governance.donorCountries.description',
     ],
@@ -206,6 +206,7 @@ export const homepageSections: PageSection[] = [
       { key: 'governance.badge', label: 'Badge', description: 'Texte du badge', type: 'text', editorialKey: 'governance.badge', editable: true },
       { key: 'governance.title', label: 'Titre', description: 'Titre principal', type: 'text', editorialKey: 'governance.title', editable: true },
       { key: 'governance.subtitle', label: 'Sous-titre', description: 'Description', type: 'textarea', editorialKey: 'governance.subtitle', editable: true },
+      { key: 'governance.image', label: 'Image Gouvernance', description: 'Image illustrative de la section Textes Fondateurs (ratio 1:1)', type: 'image', editorialKey: 'governance.image', editable: true },
       { key: 'governance.foundingTexts.badge', label: 'Textes fondateurs - Badge', description: 'Badge du bloc', type: 'text', editorialKey: 'governance.foundingTexts.badge', editable: true },
       { key: 'governance.foundingTexts.title', label: 'Textes fondateurs - Titre', description: 'Titre du bloc', type: 'text', editorialKey: 'governance.foundingTexts.title', editable: true },
       { key: 'governance.foundingTexts.description', label: 'Textes fondateurs - Description', description: 'Contenu du bloc', type: 'html', editorialKey: 'governance.foundingTexts.description', editable: true },
@@ -1089,12 +1090,11 @@ export const governancePageSections: PageSection[] = [
     description: 'Bannière principale de la page Gouvernance',
     icon: 'landmark',
     color: 'bg-gradient-to-r from-brand-blue-500 to-brand-red-500 text-white',
-    editorialKeys: ['governance.badge', 'governance.title', 'governance.subtitle', 'governance.hero.image'],
+    editorialKeys: ['governance.badge', 'governance.title', 'governance.subtitle'],
     fields: [
       { key: 'governance.badge', label: 'Badge', description: 'Texte du badge (ex: Notre structure)', type: 'text', editorialKey: 'governance.badge', editable: true },
       { key: 'governance.title', label: 'Titre', description: 'Titre principal du hero', type: 'text', editorialKey: 'governance.title', editable: true },
       { key: 'governance.subtitle', label: 'Sous-titre', description: 'Sous-titre du hero', type: 'textarea', editorialKey: 'governance.subtitle', editable: true },
-      { key: 'governance.hero.image', label: 'Image de fond', description: 'Image de fond du hero Gouvernance (ratio 16:9)', type: 'image', editorialKey: 'governance.hero.image', editable: true },
     ],
   },
   {

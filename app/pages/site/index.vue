@@ -236,7 +236,7 @@ const getNextBgColor = (index: number, isDark: boolean) => {
 </script>
 
 <template>
-  <div>
+  <div class="bg-grid-pattern">
     <!-- Hero -->
     <section class="relative py-16 md:py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
       <div class="absolute inset-0 opacity-10 heropattern-topography-brand-blue-500"></div>

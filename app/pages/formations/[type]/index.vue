@@ -266,7 +266,7 @@ const typeConfig = computed(() => {
     />
 
     <!-- Loading state -->
-    <section v-if="loading" class="py-16 bg-white dark:bg-gray-950">
+    <section v-if="loading" class="py-16 bg-white dark:bg-gray-950 bg-grid-pattern">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-center">
           <div class="text-center">
@@ -280,7 +280,7 @@ const typeConfig = computed(() => {
     </section>
 
     <!-- Error state -->
-    <section v-else-if="error" class="py-16 bg-white dark:bg-gray-950">
+    <section v-else-if="error" class="py-16 bg-white dark:bg-gray-950 bg-grid-pattern">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
           <font-awesome-icon icon="fa-solid fa-exclamation-triangle" class="w-16 h-16 text-red-500 mb-4" />
@@ -301,7 +301,7 @@ const typeConfig = computed(() => {
     </section>
 
     <!-- Content -->
-    <section v-else class="py-12 bg-white dark:bg-gray-950">
+    <section v-else class="py-12 bg-white dark:bg-gray-950 bg-grid-pattern">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col lg:flex-row gap-8">
           <!-- Main Content -->

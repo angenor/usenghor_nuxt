@@ -129,7 +129,7 @@ const typeColors: Record<string, string> = {
       :badge="t('actualites.hero.badge')"
     />
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="bg-grid-pattern max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <!-- Loading state -->
       <div v-if="isLoading" class="flex items-center justify-center py-12">
         <div class="flex flex-col items-center gap-4">

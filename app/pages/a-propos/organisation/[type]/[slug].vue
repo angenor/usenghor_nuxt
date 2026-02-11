@@ -412,7 +412,7 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
 </script>
 
 <template>
-  <div>
+  <div class="bg-grid-pattern">
     <!-- Loading state -->
     <div v-if="loading" class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
       <div class="text-center">

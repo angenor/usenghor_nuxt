@@ -32,7 +32,7 @@ const { elementRef: ctaRef } = useScrollAnimation({ animation: 'zoomIn', thresho
 </script>
 
 <template>
-  <div>
+  <div class="bg-grid-pattern">
     <!-- Hero -->
     <PageHero
       :title="getContent('team.hero.title')"
@@ -48,7 +48,7 @@ const { elementRef: ctaRef } = useScrollAnimation({ animation: 'zoomIn', thresho
     <TeamSection />
 
     <!-- CTA Section -->
-    <section class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
+    <section class="py-16 lg:py-24 bg-gray-50 bg-grid-pattern dark:bg-gray-800 transition-colors duration-300">
       <div ref="ctaRef" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div class="bg-brand-blue-50 dark:bg-brand-blue-900/20 rounded-2xl p-8 lg:p-12 hover:shadow-xl transition-shadow duration-300">
           <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-4">

@@ -32,7 +32,7 @@ const { elementRef: ctaRef } = useScrollAnimation({ animation: 'zoomIn', thresho
 </script>
 
 <template>
-  <div>
+  <div class="bg-grid-pattern">
     <!-- Hero -->
     <PageHero
       :title="getContent('organization.hero.title')"

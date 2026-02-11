@@ -201,7 +201,7 @@ const hasAssociations = (item: NewsDisplay) => {
       :badge="t('actualites.hero.badge')"
     />
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="bg-grid-pattern max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <!-- Section 1: Featured + Side news -->
       <section class="mb-16">
         <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-8">
@@ -479,7 +479,7 @@ const hasAssociations = (item: NewsDisplay) => {
     </section>
 
     <!-- Section 4: Open Calls (fond blanc) -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="bg-grid-pattern max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <section v-if="openCalls.length > 0">
         <div class="flex items-center justify-between mb-8">
           <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">

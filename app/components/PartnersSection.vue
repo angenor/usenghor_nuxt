@@ -3,7 +3,16 @@ const { t } = useI18n()
 const localePath = useLocalePath()
 
 // Contenus éditoriaux avec fallback sur i18n
-const { getContent, loadContent } = useEditorialContent('homepage')
+const { getContent, getRawContent, loadContent } = useEditorialContent('homepage')
+
+// API Media pour résoudre l'URL de l'image
+const { getMediaUrl } = useMediaApi()
+
+// Image de la section (éditorial avec fallback sur image statique)
+const sectionImage = computed(() => {
+  const imageMediaId = getRawContent('governance.image')
+  return (imageMediaId ? getMediaUrl(imageMediaId) : null) ?? '/images/gallery/gallery4.jpg'
+})
 
 const { elementRef: headerRef } = useScrollAnimation({ animation: 'fadeInDown' })
 const { elementRef: foundingTextsRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.15 })
@@ -69,7 +78,7 @@ onMounted(() => {
             <div class="morphing-border-container">
               <div class="morphing-border">
                 <img
-                  src="/images/gallery/gallery4.jpg"
+                  :src="sectionImage"
                   :alt="t('governance.foundingTexts.title')"
                   class="w-full h-full object-cover"
                 />

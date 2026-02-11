@@ -194,7 +194,7 @@ const stats = computed(() => [
     </section>
 
     <!-- Introduction Section -->
-    <section class="py-16 bg-white dark:bg-gray-950">
+    <section class="py-16 bg-white dark:bg-gray-950 bg-grid-pattern">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-3xl mx-auto mb-12">
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -220,7 +220,7 @@ const stats = computed(() => [
     </section>
 
     <!-- Loading state -->
-    <section v-if="isLoading" class="py-16 bg-gray-50 dark:bg-gray-900">
+    <section v-if="isLoading" class="py-16 bg-gray-50 dark:bg-gray-900 bg-grid-pattern">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-center py-12">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue-600" />
@@ -229,7 +229,7 @@ const stats = computed(() => [
     </section>
 
     <!-- Error state -->
-    <section v-else-if="error" class="py-16 bg-gray-50 dark:bg-gray-900">
+    <section v-else-if="error" class="py-16 bg-gray-50 dark:bg-gray-900 bg-grid-pattern">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center py-12 bg-red-50 dark:bg-red-900/20 rounded-xl">
           <font-awesome-icon icon="fa-solid fa-exclamation-triangle" class="w-16 h-16 text-red-400 mb-4" />
@@ -248,7 +248,7 @@ const stats = computed(() => [
     <!-- Content -->
     <template v-else>
       <!-- All Projects -->
-      <section class="py-16 bg-white dark:bg-gray-950">
+      <section class="py-16 bg-white dark:bg-gray-950 bg-grid-pattern">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">
             {{ getContent('projects.list.title', 'projets.list.title') }}
