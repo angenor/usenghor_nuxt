@@ -2,7 +2,8 @@
 const { t } = useI18n()
 
 // Contenus éditoriaux avec fallback sur i18n
-const { getContent, loadContent } = useEditorialContent('strategy')
+const { getContent, getRawContent, loadContent } = useEditorialContent('strategy')
+const { getMediaUrl } = useMediaApi()
 
 onMounted(() => {
   // Charger les contenus éditoriaux (non-bloquant)
@@ -120,8 +121,8 @@ const fundraisingProjects = computed(() => [
     <StrategyStrategicPlanSection
       :title="getContent('strategy.plan.title')"
       :summary="getContent('strategy.plan.summary')"
-      cover-image="https://picsum.photos/seed/strategic-plan-cover/800/600"
-      pdf-url="/documents/plan-strategique-2024-2030.pdf"
+      :cover-image="getMediaUrl(getRawContent('strategy.plan.image') ?? '') || 'https://picsum.photos/seed/strategic-plan-cover/800/600'"
+      :pdf-url="getMediaUrl(getRawContent('strategy.plan.download_url') ?? '') || getRawContent('strategy.plan.download_url') || '/documents/plan-strategique-2024-2030.pdf'"
       :pdf-label="getContent('strategy.plan.download')"
     />
 

@@ -6,7 +6,18 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 const { t } = useI18n()
 
 // Contenus éditoriaux avec fallback sur i18n
-const { getContent, loadContent } = useEditorialContent('history')
+const { getContent, getRawContent, loadContent } = useEditorialContent('history')
+const { getMediaUrl } = useMediaApi()
+
+// Résoudre une image éditoriale avec fallback sur placeholder
+function resolveImage(editorialKey: string, fallbackSrc: string, fallbackAlt: string) {
+  const mediaId = getRawContent(editorialKey)
+  return {
+    type: 'image' as const,
+    src: mediaId ? (getMediaUrl(mediaId) || fallbackSrc) : fallbackSrc,
+    alt: fallbackAlt,
+  }
+}
 
 // SEO
 useSeoMeta({
@@ -48,9 +59,9 @@ const timelineEvents = computed(() => [
     description: getContent('history.timeline.1989.description'),
     bgColor: phaseColors[getContent('history.timeline.1989.phase')] || '#FDF6E3',
     media: [
-      { type: 'image', src: 'https://picsum.photos/seed/dakar89/800/600', alt: 'Sommet de Dakar 1989' },
-      { type: 'image', src: 'https://picsum.photos/seed/francophonie/800/600', alt: 'Francophonie' },
-      { type: 'image', src: 'https://picsum.photos/seed/tabatoni/800/600', alt: 'Pierre Tabatoni' }
+      resolveImage('history.timeline.1989.image1', 'https://picsum.photos/seed/dakar89/800/600', 'Sommet de Dakar 1989'),
+      resolveImage('history.timeline.1989.image2', 'https://picsum.photos/seed/francophonie/800/600', 'Francophonie'),
+      resolveImage('history.timeline.1989.image3', 'https://picsum.photos/seed/tabatoni/800/600', 'Pierre Tabatoni'),
     ]
   },
   {
@@ -59,9 +70,9 @@ const timelineEvents = computed(() => [
     description: getContent('history.timeline.2002.description'),
     bgColor: phaseColors[getContent('history.timeline.2002.phase')] || '#E8F5E9',
     media: [
-      { type: 'image', src: 'https://picsum.photos/seed/constant/800/600', alt: 'Fred Constant' },
-      { type: 'image', src: 'https://picsum.photos/seed/elkosheri/800/600', alt: 'Ahmed El Kosheri' },
-      { type: 'image', src: 'https://picsum.photos/seed/decade2000/800/600', alt: 'Décennie 2000' }
+      resolveImage('history.timeline.2002.image1', 'https://picsum.photos/seed/constant/800/600', 'Fred Constant'),
+      resolveImage('history.timeline.2002.image2', 'https://picsum.photos/seed/elkosheri/800/600', 'Ahmed El Kosheri'),
+      resolveImage('history.timeline.2002.image3', 'https://picsum.photos/seed/decade2000/800/600', 'Décennie 2000'),
     ]
   },
   {
@@ -70,9 +81,9 @@ const timelineEvents = computed(() => [
     description: getContent('history.timeline.2016.description'),
     bgColor: phaseColors[getContent('history.timeline.2016.phase')] || '#FCE4EC',
     media: [
-      { type: 'image', src: 'https://picsum.photos/seed/verdel/800/600', alt: 'Pr. Thierry Verdel' },
-      { type: 'image', src: 'https://picsum.photos/seed/strategy2016/800/600', alt: 'Stratégie' },
-      { type: 'image', src: 'https://picsum.photos/seed/new-era/800/600', alt: 'Nouvelle ère' }
+      resolveImage('history.timeline.2016.image1', 'https://picsum.photos/seed/verdel/800/600', 'Pr. Thierry Verdel'),
+      resolveImage('history.timeline.2016.image2', 'https://picsum.photos/seed/strategy2016/800/600', 'Stratégie'),
+      resolveImage('history.timeline.2016.image3', 'https://picsum.photos/seed/new-era/800/600', 'Nouvelle ère'),
     ]
   },
   {
@@ -81,9 +92,9 @@ const timelineEvents = computed(() => [
     description: getContent('history.timeline.2020.description'),
     bgColor: phaseColors[getContent('history.timeline.2020.phase')] || '#FCE4EC',
     media: [
-      { type: 'image', src: 'https://picsum.photos/seed/30years/800/600', alt: '30 ans' },
-      { type: 'image', src: 'https://picsum.photos/seed/alumni/800/600', alt: 'Alumni' },
-      { type: 'image', src: 'https://picsum.photos/seed/impact/800/600', alt: 'Impact' }
+      resolveImage('history.timeline.2020.image1', 'https://picsum.photos/seed/30years/800/600', '30 ans'),
+      resolveImage('history.timeline.2020.image2', 'https://picsum.photos/seed/alumni/800/600', 'Alumni'),
+      resolveImage('history.timeline.2020.image3', 'https://picsum.photos/seed/impact/800/600', 'Impact'),
     ]
   }
 ])

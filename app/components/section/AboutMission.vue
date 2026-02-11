@@ -45,12 +45,18 @@ const scrollToSection = () => {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <!-- Illustration -->
-        <div class="relative order-2 lg:order-1 flex items-center justify-center">
-          <img
-            :src="props.illustration"
-            :alt="props.title"
-            class="illustration-bordered w-full max-w-md lg:max-w-lg h-auto object-contain"
-          />
+        <div class="relative order-2 lg:order-1">
+          <div class="relative rounded-2xl overflow-hidden shadow-2xl">
+            <img
+              :src="props.illustration"
+              :alt="props.title"
+              class="w-full h-auto object-cover aspect-[4/3]"
+            />
+            <!-- Gradient overlay -->
+            <div class="absolute inset-0 bg-gradient-to-t from-brand-blue-900/30 to-transparent"></div>
+          </div>
+          <!-- Decorative element -->
+          <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-brand-blue-400 rounded-xl -z-10"></div>
         </div>
 
         <!-- Content -->
@@ -131,25 +137,3 @@ const scrollToSection = () => {
     </div>
   </section>
 </template>
-
-<style scoped>
-.illustration-bordered {
-  --c: #2b4bbf; /* brand-blue-500 */
-  --b: 6px; /* thickness of the border */
-  --o: 20px; /* control the offset */
-
-  --_p: calc(2 * var(--o) + var(--b));
-  padding: var(--_p) var(--_p) 0 0;
-  outline: var(--b) solid var(--c);
-  outline-offset: calc(var(--o) - var(--_p));
-  transition: 0.4s;
-}
-
-.illustration-bordered:hover {
-  padding: calc(var(--_p) / 2);
-}
-
-:root.dark .illustration-bordered {
-  --c: #5478e6; /* brand-blue-400 for dark mode */
-}
-</style>

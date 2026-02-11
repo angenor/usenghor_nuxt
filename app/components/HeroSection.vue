@@ -7,7 +7,10 @@ const { getContent, getRawContent, loadContent } = useEditorialContent('homepage
 // API Media pour résoudre les URLs des images
 const { getMediaUrl } = useMediaApi()
 
-// Configuration des slides avec clés éditoriales et images de fallback
+// État de chargement initial (attendre que les contenus soient chargés)
+const isContentLoaded = ref(false)
+
+// Configuration des slides avec clés éditoriales (pas d'images par défaut)
 const slidesConfig = [
   {
     editorialTitleKey: 'hero.slide1.title',
@@ -17,7 +20,6 @@ const slidesConfig = [
     editorialCta1LinkKey: 'hero.slide1.cta1.link',
     editorialCta2TextKey: 'hero.slide1.cta2.text',
     editorialCta2LinkKey: 'hero.slide1.cta2.link',
-    fallbackImage: '/images/bg/backgroud_senghor1.jpg',
   },
   {
     editorialTitleKey: 'hero.slide2.title',
@@ -27,7 +29,6 @@ const slidesConfig = [
     editorialCta1LinkKey: 'hero.slide2.cta1.link',
     editorialCta2TextKey: 'hero.slide2.cta2.text',
     editorialCta2LinkKey: 'hero.slide2.cta2.link',
-    fallbackImage: '/images/bg/backgroud_senghor2.jpg',
   },
   {
     editorialTitleKey: 'hero.slide3.title',
@@ -37,7 +38,6 @@ const slidesConfig = [
     editorialCta1LinkKey: 'hero.slide3.cta1.link',
     editorialCta2TextKey: 'hero.slide3.cta2.text',
     editorialCta2LinkKey: 'hero.slide3.cta2.link',
-    fallbackImage: '/images/bg/backgroud_senghor3.jpg',
   },
   {
     editorialTitleKey: 'hero.slide4.title',
@@ -47,26 +47,35 @@ const slidesConfig = [
     editorialCta1LinkKey: 'hero.slide4.cta1.link',
     editorialCta2TextKey: 'hero.slide4.cta2.text',
     editorialCta2LinkKey: 'hero.slide4.cta2.link',
-    fallbackImage: '/images/bg/backgroud_senghor4.jpg',
   },
 ]
 
-// Computed pour résoudre les images depuis l'éditorial avec fallback
+// Computed : ne garder que les slides ayant une image éditoriale définie
 const slides = computed(() => {
-  return slidesConfig.map((config) => {
-    // Récupérer l'ID du media depuis le contenu éditorial (valeur brute, pas de fallback i18n)
-    const imageMediaId = getRawContent(config.editorialImageKey)
+  return slidesConfig
+    .map((config) => {
+      const imageMediaId = getRawContent(config.editorialImageKey)
+      if (!imageMediaId) return null
 
-    return {
-      image: imageMediaId ? getMediaUrl(imageMediaId) : config.fallbackImage,
-      editorialTitleKey: config.editorialTitleKey,
-      editorialSubtitleKey: config.editorialSubtitleKey,
-      editorialCta1TextKey: config.editorialCta1TextKey,
-      editorialCta1LinkKey: config.editorialCta1LinkKey,
-      editorialCta2TextKey: config.editorialCta2TextKey,
-      editorialCta2LinkKey: config.editorialCta2LinkKey,
-    }
-  })
+      return {
+        image: getMediaUrl(imageMediaId),
+        editorialTitleKey: config.editorialTitleKey,
+        editorialSubtitleKey: config.editorialSubtitleKey,
+        editorialCta1TextKey: config.editorialCta1TextKey,
+        editorialCta1LinkKey: config.editorialCta1LinkKey,
+        editorialCta2TextKey: config.editorialCta2TextKey,
+        editorialCta2LinkKey: config.editorialCta2LinkKey,
+      }
+    })
+    .filter(Boolean) as Array<{
+    image: string
+    editorialTitleKey: string
+    editorialSubtitleKey: string
+    editorialCta1TextKey: string
+    editorialCta1LinkKey: string
+    editorialCta2TextKey: string
+    editorialCta2LinkKey: string
+  }>
 })
 
 const currentSlide = ref(0)
@@ -132,12 +141,15 @@ const prevSlide = () => {
   goToSlide((currentSlide.value - 1 + slides.value.length) % slides.value.length, true)
 }
 
-onMounted(() => {
-  // Charger les contenus éditoriaux (non-bloquant)
-  loadContent()
+onMounted(async () => {
+  // Charger les contenus éditoriaux (bloquant : attendre avant affichage)
+  await loadContent()
+  isContentLoaded.value = true
 
-  // Démarrer le carrousel
-  slideInterval = setInterval(() => goToSlide((currentSlide.value + 1) % slides.value.length), 6000)
+  // Démarrer le carrousel seulement s'il y a des slides avec images
+  if (slides.value.length > 1) {
+    slideInterval = setInterval(() => goToSlide((currentSlide.value + 1) % slides.value.length), 6000)
+  }
 })
 
 onUnmounted(() => {
@@ -149,7 +161,15 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section class="relative h-screen min-h-[700px] overflow-hidden">
+  <!-- Chargement des contenus éditoriaux -->
+  <section v-if="!isContentLoaded" class="relative h-screen min-h-[700px] overflow-hidden bg-gray-900">
+    <div class="absolute inset-0 flex items-center justify-center">
+      <font-awesome-icon :icon="['fas', 'spinner']" class="h-10 w-10 animate-spin text-white/40" />
+    </div>
+  </section>
+
+  <!-- Hero affiché uniquement quand les contenus sont chargés et qu'il y a des slides -->
+  <section v-else-if="slides.length > 0" class="relative h-screen min-h-[700px] overflow-hidden">
     <!-- Background Slides -->
     <div class="absolute inset-0">
       <TransitionGroup name="slide">
@@ -220,43 +240,45 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- Navigation Arrows -->
-    <div class="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-20">
-      <button
-        @click="prevSlide"
-        class="group p-3 lg:p-4 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white transition-all duration-300 hover:bg-white/20 hover:scale-110"
-        :disabled="isTransitioning"
-      >
-        <font-awesome-icon icon="fa-solid fa-chevron-left" class="w-5 h-5 lg:w-6 lg:h-6 transition-transform duration-300 group-hover:-translate-x-1" />
-      </button>
-    </div>
-    <div class="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-20">
-      <button
-        @click="nextSlide"
-        class="group p-3 lg:p-4 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white transition-all duration-300 hover:bg-white/20 hover:scale-110"
-        :disabled="isTransitioning"
-      >
-        <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-5 h-5 lg:w-6 lg:h-6 transition-transform duration-300 group-hover:translate-x-1" />
-      </button>
-    </div>
+    <!-- Navigation Arrows (seulement si plus d'un slide) -->
+    <template v-if="slides.length > 1">
+      <div class="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-20">
+        <button
+          @click="prevSlide"
+          class="group p-3 lg:p-4 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white transition-all duration-300 hover:bg-white/20 hover:scale-110"
+          :disabled="isTransitioning"
+        >
+          <font-awesome-icon icon="fa-solid fa-chevron-left" class="w-5 h-5 lg:w-6 lg:h-6 transition-transform duration-300 group-hover:-translate-x-1" />
+        </button>
+      </div>
+      <div class="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-20">
+        <button
+          @click="nextSlide"
+          class="group p-3 lg:p-4 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white transition-all duration-300 hover:bg-white/20 hover:scale-110"
+          :disabled="isTransitioning"
+        >
+          <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-5 h-5 lg:w-6 lg:h-6 transition-transform duration-300 group-hover:translate-x-1" />
+        </button>
+      </div>
 
-    <!-- Slide Indicators -->
-    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-3">
-      <button
-        v-for="(item, index) in slides"
-        :key="index"
-        @click="goToSlide(index, true)"
-        class="group relative h-3 transition-all duration-500 rounded-full overflow-hidden"
-        :class="[
-          currentSlide === index ? 'w-12 bg-brand-blue-500' : 'w-3 bg-white/40 hover:bg-white/60'
-        ]"
-      >
-        <span
-          v-if="currentSlide === index"
-          class="absolute inset-0 bg-brand-blue-300 animate-progress"
-        ></span>
-      </button>
-    </div>
+      <!-- Slide Indicators -->
+      <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-3">
+        <button
+          v-for="(item, index) in slides"
+          :key="index"
+          @click="goToSlide(index, true)"
+          class="group relative h-3 transition-all duration-500 rounded-full overflow-hidden"
+          :class="[
+            currentSlide === index ? 'w-12 bg-brand-blue-500' : 'w-3 bg-white/40 hover:bg-white/60'
+          ]"
+        >
+          <span
+            v-if="currentSlide === index"
+            class="absolute inset-0 bg-brand-blue-300 animate-progress"
+          ></span>
+        </button>
+      </div>
+    </template>
   </section>
 </template>
 

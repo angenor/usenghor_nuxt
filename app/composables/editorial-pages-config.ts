@@ -23,7 +23,7 @@ export interface PageSectionField {
   key: string
   label: string
   description: string
-  type: 'text' | 'textarea' | 'number' | 'html' | 'image' | 'list' | 'documents' | 'countries'
+  type: 'text' | 'textarea' | 'number' | 'html' | 'image' | 'file' | 'list' | 'documents' | 'countries'
   i18nKey?: string
   editorialKey?: ValueSectionKey
   editable: boolean
@@ -323,11 +323,13 @@ export const strategyPageSections: PageSection[] = [
     description: 'Présentation du plan stratégique 2024-2030',
     icon: 'file-alt',
     color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-    editorialKeys: ['strategy.plan.title', 'strategy.plan.summary', 'strategy.plan.download'],
+    editorialKeys: ['strategy.plan.title', 'strategy.plan.summary', 'strategy.plan.image', 'strategy.plan.download', 'strategy.plan.download_url'],
     fields: [
       { key: 'strategy.plan.title', label: 'Titre', description: 'Titre de la section', type: 'text', editorialKey: 'strategy.plan.title', editable: true },
       { key: 'strategy.plan.summary', label: 'Résumé', description: 'Texte de présentation du plan', type: 'html', editorialKey: 'strategy.plan.summary', editable: true },
+      { key: 'strategy.plan.image', label: 'Image de couverture', description: 'Image illustrant le plan stratégique (ratio 4:3 recommandé)', type: 'image', editorialKey: 'strategy.plan.image', editable: true },
       { key: 'strategy.plan.download', label: 'Bouton téléchargement', description: 'Texte du bouton PDF', type: 'text', editorialKey: 'strategy.plan.download', editable: true },
+      { key: 'strategy.plan.download_url', label: 'Fichier PDF', description: 'Fichier PDF du plan stratégique (upload ou URL)', type: 'file', editorialKey: 'strategy.plan.download_url', editable: true },
     ],
   },
   {
@@ -1002,11 +1004,14 @@ export const historyPageSections: PageSection[] = [
     description: 'Création de l\'Université',
     icon: 'calendar',
     color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
-    editorialKeys: ['history.timeline.1989.title', 'history.timeline.1989.description', 'history.timeline.1989.phase'],
+    editorialKeys: ['history.timeline.1989.title', 'history.timeline.1989.description', 'history.timeline.1989.phase', 'history.timeline.1989.image1', 'history.timeline.1989.image2', 'history.timeline.1989.image3'],
     fields: [
       { key: 'history.timeline.1989.title', label: 'Titre', description: 'Titre de l\'événement 1989', type: 'text', editorialKey: 'history.timeline.1989.title', editable: true },
       { key: 'history.timeline.1989.description', label: 'Description', description: 'Description de l\'événement', type: 'textarea', editorialKey: 'history.timeline.1989.description', editable: true },
       { key: 'history.timeline.1989.phase', label: 'Phase', description: 'Phase historique (ex: Fondation)', type: 'text', editorialKey: 'history.timeline.1989.phase', editable: true },
+      { key: 'history.timeline.1989.image1', label: 'Image 1', description: 'Première image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.1989.image1', editable: true },
+      { key: 'history.timeline.1989.image2', label: 'Image 2', description: 'Deuxième image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.1989.image2', editable: true },
+      { key: 'history.timeline.1989.image3', label: 'Image 3', description: 'Troisième image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.1989.image3', editable: true },
     ],
   },
   {
@@ -1015,11 +1020,14 @@ export const historyPageSections: PageSection[] = [
     description: 'Nouvelle direction',
     icon: 'calendar',
     color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-    editorialKeys: ['history.timeline.2002.title', 'history.timeline.2002.description', 'history.timeline.2002.phase'],
+    editorialKeys: ['history.timeline.2002.title', 'history.timeline.2002.description', 'history.timeline.2002.phase', 'history.timeline.2002.image1', 'history.timeline.2002.image2', 'history.timeline.2002.image3'],
     fields: [
       { key: 'history.timeline.2002.title', label: 'Titre', description: 'Titre de l\'événement 2002', type: 'text', editorialKey: 'history.timeline.2002.title', editable: true },
       { key: 'history.timeline.2002.description', label: 'Description', description: 'Description de l\'événement', type: 'textarea', editorialKey: 'history.timeline.2002.description', editable: true },
       { key: 'history.timeline.2002.phase', label: 'Phase', description: 'Phase historique (ex: Développement)', type: 'text', editorialKey: 'history.timeline.2002.phase', editable: true },
+      { key: 'history.timeline.2002.image1', label: 'Image 1', description: 'Première image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.2002.image1', editable: true },
+      { key: 'history.timeline.2002.image2', label: 'Image 2', description: 'Deuxième image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.2002.image2', editable: true },
+      { key: 'history.timeline.2002.image3', label: 'Image 3', description: 'Troisième image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.2002.image3', editable: true },
     ],
   },
   {
@@ -1028,11 +1036,14 @@ export const historyPageSections: PageSection[] = [
     description: 'Direction actuelle',
     icon: 'calendar',
     color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-    editorialKeys: ['history.timeline.2016.title', 'history.timeline.2016.description', 'history.timeline.2016.phase'],
+    editorialKeys: ['history.timeline.2016.title', 'history.timeline.2016.description', 'history.timeline.2016.phase', 'history.timeline.2016.image1', 'history.timeline.2016.image2', 'history.timeline.2016.image3'],
     fields: [
       { key: 'history.timeline.2016.title', label: 'Titre', description: 'Titre de l\'événement 2016', type: 'text', editorialKey: 'history.timeline.2016.title', editable: true },
       { key: 'history.timeline.2016.description', label: 'Description', description: 'Description de l\'événement', type: 'textarea', editorialKey: 'history.timeline.2016.description', editable: true },
       { key: 'history.timeline.2016.phase', label: 'Phase', description: 'Phase historique (ex: Rayonnement)', type: 'text', editorialKey: 'history.timeline.2016.phase', editable: true },
+      { key: 'history.timeline.2016.image1', label: 'Image 1', description: 'Première image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.2016.image1', editable: true },
+      { key: 'history.timeline.2016.image2', label: 'Image 2', description: 'Deuxième image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.2016.image2', editable: true },
+      { key: 'history.timeline.2016.image3', label: 'Image 3', description: 'Troisième image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.2016.image3', editable: true },
     ],
   },
   {
@@ -1041,11 +1052,14 @@ export const historyPageSections: PageSection[] = [
     description: '30 ans d\'excellence',
     icon: 'calendar',
     color: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300',
-    editorialKeys: ['history.timeline.2020.title', 'history.timeline.2020.description', 'history.timeline.2020.phase'],
+    editorialKeys: ['history.timeline.2020.title', 'history.timeline.2020.description', 'history.timeline.2020.phase', 'history.timeline.2020.image1', 'history.timeline.2020.image2', 'history.timeline.2020.image3'],
     fields: [
       { key: 'history.timeline.2020.title', label: 'Titre', description: 'Titre de l\'événement 2020', type: 'text', editorialKey: 'history.timeline.2020.title', editable: true },
       { key: 'history.timeline.2020.description', label: 'Description', description: 'Description de l\'événement', type: 'textarea', editorialKey: 'history.timeline.2020.description', editable: true },
       { key: 'history.timeline.2020.phase', label: 'Phase', description: 'Phase historique (ex: Actuel)', type: 'text', editorialKey: 'history.timeline.2020.phase', editable: true },
+      { key: 'history.timeline.2020.image1', label: 'Image 1', description: 'Première image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.2020.image1', editable: true },
+      { key: 'history.timeline.2020.image2', label: 'Image 2', description: 'Deuxième image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.2020.image2', editable: true },
+      { key: 'history.timeline.2020.image3', label: 'Image 3', description: 'Troisième image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.2020.image3', editable: true },
     ],
   },
 ]

@@ -102,6 +102,20 @@ const EDITORIAL_TO_I18N_MAP: Partial<Record<string, string>> = {
   'history.legacy.title': 'history.legacy.title',
   'history.legacy.description': 'history.legacy.description',
 
+  // History timeline images
+  'history.timeline.1989.image1': 'history.timeline.1989.image1',
+  'history.timeline.1989.image2': 'history.timeline.1989.image2',
+  'history.timeline.1989.image3': 'history.timeline.1989.image3',
+  'history.timeline.2002.image1': 'history.timeline.2002.image1',
+  'history.timeline.2002.image2': 'history.timeline.2002.image2',
+  'history.timeline.2002.image3': 'history.timeline.2002.image3',
+  'history.timeline.2016.image1': 'history.timeline.2016.image1',
+  'history.timeline.2016.image2': 'history.timeline.2016.image2',
+  'history.timeline.2016.image3': 'history.timeline.2016.image3',
+  'history.timeline.2020.image1': 'history.timeline.2020.image1',
+  'history.timeline.2020.image2': 'history.timeline.2020.image2',
+  'history.timeline.2020.image3': 'history.timeline.2020.image3',
+
   // Formations section
   'formations.badge': 'formations.badge',
   'formations.title': 'formations.title',

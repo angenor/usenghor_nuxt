@@ -68,6 +68,19 @@ function cancel() {
     @history="emit('history')"
   />
 
+  <!-- Pour les champs fichier (upload ou URL), utiliser le composant dédié -->
+  <AdminEditorialFileField
+    v-else-if="field.type === 'file'"
+    :field="field"
+    :value="value"
+    :is-editing="isEditing"
+    :is-saving="isSaving"
+    @edit="emit('edit')"
+    @save="(val: string, valueType: 'text' | 'number' | 'html') => emit('save', val, valueType)"
+    @cancel="emit('cancel')"
+    @history="emit('history')"
+  />
+
   <!-- Pour les champs documents (liste dynamique JSON), utiliser le composant dédié -->
   <AdminEditorialDocumentsField
     v-else-if="field.type === 'documents'"
