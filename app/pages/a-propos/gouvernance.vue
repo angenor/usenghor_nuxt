@@ -2,8 +2,8 @@
 import type { PaysBailleur } from '@bank/mock-data/pays-bailleurs'
 
 const { t } = useI18n()
-const { conseilAdministration, getTextesFondateurs, getCAPresident } = useMockData()
-const { paysBailleurs: mockPaysBailleurs, egypte: mockEgypte, northernFounders: mockNorthernFounders, africanFounders: mockAfricanFounders, laterMembers } = usePaysBailleursData()
+const { conseilAdministration, getCAPresident } = useMockData()
+const { laterMembers } = usePaysBailleursData()
 const { selectedPays, openDrawer, closeDrawer } = useCountryDrawer()
 
 // Contenus éditoriaux avec fallback i18n
@@ -28,7 +28,7 @@ const breadcrumb = computed(() => [
   { label: getContent('governance.badge') },
 ])
 
-// Documents fondateurs : éditorial (JSON) → fallback mock
+// Documents fondateurs : éditorial uniquement, pas de fallback mock
 const foundingTexts = computed(() => {
   const rawDocs = getRawContent('governance.foundingTexts.documents')
   if (rawDocs) {
@@ -39,13 +39,13 @@ const foundingTexts = computed(() => {
       }
     }
     catch {
-      // Fallback vers mock data
+      // JSON invalide
     }
   }
-  return getTextesFondateurs()
+  return []
 })
 
-// Pays fondateurs : éditorial (JSON) → fallback mock
+// Pays fondateurs : éditorial uniquement, pas de fallback mock
 const paysBailleurs = computed<PaysBailleur[]>(() => {
   const rawCountries = getRawContent('governance.donorCountries.countries')
   if (rawCountries) {
@@ -56,21 +56,15 @@ const paysBailleurs = computed<PaysBailleur[]>(() => {
       }
     }
     catch {
-      // Fallback vers mock data
+      // JSON invalide
     }
   }
-  return mockPaysBailleurs.value
+  return []
 })
 
 const egypte = computed(() => paysBailleurs.value.find(p => p.code === 'EG'))
 const northernFounders = computed(() => paysBailleurs.value.filter(p => p.code !== 'EG'))
-const africanFounders = computed<PaysBailleur[]>(() => {
-  const rawCountries = getRawContent('governance.donorCountries.countries')
-  if (rawCountries) {
-    return [] // Si éditorial, les groupes sont gérés via sort_order
-  }
-  return mockAfricanFounders.value
-})
+const africanFounders = computed<PaysBailleur[]>(() => [])
 
 // Titre et description des sections (éditorial avec fallback i18n)
 const foundingTextsTitle = computed(() => getContent('governance.foundingTexts.title'))

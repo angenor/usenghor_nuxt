@@ -101,8 +101,8 @@ async function handleSaveField(key: string, value: string, valueType: 'text' | '
     let existingContent = allContents.value.get(key)
     const valueAsString = String(value)
 
-    // Forcer le type JSON pour les clés de documents (stockées en JSON)
-    const actualValueType = key.endsWith('.documents') ? 'json' as const : valueType
+    // Forcer le type JSON pour les clés stockées en JSON (documents, pays)
+    const actualValueType = (key.endsWith('.documents') || key.endsWith('.countries')) ? 'json' as const : valueType
 
     // Si le contenu n'est pas dans le cache local, vérifier s'il existe en BDD
     if (!existingContent) {
