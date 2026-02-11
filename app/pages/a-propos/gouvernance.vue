@@ -132,13 +132,13 @@ const observers = computed(() =>
     />
 
     <!-- Section 4: Conseil d'Administration -->
-    <GovernanceBoardSection
+    <!-- <GovernanceBoardSection
       :president="president"
       :vice-presidents="vicePresidents"
       :members="members"
       :observers="observers"
       :title="boardTitle"
       :description="boardDescription"
-    />
+    /> -->
   </div>
 </template>
