@@ -467,11 +467,11 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
       <!-- Tabs Navigation -->
       <div class="sticky top-20 z-40">
         <nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center gap-4">
-              <!-- Title (appears on scroll) -->
+          <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 relative tab-nav-container">
+            <div class="flex items-center gap-2 sm:gap-4">
+              <!-- Title (appears on scroll) - hidden on mobile -->
               <div
-                class="flex items-center gap-3 py-3 transition-all duration-300 overflow-hidden"
+                class="hidden sm:flex items-center gap-3 py-3 transition-all duration-300 overflow-hidden"
                 :class="showTitleInNav ? 'opacity-100 max-w-xs lg:max-w-md' : 'opacity-0 max-w-0'"
               >
                 <div
@@ -486,12 +486,12 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
               </div>
 
               <!-- Tabs -->
-              <div class="flex-1 flex items-center justify-center overflow-x-auto scrollbar-hide">
+              <div class="flex-1 flex items-center overflow-x-auto scrollbar-hide snap-x snap-mandatory sm:justify-center">
                 <button
                   v-for="tab in tabs"
                   :key="tab.key"
                   type="button"
-                  class="group flex items-center gap-2 px-3 sm:px-4 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200"
+                  class="group flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-4 text-xs sm:text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200 snap-start flex-shrink-0"
                   :class="activeTab === tab.key
                     ? `${colorClasses.border} ${colorClasses.text}`
                     : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
@@ -499,7 +499,7 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                 >
                   <font-awesome-icon
                     :icon="tab.icon"
-                    class="w-4 h-4 transition-colors duration-200"
+                    class="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors duration-200"
                     :class="activeTab === tab.key ? colorClasses.text : 'text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300'"
                   />
                   <span class="hidden sm:inline">{{ t(`organizationDetail.tabs.${tab.key}`) }}</span>
@@ -1038,5 +1038,33 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* Gradient fade sur les bords pour indiquer le scroll horizontal en mobile */
+@media (max-width: 639px) {
+  .tab-nav-container::before,
+  .tab-nav-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 16px;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .tab-nav-container::before {
+    left: 0;
+    background: linear-gradient(to right, rgb(255 255 255) 0%, transparent 100%);
+  }
+  .tab-nav-container::after {
+    right: 0;
+    background: linear-gradient(to left, rgb(255 255 255) 0%, transparent 100%);
+  }
+  :is(.dark) .tab-nav-container::before {
+    background: linear-gradient(to right, rgb(17 24 39) 0%, transparent 100%);
+  }
+  :is(.dark) .tab-nav-container::after {
+    background: linear-gradient(to left, rgb(17 24 39) 0%, transparent 100%);
+  }
 }
 </style>
