@@ -327,6 +327,7 @@ onUnmounted(() => {
                         <NuxtLink
                           :to="localePath(item.route)"
                           class="inline-flex items-center gap-2 text-sm font-semibold text-brand-blue-400 hover:text-brand-blue-300 hover:gap-3 transition-all duration-300"
+                          @click="closeDropdown"
                         >
                           <span>{{ t('nav.exploreAll') }}</span>
                           <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
@@ -342,6 +343,7 @@ onUnmounted(() => {
                           :key="child.key"
                           :to="localePath(child.route)"
                           class="group flex items-start gap-3 p-3 rounded-xl transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                          @click="closeDropdown"
                         >
                           <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center transition-all duration-300 group-hover:bg-brand-blue-50 dark:group-hover:bg-brand-blue-900/30">
                             <font-awesome-icon :icon="child.icon" class="text-gray-400 dark:text-gray-500 group-hover:text-brand-blue-500 dark:group-hover:text-brand-blue-400 transition-colors" />
