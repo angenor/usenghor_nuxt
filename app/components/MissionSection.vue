@@ -263,10 +263,10 @@ onUnmounted(() => {
             </div>
 
             <NuxtLink
-              to="/site"
+              :to="getContent('experience.cta.link', 'mission.experience.cta.link') || '/site'"
               class="group inline-flex items-center gap-2 px-8 py-4 bg-brand-blue-500 text-white font-semibold rounded-full transition-all duration-300 hover:bg-brand-blue-600 hover:shadow-xl hover:shadow-brand-blue-500/30 hover:-translate-y-1"
             >
-              <span>{{ getContent('experience.cta', 'mission.experience.cta') }}</span>
+              <span>{{ getContent('experience.cta.text', 'mission.experience.cta.text') }}</span>
               <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
             </NuxtLink>
           </div>

@@ -127,7 +127,7 @@ export const homepageSections: PageSection[] = [
     icon: 'graduation-cap',
     color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
     editorialKeys: [
-      'experience.badge', 'experience.title', 'experience.description', 'experience.cta',
+      'experience.badge', 'experience.title', 'experience.description', 'experience.cta.text', 'experience.cta.link',
       'experience.features.immersion', 'experience.features.creativity', 'experience.features.network',
       'experience.stats.countries', 'experience.stats.graduates', 'experience.stats.years',
     ],
@@ -135,7 +135,8 @@ export const homepageSections: PageSection[] = [
       { key: 'experience.badge', label: 'Badge Expérience', description: 'Texte du badge', type: 'text', editorialKey: 'experience.badge', editable: true },
       { key: 'experience.title', label: 'Titre Expérience', description: 'Titre du bloc', type: 'text', editorialKey: 'experience.title', editable: true },
       { key: 'experience.description', label: 'Description', description: 'Texte descriptif', type: 'textarea', editorialKey: 'experience.description', editable: true },
-      { key: 'experience.cta', label: 'Bouton CTA', description: 'Texte du bouton d\'action', type: 'text', editorialKey: 'experience.cta', editable: true },
+      { key: 'experience.cta.text', label: 'Bouton CTA (libellé)', description: 'Texte du bouton « En savoir plus »', type: 'text', editorialKey: 'experience.cta.text', editable: true },
+      { key: 'experience.cta.link', label: 'Bouton CTA (lien)', description: 'URL de destination du bouton', type: 'text', editorialKey: 'experience.cta.link', editable: true },
       { key: 'experience.features.immersion', label: 'Badge Immersion', description: 'Texte du badge Immersion professionnelle', type: 'text', editorialKey: 'experience.features.immersion', editable: true },
       { key: 'experience.features.creativity', label: 'Badge Créativité', description: 'Texte du badge Projets créatifs', type: 'text', editorialKey: 'experience.features.creativity', editable: true },
       { key: 'experience.features.network', label: 'Badge Réseau', description: 'Texte du badge Réseau international', type: 'text', editorialKey: 'experience.features.network', editable: true },

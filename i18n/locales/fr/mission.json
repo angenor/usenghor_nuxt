@@ -23,7 +23,10 @@
       "badge": "Découvrir",
       "title": "L'expérience Senghor",
       "description": "Une expérience éducative unique en immersion professionnelle, projets de créativité et bien d'autres.",
-      "cta": "En savoir plus",
+      "cta": {
+        "text": "En savoir plus",
+        "link": "/site"
+      },
       "features": {
         "immersion": "Immersion professionnelle",
         "creativity": "Projets créatifs",

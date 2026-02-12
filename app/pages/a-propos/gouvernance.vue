@@ -3,7 +3,13 @@ import type { PaysBailleur } from '@bank/mock-data/pays-bailleurs'
 
 const { t } = useI18n()
 const { conseilAdministration, getCAPresident } = useMockData()
-const { laterMembers } = usePaysBailleursData()
+const {
+  laterMembers,
+  paysBailleurs: mockPaysBailleurs,
+  egypte: mockEgypte,
+  northernFounders: mockNorthernFounders,
+  africanFounders: mockAfricanFounders,
+} = usePaysBailleursData()
 const { selectedPays, openDrawer, closeDrawer } = useCountryDrawer()
 
 // Contenus éditoriaux avec fallback i18n
@@ -45,7 +51,7 @@ const foundingTexts = computed(() => {
   return []
 })
 
-// Pays fondateurs : éditorial uniquement, pas de fallback mock
+// Pays fondateurs : éditorial avec fallback sur mock data
 const paysBailleurs = computed<PaysBailleur[]>(() => {
   const rawCountries = getRawContent('governance.donorCountries.countries')
   if (rawCountries) {
@@ -59,12 +65,15 @@ const paysBailleurs = computed<PaysBailleur[]>(() => {
       // JSON invalide
     }
   }
-  return []
+  return mockPaysBailleurs.value
 })
 
-const egypte = computed(() => paysBailleurs.value.find(p => p.code === 'EG'))
-const northernFounders = computed(() => paysBailleurs.value.filter(p => p.code !== 'EG'))
-const africanFounders = computed<PaysBailleur[]>(() => [])
+const egypte = computed(() => paysBailleurs.value.find(p => p.code === 'EG') ?? mockEgypte.value)
+const northernFounders = computed(() => {
+  const filtered = paysBailleurs.value.filter(p => p.code !== 'EG')
+  return filtered.length > 0 ? filtered : mockNorthernFounders.value
+})
+const africanFounders = computed<PaysBailleur[]>(() => mockAfricanFounders.value)
 
 // Titre et description des sections (éditorial avec fallback i18n)
 const foundingTextsTitle = computed(() => getContent('governance.foundingTexts.title'))
