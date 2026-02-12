@@ -38,6 +38,7 @@ const predefinedKeyFigures = [
   { key: 'stats_site_rooms', label: 'Salles (campus)', description: 'Nombre de salles de cours et espaces de travail' },
   { key: 'stats_site_capacity', label: 'Capacité (campus)', description: 'Capacité d\'accueil totale du campus' },
   { key: 'stats_site_founded', label: 'Année de fondation', description: 'Année de création de l\'université' },
+  { key: 'stats_partnership_years', label: 'Années de partenariat', description: 'Nombre d\'années de partenariat (ex: 35+)' },
 ]
 
 // === STATE ===
