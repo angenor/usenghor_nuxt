@@ -31,6 +31,7 @@ export const PREDEFINED_KEY_FIGURES = [
   'stats_site_rooms',
   'stats_site_capacity',
   'stats_site_founded',
+  'stats_partnership_years',
 ] as const
 
 export type KeyFigureKey = typeof PREDEFINED_KEY_FIGURES[number]

@@ -18,6 +18,9 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const { getFlagEmoji } = useMockData()
 const { elementRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.2 })
+const { getFigure, loadKeyFigures } = useKeyFigures()
+
+onMounted(() => loadKeyFigures())
 
 const sectionTitle = computed(() => props.title || t('governance.donorCountries.title'))
 const sectionDescription = computed(() => props.description || t('governance.donorCountries.description'))
@@ -55,7 +58,7 @@ const sectionDescription = computed(() => props.description || t('governance.don
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Pays bailleurs</p>
           </div>
           <div class="text-center">
-            <span class="text-4xl sm:text-5xl font-bold text-brand-red-500">35+</span>
+            <span class="text-4xl sm:text-5xl font-bold text-brand-red-500">{{ getFigure('stats_partnership_years', '35') }}+</span>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Années de partenariat</p>
           </div>
         </div>
