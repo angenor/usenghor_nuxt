@@ -150,8 +150,29 @@
         "type": "Type",
         "upcoming": "Upcoming",
         "past": "Past",
+        "onlineEvent": "Online event",
+        "joinOnline": "Join video conference",
         "relatedEvents": "Other events",
-        "backToEvents": "Back to events"
+        "backToEvents": "Back to events",
+        "registration": {
+          "title": "Registration",
+          "register": "Register",
+          "externalLink": "Register",
+          "closed": "Registration is closed",
+          "spots": "{count} spots available",
+          "formTitle": "Registration form",
+          "lastName": "Last name",
+          "firstName": "First name",
+          "email": "Email address",
+          "phone": "Phone",
+          "organization": "Organization",
+          "submit": "Submit registration",
+          "submitting": "Submitting...",
+          "successTitle": "Registration confirmed!",
+          "successMessage": "Your registration has been recorded. You will receive a confirmation email.",
+          "close": "Close",
+          "error": "An error occurred during registration. Please try again."
+        }
       }
     }
   }

@@ -150,8 +150,29 @@
         "type": "Type",
         "upcoming": "À venir",
         "past": "Passé",
+        "onlineEvent": "Événement en ligne",
+        "joinOnline": "Rejoindre la visioconférence",
         "relatedEvents": "Autres événements",
-        "backToEvents": "Retour aux événements"
+        "backToEvents": "Retour aux événements",
+        "registration": {
+          "title": "Inscription",
+          "register": "S'inscrire",
+          "externalLink": "S'inscrire",
+          "closed": "Les inscriptions sont closes",
+          "spots": "{count} places disponibles",
+          "formTitle": "Formulaire d'inscription",
+          "lastName": "Nom",
+          "firstName": "Prénom",
+          "email": "Adresse e-mail",
+          "phone": "Téléphone",
+          "organization": "Organisation",
+          "submit": "Envoyer mon inscription",
+          "submitting": "Envoi en cours...",
+          "successTitle": "Inscription confirmée !",
+          "successMessage": "Votre inscription a bien été enregistrée. Vous recevrez un e-mail de confirmation.",
+          "close": "Fermer",
+          "error": "Une erreur est survenue lors de l'inscription. Veuillez réessayer."
+        }
       }
     }
   }

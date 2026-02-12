@@ -19,6 +19,7 @@ export interface EventPublic {
   title: string
   slug: string
   description: string | null
+  content: string | null
   type: EventType
   type_other: string | null
   start_date: string
@@ -26,7 +27,9 @@ export interface EventPublic {
   venue: string | null
   city: string | null
   is_online: boolean
+  video_conference_link: string | null
   registration_required: boolean
+  registration_link: string | null
   max_attendees: number | null
   cover_image_external_id: string | null
   // Champs transformés pour l'affichage
