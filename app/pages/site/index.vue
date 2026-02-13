@@ -110,6 +110,17 @@ const facilityEditorialKeyMap: Record<string, string> = {
   'facility-hotel': 'site.facility.hotel.images',
 }
 
+// Mapping facility ID → clé éditoriale pour les features (checklist)
+const facilityFeaturesKeyMap: Record<string, string> = {
+  'facility-housing': 'site.facility.housing.features',
+  'facility-library': 'site.facility.library.features',
+  'facility-conference': 'site.facility.conference.features',
+  'facility-academic': 'site.facility.academic.features',
+  'facility-sports': 'site.facility.sports.features',
+  'facility-pool': 'site.facility.pool.features',
+  'facility-hotel': 'site.facility.hotel.features',
+}
+
 // Récupère les images d'une installation (éditorial avec fallback mock)
 const getFacilityImages = (facility: SiteFacility): string[] => {
   const editorialKey = facilityEditorialKeyMap[facility.id]
@@ -145,7 +156,17 @@ const getLocalizedFacilityDescription = (facility: SiteFacility) => {
   return facility.description_fr
 }
 
-const getLocalizedFacilityFeatures = (facility: SiteFacility) => {
+const getLocalizedFacilityFeatures = (facility: SiteFacility): string[] => {
+  // Vérifier si des features éditoriaux existent
+  const editorialKey = facilityFeaturesKeyMap[facility.id]
+  if (editorialKey) {
+    const raw = getContent(editorialKey)
+    // getContent retourne la clé i18n en fallback — on vérifie que c'est bien du texte multiligne
+    if (raw && raw.includes('\n')) {
+      return raw.split('\n').filter(item => item.trim())
+    }
+  }
+  // Fallback sur les données mock
   if (locale.value === 'en') return facility.features_en
   if (locale.value === 'ar') return facility.features_ar
   return facility.features_fr

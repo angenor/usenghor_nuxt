@@ -264,17 +264,17 @@ onMounted(() => {
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/a-propos/mission')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/a-propos/strategie')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.university.mission') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/a-propos/gouvernance')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/a-propos/organisation')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.university.governance') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/a-propos/campus')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/site')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.university.campus') }}
                 </NuxtLink>
               </li>
@@ -298,23 +298,13 @@ onMounted(() => {
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/evenements')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/actualites/evenements')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.resources.events') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/emplois')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/carrieres')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.resources.jobs') }}
-                </NuxtLink>
-              </li>
-              <li>
-                <NuxtLink :to="localePath('/bibliotheque')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
-                  {{ t('footer.resources.library') }}
-                </NuxtLink>
-              </li>
-              <li>
-                <NuxtLink :to="localePath('/faq')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
-                  {{ t('footer.resources.faq') }}
                 </NuxtLink>
               </li>
             </ul>
@@ -327,23 +317,13 @@ onMounted(() => {
             </h4>
             <ul class="space-y-3">
               <li>
-                <NuxtLink :to="localePath('/reseau/alumni')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/alumni')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.network.alumni') }}
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/reseau/partenaires')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/a-propos/partenaires')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.network.partners') }}
-                </NuxtLink>
-              </li>
-              <li>
-                <NuxtLink :to="localePath('/reseau/campus')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
-                  {{ t('footer.network.externalCampuses') }}
-                </NuxtLink>
-              </li>
-              <li>
-                <NuxtLink :to="localePath('/contact')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
-                  {{ t('footer.network.contact') }}
                 </NuxtLink>
               </li>
             </ul>
@@ -403,20 +383,6 @@ onMounted(() => {
             </div>
 
             <!-- Legal Links -->
-            <div class="flex flex-wrap items-center justify-center gap-6 text-sm">
-              <NuxtLink :to="localePath('/mentions-legales')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
-                {{ t('footer.legal.terms') }}
-              </NuxtLink>
-              <NuxtLink :to="localePath('/confidentialite')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
-                {{ t('footer.legal.privacy') }}
-              </NuxtLink>
-              <NuxtLink :to="localePath('/cookies')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
-                {{ t('footer.legal.cookies') }}
-              </NuxtLink>
-              <NuxtLink :to="localePath('/accessibilite')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
-                {{ t('footer.legal.accessibility') }}
-              </NuxtLink>
-            </div>
           </div>
         </div>
       </div>
