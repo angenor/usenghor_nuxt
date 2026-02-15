@@ -47,7 +47,7 @@ const localePath = useLocalePath()
             </li>
             <li class="flex items-center">
               <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3 mx-2 text-white/40" />
-              <span class="text-brand-blue-400 font-medium truncate max-w-xs">{{ call.title }}</span>
+              <span class="text-brand-red-400 font-medium truncate max-w-xs">{{ call.title }}</span>
             </li>
           </ol>
         </nav>
@@ -87,7 +87,11 @@ const localePath = useLocalePath()
       </div>
     </div>
 
-    <!-- Bottom Gradient Fade -->
-    <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white dark:from-gray-900 to-transparent"></div>
+    <!-- Ligne de séparation oblique -->
+    <div class="absolute bottom-0 left-0 right-0">
+      <svg class="w-full h-12 md:h-16 text-white dark:text-gray-900" viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <polygon points="0,40 1200,0 1200,120 0,120" fill="currentColor" />
+      </svg>
+    </div>
   </section>
 </template>
