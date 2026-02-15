@@ -23,6 +23,7 @@ const {
   deleteService: apiDeleteService,
   duplicateService: apiDuplicateService,
   toggleServiceActive: apiToggleServiceActive,
+  reorderServices,
   generateServiceId
 } = useServicesApi()
 
@@ -36,7 +37,7 @@ const filterSector = ref<string | undefined>(route.query.sector as string || und
 const filterActive = ref<boolean | undefined>(undefined)
 const sortBy = ref<'name' | 'display_order' | 'sector' | 'objectives_count'>('display_order')
 const sortOrder = ref<'asc' | 'desc'>('asc')
-const viewMode = ref<'table' | 'grouped'>('table')
+const viewMode = ref<'table' | 'grouped'>('grouped')
 const showAddModal = ref(false)
 const showEditModal = ref(false)
 const showDeleteModal = ref(false)
@@ -44,6 +45,8 @@ const editingService = ref<ServiceDisplay | null>(null)
 const deletingService = ref<ServiceDisplay | null>(null)
 const serviceUsage = ref<ServiceUsage | null>(null)
 const expandedSectors = ref<Set<string>>(new Set())
+const isDragging = ref(false)
+const error = ref<string | null>(null)
 
 // Données chargées depuis l'API
 const allServices = ref<ServiceDisplay[]>([])
@@ -526,6 +529,60 @@ const clearSectorFilter = () => {
   filterSector.value = undefined
   navigateTo('/admin/organisation/services')
 }
+
+// Drag-and-drop pour réordonner (dans la vue groupée, au sein d'un même secteur)
+const canDrag = computed(() => viewMode.value === 'grouped' && !searchQuery.value && filterActive.value === undefined)
+
+const handleDragStart = (event: DragEvent, sectorId: string, index: number) => {
+  if (!canDrag.value) return
+  isDragging.value = true
+  event.dataTransfer?.setData('text/plain', JSON.stringify({ sectorId, index }))
+}
+
+const handleDragOver = (event: DragEvent) => {
+  event.preventDefault()
+}
+
+const handleDrop = async (event: DragEvent, targetSectorId: string, targetIndex: number) => {
+  event.preventDefault()
+  isDragging.value = false
+
+  try {
+    const data = JSON.parse(event.dataTransfer?.getData('text/plain') || '{}')
+    const { sectorId: sourceSectorId, index: sourceIndex } = data
+
+    // On ne peut pas déplacer entre secteurs
+    if (sourceSectorId !== targetSectorId || sourceIndex === targetIndex) return
+
+    // Trouver le groupe concerné
+    const groupIndex = servicesGrouped.value.findIndex(g => g.sector.id === targetSectorId)
+    if (groupIndex === -1) return
+
+    const group = servicesGrouped.value[groupIndex]!
+    const items = [...group.services]
+    const [movedItem] = items.splice(sourceIndex, 1)!
+    items.splice(targetIndex, 0, movedItem!)
+
+    // Mettre à jour localement
+    servicesGrouped.value[groupIndex] = { sector: group.sector, services: items }
+
+    // Envoyer au backend (uniquement les IDs du secteur)
+    const serviceIds = items.map(s => s.id)
+    await reorderServices(serviceIds)
+    await loadData()
+    enrichServicesWithHeads()
+  }
+  catch (err: any) {
+    console.error('Erreur réordonnement:', err)
+    error.value = err.message || 'Erreur lors du réordonnement'
+    await loadData()
+    enrichServicesWithHeads()
+  }
+}
+
+const handleDragEnd = () => {
+  isDragging.value = false
+}
 </script>
 
 <template>
@@ -707,6 +764,32 @@ const clearSectorFilter = () => {
       </div>
     </div>
 
+    <!-- Info drag & drop -->
+    <div
+      v-if="canDrag"
+      class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4"
+    >
+      <div class="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300">
+        <font-awesome-icon :icon="['fas', 'info-circle']" class="w-4 h-4" />
+        <span>Glissez-déposez les lignes pour réordonner l'affichage des services</span>
+      </div>
+    </div>
+
+    <!-- Erreur non-bloquante -->
+    <div
+      v-if="error"
+      class="mb-4 rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+    >
+      <font-awesome-icon :icon="['fas', 'exclamation-circle']" class="mr-2" />
+      {{ error }}
+      <button
+        class="ml-4 text-sm underline"
+        @click="error = null"
+      >
+        Fermer
+      </button>
+    </div>
+
     <!-- Vue Table -->
     <div v-if="viewMode === 'table'" class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
       <div class="overflow-x-auto">
@@ -761,6 +844,7 @@ const clearSectorFilter = () => {
               class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
               :class="{ 'opacity-50': !service.active }"
             >
+
               <!-- Service -->
               <td class="px-4 py-3">
                 <div>
@@ -989,12 +1073,24 @@ const clearSectorFilter = () => {
         >
           <div class="divide-y divide-gray-100 dark:divide-gray-700">
             <div
-              v-for="service in group.services"
+              v-for="(service, serviceIndex) in group.services"
               :key="service.id"
               class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/30"
               :class="{ 'opacity-50': !service.active }"
+              :draggable="canDrag"
+              @dragstart="handleDragStart($event, group.sector.id, serviceIndex)"
+              @dragover="handleDragOver"
+              @drop="handleDrop($event, group.sector.id, serviceIndex)"
+              @dragend="handleDragEnd"
             >
               <div class="flex items-center gap-4 flex-1">
+                <!-- Grip -->
+                <button
+                  v-if="canDrag"
+                  class="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0"
+                >
+                  <font-awesome-icon :icon="['fas', 'grip-vertical']" class="w-4 h-4" />
+                </button>
                 <div class="flex-1 min-w-0">
                   <p class="font-medium text-gray-900 dark:text-white truncate">
                     {{ service.name }}

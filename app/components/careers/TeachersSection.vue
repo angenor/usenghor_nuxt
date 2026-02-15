@@ -1,15 +1,23 @@
 <script setup lang="ts">
+interface BenefitItem {
+  icon: string
+  title: string
+  text: string
+}
+
 const props = withDefaults(defineProps<{
   image?: string | null
+  benefitItems?: BenefitItem[]
 }>(), {
   image: null,
+  benefitItems: undefined,
 })
 
 const { t, tm } = useI18n()
 const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.1 })
 
-// Get translated arrays
-const benefits = computed(() => tm('careers.teachers.benefits.items') as any[])
+// Get translated arrays with editorial override for benefits
+const benefits = computed(() => props.benefitItems ?? tm('careers.teachers.benefits.items') as any[])
 const positions = computed(() => tm('careers.teachers.positions.items') as any[])
 
 const imageUrl = computed(() => props.image || 'https://picsum.photos/seed/teachers-career/800/600')

@@ -1,31 +1,13 @@
 <script setup lang="ts">
-import type { ProjectFundraisingDisplay } from '~/composables/usePublicProjectsApi'
-
 const { t } = useI18n()
 
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, getRawContent, loadContent } = useEditorialContent('strategy')
 const { getMediaUrl } = useMediaApi()
-const { listFundraisingFeaturedProjects } = usePublicProjectsApi()
 
-// Projets de levée de fonds (depuis l'API)
-const fundraisingProjects = ref<ProjectFundraisingDisplay[]>([])
-const fundraisingLoading = ref(true)
-
-onMounted(async () => {
+onMounted(() => {
   // Charger les contenus éditoriaux (non-bloquant)
   loadContent()
-
-  // Charger les projets de levée de fonds
-  try {
-    fundraisingProjects.value = await listFundraisingFeaturedProjects(4)
-  }
-  catch (error) {
-    console.error('Erreur chargement projets levée de fonds:', error)
-  }
-  finally {
-    fundraisingLoading.value = false
-  }
 })
 
 // SEO
@@ -128,17 +110,5 @@ const targetIndicators = computed(() => [
       background-image="/images/bg/bg_stats_section.jpeg"
     /> -->
 
-    <!-- Fundraising Section -->
-    <StrategyFundraisingSection
-      :title="getContent('strategy.fundraising.title')"
-      :subtitle="getContent('strategy.fundraising.subtitle')"
-      :projects="fundraisingProjects"
-      :loading="fundraisingLoading"
-      :cta-title="getContent('strategy.fundraising.cta.title')"
-      :cta-text="getContent('strategy.fundraising.cta.text')"
-      :cta-button="getContent('strategy.fundraising.cta.button')"
-      cta-link="/carrieres#partenaires"
-      :background-image="getMediaUrl(getRawContent('strategy.fundraising.image') ?? '') || undefined"
-    />
   </div>
 </template>

@@ -357,7 +357,7 @@ const duplicateSectorItem = async (sector: SectorDisplay) => {
 
 const toggleSectorActive = async (sector: SectorDisplay) => {
   try {
-    await apiToggleSectorActive(sector.id)
+    await apiToggleDepartmentActive(sector.id)
     await loadSectors()
   }
   catch (err: any) {

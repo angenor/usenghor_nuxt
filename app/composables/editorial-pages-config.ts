@@ -396,47 +396,6 @@ export const strategyPageSections: PageSection[] = [
       { key: 'strategy.indicators.items.insertion', label: 'Libellé Insertion', description: 'Libellé pour l\'indicateur insertion', type: 'text', editorialKey: 'strategy.indicators.items.insertion', editable: true },
     ],
   },
-  {
-    id: 'strategy-fundraising',
-    name: 'Levée de Fonds',
-    description: 'Projets de financement et appel aux dons',
-    icon: 'hand-holding-usd',
-    color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
-    editorialKeys: [
-      'strategy.fundraising.title', 'strategy.fundraising.subtitle',
-      'strategy.fundraising.projects.scholarships.title', 'strategy.fundraising.projects.scholarships.description', 'strategy.fundraising.projects.scholarships.amount',
-      'strategy.fundraising.projects.campus.title', 'strategy.fundraising.projects.campus.description', 'strategy.fundraising.projects.campus.amount',
-      'strategy.fundraising.projects.research.title', 'strategy.fundraising.projects.research.description', 'strategy.fundraising.projects.research.amount',
-      'strategy.fundraising.projects.library.title', 'strategy.fundraising.projects.library.description', 'strategy.fundraising.projects.library.amount',
-      'strategy.fundraising.cta.title', 'strategy.fundraising.cta.text', 'strategy.fundraising.cta.button',
-      'strategy.fundraising.image',
-    ],
-    fields: [
-      { key: 'strategy.fundraising.image', label: 'Image de fond', description: 'Image de fond de la section levée de fonds (ratio 16:9 recommandé)', type: 'image', editorialKey: 'strategy.fundraising.image', editable: true },
-      { key: 'strategy.fundraising.title', label: 'Titre section', description: 'Titre de la section levée de fonds', type: 'text', editorialKey: 'strategy.fundraising.title', editable: true },
-      { key: 'strategy.fundraising.subtitle', label: 'Sous-titre section', description: 'Sous-titre de la section', type: 'text', editorialKey: 'strategy.fundraising.subtitle', editable: true },
-      // Projet Bourses
-      { key: 'strategy.fundraising.projects.scholarships.title', label: 'Bourses - Titre', description: 'Titre du projet bourses', type: 'text', editorialKey: 'strategy.fundraising.projects.scholarships.title', editable: true },
-      { key: 'strategy.fundraising.projects.scholarships.description', label: 'Bourses - Description', description: 'Description du projet', type: 'textarea', editorialKey: 'strategy.fundraising.projects.scholarships.description', editable: true },
-      { key: 'strategy.fundraising.projects.scholarships.amount', label: 'Bourses - Montant', description: 'Montant recherché', type: 'text', editorialKey: 'strategy.fundraising.projects.scholarships.amount', editable: true },
-      // Projet Campus
-      { key: 'strategy.fundraising.projects.campus.title', label: 'Campus - Titre', description: 'Titre du projet campus', type: 'text', editorialKey: 'strategy.fundraising.projects.campus.title', editable: true },
-      { key: 'strategy.fundraising.projects.campus.description', label: 'Campus - Description', description: 'Description du projet', type: 'textarea', editorialKey: 'strategy.fundraising.projects.campus.description', editable: true },
-      { key: 'strategy.fundraising.projects.campus.amount', label: 'Campus - Montant', description: 'Montant recherché', type: 'text', editorialKey: 'strategy.fundraising.projects.campus.amount', editable: true },
-      // Projet Recherche
-      { key: 'strategy.fundraising.projects.research.title', label: 'Recherche - Titre', description: 'Titre du projet recherche', type: 'text', editorialKey: 'strategy.fundraising.projects.research.title', editable: true },
-      { key: 'strategy.fundraising.projects.research.description', label: 'Recherche - Description', description: 'Description du projet', type: 'textarea', editorialKey: 'strategy.fundraising.projects.research.description', editable: true },
-      { key: 'strategy.fundraising.projects.research.amount', label: 'Recherche - Montant', description: 'Montant recherché', type: 'text', editorialKey: 'strategy.fundraising.projects.research.amount', editable: true },
-      // Projet Bibliothèque
-      { key: 'strategy.fundraising.projects.library.title', label: 'Bibliothèque - Titre', description: 'Titre du projet bibliothèque', type: 'text', editorialKey: 'strategy.fundraising.projects.library.title', editable: true },
-      { key: 'strategy.fundraising.projects.library.description', label: 'Bibliothèque - Description', description: 'Description du projet', type: 'textarea', editorialKey: 'strategy.fundraising.projects.library.description', editable: true },
-      { key: 'strategy.fundraising.projects.library.amount', label: 'Bibliothèque - Montant', description: 'Montant recherché', type: 'text', editorialKey: 'strategy.fundraising.projects.library.amount', editable: true },
-      // CTA
-      { key: 'strategy.fundraising.cta.title', label: 'CTA - Titre', description: 'Titre du bloc appel à l\'action', type: 'text', editorialKey: 'strategy.fundraising.cta.title', editable: true },
-      { key: 'strategy.fundraising.cta.text', label: 'CTA - Texte', description: 'Texte d\'accompagnement', type: 'textarea', editorialKey: 'strategy.fundraising.cta.text', editable: true },
-      { key: 'strategy.fundraising.cta.button', label: 'CTA - Bouton', description: 'Texte du bouton', type: 'text', editorialKey: 'strategy.fundraising.cta.button', editable: true },
-    ],
-  },
 ]
 
 // ============================================================================
@@ -615,7 +574,12 @@ export const careersPageSections: PageSection[] = [
     color: 'bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-300',
     editorialKeys: [
       'careers.teachers.title', 'careers.teachers.text',
-      'careers.teachers.benefits.title', 'careers.teachers.positions.title',
+      'careers.teachers.benefits.title',
+      'careers.teachers.benefits.item1.icon', 'careers.teachers.benefits.item1.title', 'careers.teachers.benefits.item1.text',
+      'careers.teachers.benefits.item2.icon', 'careers.teachers.benefits.item2.title', 'careers.teachers.benefits.item2.text',
+      'careers.teachers.benefits.item3.icon', 'careers.teachers.benefits.item3.title', 'careers.teachers.benefits.item3.text',
+      'careers.teachers.benefits.item4.icon', 'careers.teachers.benefits.item4.title', 'careers.teachers.benefits.item4.text',
+      'careers.teachers.positions.title',
       'careers.teachers.cta.title', 'careers.teachers.cta.text', 'careers.teachers.cta.email', 'careers.teachers.cta.button',
       'careers.teachers.image',
     ],
@@ -623,7 +587,23 @@ export const careersPageSections: PageSection[] = [
       { key: 'careers.teachers.image', label: 'Image', description: 'Image illustrant la section enseignants (ratio 4:3 recommandé)', type: 'image', editorialKey: 'careers.teachers.image', editable: true },
       { key: 'careers.teachers.title', label: 'Titre', description: 'Titre de la section enseignants', type: 'text', editorialKey: 'careers.teachers.title', editable: true },
       { key: 'careers.teachers.text', label: 'Texte', description: 'Texte de présentation', type: 'textarea', editorialKey: 'careers.teachers.text', editable: true },
-      { key: 'careers.teachers.benefits.title', label: 'Titre Avantages', description: 'Titre de la sous-section avantages', type: 'text', editorialKey: 'careers.teachers.benefits.title', editable: true },
+      { key: 'careers.teachers.benefits.title', label: 'Titre Avantages', description: 'Titre de la sous-section "Pourquoi nous rejoindre ?"', type: 'text', editorialKey: 'careers.teachers.benefits.title', editable: true },
+      // Avantage 1
+      { key: 'careers.teachers.benefits.item1.icon', label: 'Avantage 1 - Icône', description: 'Icône FontAwesome (ex: fa-solid fa-globe-africa)', type: 'text', editorialKey: 'careers.teachers.benefits.item1.icon', editable: true },
+      { key: 'careers.teachers.benefits.item1.title', label: 'Avantage 1 - Titre', description: 'Titre du premier avantage', type: 'text', editorialKey: 'careers.teachers.benefits.item1.title', editable: true },
+      { key: 'careers.teachers.benefits.item1.text', label: 'Avantage 1 - Texte', description: 'Description du premier avantage', type: 'textarea', editorialKey: 'careers.teachers.benefits.item1.text', editable: true },
+      // Avantage 2
+      { key: 'careers.teachers.benefits.item2.icon', label: 'Avantage 2 - Icône', description: 'Icône FontAwesome (ex: fa-solid fa-network-wired)', type: 'text', editorialKey: 'careers.teachers.benefits.item2.icon', editable: true },
+      { key: 'careers.teachers.benefits.item2.title', label: 'Avantage 2 - Titre', description: 'Titre du deuxième avantage', type: 'text', editorialKey: 'careers.teachers.benefits.item2.title', editable: true },
+      { key: 'careers.teachers.benefits.item2.text', label: 'Avantage 2 - Texte', description: 'Description du deuxième avantage', type: 'textarea', editorialKey: 'careers.teachers.benefits.item2.text', editable: true },
+      // Avantage 3
+      { key: 'careers.teachers.benefits.item3.icon', label: 'Avantage 3 - Icône', description: 'Icône FontAwesome (ex: fa-solid fa-lightbulb)', type: 'text', editorialKey: 'careers.teachers.benefits.item3.icon', editable: true },
+      { key: 'careers.teachers.benefits.item3.title', label: 'Avantage 3 - Titre', description: 'Titre du troisième avantage', type: 'text', editorialKey: 'careers.teachers.benefits.item3.title', editable: true },
+      { key: 'careers.teachers.benefits.item3.text', label: 'Avantage 3 - Texte', description: 'Description du troisième avantage', type: 'textarea', editorialKey: 'careers.teachers.benefits.item3.text', editable: true },
+      // Avantage 4
+      { key: 'careers.teachers.benefits.item4.icon', label: 'Avantage 4 - Icône', description: 'Icône FontAwesome (ex: fa-solid fa-sun)', type: 'text', editorialKey: 'careers.teachers.benefits.item4.icon', editable: true },
+      { key: 'careers.teachers.benefits.item4.title', label: 'Avantage 4 - Titre', description: 'Titre du quatrième avantage', type: 'text', editorialKey: 'careers.teachers.benefits.item4.title', editable: true },
+      { key: 'careers.teachers.benefits.item4.text', label: 'Avantage 4 - Texte', description: 'Description du quatrième avantage', type: 'textarea', editorialKey: 'careers.teachers.benefits.item4.text', editable: true },
       { key: 'careers.teachers.positions.title', label: 'Titre Postes', description: 'Titre de la sous-section types de postes', type: 'text', editorialKey: 'careers.teachers.positions.title', editable: true },
       { key: 'careers.teachers.cta.title', label: 'CTA - Titre', description: 'Titre du bloc appel à l\'action', type: 'text', editorialKey: 'careers.teachers.cta.title', editable: true },
       { key: 'careers.teachers.cta.text', label: 'CTA - Texte', description: 'Texte d\'accompagnement', type: 'textarea', editorialKey: 'careers.teachers.cta.text', editable: true },
@@ -1196,7 +1176,7 @@ export const frontOfficePages: FrontOfficePage[] = [
     id: 'strategy',
     name: 'Page Stratégie',
     slug: '/a-propos/strategie',
-    description: 'Plan stratégique 2024-2030, axes, indicateurs et levée de fonds',
+    description: 'Plan stratégique 2024-2030, axes et indicateurs',
     icon: 'compass',
     sections: strategyPageSections,
   },
