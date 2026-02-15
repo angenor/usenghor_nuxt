@@ -19,6 +19,7 @@
       "achievements": "Achievements",
       "projects": "Projects",
       "news": "News",
+      "formations": "Programs",
       "media": "Media"
     },
     "missions": {
@@ -74,6 +75,14 @@
       "publishedOn": "Published on",
       "viewAll": "View all news",
       "empty": "No news at the moment."
+    },
+    "formations": {
+      "title": "Programs",
+      "subtitle": "Training programs associated with this service",
+      "duration": "Duration",
+      "credits": "Credits",
+      "viewDetails": "View program",
+      "empty": "No associated programs at the moment."
     },
     "media": {
       "title": "Media",

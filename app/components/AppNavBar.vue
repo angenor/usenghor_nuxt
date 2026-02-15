@@ -40,7 +40,7 @@ const primaryNavItems = [
       descKey: 'featuredDesc'
     },
     children: [
-      { key: 'doctorate', route: '/formations/doctorats', icon: 'fa-solid fa-book-open' },
+      { key: 'doctorate', route: '/formations/doctorat', icon: 'fa-solid fa-book-open' },
       { key: 'masters', route: '/formations/masters', icon: 'fa-solid fa-graduation-cap', badge: 'popular' },
       { key: 'universityDiplomas', route: '/formations/diplomes-universitaires', icon: 'fa-solid fa-award' },
       { key: 'certifications', route: '/formations/certifiantes', icon: 'fa-solid fa-certificate' },

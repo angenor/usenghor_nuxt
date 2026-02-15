@@ -10,6 +10,7 @@ import type {
 import type { OutputData } from '@editorjs/editorjs'
 import type { NewsDisplay } from '~/types/news'
 import type { AlbumWithMedia } from '~/types/api/media'
+import type { ProgramPublic } from '~/composables/usePublicProgramsApi'
 
 const route = useRoute()
 const { t, locale } = useI18n()
@@ -22,6 +23,7 @@ const {
 const { listPublishedNews, formatNewsDate } = usePublicNewsApi()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 const { getAlbumById: getPublicAlbumById } = usePublicAlbumsApi()
+const { listProgramsByService, publicProgramTypeLabels, publicProgramTypeColors, formatDuration, programTypeToUrlSlug } = usePublicProgramsApi()
 
 // Scroll detection for sticky title
 const heroRef = ref<HTMLElement | null>(null)
@@ -62,6 +64,7 @@ const sector = ref<SectorPublicWithServices | null>(null)
 const service = ref<ServicePublicWithDetails | null>(null)
 const relatedNews = ref<NewsDisplay[]>([])
 const serviceAlbum = ref<AlbumWithMedia | null>(null)
+const servicePrograms = ref<ProgramPublic[]>([])
 
 // Fetch entity data
 const fetchEntity = async () => {
@@ -120,12 +123,29 @@ const fetchServiceAlbum = async () => {
   }
 }
 
+// Fetch service programs (formations)
+const fetchServicePrograms = async () => {
+  if (entityType !== 'service' || !service.value) {
+    servicePrograms.value = []
+    return
+  }
+
+  try {
+    servicePrograms.value = await listProgramsByService(service.value.id)
+  }
+  catch (err) {
+    console.error('Error fetching service programs:', err)
+    servicePrograms.value = []
+  }
+}
+
 // Fetch on mount
 onMounted(async () => {
   await fetchEntity()
   await Promise.all([
     fetchRelatedNews(),
     fetchServiceAlbum(),
+    fetchServicePrograms(),
   ])
 })
 
@@ -157,10 +177,11 @@ if (entityData.value) {
     service.value = entityData.value.data as ServicePublicWithDetails
   }
   loading.value = false
-  // Charger les actualités et l'album associés (côté client)
+  // Charger les actualités, l'album et les formations associés (côté client)
   if (import.meta.client) {
     fetchRelatedNews()
     fetchServiceAlbum()
+    fetchServicePrograms()
   }
 }
 
@@ -341,15 +362,21 @@ const tabs = computed(() => {
       { key: 'news', icon: 'fa-solid fa-newspaper' },
     ]
   }
-  // Services: full tabs + actualités + médiathèque
-  return [
+  // Services: full tabs + formations conditionnelles + actualités + médiathèque
+  const serviceTabs = [
     { key: 'missions', icon: 'fa-solid fa-bullseye' },
     { key: 'team', icon: 'fa-solid fa-users' },
     { key: 'achievements', icon: 'fa-solid fa-trophy' },
     { key: 'projects', icon: 'fa-solid fa-diagram-project' },
+  ]
+  if (servicePrograms.value.length > 0) {
+    serviceTabs.push({ key: 'formations', icon: 'fa-solid fa-graduation-cap' })
+  }
+  serviceTabs.push(
     { key: 'news', icon: 'fa-solid fa-newspaper' },
     { key: 'media', icon: 'fa-solid fa-images' },
-  ]
+  )
+  return serviceTabs
 })
 
 // Navigate to next tab
@@ -828,6 +855,106 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
             <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">
               <font-awesome-icon icon="fa-solid fa-diagram-project" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
               <p class="text-gray-500 dark:text-gray-400 text-lg">{{ t('organizationDetail.projects.empty') || 'Aucun projet en cours' }}</p>
+            </div>
+          </div>
+
+          <!-- Formations Tab (for services only, when programs exist) -->
+          <div v-if="activeTab === 'formations' && entityType === 'service'" class="animate__animated animate__fadeIn">
+            <div class="mb-8">
+              <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                {{ t('organizationDetail.formations.title') }}
+              </h2>
+              <p class="text-gray-600 dark:text-gray-400">
+                {{ t('organizationDetail.formations.subtitle') }}
+              </p>
+            </div>
+
+            <div v-if="servicePrograms.length > 0" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <NuxtLink
+                v-for="program in servicePrograms"
+                :key="program.id"
+                :to="localePath(`/formations/${programTypeToUrlSlug[program.type] || 'masters'}/${program.slug}`)"
+                class="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+              >
+                <!-- Cover image -->
+                <div class="relative h-40 overflow-hidden">
+                  <img
+                    v-if="program.cover_image_external_id"
+                    :src="getMediaUrl(program.cover_image_external_id) ?? undefined"
+                    :alt="program.title"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    loading="lazy"
+                  />
+                  <div
+                    v-else
+                    class="w-full h-full flex items-center justify-center"
+                    :class="publicProgramTypeColors[program.type]?.bgColor || 'bg-brand-blue-500'"
+                  >
+                    <font-awesome-icon
+                      :icon="publicProgramTypeColors[program.type]?.icon || 'fa-solid fa-graduation-cap'"
+                      class="w-12 h-12 text-white/80"
+                    />
+                  </div>
+                  <!-- Type badge -->
+                  <div class="absolute top-4 right-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-white/90 text-gray-700">
+                      {{ publicProgramTypeLabels[program.type] || program.type }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Content -->
+                <div class="p-6">
+                  <h3 class="font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
+                    {{ program.title }}
+                  </h3>
+                  <p v-if="program.subtitle" class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+                    {{ program.subtitle }}
+                  </p>
+
+                  <!-- Meta -->
+                  <div class="flex flex-wrap gap-3 text-xs text-gray-500 dark:text-gray-400 mb-3">
+                    <span v-if="program.duration_months" class="flex items-center gap-1">
+                      <font-awesome-icon icon="fa-solid fa-clock" class="w-3 h-3" />
+                      {{ formatDuration(program.duration_months, locale) }}
+                    </span>
+                    <span v-if="program.credits" class="flex items-center gap-1">
+                      <font-awesome-icon icon="fa-solid fa-star" class="w-3 h-3" />
+                      {{ program.credits }} {{ t('organizationDetail.formations.credits') }}
+                    </span>
+                    <span v-if="program.degree_awarded" class="flex items-center gap-1">
+                      <font-awesome-icon icon="fa-solid fa-award" class="w-3 h-3" />
+                      {{ program.degree_awarded }}
+                    </span>
+                  </div>
+
+                  <!-- CTA -->
+                  <span class="flex items-center gap-2 text-sm font-medium group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors" :class="colorClasses.text">
+                    <span>{{ t('organizationDetail.formations.viewDetails') }}</span>
+                    <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </div>
+              </NuxtLink>
+            </div>
+
+            <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">
+              <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
+              <p class="text-gray-500 dark:text-gray-400 text-lg">
+                {{ t('organizationDetail.formations.empty') }}
+              </p>
+            </div>
+
+            <!-- Next Tab Button -->
+            <div v-if="nextTab" class="mt-12 flex justify-end">
+              <button
+                type="button"
+                class="group inline-flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                :class="`${colorClasses.bgLight} ${colorClasses.text}`"
+                @click="goToNextTab"
+              >
+                <span>{{ t(`organizationDetail.tabs.${nextTab.key}`) }}</span>
+                <font-awesome-icon :icon="nextTab.icon" class="w-5 h-5 transition-transform group-hover:translate-x-1" />
+              </button>
             </div>
           </div>
 

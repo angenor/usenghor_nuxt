@@ -51,7 +51,7 @@ export interface ProgramPublicWithDetails extends ProgramPublic {
 // URL slug vers ProgramType backend
 export const urlSlugToProgramType: Record<string, ProgramType> = {
   'masters': 'master',
-  'doctorats': 'doctorate',
+  'doctorat': 'doctorate',
   'diplomes-universitaires': 'university_diploma',
   'certifiantes': 'certificate',
 }
@@ -59,7 +59,7 @@ export const urlSlugToProgramType: Record<string, ProgramType> = {
 // ProgramType backend vers URL slug
 export const programTypeToUrlSlug: Record<ProgramType, string> = {
   'master': 'masters',
-  'doctorate': 'doctorats',
+  'doctorate': 'doctorat',
   'university_diploma': 'diplomes-universitaires',
   'certificate': 'certifiantes',
 }
@@ -160,6 +160,13 @@ export function usePublicProgramsApi() {
   }
 
   /**
+   * Liste les programmes publiés par service
+   */
+  async function listProgramsByService(serviceId: string): Promise<ProgramPublic[]> {
+    return publicFetch<ProgramPublic[]>(`/api/public/programs/by-service/${serviceId}`)
+  }
+
+  /**
    * Liste les programmes mis à la une (featured)
    */
   async function listFeaturedPrograms(limit = 4): Promise<ProgramPublic[]> {
@@ -236,6 +243,7 @@ export function usePublicProgramsApi() {
     getProgramBySlug,
     listProgramsByType,
     listProgramsByDepartment,
+    listProgramsByService,
     listFeaturedPrograms,
     getRelatedPrograms,
     listPublicFields,

@@ -36,7 +36,7 @@ const programs = [
   {
     key: 'doctoral',
     icon: 'fa-solid fa-flask',
-    link: '/formations/doctorats',
+    link: '/formations/doctorat',
     colors: ['#8b5cf6', '#c4b5fd'] // purple
   },
   {

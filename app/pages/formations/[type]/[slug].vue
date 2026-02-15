@@ -66,7 +66,7 @@ const {
 } = usePublicCallsApi()
 
 // Valid URL types
-const validTypes = ['masters', 'doctorats', 'diplomes-universitaires', 'certifiantes']
+const validTypes = ['masters', 'doctorat', 'diplomes-universitaires', 'certifiantes']
 
 // Get current type and slug from route
 const typeSlug = computed(() => route.params.type as string)
@@ -212,7 +212,7 @@ const typeConfig = computed(() => {
 const breadcrumb = computed(() => [
   { label: t('nav.home'), to: '/' },
   { label: t('nav.training'), to: '/carrieres#etudiants' },
-  { label: t(`formations.types.${typeSlug.value}`), to: `/formations/${typeSlug.value}` },
+  { label: t(`formations.types.${program.value?.type || typeSlug.value}`), to: `/formations/${typeSlug.value}` },
   { label: getLocalizedTitle.value },
 ])
 
@@ -675,7 +675,7 @@ const toggleSemester = (num: number) => {
               <!-- Back to list -->
               <div class="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                  {{ t(`formations.types.${typeSlug}`) }}
+                  {{ t(`formations.types.${program.type}`) }}
                 </h3>
                 <NuxtLink
                   :to="localePath(`/formations/${typeSlug}`)"

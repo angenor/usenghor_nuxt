@@ -245,7 +245,7 @@ onMounted(() => {
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/formations/doctorats')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/formations/doctorat')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.programs.doctorate') }}
                 </NuxtLink>
               </li>

@@ -37,7 +37,7 @@ const {
 } = usePublicProgramsApi()
 
 // Valid types for route validation
-const validTypes = ['masters', 'doctorats', 'diplomes-universitaires', 'certifiantes']
+const validTypes = ['masters', 'doctorat', 'diplomes-universitaires', 'certifiantes']
 
 // Get current type from route
 const typeSlug = computed(() => route.params.type as string)
@@ -212,14 +212,14 @@ const otherTypes = computed(() => {
         count: typePrograms.length,
         icon: slug === 'masters'
           ? 'fa-graduation-cap'
-          : slug === 'doctorats'
+          : slug === 'doctorat'
             ? 'fa-user-graduate'
             : slug === 'diplomes-universitaires'
               ? 'fa-certificate'
               : 'fa-award',
         color: slug === 'masters'
           ? 'bg-indigo-500'
-          : slug === 'doctorats'
+          : slug === 'doctorat'
             ? 'bg-purple-600'
             : slug === 'diplomes-universitaires'
               ? 'bg-teal-500'

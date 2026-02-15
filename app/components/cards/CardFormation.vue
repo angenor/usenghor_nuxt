@@ -16,7 +16,7 @@ const localePath = useLocalePath()
 // Mapping type to URL slug
 const typeToSlug: Record<string, string> = {
   master: 'masters',
-  doctorat: 'doctorats',
+  doctorat: 'doctorat',
   du: 'diplomes-universitaires',
   certifiante: 'certifiantes'
 }

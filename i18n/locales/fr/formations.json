@@ -26,6 +26,7 @@
     },
     "typeDescriptions": {
       "masters": "Programmes de Master en 2 ans dispensés sur notre campus d'Alexandrie et nos campus externalisés",
+      "doctorat": "Programmes doctoraux en partenariat avec notre École doctorale",
       "doctorats": "Programmes doctoraux en partenariat avec notre École doctorale",
       "diplomes-universitaires": "Formations spécialisées courtes sanctionnées par un diplôme d'université",
       "certifiantes": "Certifications professionnelles courtes et intensives"

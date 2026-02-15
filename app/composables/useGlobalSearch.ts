@@ -178,13 +178,13 @@ const staticPages: SearchResult[] = [
     score: 0
   },
   {
-    id: 'page-doctorats',
+    id: 'page-doctorat',
     type: 'page',
-    title: 'Doctorats',
+    title: 'Doctorat',
     subtitle: 'Programmes doctoraux',
     description: 'Nos programmes de doctorat en partenariat avec des universités internationales',
     icon: 'fa-solid fa-book-open',
-    route: '/formations/doctorats',
+    route: '/formations/doctorat',
     score: 0
   },
   {
@@ -300,7 +300,7 @@ const formationIcons: Record<string, string> = {
 // Mapping des types de programme vers les slugs URL
 const programTypeToUrlSlug: Record<string, string> = {
   master: 'masters',
-  doctorate: 'doctorats',
+  doctorate: 'doctorat',
   university_diploma: 'diplomes-universitaires',
   certificate: 'certifiantes'
 }

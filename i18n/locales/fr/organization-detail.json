@@ -19,6 +19,7 @@
       "achievements": "Réalisations",
       "projects": "Projets",
       "news": "Actualités",
+      "formations": "Formations",
       "media": "Médiathèque"
     },
     "missions": {
@@ -74,6 +75,14 @@
       "publishedOn": "Publié le",
       "viewAll": "Voir toutes les actualités",
       "empty": "Aucune actualité pour le moment."
+    },
+    "formations": {
+      "title": "Formations",
+      "subtitle": "Programmes de formation associés à ce service",
+      "duration": "Durée",
+      "credits": "Crédits",
+      "viewDetails": "Voir le programme",
+      "empty": "Aucune formation associée pour le moment."
     },
     "media": {
       "title": "Médiathèque",
