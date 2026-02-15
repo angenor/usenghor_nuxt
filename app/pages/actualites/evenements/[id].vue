@@ -213,9 +213,6 @@ const parsedContent = computed(() => {
           :alt="getLocalizedTitle"
           class="w-full h-full object-cover"
         >
-        <!-- Gradient Overlays -->
-        <div class="absolute inset-0 bg-gradient-to-r from-gray-900/80 via-gray-900/60 to-gray-900/40"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-gray-900/70 via-transparent to-gray-900/30"></div>
       </div>
 
       <!-- Content -->
@@ -271,8 +268,6 @@ const parsedContent = computed(() => {
         </div>
       </div>
 
-      <!-- Bottom Gradient Fade -->
-      <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white dark:from-gray-900 to-transparent"></div>
     </section>
 
     <!-- Content -->
