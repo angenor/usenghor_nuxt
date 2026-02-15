@@ -26,6 +26,22 @@ const {
   listFields,
 } = useProgramFieldsApi()
 
+// Données de référence (campus, secteurs, services)
+const {
+  getCampuses,
+  getDepartments,
+  getServices,
+  campuses: allCampuses,
+  departments: allDepartments,
+  services: allServices,
+} = useReferenceData()
+
+// Services filtrés par secteur
+const filteredServices = computed(() => {
+  if (!programForm.value.sector_id) return []
+  return allServices.value.filter(s => s.sector_id === programForm.value.sector_id)
+})
+
 // Champs disciplinaires (pour les certificats)
 const programFields = ref<ProgramFieldRead[]>([])
 
@@ -39,7 +55,12 @@ async function loadProgramFields() {
   }
 }
 
-onMounted(loadProgramFields)
+onMounted(() => {
+  loadProgramFields()
+  getCampuses()
+  getDepartments()
+  getServices()
+})
 
 // === STATE ===
 const loading = ref(true)
@@ -87,6 +108,9 @@ const programForm = ref({
   is_featured: false,
   cover_image: '',
   cover_image_external_id: null as string | null,
+  campus_id: '',
+  sector_id: '',
+  service_id: '',
   field_id: null as string | null,
 })
 
@@ -264,6 +288,9 @@ function openCreateModal() {
     is_featured: false,
     cover_image: '',
     cover_image_external_id: null,
+    campus_id: '',
+    sector_id: '',
+    service_id: '',
     field_id: null,
   }
   pendingCoverFile.value = null
@@ -355,6 +382,9 @@ async function handleCreateProgram() {
       status: programForm.value.status,
       is_featured: programForm.value.is_featured,
       cover_image_external_id: programForm.value.cover_image_external_id,
+      campus_external_id: programForm.value.campus_id || null,
+      sector_external_id: programForm.value.sector_id || null,
+      service_external_id: programForm.value.service_id || null,
       field_id: programForm.value.type === 'certificate' ? programForm.value.field_id : null,
     }
     const result = await createProgram(payload)
@@ -895,6 +925,53 @@ async function bulkDelete() {
                 </option>
               </select>
               <p class="mt-1 text-xs text-gray-500">Domaine thématique du certificat</p>
+            </div>
+
+            <!-- Associations -->
+            <div class="grid gap-4 sm:grid-cols-3">
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Campus associé
+                </label>
+                <select
+                  v-model="programForm.campus_id"
+                  class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="">Aucun</option>
+                  <option v-for="campus in allCampuses" :key="campus.id" :value="campus.id">
+                    {{ campus.name }}
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Secteur associé
+                </label>
+                <select
+                  v-model="programForm.sector_id"
+                  class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="">Aucun</option>
+                  <option v-for="dept in allDepartments" :key="dept.id" :value="dept.id">
+                    {{ dept.name }}
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Service associé
+                </label>
+                <select
+                  v-model="programForm.service_id"
+                  :disabled="!programForm.sector_id"
+                  class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="">Aucun</option>
+                  <option v-for="service in filteredServices" :key="service.id" :value="service.id">
+                    {{ service.name }}
+                  </option>
+                </select>
+              </div>
             </div>
 
             <!-- Sous-titre -->

@@ -61,6 +61,16 @@ const {
   listFields,
 } = useProgramFieldsApi()
 
+// Données de référence (campus, secteurs, services)
+const {
+  getCampuses,
+  getDepartments,
+  getServices,
+  campuses: allCampuses,
+  departments: allDepartments,
+  services: allServices,
+} = useReferenceData()
+
 // Champs disciplinaires (pour les certificats)
 const programFields = ref<ProgramFieldRead[]>([])
 
@@ -74,7 +84,18 @@ async function loadProgramFields() {
   }
 }
 
-onMounted(loadProgramFields)
+onMounted(() => {
+  loadProgramFields()
+  getCampuses()
+  getDepartments()
+  getServices()
+})
+
+// Services filtrés par secteur
+const filteredServices = computed(() => {
+  if (!form.value.sector_id) return []
+  return allServices.value.filter(s => s.sector_id === form.value.sector_id)
+})
 
 // États
 const loading = ref(true)
@@ -91,6 +112,9 @@ const form = ref<{
   teaching_methods: string
   cover_image: string
   cover_image_external_id: string | null
+  campus_id: string
+  sector_id: string
+  service_id: string
   field_id: string | null
   type: ProgramType
   duration_months: number | null
@@ -108,6 +132,9 @@ const form = ref<{
   teaching_methods: '',
   cover_image: '',
   cover_image_external_id: null,
+  campus_id: '',
+  sector_id: '',
+  service_id: '',
   field_id: null,
   type: 'master',
   duration_months: null,
@@ -164,6 +191,9 @@ async function loadProgram() {
       cover_image: program.value.cover_image_external_id
         ? (getMediaUrl(program.value.cover_image_external_id) || '')
         : '',
+      campus_id: program.value.campus_external_id || '',
+      sector_id: program.value.sector_external_id || '',
+      service_id: program.value.service_external_id || '',
       field_id: program.value.field_id || null,
       type: program.value.type,
       duration_months: program.value.duration_months,
@@ -545,6 +575,9 @@ const submitForm = async () => {
       description: descriptionJson,
       teaching_methods: form.value.teaching_methods || null,
       cover_image_external_id: form.value.cover_image_external_id,
+      campus_external_id: form.value.campus_id || null,
+      sector_external_id: form.value.sector_id || null,
+      service_external_id: form.value.service_id || null,
       field_id: form.value.type === 'certificate' ? form.value.field_id : null,
       type: form.value.type,
       duration_months: form.value.duration_months,
@@ -776,6 +809,68 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Domaine thématique du certificat
             </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Associations -->
+      <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+        <h2 class="mb-6 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+          <font-awesome-icon icon="fa-solid fa-link" class="w-5 h-5 text-cyan-500" />
+          Associations
+        </h2>
+
+        <div class="grid gap-4 sm:grid-cols-3">
+          <!-- Campus -->
+          <div>
+            <label for="campus_id" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Campus associé
+            </label>
+            <select
+              id="campus_id"
+              v-model="form.campus_id"
+              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">Aucun</option>
+              <option v-for="campus in allCampuses" :key="campus.id" :value="campus.id">
+                {{ campus.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Secteur -->
+          <div>
+            <label for="sector_id" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Secteur associé
+            </label>
+            <select
+              id="sector_id"
+              v-model="form.sector_id"
+              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">Aucun</option>
+              <option v-for="dept in allDepartments" :key="dept.id" :value="dept.id">
+                {{ dept.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Service -->
+          <div>
+            <label for="service_id" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Service associé
+            </label>
+            <select
+              id="service_id"
+              v-model="form.service_id"
+              :disabled="!form.sector_id"
+              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">Aucun</option>
+              <option v-for="service in filteredServices" :key="service.id" :value="service.id">
+                {{ service.name }}
+              </option>
+            </select>
           </div>
         </div>
       </div>

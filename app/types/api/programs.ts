@@ -99,6 +99,8 @@ export interface ProgramRead {
   teaching_methods: string | null
   cover_image_external_id: string | null
   sector_external_id: string | null
+  campus_external_id: string | null
+  service_external_id: string | null
   coordinator_external_id: string | null
   field_id: string | null
   type: ProgramType
@@ -132,6 +134,8 @@ export interface ProgramCreatePayload {
   teaching_methods?: string | null
   cover_image_external_id?: string | null
   sector_external_id?: string | null
+  campus_external_id?: string | null
+  service_external_id?: string | null
   field_id?: string | null
   type: ProgramType
   duration_months?: number | null
@@ -152,6 +156,8 @@ export interface ProgramUpdatePayload {
   teaching_methods?: string | null
   cover_image_external_id?: string | null
   sector_external_id?: string | null
+  campus_external_id?: string | null
+  service_external_id?: string | null
   field_id?: string | null
   type?: ProgramType
   duration_months?: number | null
