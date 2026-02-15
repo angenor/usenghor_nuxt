@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { t } = useI18n()
+const { getContent } = useEditorialContent('careers')
 const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.1 })
 
 // Opportunities cards
@@ -61,12 +61,12 @@ const scrollToAnchor = (anchor: string) => {
       <div class="text-center mb-12">
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
           <span class="relative inline-block">
-            {{ t('careers.opportunities.title') }}
+            {{ getContent('careers.opportunities.title') }}
             <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
           </span>
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-300">
-          {{ t('careers.opportunities.subtitle') }}
+          {{ getContent('careers.opportunities.subtitle') }}
         </p>
       </div>
 
@@ -93,10 +93,10 @@ const scrollToAnchor = (anchor: string) => {
 
           <!-- Content -->
           <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">
-            {{ t(`careers.opportunities.${opp.key}.title`) }}
+            {{ getContent(`careers.opportunities.${opp.key}.title`) }}
           </h3>
           <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-            {{ t(`careers.opportunities.${opp.key}.description`) }}
+            {{ getContent(`careers.opportunities.${opp.key}.description`) }}
           </p>
 
           <!-- CTA -->
@@ -104,7 +104,7 @@ const scrollToAnchor = (anchor: string) => {
             class="inline-flex items-center gap-2 font-medium transition-colors duration-300"
             :class="opp.color.text"
           >
-            {{ t('careers.opportunities.discover') }}
+            {{ getContent('careers.opportunities.discover') }}
             <font-awesome-icon
               icon="fa-solid fa-arrow-down"
               class="w-4 h-4 transition-transform duration-300 group-hover:translate-y-1"

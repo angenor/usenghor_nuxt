@@ -560,10 +560,25 @@ export const careersPageSections: PageSection[] = [
     description: 'Cartes des 3 types d\'opportunités (enseignants, étudiants, partenaires)',
     icon: 'door-open',
     color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-    editorialKeys: ['careers.opportunities.title', 'careers.opportunities.subtitle'],
+    editorialKeys: [
+      'careers.opportunities.title', 'careers.opportunities.subtitle', 'careers.opportunities.discover',
+      'careers.opportunities.teachers.title', 'careers.opportunities.teachers.description',
+      'careers.opportunities.students.title', 'careers.opportunities.students.description',
+      'careers.opportunities.partners.title', 'careers.opportunities.partners.description',
+    ],
     fields: [
-      { key: 'careers.opportunities.title', label: 'Titre', description: 'Titre de la section opportunités', type: 'text', editorialKey: 'careers.opportunities.title', editable: true },
+      { key: 'careers.opportunities.title', label: 'Titre', description: 'Titre de la section (ex: "Rejoignez-nous")', type: 'text', editorialKey: 'careers.opportunities.title', editable: true },
       { key: 'careers.opportunities.subtitle', label: 'Sous-titre', description: 'Sous-titre de la section', type: 'textarea', editorialKey: 'careers.opportunities.subtitle', editable: true },
+      { key: 'careers.opportunities.discover', label: 'Bouton Découvrir', description: 'Texte du bouton sur chaque carte', type: 'text', editorialKey: 'careers.opportunities.discover', editable: true },
+      // Carte Enseignants
+      { key: 'careers.opportunities.teachers.title', label: 'Enseignants - Titre', description: 'Titre de la carte enseignants (ex: "En tant qu\'enseignant")', type: 'text', editorialKey: 'careers.opportunities.teachers.title', editable: true },
+      { key: 'careers.opportunities.teachers.description', label: 'Enseignants - Description', description: 'Description de la carte enseignants', type: 'textarea', editorialKey: 'careers.opportunities.teachers.description', editable: true },
+      // Carte Étudiants
+      { key: 'careers.opportunities.students.title', label: 'Étudiants - Titre', description: 'Titre de la carte étudiants (ex: "En tant qu\'étudiant")', type: 'text', editorialKey: 'careers.opportunities.students.title', editable: true },
+      { key: 'careers.opportunities.students.description', label: 'Étudiants - Description', description: 'Description de la carte étudiants', type: 'textarea', editorialKey: 'careers.opportunities.students.description', editable: true },
+      // Carte Partenaires
+      { key: 'careers.opportunities.partners.title', label: 'Partenaires - Titre', description: 'Titre de la carte partenaires (ex: "En tant que partenaire")', type: 'text', editorialKey: 'careers.opportunities.partners.title', editable: true },
+      { key: 'careers.opportunities.partners.description', label: 'Partenaires - Description', description: 'Description de la carte partenaires', type: 'textarea', editorialKey: 'careers.opportunities.partners.description', editable: true },
     ],
   },
   {
@@ -580,6 +595,9 @@ export const careersPageSections: PageSection[] = [
       'careers.teachers.benefits.item3.icon', 'careers.teachers.benefits.item3.title', 'careers.teachers.benefits.item3.text',
       'careers.teachers.benefits.item4.icon', 'careers.teachers.benefits.item4.title', 'careers.teachers.benefits.item4.text',
       'careers.teachers.positions.title',
+      'careers.teachers.positions.item1.title', 'careers.teachers.positions.item1.text',
+      'careers.teachers.positions.item2.title', 'careers.teachers.positions.item2.text',
+      'careers.teachers.positions.item3.title', 'careers.teachers.positions.item3.text',
       'careers.teachers.cta.title', 'careers.teachers.cta.text', 'careers.teachers.cta.email', 'careers.teachers.cta.button',
       'careers.teachers.image',
     ],
@@ -605,6 +623,15 @@ export const careersPageSections: PageSection[] = [
       { key: 'careers.teachers.benefits.item4.title', label: 'Avantage 4 - Titre', description: 'Titre du quatrième avantage', type: 'text', editorialKey: 'careers.teachers.benefits.item4.title', editable: true },
       { key: 'careers.teachers.benefits.item4.text', label: 'Avantage 4 - Texte', description: 'Description du quatrième avantage', type: 'textarea', editorialKey: 'careers.teachers.benefits.item4.text', editable: true },
       { key: 'careers.teachers.positions.title', label: 'Titre Postes', description: 'Titre de la sous-section types de postes', type: 'text', editorialKey: 'careers.teachers.positions.title', editable: true },
+      // Poste 1
+      { key: 'careers.teachers.positions.item1.title', label: 'Poste 1 - Titre', description: 'Titre du premier type de poste', type: 'text', editorialKey: 'careers.teachers.positions.item1.title', editable: true },
+      { key: 'careers.teachers.positions.item1.text', label: 'Poste 1 - Texte', description: 'Description du premier type de poste', type: 'textarea', editorialKey: 'careers.teachers.positions.item1.text', editable: true },
+      // Poste 2
+      { key: 'careers.teachers.positions.item2.title', label: 'Poste 2 - Titre', description: 'Titre du deuxième type de poste', type: 'text', editorialKey: 'careers.teachers.positions.item2.title', editable: true },
+      { key: 'careers.teachers.positions.item2.text', label: 'Poste 2 - Texte', description: 'Description du deuxième type de poste', type: 'textarea', editorialKey: 'careers.teachers.positions.item2.text', editable: true },
+      // Poste 3
+      { key: 'careers.teachers.positions.item3.title', label: 'Poste 3 - Titre', description: 'Titre du troisième type de poste', type: 'text', editorialKey: 'careers.teachers.positions.item3.title', editable: true },
+      { key: 'careers.teachers.positions.item3.text', label: 'Poste 3 - Texte', description: 'Description du troisième type de poste', type: 'textarea', editorialKey: 'careers.teachers.positions.item3.text', editable: true },
       { key: 'careers.teachers.cta.title', label: 'CTA - Titre', description: 'Titre du bloc appel à l\'action', type: 'text', editorialKey: 'careers.teachers.cta.title', editable: true },
       { key: 'careers.teachers.cta.text', label: 'CTA - Texte', description: 'Texte d\'accompagnement', type: 'textarea', editorialKey: 'careers.teachers.cta.text', editable: true },
       { key: 'careers.teachers.cta.email', label: 'CTA - Email', description: 'Adresse email de contact', type: 'text', editorialKey: 'careers.teachers.cta.email', editable: true },

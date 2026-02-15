@@ -1,24 +1,32 @@
 <script setup lang="ts">
-interface BenefitItem {
-  icon: string
-  title: string
-  text: string
-}
-
 const props = withDefaults(defineProps<{
   image?: string | null
-  benefitItems?: BenefitItem[]
 }>(), {
   image: null,
-  benefitItems: undefined,
 })
 
-const { t, tm } = useI18n()
+const { tm } = useI18n()
+const { getContent, getRawContent } = useEditorialContent('careers')
 const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.1 })
 
-// Get translated arrays with editorial override for benefits
-const benefits = computed(() => props.benefitItems ?? tm('careers.teachers.benefits.items') as any[])
-const positions = computed(() => tm('careers.teachers.positions.items') as any[])
+// Benefits avec override éditorial
+const benefits = computed(() => {
+  const i18nItems = tm('careers.teachers.benefits.items') as any[]
+  return [1, 2, 3, 4].map((n, i) => ({
+    icon: getRawContent(`careers.teachers.benefits.item${n}.icon`) ?? i18nItems[i]?.icon ?? '',
+    title: getRawContent(`careers.teachers.benefits.item${n}.title`) ?? i18nItems[i]?.title ?? '',
+    text: getRawContent(`careers.teachers.benefits.item${n}.text`) ?? i18nItems[i]?.text ?? '',
+  }))
+})
+
+// Positions avec override éditorial
+const positions = computed(() => {
+  const i18nItems = tm('careers.teachers.positions.items') as any[]
+  return [1, 2, 3].map((n, i) => ({
+    title: getRawContent(`careers.teachers.positions.item${n}.title`) ?? i18nItems[i]?.title ?? '',
+    text: getRawContent(`careers.teachers.positions.item${n}.text`) ?? i18nItems[i]?.text ?? '',
+  }))
+})
 
 const imageUrl = computed(() => props.image || 'https://picsum.photos/seed/teachers-career/800/600')
 </script>
@@ -36,7 +44,7 @@ const imageUrl = computed(() => props.image || 'https://picsum.photos/seed/teach
           <div class="relative rounded-2xl overflow-hidden shadow-2xl">
             <img
               :src="imageUrl"
-              :alt="t('careers.teachers.title')"
+              :alt="getContent('careers.teachers.title')"
               class="w-full h-auto object-cover aspect-[4/3]"
             />
             <div class="absolute inset-0 bg-gradient-to-tr from-lime-500/20 to-transparent"></div>
@@ -50,26 +58,26 @@ const imageUrl = computed(() => props.image || 'https://picsum.photos/seed/teach
           <!-- Badge -->
           <span class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium mb-6 bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-400">
             <font-awesome-icon icon="fa-solid fa-chalkboard-user" class="w-3.5 h-3.5 mr-2" />
-            {{ t('careers.opportunities.teachers.title') }}
+            {{ getContent('careers.opportunities.teachers.title') }}
           </span>
 
           <!-- Title -->
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             <span class="relative inline-block">
-              {{ t('careers.teachers.title') }}
+              {{ getContent('careers.teachers.title') }}
               <span class="absolute top-[calc(1lh_+_0.25rem)] left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
             </span>
           </h2>
 
           <!-- Subtitle -->
           <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-8">
-            {{ t('careers.teachers.text') }}
+            {{ getContent('careers.teachers.text') }}
           </p>
 
           <!-- Benefits -->
           <div class="mb-8">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              {{ t('careers.teachers.benefits.title') }}
+              {{ getContent('careers.teachers.benefits.title') }}
             </h3>
             <div class="grid sm:grid-cols-2 gap-4">
               <div
@@ -98,7 +106,7 @@ const imageUrl = computed(() => props.image || 'https://picsum.photos/seed/teach
           <!-- Position types -->
           <div class="mb-8">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              {{ t('careers.teachers.positions.title') }}
+              {{ getContent('careers.teachers.positions.title') }}
             </h3>
             <div class="space-y-3">
               <div
@@ -121,17 +129,17 @@ const imageUrl = computed(() => props.image || 'https://picsum.photos/seed/teach
           <!-- CTA -->
           <div class="p-6 rounded-xl bg-lime-50 dark:bg-lime-900/20 border border-lime-200 dark:border-lime-800">
             <h4 class="font-semibold text-gray-900 dark:text-white mb-2">
-              {{ t('careers.teachers.cta.title') }}
+              {{ getContent('careers.teachers.cta.title') }}
             </h4>
             <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              {{ t('careers.teachers.cta.text') }}
+              {{ getContent('careers.teachers.cta.text') }}
             </p>
             <a
-              :href="`mailto:${t('careers.teachers.cta.email')}`"
+              :href="`mailto:${getContent('careers.teachers.cta.email')}`"
               class="inline-flex items-center gap-2 px-6 py-3 bg-lime-600 hover:bg-lime-700 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-lime-500/30 hover:-translate-y-0.5"
             >
               <font-awesome-icon icon="fa-solid fa-paper-plane" class="w-4 h-4" />
-              {{ t('careers.teachers.cta.button') }}
+              {{ getContent('careers.teachers.cta.button') }}
             </a>
           </div>
         </div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { t, tm } = useI18n()
+const { t } = useI18n()
 
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, getRawContent, loadContent } = useEditorialContent('careers')
@@ -8,16 +8,6 @@ const { getMediaUrl } = useMediaApi()
 onMounted(() => {
   // Charger les contenus éditoriaux (non-bloquant)
   loadContent()
-})
-
-// Benefits "Pourquoi nous rejoindre" avec override éditorial
-const teacherBenefits = computed(() => {
-  const i18nItems = tm('careers.teachers.benefits.items') as any[]
-  return [1, 2, 3, 4].map((n, i) => ({
-    icon: getRawContent(`careers.teachers.benefits.item${n}.icon`) ?? i18nItems[i]?.icon ?? '',
-    title: getRawContent(`careers.teachers.benefits.item${n}.title`) ?? i18nItems[i]?.title ?? '',
-    text: getRawContent(`careers.teachers.benefits.item${n}.text`) ?? i18nItems[i]?.text ?? '',
-  }))
 })
 
 // SEO
@@ -54,7 +44,6 @@ const breadcrumb = computed(() => [
     <!-- Teachers Section -->
     <CareersTeachersSection
       :image="getMediaUrl(getRawContent('careers.teachers.image') ?? '') || undefined"
-      :benefit-items="teacherBenefits"
     />
 
     <!-- Students Section -->
