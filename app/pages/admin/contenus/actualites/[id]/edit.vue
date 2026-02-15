@@ -639,7 +639,7 @@ async function createTag() {
           <!-- Département -->
           <div>
             <label for="sector_id" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Département associé
+              Secteur associé
             </label>
             <select
               id="sector_id"
