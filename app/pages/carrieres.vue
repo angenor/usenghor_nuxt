@@ -41,7 +41,7 @@ const breadcrumb = computed(() => [
     <PageHero
       :title="getContent('careers.hero.title')"
       :subtitle="getContent('careers.hero.subtitle')"
-      image="/images/bg/backgroud_senghor3.jpg"
+      image="/images/bg/hero_section_default_backgroune.jpeg"
       :breadcrumb="breadcrumb"
     />
 

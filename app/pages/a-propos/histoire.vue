@@ -301,7 +301,6 @@ onUnmounted(() => {
     <PageHero
       :title="getContent('history.badge')"
       :subtitle="getContent('history.subtitle')"
-      image="/images/bg/backgroud_senghor3.jpg"
       :breadcrumb="breadcrumb"
     />
 

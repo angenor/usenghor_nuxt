@@ -34,7 +34,6 @@ const breadcrumb = computed(() => [
       :badge="getContent('partners.hero.badge')"
       :title="getContent('partners.hero.title')"
       :subtitle="getContent('partners.hero.subtitle')"
-      image="/images/bg/backgroud_senghor3.jpg"
       :breadcrumb="breadcrumb"
       badge-icon="fa-solid fa-globe"
     />

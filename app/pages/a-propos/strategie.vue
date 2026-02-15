@@ -79,7 +79,6 @@ const targetIndicators = computed(() => [
     <PageHero
       :title="getContent('strategy.hero.title')"
       :subtitle="getContent('strategy.hero.subtitle')"
-      image="/images/bg/backgroud_senghor3.jpg"
       :breadcrumb="breadcrumb"
     />
 

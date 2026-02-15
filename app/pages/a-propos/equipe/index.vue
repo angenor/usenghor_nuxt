@@ -37,7 +37,6 @@ const { elementRef: ctaRef } = useScrollAnimation({ animation: 'zoomIn', thresho
     <PageHero
       :title="getContent('team.hero.title')"
       :subtitle="getContent('team.hero.subtitle')"
-      image="/images/bg/backgroud_senghor3.jpg"
       :breadcrumb="breadcrumb"
     />
 

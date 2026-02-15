@@ -450,7 +450,6 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
         <PageHero
           :title="entityName"
           :subtitle="entityDescriptionText"
-          image="/images/bg/backgroud_senghor3.jpg"
           :breadcrumb="breadcrumb"
         >
           <template #badge>

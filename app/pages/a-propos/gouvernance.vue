@@ -102,7 +102,6 @@ const observers = computed(() =>
     <PageHero
       :title="getContent('governance.badge')"
       :subtitle="getContent('governance.subtitle')"
-      image="/images/bg/backgroud_senghor3.jpg"
       :breadcrumb="breadcrumb"
     />
 

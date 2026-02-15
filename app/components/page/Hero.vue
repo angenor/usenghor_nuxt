@@ -11,28 +11,33 @@ interface Props {
   breadcrumb?: BreadcrumbItem[]
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  image: 'https://picsum.photos/seed/hero-about/1920/600'
-})
+const props = defineProps<Props>()
 
 const localePath = useLocalePath()
 </script>
 
 <template>
-  <section class="relative h-[50vh] min-h-[400px] max-h-[500px] overflow-hidden">
-    <!-- Background Image -->
-    <div class="absolute inset-0">
-      <img
-        :src="props.image"
-        :alt="props.title"
-        class="w-full h-full object-cover"
-      />
-      <!-- Overlay -->
-      <div class="absolute inset-0 bg-gray-900/60"></div>
-    </div>
+  <section class="relative overflow-hidden" :class="props.image ? 'h-[50vh] min-h-[400px] max-h-[500px]' : 'py-16 md:py-24'">
+    <!-- Mode image (quand image est fournie) -->
+    <template v-if="props.image">
+      <div class="absolute inset-0">
+        <img
+          :src="props.image"
+          :alt="props.title"
+          class="w-full h-full object-cover"
+        />
+        <div class="absolute inset-0 bg-gray-900/60"></div>
+      </div>
+    </template>
+
+    <!-- Mode pattern (par défaut, sans image) -->
+    <template v-else>
+      <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"></div>
+      <div class="absolute inset-0 opacity-10 heropattern-topography-brand-blue-500"></div>
+    </template>
 
     <!-- Content -->
-    <div class="relative z-10 h-full flex flex-col justify-center">
+    <div class="relative z-10" :class="props.image ? 'h-full flex flex-col justify-center' : ''">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <!-- Breadcrumb -->
         <nav v-if="props.breadcrumb?.length" class="mb-6">
@@ -67,7 +72,7 @@ const localePath = useLocalePath()
       </div>
     </div>
 
-    <!-- Ligne de séparation droite -->
+    <!-- Ligne de séparation oblique -->
     <div class="absolute bottom-0 left-0 right-0">
       <svg class="w-full h-12 md:h-16 text-white dark:text-gray-900" viewBox="0 0 1200 120" preserveAspectRatio="none">
         <polygon points="0,40 1200,0 1200,120 0,120" fill="currentColor" />

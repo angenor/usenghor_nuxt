@@ -133,7 +133,6 @@ const breadcrumb = computed(() => [
     <PageHero
       :title="heroTitle"
       :subtitle="heroSubtitle"
-      image="/images/bg/backgroud_senghor3.jpg"
       :breadcrumb="breadcrumb"
     />
 
