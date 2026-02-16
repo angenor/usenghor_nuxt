@@ -72,14 +72,9 @@ async function handleLogin() {
     <div class="relative z-10 flex min-h-screen items-center justify-center p-4 lg:p-8">
       <div class="w-full max-w-4xl">
         <div class="overflow-hidden rounded-3xl border border-white/20 shadow-2xl lg:grid lg:grid-cols-12">
-          <!-- Panneau gauche : Image + branding (desktop) -->
+          <!-- Panneau gauche : Branding (desktop) -->
           <div class="relative hidden lg:col-span-5 lg:block">
-            <img
-              src="/images/bg/background_login_admin.jpg"
-              alt="Campus de l'Université Senghor"
-              class="absolute inset-0 h-full w-full object-cover"
-            >
-            <div class="absolute inset-0 bg-gradient-to-b from-brand-blue-900/85 via-brand-blue-800/75 to-brand-blue-900/90 backdrop-blur-[2px]" />
+            <div class="absolute inset-0 bg-brand-blue-900" />
             <div class="relative flex h-full flex-col justify-between p-8">
               <!-- Branding -->
               <div>
