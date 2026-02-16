@@ -5,7 +5,6 @@ const route = useRoute()
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getNewsBySlug: getPublicNewsBySlug, getAllPublishedNews } = usePublicNewsApi()
-const { getCampusById, getFlagEmoji } = useMockData()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
 // Helper pour obtenir l'URL de l'image de couverture selon la variante souhaitée
@@ -53,14 +52,12 @@ onMounted(async () => {
   }
 })
 
-// Get campus info
-const campus = computed(() => news.value?.campus_ids?.length ? getCampusById(news.value.campus_ids[0]) : null)
-const campusFlag = computed(() => campus.value ? getFlagEmoji(campus.value.country) : '')
-const campusName = computed(() => {
-  if (!campus.value) return ''
-  if (locale.value === 'en' && campus.value.name_en) return campus.value.name_en
-  if (locale.value === 'ar' && campus.value.name_ar) return campus.value.name_ar
-  return campus.value.name_fr
+// Vérifier s'il y a des métadonnées d'association à afficher
+const hasAssociations = computed(() => {
+  if (!news.value) return false
+  return (news.value.campus_ids?.length > 0)
+    || (news.value.service_names?.length > 0)
+    || news.value.sector_name
 })
 
 // Localization helpers
@@ -151,9 +148,13 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
 
             <!-- Meta info -->
             <div class="flex flex-wrap items-center gap-3 mb-4">
-              <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-blue-600 text-white text-sm font-medium rounded-full">
-                <span>{{ campusFlag }}</span>
-                <span>{{ campusName }}</span>
+              <span
+                v-for="(name, idx) in news.campus_names"
+                :key="idx"
+                class="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-blue-600 text-white text-sm font-medium rounded-full"
+              >
+                <font-awesome-icon icon="fa-solid fa-building-columns" class="w-3 h-3" />
+                {{ name }}
               </span>
               <span class="text-white/70 text-sm">{{ formatDate(news.published_at) }}</span>
             </div>
@@ -185,6 +186,47 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
               :alt="getLocalizedTitle"
               class="w-full h-auto object-cover"
             >
+          </div>
+
+          <!-- Info cards : campus, services, secteur -->
+          <div v-if="hasAssociations" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+            <!-- Campus -->
+            <div v-if="news.campus_ids?.length" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+              <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
+                <font-awesome-icon icon="fa-solid fa-building-columns" class="w-4 h-4" />
+                Campus
+              </div>
+              <div class="flex flex-wrap gap-1.5 mt-1">
+                <ActualitesCampusBadge
+                  v-for="cid in news.campus_ids"
+                  :key="cid"
+                  :campus-id="cid"
+                  size="sm"
+                />
+              </div>
+            </div>
+
+            <!-- Services -->
+            <div v-if="news.service_names?.length" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+              <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
+                <font-awesome-icon icon="fa-solid fa-sitemap" class="w-4 h-4" />
+                Services
+              </div>
+              <div class="font-bold text-gray-900 dark:text-white text-sm">
+                {{ news.service_names.join(', ') }}
+              </div>
+            </div>
+
+            <!-- Secteur -->
+            <div v-if="news.sector_name" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+              <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
+                <font-awesome-icon icon="fa-solid fa-layer-group" class="w-4 h-4" />
+                Secteur
+              </div>
+              <div class="font-bold text-gray-900 dark:text-white text-sm">
+                {{ news.sector_name }}
+              </div>
+            </div>
           </div>
 
           <!-- Article content -->
