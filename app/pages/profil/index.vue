@@ -9,6 +9,7 @@ definePageMeta({
 
 // === COMPOSABLES ===
 const authStore = useAuthStore()
+const router = useRouter()
 const { apiFetch } = useApi()
 const { getUserProfile } = usePublicUserApi()
 const { getCountriesForSelect, getFlagEmoji } = useCountriesApi()
@@ -412,6 +413,12 @@ async function refreshData() {
   }
 }
 
+// === DÉCONNEXION ===
+function handleLogout() {
+  authStore.logout()
+  router.push('/admin/login')
+}
+
 // === HELPERS ===
 function parseBiography(bio) {
   if (!bio) return null
@@ -534,7 +541,7 @@ function getCampusBadgeColor(code) {
             </span>
           </div>
 
-          <!-- Actions photo -->
+          <!-- Actions photo + déconnexion -->
           <div class="mt-4 flex items-center gap-3">
             <label
               class="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-white/15 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/25"
@@ -553,6 +560,14 @@ function getCampusBadgeColor(code) {
                 @change="handlePhotoUpload"
               >
             </label>
+            <button
+              type="button"
+              class="inline-flex items-center gap-2 rounded-xl bg-red-500/20 px-4 py-2 text-sm font-medium text-red-200 transition hover:bg-red-500/30"
+              @click="handleLogout"
+            >
+              <font-awesome-icon :icon="['fas', 'right-from-bracket']" class="h-4 w-4" />
+              Se déconnecter
+            </button>
           </div>
         </div>
       </div>
