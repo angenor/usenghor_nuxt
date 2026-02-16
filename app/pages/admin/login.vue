@@ -14,9 +14,21 @@ const loading = ref(false)
 const error = ref('')
 const showPassword = ref(false)
 
+// Rôles avec accès au panneau d'administration
+const adminRoleCodes = ['super_admin', 'admin', 'campus_admin', 'editor', 'moderator']
+
+function isAdminUser() {
+  const roles = authStore.user?.roles || []
+  return roles.some(r => adminRoleCodes.includes(r.code))
+}
+
+function getRedirectPath() {
+  return isAdminUser() ? '/admin/candidatures/appels' : '/profil'
+}
+
 // Si déjà connecté, rediriger
 if (authStore.isAuthenticated) {
-  router.replace('/admin/candidatures/appels')
+  router.replace(getRedirectPath())
 }
 
 async function handleLogin() {
@@ -24,7 +36,7 @@ async function handleLogin() {
   loading.value = true
   try {
     await authStore.login(email.value, password.value)
-    await router.push('/admin/candidatures/appels')
+    await router.push(getRedirectPath())
   }
   catch (e) {
     // @ts-expect-error fetch error shape
