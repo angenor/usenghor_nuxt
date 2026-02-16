@@ -69,6 +69,8 @@ export interface SectorPublic {
 export interface ServicePublic {
   id: string
   name: string
+  sigle: string | null
+  color: string | null
   description: string | null
   mission: string | null
   email: string | null

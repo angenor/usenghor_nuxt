@@ -188,7 +188,7 @@ const getEventTitle = (event: any) => {
 
 // Vérifier si une actualité a des associations
 const hasAssociations = (item: NewsDisplay) => {
-  return item.sector_name || item.service_name || item.project_name
+  return item.sector_name || item.service_names?.length || item.project_name
 }
 </script>
 
@@ -246,11 +246,11 @@ const hasAssociations = (item: NewsDisplay) => {
                       {{ featuredNews.sector_name }}
                     </span>
                     <span
-                      v-if="featuredNews.service_name"
+                      v-if="featuredNews.service_names?.length"
                       class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
                     >
                       <font-awesome-icon icon="fa-solid fa-cogs" class="w-2.5 h-2.5" />
-                      {{ featuredNews.service_name }}
+                      {{ featuredNews.service_names?.join(', ') }}
                     </span>
                     <span
                       v-if="featuredNews.project_name"
@@ -306,10 +306,10 @@ const hasAssociations = (item: NewsDisplay) => {
                       {{ item.sector_name }}
                     </span>
                     <span
-                      v-if="item.service_name"
+                      v-if="item.service_names?.length"
                       class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
                     >
-                      {{ item.service_name }}
+                      {{ item.service_names?.join(', ') }}
                     </span>
                     <span
                       v-if="item.project_name"
@@ -367,10 +367,10 @@ const hasAssociations = (item: NewsDisplay) => {
                   {{ item.sector_name }}
                 </span>
                 <span
-                  v-if="item.service_name"
+                  v-if="item.service_names?.length"
                   class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
                 >
-                  {{ item.service_name }}
+                  {{ item.service_names?.join(', ') }}
                 </span>
                 <span
                   v-if="item.project_name"

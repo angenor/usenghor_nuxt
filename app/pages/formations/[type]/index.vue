@@ -108,7 +108,7 @@ const sectorColorMap = computed(() => {
   return map
 })
 
-// Obtenir la couleur d'un service via son sector_id
+// Obtenir la couleur d'un service via son sector_id (fallback palette)
 const getServiceColor = (service: ServicePublicSimple) => {
   if (service.sector_id) {
     const index = sectorColorMap.value.get(service.sector_id)
@@ -117,12 +117,25 @@ const getServiceColor = (service: ServicePublicSimple) => {
   return sectorColors[0]
 }
 
+// Obtenir la couleur hex d'un service (priorité : service.color > palette secteur)
+const getServiceHexColor = (service: ServicePublicSimple): string | null => {
+  return service.color || null
+}
+
 // Obtenir la couleur d'un programme via son service_external_id
 const getProgramServiceColor = (program: ProgramPublic) => {
   if (!program.service_external_id) return null
   const svc = services.value.find(s => s.id === program.service_external_id)
   if (svc) return getServiceColor(svc)
   return sectorColors[0]
+}
+
+// Obtenir la couleur hex d'un programme via son service
+const getProgramServiceHexColor = (program: ProgramPublic): string | null => {
+  if (!program.service_external_id) return null
+  const svc = services.value.find(s => s.id === program.service_external_id)
+  if (svc) return getServiceHexColor(svc)
+  return null
 }
 
 // Search and filters state
@@ -515,8 +528,9 @@ const typeConfig = computed(() => {
                     type="button"
                     class="px-4 py-2 text-sm font-medium rounded-full transition-all"
                     :class="selectedServiceId === svc.id
-                      ? getServiceColor(svc).selectedBg
+                      ? (svc.color ? 'text-white shadow-md' : getServiceColor(svc).selectedBg)
                       : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
+                    :style="selectedServiceId === svc.id && svc.color ? { backgroundColor: svc.color } : {}"
                     @click="selectedServiceId = svc.id"
                   >
                     {{ svc.name }}
@@ -579,10 +593,13 @@ const typeConfig = computed(() => {
                   <span
                     v-if="program.service_name"
                     class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full mb-3"
-                    :class="[
-                      getProgramServiceColor(program)?.bgLight || 'bg-gray-100 dark:bg-gray-700',
-                      getProgramServiceColor(program)?.text || 'text-gray-600 dark:text-gray-400',
-                    ]"
+                    :class="getProgramServiceHexColor(program)
+                      ? 'text-white'
+                      : [
+                          getProgramServiceColor(program)?.bgLight || 'bg-gray-100 dark:bg-gray-700',
+                          getProgramServiceColor(program)?.text || 'text-gray-600 dark:text-gray-400',
+                        ]"
+                    :style="getProgramServiceHexColor(program) ? { backgroundColor: getProgramServiceHexColor(program)! } : {}"
                   >
                     <font-awesome-icon icon="fa-solid fa-building" class="w-3 h-3" />
                     {{ program.service_name }}

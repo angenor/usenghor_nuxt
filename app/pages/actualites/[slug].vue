@@ -35,11 +35,11 @@ onMounted(async () => {
       })
     }
 
-    // Charger les actualités liées
-    if (news.value.campus_id) {
+    // Charger les actualités liées (par campus commun)
+    if (news.value.campus_ids?.length > 0) {
       const allNews = await getAllPublishedNews()
       relatedNewsItems.value = allNews
-        .filter(n => n.campus_id === news.value!.campus_id && n.id !== news.value!.id)
+        .filter(n => n.campus_ids?.some(cid => news.value!.campus_ids.includes(cid)) && n.id !== news.value!.id)
         .slice(0, 3)
     }
   } catch (error) {
@@ -54,7 +54,7 @@ onMounted(async () => {
 })
 
 // Get campus info
-const campus = computed(() => news.value?.campus_id ? getCampusById(news.value.campus_id) : null)
+const campus = computed(() => news.value?.campus_ids?.length ? getCampusById(news.value.campus_ids[0]) : null)
 const campusFlag = computed(() => campus.value ? getFlagEmoji(campus.value.country) : '')
 const campusName = computed(() => {
   if (!campus.value) return ''

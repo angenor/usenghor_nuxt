@@ -719,8 +719,8 @@ const truncate = (text: string, length: number) => {
                 <span v-else class="text-sm text-gray-400">-</span>
               </td>
               <td class="px-4 py-3">
-                <span v-if="newsItem.campus_name" class="text-sm text-gray-600 dark:text-gray-300">
-                  {{ newsItem.campus_name }}
+                <span v-if="newsItem.campus_names?.length" class="text-sm text-gray-600 dark:text-gray-300">
+                  {{ newsItem.campus_names.join(', ') }}
                 </span>
                 <span v-else class="text-sm text-gray-400">-</span>
               </td>

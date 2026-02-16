@@ -91,12 +91,12 @@ export function usePublicNewsApi() {
       // Médias additionnels (à implémenter)
       media: [],
       // Associations (noms résolus par le backend)
-      campus_id: news.campus_external_id,
-      campus_name: news.campus_name,
+      campus_ids: news.campus_external_ids || [],
+      campus_names: news.campus_names || [],
       sector_id: news.sector_external_id,
       sector_name: news.sector_name,
-      service_id: news.service_external_id,
-      service_name: news.service_name,
+      service_ids: news.service_external_ids || [],
+      service_names: news.service_names || [],
       event_id: news.event_external_id,
       event_name: news.event_name,
       project_id: news.project_external_id,

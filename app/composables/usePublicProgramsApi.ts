@@ -43,6 +43,8 @@ export interface ProgramFieldPublic {
 export interface ServicePublicSimple {
   id: string
   name: string
+  sigle: string | null
+  color: string | null
   sector_id: string | null
 }
 

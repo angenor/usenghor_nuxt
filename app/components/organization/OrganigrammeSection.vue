@@ -257,18 +257,30 @@ const getSectorUrl = (sector: SectorPublicWithServices) => {
               :to="getServiceUrl(service)"
               data-card
               class="group bg-white dark:bg-gray-800 rounded-xl p-5 border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-              :class="getSectorColors(sectorIndex).border"
+              :class="service.color ? 'border-opacity-30' : getSectorColors(sectorIndex).border"
+              :style="service.color ? { borderColor: service.color + '40' } : {}"
             >
               <div class="flex items-start gap-4">
                 <div
                   class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300"
-                  :class="getSectorColors(sectorIndex).bg"
+                  :class="service.color ? '' : getSectorColors(sectorIndex).bg"
+                  :style="service.color ? { backgroundColor: service.color + '20' } : {}"
                 >
                   <font-awesome-icon
+                    v-if="!service.sigle"
                     icon="fa-solid fa-building"
                     class="w-5 h-5"
-                    :class="getSectorColors(sectorIndex).text"
+                    :class="service.color ? '' : getSectorColors(sectorIndex).text"
+                    :style="service.color ? { color: service.color } : {}"
                   />
+                  <span
+                    v-else
+                    class="text-xs font-bold"
+                    :class="service.color ? '' : getSectorColors(sectorIndex).text"
+                    :style="service.color ? { color: service.color } : {}"
+                  >
+                    {{ service.sigle }}
+                  </span>
                 </div>
                 <div class="flex-1 min-w-0">
                   <h4 class="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
@@ -276,7 +288,8 @@ const getSectorUrl = (sector: SectorPublicWithServices) => {
                   </h4>
                   <span
                     class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 transition-colors"
-                    :class="getSectorColors(sectorIndex).hover"
+                    :class="service.color ? '' : getSectorColors(sectorIndex).hover"
+                    :style="service.color ? { '--tw-hover-color': service.color } : {}"
                   >
                     <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
                     <span>{{ t('organization.departments.view_programs') }}</span>
