@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProgramFieldPublic, ProgramPublic } from '~/composables/usePublicProgramsApi'
+import type { ProgramFieldPublic, ProgramPublic, ServicePublicSimple } from '~/composables/usePublicProgramsApi'
 
 // Extraire le texte brut d'un contenu EditorJS (pour les aperçus)
 const extractPlainText = (content: string | null | undefined): string => {
@@ -31,6 +31,7 @@ const localePath = useLocalePath()
 const {
   listProgramsByType,
   listPublicFields,
+  listPublicServices,
   urlSlugToProgramType,
   programTypeToUrlSlug,
   publicProgramTypeColors,
@@ -55,10 +56,14 @@ const isCertificate = computed(() => typeSlug.value === 'certifiantes')
 // Champs disciplinaires (pour filtre certificats)
 const programFields = ref<ProgramFieldPublic[]>([])
 
+// Services (pour filtre par service)
+const services = ref<ServicePublicSimple[]>([])
+
 // Search and filters state
 const searchQuery = ref('')
 const selectedDuration = ref<'all' | 'short' | 'long'>('all')
 const selectedFieldId = ref<string>('all')
+const selectedServiceId = ref<string>('all')
 
 // Duration filter options
 const durationFilters = [
@@ -97,12 +102,27 @@ const filteredPrograms = computed(() => {
     result = result.filter(program => program.field_id === selectedFieldId.value)
   }
 
+  // Service filter
+  if (selectedServiceId.value !== 'all') {
+    result = result.filter(program => program.service_external_id === selectedServiceId.value)
+  }
+
   return result
+})
+
+// Services qui ont au moins une formation dans le type courant
+const servicesWithPrograms = computed(() => {
+  const serviceIds = new Set(
+    programs.value
+      .map(p => p.service_external_id)
+      .filter((id): id is string => !!id),
+  )
+  return services.value.filter(s => serviceIds.has(s.id))
 })
 
 // Check if any filters are active
 const hasActiveFilters = computed(() => {
-  return searchQuery.value.trim() !== '' || selectedDuration.value !== 'all' || selectedFieldId.value !== 'all'
+  return searchQuery.value.trim() !== '' || selectedDuration.value !== 'all' || selectedFieldId.value !== 'all' || selectedServiceId.value !== 'all'
 })
 
 // Reset all filters
@@ -110,6 +130,7 @@ const resetFilters = () => {
   searchQuery.value = ''
   selectedDuration.value = 'all'
   selectedFieldId.value = 'all'
+  selectedServiceId.value = 'all'
 }
 
 // Other types data for sidebar
@@ -141,6 +162,14 @@ const fetchPrograms = async () => {
       catch (e) {
         console.error('Erreur chargement champs disciplinaires:', e)
       }
+    }
+
+    // Charger les services pour le filtre
+    try {
+      services.value = await listPublicServices()
+    }
+    catch (e) {
+      console.error('Erreur chargement services:', e)
     }
 
     // Fetch other types for sidebar
@@ -363,7 +392,7 @@ const typeConfig = computed(() => {
               </div>
 
               <!-- Field filter (certificats uniquement, si au moins 2 champs) -->
-              <div v-if="isCertificate && programFields.length >= 2" class="flex flex-wrap items-center gap-3">
+              <div v-if="isCertificate && programFields.length >= 1" class="flex flex-wrap items-center gap-3">
                 <span class="text-sm font-medium text-gray-600 dark:text-gray-400">
                   {{ t('formations.filters.field') }} :
                 </span>
@@ -389,6 +418,37 @@ const typeConfig = computed(() => {
                     @click="selectedFieldId = field.id"
                   >
                     {{ field.name }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Service filter (si au moins 1 service avec des formations) -->
+              <div v-if="servicesWithPrograms.length >= 1" class="flex flex-wrap items-center gap-3">
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  {{ t('formations.filters.service') }} :
+                </span>
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    class="px-4 py-2 text-sm font-medium rounded-full transition-all"
+                    :class="selectedServiceId === 'all'
+                      ? 'bg-brand-blue-600 text-white shadow-md'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
+                    @click="selectedServiceId = 'all'"
+                  >
+                    {{ t('formations.filters.allServices') }}
+                  </button>
+                  <button
+                    v-for="svc in servicesWithPrograms"
+                    :key="svc.id"
+                    type="button"
+                    class="px-4 py-2 text-sm font-medium rounded-full transition-all"
+                    :class="selectedServiceId === svc.id
+                      ? 'bg-brand-blue-600 text-white shadow-md'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
+                    @click="selectedServiceId = svc.id"
+                  >
+                    {{ svc.name }}
                   </button>
                 </div>
               </div>

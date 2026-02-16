@@ -25,7 +25,8 @@
     "success": "Succès",
     "confirm": "Confirmer",
     "discover": "Découvrir",
-    "learnMore": "En savoir plus"
+    "learnMore": "En savoir plus",
+    "retry": "Réessayer"
   },
   "wip": {
     "title": "Page en développement",

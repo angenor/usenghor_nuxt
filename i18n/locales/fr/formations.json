@@ -26,8 +26,8 @@
     },
     "typeDescriptions": {
       "masters": "Programmes de Master en 2 ans dispensés sur notre campus d'Alexandrie et nos campus externalisés",
-      "doctorat": "Programmes doctoraux en partenariat avec notre École doctorale",
-      "doctorats": "Programmes doctoraux en partenariat avec notre École doctorale",
+      "doctorat": "L'école doctorale de l'Université Senghor",
+      "doctorats": "L'école doctorale de l'Université Senghor",
       "diplomes-universitaires": "Formations spécialisées courtes sanctionnées par un diplôme d'université",
       "certifiantes": "Certifications professionnelles courtes et intensives"
     },
@@ -48,6 +48,8 @@
       "durationLong": "> 12 mois",
       "field": "Champ disciplinaire",
       "allFields": "Tous les champs",
+      "service": "Service",
+      "allServices": "Tous les services",
       "reset": "Réinitialiser",
       "resultsCount": "{count} formation(s) trouvée(s)",
       "noResults": "Aucun résultat",
@@ -72,6 +74,7 @@
       "credits": "Crédits",
       "diploma": "Diplôme",
       "department": "Département",
+      "service": "Service",
       "field": "Champ disciplinaire",
       "apply": "Candidater",
       "applicationDeadline": "Date limite de candidature",

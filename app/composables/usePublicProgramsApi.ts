@@ -20,6 +20,8 @@ export interface ProgramPublic {
   teaching_methods: string | null
   cover_image_external_id: string | null
   sector_external_id: string | null
+  service_external_id: string | null
+  service_name: string | null
   field_id: string | null
   field_name: string | null
   type: ProgramType
@@ -36,6 +38,12 @@ export interface ProgramFieldPublic {
   slug: string
   description: string | null
   display_order: number
+}
+
+export interface ServicePublicSimple {
+  id: string
+  name: string
+  sector_id: string | null
 }
 
 export interface ProgramPublicWithDetails extends ProgramPublic {
@@ -202,6 +210,13 @@ export function usePublicProgramsApi() {
   }
 
   /**
+   * Liste les services actifs (pour filtrage par service)
+   */
+  async function listPublicServices(): Promise<ServicePublicSimple[]> {
+    return publicFetch<ServicePublicSimple[]>('/api/public/services')
+  }
+
+  /**
    * Récupère les actualités associées à un programme
    */
   async function getProgramNews(slug: string): Promise<unknown[]> {
@@ -247,6 +262,7 @@ export function usePublicProgramsApi() {
     listFeaturedPrograms,
     getRelatedPrograms,
     listPublicFields,
+    listPublicServices,
     getProgramNews,
     getProgramAlbums,
 

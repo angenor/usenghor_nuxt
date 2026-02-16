@@ -404,6 +404,17 @@ const toggleSemester = (num: number) => {
                   {{ program.field_name }}
                 </div>
               </div>
+
+              <!-- Service -->
+              <div v-if="program.service_name" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
+                  <font-awesome-icon icon="fa-solid fa-building" class="w-4 h-4" />
+                  {{ t('formations.detail.service') }}
+                </div>
+                <div class="font-bold text-gray-900 dark:text-white text-sm">
+                  {{ program.service_name }}
+                </div>
+              </div>
             </div>
 
             <!-- Skills section -->
@@ -613,6 +624,12 @@ const toggleSemester = (num: number) => {
                     <span class="text-gray-500 dark:text-gray-400">{{ t('formations.detail.field') }}</span>
                     <span class="font-medium text-gray-900 dark:text-white">
                       {{ program.field_name }}
+                    </span>
+                  </div>
+                  <div v-if="program.service_name" class="flex items-center justify-between">
+                    <span class="text-gray-500 dark:text-gray-400">{{ t('formations.detail.service') }}</span>
+                    <span class="font-medium text-gray-900 dark:text-white">
+                      {{ program.service_name }}
                     </span>
                   </div>
                 </div>
