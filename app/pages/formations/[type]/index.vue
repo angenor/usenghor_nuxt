@@ -138,6 +138,13 @@ const getProgramServiceHexColor = (program: ProgramPublic): string | null => {
   return null
 }
 
+// Obtenir le sigle d'un programme via son service
+const getProgramServiceSigle = (program: ProgramPublic): string | null => {
+  if (!program.service_external_id) return null
+  const svc = services.value.find(s => s.id === program.service_external_id)
+  return svc?.sigle || null
+}
+
 // Search and filters state
 const searchQuery = ref('')
 const selectedDuration = ref<'all' | 'short' | 'long'>('all')
@@ -567,14 +574,22 @@ const typeConfig = computed(() => {
                   <!-- Gradient overlay -->
                   <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                  <!-- Type badge -->
-                  <div class="absolute bottom-3 left-3">
+                  <!-- Type + Service badges -->
+                  <div class="absolute bottom-3 left-3 flex items-center gap-2">
                     <span
                       class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-white rounded-full shadow-lg backdrop-blur-sm"
                       :class="typeConfig.bgColor"
                     >
                       <font-awesome-icon :icon="typeConfig.icon" class="w-3 h-3" />
                       {{ t(`formations.types.${program.type}`) }}
+                    </span>
+                    <span
+                      v-if="getProgramServiceSigle(program)"
+                      class="inline-flex items-center px-2.5 py-1.5 text-xs font-bold text-white rounded-full shadow-lg backdrop-blur-sm"
+                      :style="{ backgroundColor: getProgramServiceHexColor(program) || 'rgba(255,255,255,0.25)' }"
+                      :title="program.service_name || ''"
+                    >
+                      {{ getProgramServiceSigle(program) }}
                     </span>
                   </div>
                 </div>
@@ -588,22 +603,6 @@ const typeConfig = computed(() => {
                   <p v-if="program.description" class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
                     {{ extractPlainText(program.description) }}
                   </p>
-
-                  <!-- Service badge -->
-                  <span
-                    v-if="program.service_name"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full mb-3"
-                    :class="getProgramServiceHexColor(program)
-                      ? 'text-white'
-                      : [
-                          getProgramServiceColor(program)?.bgLight || 'bg-gray-100 dark:bg-gray-700',
-                          getProgramServiceColor(program)?.text || 'text-gray-600 dark:text-gray-400',
-                        ]"
-                    :style="getProgramServiceHexColor(program) ? { backgroundColor: getProgramServiceHexColor(program)! } : {}"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-building" class="w-3 h-3" />
-                    {{ program.service_name }}
-                  </span>
 
                   <!-- Meta info -->
                   <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
