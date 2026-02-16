@@ -40,7 +40,17 @@ async function handleLogin() {
   }
   catch (e) {
     // @ts-expect-error fetch error shape
-    error.value = e?.data?.detail || 'Email ou mot de passe incorrect'
+    const detail = e?.data?.detail
+    if (!detail) {
+      error.value = 'Email ou mot de passe incorrect'
+    }
+    else if (typeof detail === 'string') {
+      error.value = detail
+    }
+    else {
+      // Erreurs de validation FastAPI (tableau d'objets)
+      error.value = 'Email ou mot de passe incorrect'
+    }
   }
   finally {
     loading.value = false
