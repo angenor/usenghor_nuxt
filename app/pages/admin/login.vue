@@ -49,13 +49,14 @@ async function handleLogin() {
 </script>
 
 <template>
-  <div class="relative min-h-screen overflow-hidden bg-gradient-to-br from-brand-blue-900 via-brand-blue-800 to-brand-blue-950">
-    <!-- Éléments décoratifs d'arrière-plan -->
-    <div class="pointer-events-none absolute inset-0 overflow-hidden">
-      <div class="absolute -left-40 -top-40 h-80 w-80 rounded-full bg-brand-blue-500/20 blur-3xl" />
-      <div class="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-brand-red-500/10 blur-3xl" />
-      <div class="absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-brand-blue-400/10 blur-3xl" />
-    </div>
+  <div class="relative min-h-screen overflow-hidden bg-brand-blue-950">
+    <!-- Image de fond floutée -->
+    <img
+      src="/images/bg/background_login_admin.jpg"
+      alt=""
+      class="pointer-events-none absolute inset-0 h-full w-full object-cover blur-[2px] scale-[1.01]"
+    >
+    <div class="pointer-events-none absolute inset-0 bg-brand-blue-900/60" />
 
     <!-- Conteneur principal -->
     <div class="relative z-10 flex min-h-screen items-center justify-center p-4 lg:p-8">
@@ -64,8 +65,8 @@ async function handleLogin() {
           <!-- Panneau gauche : Image + branding (desktop) -->
           <div class="relative hidden lg:col-span-5 lg:block">
             <img
-              src="https://picsum.photos/seed/senghor-login/800/1200"
-              alt=""
+              src="/images/bg/background_login_admin.jpg"
+              alt="Campus de l'Université Senghor"
               class="absolute inset-0 h-full w-full object-cover"
             >
             <div class="absolute inset-0 bg-gradient-to-b from-brand-blue-900/85 via-brand-blue-800/75 to-brand-blue-900/90 backdrop-blur-[2px]" />
