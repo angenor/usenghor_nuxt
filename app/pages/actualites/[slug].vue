@@ -55,7 +55,7 @@ onMounted(async () => {
 // Vérifier s'il y a des métadonnées d'association à afficher
 const hasAssociations = computed(() => {
   if (!news.value) return false
-  return (news.value.campus_ids?.length > 0)
+  return (news.value.campus_names?.length > 0)
     || (news.value.service_names?.length > 0)
     || news.value.sector_name
 })
@@ -191,18 +191,13 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
           <!-- Info cards : campus, services, secteur -->
           <div v-if="hasAssociations" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
             <!-- Campus -->
-            <div v-if="news.campus_ids?.length" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+            <div v-if="news.campus_names?.length" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
               <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
                 <font-awesome-icon icon="fa-solid fa-building-columns" class="w-4 h-4" />
                 Campus
               </div>
-              <div class="flex flex-wrap gap-1.5 mt-1">
-                <ActualitesCampusBadge
-                  v-for="cid in news.campus_ids"
-                  :key="cid"
-                  :campus-id="cid"
-                  size="sm"
-                />
+              <div class="font-bold text-gray-900 dark:text-white text-sm">
+                {{ news.campus_names.join(', ') }}
               </div>
             </div>
 

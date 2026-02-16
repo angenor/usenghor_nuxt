@@ -540,7 +540,7 @@ const typeConfig = computed(() => {
                     :style="selectedServiceId === svc.id && svc.color ? { backgroundColor: svc.color } : {}"
                     @click="selectedServiceId = svc.id"
                   >
-                    {{ svc.name }}
+                    {{ svc.name }}<span v-if="svc.sigle">&nbsp;({{ svc.sigle }})</span>
                   </button>
                 </div>
               </div>
