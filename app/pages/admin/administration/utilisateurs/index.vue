@@ -140,6 +140,54 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- Rappel anniversaires -->
+    <div
+      v-if="!isLoading && upcomingBirthdays.length > 0"
+      class="rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4 dark:border-amber-800/50 dark:from-amber-900/20 dark:to-orange-900/20"
+    >
+      <div class="flex items-start gap-3">
+        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-lg dark:bg-amber-900/40">
+          🎂
+        </div>
+        <div class="min-w-0 flex-1">
+          <h3 class="text-sm font-semibold text-amber-800 dark:text-amber-300">
+            Anniversaires à venir
+          </h3>
+          <div class="mt-1.5 flex flex-wrap gap-2">
+            <button
+              v-for="entry in upcomingBirthdays"
+              :key="entry.user.id"
+              type="button"
+              class="inline-flex items-center gap-1.5 rounded-lg bg-white/80 px-3 py-1.5 text-xs font-medium text-amber-900 shadow-sm transition hover:bg-white dark:bg-gray-800/60 dark:text-amber-200 dark:hover:bg-gray-800"
+              @click="viewUserDetail(entry.user)"
+            >
+              <span>{{ getFullName(entry.user) }}</span>
+              <span class="text-amber-500 dark:text-amber-400">·</span>
+              <span class="text-amber-600 dark:text-amber-400">{{ entry.displayDate }}</span>
+              <span
+                v-if="entry.daysUntil === 0"
+                class="rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white"
+              >
+                Aujourd'hui !
+              </span>
+              <span
+                v-else-if="entry.daysUntil === 1"
+                class="text-amber-500 dark:text-amber-400"
+              >
+                demain
+              </span>
+              <span
+                v-else
+                class="text-amber-500/70 dark:text-amber-400/70"
+              >
+                dans {{ entry.daysUntil }}j
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Loading -->
     <div v-if="isLoading" class="flex items-center justify-center py-12">
       <font-awesome-icon :icon="['fas', 'spinner']" class="h-8 w-8 animate-spin text-gray-400" />
