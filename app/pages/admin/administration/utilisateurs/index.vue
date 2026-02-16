@@ -48,6 +48,7 @@ const {
   allSelected,
   someSelected,
   filteredServiceOptions,
+  upcomingBirthdays,
 
   // Affectation options
   sectorOptions,

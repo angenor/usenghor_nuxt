@@ -228,6 +228,41 @@ export function useUsersManagement() {
     return serviceOptions.value.filter(s => s.sector_id === sectorId)
   })
 
+  // Anniversaires à venir (dans les 7 prochains jours) — uniquement utilisateurs actifs et vérifiés
+  const upcomingBirthdays = computed(() => {
+    const today = new Date()
+    const results: Array<{ user: UserWithRoles; daysUntil: number; displayDate: string }> = []
+
+    for (const user of users.value) {
+      if (!user.birth_date || !user.active || !user.email_verified) continue
+
+      // birth_date stocké comme "2000-MM-DD"
+      const parts = user.birth_date.split('-')
+      if (parts.length < 3) continue
+      const month = parseInt(parts[1]!)
+      const day = parseInt(parts[2]!)
+      if (isNaN(month) || isNaN(day)) continue
+
+      // Calculer la prochaine occurrence de cet anniversaire
+      const thisYear = today.getFullYear()
+      let nextBirthday = new Date(thisYear, month - 1, day)
+      // Si la date est passée cette année, regarder l'année prochaine
+      if (nextBirthday.getTime() < today.getTime() - 86400000) {
+        nextBirthday = new Date(thisYear + 1, month - 1, day)
+      }
+
+      const diffMs = nextBirthday.getTime() - today.getTime()
+      const daysUntil = Math.ceil(diffMs / 86400000)
+
+      if (daysUntil >= 0 && daysUntil <= 7) {
+        const displayDate = `${day} ${['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'][month - 1]}`
+        results.push({ user, daysUntil, displayDate })
+      }
+    }
+
+    return results.sort((a, b) => a.daysUntil - b.daysUntil)
+  })
+
   // === METHODS ===
   const loadAffectationOptions = async () => {
     try {
@@ -803,6 +838,7 @@ export function useUsersManagement() {
     allSelected,
     someSelected,
     filteredServiceOptions,
+    upcomingBirthdays,
 
     // Affectation options
     sectorOptions,

@@ -15,6 +15,8 @@ export interface RegisterFormData {
   last_name: string
   first_name: string
   affectation: AffectationFormData
+  birthday_day: number | null
+  birthday_month: number | null
   photo_external_id: string | null
   photo_base64: string | null
   biography: string
@@ -60,6 +62,8 @@ const defaultFormData: RegisterFormData = {
   last_name: '',
   first_name: '',
   affectation: { ...defaultAffectation },
+  birthday_day: null,
+  birthday_month: null,
   photo_external_id: null,
   photo_base64: null,
   biography: '',
@@ -276,6 +280,8 @@ export function useAdminRegistration() {
           sector_id: formData.value.affectation.sector_id,
           service_id: formData.value.affectation.service_id,
           campus_id: formData.value.affectation.campus_id,
+          birthday_day: formData.value.birthday_day,
+          birthday_month: formData.value.birthday_month,
           photo_base64: formData.value.photo_base64,
           biography: formData.value.biography || null,
           linkedin_url: formData.value.linkedin_url || null,

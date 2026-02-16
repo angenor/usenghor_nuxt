@@ -75,7 +75,7 @@ const steps = [
   },
 ]
 
-const currentStepData = computed(() => steps[currentStep.value - 1])
+const currentStepData = computed(() => steps[currentStep.value - 1]!)
 const progress = computed(() => (currentStep.value / totalSteps) * 100)
 const transitionName = computed(() => direction.value === 'forward' ? 'slide-left' : 'slide-right')
 
@@ -114,6 +114,9 @@ function validateCurrentStep() {
   formErrors.value = {}
 
   if (currentStep.value === 1) {
+    if (!formData.value.salutation) {
+      formErrors.value.salutation = 'La civilité est requise'
+    }
     if (!formData.value.last_name.trim()) {
       formErrors.value.last_name = 'Le nom est requis'
     }
@@ -271,8 +274,12 @@ onMounted(() => {
                     Université Senghor
                   </h1>
                   <p class="mt-1 text-sm text-white/60">
-                    Créer un compte
+                    Espace personnel
                   </p>
+                  <div class="mt-3 rounded-lg bg-white/10 px-3 py-2 text-xs text-white/70 backdrop-blur-sm">
+                    <font-awesome-icon :icon="['fas', 'shield-halved']" class="mr-1.5" />
+                    Réservé au personnel de l'Université
+                  </div>
                 </div>
 
                 <!-- Info étape animée -->
@@ -323,13 +330,17 @@ onMounted(() => {
             <div class="bg-white/95 dark:bg-gray-900/95 lg:col-span-8">
               <!-- En-tête mobile -->
               <div class="bg-gradient-to-r from-brand-blue-700 to-brand-blue-900 p-6 lg:hidden">
+                <div class="mb-3 rounded-lg bg-white/10 px-3 py-2 text-xs text-white/70">
+                  <font-awesome-icon :icon="['fas', 'shield-halved']" class="mr-1.5" />
+                  Inscription réservée au personnel de l'Université Senghor
+                </div>
                 <div class="flex items-center justify-between">
                   <div>
                     <h1 class="text-lg font-bold text-white">
                       Créer un compte
                     </h1>
                     <p class="text-sm text-white/70">
-                      Université Senghor
+                      Espace personnel
                     </p>
                   </div>
                   <Transition name="fade" mode="out-in">
@@ -423,20 +434,25 @@ onMounted(() => {
                   <div v-if="currentStep === 1" key="step1" class="space-y-5">
                     <div>
                       <label for="salutation" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Civilité
+                        Civilité <span class="text-red-500">*</span>
                       </label>
                       <select
                         id="salutation"
                         v-model="formData.salutation"
-                        class="w-full rounded-xl border border-gray-200/80 bg-white/50 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-500/20 dark:border-gray-700/50 dark:bg-gray-800/50 dark:text-white"
+                        required
+                        class="w-full rounded-xl border bg-white/50 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-500/20 dark:bg-gray-800/50 dark:text-white"
+                        :class="formErrors.salutation ? 'border-red-500' : 'border-gray-200/80 dark:border-gray-700/50'"
                       >
-                        <option :value="null">
-                          -
+                        <option :value="null" disabled>
+                          Sélectionnez
                         </option>
                         <option v-for="option in salutationOptions" :key="option.value" :value="option.value">
                           {{ option.label }}
                         </option>
                       </select>
+                      <p v-if="formErrors.salutation" class="mt-1 text-sm text-red-500">
+                        {{ formErrors.salutation }}
+                      </p>
                     </div>
 
                     <div class="grid gap-4 sm:grid-cols-2">
@@ -495,6 +511,48 @@ onMounted(() => {
                       <p v-if="formErrors.email" class="mt-1 text-sm text-red-500">
                         {{ formErrors.email }}
                       </p>
+                    </div>
+
+                    <!-- Jour d'anniversaire (facultatif) -->
+                    <div>
+                      <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <font-awesome-icon :icon="['fas', 'cake-candles']" class="mr-1 text-brand-blue-400" />
+                        Jour d'anniversaire
+                        <span class="text-xs font-normal text-gray-400">(facultatif)</span>
+                      </label>
+                      <div class="grid grid-cols-2 gap-3">
+                        <select
+                          v-model="formData.birthday_day"
+                          class="w-full rounded-xl border border-gray-200/80 bg-white/50 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-500/20 dark:border-gray-700/50 dark:bg-gray-800/50 dark:text-white"
+                        >
+                          <option :value="null">
+                            Jour
+                          </option>
+                          <option v-for="d in 31" :key="d" :value="d">
+                            {{ d }}
+                          </option>
+                        </select>
+                        <select
+                          v-model="formData.birthday_month"
+                          class="w-full rounded-xl border border-gray-200/80 bg-white/50 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-500/20 dark:border-gray-700/50 dark:bg-gray-800/50 dark:text-white"
+                        >
+                          <option :value="null">
+                            Mois
+                          </option>
+                          <option :value="1">Janvier</option>
+                          <option :value="2">Février</option>
+                          <option :value="3">Mars</option>
+                          <option :value="4">Avril</option>
+                          <option :value="5">Mai</option>
+                          <option :value="6">Juin</option>
+                          <option :value="7">Juillet</option>
+                          <option :value="8">Août</option>
+                          <option :value="9">Septembre</option>
+                          <option :value="10">Octobre</option>
+                          <option :value="11">Novembre</option>
+                          <option :value="12">Décembre</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
 
