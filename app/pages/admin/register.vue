@@ -79,7 +79,8 @@ const currentStepData = computed(() => steps[currentStep.value - 1])
 const progress = computed(() => (currentStep.value / totalSteps) * 100)
 const transitionName = computed(() => direction.value === 'forward' ? 'slide-left' : 'slide-right')
 
-// Biographie avec EditorJS
+// Biographie avec EditorJS dans un modal
+const showBiographyModal = ref(false)
 const biographyData = computed({
   get: () => {
     if (!formData.value.biography) {
@@ -95,6 +96,17 @@ const biographyData = computed({
   set: (value) => {
     formData.value.biography = JSON.stringify(value)
   },
+})
+
+const biographyPreview = computed(() => {
+  const blocks = biographyData.value?.blocks
+  if (!blocks || blocks.length === 0) return ''
+  return blocks
+    .filter((b: { type: string }) => b.type === 'paragraph')
+    .map((b: { data?: { text?: string } }) => b.data?.text || '')
+    .join(' ')
+    .replace(/<[^>]*>/g, '')
+    .slice(0, 150)
 })
 
 // Validation par étape
@@ -308,7 +320,7 @@ onMounted(() => {
             </div>
 
             <!-- Panneau droit : Formulaire -->
-            <div class="bg-white/80 backdrop-blur-2xl dark:bg-gray-900/80 lg:col-span-8">
+            <div class="bg-white/95 dark:bg-gray-900/95 lg:col-span-8">
               <!-- En-tête mobile -->
               <div class="bg-gradient-to-r from-brand-blue-700 to-brand-blue-900 p-6 lg:hidden">
                 <div class="flex items-center justify-between">
@@ -617,13 +629,25 @@ onMounted(() => {
                       <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Biographie
                       </label>
-                      <div class="overflow-hidden rounded-xl border border-gray-200/80 bg-white/50 backdrop-blur-sm dark:border-gray-700/50 dark:bg-gray-800/50">
-                        <EditorJS
-                          v-model="biographyData"
-                          placeholder="Quelques mots sur vous..."
-                          :min-height="120"
-                        />
-                      </div>
+                      <button
+                        type="button"
+                        class="group w-full rounded-xl border border-gray-200/80 bg-white/50 px-4 py-4 text-left transition hover:border-brand-blue-300 hover:bg-white/80 dark:border-gray-700/50 dark:bg-gray-800/50 dark:hover:border-brand-blue-600"
+                        @click="showBiographyModal = true"
+                      >
+                        <div v-if="biographyPreview" class="space-y-2">
+                          <p class="line-clamp-3 text-sm text-gray-700 dark:text-gray-300">
+                            {{ biographyPreview }}{{ biographyPreview.length >= 150 ? '...' : '' }}
+                          </p>
+                          <span class="inline-flex items-center gap-1.5 text-xs font-medium text-brand-blue-500">
+                            <font-awesome-icon :icon="['fas', 'pen']" class="h-3 w-3" />
+                            Modifier la biographie
+                          </span>
+                        </div>
+                        <div v-else class="flex items-center gap-3 text-gray-400 dark:text-gray-500">
+                          <font-awesome-icon :icon="['fas', 'pen-to-square']" class="h-5 w-5 transition group-hover:text-brand-blue-500" />
+                          <span class="text-sm">Quelques mots sur vous...</span>
+                        </div>
+                      </button>
                     </div>
 
                     <!-- Liens sociaux -->
@@ -767,6 +791,64 @@ onMounted(() => {
         </div>
       </Transition>
     </div>
+
+    <!-- Modale biographie -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div
+          v-if="showBiographyModal"
+          class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          @click.self="showBiographyModal = false"
+        >
+          <div class="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
+            <!-- En-tête modal -->
+            <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                <font-awesome-icon :icon="['fas', 'pen-to-square']" class="mr-2 h-4 w-4 text-brand-blue-500" />
+                Biographie
+              </h3>
+              <button
+                type="button"
+                class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                @click="showBiographyModal = false"
+              >
+                <font-awesome-icon :icon="['fas', 'times']" class="h-4 w-4" />
+              </button>
+            </div>
+            <!-- Éditeur -->
+            <div class="flex-1 overflow-y-auto p-6">
+              <ClientOnly>
+                <AdminRichTextEditor
+                  v-model="biographyData"
+                  :show-card="false"
+                  placeholder="Quelques mots sur vous..."
+                  :min-height="300"
+                />
+                <template #fallback>
+                  <div
+                    class="flex items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
+                    style="min-height: 300px"
+                  >
+                    <font-awesome-icon :icon="['fas', 'spinner']" class="h-6 w-6 animate-spin text-gray-400" />
+                  </div>
+                </template>
+              </ClientOnly>
+            </div>
+            <!-- Pied de modal -->
+            <div class="flex justify-end border-t border-gray-200 px-6 py-4 dark:border-gray-700">
+              <button
+                type="button"
+                class="inline-flex items-center gap-2 rounded-xl bg-brand-blue-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-blue-600"
+                @click="showBiographyModal = false"
+              >
+                <font-awesome-icon :icon="['fas', 'check']" class="h-3.5 w-3.5" />
+                Valider
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
 
     <!-- Modale éditeur photo -->
     <Teleport to="body">

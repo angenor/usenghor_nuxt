@@ -547,8 +547,9 @@ defineExpose({
     <!-- Éditeur -->
     <div
       ref="editorContainer"
-      class="editor-js-container prose prose-lg dark:prose-invert max-w-none"
+      class="editor-js-container prose prose-lg dark:prose-invert max-w-none cursor-text"
       :class="{ 'opacity-50': !isReady }"
+      :style="{ minHeight: `${minHeight}px` }"
     />
   </div>
 </template>
@@ -560,6 +561,11 @@ defineExpose({
 
 .editor-js-container {
   @apply p-4;
+}
+
+.editor-js-container .codex-editor,
+.editor-js-container .codex-editor__redactor {
+  min-height: inherit;
 }
 
 /* Toolbar styles */
