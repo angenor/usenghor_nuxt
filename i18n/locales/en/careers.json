@@ -135,18 +135,13 @@
         "items": [
           {
             "icon": "fa-solid fa-building-columns",
-            "title": "Academic partnerships",
-            "text": "Student and faculty exchanges, joint degrees, collaborative research projects."
+            "title": "Campus partnership",
+            "text": "Collaboration with campuses and higher education institutions."
           },
           {
             "icon": "fa-solid fa-landmark",
-            "title": "Institutional partnerships",
+            "title": "Institutional partnership",
             "text": "Collaboration with governments and international organizations."
-          },
-          {
-            "icon": "fa-solid fa-briefcase",
-            "title": "Corporate partnerships",
-            "text": "Internships, sponsorship, teaching chairs, continuing education."
           }
         ]
       },

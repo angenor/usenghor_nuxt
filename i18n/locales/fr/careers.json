@@ -135,18 +135,13 @@
         "items": [
           {
             "icon": "fa-solid fa-building-columns",
-            "title": "Partenariats académiques",
-            "text": "Échanges d'étudiants et d'enseignants, co-diplomation, projets de recherche conjoints."
+            "title": "Partenariat campus",
+            "text": "Collaboration avec les campus et établissements d'enseignement supérieur."
           },
           {
             "icon": "fa-solid fa-landmark",
-            "title": "Partenariats institutionnels",
+            "title": "Partenariat institutionnel",
             "text": "Collaboration avec gouvernements et organisations internationales."
-          },
-          {
-            "icon": "fa-solid fa-briefcase",
-            "title": "Partenariats entreprises",
-            "text": "Stages, mécénat, chaires d'enseignement, formation continue."
           }
         ]
       },

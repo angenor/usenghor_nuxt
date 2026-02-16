@@ -1,10 +1,18 @@
 <script setup lang="ts">
 const { t, tm } = useI18n()
+const { getContent, getRawContent } = useEditorialContent('careers')
 const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.1 })
 const { submitRequest } = usePartnershipRequestsApi()
 
-// Get translated arrays
-const partnerTypes = computed(() => tm('careers.partners.types.items') as any[])
+// Types de partenariats avec override éditorial
+const partnerTypes = computed(() => {
+  const i18nItems = tm('careers.partners.types.items') as any[]
+  return [1, 2].map((n, i) => ({
+    icon: getRawContent(`careers.partners.types.item${n}.icon`) ?? i18nItems[i]?.icon ?? '',
+    title: getRawContent(`careers.partners.types.item${n}.title`) ?? i18nItems[i]?.title ?? '',
+    text: getRawContent(`careers.partners.types.item${n}.text`) ?? i18nItems[i]?.text ?? '',
+  }))
+})
 
 // Form state
 const form = reactive({
@@ -65,12 +73,12 @@ const handleSubmit = async () => {
         </span>
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
           <span class="relative inline-block">
-            {{ t('careers.partners.title') }}
+            {{ getContent('careers.partners.title') }}
             <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
           </span>
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-300">
-          {{ t('careers.partners.text') }}
+          {{ getContent('careers.partners.text') }}
         </p>
       </div>
 
@@ -78,7 +86,7 @@ const handleSubmit = async () => {
         <!-- Partner types -->
         <div>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-            {{ t('careers.partners.types.title') }}
+            {{ getContent('careers.partners.types.title') }}
           </h3>
           <div class="space-y-4">
             <div
@@ -108,10 +116,10 @@ const handleSubmit = async () => {
         <div>
           <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 lg:p-8 border border-gray-100 dark:border-gray-700">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              {{ t('careers.partners.form.title') }}
+              {{ getContent('careers.partners.form.title') }}
             </h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-              {{ t('careers.partners.form.text') }}
+              {{ getContent('careers.partners.form.text') }}
             </p>
 
             <form @submit.prevent="handleSubmit" class="space-y-4">

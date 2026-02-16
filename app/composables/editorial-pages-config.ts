@@ -649,12 +649,23 @@ export const careersPageSections: PageSection[] = [
     color: 'bg-brand-red-100 text-brand-red-800 dark:bg-brand-red-900/30 dark:text-brand-red-300',
     editorialKeys: [
       'careers.partners.title', 'careers.partners.text',
-      'careers.partners.types.title', 'careers.partners.form.title', 'careers.partners.form.text',
+      'careers.partners.types.title',
+      'careers.partners.types.item1.icon', 'careers.partners.types.item1.title', 'careers.partners.types.item1.text',
+      'careers.partners.types.item2.icon', 'careers.partners.types.item2.title', 'careers.partners.types.item2.text',
+      'careers.partners.form.title', 'careers.partners.form.text',
     ],
     fields: [
       { key: 'careers.partners.title', label: 'Titre', description: 'Titre de la section partenaires', type: 'text', editorialKey: 'careers.partners.title', editable: true },
       { key: 'careers.partners.text', label: 'Texte', description: 'Texte de présentation', type: 'textarea', editorialKey: 'careers.partners.text', editable: true },
       { key: 'careers.partners.types.title', label: 'Titre Types', description: 'Titre de la sous-section types de partenariats', type: 'text', editorialKey: 'careers.partners.types.title', editable: true },
+      // Partenariat campus
+      { key: 'careers.partners.types.item1.icon', label: 'Type 1 - Icône', description: 'Icône FontAwesome (ex: fa-solid fa-building-columns)', type: 'text', editorialKey: 'careers.partners.types.item1.icon', editable: true },
+      { key: 'careers.partners.types.item1.title', label: 'Type 1 - Titre', description: 'Titre du premier type de partenariat (ex: Partenariat campus)', type: 'text', editorialKey: 'careers.partners.types.item1.title', editable: true },
+      { key: 'careers.partners.types.item1.text', label: 'Type 1 - Texte', description: 'Description du premier type de partenariat', type: 'textarea', editorialKey: 'careers.partners.types.item1.text', editable: true },
+      // Partenariat institutionnel
+      { key: 'careers.partners.types.item2.icon', label: 'Type 2 - Icône', description: 'Icône FontAwesome (ex: fa-solid fa-landmark)', type: 'text', editorialKey: 'careers.partners.types.item2.icon', editable: true },
+      { key: 'careers.partners.types.item2.title', label: 'Type 2 - Titre', description: 'Titre du deuxième type de partenariat (ex: Partenariat institutionnel)', type: 'text', editorialKey: 'careers.partners.types.item2.title', editable: true },
+      { key: 'careers.partners.types.item2.text', label: 'Type 2 - Texte', description: 'Description du deuxième type de partenariat', type: 'textarea', editorialKey: 'careers.partners.types.item2.text', editable: true },
       { key: 'careers.partners.form.title', label: 'Formulaire - Titre', description: 'Titre du formulaire de contact', type: 'text', editorialKey: 'careers.partners.form.title', editable: true },
       { key: 'careers.partners.form.text', label: 'Formulaire - Texte', description: 'Texte d\'accompagnement du formulaire', type: 'textarea', editorialKey: 'careers.partners.form.text', editable: true },
     ],

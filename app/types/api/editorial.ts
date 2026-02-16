@@ -379,6 +379,12 @@ export type ValueSectionKey =
   | 'careers.partners.title'
   | 'careers.partners.text'
   | 'careers.partners.types.title'
+  | 'careers.partners.types.item1.icon'
+  | 'careers.partners.types.item1.title'
+  | 'careers.partners.types.item1.text'
+  | 'careers.partners.types.item2.icon'
+  | 'careers.partners.types.item2.title'
+  | 'careers.partners.types.item2.text'
   | 'careers.partners.form.title'
   | 'careers.partners.form.text'
   // Page Projets - Hero
