@@ -26,7 +26,8 @@
     "confirm": "Confirmer",
     "discover": "Découvrir",
     "learnMore": "En savoir plus",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "loadMore": "Voir plus"
   },
   "wip": {
     "title": "Page en développement",

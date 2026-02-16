@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ProgramFieldPublic, ProgramPublic, ServicePublicSimple } from '~/composables/usePublicProgramsApi'
+import type { SectorPublic } from '~/composables/usePublicOrganizationApi'
 
 // Extraire le texte brut d'un contenu EditorJS (pour les aperçus)
 const extractPlainText = (content: string | null | undefined): string => {
@@ -37,6 +38,42 @@ const {
   publicProgramTypeColors,
 } = usePublicProgramsApi()
 
+const { listSectors } = usePublicOrganizationApi()
+
+// Palette de couleurs par secteur (même que OrganigrammeSection)
+const sectorColors = [
+  {
+    bg: 'bg-brand-blue-500',
+    bgLight: 'bg-brand-blue-100 dark:bg-brand-blue-900/30',
+    text: 'text-brand-blue-600 dark:text-brand-blue-400',
+    selectedBg: 'bg-brand-blue-600 text-white shadow-md',
+  },
+  {
+    bg: 'bg-purple-500',
+    bgLight: 'bg-purple-100 dark:bg-purple-900/30',
+    text: 'text-purple-600 dark:text-purple-400',
+    selectedBg: 'bg-purple-600 text-white shadow-md',
+  },
+  {
+    bg: 'bg-brand-red-500',
+    bgLight: 'bg-brand-red-100 dark:bg-brand-red-900/30',
+    text: 'text-brand-red-600 dark:text-brand-red-400',
+    selectedBg: 'bg-brand-red-600 text-white shadow-md',
+  },
+  {
+    bg: 'bg-teal-500',
+    bgLight: 'bg-teal-100 dark:bg-teal-900/30',
+    text: 'text-teal-600 dark:text-teal-400',
+    selectedBg: 'bg-teal-600 text-white shadow-md',
+  },
+  {
+    bg: 'bg-amber-500',
+    bgLight: 'bg-amber-100 dark:bg-amber-900/30',
+    text: 'text-amber-600 dark:text-amber-400',
+    selectedBg: 'bg-amber-600 text-white shadow-md',
+  },
+]
+
 // Valid types for route validation
 const validTypes = ['masters', 'doctorat', 'diplomes-universitaires', 'certifiantes']
 
@@ -58,6 +95,35 @@ const programFields = ref<ProgramFieldPublic[]>([])
 
 // Services (pour filtre par service)
 const services = ref<ServicePublicSimple[]>([])
+
+// Secteurs (pour résoudre les couleurs des services)
+const sectors = ref<SectorPublic[]>([])
+
+// Mapping sectorId → index de couleur (basé sur l'ordre d'affichage)
+const sectorColorMap = computed(() => {
+  const map = new Map<string, number>()
+  sectors.value.forEach((sector, index) => {
+    map.set(sector.id, index % sectorColors.length)
+  })
+  return map
+})
+
+// Obtenir la couleur d'un service via son sector_id
+const getServiceColor = (service: ServicePublicSimple) => {
+  if (service.sector_id) {
+    const index = sectorColorMap.value.get(service.sector_id)
+    if (index !== undefined) return sectorColors[index]
+  }
+  return sectorColors[0]
+}
+
+// Obtenir la couleur d'un programme via son service_external_id
+const getProgramServiceColor = (program: ProgramPublic) => {
+  if (!program.service_external_id) return null
+  const svc = services.value.find(s => s.id === program.service_external_id)
+  if (svc) return getServiceColor(svc)
+  return sectorColors[0]
+}
 
 // Search and filters state
 const searchQuery = ref('')
@@ -164,12 +230,17 @@ const fetchPrograms = async () => {
       }
     }
 
-    // Charger les services pour le filtre
+    // Charger les services et secteurs pour le filtre coloré
     try {
-      services.value = await listPublicServices()
+      const [svcData, sectorData] = await Promise.all([
+        listPublicServices(),
+        listSectors(),
+      ])
+      services.value = svcData
+      sectors.value = sectorData
     }
     catch (e) {
-      console.error('Erreur chargement services:', e)
+      console.error('Erreur chargement services/secteurs:', e)
     }
 
     // Fetch other types for sidebar
@@ -432,7 +503,7 @@ const typeConfig = computed(() => {
                     type="button"
                     class="px-4 py-2 text-sm font-medium rounded-full transition-all"
                     :class="selectedServiceId === 'all'
-                      ? 'bg-brand-blue-600 text-white shadow-md'
+                      ? 'bg-gray-700 dark:bg-gray-200 text-white dark:text-gray-900 shadow-md'
                       : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
                     @click="selectedServiceId = 'all'"
                   >
@@ -444,7 +515,7 @@ const typeConfig = computed(() => {
                     type="button"
                     class="px-4 py-2 text-sm font-medium rounded-full transition-all"
                     :class="selectedServiceId === svc.id
-                      ? 'bg-brand-blue-600 text-white shadow-md'
+                      ? getServiceColor(svc).selectedBg
                       : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
                     @click="selectedServiceId = svc.id"
                   >
@@ -503,6 +574,19 @@ const typeConfig = computed(() => {
                   <p v-if="program.description" class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
                     {{ extractPlainText(program.description) }}
                   </p>
+
+                  <!-- Service badge -->
+                  <span
+                    v-if="program.service_name"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full mb-3"
+                    :class="[
+                      getProgramServiceColor(program)?.bgLight || 'bg-gray-100 dark:bg-gray-700',
+                      getProgramServiceColor(program)?.text || 'text-gray-600 dark:text-gray-400',
+                    ]"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-building" class="w-3 h-3" />
+                    {{ program.service_name }}
+                  </span>
 
                   <!-- Meta info -->
                   <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">

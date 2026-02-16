@@ -78,6 +78,31 @@ const filteredPartners = computed(() => {
   return allPartners.value.filter(p => p.type === selectedFilter.value)
 })
 
+// === CHARGEMENT PROGRESSIF (3 lignes max, puis "voir plus") ===
+const ITEMS_PER_PAGE = 15 // 3 lignes × 5 colonnes (xl)
+const visibleCount = ref(ITEMS_PER_PAGE)
+
+const visiblePartners = computed(() =>
+  filteredPartners.value.slice(0, visibleCount.value)
+)
+
+const hasMore = computed(() =>
+  visibleCount.value < filteredPartners.value.length
+)
+
+const remainingCount = computed(() =>
+  filteredPartners.value.length - visibleCount.value
+)
+
+function loadMore() {
+  visibleCount.value += ITEMS_PER_PAGE
+}
+
+// Réinitialiser le compteur quand le filtre change
+watch(selectedFilter, () => {
+  visibleCount.value = ITEMS_PER_PAGE
+})
+
 // Check if charter operator (for styling)
 const isCharterOperator = (partner: PartnerPublic) => checkIsCharterOperator(partner)
 
@@ -257,7 +282,7 @@ const uniqueCountriesCount = computed(() => {
             class="contents"
           >
             <a
-              v-for="partner in filteredPartners"
+              v-for="partner in visiblePartners"
               :key="partner.id"
               :href="partner.website || undefined"
               :target="partner.website ? '_blank' : undefined"
@@ -314,6 +339,20 @@ const uniqueCountriesCount = computed(() => {
               </div>
             </a>
           </TransitionGroup>
+        </div>
+
+        <!-- Bouton "Voir plus" -->
+        <div v-if="hasMore" class="text-center mt-8">
+          <button
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium bg-white dark:bg-gray-800 text-brand-blue-600 dark:text-brand-blue-400 border border-brand-blue-200 dark:border-brand-blue-800 hover:bg-brand-blue-50 dark:hover:bg-gray-700 hover:border-brand-blue-400 dark:hover:border-brand-blue-600 shadow-sm hover:shadow-md transition-all duration-200"
+            @click="loadMore"
+          >
+            <font-awesome-icon icon="fa-solid fa-plus" class="w-3.5 h-3.5" />
+            {{ t('common.loadMore') }}
+            <span class="px-2 py-0.5 text-xs rounded-full bg-brand-blue-100 dark:bg-brand-blue-900/30 font-semibold">
+              {{ remainingCount }}
+            </span>
+          </button>
         </div>
 
         <!-- Empty State -->

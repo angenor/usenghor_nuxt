@@ -26,7 +26,8 @@
     "confirm": "Confirm",
     "discover": "Discover",
     "learnMore": "Learn more",
-    "retry": "Retry"
+    "retry": "Retry",
+    "loadMore": "Load more"
   },
   "wip": {
     "title": "Page under development",
