@@ -284,7 +284,7 @@ const getSectorUrl = (sector: SectorPublicWithServices) => {
                 </div>
                 <div class="flex-1 min-w-0">
                   <h4 class="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
-                    {{ service.name }}
+                    {{ service.name }}<span v-if="service.sigle">&nbsp;({{ service.sigle }})</span>
                   </h4>
                   <span
                     class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 transition-colors"
