@@ -76,14 +76,14 @@ export interface NewsRead {
   content: string | null // JSON stringifié contenant MultilingualContent
   video_url: string | null
   cover_image_external_id: string | null
-  campus_external_id: string | null
   sector_external_id: string | null
-  service_external_id: string | null
   event_external_id: string | null
   project_external_id: string | null
   call_external_id: string | null
   program_external_id: string | null
   author_external_id: string | null
+  campus_external_ids: string[]
+  service_external_ids: string[]
   highlight_status: NewsHighlightStatus
   status: NewsStatus
   published_at: string | null
@@ -101,9 +101,9 @@ export interface NewsWithTags extends NewsRead {
  * Correspond au schéma Pydantic NewsPublicEnriched
  */
 export interface NewsPublicEnriched extends NewsWithTags {
-  campus_name: string | null
+  campus_names: string[]
   sector_name: string | null
-  service_name: string | null
+  service_names: string[]
   project_name: string | null
   call_name: string | null
   program_name: string | null
@@ -141,12 +141,12 @@ export interface NewsDisplay {
   // Médias additionnels
   media: NewsMedia[]
   // Associations (IDs)
-  campus_id: string | null
-  campus_name: string | null
+  campus_ids: string[]
+  campus_names: string[]
   sector_id: string | null
   sector_name: string | null
-  service_id: string | null
-  service_name: string | null
+  service_ids: string[]
+  service_names: string[]
   event_id: string | null
   event_name: string | null
   project_id: string | null
@@ -203,9 +203,7 @@ export interface NewsCreatePayload {
   video_url?: string | null
   highlight_status?: NewsHighlightStatus
   cover_image_external_id?: string | null
-  campus_external_id?: string | null
   sector_external_id?: string | null
-  service_external_id?: string | null
   event_external_id?: string | null
   project_external_id?: string | null
   call_external_id?: string | null
@@ -215,6 +213,8 @@ export interface NewsCreatePayload {
   published_at?: string | null
   visible_from?: string | null
   tag_ids?: string[]
+  campus_external_ids?: string[]
+  service_external_ids?: string[]
 }
 
 export interface NewsUpdatePayload {
@@ -225,9 +225,7 @@ export interface NewsUpdatePayload {
   video_url?: string | null
   highlight_status?: NewsHighlightStatus
   cover_image_external_id?: string | null
-  campus_external_id?: string | null
   sector_external_id?: string | null
-  service_external_id?: string | null
   event_external_id?: string | null
   project_external_id?: string | null
   call_external_id?: string | null
@@ -237,6 +235,8 @@ export interface NewsUpdatePayload {
   published_at?: string | null
   visible_from?: string | null
   tag_ids?: string[]
+  campus_external_ids?: string[]
+  service_external_ids?: string[]
 }
 
 export interface NewsPublishPayload {

@@ -56,6 +56,8 @@ export interface SectorReorder {
 export interface ServiceRead {
   id: string
   name: string
+  sigle: string | null
+  color: string | null
   description: string | null
   mission: string | null
   email: string | null

@@ -77,6 +77,8 @@ export interface ServiceWithDetails extends ServiceRead {
 
 export interface ServiceCreate {
   name: string
+  sigle?: string | null
+  color?: string | null
   description?: string | null
   mission?: string | null
   email?: string | null
@@ -90,6 +92,8 @@ export interface ServiceCreate {
 
 export interface ServiceUpdate {
   name?: string
+  sigle?: string | null
+  color?: string | null
   description?: string | null
   mission?: string | null
   email?: string | null

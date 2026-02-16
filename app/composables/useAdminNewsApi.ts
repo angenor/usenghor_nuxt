@@ -158,14 +158,14 @@ export function useAdminNewsApi() {
       // Médias additionnels (à implémenter)
       media: [],
       // Associations
-      campus_id: news.campus_external_id,
-      campus_name: news.campus_external_id
-        ? campusesCache.value.find(c => c.id === news.campus_external_id)?.name ?? null
-        : null,
+      campus_ids: news.campus_external_ids || [],
+      campus_names: (news.campus_external_ids || [])
+        .map(cid => campusesCache.value.find(c => c.id === cid)?.name)
+        .filter((n): n is string => !!n),
       sector_id: news.sector_external_id,
       sector_name: null,
-      service_id: news.service_external_id,
-      service_name: null,
+      service_ids: news.service_external_ids || [],
+      service_names: [],
       event_id: news.event_external_id,
       event_name: null,
       project_id: news.project_external_id,
@@ -272,9 +272,7 @@ export function useAdminNewsApi() {
     video_url?: string | null
     highlight_status?: NewsHighlightStatus
     cover_image_external_id?: string | null
-    campus_external_id?: string | null
     sector_external_id?: string | null
-    service_external_id?: string | null
     event_external_id?: string | null
     project_external_id?: string | null
     call_external_id?: string | null
@@ -284,6 +282,8 @@ export function useAdminNewsApi() {
     published_at?: string | null
     visible_from?: string | null
     tag_ids?: string[]
+    campus_external_ids?: string[]
+    service_external_ids?: string[]
   }): Promise<IdResponse> {
     const payload: NewsCreatePayload = {
       title: data.title,
@@ -297,9 +297,7 @@ export function useAdminNewsApi() {
       video_url: data.video_url,
       highlight_status: data.highlight_status || 'standard',
       cover_image_external_id: data.cover_image_external_id,
-      campus_external_id: data.campus_external_id,
       sector_external_id: data.sector_external_id,
-      service_external_id: data.service_external_id,
       event_external_id: data.event_external_id,
       project_external_id: data.project_external_id,
       call_external_id: data.call_external_id,
@@ -309,6 +307,8 @@ export function useAdminNewsApi() {
       published_at: data.published_at,
       visible_from: data.visible_from,
       tag_ids: data.tag_ids || [],
+      campus_external_ids: data.campus_external_ids || [],
+      service_external_ids: data.service_external_ids || [],
     }
 
     return apiFetch<IdResponse>('/api/admin/news', {
@@ -330,9 +330,7 @@ export function useAdminNewsApi() {
     video_url?: string | null
     highlight_status?: NewsHighlightStatus
     cover_image_external_id?: string | null
-    campus_external_id?: string | null
     sector_external_id?: string | null
-    service_external_id?: string | null
     event_external_id?: string | null
     project_external_id?: string | null
     call_external_id?: string | null
@@ -342,6 +340,8 @@ export function useAdminNewsApi() {
     published_at?: string | null
     visible_from?: string | null
     tag_ids?: string[]
+    campus_external_ids?: string[]
+    service_external_ids?: string[]
   }): Promise<NewsDisplay> {
     // Construire le payload uniquement avec les champs définis
     const payload: NewsUpdatePayload = {}
@@ -352,9 +352,7 @@ export function useAdminNewsApi() {
     if (data.video_url !== undefined) payload.video_url = data.video_url
     if (data.highlight_status !== undefined) payload.highlight_status = data.highlight_status
     if (data.cover_image_external_id !== undefined) payload.cover_image_external_id = data.cover_image_external_id
-    if (data.campus_external_id !== undefined) payload.campus_external_id = data.campus_external_id
     if (data.sector_external_id !== undefined) payload.sector_external_id = data.sector_external_id
-    if (data.service_external_id !== undefined) payload.service_external_id = data.service_external_id
     if (data.event_external_id !== undefined) payload.event_external_id = data.event_external_id
     if (data.project_external_id !== undefined) payload.project_external_id = data.project_external_id
     if (data.call_external_id !== undefined) payload.call_external_id = data.call_external_id
@@ -364,6 +362,8 @@ export function useAdminNewsApi() {
     if (data.published_at !== undefined) payload.published_at = data.published_at
     if (data.visible_from !== undefined) payload.visible_from = data.visible_from
     if (data.tag_ids !== undefined) payload.tag_ids = data.tag_ids
+    if (data.campus_external_ids !== undefined) payload.campus_external_ids = data.campus_external_ids
+    if (data.service_external_ids !== undefined) payload.service_external_ids = data.service_external_ids
 
     // Gérer le contenu multilingue si au moins un champ content est fourni
     if (data.content !== undefined || data.content_en !== undefined || data.content_ar !== undefined) {

@@ -470,28 +470,32 @@ const editorContent = computed(() => {
             Associations
           </h2>
           <dl class="space-y-3">
-            <div v-if="newsItem.campus_name || newsItem.campus_id">
+            <div v-if="newsItem.campus_names?.length > 0 || newsItem.campus_ids?.length > 0">
               <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
                 Campus
               </dt>
-              <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                {{ newsItem.campus_name || newsItem.campus_id }}
+              <dd class="mt-1 flex flex-wrap gap-1">
+                <span
+                  v-for="name in (newsItem.campus_names?.length ? newsItem.campus_names : newsItem.campus_ids)"
+                  :key="name"
+                  class="inline-flex rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                >
+                  {{ name }}
+                </span>
               </dd>
             </div>
-            <div v-if="newsItem.department_name || newsItem.department_id">
+            <div v-if="newsItem.service_names?.length > 0 || newsItem.service_ids?.length > 0">
               <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
-                Département
+                Services
               </dt>
-              <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                {{ newsItem.department_name || newsItem.department_id }}
-              </dd>
-            </div>
-            <div v-if="newsItem.service_name || newsItem.service_id">
-              <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">
-                Service
-              </dt>
-              <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                {{ newsItem.service_name || newsItem.service_id }}
+              <dd class="mt-1 flex flex-wrap gap-1">
+                <span
+                  v-for="name in (newsItem.service_names?.length ? newsItem.service_names : newsItem.service_ids)"
+                  :key="name"
+                  class="inline-flex rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
+                >
+                  {{ name }}
+                </span>
               </dd>
             </div>
             <div v-if="newsItem.project_name || newsItem.project_id">
@@ -510,7 +514,7 @@ const editorContent = computed(() => {
                 {{ newsItem.event_name || newsItem.event_id }}
               </dd>
             </div>
-            <div v-if="!newsItem.campus_id && !newsItem.department_id && !newsItem.service_id && !newsItem.project_id && !newsItem.event_id">
+            <div v-if="!newsItem.campus_ids?.length && !newsItem.service_ids?.length && !newsItem.project_id && !newsItem.event_id">
               <p class="text-sm italic text-gray-500 dark:text-gray-400">
                 Aucune association
               </p>

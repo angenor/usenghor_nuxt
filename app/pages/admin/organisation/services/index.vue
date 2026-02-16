@@ -81,6 +81,8 @@ const availableAlbums = ref<AlbumOption[]>([])
 // Form state
 const newService = ref<{
   name: string
+  sigle: string
+  color: string
   sector_id: string
   description: OutputData | undefined
   mission: OutputData | undefined
@@ -91,6 +93,8 @@ const newService = ref<{
   active: boolean
 }>({
   name: '',
+  sigle: '',
+  color: '',
   sector_id: '',
   description: undefined,
   mission: undefined,
@@ -380,6 +384,8 @@ const getPlainText = (content: string | null | undefined): string => {
 const openAddModal = () => {
   newService.value = {
     name: '',
+    sigle: '',
+    color: '',
     sector_id: filterSector.value || '',
     description: undefined,
     mission: undefined,
@@ -396,6 +402,8 @@ const openEditModal = (service: ServiceDisplay) => {
   editingService.value = service
   newService.value = {
     name: service.name,
+    sigle: service.sigle || '',
+    color: service.color || '',
     sector_id: service.sector_id || '',
     description: parseEditorContent(service.description),
     mission: parseEditorContent(service.mission),
@@ -437,6 +445,8 @@ const saveService = async () => {
 
     const serviceData = {
       name: newService.value.name,
+      sigle: newService.value.sigle || null,
+      color: newService.value.color || null,
       sector_id: newService.value.sector_id || null,
       description: descriptionJson,
       mission: missionJson,
@@ -847,13 +857,24 @@ const handleDragEnd = () => {
 
               <!-- Service -->
               <td class="px-4 py-3">
-                <div>
-                  <p class="font-medium text-gray-900 dark:text-white">
-                    {{ service.name }}
-                  </p>
-                  <p v-if="getPlainText(service.description)" class="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
-                    {{ getPlainText(service.description) }}
-                  </p>
+                <div class="flex items-center gap-3">
+                  <span
+                    v-if="service.color"
+                    class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold"
+                    :style="{ backgroundColor: service.color }"
+                    :title="service.sigle || service.name"
+                  >
+                    {{ service.sigle || '' }}
+                  </span>
+                  <div>
+                    <p class="font-medium text-gray-900 dark:text-white">
+                      {{ service.name }}
+                      <span v-if="service.sigle && !service.color" class="text-xs text-gray-400 dark:text-gray-500 font-normal ml-1">({{ service.sigle }})</span>
+                    </p>
+                    <p v-if="getPlainText(service.description)" class="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
+                      {{ getPlainText(service.description) }}
+                    </p>
+                  </div>
                 </div>
               </td>
 
@@ -1091,9 +1112,18 @@ const handleDragEnd = () => {
                 >
                   <font-awesome-icon :icon="['fas', 'grip-vertical']" class="w-4 h-4" />
                 </button>
+                <span
+                  v-if="service.color"
+                  class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold"
+                  :style="{ backgroundColor: service.color }"
+                  :title="service.sigle || service.name"
+                >
+                  {{ service.sigle || '' }}
+                </span>
                 <div class="flex-1 min-w-0">
                   <p class="font-medium text-gray-900 dark:text-white truncate">
                     {{ service.name }}
+                    <span v-if="service.sigle && !service.color" class="text-xs text-gray-400 dark:text-gray-500 font-normal ml-1">({{ service.sigle }})</span>
                   </p>
                   <div class="flex items-center gap-4 mt-1">
                     <span v-if="service.head" class="text-sm text-gray-500 dark:text-gray-400">
@@ -1229,6 +1259,52 @@ const handleDragEnd = () => {
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent"
                 placeholder="Ex: Service de Scolarité"
               />
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <!-- Sigle -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Sigle / Abréviation
+                </label>
+                <input
+                  v-model="newService.sigle"
+                  type="text"
+                  maxlength="50"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent"
+                  placeholder="Ex: SS, DRI, SG..."
+                />
+              </div>
+
+              <!-- Couleur -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Couleur
+                </label>
+                <div class="flex items-center gap-3">
+                  <input
+                    v-model="newService.color"
+                    type="color"
+                    class="w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer p-0.5 bg-white dark:bg-gray-700"
+                  />
+                  <input
+                    v-model="newService.color"
+                    type="text"
+                    maxlength="7"
+                    class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent font-mono text-sm"
+                    placeholder="#000000"
+                  />
+                  <button
+                    v-if="newService.color"
+                    type="button"
+                    class="p-2 text-gray-400 hover:text-red-500 rounded-lg transition-colors"
+                    title="Effacer la couleur"
+                    @click="newService.color = ''"
+                  >
+                    <font-awesome-icon :icon="['fas', 'times']" class="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             </div>
 
             <!-- Description -->

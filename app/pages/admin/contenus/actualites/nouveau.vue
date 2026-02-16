@@ -76,9 +76,9 @@ const form = reactive({
   cover_image_external_id: null as string | null,
   author_id: '',
   tags: [] as string[],
-  campus_id: '',
+  campus_ids: [] as string[],
   sector_id: '',
-  service_id: '',
+  service_ids: [] as string[],
   event_id: '',
   project_id: '',
   call_id: '',
@@ -135,9 +135,9 @@ watch(() => form.title, (newTitle) => {
   }
 })
 
-// Filtered services based on department
-const filteredServices = computed(() => {
-  if (!form.sector_id) return []
+// Services affichés (filtrés par secteur si sélectionné, sinon tous)
+const displayedServices = computed(() => {
+  if (!form.sector_id) return allServices.value
   return allServices.value.filter(s => s.sector_id === form.sector_id)
 })
 
@@ -173,6 +173,18 @@ function removeTag(tagId: string) {
   if (index !== -1) {
     form.tags.splice(index, 1)
   }
+}
+
+function toggleCampus(campusId: string) {
+  const index = form.campus_ids.indexOf(campusId)
+  if (index === -1) form.campus_ids.push(campusId)
+  else form.campus_ids.splice(index, 1)
+}
+
+function toggleService(serviceId: string) {
+  const index = form.service_ids.indexOf(serviceId)
+  if (index === -1) form.service_ids.push(serviceId)
+  else form.service_ids.splice(index, 1)
 }
 
 // État pour l'éditeur d'image de couverture
@@ -260,9 +272,9 @@ async function submitForm() {
       highlight_status: form.highlight_status,
       // Filtrer les IDs mock - seuls les vrais UUIDs sont envoyés
       cover_image_external_id: toUUIDOrNull(form.cover_image_external_id),
-      campus_external_id: toUUIDOrNull(form.campus_id),
       sector_external_id: toUUIDOrNull(form.sector_id),
-      service_external_id: toUUIDOrNull(form.service_id),
+      campus_external_ids: form.campus_ids.filter(id => isValidUUID(id)),
+      service_external_ids: form.service_ids.filter(id => isValidUUID(id)),
       event_external_id: toUUIDOrNull(form.event_id),
       project_external_id: toUUIDOrNull(form.project_id),
       call_external_id: toUUIDOrNull(form.call_id),
@@ -527,56 +539,66 @@ async function createTag() {
             </select>
           </div>
 
-          <!-- Campus -->
-          <div>
-            <label for="campus_id" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Campus associé
+          <!-- Campus associés -->
+          <div class="md:col-span-2">
+            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Campus associés
             </label>
-            <select
-              id="campus_id"
-              v-model="form.campus_id"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            >
-              <option value="">Aucun</option>
-              <option v-for="campus in allCampuses" :key="campus.id" :value="campus.id">
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="campus in allCampuses"
+                :key="campus.id"
+                type="button"
+                class="rounded-full border px-3 py-1 text-sm transition-colors"
+                :class="form.campus_ids.includes(campus.id)
+                  ? 'border-green-500 bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'
+                  : 'border-gray-300 text-gray-600 hover:border-gray-400 dark:border-gray-600 dark:text-gray-400 dark:hover:border-gray-500'"
+                @click="toggleCampus(campus.id)"
+              >
                 {{ campus.name }}
-              </option>
-            </select>
+              </button>
+            </div>
           </div>
 
-          <!-- Département -->
+          <!-- Secteur (filtre pour services) -->
           <div>
             <label for="sector_id" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Secteur associé
+              Filtrer services par secteur
             </label>
             <select
               id="sector_id"
               v-model="form.sector_id"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             >
-              <option value="">Aucun</option>
+              <option value="">Tous les secteurs</option>
               <option v-for="dept in allDepartments" :key="dept.id" :value="dept.id">
                 {{ dept.name }}
               </option>
             </select>
           </div>
 
-          <!-- Service -->
-          <div>
-            <label for="service_id" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Service associé
+          <!-- Services associés -->
+          <div class="md:col-span-2">
+            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Services associés
             </label>
-            <select
-              id="service_id"
-              v-model="form.service_id"
-              :disabled="!form.sector_id"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            >
-              <option value="">Aucun</option>
-              <option v-for="service in filteredServices" :key="service.id" :value="service.id">
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="service in displayedServices"
+                :key="service.id"
+                type="button"
+                class="rounded-full border px-3 py-1 text-sm transition-colors"
+                :class="form.service_ids.includes(service.id)
+                  ? 'border-purple-500 bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300'
+                  : 'border-gray-300 text-gray-600 hover:border-gray-400 dark:border-gray-600 dark:text-gray-400 dark:hover:border-gray-500'"
+                @click="toggleService(service.id)"
+              >
                 {{ service.name }}
-              </option>
-            </select>
+              </button>
+            </div>
+            <p v-if="form.service_ids.length > 0" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {{ form.service_ids.length }} service(s) sélectionné(s)
+            </p>
           </div>
 
           <!-- Projet -->
