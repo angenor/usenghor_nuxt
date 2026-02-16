@@ -537,24 +537,6 @@ export const careersPageSections: PageSection[] = [
     ],
   },
   {
-    id: 'careers-intro',
-    name: 'Section Introduction',
-    description: 'Introduction avec statistiques clés',
-    icon: 'info-circle',
-    color: 'bg-lime-100 text-lime-800 dark:bg-lime-900/30 dark:text-lime-300',
-    editorialKeys: [
-      'careers.intro.title', 'careers.intro.text',
-      'careers.intro.stats.positions.label', 'careers.intro.stats.nationalities.label', 'careers.intro.stats.years.label',
-    ],
-    fields: [
-      { key: 'careers.intro.title', label: 'Titre', description: 'Titre de la section introduction', type: 'text', editorialKey: 'careers.intro.title', editable: true },
-      { key: 'careers.intro.text', label: 'Texte', description: 'Texte de présentation', type: 'textarea', editorialKey: 'careers.intro.text', editable: true },
-      { key: 'careers.intro.stats.positions.label', label: 'Label Postes', description: 'Libellé pour le nombre de postes (valeur dans Chiffres clés)', type: 'text', editorialKey: 'careers.intro.stats.positions.label', editable: true },
-      { key: 'careers.intro.stats.nationalities.label', label: 'Label Nationalités', description: 'Libellé pour les nationalités (valeur dans Chiffres clés)', type: 'text', editorialKey: 'careers.intro.stats.nationalities.label', editable: true },
-      { key: 'careers.intro.stats.years.label', label: 'Label Années', description: 'Libellé pour les années (valeur dans Chiffres clés)', type: 'text', editorialKey: 'careers.intro.stats.years.label', editable: true },
-    ],
-  },
-  {
     id: 'careers-opportunities',
     name: 'Section Opportunités',
     description: 'Cartes des 3 types d\'opportunités (enseignants, étudiants, partenaires)',
@@ -646,8 +628,8 @@ export const careersPageSections: PageSection[] = [
     color: 'bg-brand-blue-100 text-brand-blue-800 dark:bg-brand-blue-900/30 dark:text-brand-blue-300',
     editorialKeys: [
       'careers.students.title', 'careers.students.text',
-      'careers.students.why.title', 'careers.students.programs.title',
-      'careers.students.cta.title', 'careers.students.cta.text', 'careers.students.cta.button',
+      'careers.students.why.title', 'careers.students.why.items',
+      'careers.students.programs.title',
       'careers.students.image',
     ],
     fields: [
@@ -655,10 +637,8 @@ export const careersPageSections: PageSection[] = [
       { key: 'careers.students.title', label: 'Titre', description: 'Titre de la section étudiants', type: 'text', editorialKey: 'careers.students.title', editable: true },
       { key: 'careers.students.text', label: 'Texte', description: 'Texte de présentation', type: 'textarea', editorialKey: 'careers.students.text', editable: true },
       { key: 'careers.students.why.title', label: 'Titre "Pourquoi nous"', description: 'Titre de la sous-section pourquoi étudier chez nous', type: 'text', editorialKey: 'careers.students.why.title', editable: true },
+      { key: 'careers.students.why.items', label: 'Éléments de la checklist', description: 'Liste des arguments "Pourquoi étudier chez nous" (un argument par ligne)', type: 'list', editorialKey: 'careers.students.why.items', editable: true },
       { key: 'careers.students.programs.title', label: 'Titre Programmes', description: 'Titre de la sous-section programmes', type: 'text', editorialKey: 'careers.students.programs.title', editable: true },
-      { key: 'careers.students.cta.title', label: 'CTA - Titre', description: 'Titre du bloc appel à l\'action', type: 'text', editorialKey: 'careers.students.cta.title', editable: true },
-      { key: 'careers.students.cta.text', label: 'CTA - Texte', description: 'Texte d\'accompagnement', type: 'textarea', editorialKey: 'careers.students.cta.text', editable: true },
-      { key: 'careers.students.cta.button', label: 'CTA - Bouton', description: 'Texte du bouton inscription', type: 'text', editorialKey: 'careers.students.cta.button', editable: true },
     ],
   },
   {

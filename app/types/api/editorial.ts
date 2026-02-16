@@ -369,6 +369,7 @@ export type ValueSectionKey =
   | 'careers.students.title'
   | 'careers.students.text'
   | 'careers.students.why.title'
+  | 'careers.students.why.items'
   | 'careers.students.cta.title'
   | 'careers.students.cta.text'
   | 'careers.students.cta.button'

@@ -6,6 +6,7 @@ const props = withDefaults(defineProps<{
 })
 
 const { t, tm } = useI18n()
+const { getContent, getRawContent } = useEditorialContent('careers')
 const localePath = useLocalePath()
 const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.1 })
 
@@ -22,8 +23,15 @@ const stats = computed(() => ({
   years: Number(keyFiguresStore.getFigure('stats_years')) || 30,
 }))
 
-// Get translated array
-const whyItems = computed(() => tm('careers.students.why.items') as string[])
+// Checklist avec override éditorial
+const whyItems = computed(() => {
+  const raw = getRawContent('careers.students.why.items')
+  if (raw && raw.trim()) {
+    return raw.split('\n').filter(item => item.trim())
+  }
+  // Fallback i18n
+  return tm('careers.students.why.items') as string[]
+})
 
 // Programs with infographic colors
 const programs = [
@@ -141,7 +149,7 @@ const imageUrl = computed(() => props.image || '/images/bg/backgroud_senghor1.jp
               <span class="w-10 h-10 rounded-xl bg-brand-blue-100 dark:bg-brand-blue-900/30 flex items-center justify-center">
                 <font-awesome-icon icon="fa-solid fa-star" class="w-4 h-4 text-brand-blue-600 dark:text-brand-blue-400" />
               </span>
-              {{ t('careers.students.why.title') }}
+              {{ getContent('careers.students.why.title') }}
             </h3>
             <div class="space-y-3">
               <div
