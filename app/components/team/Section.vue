@@ -258,12 +258,19 @@ watch(filteredMembers, () => {
             :class="getCampusColors(member).border"
           >
             <!-- Photo -->
-            <div class="relative aspect-[4/3] overflow-hidden">
+            <div class="relative aspect-square overflow-hidden">
               <img
-                :src="member.user.photo_url || `https://i.pravatar.cc/300?u=${member.user.id}`"
+                v-if="member.user.photo_url"
+                :src="member.user.photo_url"
                 :alt="getFullName(member.user)"
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
+              <div
+                v-else
+                class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+              >
+                <font-awesome-icon icon="fa-solid fa-user" class="w-16 h-16 text-gray-400 dark:text-gray-500" />
+              </div>
               <!-- Overlay gradient -->
               <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
               <!-- Badge campus -->
