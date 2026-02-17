@@ -289,10 +289,10 @@ const projects = computed<ServiceProjectPublic[]>(() => {
   return []
 })
 
-// Team (only for services)
+// Team (only for services) — filtrer les membres dont l'utilisateur a été supprimé
 const team = computed<ServiceTeamMemberPublic[]>(() => {
   if (entityType === 'service' && service.value) {
-    return service.value.team || []
+    return (service.value.team || []).filter(member => member.user)
   }
   return []
 })
