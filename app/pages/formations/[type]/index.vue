@@ -385,6 +385,24 @@ const typeConfig = computed(() => {
       :breadcrumb="breadcrumb"
     />
 
+    <!-- Sticky type bar -->
+    <div class="sticky top-20 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-3">
+        <span
+          class="w-8 h-8 rounded-lg flex items-center justify-center text-white flex-shrink-0"
+          :class="typeConfig.bgColor"
+        >
+          <font-awesome-icon :icon="typeConfig.icon" class="w-4 h-4" />
+        </span>
+        <span class="font-semibold text-gray-900 dark:text-white">
+          {{ t(`formations.types.${typeSlug}`) }}
+        </span>
+        <span class="text-sm text-gray-500 dark:text-gray-400">
+          {{ t('formations.filters.resultsCount', { count: filteredPrograms.length }) }}
+        </span>
+      </div>
+    </div>
+
     <!-- Loading state -->
     <section v-if="loading" class="py-16 bg-white dark:bg-gray-950 bg-grid-pattern">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
