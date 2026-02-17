@@ -373,20 +373,40 @@ const typeConfig = computed(() => {
   if (!programType.value) return publicProgramTypeColors.master
   return publicProgramTypeColors[programType.value]
 })
+
+// Sticky bar visibility: apparaît quand le hero quitte le viewport
+const heroRef = ref<HTMLElement | null>(null)
+const heroVisible = ref(true)
+
+onMounted(() => {
+  const observer = new IntersectionObserver(
+    ([entry]) => { heroVisible.value = entry.isIntersecting },
+    { threshold: 0 },
+  )
+  if (heroRef.value) observer.observe(heroRef.value)
+  onBeforeUnmount(() => observer.disconnect())
+})
 </script>
 
 <template>
   <div v-if="isValidType">
     <!-- Hero -->
-    <PageHero
-      :title="t(`formations.types.${typeSlug}`)"
-      :subtitle="t(`formations.typeDescriptions.${typeSlug}`)"
-      image="/images/bg/backgroud_senghor2.jpg"
-      :breadcrumb="breadcrumb"
-    />
+    <div ref="heroRef">
+      <PageHero
+        :title="t(`formations.types.${typeSlug}`)"
+        :subtitle="t(`formations.typeDescriptions.${typeSlug}`)"
+        image="/images/bg/backgroud_senghor2.jpg"
+        :breadcrumb="breadcrumb"
+      />
+    </div>
 
-    <!-- Sticky type bar -->
-    <div class="sticky top-20 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 shadow-sm">
+    <!-- Sticky type bar (visible uniquement quand le hero est hors du viewport) -->
+    <div
+      class="sticky top-20 z-40 border-b border-gray-200 dark:border-gray-700 transition-all duration-300"
+      :class="heroVisible
+        ? 'opacity-0 -translate-y-2 pointer-events-none'
+        : 'opacity-100 translate-y-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-sm'"
+    >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-3">
         <span
           class="w-8 h-8 rounded-lg flex items-center justify-center text-white flex-shrink-0"
