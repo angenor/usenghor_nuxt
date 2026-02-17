@@ -140,6 +140,9 @@ function validateCurrentStep() {
     if (!formData.value.affectation.service_id) {
       formErrors.value.service_id = 'Le département est requis'
     }
+    if (!formData.value.affectation.position.trim()) {
+      formErrors.value.position = 'Le poste est requis'
+    }
     if (!formData.value.affectation.campus_id) {
       formErrors.value.campus_id = 'Le campus est requis'
     }
@@ -608,6 +611,24 @@ onMounted(() => {
                       </select>
                       <p v-if="formErrors.service_id" class="mt-1 text-sm text-red-500">
                         {{ formErrors.service_id }}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label for="position" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Poste <span class="text-red-500">*</span>
+                      </label>
+                      <input
+                        id="position"
+                        v-model="formData.affectation.position"
+                        type="text"
+                        required
+                        class="w-full rounded-xl border bg-white/50 px-4 py-3 text-gray-900 placeholder-gray-400 outline-none backdrop-blur-sm transition focus:border-brand-blue-500 focus:ring-2 focus:ring-brand-blue-500/20 dark:bg-gray-800/50 dark:text-white"
+                        :class="formErrors.position ? 'border-red-500' : 'border-gray-200/80 dark:border-gray-700/50'"
+                        placeholder="Ex : Directeur, Chargé de cours, Assistant..."
+                      >
+                      <p v-if="formErrors.position" class="mt-1 text-sm text-red-500">
+                        {{ formErrors.position }}
                       </p>
                     </div>
 

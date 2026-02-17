@@ -5,6 +5,7 @@ export interface AffectationFormData {
   sector_id: string | null
   service_id: string | null
   campus_id: string | null
+  position: string
 }
 
 export interface RegisterFormData {
@@ -52,6 +53,7 @@ const defaultAffectation: AffectationFormData = {
   sector_id: null,
   service_id: null,
   campus_id: null,
+  position: '',
 }
 
 const defaultFormData: RegisterFormData = {
@@ -258,6 +260,11 @@ export function useAdminRegistration() {
       formErrors.value.campus_id = 'Le campus est requis'
     }
 
+    // Affectation - Poste obligatoire
+    if (!formData.value.affectation.position.trim()) {
+      formErrors.value.position = 'Le poste est requis'
+    }
+
     return Object.keys(formErrors.value).length === 0
   }
 
@@ -280,6 +287,7 @@ export function useAdminRegistration() {
           sector_id: formData.value.affectation.sector_id,
           service_id: formData.value.affectation.service_id,
           campus_id: formData.value.affectation.campus_id,
+          position: formData.value.affectation.position,
           birthday_day: formData.value.birthday_day,
           birthday_month: formData.value.birthday_month,
           photo_base64: formData.value.photo_base64,
