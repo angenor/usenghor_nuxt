@@ -7,9 +7,6 @@ const { getContent, getRawContent, loadContent } = useEditorialContent('homepage
 // API Media pour résoudre les URLs des images
 const { getMediaUrl } = useMediaApi()
 
-// État de chargement initial (attendre que les contenus soient chargés)
-const isContentLoaded = ref(false)
-
 // Configuration des slides avec clés éditoriales (pas d'images par défaut)
 const slidesConfig = [
   {
@@ -58,7 +55,7 @@ const slides = computed(() => {
       if (!imageMediaId) return null
 
       return {
-        image: getMediaUrl(imageMediaId, 'medium'),
+        image: getMediaUrl(imageMediaId),
         editorialTitleKey: config.editorialTitleKey,
         editorialSubtitleKey: config.editorialSubtitleKey,
         editorialCta1TextKey: config.editorialCta1TextKey,
@@ -84,14 +81,17 @@ let slideInterval: ReturnType<typeof setInterval> | null = null
 
 const currentSlideData = computed(() => slides.value[currentSlide.value])
 
-// Titre et sous-titre du slide courant (avec fallback i18n)
+// Titre et sous-titre : fallback i18n du premier slide tant que les données ne sont pas chargées
 const currentTitle = computed(() => {
   const slide = currentSlideData.value
-  return slide ? getContent(slide.editorialTitleKey) : ''
+  if (slide) return getContent(slide.editorialTitleKey)
+  // Fallback i18n du premier slide pendant le chargement
+  return getContent(slidesConfig[0]!.editorialTitleKey)
 })
 const currentSubtitle = computed(() => {
   const slide = currentSlideData.value
-  return slide ? getContent(slide.editorialSubtitleKey) : ''
+  if (slide) return getContent(slide.editorialSubtitleKey)
+  return getContent(slidesConfig[0]!.editorialSubtitleKey)
 })
 
 // Boutons CTA du slide courant (0, 1 ou 2 boutons par slide)
@@ -120,6 +120,12 @@ const hasButtons = computed(() => {
   return hasCta1 || hasCta2
 })
 
+// Savoir si les slides sont prêts (images éditoriales chargées)
+const slidesReady = computed(() => slides.value.length > 0)
+
+// Index du prochain slide à afficher (pour le préchargement)
+const nextSlideIndex = computed(() => (currentSlide.value + 1) % Math.max(slides.value.length, 1))
+
 const goToSlide = (index: number, resetTimer = false) => {
   if (isTransitioning.value || index === currentSlide.value) return
   isTransitioning.value = true
@@ -141,15 +147,18 @@ const prevSlide = () => {
   goToSlide((currentSlide.value - 1 + slides.value.length) % slides.value.length, true)
 }
 
-onMounted(async () => {
-  // Charger les contenus éditoriaux (bloquant : attendre avant affichage)
-  await loadContent()
-  isContentLoaded.value = true
-
-  // Démarrer le carrousel seulement s'il y a des slides avec images
-  if (slides.value.length > 1) {
+const startCarousel = () => {
+  if (slides.value.length > 1 && !slideInterval) {
     slideInterval = setInterval(() => goToSlide((currentSlide.value + 1) % slides.value.length), 6000)
   }
+}
+
+onMounted(() => {
+  // Chargement non-bloquant : le hero s'affiche immédiatement avec i18n
+  // Les slides apparaissent dès que les contenus éditoriaux sont prêts
+  loadContent().then(() => {
+    startCarousel()
+  })
 })
 
 onUnmounted(() => {
@@ -161,38 +170,37 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <!-- Chargement des contenus éditoriaux -->
-  <section v-if="!isContentLoaded" class="relative h-screen min-h-[700px] overflow-hidden bg-gray-900">
-    <div class="absolute inset-0 flex items-center justify-center">
-      <font-awesome-icon :icon="['fas', 'spinner']" class="h-10 w-10 animate-spin text-white/40" />
-    </div>
-  </section>
-
-  <!-- Hero affiché uniquement quand les contenus sont chargés et qu'il y a des slides -->
-  <section v-else-if="slides.length > 0" class="relative h-screen min-h-[700px] overflow-hidden">
-    <!-- Background Slides -->
-    <div class="absolute inset-0">
-      <TransitionGroup name="slide">
-        <div
-          v-for="(item, index) in slides"
-          :key="index"
-          v-show="currentSlide === index"
-          class="absolute inset-0"
-        >
-          <img
-            :src="item.image"
-            :alt="`Slide ${index + 1}`"
-            class="w-full h-full object-cover scale-105 animate-slow-zoom"
-          />
-        </div>
-      </TransitionGroup>
+  <section class="relative h-screen min-h-[700px] overflow-hidden">
+    <!-- Background : gradient de base toujours visible (pas de spinner) -->
+    <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-brand-blue-900 to-gray-900">
+      <!-- Slides images (chargées progressivement, sans bloquer) -->
+      <template v-if="slidesReady">
+        <TransitionGroup name="slide">
+          <div
+            v-for="(item, index) in slides"
+            v-show="currentSlide === index"
+            :key="index"
+            class="absolute inset-0"
+          >
+            <!-- Seul le slide courant et le suivant chargent leur image -->
+            <img
+              v-if="index === currentSlide || index === nextSlideIndex"
+              :src="item.image"
+              :alt="`Slide ${index + 1}`"
+              class="w-full h-full object-cover scale-105 animate-slow-zoom"
+              :fetchpriority="index === 0 ? 'high' : 'auto'"
+              :loading="index === 0 ? 'eager' : 'lazy'"
+            >
+          </div>
+        </TransitionGroup>
+      </template>
 
       <!-- Gradient Overlays -->
       <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent"></div>
       <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30"></div>
     </div>
 
-    <!-- Content -->
+    <!-- Content (affiché immédiatement avec fallback i18n) -->
     <div class="relative z-10 h-full flex items-center">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div class="max-w-3xl">
@@ -240,22 +248,22 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- Navigation Arrows (seulement si plus d'un slide) -->
+    <!-- Navigation Arrows (seulement si plus d'un slide chargé) -->
     <template v-if="slides.length > 1">
       <div class="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-20">
         <button
-          @click="prevSlide"
           class="group p-3 lg:p-4 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white transition-all duration-300 hover:bg-white/20 hover:scale-110"
           :disabled="isTransitioning"
+          @click="prevSlide"
         >
           <font-awesome-icon icon="fa-solid fa-chevron-left" class="w-5 h-5 lg:w-6 lg:h-6 transition-transform duration-300 group-hover:-translate-x-1" />
         </button>
       </div>
       <div class="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-20">
         <button
-          @click="nextSlide"
           class="group p-3 lg:p-4 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white transition-all duration-300 hover:bg-white/20 hover:scale-110"
           :disabled="isTransitioning"
+          @click="nextSlide"
         >
           <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-5 h-5 lg:w-6 lg:h-6 transition-transform duration-300 group-hover:translate-x-1" />
         </button>
@@ -264,13 +272,13 @@ onUnmounted(() => {
       <!-- Slide Indicators -->
       <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-3">
         <button
-          v-for="(item, index) in slides"
+          v-for="(_item, index) in slides"
           :key="index"
-          @click="goToSlide(index, true)"
           class="group relative h-3 transition-all duration-500 rounded-full overflow-hidden"
           :class="[
             currentSlide === index ? 'w-12 bg-brand-blue-500' : 'w-3 bg-white/40 hover:bg-white/60'
           ]"
+          @click="goToSlide(index, true)"
         >
           <span
             v-if="currentSlide === index"
