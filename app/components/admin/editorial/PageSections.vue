@@ -161,6 +161,8 @@ function handleFieldHistory(field: PageSectionField) {
                   @history="handleFieldHistory(field)"
                 />
               </div>
+              <!-- Slot pour contenu supplémentaire par section -->
+              <slot :name="`section-${pageSection.id}`" :section="pageSection" />
             </div>
           </div>
         </div>

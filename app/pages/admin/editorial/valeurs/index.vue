@@ -389,16 +389,6 @@ function closeHistoryModal() {
         :stats="globalStats"
       />
 
-      <!-- Testimonials Section -->
-      <AdminEditorialTestimonialsList
-        :testimonials="testimonials"
-        @add="handleAddTestimonial"
-        @edit="handleEditTestimonial"
-        @delete="handleRequestDeleteTestimonial"
-        @move="handleMoveTestimonial"
-        @history="handleTestimonialHistory"
-      />
-
       <!-- Pages Sections -->
       <AdminEditorialPageSections
         :pages="frontOfficePages"
@@ -406,7 +396,21 @@ function closeHistoryModal() {
         :is-saving="isSaving"
         @save-field="handleSaveField"
         @open-history="openFieldHistory"
-      />
+      >
+        <!-- Témoignages intégrés dans la section Alumni > Témoignages -->
+        <template #section-alumni-testimonials>
+          <div class="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+            <AdminEditorialTestimonialsList
+              :testimonials="testimonials"
+              @add="handleAddTestimonial"
+              @edit="handleEditTestimonial"
+              @delete="handleRequestDeleteTestimonial"
+              @move="handleMoveTestimonial"
+              @history="handleTestimonialHistory"
+            />
+          </div>
+        </template>
+      </AdminEditorialPageSections>
     </template>
 
     <!-- Testimonial Modal -->
