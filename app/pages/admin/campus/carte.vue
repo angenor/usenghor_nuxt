@@ -199,7 +199,7 @@ function clampViewBox() {
               <font-awesome-icon icon="fa-solid fa-crop-alt" class="w-3.5 h-3.5 mr-1.5" />
               Zone visible — glissez pour déplacer, utilisez les poignées pour redimensionner
             </h3>
-            <MapViewboxEditor
+            <AdminMapViewboxEditor
               :view-box="viewBox"
               :excluded-countries="excludedCountries"
               :campuses="campuses"
