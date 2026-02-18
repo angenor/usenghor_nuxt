@@ -27,7 +27,7 @@ interface SearchableItem {
 const searchableItems = computed<SearchableItem[]>(() => {
   const items: SearchableItem[] = []
 
-  sidebarItems.forEach(section => {
+  sidebarItems.value.forEach(section => {
     if (section.route) {
       items.push({
         id: section.id,

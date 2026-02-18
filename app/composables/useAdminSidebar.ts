@@ -26,9 +26,10 @@ export interface SidebarSection {
 export function useAdminSidebar() {
   const { t } = useI18n()
   const route = useRoute()
+  const { hasPermission } = usePermissions()
 
   // Structure complète du sidebar admin
-  const sidebarItems: SidebarSection[] = [
+  const _allSidebarItems: SidebarSection[] = [
     // ========================================================================
     // TABLEAU DE BORD
     // ========================================================================
@@ -457,6 +458,22 @@ export function useAdminSidebar() {
     }
   ]
 
+  // Items filtrés selon les permissions de l'utilisateur
+  // Retourné comme tableau réactif (pas un ComputedRef) pour compatibilité
+  const sidebarItems = computed(() => {
+    return _allSidebarItems
+      .filter(item => hasPermission(...item.permissions))
+      .map(item => {
+        if (!item.children) return item
+        const filteredChildren = item.children.filter(child =>
+          hasPermission(...child.permissions)
+        )
+        if (filteredChildren.length === 0) return null
+        return { ...item, children: filteredChildren }
+      })
+      .filter((item): item is SidebarSection => item !== null)
+  })
+
   // État du sidebar (expanded/collapsed)
   const isCollapsed = ref(false)
   const expandedMenus = ref<string[]>([])
@@ -502,7 +519,7 @@ export function useAdminSidebar() {
 
   // Initialise les menus ouverts basé sur la route active
   const initExpandedMenus = () => {
-    sidebarItems.forEach(item => {
+    sidebarItems.value.forEach(item => {
       if (item.children && hasActiveChild(item)) {
         if (!expandedMenus.value.includes(item.id)) {
           expandedMenus.value.push(item.id)

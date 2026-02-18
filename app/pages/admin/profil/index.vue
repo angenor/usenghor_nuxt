@@ -10,6 +10,7 @@ definePageMeta({
 })
 
 // === COMPOSABLES ===
+const { userPermissions } = usePermissions()
 const authStore = useAuthStore()
 const { apiFetch } = useApi()
 const { getUserProfile } = usePublicUserApi()
@@ -495,13 +496,23 @@ function getCampusBadgeColor(code: string): string {
 <template>
   <div class="mx-auto max-w-5xl p-6">
     <!-- Header -->
-    <div class="mb-6">
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-        Mon profil
-      </h1>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Consultez et modifiez vos informations personnelles
-      </p>
+    <div class="mb-6 flex items-start justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+          Mon profil
+        </h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Consultez et modifiez vos informations personnelles
+        </p>
+      </div>
+      <NuxtLink
+        v-if="userPermissions.length > 0"
+        to="/admin"
+        class="inline-flex items-center gap-2 rounded-lg bg-brand-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand-blue-700 flex-shrink-0"
+      >
+        <font-awesome-icon icon="fa-solid fa-gauge-high" class="h-4 w-4" />
+        Accéder à l'administration
+      </NuxtLink>
     </div>
 
     <!-- Messages -->

@@ -8,6 +8,9 @@ definePageMeta({
   layout: 'admin'
 })
 
+// Permissions
+const { hasPermission } = usePermissions()
+
 // APIs
 const { listApplications, getStatistics, getExtendedStatistics, applicationStatusLabels } = useApplicationsApi()
 const { listEvents, getEventsStats, eventTypeLabels } = useEventsApi()
@@ -54,44 +57,51 @@ const recentNewsList = ref<NewsDisplay[]>([])
 const recentActivity = ref<AuditLogWithUser[]>([])
 
 // === COMPUTED STATS ===
-const stats = computed(() => [
-  {
-    id: 'applications',
-    label: 'Candidatures soumises',
-    value: applicationStats.value.submitted + applicationStats.value.under_review,
-    change: 'À traiter',
-    changeType: 'neutral',
-    icon: 'fa-solid fa-file-alt',
-    color: 'blue'
-  },
-  {
-    id: 'events',
-    label: 'Événements à venir',
-    value: upcomingEventsCount.value,
-    change: 'Prochains',
-    changeType: 'neutral',
-    icon: 'fa-solid fa-calendar-days',
-    color: 'purple'
-  },
-  {
-    id: 'news',
-    label: 'Actualités publiées',
-    value: newsStats.value.published,
-    change: 'En ligne',
-    changeType: 'positive',
-    icon: 'fa-solid fa-newspaper',
-    color: 'green'
-  },
-  {
-    id: 'total',
-    label: 'Total candidatures',
-    value: applicationStats.value.total,
-    change: 'Global',
-    changeType: 'neutral',
-    icon: 'fa-solid fa-users',
-    color: 'orange'
-  }
-])
+const stats = computed(() => {
+  const all = [
+    {
+      id: 'applications',
+      label: 'Candidatures soumises',
+      value: applicationStats.value.submitted + applicationStats.value.under_review,
+      change: 'À traiter',
+      changeType: 'neutral',
+      icon: 'fa-solid fa-file-alt',
+      color: 'blue',
+      permissions: ['applications.view'],
+    },
+    {
+      id: 'events',
+      label: 'Événements à venir',
+      value: upcomingEventsCount.value,
+      change: 'Prochains',
+      changeType: 'neutral',
+      icon: 'fa-solid fa-calendar-days',
+      color: 'purple',
+      permissions: ['events.view'],
+    },
+    {
+      id: 'news',
+      label: 'Actualités publiées',
+      value: newsStats.value.published,
+      change: 'En ligne',
+      changeType: 'positive',
+      icon: 'fa-solid fa-newspaper',
+      color: 'green',
+      permissions: ['news.view'],
+    },
+    {
+      id: 'total',
+      label: 'Total candidatures',
+      value: applicationStats.value.total,
+      change: 'Global',
+      changeType: 'neutral',
+      icon: 'fa-solid fa-users',
+      color: 'orange',
+      permissions: ['applications.view'],
+    },
+  ]
+  return all.filter(s => hasPermission(...s.permissions))
+})
 
 // === CHART DATA AVAILABILITY ===
 const hasApplicationTrendData = computed(() =>
@@ -119,39 +129,57 @@ async function fetchDashboardData() {
   error.value = null
 
   try {
-    // Fetch all data in parallel
-    const [
-      appStatsResult,
-      extendedAppStatsResult,
-      eventStatsResult,
-      newsStatsResult,
-      applicationsResult,
-      upcomingEventsResult,
-      newsResult,
-      auditResult,
-    ] = await Promise.all([
-      getStatistics().catch(() => applicationStats.value),
-      getExtendedStatistics({ granularity: 'month' }).catch(() => null),
-      getEventsStats(12).catch(() => null),
-      getNewsStats(6).catch(() => newsStats.value),
-      listApplications({ limit: 5, sort_by: 'submitted_at', sort_order: 'desc' }).catch(() => ({ items: [], total: 0 })),
-      listEvents({ limit: 5, from_date: new Date().toISOString(), sort_by: 'start_date', sort_order: 'asc' }).catch(() => ({ items: [], total: 0 })),
-      listNews({ limit: 5, sort_by: 'updated_at', sort_order: 'desc' }).catch(() => ({ items: [], total: 0 })),
-      listAuditLogs({ limit: 10 }).catch(() => ({ items: [], total: 0 })),
-    ])
+    // Fetch data en parallèle, uniquement pour les sections autorisées
+    const promises: Promise<void>[] = []
 
-    // Update stats
-    applicationStats.value = appStatsResult
-    extendedAppStats.value = extendedAppStatsResult
-    eventStats.value = eventStatsResult
-    newsStats.value = newsStatsResult
-    upcomingEventsCount.value = eventStatsResult?.upcoming ?? upcomingEventsResult.total
+    if (canViewApplications.value) {
+      promises.push(
+        Promise.all([
+          getStatistics().catch(() => applicationStats.value),
+          getExtendedStatistics({ granularity: 'month' }).catch(() => null),
+          listApplications({ limit: 5, sort_by: 'submitted_at', sort_order: 'desc' }).catch(() => ({ items: [], total: 0 })),
+        ]).then(([appStatsResult, extendedAppStatsResult, applicationsResult]) => {
+          applicationStats.value = appStatsResult
+          extendedAppStats.value = extendedAppStatsResult
+          recentApplications.value = applicationsResult.items
+        })
+      )
+    }
 
-    // Update lists
-    recentApplications.value = applicationsResult.items
-    upcomingEventsList.value = upcomingEventsResult.items
-    recentNewsList.value = newsResult.items
-    recentActivity.value = auditResult.items.map(enrichLog)
+    if (canViewEvents.value) {
+      promises.push(
+        Promise.all([
+          getEventsStats(12).catch(() => null),
+          listEvents({ limit: 5, from_date: new Date().toISOString(), sort_by: 'start_date', sort_order: 'asc' }).catch(() => ({ items: [], total: 0 })),
+        ]).then(([eventStatsResult, upcomingEventsResult]) => {
+          eventStats.value = eventStatsResult
+          upcomingEventsCount.value = eventStatsResult?.upcoming ?? upcomingEventsResult.total
+          upcomingEventsList.value = upcomingEventsResult.items
+        })
+      )
+    }
+
+    if (canViewNews.value) {
+      promises.push(
+        Promise.all([
+          getNewsStats(6).catch(() => newsStats.value),
+          listNews({ limit: 5, sort_by: 'updated_at', sort_order: 'desc' }).catch(() => ({ items: [], total: 0 })),
+        ]).then(([newsStatsResult, newsResult]) => {
+          newsStats.value = newsStatsResult
+          recentNewsList.value = newsResult.items
+        })
+      )
+    }
+
+    if (canViewAudit.value) {
+      promises.push(
+        listAuditLogs({ limit: 10 }).catch(() => ({ items: [], total: 0 })).then((auditResult) => {
+          recentActivity.value = auditResult.items.map(enrichLog)
+        })
+      )
+    }
+
+    await Promise.all(promises)
 
     // Generate chart data from real stats
     generateChartData()
@@ -209,6 +237,25 @@ function generateChartData() {
     newsPublicationData.value = []
   }
 }
+
+// Actions rapides filtrées par permissions
+const quickActions = computed(() => {
+  const all = [
+    { label: 'Actualité', icon: 'fa-solid fa-newspaper', route: '/admin/contenus/actualites', permissions: ['news.view'] },
+    { label: 'Événement', icon: 'fa-solid fa-calendar-plus', route: '/admin/contenus/evenements', permissions: ['events.view'] },
+    { label: 'Programme', icon: 'fa-solid fa-graduation-cap', route: '/admin/formations/programmes', permissions: ['programs.view'] },
+    { label: 'Partenaire', icon: 'fa-solid fa-handshake', route: '/admin/partenaires', permissions: ['partners.view'] },
+    { label: 'Média', icon: 'fa-solid fa-cloud-arrow-up', route: '/admin/mediatheque', permissions: ['media.view'] },
+    { label: 'Utilisateur', icon: 'fa-solid fa-user-plus', route: '/admin/administration/utilisateurs', permissions: ['users.view'] },
+  ]
+  return all.filter(a => hasPermission(...a.permissions))
+})
+
+// Permissions pour les sections du dashboard
+const canViewApplications = computed(() => hasPermission('applications.view'))
+const canViewEvents = computed(() => hasPermission('events.view'))
+const canViewNews = computed(() => hasPermission('news.view'))
+const canViewAudit = computed(() => hasPermission('admin.audit'))
 
 // Load data on mount
 onMounted(() => {
@@ -463,9 +510,9 @@ const formatDate = (dateString: string) => {
     </div>
 
     <!-- Content grid: Candidatures + Événements -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div v-if="canViewApplications || canViewEvents" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Candidatures récentes -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+      <div v-if="canViewApplications" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
             Candidatures récentes
@@ -522,7 +569,7 @@ const formatDate = (dateString: string) => {
       </div>
 
       <!-- Événements à venir -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+      <div v-if="canViewEvents" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
             Événements à venir
@@ -579,9 +626,9 @@ const formatDate = (dateString: string) => {
     </div>
 
     <!-- Content grid: Actualités + Activité -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div v-if="canViewNews || canViewAudit" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Actualités récentes -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+      <div v-if="canViewNews" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
             Actualités récentes
@@ -633,7 +680,7 @@ const formatDate = (dateString: string) => {
       </div>
 
       <!-- Activité récente -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+      <div v-if="canViewAudit" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
             Activité récente
@@ -681,13 +728,15 @@ const formatDate = (dateString: string) => {
     </div>
 
     <!-- Quick actions -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <div v-if="quickActions.length > 0" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
         Actions rapides
       </h2>
       <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
         <NuxtLink
-          to="/admin/contenus/actualites"
+          v-for="action in quickActions"
+          :key="action.route"
+          :to="action.route"
           class="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 dark:border-gray-700
                  hover:border-brand-blue-300 dark:hover:border-brand-blue-600 hover:bg-brand-blue-50
                  dark:hover:bg-brand-blue-900/20 transition-colors group"
@@ -695,108 +744,13 @@ const formatDate = (dateString: string) => {
           <div class="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center
                       group-hover:bg-brand-blue-100 dark:group-hover:bg-brand-blue-900/40 transition-colors">
             <font-awesome-icon
-              icon="fa-solid fa-newspaper"
+              :icon="action.icon"
               class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-brand-blue-600
                      dark:group-hover:text-brand-blue-400 transition-colors"
             />
           </div>
           <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">
-            Actualité
-          </span>
-        </NuxtLink>
-
-        <NuxtLink
-          to="/admin/contenus/evenements"
-          class="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 dark:border-gray-700
-                 hover:border-brand-blue-300 dark:hover:border-brand-blue-600 hover:bg-brand-blue-50
-                 dark:hover:bg-brand-blue-900/20 transition-colors group"
-        >
-          <div class="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center
-                      group-hover:bg-brand-blue-100 dark:group-hover:bg-brand-blue-900/40 transition-colors">
-            <font-awesome-icon
-              icon="fa-solid fa-calendar-plus"
-              class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-brand-blue-600
-                     dark:group-hover:text-brand-blue-400 transition-colors"
-            />
-          </div>
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">
-            Événement
-          </span>
-        </NuxtLink>
-
-        <NuxtLink
-          to="/admin/formations/programmes"
-          class="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 dark:border-gray-700
-                 hover:border-brand-blue-300 dark:hover:border-brand-blue-600 hover:bg-brand-blue-50
-                 dark:hover:bg-brand-blue-900/20 transition-colors group"
-        >
-          <div class="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center
-                      group-hover:bg-brand-blue-100 dark:group-hover:bg-brand-blue-900/40 transition-colors">
-            <font-awesome-icon
-              icon="fa-solid fa-graduation-cap"
-              class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-brand-blue-600
-                     dark:group-hover:text-brand-blue-400 transition-colors"
-            />
-          </div>
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">
-            Programme
-          </span>
-        </NuxtLink>
-
-        <NuxtLink
-          to="/admin/partenaires"
-          class="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 dark:border-gray-700
-                 hover:border-brand-blue-300 dark:hover:border-brand-blue-600 hover:bg-brand-blue-50
-                 dark:hover:bg-brand-blue-900/20 transition-colors group"
-        >
-          <div class="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center
-                      group-hover:bg-brand-blue-100 dark:group-hover:bg-brand-blue-900/40 transition-colors">
-            <font-awesome-icon
-              icon="fa-solid fa-handshake"
-              class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-brand-blue-600
-                     dark:group-hover:text-brand-blue-400 transition-colors"
-            />
-          </div>
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">
-            Partenaire
-          </span>
-        </NuxtLink>
-
-        <NuxtLink
-          to="/admin/mediatheque"
-          class="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 dark:border-gray-700
-                 hover:border-brand-blue-300 dark:hover:border-brand-blue-600 hover:bg-brand-blue-50
-                 dark:hover:bg-brand-blue-900/20 transition-colors group"
-        >
-          <div class="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center
-                      group-hover:bg-brand-blue-100 dark:group-hover:bg-brand-blue-900/40 transition-colors">
-            <font-awesome-icon
-              icon="fa-solid fa-cloud-arrow-up"
-              class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-brand-blue-600
-                     dark:group-hover:text-brand-blue-400 transition-colors"
-            />
-          </div>
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">
-            Média
-          </span>
-        </NuxtLink>
-
-        <NuxtLink
-          to="/admin/administration/utilisateurs"
-          class="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 dark:border-gray-700
-                 hover:border-brand-blue-300 dark:hover:border-brand-blue-600 hover:bg-brand-blue-50
-                 dark:hover:bg-brand-blue-900/20 transition-colors group"
-        >
-          <div class="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center
-                      group-hover:bg-brand-blue-100 dark:group-hover:bg-brand-blue-900/40 transition-colors">
-            <font-awesome-icon
-              icon="fa-solid fa-user-plus"
-              class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-brand-blue-600
-                     dark:group-hover:text-brand-blue-400 transition-colors"
-            />
-          </div>
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">
-            Utilisateur
+            {{ action.label }}
           </span>
         </NuxtLink>
       </div>
