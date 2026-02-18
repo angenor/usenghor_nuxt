@@ -64,8 +64,20 @@ const mapsUrl = computed(() => {
   return 'https://www.google.com/maps/place/Senghor+University/@31.2018,29.9158,17z'
 })
 
+const { $lenis } = useNuxtApp()
+
 const scrollToFooter = () => {
-  document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })
+  const el = document.getElementById('footer-contact')
+  if (!el) return
+  $lenis.scrollTo(el, {
+    offset: -20,
+    onComplete: () => {
+      el.classList.add('highlight-blink')
+      el.addEventListener('animationend', () => {
+        el.classList.remove('highlight-blink')
+      }, { once: true })
+    },
+  })
 }
 
 // Get data
@@ -692,5 +704,18 @@ const getNextBgColor = (index: number, isDark: boolean) => {
 /* Section bubble container */
 .section-bubble {
   position: relative;
+}
+</style>
+
+<style>
+/* Animation clignotement pour la section contact du footer */
+@keyframes highlight-blink {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: rgba(59, 130, 246, 0.15); }
+}
+
+.highlight-blink {
+  animation: highlight-blink 0.5s ease-in-out 3;
+  border-radius: 0.75rem;
 }
 </style>

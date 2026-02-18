@@ -331,7 +331,7 @@ onMounted(() => {
         </div>
 
         <!-- Contact Info -->
-        <div class="mt-12 pt-8 border-t border-white/10">
+        <div id="footer-contact" class="mt-12 pt-8 border-t border-white/10">
           <div class="grid md:grid-cols-3 gap-6">
             <div class="flex items-start gap-3">
               <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
