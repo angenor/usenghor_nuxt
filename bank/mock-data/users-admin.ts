@@ -609,7 +609,7 @@ export const enrichUser = (user: User): UserWithRelations => {
       name_fr: residence.name_fr,
       iso_code: residence.iso_code
     } : undefined,
-    photo_url: user.photo_external_id ? `https://i.pravatar.cc/150?u=${user.id}` : undefined,
+    photo_url: undefined,
     full_name: getFullName(user)
   }
 }

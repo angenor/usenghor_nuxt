@@ -9,12 +9,12 @@ const { t } = useI18n()
 const { getContent, getRawContent, loadContent } = useEditorialContent('history')
 const { getMediaUrl } = useMediaApi()
 
-// Résoudre une image éditoriale avec fallback sur placeholder
-function resolveImage(editorialKey: string, fallbackSrc: string, fallbackAlt: string) {
+// Résoudre une image éditoriale avec fallback null
+function resolveImage(editorialKey: string, fallbackSrc: string | null, fallbackAlt: string) {
   const mediaId = getRawContent(editorialKey)
   return {
     type: 'image' as const,
-    src: mediaId ? (getMediaUrl(mediaId, 'medium') || fallbackSrc) : fallbackSrc,
+    src: mediaId ? (getMediaUrl(mediaId, 'medium') || null) : null,
     alt: fallbackAlt,
   }
 }
@@ -25,7 +25,7 @@ useSeoMeta({
   description: () => t('history.subtitle'),
   ogTitle: () => t('history.title'),
   ogDescription: () => t('history.subtitle'),
-  ogImage: 'https://picsum.photos/seed/og-history/1200/630'
+  ogImage: undefined
 })
 
 // Breadcrumb
@@ -59,9 +59,9 @@ const timelineEvents = computed(() => [
     description: getContent('history.timeline.1989.description'),
     bgColor: phaseColors[getContent('history.timeline.1989.phase')] || '#FDF6E3',
     media: [
-      resolveImage('history.timeline.1989.image1', 'https://picsum.photos/seed/dakar89/800/600', 'Sommet de Dakar 1989'),
-      resolveImage('history.timeline.1989.image2', 'https://picsum.photos/seed/francophonie/800/600', 'Francophonie'),
-      resolveImage('history.timeline.1989.image3', 'https://picsum.photos/seed/tabatoni/800/600', 'Pierre Tabatoni'),
+      resolveImage('history.timeline.1989.image1', null, 'Sommet de Dakar 1989'),
+      resolveImage('history.timeline.1989.image2', null, 'Francophonie'),
+      resolveImage('history.timeline.1989.image3', null, 'Pierre Tabatoni'),
     ]
   },
   {
@@ -70,9 +70,9 @@ const timelineEvents = computed(() => [
     description: getContent('history.timeline.2002.description'),
     bgColor: phaseColors[getContent('history.timeline.2002.phase')] || '#E8F5E9',
     media: [
-      resolveImage('history.timeline.2002.image1', 'https://picsum.photos/seed/constant/800/600', 'Fred Constant'),
-      resolveImage('history.timeline.2002.image2', 'https://picsum.photos/seed/elkosheri/800/600', 'Ahmed El Kosheri'),
-      resolveImage('history.timeline.2002.image3', 'https://picsum.photos/seed/decade2000/800/600', 'Décennie 2000'),
+      resolveImage('history.timeline.2002.image1', null, 'Fred Constant'),
+      resolveImage('history.timeline.2002.image2', null, 'Ahmed El Kosheri'),
+      resolveImage('history.timeline.2002.image3', null, 'Décennie 2000'),
     ]
   },
   {
@@ -81,9 +81,9 @@ const timelineEvents = computed(() => [
     description: getContent('history.timeline.2016.description'),
     bgColor: phaseColors[getContent('history.timeline.2016.phase')] || '#FCE4EC',
     media: [
-      resolveImage('history.timeline.2016.image1', 'https://picsum.photos/seed/verdel/800/600', 'Pr. Thierry Verdel'),
-      resolveImage('history.timeline.2016.image2', 'https://picsum.photos/seed/strategy2016/800/600', 'Stratégie'),
-      resolveImage('history.timeline.2016.image3', 'https://picsum.photos/seed/new-era/800/600', 'Nouvelle ère'),
+      resolveImage('history.timeline.2016.image1', null, 'Pr. Thierry Verdel'),
+      resolveImage('history.timeline.2016.image2', null, 'Stratégie'),
+      resolveImage('history.timeline.2016.image3', null, 'Nouvelle ère'),
     ]
   },
   {
@@ -92,9 +92,9 @@ const timelineEvents = computed(() => [
     description: getContent('history.timeline.2020.description'),
     bgColor: phaseColors[getContent('history.timeline.2020.phase')] || '#FCE4EC',
     media: [
-      resolveImage('history.timeline.2020.image1', 'https://picsum.photos/seed/30years/800/600', '30 ans'),
-      resolveImage('history.timeline.2020.image2', 'https://picsum.photos/seed/alumni/800/600', 'Alumni'),
-      resolveImage('history.timeline.2020.image3', 'https://picsum.photos/seed/impact/800/600', 'Impact'),
+      resolveImage('history.timeline.2020.image1', null, '30 ans'),
+      resolveImage('history.timeline.2020.image2', null, 'Alumni'),
+      resolveImage('history.timeline.2020.image3', null, 'Impact'),
     ]
   }
 ])
@@ -383,14 +383,20 @@ onUnmounted(() => {
           <div class="media-stack relative w-full h-full flex items-center justify-center p-4 md:p-12 order-1 md:order-2">
             <template v-for="(media, mediaIndex) in event.media" :key="mediaIndex">
               <img
-                v-if="media.type === 'image'"
+                v-if="media.type === 'image' && media.src"
                 :src="media.src"
                 :alt="media.alt"
                 class="media-item"
               />
+              <div
+                v-else-if="media.type === 'image' && !media.src"
+                class="media-item w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+              >
+                <font-awesome-icon icon="fa-solid fa-image" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+              </div>
               <video
                 v-else
-                :src="media.src"
+                :src="media.src ?? undefined"
                 class="media-item"
                 autoplay
                 muted

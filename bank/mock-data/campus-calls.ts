@@ -40,7 +40,7 @@ export const mockCampusCalls: CampusCall[] = [
     description_fr: 'L\'Université Senghor ouvre ses candidatures pour le Master en Développement, formation phare destinée aux futurs cadres africains souhaitant contribuer au développement durable du continent.',
     description_en: 'Senghor University opens applications for the Master in Development, a flagship program for future African leaders wishing to contribute to sustainable development of the continent.',
     description_ar: 'تفتح جامعة سنغور باب التقديم لماجستير التنمية، البرنامج الرائد للقادة الأفارقة المستقبليين.',
-    image: 'https://picsum.photos/seed/call-siege-1/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png'
@@ -60,7 +60,7 @@ export const mockCampusCalls: CampusCall[] = [
     description_fr: 'Formation d\'excellence en administration et gestion des entreprises, préparant les futurs dirigeants africains aux défis du management moderne.',
     description_en: 'Excellence training in business administration, preparing future African leaders for modern management challenges.',
     description_ar: 'تدريب متميز في إدارة الأعمال لإعداد القادة الأفارقة المستقبليين.',
-    image: 'https://picsum.photos/seed/call-siege-2/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/03.png'
@@ -80,7 +80,7 @@ export const mockCampusCalls: CampusCall[] = [
     description_fr: 'L\'Organisation Internationale de la Francophonie offre 30 bourses complètes pour les étudiants méritants souhaitant intégrer l\'Université Senghor.',
     description_en: 'The International Organization of La Francophonie offers 30 full scholarships for deserving students wishing to join Senghor University.',
     description_ar: 'تقدم المنظمة الدولية للفرنكوفونية 30 منحة كاملة للطلاب المستحقين.',
-    image: 'https://picsum.photos/seed/call-siege-3/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/04.jpg'
@@ -100,7 +100,7 @@ export const mockCampusCalls: CampusCall[] = [
     description_fr: 'L\'Université Senghor lance un appel à projets pour financer des recherches sur les thématiques du développement durable, de la gouvernance et de la santé en Afrique.',
     description_en: 'Senghor University launches a call for projects to fund research on sustainable development, governance and health in Africa.',
     description_ar: 'تطلق جامعة سنغور دعوة لمشاريع لتمويل البحوث حول التنمية المستدامة.',
-    image: 'https://picsum.photos/seed/call-siege-4/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg'
@@ -120,7 +120,7 @@ export const mockCampusCalls: CampusCall[] = [
     description_fr: 'Programme de bourses en partenariat avec l\'Agence Universitaire de la Francophonie pour favoriser la mobilité des étudiants et enseignants.',
     description_en: 'Scholarship program in partnership with the Agence Universitaire de la Francophonie to promote student and teacher mobility.',
     description_ar: 'برنامج منح بالشراكة مع الوكالة الجامعية للفرنكوفونية.',
-    image: 'https://picsum.photos/seed/call-siege-5/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png'
     ],
@@ -140,7 +140,7 @@ export const mockCampusCalls: CampusCall[] = [
     description_fr: 'L\'Université Senghor recrute un enseignant-chercheur spécialisé en économie du développement. Doctorat exigé avec publications dans des revues à comité de lecture.',
     description_en: 'Senghor University is recruiting a lecturer-researcher specialized in development economics. PhD required with publications in peer-reviewed journals.',
     description_ar: 'تبحث جامعة سنغور عن أستاذ باحث متخصص في اقتصاديات التنمية.',
-    image: 'https://picsum.photos/seed/recruit-siege-1/800/400',
+    image: '',
     partner_logos: [],
     url: 'https://usenghor.org/recrutements/enseignant-economie',
     is_active: true
@@ -157,7 +157,7 @@ export const mockCampusCalls: CampusCall[] = [
     description_fr: 'Poste stratégique pour développer et coordonner les partenariats internationaux de l\'université. Master minimum, expérience en coopération internationale requise.',
     description_en: 'Strategic position to develop and coordinate the university\'s international partnerships. Minimum Master\'s degree, experience in international cooperation required.',
     description_ar: 'منصب استراتيجي لتطوير وتنسيق الشراكات الدولية للجامعة.',
-    image: 'https://picsum.photos/seed/recruit-siege-2/800/400',
+    image: '',
     partner_logos: [],
     url: 'https://usenghor.org/recrutements/relations-internationales',
     is_active: true
@@ -175,7 +175,7 @@ export const mockCampusCalls: CampusCall[] = [
     description_fr: 'Formation spécialisée en santé publique internationale pour les professionnels de santé francophones.',
     description_en: 'Specialized training in international public health for French-speaking health professionals.',
     description_ar: 'تدريب متخصص في الصحة العامة الدولية.',
-    image: 'https://picsum.photos/seed/call-siege-closed-1/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg'
     ],
@@ -193,7 +193,7 @@ export const mockCampusCalls: CampusCall[] = [
     description_fr: 'Programme de bourses pour doctorants travaillant sur des thématiques de développement africain.',
     description_en: 'Scholarship program for doctoral students working on African development topics.',
     description_ar: 'برنامج منح لطلاب الدكتوراه.',
-    image: 'https://picsum.photos/seed/call-siege-closed-2/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png'
     ],
@@ -212,7 +212,7 @@ export const mockCampusCalls: CampusCall[] = [
     deadline: '2025-06-30',
     description_fr: 'Le campus de Dakar lance son appel à candidatures pour le Master en Management des Organisations pour la rentrée 2025.',
     description_en: 'The Dakar campus launches its call for applications for the Master in Organizational Management for the 2025 academic year.',
-    image: 'https://picsum.photos/seed/call-dakar-1/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/20.jpg',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg'
@@ -231,7 +231,7 @@ export const mockCampusCalls: CampusCall[] = [
     deadline: '2025-05-15',
     description_fr: 'Bourses couvrant les frais de scolarité pour les étudiants méritants du Master Santé Publique.',
     description_en: 'Scholarships covering tuition fees for deserving students in the Public Health Master.',
-    image: 'https://picsum.photos/seed/call-dakar-2/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/20.jpg'
     ],
@@ -250,7 +250,7 @@ export const mockCampusCalls: CampusCall[] = [
     deadline: '2025-04-30',
     description_fr: 'Le campus de Yaoundé recherche des projets innovants dans le domaine de la gestion environnementale pour l\'Afrique Centrale.',
     description_en: 'The Yaoundé campus seeks innovative projects in environmental management for Central Africa.',
-    image: 'https://picsum.photos/seed/call-yaounde-1/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/17.jpg',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg'
@@ -270,7 +270,7 @@ export const mockCampusCalls: CampusCall[] = [
     deadline: '2025-09-15',
     description_fr: 'L\'Université Senghor, en partenariat avec l\'ENA de Côte d\'Ivoire et l\'Université Félix Houphouët-Boigny, ouvre les candidatures pour le Master 2 en Pilotage et Évaluation des Politiques Publiques. Cette formation d\'excellence vise à former des cadres supérieurs capables de concevoir, piloter et évaluer les politiques publiques dans l\'espace francophone africain.',
     description_en: 'Senghor University, in partnership with ENA of Côte d\'Ivoire and Félix Houphouët-Boigny University, opens applications for the Master 2 in Public Policy Management and Evaluation. This program of excellence aims to train senior executives capable of designing, managing and evaluating public policies in the francophone African space.',
-    image: 'https://picsum.photos/seed/call-abidjan-pp/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.png',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg',
@@ -291,7 +291,7 @@ export const mockCampusCalls: CampusCall[] = [
     deadline: '2025-07-15',
     description_fr: 'Le campus d\'Abidjan lance son appel à candidatures pour le Master 2 en Culture et Industries Créatives, en partenariat avec le Ministère de la Culture et de la Francophonie. Formation axée sur le management culturel, l\'économie créative et la valorisation du patrimoine africain.',
     description_en: 'The Abidjan campus launches its call for applications for the Master 2 in Culture and Creative Industries, in partnership with the Ministry of Culture and Francophonie. Training focused on cultural management, creative economy and the enhancement of African heritage.',
-    image: 'https://picsum.photos/seed/call-abidjan-culture/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.png',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/03.png',
@@ -311,7 +311,7 @@ export const mockCampusCalls: CampusCall[] = [
     deadline: '2025-06-30',
     description_fr: 'L\'Organisation Internationale de la Francophonie (OIF) et l\'Université Senghor offrent 15 bourses d\'excellence couvrant les frais de scolarité et une allocation mensuelle pour les étudiants méritants souhaitant intégrer les Masters du campus d\'Abidjan.',
     description_en: 'The International Organization of La Francophonie (OIF) and Senghor University offer 15 excellence scholarships covering tuition fees and a monthly allowance for deserving students wishing to join the Masters programs at the Abidjan campus.',
-    image: 'https://picsum.photos/seed/call-abidjan-bourse/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png',
@@ -332,7 +332,7 @@ export const mockCampusCalls: CampusCall[] = [
     deadline: '2025-08-31',
     description_fr: 'Le campus d\'Abidjan, avec le soutien de l\'Agence Universitaire de la Francophonie (AUF), lance un appel à projets destiné aux chercheurs et doctorants travaillant sur des solutions innovantes pour le développement durable en Afrique de l\'Ouest.',
     description_en: 'The Abidjan campus, with the support of the Agence Universitaire de la Francophonie (AUF), launches a call for projects for researchers and doctoral students working on innovative solutions for sustainable development in West Africa.',
-    image: 'https://picsum.photos/seed/call-abidjan-innovation/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.png',
@@ -354,7 +354,7 @@ export const mockCampusCalls: CampusCall[] = [
     deadline: '2025-05-31',
     description_fr: 'Programme de bourses pour faciliter la mobilité des étudiants entre les campus du Maghreb.',
     description_en: 'Scholarship program to facilitate student mobility between Maghreb campuses.',
-    image: 'https://picsum.photos/seed/call-tunis-1/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/27.jpg',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.jpg'
@@ -373,7 +373,7 @@ export const mockCampusCalls: CampusCall[] = [
     status: 'open',
     deadline: '2025-06-15',
     description_fr: 'Le campus de Rabat recrute pour son Master en Gestion du Patrimoine Culturel.',
-    image: 'https://picsum.photos/seed/call-rabat-1/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/31.jpg',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/03.jpg'
@@ -391,7 +391,7 @@ export const mockCampusCalls: CampusCall[] = [
     status: 'open',
     deadline: '2025-08-30',
     description_fr: 'Projets de recherche sur la conservation des forêts du bassin du Congo.',
-    image: 'https://picsum.photos/seed/call-libreville-1/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/25.jpg'
     ],
@@ -408,7 +408,7 @@ export const mockCampusCalls: CampusCall[] = [
     status: 'open',
     deadline: '2025-07-01',
     description_fr: 'Ouverture des candidatures pour le Master en Santé Publique, spécialisation Santé Communautaire.',
-    image: 'https://picsum.photos/seed/call-cotonou-1/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/11.jpg',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg'
@@ -429,7 +429,7 @@ export const mockCampusCalls: CampusCall[] = [
     deadline: '2024-06-30',
     description_fr: 'Formation destinée aux professionnels RH souhaitant renforcer leurs compétences en management des ressources humaines dans le contexte africain.',
     description_en: 'Training for HR professionals looking to strengthen their human resources management skills in the African context.',
-    image: 'https://picsum.photos/seed/call-abidjan-rh-closed/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.png',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg'
@@ -446,7 +446,7 @@ export const mockCampusCalls: CampusCall[] = [
     deadline: '2024-09-15',
     description_fr: 'Soutien aux projets innovants dans le domaine de l\'économie sociale et solidaire en Afrique de l\'Ouest.',
     description_en: 'Support for innovative projects in the field of social and solidarity economy in West Africa.',
-    image: 'https://picsum.photos/seed/call-abidjan-ess-closed/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.png'
@@ -463,7 +463,7 @@ export const mockCampusCalls: CampusCall[] = [
     deadline: '2024-05-31',
     description_fr: 'Programme de bourses pour doctorants travaillant sur des thématiques liées au développement culturel africain.',
     description_en: 'Scholarship program for doctoral students working on topics related to African cultural development.',
-    image: 'https://picsum.photos/seed/call-abidjan-doctorat-closed/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png'
@@ -484,7 +484,7 @@ export const mockCampusCalls: CampusCall[] = [
     deadline: '2025-04-30',
     description_fr: 'Le campus d\'Abidjan recrute un enseignant-chercheur (H/F) spécialisé en management culturel et économie créative. Doctorat exigé avec une expérience d\'au moins 3 ans dans l\'enseignement supérieur.',
     description_en: 'The Abidjan campus is recruiting a lecturer-researcher (M/F) specialized in cultural management and creative economy. PhD required with at least 3 years of experience in higher education.',
-    image: 'https://picsum.photos/seed/recruit-abidjan-1/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.png'
     ],
@@ -501,7 +501,7 @@ export const mockCampusCalls: CampusCall[] = [
     deadline: '2025-05-15',
     description_fr: 'Poste de coordinateur pédagogique pour assurer le suivi des programmes de Master et la coordination avec les universités partenaires. Master minimum, 5 ans d\'expérience.',
     description_en: 'Academic coordinator position to ensure monitoring of Master programs and coordination with partner universities. Minimum Master degree, 5 years of experience.',
-    image: 'https://picsum.photos/seed/recruit-abidjan-2/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.png'
     ],
@@ -518,7 +518,7 @@ export const mockCampusCalls: CampusCall[] = [
     deadline: '2025-03-31',
     description_fr: 'Recrutement d\'un(e) assistant(e) pour la gestion administrative et financière du campus. BAC+3 en gestion, comptabilité ou administration. Maîtrise du français et de l\'anglais appréciée.',
     description_en: 'Recruitment of an assistant for administrative and financial management of the campus. Bachelor\'s degree in management, accounting or administration. French and English proficiency appreciated.',
-    image: 'https://picsum.photos/seed/recruit-abidjan-3/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.png'
     ],
@@ -638,7 +638,7 @@ Partial and full scholarships are available for deserving candidates. Participat
 - خبرة مهنية لا تقل عن 5 سنوات
 - القدرة على قيادة مشاريع التحول
 - الالتزام بالتنمية المستدامة`,
-    image: 'https://picsum.photos/seed/call-ta-2025/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png'
@@ -699,7 +699,7 @@ Scholarships are awarded based on:
 - Leadership potential
 - Expected impact on home organization
 - Motivation and commitment`,
-    image: 'https://picsum.photos/seed/call-ta-bourses/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg'
@@ -720,7 +720,7 @@ Scholarships are awarded based on:
     description_fr: 'La cohorte 2024 a accueilli 45 cadres dirigeants de 12 pays africains francophones.',
     description_en: 'The 2024 cohort welcomed 45 senior executives from 12 French-speaking African countries.',
     description_ar: 'استقبل فوج 2024 45 مديراً تنفيذياً من 12 دولة أفريقية ناطقة بالفرنسية.',
-    image: 'https://picsum.photos/seed/call-ta-2024/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg'
     ],
@@ -811,7 +811,7 @@ KreAfrika organizes its first **international Bootcamp** in Marseille from June 
 - Project presentations
 - Certificate ceremony
 - Closing cocktail`,
-    image: 'https://picsum.photos/seed/call-kreafrika-bootcamp/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/31.jpg',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png'
@@ -852,7 +852,7 @@ Le campus d'Abidjan accueille le 5ème séminaire régional KreAfrika, consacré
 - Experts en financement culturel
 - Entrepreneurs à succès du secteur
 - Représentants des bailleurs de fonds`,
-    image: 'https://picsum.photos/seed/call-kreafrika-abidjan/800/400',
+    image: '',
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.png',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/31.jpg'

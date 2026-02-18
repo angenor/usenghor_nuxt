@@ -158,16 +158,15 @@ const callUrl = computed(() => {
   return (props.call as CampusCall).url
 })
 
-// Get image
+// Get image (null if no image available)
 const callImage = computed(() => {
   if (isApiCall.value) {
     const apiCall = props.call as ApplicationCallPublic
-    // Use placeholder if no cover image
     return apiCall.cover_image_external_id
       ? `/api/public/media/${apiCall.cover_image_external_id}/download?variant=medium`
-      : 'https://picsum.photos/seed/call/800/600'
+      : null
   }
-  return (props.call as CampusCall).image
+  return (props.call as CampusCall).image || null
 })
 
 // Get partner logos (only for mock data)
@@ -182,8 +181,15 @@ const partnerLogos = computed(() => {
 <template>
   <div
     class="blog-card group relative block w-full h-[380px] bg-cover bg-center bg-no-repeat overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
-    :style="{ backgroundImage: `url(${callImage})` }"
+    :style="callImage ? { backgroundImage: `url(${callImage})` } : {}"
   >
+    <!-- Icon placeholder when no cover image -->
+    <div
+      v-if="!callImage"
+      class="absolute inset-0 bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+    >
+      <font-awesome-icon icon="fa-solid fa-bullhorn" class="w-16 h-16 text-gray-400 dark:text-gray-500" />
+    </div>
     <!-- Content mask (white area on left) - inline-block -->
     <div class="content-mask">
       <!-- Type badge -->

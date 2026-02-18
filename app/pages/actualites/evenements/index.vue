@@ -7,12 +7,12 @@ const { getUpcomingEvents: getApiUpcomingEvents, getPastEvents: getApiPastEvents
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
 // Helper pour obtenir l'URL de l'image de couverture selon la variante souhaitée
-function getCoverImageUrl(item: EventPublic, variant: 'low' | 'medium' | 'original' = 'medium'): string {
+function getCoverImageUrl(item: EventPublic, variant: 'low' | 'medium' | 'original' = 'medium'): string | null {
   if ((item as any).cover_image_external_id) {
     const originalUrl = getMediaUrl((item as any).cover_image_external_id)
-    return originalUrl ? getImageVariantUrl(originalUrl, variant) : 'https://picsum.photos/seed/default-event/600/400'
+    return originalUrl ? getImageVariantUrl(originalUrl, variant) : null
   }
-  return item.cover_image || 'https://picsum.photos/seed/default-event/600/400'
+  return item.cover_image || null
 }
 
 // SEO
@@ -174,11 +174,15 @@ const typeColors: Record<string, string> = {
           >
             <!-- Background image -->
             <img
-              :src="getCoverImageUrl(event, 'medium')"
+              v-if="getCoverImageUrl(event, 'medium')"
+              :src="getCoverImageUrl(event, 'medium')!"
               :alt="getLocalizedTitle(event)"
               class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               loading="lazy"
             >
+            <div v-else class="absolute inset-0 w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+              <font-awesome-icon icon="fa-solid fa-calendar" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+            </div>
 
             <!-- Gradient overlay -->
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-300 group-hover:from-black/90"></div>
@@ -241,11 +245,15 @@ const typeColors: Record<string, string> = {
                 <!-- Thumbnail -->
                 <div class="md:w-1/4 overflow-hidden rounded-lg">
                   <img
-                    :src="getCoverImageUrl(event, 'low')"
+                    v-if="getCoverImageUrl(event, 'low')"
+                    :src="getCoverImageUrl(event, 'low')!"
                     :alt="getLocalizedTitle(event)"
                     class="w-full h-40 md:h-32 object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
                   >
+                  <div v-else class="w-full h-40 md:h-32 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                    <font-awesome-icon icon="fa-solid fa-calendar" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                  </div>
                 </div>
 
                 <!-- Content -->

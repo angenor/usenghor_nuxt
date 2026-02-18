@@ -8,12 +8,12 @@ const { getNewsBySlug: getPublicNewsBySlug, getAllPublishedNews } = usePublicNew
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
 // Helper pour obtenir l'URL de l'image de couverture selon la variante souhaitée
-function getCoverImageUrl(item: NewsDisplay, variant: 'low' | 'medium' | 'original' = 'medium'): string {
+function getCoverImageUrl(item: NewsDisplay, variant: 'low' | 'medium' | 'original' = 'medium'): string | null {
   if (item.cover_image_external_id) {
     const originalUrl = getMediaUrl(item.cover_image_external_id)
-    return originalUrl ? getImageVariantUrl(originalUrl, variant) : 'https://picsum.photos/seed/default/800/500'
+    return originalUrl ? getImageVariantUrl(originalUrl, variant) : null
   }
-  return item.cover_image || 'https://picsum.photos/seed/default/800/500'
+  return item.cover_image || null
 }
 
 // Get the news item
@@ -77,7 +77,7 @@ const getLocalizedExcerpt = computed(() => {
 useSeoMeta({
   title: () => `${getLocalizedTitle.value} | ${t('actualites.seo.title')}`,
   description: () => getLocalizedExcerpt.value,
-  ogImage: () => news.value ? getCoverImageUrl(news.value) : 'https://picsum.photos/seed/og-news/1200/630'
+  ogImage: () => news.value ? getCoverImageUrl(news.value) ?? undefined : undefined
 })
 
 // Format date
@@ -115,10 +115,14 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
         <!-- Background Image -->
         <div class="absolute inset-0">
           <img
-            :src="getCoverImageUrl(news, 'original')"
+            v-if="getCoverImageUrl(news, 'original')"
+            :src="getCoverImageUrl(news, 'original')!"
             :alt="getLocalizedTitle"
             class="w-full h-full object-cover"
           >
+          <div v-else class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+            <font-awesome-icon icon="fa-solid fa-newspaper" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+          </div>
           <div class="absolute inset-0 bg-gray-900/60"></div>
         </div>
 
@@ -182,10 +186,14 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
           <!-- Featured image -->
           <div class="overflow-hidden rounded-xl mb-8 shadow-lg">
             <img
-              :src="getCoverImageUrl(news, 'medium')"
+              v-if="getCoverImageUrl(news, 'medium')"
+              :src="getCoverImageUrl(news, 'medium')!"
               :alt="getLocalizedTitle"
               class="w-full h-auto object-cover"
             >
+            <div v-else class="w-full h-64 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+              <font-awesome-icon icon="fa-solid fa-newspaper" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+            </div>
           </div>
 
           <!-- Info cards : campus, services, secteur -->
@@ -269,11 +277,15 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
                 <NuxtLink :to="localePath(`/actualites/${item.slug}`)">
                   <div class="overflow-hidden rounded-lg mb-3">
                     <img
-                      :src="getCoverImageUrl(item, 'low')"
+                      v-if="getCoverImageUrl(item, 'low')"
+                      :src="getCoverImageUrl(item, 'low')!"
                       :alt="getLocalizedTitleFor(item)"
                       class="w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
                     >
+                    <div v-else class="w-full h-40 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                      <font-awesome-icon icon="fa-solid fa-newspaper" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                    </div>
                   </div>
 
                   <h3 class="text-base font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">

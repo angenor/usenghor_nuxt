@@ -210,11 +210,11 @@ export function usePublicOrganizationApi() {
   /**
    * Retourne l'URL de l'image de couverture ou un placeholder
    */
-  function getCoverImageUrl(externalId: string | null, seed?: string): string {
+  function getCoverImageUrl(externalId: string | null, _seed?: string): string | null {
     if (externalId) {
-      return `/api/media/${externalId}`
+      return `/api/public/media/${externalId}/download`
     }
-    return `https://picsum.photos/seed/${seed || 'default'}/800/400`
+    return null
   }
 
   /**

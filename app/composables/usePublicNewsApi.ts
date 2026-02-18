@@ -72,8 +72,8 @@ export function usePublicNewsApi() {
       // Médias
       video_url: news.video_url,
       cover_image: news.cover_image_external_id
-        ? `https://picsum.photos/seed/${news.cover_image_external_id}/1200/600`
-        : null, // TODO: Résoudre via API Media
+        ? `/api/public/media/${news.cover_image_external_id}/download`
+        : null,
       cover_image_alt: news.title,
       cover_image_external_id: news.cover_image_external_id,
       // Auteur (résolu depuis le backend)

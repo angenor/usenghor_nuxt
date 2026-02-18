@@ -28,7 +28,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2025-01-20',
     excerpt_fr: 'L\'Université Senghor d\'Alexandrie a célébré son 35e anniversaire en présence de nombreuses personnalités de la Francophonie.',
     excerpt_en: 'Senghor University of Alexandria celebrated its 35th anniversary in the presence of many Francophonie dignitaries.',
-    image: 'https://picsum.photos/seed/news-siege-1/600/400',
+    image: '',
     url: '/actualites/35-ans-senghor',
     is_featured: true
   },
@@ -41,7 +41,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2025-01-18',
     excerpt_fr: 'L\'Université Senghor renforce sa collaboration avec l\'Organisation Internationale de la Francophonie pour développer de nouveaux programmes.',
     excerpt_en: 'Senghor University strengthens its collaboration with the International Organization of the Francophonie to develop new programs.',
-    image: 'https://picsum.photos/seed/news-siege-2/600/400',
+    image: '',
     is_featured: true
   },
   {
@@ -53,7 +53,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2025-01-10',
     excerpt_fr: 'L\'Université Senghor accueille cette année un nombre record d\'étudiants venus de 35 pays francophones.',
     excerpt_en: 'Senghor University welcomes a record number of students from 35 French-speaking countries this year.',
-    image: 'https://picsum.photos/seed/news-siege-3/600/400'
+    image: ''
   },
   {
     id: 'news-siege-4',
@@ -64,7 +64,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-12-15',
     excerpt_fr: 'Le Secrétaire général de l\'OIF a effectué une visite de travail à l\'Université Senghor pour discuter des perspectives de coopération.',
     excerpt_en: 'The OIF Secretary General made a working visit to Senghor University to discuss cooperation prospects.',
-    image: 'https://picsum.photos/seed/news-siege-4/600/400'
+    image: ''
   },
   {
     id: 'news-siege-5',
@@ -75,7 +75,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-12-01',
     excerpt_fr: 'L\'Université Senghor lance un programme innovant alliant intelligence artificielle et problématiques de développement en Afrique.',
     excerpt_en: 'Senghor University launches an innovative program combining artificial intelligence with development issues in Africa.',
-    image: 'https://picsum.photos/seed/news-siege-5/600/400'
+    image: ''
   },
   {
     id: 'news-siege-6',
@@ -86,7 +86,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-11-20',
     excerpt_fr: 'Le rapport annuel 2024 met en lumière les réalisations de l\'université et ses perspectives de développement.',
     excerpt_en: 'The 2024 annual report highlights the university\'s achievements and development prospects.',
-    image: 'https://picsum.photos/seed/news-siege-6/600/400'
+    image: ''
   },
   {
     id: 'news-siege-7',
@@ -97,7 +97,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-11-05',
     excerpt_fr: 'L\'Université Senghor a organisé une conférence réunissant experts et décideurs autour des enjeux de gouvernance.',
     excerpt_en: 'Senghor University organized a conference bringing together experts and decision-makers on governance issues.',
-    image: 'https://picsum.photos/seed/news-siege-7/600/400'
+    image: ''
   },
   {
     id: 'news-siege-8',
@@ -108,7 +108,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-10-25',
     excerpt_fr: 'Un accord de coopération académique a été signé entre l\'Université Senghor et l\'Université du Caire.',
     excerpt_en: 'An academic cooperation agreement was signed between Senghor University and Cairo University.',
-    image: 'https://picsum.photos/seed/news-siege-8/600/400'
+    image: ''
   },
 
   // Campus Dakar
@@ -120,7 +120,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2025-01-15',
     excerpt_fr: 'Le campus de Dakar signe un accord de coopération avec l\'Université de Bordeaux pour renforcer les échanges académiques.',
     excerpt_en: 'The Dakar campus signs a cooperation agreement with the University of Bordeaux to strengthen academic exchanges.',
-    image: 'https://picsum.photos/seed/news-dakar-1/600/400',
+    image: '',
     url: '/actualites/partenariat-bordeaux'
   },
   {
@@ -130,7 +130,7 @@ export const mockCampusNews: CampusNews[] = [
     title_en: '2024 Cohort Success: 95% Employment Rate',
     date: '2024-12-20',
     excerpt_fr: 'Les diplômés du Master Management affichent un taux d\'insertion professionnelle exceptionnel.',
-    image: 'https://picsum.photos/seed/news-dakar-2/600/400'
+    image: ''
   },
 
   // Campus Yaoundé
@@ -141,7 +141,7 @@ export const mockCampusNews: CampusNews[] = [
     title_en: 'Launch of Equatorial Forests Research Program',
     date: '2025-01-10',
     excerpt_fr: 'Le campus de Yaoundé lance un programme de recherche ambitieux sur la préservation des forêts équatoriales.',
-    image: 'https://picsum.photos/seed/news-yaounde-1/600/400'
+    image: ''
   },
   {
     id: 'news-yaounde-2',
@@ -150,7 +150,7 @@ export const mockCampusNews: CampusNews[] = [
     title_en: 'Official Visit from the Minister of Environment',
     date: '2024-11-28',
     excerpt_fr: 'Le Ministre de l\'Environnement a visité le campus pour discuter des collaborations futures.',
-    image: 'https://picsum.photos/seed/news-yaounde-2/600/400'
+    image: ''
   },
 
   // Campus Abidjan
@@ -162,7 +162,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2025-01-05',
     excerpt_fr: 'Le campus sera partenaire officiel du Marché des Arts du Spectacle Africain en mars 2025. Cette collaboration permettra aux étudiants de participer activement à l\'organisation de cet événement majeur de la scène culturelle africaine.',
     excerpt_en: 'The campus will be an official partner of the African Performing Arts Market in March 2025. This collaboration will allow students to actively participate in organizing this major event on the African cultural scene.',
-    image: 'https://picsum.photos/seed/news-abidjan-1/800/500',
+    image: '',
     url: '/actualites/masa-2025'
   },
   {
@@ -173,7 +173,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-12-15',
     excerpt_fr: 'Les étudiants du Master Culture présentent leurs projets de fin d\'études au musée. Une occasion unique de découvrir les talents émergents de la scène culturelle ivoirienne.',
     excerpt_en: 'Master Culture students present their final projects at the museum. A unique opportunity to discover emerging talents from the Ivorian cultural scene.',
-    image: 'https://picsum.photos/seed/news-abidjan-2/800/500'
+    image: ''
   },
   {
     id: 'news-abidjan-3',
@@ -183,7 +183,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-11-28',
     excerpt_fr: 'Le campus renforce son partenariat stratégique avec l\'École Nationale d\'Administration pour la formation des cadres de la fonction publique ivoirienne.',
     excerpt_en: 'The campus strengthens its strategic partnership with the National School of Administration for training Ivorian civil service executives.',
-    image: 'https://picsum.photos/seed/news-abidjan-3/800/500'
+    image: ''
   },
   {
     id: 'news-abidjan-4',
@@ -193,7 +193,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-10-20',
     excerpt_fr: 'Cérémonie officielle de remise des diplômes en présence du Ministre de l\'Enseignement Supérieur. 85 diplômés ont été célébrés cette année.',
     excerpt_en: 'Official graduation ceremony in the presence of the Minister of Higher Education. 85 graduates were celebrated this year.',
-    image: 'https://picsum.photos/seed/news-abidjan-4/800/500'
+    image: ''
   },
   {
     id: 'news-abidjan-5',
@@ -203,7 +203,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-09-15',
     excerpt_fr: 'Un nouveau programme de mentorat connecte les étudiants actuels avec les anciens diplômés occupant des postes stratégiques en Afrique de l\'Ouest.',
     excerpt_en: 'A new mentorship program connects current students with alumni holding strategic positions in West Africa.',
-    image: 'https://picsum.photos/seed/news-abidjan-5/800/500'
+    image: ''
   },
   {
     id: 'news-abidjan-6',
@@ -213,7 +213,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-08-22',
     excerpt_fr: 'Le campus a organisé une conférence réunissant des experts internationaux sur les enjeux du développement durable en Afrique subsaharienne.',
     excerpt_en: 'The campus organized a conference bringing together international experts on sustainable development challenges in sub-Saharan Africa.',
-    image: 'https://picsum.photos/seed/news-abidjan-6/800/500'
+    image: ''
   },
   {
     id: 'news-abidjan-7',
@@ -223,7 +223,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-07-10',
     excerpt_fr: 'Les candidatures sont ouvertes pour les Masters en Management, Culture et Politiques Publiques. Date limite : 30 septembre 2024.',
     excerpt_en: 'Applications are open for Masters in Management, Culture and Public Policy. Deadline: September 30, 2024.',
-    image: 'https://picsum.photos/seed/news-abidjan-7/800/500'
+    image: ''
   },
   {
     id: 'news-abidjan-8',
@@ -233,7 +233,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-06-05',
     excerpt_fr: 'La Secrétaire Générale de l\'Organisation Internationale de la Francophonie a visité le campus et rencontré les étudiants.',
     excerpt_en: 'The Secretary General of the International Organization of the Francophonie visited the campus and met with students.',
-    image: 'https://picsum.photos/seed/news-abidjan-8/800/500'
+    image: ''
   },
   {
     id: 'news-abidjan-9',
@@ -243,7 +243,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-05-18',
     excerpt_fr: 'Plus de 100 étudiants ont participé au hackathon pour développer des solutions innovantes aux défis sociaux de la Côte d\'Ivoire.',
     excerpt_en: 'Over 100 students participated in the hackathon to develop innovative solutions to Ivory Coast\'s social challenges.',
-    image: 'https://picsum.photos/seed/news-abidjan-9/800/500'
+    image: ''
   },
   {
     id: 'news-abidjan-10',
@@ -253,7 +253,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-04-12',
     excerpt_fr: 'Un laboratoire équipé des dernières technologies a été inauguré pour accompagner la transformation digitale de nos formations.',
     excerpt_en: 'A laboratory equipped with the latest technologies was inaugurated to support the digital transformation of our programs.',
-    image: 'https://picsum.photos/seed/news-abidjan-10/800/500'
+    image: ''
   },
 
   // Campus Tunis
@@ -266,7 +266,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2025-01-08',
     excerpt_fr: 'Le Master Santé Publique du campus de Tunis obtient l\'accréditation de l\'APHEA.',
     excerpt_en: 'The Public Health Master at the Tunis campus receives APHEA accreditation.',
-    image: 'https://picsum.photos/seed/news-tunis-1/600/400'
+    image: ''
   },
   {
     id: 'news-tunis-2',
@@ -275,7 +275,7 @@ export const mockCampusNews: CampusNews[] = [
     title_en: 'Strengthened Cooperation with WHO North Africa',
     date: '2024-12-10',
     excerpt_fr: 'Signature d\'un protocole d\'accord avec le bureau régional de l\'OMS.',
-    image: 'https://picsum.photos/seed/news-tunis-2/600/400'
+    image: ''
   },
 
   // Campus Rabat
@@ -287,7 +287,7 @@ export const mockCampusNews: CampusNews[] = [
     title_ar: 'تصنيف فرع الرباط ضمن أفضل برامج التراث',
     date: '2025-01-12',
     excerpt_fr: 'Le Master en Gestion du Patrimoine Culturel est reconnu par l\'UNESCO comme formation d\'excellence.',
-    image: 'https://picsum.photos/seed/news-rabat-1/600/400'
+    image: ''
   },
   {
     id: 'news-rabat-2',
@@ -296,7 +296,7 @@ export const mockCampusNews: CampusNews[] = [
     title_en: 'Fez Medina Restoration Project',
     date: '2024-11-20',
     excerpt_fr: 'Les étudiants participent à un projet de restauration dans le cadre de leur formation.',
-    image: 'https://picsum.photos/seed/news-rabat-2/600/400'
+    image: ''
   },
 
   // Campus Libreville
@@ -307,7 +307,7 @@ export const mockCampusNews: CampusNews[] = [
     title_en: 'New Specialization in Green Economy',
     date: '2025-01-03',
     excerpt_fr: 'Le campus lance une nouvelle spécialisation axée sur l\'économie verte et le développement durable.',
-    image: 'https://picsum.photos/seed/news-libreville-1/600/400'
+    image: ''
   },
   {
     id: 'news-libreville-2',
@@ -316,7 +316,7 @@ export const mockCampusNews: CampusNews[] = [
     title_en: 'Field Mission in Gabon National Parks',
     date: '2024-12-05',
     excerpt_fr: 'Les étudiants ont participé à une mission de terrain dans les parcs nationaux.',
-    image: 'https://picsum.photos/seed/news-libreville-2/600/400'
+    image: ''
   },
 
   // Campus Cotonou
@@ -327,7 +327,7 @@ export const mockCampusNews: CampusNews[] = [
     title_en: 'Partnership with Benin Ministry of Health',
     date: '2025-01-06',
     excerpt_fr: 'Signature d\'un accord de partenariat pour renforcer la formation des cadres de santé.',
-    image: 'https://picsum.photos/seed/news-cotonou-1/600/400'
+    image: ''
   },
   {
     id: 'news-cotonou-2',
@@ -336,7 +336,7 @@ export const mockCampusNews: CampusNews[] = [
     title_en: 'Hospital Internship: A Rewarding Experience',
     date: '2024-11-25',
     excerpt_fr: 'Témoignages des étudiants sur leurs stages dans les hôpitaux partenaires.',
-    image: 'https://picsum.photos/seed/news-cotonou-2/600/400'
+    image: ''
   },
 
   // ============================================
@@ -354,7 +354,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2025-01-10',
     excerpt_fr: 'La cérémonie de clôture de la Cohorte 2024 a célébré 45 cadres dirigeants venus de 12 pays africains, désormais équipés pour conduire le changement dans leurs organisations.',
     excerpt_en: 'The 2024 Cohort closing ceremony celebrated 45 senior executives from 12 African countries, now equipped to drive change in their organizations.',
-    image: 'https://picsum.photos/seed/news-ta-1/800/500',
+    image: '',
     url: '/actualites/transformaction-cohorte-2024'
   },
   {
@@ -367,7 +367,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-11-15',
     excerpt_fr: 'La deuxième session présentielle de la Cohorte 2024 s\'est tenue à Abidjan avec des ateliers sur l\'innovation dans le secteur public africain.',
     excerpt_en: 'The second in-person session of the 2024 Cohort was held in Abidjan with workshops on innovation in the African public sector.',
-    image: 'https://picsum.photos/seed/news-ta-2/800/500'
+    image: ''
   },
   {
     id: 'news-transformaction-3',
@@ -379,7 +379,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-09-20',
     excerpt_fr: 'L\'Université Senghor et le PNUD signent un accord de partenariat pour renforcer l\'impact de Transform\'Action Africa sur la gouvernance publique.',
     excerpt_en: 'Senghor University and UNDP sign a partnership agreement to strengthen Transform\'Action Africa\'s impact on public governance.',
-    image: 'https://picsum.photos/seed/news-ta-3/800/500'
+    image: ''
   },
   {
     id: 'news-transformaction-4',
@@ -391,7 +391,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-07-05',
     excerpt_fr: 'Marie Koné, Directrice des Ressources Humaines au Ministère de la Fonction Publique de Côte d\'Ivoire, partage son expérience Transform\'Action.',
     excerpt_en: 'Marie Koné, HR Director at the Ministry of Public Service of Côte d\'Ivoire, shares her Transform\'Action experience.',
-    image: 'https://picsum.photos/seed/news-ta-4/800/500'
+    image: ''
   },
 
   // KreAfrika - Actualités
@@ -405,7 +405,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2025-01-08',
     excerpt_fr: 'KreAfrika sera présent au Marché du Film de Cannes 2025 pour accompagner 10 professionnels africains du cinéma et de l\'audiovisuel.',
     excerpt_en: 'KreAfrika will be present at the Cannes Film Market 2025 to support 10 African cinema and audiovisual professionals.',
-    image: 'https://picsum.photos/seed/news-kreafrika-1/800/500',
+    image: '',
     url: '/actualites/kreafrika-cannes-2025'
   },
   {
@@ -418,7 +418,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-12-01',
     excerpt_fr: 'Le séminaire régional KreAfrika de Kinshasa a réuni 120 professionnels des industries créatives d\'Afrique centrale sur la gestion des équipements culturels.',
     excerpt_en: 'The KreAfrika regional seminar in Kinshasa brought together 120 creative industries professionals from Central Africa on cultural facility management.',
-    image: 'https://picsum.photos/seed/news-kreafrika-2/800/500'
+    image: ''
   },
   {
     id: 'news-kreafrika-3',
@@ -430,7 +430,7 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-10-15',
     excerpt_fr: 'La nouvelle plateforme de formation en ligne KreAfrika propose 15 modules gratuits pour les professionnels des industries créatives africaines.',
     excerpt_en: 'The new KreAfrika online training platform offers 15 free modules for African creative industries professionals.',
-    image: 'https://picsum.photos/seed/news-kreafrika-3/800/500'
+    image: ''
   },
   {
     id: 'news-kreafrika-4',
@@ -442,6 +442,6 @@ export const mockCampusNews: CampusNews[] = [
     date: '2024-08-20',
     excerpt_fr: 'KreAfrika devient partenaire officiel du Marché des Arts du Spectacle Africain (MASA) pour les éditions 2025 et 2026.',
     excerpt_en: 'KreAfrika becomes official partner of the African Performing Arts Market (MASA) for the 2025 and 2026 editions.',
-    image: 'https://picsum.photos/seed/news-kreafrika-4/800/500'
+    image: ''
   }
 ]

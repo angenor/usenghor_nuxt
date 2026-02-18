@@ -23,12 +23,12 @@ const { listOngoingCalls } = usePublicCallsApi()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
 // Helper pour obtenir l'URL de l'image de couverture (utilise la variante low pour les miniatures)
-function getCoverImageUrl(item: any): string {
+function getCoverImageUrl(item: any): string | null {
   if (item.cover_image_external_id) {
     const originalUrl = getMediaUrl(item.cover_image_external_id)
-    return originalUrl ? getImageVariantUrl(originalUrl, 'low') : `https://picsum.photos/seed/${item.slug}/100/100`
+    return originalUrl ? getImageVariantUrl(originalUrl, 'low') : null
   }
-  return item.cover_image || `https://picsum.photos/seed/${item.slug}/100/100`
+  return item.cover_image || null
 }
 
 // Mapping des types API vers les clés i18n
@@ -169,11 +169,18 @@ const typeColors: Record<string, string> = {
             <!-- Thumbnail -->
             <div class="flex-shrink-0 w-16 h-16 overflow-hidden rounded-lg">
               <img
-                :src="getCoverImageUrl(news)"
+                v-if="getCoverImageUrl(news)"
+                :src="getCoverImageUrl(news)!"
                 :alt="news.title"
                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                 loading="lazy"
               >
+              <div
+                v-else
+                class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+              >
+                <font-awesome-icon icon="fa-solid fa-newspaper" class="w-6 h-6 text-gray-400 dark:text-gray-500" />
+              </div>
             </div>
 
             <!-- Content -->

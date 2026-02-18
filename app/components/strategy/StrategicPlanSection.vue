@@ -8,7 +8,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  coverImage: 'https://picsum.photos/seed/strategic-plan/800/600',
+  coverImage: '',
   pdfUrl: '/documents/plan-strategique-2024-2030.pdf',
   pdfLabel: 'Telecharger le plan strategique (PDF)'
 })
@@ -27,10 +27,17 @@ const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', t
         <div class="relative">
           <div class="relative rounded-2xl overflow-hidden shadow-2xl">
             <img
+              v-if="props.coverImage"
               :src="props.coverImage"
               :alt="props.title"
               class="w-full h-auto object-cover aspect-[4/3]"
             />
+            <div
+              v-else
+              class="aspect-[4/3] bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center"
+            >
+              <font-awesome-icon icon="fa-solid fa-chart-line" class="w-16 h-16 text-gray-400 dark:text-gray-500" />
+            </div>
             <!-- Gradient overlay -->
             <div class="absolute inset-0 bg-gradient-to-t from-brand-blue-900/30 to-transparent"></div>
           </div>

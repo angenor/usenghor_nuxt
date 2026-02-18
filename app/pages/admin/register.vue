@@ -265,7 +265,7 @@ onMounted(() => {
             <!-- Panneau gauche : Image + branding (desktop) -->
             <div class="relative hidden lg:col-span-4 lg:block">
               <img
-                src="https://picsum.photos/seed/senghor-register/800/1200"
+                src="/images/bg/backgroud_senghor2.jpg"
                 alt=""
                 class="absolute inset-0 h-full w-full object-cover"
               >

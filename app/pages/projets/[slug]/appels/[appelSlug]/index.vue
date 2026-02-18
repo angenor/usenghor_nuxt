@@ -147,10 +147,14 @@ const breadcrumb = computed(() => [
             <!-- Cover image -->
             <div class="rounded-xl overflow-hidden shadow-lg mb-8">
               <img
-                :src="call.cover_image || 'https://picsum.photos/seed/call/1200/600'"
+                v-if="call.cover_image"
+                :src="call.cover_image"
                 :alt="getCallTitle"
                 class="w-full h-64 md:h-80 object-cover"
               >
+              <div v-else class="w-full h-64 md:h-80 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                <font-awesome-icon icon="fa-solid fa-bullhorn" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+              </div>
             </div>
 
             <!-- Status badge -->
@@ -263,10 +267,14 @@ const breadcrumb = computed(() => [
                   class="group flex items-center gap-3"
                 >
                   <img
-                    :src="project.cover_image || 'https://picsum.photos/seed/project/200/200'"
+                    v-if="project.cover_image"
+                    :src="project.cover_image"
                     :alt="getProjectTitle"
                     class="w-12 h-12 rounded-lg object-cover"
                   >
+                  <div v-else class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                    <font-awesome-icon icon="fa-solid fa-diagram-project" class="w-6 h-6 text-gray-400 dark:text-gray-500" />
+                  </div>
                   <span class="font-bold text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                     {{ getProjectTitle }}
                   </span>

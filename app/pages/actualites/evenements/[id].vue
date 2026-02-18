@@ -9,12 +9,12 @@ const { getCampusById, getFlagEmoji } = useMockData()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
 // Helper pour obtenir l'URL de l'image de couverture selon la variante souhaitée
-function getCoverImageUrl(item: EventPublic, variant: 'low' | 'medium' | 'original' = 'medium'): string {
+function getCoverImageUrl(item: EventPublic, variant: 'low' | 'medium' | 'original' = 'medium'): string | null {
   if ((item as any).cover_image_external_id) {
     const originalUrl = getMediaUrl((item as any).cover_image_external_id)
-    return originalUrl ? getImageVariantUrl(originalUrl, variant) : 'https://picsum.photos/seed/default-event/600/400'
+    return originalUrl ? getImageVariantUrl(originalUrl, variant) : null
   }
-  return item.cover_image || 'https://picsum.photos/seed/default-event/600/400'
+  return item.cover_image || null
 }
 
 // Get the event
@@ -72,7 +72,7 @@ const getLocalizedLocation = computed(() => {
 useSeoMeta({
   title: () => `${getLocalizedTitle.value} | ${t('actualites.events.title')}`,
   description: () => event.value?.description || '',
-  ogImage: () => event.value ? getCoverImageUrl(event.value) : 'https://picsum.photos/seed/og-event/1200/630'
+  ogImage: () => event.value ? getCoverImageUrl(event.value) ?? undefined : undefined
 })
 
 // Format date
@@ -209,10 +209,14 @@ const parsedContent = computed(() => {
       <!-- Background Image -->
       <div class="absolute inset-0">
         <img
-          :src="getCoverImageUrl(event, 'original')"
+          v-if="getCoverImageUrl(event, 'original')"
+          :src="getCoverImageUrl(event, 'original')!"
           :alt="getLocalizedTitle"
           class="w-full h-full object-cover"
         >
+        <div v-else class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+          <font-awesome-icon icon="fa-solid fa-calendar" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+        </div>
       </div>
 
       <!-- Content -->
@@ -278,10 +282,14 @@ const parsedContent = computed(() => {
           <!-- Featured image -->
           <div class="overflow-hidden rounded-xl mb-8 shadow-lg">
             <img
-              :src="getCoverImageUrl(event, 'medium')"
+              v-if="getCoverImageUrl(event, 'medium')"
+              :src="getCoverImageUrl(event, 'medium')!"
               :alt="getLocalizedTitle"
               class="w-full h-auto object-cover"
             >
+            <div v-else class="w-full h-64 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+              <font-awesome-icon icon="fa-solid fa-calendar" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+            </div>
           </div>
 
           <!-- Info cards -->
@@ -380,11 +388,15 @@ const parsedContent = computed(() => {
                 <NuxtLink :to="localePath(`/actualites/evenements/${item.slug}`)">
                   <!-- Background image -->
                   <img
-                    :src="getCoverImageUrl(item, 'low')"
+                    v-if="getCoverImageUrl(item, 'low')"
+                    :src="getCoverImageUrl(item, 'low')!"
                     :alt="getLocalizedTitleFor(item)"
                     class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"
                   >
+                  <div v-else class="absolute inset-0 w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                    <font-awesome-icon icon="fa-solid fa-calendar" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                  </div>
 
                   <!-- Gradient overlay -->
                   <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>

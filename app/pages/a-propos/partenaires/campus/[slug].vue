@@ -31,7 +31,7 @@ useSeoMeta({
   description: () => campus.value?.description || t('partners.seo.description'),
   ogTitle: () => `${campus.value?.name || ''} | ${t('partners.seo.title')}`,
   ogDescription: () => campus.value?.description || t('partners.seo.description'),
-  ogImage: () => campus.value ? getCoverImageUrl(campus.value) : 'https://picsum.photos/seed/og-campus/1200/630'
+  ogImage: () => campus.value ? (getCoverImageUrl(campus.value) ?? undefined) : undefined
 })
 
 // Breadcrumb

@@ -199,7 +199,7 @@ useSeoMeta({
   description: () => getLocalizedDescription.value,
   ogImage: () => program.value?.cover_image_external_id
     ? `/api/public/media/${program.value.cover_image_external_id}/download`
-    : 'https://picsum.photos/seed/og-formation/1200/630',
+    : undefined,
 })
 
 // Type configuration
@@ -320,12 +320,17 @@ const toggleSemester = (num: number) => {
             <div class="mb-8">
               <div class="relative h-56 md:h-64 lg:h-72 rounded-2xl overflow-hidden shadow-lg">
                 <img
-                  :src="program.cover_image_external_id
-                    ? `/api/public/media/${program.cover_image_external_id}/download`
-                    : `https://picsum.photos/seed/${program.slug}/1920/1080`"
+                  v-if="program.cover_image_external_id"
+                  :src="`/api/public/media/${program.cover_image_external_id}/download`"
                   :alt="getLocalizedTitle"
                   class="w-full h-full object-cover"
                 >
+                <div
+                  v-else
+                  class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+                >
+                  <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-16 h-16 text-gray-400 dark:text-gray-500" />
+                </div>
                 <!-- Gradient overlay -->
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
@@ -571,13 +576,18 @@ const toggleSemester = (num: number) => {
                 >
                   <div class="overflow-hidden h-32">
                     <img
-                      :src="related.cover_image_external_id
-                        ? `/api/public/media/${related.cover_image_external_id}/download?variant=low`
-                        : `https://picsum.photos/seed/${related.slug}/400/200`"
+                      v-if="related.cover_image_external_id"
+                      :src="`/api/public/media/${related.cover_image_external_id}/download?variant=low`"
                       :alt="getLocalizedTitleFor(related)"
                       class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
                     >
+                    <div
+                      v-else
+                      class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                    </div>
                   </div>
 
                   <div class="p-4">

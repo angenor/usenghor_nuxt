@@ -38,7 +38,7 @@ export const mockDocuments: Document[] = [
     year: 1989,
     is_public: true,
     sort_order: 1,
-    cover_image: 'https://picsum.photos/seed/doc-convention/400/500'
+    cover_image: null
   },
   {
     id: 'doc-statuts',
@@ -53,7 +53,7 @@ export const mockDocuments: Document[] = [
     year: 2020,
     is_public: true,
     sort_order: 2,
-    cover_image: 'https://picsum.photos/seed/doc-statuts/400/500'
+    cover_image: null
   },
   {
     id: 'doc-reglement',
@@ -68,7 +68,7 @@ export const mockDocuments: Document[] = [
     year: 2022,
     is_public: true,
     sort_order: 3,
-    cover_image: 'https://picsum.photos/seed/doc-reglement/400/500'
+    cover_image: null
   },
 
   // === CHARTES ===

@@ -62,7 +62,7 @@ const fullName = computed(() => profile.value ? getFullName(profile.value) : '')
 
 const photoUrl = computed(() => {
   if (profile.value?.photo_url) return profile.value.photo_url
-  return `https://i.pravatar.cc/400?u=${userId}`
+  return null
 })
 
 const primaryPosition = computed(() => {
@@ -128,7 +128,7 @@ useSeoMeta({
     ? t('team.profile.seo.title', { name: fullName.value })
     : t('team.seo.title'),
   ogDescription: () => profile.value?.biography?.substring(0, 160) || '',
-  ogImage: () => photoUrl.value,
+  ogImage: () => photoUrl.value ?? undefined,
 })
 </script>
 
@@ -186,10 +186,17 @@ useSeoMeta({
             <div class="relative shrink-0">
               <div class="w-36 h-36 lg:w-44 lg:h-44 rounded-full overflow-hidden ring-4 ring-white/20 shadow-2xl">
                 <img
+                  v-if="photoUrl"
                   :src="photoUrl"
                   :alt="fullName"
                   class="w-full h-full object-cover"
                 />
+                <div
+                  v-else
+                  class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+                >
+                  <font-awesome-icon icon="fa-solid fa-user" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                </div>
               </div>
               <!-- Badge nationalité -->
               <div

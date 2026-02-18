@@ -117,16 +117,6 @@ const getFormationName = (formation: any) => {
   return formation.title_fr
 }
 
-// Images illustratives par département (utilisant picsum avec seed pour consistance)
-const sectorImages: Record<string, string> = {
-  'sec-culture': 'https://picsum.photos/seed/culture-art/600/400',
-  'sec-environnement': 'https://picsum.photos/seed/environment-nature/600/400',
-  'sec-management': 'https://picsum.photos/seed/business-management/600/400',
-  'sec-sante': 'https://picsum.photos/seed/health-medical/600/400',
-  'sec-doctoral': 'https://picsum.photos/seed/research-doctoral/600/400'
-}
-
-const getSectorImage = (deptId: string) => sectorImages[deptId] || 'https://picsum.photos/seed/university/600/400'
 </script>
 
 <template>
@@ -179,11 +169,9 @@ const getSectorImage = (deptId: string) => sectorImages[deptId] || 'https://pics
                       : 'polygon(0 0, 100% 0, 100% 100%, 15% 100%, 0 85%)'
                   }"
                 >
-                  <img
-                    :src="getSectorImage(sec.id)"
-                    :alt="getSectorName(sec)"
-                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
+                  <div class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                    <font-awesome-icon icon="fa-solid fa-building-columns" class="w-16 h-16 text-gray-400 dark:text-gray-500" />
+                  </div>
                 </div>
                 <!-- Overlay gradient -->
                 <div

@@ -63,16 +63,16 @@ const getLocalizedDescription = computed(() => {
   return mockFormation.description_fr
 })
 
-// Get image URL (supports both mock and API data)
+// Get image URL (null if no image available)
 const formationImage = computed(() => {
   if (isApiCall.value) {
     const apiCall = props.formation as ApplicationCallPublic
     return apiCall.cover_image_external_id
       ? `/api/public/media/${apiCall.cover_image_external_id}/download?variant=medium`
-      : `https://picsum.photos/seed/${apiCall.slug}/800/600`
+      : null
   }
   const mockFormation = props.formation as CampusFormationRealisee
-  return mockFormation.image || `https://picsum.photos/seed/${mockFormation.id}/800/600`
+  return mockFormation.image || null
 })
 
 // Get formation type
@@ -120,8 +120,15 @@ const typeLabels: Record<string, string> = {
 <template>
   <div
     class="blog-card group relative block w-full h-[380px] bg-cover bg-center bg-no-repeat overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
-    :style="{ backgroundImage: `url(${formationImage})` }"
+    :style="formationImage ? { backgroundImage: `url(${formationImage})` } : {}"
   >
+    <!-- Icon placeholder when no cover image -->
+    <div
+      v-if="!formationImage"
+      class="absolute inset-0 bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+    >
+      <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-16 h-16 text-gray-400 dark:text-gray-500" />
+    </div>
     <!-- Content mask (white area on left) - inline-block -->
     <div class="content-mask">
       <!-- Type badge -->

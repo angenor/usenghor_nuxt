@@ -159,14 +159,15 @@ const uniqueCountriesCount = computed(() => {
             class="group flex flex-col items-center p-4 rounded-xl border bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:shadow-md hover:border-brand-blue-300 dark:hover:border-brand-blue-700 transition-all duration-300"
             :class="partner.website ? 'cursor-pointer' : 'cursor-default'"
           >
-            <div class="w-16 h-16 mb-2 flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 p-2">
+            <div class="relative w-16 h-16 mb-2 flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 p-2">
               <img
                 :src="getPartnerLogoUrl(partner)"
                 :alt="partner.name"
                 class="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-110"
                 loading="lazy"
-                @error="($event.target as HTMLImageElement).src = `https://picsum.photos/seed/${partner.id}/200/200`"
+                @error="($event.target as HTMLImageElement).style.display = 'none'"
               >
+              <font-awesome-icon icon="fa-solid fa-handshake" class="absolute w-8 h-8 text-gray-400 dark:text-gray-500" />
             </div>
             <span class="text-xs font-medium text-gray-700 dark:text-gray-300 text-center line-clamp-2 w-28">
               {{ partner.name }}
@@ -188,14 +189,15 @@ const uniqueCountriesCount = computed(() => {
             :class="partner.website ? 'cursor-pointer' : 'cursor-default'"
             tabindex="-1"
           >
-            <div class="w-16 h-16 mb-2 flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 p-2">
+            <div class="relative w-16 h-16 mb-2 flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 p-2">
               <img
                 :src="getPartnerLogoUrl(partner)"
                 :alt="partner.name"
                 class="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-110"
                 loading="lazy"
-                @error="($event.target as HTMLImageElement).src = `https://picsum.photos/seed/${partner.id}/200/200`"
+                @error="($event.target as HTMLImageElement).style.display = 'none'"
               >
+              <font-awesome-icon icon="fa-solid fa-handshake" class="absolute w-8 h-8 text-gray-400 dark:text-gray-500" />
             </div>
             <span class="text-xs font-medium text-gray-700 dark:text-gray-300 text-center line-clamp-2 w-28">
               {{ partner.name }}
@@ -315,8 +317,9 @@ const uniqueCountriesCount = computed(() => {
                   :alt="partner.name"
                   class="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-105"
                   loading="lazy"
-                  @error="($event.target as HTMLImageElement).src = `https://picsum.photos/seed/${partner.id}/200/200`"
+                  @error="($event.target as HTMLImageElement).style.display = 'none'"
                 >
+                <font-awesome-icon icon="fa-solid fa-handshake" class="absolute w-8 h-8 text-gray-400 dark:text-gray-500" />
               </div>
 
               <!-- Name -->

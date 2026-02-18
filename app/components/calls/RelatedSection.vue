@@ -17,7 +17,7 @@ const getCallImage = (call: ApplicationCallPublicWithDetails) => {
   if (call.cover_image_external_id) {
     return `/api/public/media/${call.cover_image_external_id}/download?variant=low`
   }
-  return `https://picsum.photos/seed/${call.slug}/400/200`
+  return null
 }
 </script>
 
@@ -39,11 +39,15 @@ const getCallImage = (call: ApplicationCallPublicWithDetails) => {
         <NuxtLink :to="localePath(`/actualites/appels/${item.slug}`)">
           <div class="overflow-hidden h-32">
             <img
-              :src="getCallImage(item)"
+              v-if="getCallImage(item)"
+              :src="getCallImage(item)!"
               :alt="item.title"
               class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
             >
+            <div v-else class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+              <font-awesome-icon icon="fa-solid fa-bullhorn" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+            </div>
           </div>
 
           <div class="p-4">

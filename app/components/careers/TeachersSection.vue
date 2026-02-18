@@ -28,7 +28,6 @@ const positions = computed(() => {
   }))
 })
 
-const imageUrl = computed(() => props.image || 'https://picsum.photos/seed/teachers-career/800/600')
 </script>
 
 <template>
@@ -43,10 +42,17 @@ const imageUrl = computed(() => props.image || 'https://picsum.photos/seed/teach
         <div class="relative order-2 lg:order-1">
           <div class="relative rounded-2xl overflow-hidden shadow-2xl">
             <img
-              :src="imageUrl"
+              v-if="props.image"
+              :src="props.image"
               :alt="getContent('careers.teachers.title')"
               class="w-full h-auto object-cover aspect-[4/3]"
             />
+            <div
+              v-else
+              class="aspect-[4/3] bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center"
+            >
+              <font-awesome-icon icon="fa-solid fa-chalkboard-user" class="w-16 h-16 text-gray-400 dark:text-gray-500" />
+            </div>
             <div class="absolute inset-0 bg-gradient-to-tr from-lime-500/20 to-transparent"></div>
           </div>
           <div class="absolute -bottom-4 -left-4 w-24 h-24 rounded-2xl -z-10 bg-lime-500/10"></div>

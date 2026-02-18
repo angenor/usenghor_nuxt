@@ -77,7 +77,8 @@ const formatFileSize = (bytes?: number) => {
                 <!-- Face avant -->
                 <div
                   class="flip-card-front"
-                  :style="{ backgroundImage: `url(${doc.cover_image || 'https://picsum.photos/seed/' + doc.id + '/400/500'})` }"
+                  :style="doc.cover_image ? { backgroundImage: `url(${doc.cover_image})` } : {}"
+                  :class="!doc.cover_image ? 'bg-gray-700 dark:bg-gray-800' : ''"
                 >
                   <div class="flip-card-inner">
                     <div class="w-14 h-14 bg-brand-red-500/80 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4">
@@ -96,7 +97,8 @@ const formatFileSize = (bytes?: number) => {
                 <!-- Face arrière -->
                 <div
                   class="flip-card-back"
-                  :style="{ backgroundImage: `url(${doc.cover_image || 'https://picsum.photos/seed/' + doc.id + '/400/500'})` }"
+                  :style="doc.cover_image ? { backgroundImage: `url(${doc.cover_image})` } : {}"
+                  :class="!doc.cover_image ? 'bg-gray-700 dark:bg-gray-800' : ''"
                 >
                   <div class="flip-card-inner">
                     <h4 class="text-white font-bold text-base leading-tight mb-3 line-clamp-2">

@@ -35,12 +35,12 @@ const getNewsUrl = (item: NewsDisplay) => {
 }
 
 // Get cover image URL selon la variante souhaitée
-const getCoverImage = (item: NewsDisplay, variant: 'low' | 'medium' | 'original' = 'low') => {
+const getCoverImage = (item: NewsDisplay, variant: 'low' | 'medium' | 'original' = 'low'): string | null => {
   if ((item as any).cover_image_external_id) {
     const originalUrl = getMediaUrl((item as any).cover_image_external_id)
-    return originalUrl ? getImageVariantUrl(originalUrl, variant) : `https://picsum.photos/seed/news-${item.id}/800/500`
+    return originalUrl ? getImageVariantUrl(originalUrl, variant) : null
   }
-  return item.cover_image || `https://picsum.photos/seed/news-${item.id}/800/500`
+  return item.cover_image || null
 }
 
 // Format date with locale
@@ -78,11 +78,15 @@ const formatDate = (dateStr: string | null | undefined) => {
             <!-- Hero image -->
             <div class="overflow-hidden rounded-xl">
               <img
-                :src="getCoverImage(featuredNews, 'medium')"
+                v-if="getCoverImage(featuredNews, 'medium')"
+                :src="getCoverImage(featuredNews, 'medium')!"
                 :alt="featuredNews.title"
                 class="w-full h-64 md:h-80 object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
               >
+              <div v-else class="w-full h-64 md:h-80 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                <font-awesome-icon icon="fa-solid fa-newspaper" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+              </div>
             </div>
 
             <!-- Content -->
@@ -128,11 +132,15 @@ const formatDate = (dateStr: string | null | undefined) => {
               <div class="md:w-2/5 lg:w-2/5 flex-shrink-0">
                 <div class="overflow-hidden rounded-lg">
                   <img
-                    :src="getCoverImage(item)"
+                    v-if="getCoverImage(item)"
+                    :src="getCoverImage(item)!"
                     :alt="item.title"
                     class="w-full h-40 md:h-32 object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
                   >
+                  <div v-else class="w-full h-40 md:h-32 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                    <font-awesome-icon icon="fa-solid fa-newspaper" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                  </div>
                 </div>
               </div>
 
@@ -173,11 +181,15 @@ const formatDate = (dateStr: string | null | undefined) => {
           <!-- Image -->
           <div class="overflow-hidden rounded-xl">
             <img
-              :src="getCoverImage(item)"
+              v-if="getCoverImage(item)"
+              :src="getCoverImage(item)!"
               :alt="item.title"
               class="w-full h-48 md:h-56 object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
             >
+            <div v-else class="w-full h-48 md:h-56 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+              <font-awesome-icon icon="fa-solid fa-newspaper" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+            </div>
           </div>
 
           <!-- Title -->

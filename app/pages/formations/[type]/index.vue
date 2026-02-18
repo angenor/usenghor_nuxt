@@ -355,11 +355,11 @@ const getLocalizedTitle = (p: ProgramPublic) => {
 }
 
 // Get thumbnail version of image
-const getThumbnail = (p: ProgramPublic) => {
+const getThumbnail = (p: ProgramPublic): string | null => {
   if (p.cover_image_external_id) {
     return `/api/public/media/${p.cover_image_external_id}/download?variant=low`
   }
-  return `https://picsum.photos/seed/${p.slug}/100/100`
+  return null
 }
 
 // Get program URL
@@ -602,13 +602,15 @@ onMounted(() => {
                 <!-- Image -->
                 <div class="relative h-48 overflow-hidden">
                   <img
-                    :src="program.cover_image_external_id
-                      ? `/api/public/media/${program.cover_image_external_id}/download?variant=medium`
-                      : `https://picsum.photos/seed/${program.slug}/600/400`"
+                    v-if="program.cover_image_external_id"
+                    :src="`/api/public/media/${program.cover_image_external_id}/download?variant=medium`"
                     :alt="getLocalizedTitle(program)"
                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
                   >
+                  <div v-else class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                    <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                  </div>
                   <!-- Gradient overlay -->
                   <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
@@ -744,11 +746,15 @@ onMounted(() => {
                     <!-- Thumbnail -->
                     <div class="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200 dark:bg-gray-700">
                       <img
-                        :src="getThumbnail(program)"
+                        v-if="getThumbnail(program)"
+                        :src="getThumbnail(program)!"
                         :alt="getLocalizedTitle(program)"
                         class="w-full h-full object-cover"
                         loading="lazy"
                       >
+                      <div v-else class="w-full h-full flex items-center justify-center">
+                        <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-6 h-6 text-gray-400 dark:text-gray-500" />
+                      </div>
                     </div>
                     <!-- Title -->
                     <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors line-clamp-2 leading-tight">

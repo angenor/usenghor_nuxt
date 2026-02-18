@@ -174,11 +174,11 @@ export function usePublicPartnersApi() {
   /**
    * Retourne l'URL du logo ou un placeholder
    */
-  function getPartnerLogoUrl(partner: PartnerPublic): string {
+  function getPartnerLogoUrl(partner: PartnerPublic): string | null {
     if (partner.logo_url) {
       return partner.logo_url
     }
-    return `https://picsum.photos/seed/partner-${partner.id}/200/200`
+    return null
   }
 
   /**

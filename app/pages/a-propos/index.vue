@@ -14,7 +14,7 @@ useSeoMeta({
   description: () => t('about.seo.description'),
   ogTitle: () => t('about.seo.title'),
   ogDescription: () => t('about.seo.description'),
-  ogImage: 'https://picsum.photos/seed/og-about/1200/630',
+  ogImage: undefined,
 })
 
 // Fallback values for stats (used if editorial API not available)

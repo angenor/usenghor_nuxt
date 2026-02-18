@@ -15,11 +15,9 @@ const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', t
         <!-- Image (droite) -->
         <div class="relative order-2 lg:order-2">
           <div class="relative rounded-2xl overflow-hidden shadow-2xl">
-            <img
-              src="https://picsum.photos/seed/preview-partners/800/600"
-              :alt="t('about.preview.partners.title')"
-              class="w-full h-auto object-cover aspect-[4/3]"
-            />
+            <div class="aspect-[4/3] bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+              <font-awesome-icon icon="fa-solid fa-handshake" class="w-16 h-16 text-gray-400 dark:text-gray-500" />
+            </div>
             <div class="absolute inset-0 bg-gradient-to-tr from-cyan-500/20 to-transparent"></div>
           </div>
           <div class="absolute -bottom-4 -left-4 w-24 h-24 rounded-2xl -z-10 bg-cyan-500/10"></div>

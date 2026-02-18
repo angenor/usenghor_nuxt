@@ -34,8 +34,8 @@ const getEventUrl = (event: EventPublic) => {
 }
 
 // Get cover image URL
-const getCoverImage = (event: EventPublic) => {
-  return event.cover_image || `https://picsum.photos/seed/event-${event.id}/600/400`
+const getCoverImage = (event: EventPublic): string | null => {
+  return event.cover_image || null
 }
 
 // Get location string
@@ -117,11 +117,15 @@ const getTypeLabel = (type: string) => {
             >
               <!-- Background Image -->
               <img
-                :src="getCoverImage(event)"
+                v-if="getCoverImage(event)"
+                :src="getCoverImage(event)!"
                 :alt="event.title"
                 class="absolute z-0 object-cover w-full h-72 md:h-96 transform transition-transform duration-500 group-hover:scale-110"
                 loading="lazy"
               >
+              <div v-else class="absolute z-0 w-full h-72 md:h-96 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                <font-awesome-icon icon="fa-solid fa-calendar" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+              </div>
               <!-- Gradient Overlay -->
               <div class="absolute event-gradient transition duration-300 group-hover:bg-black group-hover:opacity-90 w-full h-72 md:h-96 z-10"></div>
 
@@ -185,11 +189,15 @@ const getTypeLabel = (type: string) => {
                 <div class="md:mx-2">
                   <div class="overflow-hidden rounded-lg">
                     <img
-                      :src="getCoverImage(event)"
+                      v-if="getCoverImage(event)"
+                      :src="getCoverImage(event)!"
                       :alt="event.title"
                       class="w-full h-40 md:h-32 object-cover transition-transform duration-500 hover:scale-105"
                       loading="lazy"
                     >
+                    <div v-else class="w-full h-40 md:h-32 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                      <font-awesome-icon icon="fa-solid fa-calendar" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -252,11 +260,15 @@ const getTypeLabel = (type: string) => {
             <NuxtLink :to="getEventUrl(highlightedEvent)" class="group block">
               <div class="overflow-hidden rounded-xl">
                 <img
-                  :src="getCoverImage(highlightedEvent)"
+                  v-if="getCoverImage(highlightedEvent)"
+                  :src="getCoverImage(highlightedEvent)!"
                   :alt="highlightedEvent.title"
                   class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                 >
+                <div v-else class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                  <font-awesome-icon icon="fa-solid fa-calendar" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                </div>
               </div>
 
               <!-- Type Badge -->

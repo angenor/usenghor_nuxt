@@ -79,9 +79,9 @@ const formattedDeadline = computed(() => {
   )
 })
 
-// Image URL with fallback
+// Image URL (null if no image available)
 const imageUrl = computed(() => {
-  return props.formation.image || `https://picsum.photos/seed/${props.formation.slug}/800/500`
+  return props.formation.image || null
 })
 </script>
 
@@ -91,11 +91,15 @@ const imageUrl = computed(() => {
       <!-- Image -->
       <div class="relative h-48 overflow-hidden">
         <img
+          v-if="imageUrl"
           :src="imageUrl"
           :alt="localizedTitle"
           class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
         />
+        <div v-else class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+          <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+        </div>
         <!-- Type badge -->
         <span
           v-if="showType"

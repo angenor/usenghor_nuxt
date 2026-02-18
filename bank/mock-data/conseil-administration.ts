@@ -37,7 +37,7 @@ export const mockConseilAdministration: CAMember[] = [
     representing_fr: 'République du Sénégal',
     representing_en: 'Republic of Senegal',
     country_code: 'SN',
-    photo: 'https://i.pravatar.cc/300?u=ca-president',
+    photo: null,
     bio_fr: 'Son Excellence Amadou Bâ préside le Conseil d\'Administration depuis 2022.',
     sort_order: 1,
     is_active: true,
@@ -52,7 +52,7 @@ export const mockConseilAdministration: CAMember[] = [
     ca_role: 'vice_president',
     representing_fr: 'République Arabe d\'Égypte',
     country_code: 'EG',
-    photo: 'https://i.pravatar.cc/300?u=ca-vp',
+    photo: null,
     sort_order: 2,
     is_active: true
   },

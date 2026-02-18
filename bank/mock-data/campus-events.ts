@@ -29,7 +29,7 @@ export const mockCampusEvents: CampusEvent[] = [
     location_fr: 'Amphithéâtre principal, Université Senghor',
     location_en: 'Main Amphitheater, Senghor University',
     description_fr: 'Grande conférence réunissant des experts internationaux pour discuter des enjeux et perspectives de la Francophonie africaine.',
-    image: 'https://picsum.photos/seed/event-siege-1/600/400',
+    image: '',
     type: 'conference',
     is_featured: true
   },
@@ -43,7 +43,7 @@ export const mockCampusEvents: CampusEvent[] = [
     location_fr: 'Salle de conférence, Bâtiment A',
     location_en: 'Conference Room, Building A',
     description_fr: 'Atelier intensif de trois jours sur le développement du leadership pour les futurs décideurs africains.',
-    image: 'https://picsum.photos/seed/event-siege-2/600/400',
+    image: '',
     type: 'atelier'
   },
   {
@@ -56,7 +56,7 @@ export const mockCampusEvents: CampusEvent[] = [
     location_fr: 'Bibliothèque d\'Alexandrie',
     location_en: 'Library of Alexandria',
     description_fr: 'Cérémonie officielle de remise des diplômes pour la promotion 2025 en présence des autorités académiques et des partenaires.',
-    image: 'https://picsum.photos/seed/event-siege-3/600/400',
+    image: '',
     type: 'ceremonie',
     is_featured: true
   },
@@ -70,7 +70,7 @@ export const mockCampusEvents: CampusEvent[] = [
     location_fr: 'Amphithéâtre principal, Université Senghor',
     location_en: 'Main Amphitheater, Senghor University',
     description_fr: 'Séminaire réunissant chercheurs et praticiens autour des questions de gouvernance en Afrique francophone.',
-    image: 'https://picsum.photos/seed/event-siege-4/600/400',
+    image: '',
     type: 'conference'
   },
   {
@@ -83,7 +83,7 @@ export const mockCampusEvents: CampusEvent[] = [
     location_fr: 'Université Senghor, Alexandrie',
     location_en: 'Senghor University, Alexandria',
     description_fr: 'Découvrez nos formations et rencontrez nos équipes pédagogiques lors de cette journée exceptionnelle.',
-    image: 'https://picsum.photos/seed/event-siege-5/600/400',
+    image: '',
     type: 'autre'
   },
   {
@@ -96,7 +96,7 @@ export const mockCampusEvents: CampusEvent[] = [
     location_fr: 'Salle de recherche, Bâtiment B',
     location_en: 'Research Room, Building B',
     description_fr: 'Formation intensive sur les méthodologies de recherche appliquées au développement africain.',
-    image: 'https://picsum.photos/seed/event-siege-6/600/400',
+    image: '',
     type: 'atelier'
   },
   {
@@ -109,7 +109,7 @@ export const mockCampusEvents: CampusEvent[] = [
     location_fr: 'Centre de conférences, Alexandrie',
     location_en: 'Conference Center, Alexandria',
     description_fr: 'Rencontre annuelle des anciens étudiants pour échanger et renforcer le réseau Senghor.',
-    image: 'https://picsum.photos/seed/event-siege-7/600/400',
+    image: '',
     type: 'autre'
   },
   {
@@ -122,7 +122,7 @@ export const mockCampusEvents: CampusEvent[] = [
     location_fr: 'Amphithéâtre principal, Université Senghor',
     location_en: 'Main Amphitheater, Senghor University',
     description_fr: 'Cérémonie officielle marquant le début de la nouvelle année académique.',
-    image: 'https://picsum.photos/seed/event-siege-8/600/400',
+    image: '',
     type: 'ceremonie'
   },
   // Événements passés pour Alexandrie
@@ -136,7 +136,7 @@ export const mockCampusEvents: CampusEvent[] = [
     location_fr: 'Amphithéâtre principal, Université Senghor',
     location_en: 'Main Amphitheater, Senghor University',
     description_fr: 'Conférence sur les applications de l\'IA dans l\'enseignement supérieur en Afrique.',
-    image: 'https://picsum.photos/seed/event-siege-past-1/600/400',
+    image: '',
     type: 'conference'
   },
   {
@@ -149,7 +149,7 @@ export const mockCampusEvents: CampusEvent[] = [
     location_fr: 'Salle de conférence, Bâtiment A',
     location_en: 'Conference Room, Building A',
     description_fr: 'Atelier pratique sur l\'entrepreneuriat et l\'innovation en Afrique.',
-    image: 'https://picsum.photos/seed/event-siege-past-2/600/400',
+    image: '',
     type: 'atelier'
   },
   {
@@ -162,7 +162,7 @@ export const mockCampusEvents: CampusEvent[] = [
     location_fr: 'Université Senghor, Alexandrie',
     location_en: 'Senghor University, Alexandria',
     description_fr: 'Séminaire réunissant experts et décideurs sur les politiques de santé en Afrique francophone.',
-    image: 'https://picsum.photos/seed/event-siege-past-3/600/400',
+    image: '',
     type: 'conference'
   },
   {
@@ -175,7 +175,7 @@ export const mockCampusEvents: CampusEvent[] = [
     location_fr: 'Salle de conférence, Bâtiment A',
     location_en: 'Conference Room, Building A',
     description_fr: 'Table ronde avec des experts sur l\'avancement des ODD dans les pays francophones africains.',
-    image: 'https://picsum.photos/seed/event-siege-past-4/600/400',
+    image: '',
     type: 'conference'
   },
   {
@@ -188,7 +188,7 @@ export const mockCampusEvents: CampusEvent[] = [
     location_fr: 'Amphithéâtre principal, Université Senghor',
     location_en: 'Main Amphitheater, Senghor University',
     description_fr: 'Cérémonie officielle marquant le début de l\'année académique 2025-2026.',
-    image: 'https://picsum.photos/seed/event-siege-past-5/600/400',
+    image: '',
     type: 'ceremonie'
   },
 
@@ -202,7 +202,7 @@ export const mockCampusEvents: CampusEvent[] = [
     location_fr: 'Auditorium UCAD, Dakar',
     location_en: 'UCAD Auditorium, Dakar',
     description_fr: 'Conférence réunissant experts et décideurs pour discuter des enjeux du développement durable dans la sous-région.',
-    image: 'https://picsum.photos/seed/event-dakar-1/600/400',
+    image: '',
     type: 'conference'
   },
   {
@@ -213,7 +213,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-04-22',
     location_fr: 'Campus de Dakar',
     description_fr: 'Atelier pratique sur la création et la gestion d\'entreprises sociales.',
-    image: 'https://picsum.photos/seed/event-dakar-2/600/400',
+    image: '',
     type: 'atelier'
   },
   {
@@ -224,7 +224,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-02-10',
     location_fr: 'Grand Théâtre National, Dakar',
     description_fr: 'Cérémonie officielle de remise des diplômes pour la promotion 2024.',
-    image: 'https://picsum.photos/seed/event-dakar-3/600/400',
+    image: '',
     type: 'ceremonie'
   },
 
@@ -237,7 +237,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-05-18',
     location_fr: 'Université de Yaoundé II',
     description_fr: 'Forum régional sur la protection de l\'environnement et la biodiversité en Afrique Centrale.',
-    image: 'https://picsum.photos/seed/event-yaounde-1/600/400',
+    image: '',
     type: 'conference'
   },
   {
@@ -248,7 +248,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-06-05',
     location_fr: 'Campus de Yaoundé',
     description_fr: 'Découvrez nos formations et rencontrez nos enseignants.',
-    image: 'https://picsum.photos/seed/event-yaounde-2/600/400',
+    image: '',
     type: 'autre'
   },
 
@@ -261,7 +261,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-03-20',
     location_fr: 'Palais de la Culture, Abidjan',
     description_fr: 'Festival célébrant la diversité culturelle de la francophonie africaine avec des performances artistiques, expositions et rencontres.',
-    image: 'https://picsum.photos/seed/event-abidjan-1/600/400',
+    image: '',
     type: 'autre'
   },
   {
@@ -272,7 +272,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-04-10',
     location_fr: 'Campus d\'Abidjan',
     description_fr: 'Masterclass animée par des professionnels des industries créatives africaines sur les tendances et opportunités du secteur.',
-    image: 'https://picsum.photos/seed/event-abidjan-2/600/400',
+    image: '',
     type: 'atelier'
   },
   {
@@ -284,7 +284,7 @@ export const mockCampusEvents: CampusEvent[] = [
     location_fr: 'Hôtel Ivoire, Abidjan',
     location_en: 'Hotel Ivoire, Abidjan',
     description_fr: 'Grande conférence réunissant chercheurs, entrepreneurs et décideurs pour explorer les opportunités économiques du secteur culturel en Afrique.',
-    image: 'https://picsum.photos/seed/event-abidjan-3/600/400',
+    image: '',
     type: 'conference'
   },
   {
@@ -295,7 +295,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-09-15',
     location_fr: 'Campus d\'Abidjan',
     description_fr: 'Cérémonie officielle marquant le début de la nouvelle année académique avec la présentation des nouveaux programmes et la bienvenue aux étudiants.',
-    image: 'https://picsum.photos/seed/event-abidjan-4/600/400',
+    image: '',
     type: 'ceremonie'
   },
   {
@@ -306,7 +306,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-06-08',
     location_fr: 'Espace Innovation, Campus d\'Abidjan',
     description_fr: 'Atelier pratique de deux jours sur les méthodologies de design thinking appliquées aux défis sociaux africains.',
-    image: 'https://picsum.photos/seed/event-abidjan-5/600/400',
+    image: '',
     type: 'atelier'
   },
   {
@@ -317,7 +317,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-03-08',
     location_fr: 'Auditorium du Campus, Abidjan',
     description_fr: 'À l\'occasion de la Journée internationale des droits des femmes, rencontre avec des femmes qui façonnent le paysage culturel africain.',
-    image: 'https://picsum.photos/seed/event-abidjan-6/600/400',
+    image: '',
     type: 'conference'
   },
   {
@@ -328,7 +328,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-07-20',
     location_fr: 'Campus d\'Abidjan',
     description_fr: '48 heures pour développer des solutions innovantes de préservation et valorisation du patrimoine culturel africain grâce au numérique.',
-    image: 'https://picsum.photos/seed/event-abidjan-7/600/400',
+    image: '',
     type: 'atelier'
   },
   {
@@ -339,7 +339,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-10-12',
     location_fr: 'Fondation Félix Houphouët-Boigny, Yamoussoukro',
     description_fr: 'Colloque interdisciplinaire explorant le rôle des politiques culturelles dans l\'atteinte des objectifs de développement durable.',
-    image: 'https://picsum.photos/seed/event-abidjan-8/600/400',
+    image: '',
     type: 'conference'
   },
   {
@@ -350,7 +350,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-12-15',
     location_fr: 'Palais de la Culture, Abidjan',
     description_fr: 'Célébration officielle de la promotion 2025 en présence des autorités académiques, des familles et des partenaires institutionnels.',
-    image: 'https://picsum.photos/seed/event-abidjan-9/600/400',
+    image: '',
     type: 'ceremonie'
   },
 
@@ -364,7 +364,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-04-25',
     location_fr: 'Cité des Sciences, Tunis',
     description_fr: 'Colloque international sur les défis de la santé publique au Maghreb.',
-    image: 'https://picsum.photos/seed/event-tunis-1/600/400',
+    image: '',
     type: 'conference'
   },
   {
@@ -375,7 +375,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-05-12',
     location_fr: 'Campus de Tunis',
     description_fr: 'Atelier sur les innovations numériques dans le secteur de la santé.',
-    image: 'https://picsum.photos/seed/event-tunis-2/600/400',
+    image: '',
     type: 'atelier'
   },
 
@@ -389,7 +389,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-05-08',
     location_fr: 'Bibliothèque Nationale, Rabat',
     description_fr: 'Conférence sur la valorisation du patrimoine culturel par le tourisme durable.',
-    image: 'https://picsum.photos/seed/event-rabat-1/600/400',
+    image: '',
     type: 'conference'
   },
   {
@@ -400,7 +400,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-03-28',
     location_fr: 'Centre historique de Rabat',
     description_fr: 'Sortie pédagogique pour les étudiants du Master Patrimoine.',
-    image: 'https://picsum.photos/seed/event-rabat-2/600/400',
+    image: '',
     type: 'autre'
   },
 
@@ -413,7 +413,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-06-12',
     location_fr: 'Campus de Libreville',
     description_fr: 'Séminaire sur la conservation de la biodiversité dans le bassin du Congo.',
-    image: 'https://picsum.photos/seed/event-libreville-1/600/400',
+    image: '',
     type: 'conference'
   },
   {
@@ -424,7 +424,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-10-01',
     location_fr: 'Campus de Libreville',
     description_fr: 'Cérémonie officielle de rentrée pour la nouvelle année académique.',
-    image: 'https://picsum.photos/seed/event-libreville-2/600/400',
+    image: '',
     type: 'ceremonie'
   },
 
@@ -437,7 +437,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-04-07',
     location_fr: 'Campus de Cotonou',
     description_fr: 'Événement spécial avec conférences et stands d\'information santé.',
-    image: 'https://picsum.photos/seed/event-cotonou-1/600/400',
+    image: '',
     type: 'autre'
   },
   {
@@ -448,7 +448,7 @@ export const mockCampusEvents: CampusEvent[] = [
     date: '2025-05-20',
     location_fr: 'CHU de Cotonou',
     description_fr: 'Atelier pratique sur la gestion des établissements de santé.',
-    image: 'https://picsum.photos/seed/event-cotonou-2/600/400',
+    image: '',
     type: 'atelier'
   }
 ]

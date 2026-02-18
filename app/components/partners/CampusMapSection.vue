@@ -327,11 +327,6 @@ const getCampusDescriptionData = (campus: CampusItem): OutputData | undefined =>
   return parseEditorContent(campus.description)
 }
 
-// Fallback image handler
-const handleImageError = (e: Event) => {
-  const target = e.target as HTMLImageElement
-  target.src = 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&h=400&fit=crop'
-}
 </script>
 
 <template>
@@ -470,11 +465,15 @@ const handleImageError = (e: Event) => {
                 <!-- Image -->
                 <div class="relative h-52 overflow-hidden">
                   <img
-                    :src="selectedCampus.image || `https://picsum.photos/seed/${selectedCampus.id}/600/400`"
+                    v-if="selectedCampus.image"
+                    :src="selectedCampus.image"
                     :alt="getCampusName(selectedCampus)"
                     class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                    @error="handleImageError"
+                    @error="($event.target as HTMLImageElement).style.display = 'none'"
                   />
+                  <div v-else class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                    <font-awesome-icon icon="fa-solid fa-building-columns" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                  </div>
                   <!-- Gradient Overlay -->
                   <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
                   <!-- Badge -->

@@ -63,7 +63,7 @@ export function usePublicEventsApi() {
     return {
       ...event,
       cover_image: event.cover_image_external_id
-        ? `https://picsum.photos/seed/${event.cover_image_external_id}/1200/600`
+        ? `/api/public/media/${event.cover_image_external_id}/download`
         : null,
     }
   }

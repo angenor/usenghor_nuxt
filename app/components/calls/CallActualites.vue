@@ -44,13 +44,13 @@ const formatDate = (dateStr: string | null) => {
   )
 }
 
-// Get cover image URL
-function getCoverImage(item: NewsPublicEnriched): string {
+// Get cover image URL (null if no image available)
+function getCoverImage(item: NewsPublicEnriched): string | null {
   if (item.cover_image_external_id) {
     const url = getMediaUrl(item.cover_image_external_id)
-    return url ? getImageVariantUrl(url, 'medium') : 'https://picsum.photos/seed/news/600/400'
+    return url ? getImageVariantUrl(url, 'medium') : null
   }
-  return 'https://picsum.photos/seed/news/600/400'
+  return null
 }
 </script>
 
@@ -85,10 +85,14 @@ function getCoverImage(item: NewsPublicEnriched): string {
         <!-- Image -->
         <div class="h-48 overflow-hidden">
           <img
-            :src="getCoverImage(item)"
+            v-if="getCoverImage(item)"
+            :src="getCoverImage(item)!"
             :alt="item.title"
             class="w-full h-full object-cover"
           >
+          <div v-else class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+            <font-awesome-icon icon="fa-solid fa-newspaper" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+          </div>
         </div>
 
         <!-- Content -->

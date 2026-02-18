@@ -51,12 +51,12 @@ export const mockSiteFacilities: SiteFacility[] = [
       'خدمات الغسيل والتنظيف',
       'أمن على مدار الساعة'
     ],
-    image: 'https://picsum.photos/seed/senghor-housing/800/600',
+    image: '',
     images: [
-      'https://picsum.photos/seed/housing-exterior/800/600',
-      'https://picsum.photos/seed/housing-room/800/600',
-      'https://picsum.photos/seed/housing-lounge/800/600',
-      'https://picsum.photos/seed/housing-corridor/800/600'
+      '',
+      '',
+      '',
+      ''
     ],
     capacity: '200 chambres',
     sort_order: 1
@@ -95,12 +95,12 @@ export const mockSiteFacilities: SiteFacility[] = [
       'محطات حاسوب',
       'خدمة الإعارة بين المكتبات'
     ],
-    image: 'https://picsum.photos/seed/senghor-library/800/600',
+    image: '',
     images: [
-      'https://picsum.photos/seed/library-main/800/600',
-      'https://picsum.photos/seed/library-reading/800/600',
-      'https://picsum.photos/seed/library-shelves/800/600',
-      'https://picsum.photos/seed/library-study/800/600'
+      '',
+      '',
+      '',
+      ''
     ],
     capacity: '150 places assises',
     sort_order: 2
@@ -139,12 +139,12 @@ export const mockSiteFacilities: SiteFacility[] = [
       'ترجمة فورية',
       'مؤتمرات الفيديو'
     ],
-    image: 'https://picsum.photos/seed/senghor-conference/800/600',
+    image: '',
     images: [
-      'https://picsum.photos/seed/conference-amphitheater/800/600',
-      'https://picsum.photos/seed/conference-hall/800/600',
-      'https://picsum.photos/seed/conference-meeting/800/600',
-      'https://picsum.photos/seed/conference-event/800/600'
+      '',
+      '',
+      '',
+      ''
     ],
     capacity: '500 places totales',
     sort_order: 3
@@ -183,12 +183,12 @@ export const mockSiteFacilities: SiteFacility[] = [
       'غرف أعمال تطبيقية',
       'اتصال إنترنت عالي السرعة'
     ],
-    image: 'https://picsum.photos/seed/senghor-academic/800/600',
+    image: '',
     images: [
-      'https://picsum.photos/seed/academic-classroom/800/600',
-      'https://picsum.photos/seed/academic-lab/800/600',
-      'https://picsum.photos/seed/academic-coworking/800/600',
-      'https://picsum.photos/seed/academic-workshop/800/600'
+      '',
+      '',
+      '',
+      ''
     ],
     capacity: '600 étudiants',
     sort_order: 4
@@ -227,12 +227,12 @@ export const mockSiteFacilities: SiteFacility[] = [
       'ملعب كرة سلة',
       'غرف تبديل ملابس مجهزة'
     ],
-    image: 'https://picsum.photos/seed/senghor-sports/800/600',
+    image: '',
     images: [
-      'https://picsum.photos/seed/sports-gymnasium/800/600',
-      'https://picsum.photos/seed/sports-football/800/600',
-      'https://picsum.photos/seed/sports-tennis/800/600',
-      'https://picsum.photos/seed/sports-fitness/800/600'
+      '',
+      '',
+      '',
+      ''
     ],
     sort_order: 5
   },
@@ -270,12 +270,12 @@ export const mockSiteFacilities: SiteFacility[] = [
       'غرف تبديل ملابس منفصلة',
       'إشراف منقذ'
     ],
-    image: 'https://picsum.photos/seed/senghor-pool/800/600',
+    image: '',
     images: [
-      'https://picsum.photos/seed/pool-main/800/600',
-      'https://picsum.photos/seed/pool-terrace/800/600',
-      'https://picsum.photos/seed/pool-changing/800/600',
-      'https://picsum.photos/seed/pool-sunset/800/600'
+      '',
+      '',
+      '',
+      ''
     ],
     capacity: '50 nageurs',
     sort_order: 6
@@ -314,12 +314,12 @@ export const mockSiteFacilities: SiteFacility[] = [
       'إطلالة على البحر المتوسط',
       'استقبال على مدار الساعة'
     ],
-    image: 'https://picsum.photos/seed/senghor-hotel/800/600',
+    image: '',
     images: [
-      'https://picsum.photos/seed/hotel-facade/800/600',
-      'https://picsum.photos/seed/hotel-room/800/600',
-      'https://picsum.photos/seed/hotel-restaurant/800/600',
-      'https://picsum.photos/seed/hotel-sea-view/800/600'
+      '',
+      '',
+      '',
+      ''
     ],
     capacity: '30 chambres',
     sort_order: 7

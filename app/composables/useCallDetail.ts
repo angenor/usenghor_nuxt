@@ -78,14 +78,14 @@ export function useCallDetail(call: Ref<ApplicationCallPublicWithDetails | null>
     if (callData.cover_image_external_id) {
       return `/api/public/media/${callData.cover_image_external_id}/download?variant=medium`
     }
-    return `https://picsum.photos/seed/${callData.slug}/800/450`
+    return null
   }
 
   const getHeroImage = (callData: ApplicationCallPublicWithDetails) => {
     if (callData.cover_image_external_id) {
       return `/api/public/media/${callData.cover_image_external_id}/download`
     }
-    return `https://picsum.photos/seed/${callData.slug}-hero/1920/600`
+    return null
   }
 
   return {

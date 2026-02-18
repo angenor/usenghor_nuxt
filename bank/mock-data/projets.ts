@@ -234,12 +234,12 @@ export const mockProjects: Project[] = [
         }
       ]
     },
-    cover_image: 'https://picsum.photos/seed/transformaction-africa/1200/600',
+    cover_image: '',
     cover_image_alt: 'Programme Transform\'Action Africa',
     gallery: [
-      'https://picsum.photos/seed/transformaction-africa-1/800/600',
-      'https://picsum.photos/seed/transformaction-africa-2/800/600',
-      'https://picsum.photos/seed/transformaction-africa-3/800/600'
+      '',
+      '',
+      ''
     ],
     category_ids: ['cat-1', 'cat-8'],
     department_id: 'dep-admin',
@@ -336,12 +336,12 @@ export const mockProjects: Project[] = [
         }
       ]
     },
-    cover_image: 'https://picsum.photos/seed/kreafrika/1200/600',
+    cover_image: '',
     cover_image_alt: 'Programme KreAfrika',
     gallery: [
-      'https://picsum.photos/seed/kreafrika-1/800/600',
-      'https://picsum.photos/seed/kreafrika-2/800/600',
-      'https://picsum.photos/seed/kreafrika-3/800/600'
+      '',
+      '',
+      ''
     ],
     category_ids: ['cat-2'],
     department_id: 'dep-culture',
@@ -412,7 +412,7 @@ export const mockProjects: Project[] = [
         }
       ]
     },
-    cover_image: 'https://picsum.photos/seed/levee-fonds/1200/600',
+    cover_image: '',
     category_ids: ['cat-1'],
     status: 'ongoing',
     publication_status: 'published',
@@ -495,7 +495,7 @@ export const mockProjects: Project[] = [
         }
       ]
     },
-    cover_image: 'https://picsum.photos/seed/bourses-excellence/1200/600',
+    cover_image: '',
     category_ids: ['cat-1'],
     status: 'ongoing',
     publication_status: 'published',
@@ -559,7 +559,7 @@ export const mockProjects: Project[] = [
         }
       ]
     },
-    cover_image: 'https://picsum.photos/seed/recherche-francophone/1200/600',
+    cover_image: '',
     category_ids: ['cat-4'],
     status: 'ongoing',
     publication_status: 'published',
@@ -645,7 +645,7 @@ export const mockProjects: Project[] = [
         }
       ]
     },
-    cover_image: 'https://picsum.photos/seed/africa-digital/1200/600',
+    cover_image: '',
     category_ids: ['cat-5'],
     status: 'planned',
     publication_status: 'published',
@@ -675,7 +675,7 @@ export const mockProjects: Project[] = [
     summary_fr: 'Programme de renforcement des capacités en santé numérique pour les professionnels de santé africains.',
     summary_en: 'Digital health capacity building program for African health professionals.',
     summary_ar: 'برنامج بناء القدرات في الصحة الرقمية للمهنيين الصحيين الأفارقة.',
-    cover_image: 'https://picsum.photos/seed/sante-numerique/1200/600',
+    cover_image: '',
     category_ids: ['cat-7', 'cat-5'],
     department_id: 'dep-sante',
     department_name: 'Santé',
@@ -734,7 +734,7 @@ export const mockProjects: Project[] = [
         }
       ]
     },
-    cover_image: 'https://picsum.photos/seed/gouvernance-2023/1200/600',
+    cover_image: '',
     category_ids: ['cat-8', 'cat-1'],
     department_id: 'dep-admin',
     department_name: 'Administration et Gestion',
@@ -766,7 +766,7 @@ export const mockProjects: Project[] = [
     summary_fr: 'Développement d\'une plateforme de formation en ligne pour l\'ensemble des programmes de l\'université.',
     summary_en: 'Development of an online training platform for all university programs.',
     summary_ar: 'تطوير منصة تدريب عبر الإنترنت لجميع برامج الجامعة.',
-    cover_image: 'https://picsum.photos/seed/campus-virtuel/1200/600',
+    cover_image: '',
     category_ids: ['cat-5', 'cat-1'],
     status: 'suspended',
     publication_status: 'draft',

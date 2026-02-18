@@ -34,12 +34,12 @@ const { listOngoingCalls } = usePublicCallsApi()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
 // Helper pour obtenir l'URL de l'image de couverture selon la variante souhaitée
-function getCoverImageUrl(item: NewsDisplay | any, variant: 'low' | 'medium' | 'original' = 'medium'): string {
+function getCoverImageUrl(item: NewsDisplay | any, variant: 'low' | 'medium' | 'original' = 'medium'): string | null {
   if (item.cover_image_external_id) {
     const originalUrl = getMediaUrl(item.cover_image_external_id)
-    return originalUrl ? getImageVariantUrl(originalUrl, variant) : 'https://picsum.photos/seed/default/800/500'
+    return originalUrl ? getImageVariantUrl(originalUrl, variant) : null
   }
-  return item.cover_image || 'https://picsum.photos/seed/default/800/500'
+  return item.cover_image || null
 }
 
 // SEO
@@ -225,11 +225,15 @@ const hasAssociations = (item: NewsDisplay) => {
               <NuxtLink v-if="featuredNews" :to="localePath(`/actualites/${featuredNews.slug}`)" class="md:w-3/5 group block">
                 <div class="overflow-hidden rounded-xl">
                   <img
-                    :src="getCoverImageUrl(featuredNews, 'medium')"
+                    v-if="getCoverImageUrl(featuredNews, 'medium')"
+                    :src="getCoverImageUrl(featuredNews, 'medium')!"
                     :alt="getLocalizedTitle(featuredNews)"
                     class="w-full h-64 md:h-80 object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
                   >
+                  <div v-else class="w-full h-64 md:h-80 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                    <font-awesome-icon icon="fa-solid fa-newspaper" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                  </div>
                 </div>
 
                 <div class="mt-5">
@@ -286,11 +290,15 @@ const hasAssociations = (item: NewsDisplay) => {
                 >
                   <div class="overflow-hidden rounded-lg mb-3">
                     <img
-                      :src="getCoverImageUrl(item, 'low')"
+                      v-if="getCoverImageUrl(item, 'low')"
+                      :src="getCoverImageUrl(item, 'low')!"
                       :alt="getLocalizedTitle(item)"
                       class="w-full h-32 object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
                     >
+                    <div v-else class="w-full h-32 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                      <font-awesome-icon icon="fa-solid fa-newspaper" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                    </div>
                   </div>
 
                   <h4 class="text-lg font-bold text-gray-900 dark:text-white leading-tight group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
@@ -346,11 +354,15 @@ const hasAssociations = (item: NewsDisplay) => {
           >
             <div class="overflow-hidden rounded-xl">
               <img
-                :src="getCoverImageUrl(item, 'low')"
+                v-if="getCoverImageUrl(item, 'low')"
+                :src="getCoverImageUrl(item, 'low')!"
                 :alt="getLocalizedTitle(item)"
                 class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
               >
+              <div v-else class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                <font-awesome-icon icon="fa-solid fa-newspaper" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+              </div>
             </div>
 
             <div class="mt-4">
@@ -442,11 +454,15 @@ const hasAssociations = (item: NewsDisplay) => {
           >
             <!-- Background image -->
             <img
-              :src="getCoverImageUrl(event, 'low')"
+              v-if="getCoverImageUrl(event, 'low')"
+              :src="getCoverImageUrl(event, 'low')!"
               :alt="getEventTitle(event)"
               class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               loading="lazy"
             >
+            <div v-else class="absolute inset-0 w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+              <font-awesome-icon icon="fa-solid fa-calendar" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+            </div>
 
             <!-- Gradient overlay -->
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
@@ -507,11 +523,15 @@ const hasAssociations = (item: NewsDisplay) => {
             <!-- Image -->
             <div class="overflow-hidden h-48">
               <img
-                :src="getCoverImageUrl(call)"
+                v-if="getCoverImageUrl(call)"
+                :src="getCoverImageUrl(call)!"
                 :alt="call.title"
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
               >
+              <div v-else class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                <font-awesome-icon icon="fa-solid fa-newspaper" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+              </div>
             </div>
 
             <!-- Content -->

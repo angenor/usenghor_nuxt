@@ -31,7 +31,7 @@ export const mockCampusFormationsRealisees: CampusFormationRealisee[] = [
     year: 2024,
     graduates_count: 28,
     description_fr: 'Première promotion du Master en partenariat avec l\'ENA de Côte d\'Ivoire.',
-    image: 'https://picsum.photos/seed/fr-abidjan-pp/400/250',
+    image: null,
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.png',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/01.jpg'
@@ -47,7 +47,7 @@ export const mockCampusFormationsRealisees: CampusFormationRealisee[] = [
     year: 2023,
     graduates_count: 24,
     description_fr: 'Formation axée sur le management culturel et l\'économie créative africaine.',
-    image: 'https://picsum.photos/seed/fr-abidjan-culture/400/250',
+    image: null,
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.png',
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/03.png'
@@ -63,7 +63,7 @@ export const mockCampusFormationsRealisees: CampusFormationRealisee[] = [
     year: 2023,
     graduates_count: 35,
     description_fr: 'Formation courte pour les porteurs de projets à impact social.',
-    image: 'https://picsum.photos/seed/fr-abidjan-du/400/250',
+    image: null,
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/02.png'
     ]
@@ -78,7 +78,7 @@ export const mockCampusFormationsRealisees: CampusFormationRealisee[] = [
     year: 2022,
     graduates_count: 30,
     description_fr: 'Formation des professionnels RH pour les organisations africaines.',
-    image: 'https://picsum.photos/seed/fr-abidjan-rh/400/250',
+    image: null,
     partner_logos: [
       'https://usenghor-francophonie.org/wp-content/uploads/2023/09/12.png'
     ]

@@ -419,7 +419,7 @@ function formatFileSize(bytes?: number) {
                 v-model="formData.cover_image"
                 type="text"
                 class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                placeholder="https://picsum.photos/400/500"
+                placeholder="https://example.com/image.jpg"
               />
             </div>
           </div>

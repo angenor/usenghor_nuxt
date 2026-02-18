@@ -402,7 +402,7 @@ export function useGlobalSearch() {
         icon: formationIcons[program.type] || 'fa-solid fa-graduation-cap',
         route: `/formations/${typeSlug}/${program.slug}`,
         image: program.cover_image_external_id
-          ? `https://picsum.photos/seed/${program.cover_image_external_id}/400/300`
+          ? `/api/public/media/${program.cover_image_external_id}/download?variant=low`
           : undefined,
         score: 0
       })

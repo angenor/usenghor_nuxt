@@ -208,12 +208,12 @@ export function usePublicCampusApi() {
   /**
    * Retourne l'URL de l'image de couverture ou un placeholder
    */
-  function getCoverImageUrl(campus: CampusPublic): string {
+  function getCoverImageUrl(campus: CampusPublic): string | null {
     const resolvedUrl = resolveMediaUrl(campus.cover_image_url)
     if (resolvedUrl) {
       return resolvedUrl
     }
-    return `https://picsum.photos/seed/campus-${campus.code}/800/500`
+    return null
   }
 
   /**
@@ -236,12 +236,12 @@ export function usePublicCampusApi() {
   /**
    * Retourne l'URL du logo d'un partenaire ou un placeholder
    */
-  function getPartnerLogoUrl(partner: CampusPartnerPublic): string {
+  function getPartnerLogoUrl(partner: CampusPartnerPublic): string | null {
     const resolvedUrl = resolveMediaUrl(partner.logo_url)
     if (resolvedUrl) {
       return resolvedUrl
     }
-    return `https://picsum.photos/seed/partner-${partner.id}/200/200`
+    return null
   }
 
   /**
@@ -254,12 +254,12 @@ export function usePublicCampusApi() {
   /**
    * Retourne l'URL de la photo d'un membre d'équipe ou un placeholder
    */
-  function getTeamMemberPhotoUrl(member: CampusTeamMemberPublic): string {
+  function getTeamMemberPhotoUrl(member: CampusTeamMemberPublic): string | null {
     const resolvedUrl = resolveMediaUrl(member.photo_url)
     if (resolvedUrl) {
       return resolvedUrl
     }
-    return `https://i.pravatar.cc/200?u=${member.id}`
+    return null
   }
 
   /**

@@ -429,12 +429,12 @@ const getServiceUrl = (svc: { name: string }) => {
 }
 
 // Helper pour obtenir l'URL de l'image de couverture d'une actualité
-const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'original' = 'low'): string => {
+const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'original' = 'low'): string | null => {
   if (news.cover_image_external_id) {
     const originalUrl = getMediaUrl(news.cover_image_external_id)
-    return originalUrl ? getImageVariantUrl(originalUrl, variant) : `https://picsum.photos/seed/${news.id}/800/500`
+    return originalUrl ? getImageVariantUrl(originalUrl, variant) : null
   }
-  return news.cover_image || `https://picsum.photos/seed/${news.id}/800/500`
+  return news.cover_image || null
 }
 </script>
 
@@ -979,11 +979,18 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                 <!-- Image -->
                 <div class="relative h-48 overflow-hidden">
                   <img
-                    :src="getNewsCoverImageUrl(news, 'low')"
+                    v-if="getNewsCoverImageUrl(news, 'low')"
+                    :src="getNewsCoverImageUrl(news, 'low')!"
                     :alt="news.title"
                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"
                   />
+                  <div
+                    v-else
+                    class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-newspaper" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                  </div>
                   <!-- Badge highlight status -->
                   <div v-if="news.highlight_status !== 'standard'" class="absolute top-4 left-4">
                     <span

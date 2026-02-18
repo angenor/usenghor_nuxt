@@ -83,12 +83,12 @@ const getDetailUrl = (program: ProgramPublic) => {
   return localePath(`/formations/${typeSlug}/${program.slug}`)
 }
 
-// Image URL with fallback
+// Image URL (null if no image available)
 const getImageUrl = (program: ProgramPublic) => {
   if (program.cover_image_external_id) {
     return `/api/public/media/${program.cover_image_external_id}/download?variant=medium`
   }
-  return `https://picsum.photos/seed/${program.slug}/800/600`
+  return null
 }
 </script>
 
@@ -137,10 +137,14 @@ const getImageUrl = (program: ProgramPublic) => {
           <div class="relative">
             <!-- Image -->
             <img
-              :src="getImageUrl(program)"
+              v-if="getImageUrl(program)"
+              :src="getImageUrl(program)!"
               :alt="getLocalizedTitle(program)"
               class="w-full aspect-[3/2] lg:aspect-[3/4] h-44 lg:h-[26rem] xl:h-[24rem] object-cover shadow-lg"
             />
+            <div v-else class="w-full aspect-[3/2] lg:aspect-[3/4] h-44 lg:h-[26rem] xl:h-[24rem] bg-gray-200 dark:bg-gray-700 flex items-center justify-center shadow-lg">
+              <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+            </div>
 
             <!-- Overlay Card - positioned to the right of image on lg+ -->
             <div class="lg:rounded-l-[30px] lg:rounded-t-[30px] bg-white dark:bg-gray-800 lg:absolute bottom-6 -right-10 xl:-right-8 lg:w-[16rem] xl:w-[14rem] px-6 xl:px-5 py-5 lg:h-80 xl:h-72 shadow-lg transition-all duration-300 group-hover:shadow-xl">

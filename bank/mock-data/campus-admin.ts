@@ -83,7 +83,7 @@ export const mockCampusAdmin: CampusAdmin[] = [
     code: 'ALX',
     name: 'Siège - Campus d\'Alexandrie',
     description: 'Le siège de l\'Université Senghor situé à Alexandrie, Égypte. Campus principal accueillant les formations de master et les services administratifs centraux.',
-    cover_image: 'https://picsum.photos/seed/campus-siege/800/500',
+    cover_image: null,
     cover_image_alt: 'Vue du campus d\'Alexandrie',
     country_id: 'country-eg',
     country_code: 'EG',
@@ -97,7 +97,7 @@ export const mockCampusAdmin: CampusAdmin[] = [
     phone: '+20 3 487 1374',
     head_id: 'staff-rector',
     head_name: 'Pr. Thierry Verdel',
-    head_photo: 'https://picsum.photos/seed/rector/200/200',
+    head_photo: null,
     is_headquarters: true,
     is_active: true,
     programs_count: 12,
@@ -126,7 +126,7 @@ export const mockCampusAdmin: CampusAdmin[] = [
     phone: undefined,
     head_id: `staff-head-${campus.slug}`,
     head_name: getHeadName(index),
-    head_photo: `https://picsum.photos/seed/head-${campus.slug}/200/200`,
+    head_photo: null,
     is_headquarters: false,
     is_active: campus.is_active,
     programs_count: Math.floor(Math.random() * 5) + 2,
@@ -362,15 +362,15 @@ export const getCampusCountries = (): Array<{ id: string; code: string; name: st
  */
 export const getCampusHeadCandidates = (): Array<{ id: string; name: string; photo?: string }> => {
   return [
-    { id: 'staff-1', name: 'Dr. Kouadio Yao', photo: 'https://picsum.photos/seed/staff1/100/100' },
-    { id: 'staff-2', name: 'Pr. Fatou Diallo', photo: 'https://picsum.photos/seed/staff2/100/100' },
-    { id: 'staff-3', name: 'Dr. Jean-Pierre Nkurunziza', photo: 'https://picsum.photos/seed/staff3/100/100' },
-    { id: 'staff-4', name: 'Pr. Amal Ben Salem', photo: 'https://picsum.photos/seed/staff4/100/100' },
-    { id: 'staff-5', name: 'Dr. Mohamed El Fassi', photo: 'https://picsum.photos/seed/staff5/100/100' },
-    { id: 'staff-6', name: 'Pr. Gisèle Moussavou', photo: 'https://picsum.photos/seed/staff6/100/100' },
-    { id: 'staff-7', name: 'Dr. Codjo Agossou', photo: 'https://picsum.photos/seed/staff7/100/100' },
-    { id: 'staff-8', name: 'Pr. Katalin Kovács', photo: 'https://picsum.photos/seed/staff8/100/100' },
-    { id: 'staff-9', name: 'Dr. Nguyen Van Minh', photo: 'https://picsum.photos/seed/staff9/100/100' },
-    { id: 'staff-10', name: 'Pr. Hery Rakotoarison', photo: 'https://picsum.photos/seed/staff10/100/100' }
+    { id: 'staff-1', name: 'Dr. Kouadio Yao', photo: undefined },
+    { id: 'staff-2', name: 'Pr. Fatou Diallo', photo: undefined },
+    { id: 'staff-3', name: 'Dr. Jean-Pierre Nkurunziza', photo: undefined },
+    { id: 'staff-4', name: 'Pr. Amal Ben Salem', photo: undefined },
+    { id: 'staff-5', name: 'Dr. Mohamed El Fassi', photo: undefined },
+    { id: 'staff-6', name: 'Pr. Gisèle Moussavou', photo: undefined },
+    { id: 'staff-7', name: 'Dr. Codjo Agossou', photo: undefined },
+    { id: 'staff-8', name: 'Pr. Katalin Kovács', photo: undefined },
+    { id: 'staff-9', name: 'Dr. Nguyen Van Minh', photo: undefined },
+    { id: 'staff-10', name: 'Pr. Hery Rakotoarison', photo: undefined }
   ]
 }

@@ -16,7 +16,7 @@ useSeoMeta({
   description: () => t('partners.seo.description'),
   ogTitle: () => t('partners.seo.title'),
   ogDescription: () => t('partners.seo.description'),
-  ogImage: 'https://picsum.photos/seed/og-partners/1200/630'
+  ogImage: undefined
 })
 
 // Breadcrumb

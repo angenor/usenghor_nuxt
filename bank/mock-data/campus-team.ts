@@ -48,7 +48,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Amadou',
       last_name: 'Diallo',
       email: 'a.diallo@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-dakar-1'
+      photo_url: undefined
     },
     position: 'Directeur du campus',
     display_order: 1,
@@ -66,7 +66,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Fatou',
       last_name: 'Sow',
       email: 'f.sow@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-dakar-2'
+      photo_url: undefined
     },
     position: 'Responsable administrative',
     display_order: 2,
@@ -84,7 +84,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Moussa',
       last_name: 'Ndiaye',
       email: 'm.ndiaye@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-dakar-3'
+      photo_url: undefined
     },
     position: 'Coordinateur pédagogique',
     display_order: 3,
@@ -102,7 +102,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Aïssatou',
       last_name: 'Ba',
       email: 'a.ba@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-dakar-4'
+      photo_url: undefined
     },
     position: 'Assistante administrative',
     display_order: 4,
@@ -122,7 +122,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Marie-Claire',
       last_name: 'Onana',
       email: 'mc.onana@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-yaounde-1'
+      photo_url: undefined
     },
     position: 'Directrice du campus',
     display_order: 1,
@@ -140,7 +140,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Jean-Baptiste',
       last_name: 'Mbarga',
       email: 'jb.mbarga@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-yaounde-2'
+      photo_url: undefined
     },
     position: 'Responsable des partenariats',
     display_order: 2,
@@ -158,7 +158,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Paul',
       last_name: 'Essomba',
       email: 'p.essomba@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-yaounde-3'
+      photo_url: undefined
     },
     position: 'Coordinateur des formations',
     display_order: 3,
@@ -178,7 +178,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Kouadio',
       last_name: 'Yao',
       email: 'k.yao@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-abidjan-1'
+      photo_url: undefined
     },
     position: 'Directeur du campus',
     display_order: 1,
@@ -196,7 +196,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Adjoua',
       last_name: 'Koffi',
       email: 'a.koffi@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-abidjan-2'
+      photo_url: undefined
     },
     position: 'Coordinatrice des formations',
     display_order: 2,
@@ -216,7 +216,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Leïla',
       last_name: 'Ben Amor',
       email: 'l.benamor@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-tunis-1'
+      photo_url: undefined
     },
     position: 'Directrice du campus',
     display_order: 1,
@@ -234,7 +234,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Mohamed',
       last_name: 'Trabelsi',
       email: 'm.trabelsi@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-tunis-2'
+      photo_url: undefined
     },
     position: 'Responsable administratif',
     display_order: 2,
@@ -254,7 +254,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Nadia',
       last_name: 'El Fassi',
       email: 'n.elfassi@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-rabat-1'
+      photo_url: undefined
     },
     position: 'Directrice du campus',
     display_order: 1,
@@ -272,7 +272,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Youssef',
       last_name: 'Bennani',
       email: 'y.bennani@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-rabat-2'
+      photo_url: undefined
     },
     position: 'Coordinateur pédagogique',
     display_order: 2,
@@ -292,7 +292,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Pierre',
       last_name: 'Ndong',
       email: 'p.ndong@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-libreville-1'
+      photo_url: undefined
     },
     position: 'Directeur du campus',
     display_order: 1,
@@ -310,7 +310,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Sylvie',
       last_name: 'Moussavou',
       email: 's.moussavou@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-libreville-2'
+      photo_url: undefined
     },
     position: 'Responsable des admissions',
     display_order: 2,
@@ -330,7 +330,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Honoré',
       last_name: 'Agossou',
       email: 'h.agossou@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-cotonou-1'
+      photo_url: undefined
     },
     position: 'Directeur du campus',
     display_order: 1,
@@ -348,7 +348,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Fifamè',
       last_name: 'Hounkonnou',
       email: 'f.hounkonnou@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-cotonou-2'
+      photo_url: undefined
     },
     position: 'Coordinatrice des programmes',
     display_order: 2,
@@ -368,7 +368,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'László',
       last_name: 'Kovács',
       email: 'l.kovacs@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-budapest-1'
+      photo_url: undefined
     },
     position: 'Directeur du campus',
     display_order: 1,
@@ -388,7 +388,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Nguyen',
       last_name: 'Thi Mai',
       email: 'n.thimai@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-hanoi-1'
+      photo_url: undefined
     },
     position: 'Directrice du campus',
     display_order: 1,
@@ -408,7 +408,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Hery',
       last_name: 'Rakotomalala',
       email: 'h.rakotomalala@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-antananarivo-1'
+      photo_url: undefined
     },
     position: 'Directeur du campus',
     display_order: 1,
@@ -426,7 +426,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Volatiana',
       last_name: 'Rasoarivony',
       email: 'v.rasoarivony@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-antananarivo-2'
+      photo_url: undefined
     },
     position: 'Responsable pédagogique',
     display_order: 2,
@@ -446,7 +446,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Patrick',
       last_name: 'Mukendi',
       email: 'p.mukendi@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-kinshasa-1'
+      photo_url: undefined
     },
     position: 'Directeur du campus',
     display_order: 1,
@@ -464,7 +464,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Grace',
       last_name: 'Kalala',
       email: 'g.kalala@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-kinshasa-2'
+      photo_url: undefined
     },
     position: 'Coordinatrice administrative',
     display_order: 2,
@@ -484,7 +484,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Ahmed',
       last_name: 'Hassan',
       email: 'a.hassan@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-siege-1'
+      photo_url: undefined
     },
     position: 'Recteur',
     display_order: 1,
@@ -502,7 +502,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Maryam',
       last_name: 'El-Sayed',
       email: 'm.elsayed@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-siege-2'
+      photo_url: undefined
     },
     position: 'Vice-Rectrice',
     display_order: 2,
@@ -520,7 +520,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Omar',
       last_name: 'Farouk',
       email: 'o.farouk@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-siege-3'
+      photo_url: undefined
     },
     position: 'Secrétaire général',
     display_order: 3,
@@ -538,7 +538,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Fatma',
       last_name: 'Ibrahim',
       email: 'f.ibrahim@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-siege-4'
+      photo_url: undefined
     },
     position: 'Directrice des études',
     display_order: 4,
@@ -556,7 +556,7 @@ export const mockCampusTeam: CampusTeamMember[] = [
       first_name: 'Khaled',
       last_name: 'Mansour',
       email: 'k.mansour@usenghor.org',
-      photo_url: 'https://i.pravatar.cc/150?u=team-siege-5'
+      photo_url: undefined
     },
     position: 'Directeur des relations internationales',
     display_order: 5,
@@ -666,14 +666,14 @@ export function getCampusTeamStats() {
 
 // Mock des utilisateurs disponibles (pour l'autocomplete)
 export const mockAvailableUsers: CampusTeamUser[] = [
-  { id: 'user-new-1', first_name: 'Jean', last_name: 'Dupont', email: 'j.dupont@usenghor.org', photo_url: 'https://i.pravatar.cc/150?u=user-new-1' },
-  { id: 'user-new-2', first_name: 'Marie', last_name: 'Martin', email: 'm.martin@usenghor.org', photo_url: 'https://i.pravatar.cc/150?u=user-new-2' },
-  { id: 'user-new-3', first_name: 'Pierre', last_name: 'Bernard', email: 'p.bernard@usenghor.org', photo_url: 'https://i.pravatar.cc/150?u=user-new-3' },
-  { id: 'user-new-4', first_name: 'Sophie', last_name: 'Petit', email: 's.petit@usenghor.org', photo_url: 'https://i.pravatar.cc/150?u=user-new-4' },
-  { id: 'user-new-5', first_name: 'Abdou', last_name: 'Diop', email: 'a.diop@usenghor.org', photo_url: 'https://i.pravatar.cc/150?u=user-new-5' },
-  { id: 'user-new-6', first_name: 'Amina', last_name: 'Traoré', email: 'a.traore@usenghor.org', photo_url: 'https://i.pravatar.cc/150?u=user-new-6' },
-  { id: 'user-new-7', first_name: 'Kofi', last_name: 'Asante', email: 'k.asante@usenghor.org', photo_url: 'https://i.pravatar.cc/150?u=user-new-7' },
-  { id: 'user-new-8', first_name: 'Fatou', last_name: 'Camara', email: 'f.camara@usenghor.org', photo_url: 'https://i.pravatar.cc/150?u=user-new-8' }
+  { id: 'user-new-1', first_name: 'Jean', last_name: 'Dupont', email: 'j.dupont@usenghor.org', photo_url: undefined },
+  { id: 'user-new-2', first_name: 'Marie', last_name: 'Martin', email: 'm.martin@usenghor.org', photo_url: undefined },
+  { id: 'user-new-3', first_name: 'Pierre', last_name: 'Bernard', email: 'p.bernard@usenghor.org', photo_url: undefined },
+  { id: 'user-new-4', first_name: 'Sophie', last_name: 'Petit', email: 's.petit@usenghor.org', photo_url: undefined },
+  { id: 'user-new-5', first_name: 'Abdou', last_name: 'Diop', email: 'a.diop@usenghor.org', photo_url: undefined },
+  { id: 'user-new-6', first_name: 'Amina', last_name: 'Traoré', email: 'a.traore@usenghor.org', photo_url: undefined },
+  { id: 'user-new-7', first_name: 'Kofi', last_name: 'Asante', email: 'k.asante@usenghor.org', photo_url: undefined },
+  { id: 'user-new-8', first_name: 'Fatou', last_name: 'Camara', email: 'f.camara@usenghor.org', photo_url: undefined }
 ]
 
 // Rechercher des utilisateurs (pour autocomplete)

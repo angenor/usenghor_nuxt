@@ -483,10 +483,14 @@ const breadcrumb = computed(() => [
               <div v-if="selectedFormation" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
                 <div class="h-32 overflow-hidden">
                   <img
-                    :src="selectedFormation.image || `https://picsum.photos/seed/${selectedFormation.slug}/400/200`"
+                    v-if="selectedFormation.image"
+                    :src="selectedFormation.image"
                     :alt="getLocalizedTitle(selectedFormation)"
                     class="w-full h-full object-cover"
                   >
+                  <div v-else class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                    <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                  </div>
                 </div>
                 <div class="p-4">
                   <h3 class="font-bold text-gray-900 dark:text-white mb-2">

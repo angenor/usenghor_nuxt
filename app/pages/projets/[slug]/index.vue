@@ -15,12 +15,12 @@ const {
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
 // Helper pour obtenir l'URL de l'image de couverture selon la variante souhaitée
-function getCoverImageUrl(project: ProjectPublicDisplay, variant: 'low' | 'medium' | 'original' = 'medium'): string {
+function getCoverImageUrl(project: ProjectPublicDisplay, variant: 'low' | 'medium' | 'original' = 'medium'): string | null {
   if ((project as any).cover_image_external_id) {
     const originalUrl = getMediaUrl((project as any).cover_image_external_id)
-    return originalUrl ? getImageVariantUrl(originalUrl, variant) : 'https://picsum.photos/seed/project/1200/600'
+    return originalUrl ? getImageVariantUrl(originalUrl, variant) : null
   }
-  return project.cover_image || 'https://picsum.photos/seed/project/1200/600'
+  return project.cover_image || null
 }
 
 // ============================================================================
@@ -124,7 +124,7 @@ const getLocalizedSummary = computed(() => {
 useSeoMeta({
   title: () => `${getLocalizedTitle.value} | ${t('projets.hero.title')}`,
   description: () => getLocalizedSummary.value,
-  ogImage: () => project.value ? getCoverImageUrl(project.value) : 'https://picsum.photos/seed/og-project/1200/630',
+  ogImage: () => project.value ? getCoverImageUrl(project.value) ?? undefined : undefined,
 })
 
 // First category name
@@ -218,10 +218,14 @@ const breadcrumb = computed(() => [
               <div class="mb-8">
                 <div class="relative h-56 md:h-64 lg:h-72 rounded-2xl overflow-hidden shadow-lg">
                   <img
-                    :src="getCoverImageUrl(project)"
+                    v-if="getCoverImageUrl(project)"
+                    :src="getCoverImageUrl(project)!"
                     :alt="getLocalizedTitle"
                     class="w-full h-full object-cover"
                   >
+                  <div v-else class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                    <font-awesome-icon icon="fa-solid fa-diagram-project" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                  </div>
                   <!-- Gradient overlay -->
                   <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 

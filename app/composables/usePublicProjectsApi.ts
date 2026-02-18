@@ -78,7 +78,7 @@ export function usePublicProjectsApi() {
     return {
       ...project,
       cover_image: project.cover_image_external_id
-        ? `https://picsum.photos/seed/${project.cover_image_external_id}/1200/600`
+        ? `/api/public/media/${project.cover_image_external_id}/download`
         : null,
     }
   }
@@ -90,7 +90,7 @@ export function usePublicProjectsApi() {
     return {
       ...call,
       cover_image: call.cover_image_external_id
-        ? `https://picsum.photos/seed/${call.cover_image_external_id}/1200/600`
+        ? `/api/public/media/${call.cover_image_external_id}/download`
         : null,
     }
   }
@@ -193,7 +193,7 @@ export function usePublicProjectsApi() {
     return projects.map(project => ({
       ...project,
       cover_image: project.cover_image_external_id
-        ? `https://picsum.photos/seed/${project.cover_image_external_id}/800/500`
+        ? `/api/public/media/${project.cover_image_external_id}/download`
         : null,
       formatted_budget: formatBudget(
         project.budget != null ? Number(project.budget) : null,

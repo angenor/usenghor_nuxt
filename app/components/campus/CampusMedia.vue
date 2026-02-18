@@ -48,12 +48,12 @@ const imageAlbums = computed(() => {
 })
 
 // Get album cover image (first image in the album)
-function getAlbumCover(album: AlbumPublicWithMedia): string {
+function getAlbumCover(album: AlbumPublicWithMedia): string | null {
   const firstImage = album.media_items.find(m => m.type === 'image')
   if (firstImage?.url) {
-    return resolveMediaUrl(firstImage.url) || `https://picsum.photos/seed/album-${album.id}/400/300`
+    return resolveMediaUrl(firstImage.url)
   }
-  return `https://picsum.photos/seed/album-${album.id}/400/300`
+  return null
 }
 
 // Get album preview images (up to 4)
@@ -61,7 +61,8 @@ function getAlbumPreviews(album: AlbumPublicWithMedia): string[] {
   const images = album.media_items
     .filter(m => m.type === 'image')
     .slice(0, 4)
-    .map(m => resolveMediaUrl(m.url) || `https://picsum.photos/seed/${m.id}/200/200`)
+    .map(m => resolveMediaUrl(m.url))
+    .filter((url): url is string => url !== null)
   return images
 }
 
@@ -108,10 +109,14 @@ function getImageCount(album: AlbumPublicWithMedia): number {
           <!-- Main image -->
           <div class="relative h-full w-full overflow-hidden rounded-lg">
             <img
-              :src="getAlbumCover(album)"
+              v-if="getAlbumCover(album)"
+              :src="getAlbumCover(album)!"
               :alt="album.title"
               class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             >
+            <div v-else class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+              <font-awesome-icon icon="fa-solid fa-images" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+            </div>
             <!-- Overlay with count -->
             <div class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
               <div class="flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-gray-900">

@@ -207,12 +207,12 @@ const getTypeLabel = (type: CallType) => {
   return t(`actualites.calls.filters.${key}`)
 }
 
-// Get call image from media service or fallback to placeholder
-const getCallImage = (call: ApplicationCallPublic) => {
+// Get call image from media service or null if no image
+const getCallImage = (call: ApplicationCallPublic): string | null => {
   if (call.cover_image_external_id) {
     return `/api/public/media/${call.cover_image_external_id}/download?variant=medium`
   }
-  return `https://picsum.photos/seed/${call.slug}/800/400`
+  return null
 }
 </script>
 
@@ -307,12 +307,16 @@ const getCallImage = (call: ApplicationCallPublic) => {
                   <!-- Image -->
                   <div class="md:w-1/3 overflow-hidden relative">
                     <img
-                      :src="getCallImage(call)"
+                      v-if="getCallImage(call)"
+                      :src="getCallImage(call)!"
                       :alt="call.title"
                       class="w-full h-48 md:h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       :class="call.status === 'closed' ? 'grayscale group-hover:grayscale-0' : ''"
                       loading="lazy"
                     >
+                    <div v-else class="w-full h-48 md:h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                      <font-awesome-icon icon="fa-solid fa-bullhorn" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                    </div>
                     <!-- Closed overlay -->
                     <div
                       v-if="call.status === 'closed'"

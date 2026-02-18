@@ -160,7 +160,7 @@ function openEditRole(partnerId: string, currentRole: string | null) {
         <div class="flex items-center gap-3">
           <img
             v-if="item.partner?.logo_external_id"
-            :src="`https://picsum.photos/seed/${item.partner.logo_external_id}/40/40`"
+            :src="`/api/public/media/${item.partner.logo_external_id}/download?variant=low`"
             class="h-10 w-10 rounded object-contain"
           />
           <div v-else class="flex h-10 w-10 items-center justify-center rounded bg-gray-100 dark:bg-gray-700">

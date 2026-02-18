@@ -194,14 +194,14 @@ export const mockNews: News[] = [
       ]
     },
     video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    cover_image: 'https://picsum.photos/seed/news-35ans/1200/600',
+    cover_image: '',
     cover_image_alt: 'Cérémonie des 35 ans de l\'Université Senghor',
     author: mockNewsAuthors[0],
     tags: [mockNewsTags[0], mockNewsTags[4]],
     media: [
-      { id: 'media-1-1', url: 'https://picsum.photos/seed/news-35-1/800/600', alt: 'Cérémonie officielle', order: 0 },
-      { id: 'media-1-2', url: 'https://picsum.photos/seed/news-35-2/800/600', alt: 'Discours du Recteur', order: 1 },
-      { id: 'media-1-3', url: 'https://picsum.photos/seed/news-35-3/800/600', alt: 'Invités de marque', order: 2 }
+      { id: 'media-1-1', url: '', alt: 'Cérémonie officielle', order: 0 },
+      { id: 'media-1-2', url: '', alt: 'Discours du Recteur', order: 1 },
+      { id: 'media-1-3', url: '', alt: 'Invités de marque', order: 2 }
     ],
     status: 'published',
     highlight_status: 'headline',
@@ -257,7 +257,7 @@ export const mockNews: News[] = [
         }
       ]
     },
-    cover_image: 'https://picsum.photos/seed/news-oif/1200/600',
+    cover_image: '',
     author: mockNewsAuthors[2],
     tags: [mockNewsTags[1], mockNewsTags[4]],
     media: [],
@@ -317,7 +317,7 @@ export const mockNews: News[] = [
         }
       ]
     },
-    cover_image: 'https://picsum.photos/seed/news-rentree/1200/600',
+    cover_image: '',
     author: mockNewsAuthors[1],
     tags: [mockNewsTags[0], mockNewsTags[6]],
     media: [],
@@ -381,7 +381,7 @@ export const mockNews: News[] = [
         }
       ]
     },
-    cover_image: 'https://picsum.photos/seed/news-cannes/1200/600',
+    cover_image: '',
     author: mockNewsAuthors[4],
     tags: [mockNewsTags[8], mockNewsTags[4], mockNewsTags[7]],
     media: [],
@@ -420,7 +420,7 @@ export const mockNews: News[] = [
         }
       ]
     },
-    cover_image: 'https://picsum.photos/seed/news-sg/1200/600',
+    cover_image: '',
     author: mockNewsAuthors[0],
     tags: [mockNewsTags[4], mockNewsTags[1]],
     media: [],
@@ -478,7 +478,7 @@ export const mockNews: News[] = [
         }
       ]
     },
-    cover_image: 'https://picsum.photos/seed/news-ia/1200/600',
+    cover_image: '',
     author: mockNewsAuthors[1],
     tags: [mockNewsTags[6], mockNewsTags[7], mockNewsTags[3]],
     media: [],
@@ -515,7 +515,7 @@ export const mockNews: News[] = [
         }
       ]
     },
-    cover_image: 'https://picsum.photos/seed/news-gouv/1200/600',
+    cover_image: '',
     author: mockNewsAuthors[2],
     tags: [mockNewsTags[9], mockNewsTags[2]],
     media: [],
@@ -543,7 +543,7 @@ export const mockNews: News[] = [
         }
       ]
     },
-    cover_image: 'https://picsum.photos/seed/news-caire/1200/600',
+    cover_image: '',
     author: mockNewsAuthors[3],
     tags: [mockNewsTags[1], mockNewsTags[4]],
     media: [],
@@ -578,7 +578,7 @@ export const mockNews: News[] = [
         }
       ]
     },
-    cover_image: 'https://picsum.photos/seed/news-masa/1200/600',
+    cover_image: '',
     author: mockNewsAuthors[0],
     tags: [mockNewsTags[8], mockNewsTags[2]],
     media: [],
@@ -623,7 +623,7 @@ export const mockNews: News[] = [
         }
       ]
     },
-    cover_image: 'https://picsum.photos/seed/news-ta/1200/600',
+    cover_image: '',
     author: mockNewsAuthors[4],
     tags: [mockNewsTags[6], mockNewsTags[9]],
     media: [],
@@ -662,7 +662,7 @@ export const mockNews: News[] = [
         }
       ]
     },
-    cover_image: 'https://picsum.photos/seed/news-nairobi/1200/600',
+    cover_image: '',
     author: mockNewsAuthors[0],
     tags: [mockNewsTags[4], mockNewsTags[7]],
     media: [],
@@ -719,7 +719,7 @@ export const mockNews: News[] = [
         }
       ]
     },
-    cover_image: 'https://picsum.photos/seed/news-old/1200/600',
+    cover_image: '',
     author: mockNewsAuthors[0],
     tags: [mockNewsTags[0]],
     media: [],

@@ -11,12 +11,12 @@ const {
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
 // Helper pour obtenir l'URL de l'image de couverture selon la variante souhaitée
-function getCoverImageUrl(project: ProjectPublicDisplay, variant: 'low' | 'medium' | 'original' = 'low'): string {
+function getCoverImageUrl(project: ProjectPublicDisplay, variant: 'low' | 'medium' | 'original' = 'low'): string | null {
   if ((project as any).cover_image_external_id) {
     const originalUrl = getMediaUrl((project as any).cover_image_external_id)
-    return originalUrl ? getImageVariantUrl(originalUrl, variant) : 'https://picsum.photos/seed/project/1200/600'
+    return originalUrl ? getImageVariantUrl(originalUrl, variant) : null
   }
-  return project.cover_image || 'https://picsum.photos/seed/project/1200/600'
+  return project.cover_image || null
 }
 
 // Contenus éditoriaux avec fallback sur i18n
@@ -264,11 +264,15 @@ const stats = computed(() => [
             >
               <div class="aspect-video overflow-hidden">
                 <img
-                  :src="getCoverImageUrl(project)"
+                  v-if="getCoverImageUrl(project)"
+                  :src="getCoverImageUrl(project)!"
                   :alt="getLocalizedTitle(project)"
                   class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                 >
+                <div v-else class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                  <font-awesome-icon icon="fa-solid fa-diagram-project" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                </div>
               </div>
 
               <div class="p-5">
