@@ -7,8 +7,9 @@ export default defineNuxtRouteMiddleware(async () => {
     return navigateTo('/admin/login')
   }
 
-  // Charger les données utilisateur si pas encore chargées
-  if (!authStore.user) {
+  // Charger les données utilisateur complètes (avec rôles/permissions)
+  // Le cache cookie ne contient que les données minimales (sans rôles)
+  if (!authStore.user?.roles?.length) {
     await authStore.fetchCurrentUser()
   }
 })

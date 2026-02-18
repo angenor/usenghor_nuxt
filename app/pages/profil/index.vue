@@ -14,6 +14,7 @@ const { apiFetch } = useApi()
 const { getUserProfile } = usePublicUserApi()
 const { getCountriesForSelect, getFlagEmoji } = useCountriesApi()
 const { uploadMediaVariants, getMediaUrl } = useMediaApi()
+const { userPermissions } = usePermissions()
 
 // === STATE ===
 const isLoading = ref(true)
@@ -541,8 +542,16 @@ function getCampusBadgeColor(code) {
             </span>
           </div>
 
-          <!-- Actions photo + déconnexion -->
-          <div class="mt-4 flex items-center gap-3">
+          <!-- Actions photo + admin + déconnexion -->
+          <div class="mt-4 flex flex-wrap items-center justify-center gap-3">
+            <NuxtLink
+              v-if="userPermissions.length > 0"
+              to="/admin"
+              class="inline-flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/25"
+            >
+              <font-awesome-icon :icon="['fas', 'gauge-high']" class="h-4 w-4" />
+              Espace administration
+            </NuxtLink>
             <label
               class="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-white/15 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/25"
               :class="{ 'pointer-events-none opacity-50': isUploadingPhoto }"

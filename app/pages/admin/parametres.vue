@@ -129,7 +129,7 @@ function cancelEdit() {
 
     <!-- Lien vers le profil -->
     <NuxtLink
-      to="/admin/profil"
+      to="/profil"
       class="mb-6 flex items-center gap-3 rounded-xl border border-brand-blue-200 bg-brand-blue-50 p-4 transition-colors hover:bg-brand-blue-100 dark:border-brand-blue-800 dark:bg-brand-blue-900/20 dark:hover:bg-brand-blue-900/30"
     >
       <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue-100 dark:bg-brand-blue-900/30">

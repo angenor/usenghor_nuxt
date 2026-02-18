@@ -23,7 +23,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   // Routes toujours accessibles à tout utilisateur authentifié
-  const alwaysAllowed = ['/admin', '/admin/profil', '/admin/parametres', '/admin/acces-refuse']
+  const alwaysAllowed = ['/admin', '/admin/parametres', '/admin/acces-refuse']
   const cleanPath = to.path.endsWith('/') ? to.path.slice(0, -1) : to.path
   if (alwaysAllowed.includes(cleanPath)) {
     return
