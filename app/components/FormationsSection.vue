@@ -86,7 +86,7 @@ const getDetailUrl = (program: ProgramPublic) => {
 // Image URL with fallback
 const getImageUrl = (program: ProgramPublic) => {
   if (program.cover_image_external_id) {
-    return `/api/public/media/${program.cover_image_external_id}/download`
+    return `/api/public/media/${program.cover_image_external_id}/download?variant=medium`
   }
   return `https://picsum.photos/seed/${program.slug}/800/600`
 }

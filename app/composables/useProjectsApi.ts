@@ -126,7 +126,7 @@ export function useProjectsApi() {
     return {
       ...project,
       cover_image: project.cover_image_external_id
-        ? getMediaUrl(project.cover_image_external_id)
+        ? getMediaUrl(project.cover_image_external_id, 'medium')
         : null,
     }
   }
@@ -138,7 +138,7 @@ export function useProjectsApi() {
     return {
       ...project,
       cover_image: project.cover_image_external_id
-        ? getMediaUrl(project.cover_image_external_id)
+        ? getMediaUrl(project.cover_image_external_id, 'medium')
         : null,
       categories: [],
     }

@@ -82,7 +82,7 @@ const photoUrl = computed(() => {
     return enrichedProfile.value.photo_url
   }
   if (user.value?.photo_external_id) {
-    return getMediaUrl(user.value.photo_external_id)
+    return getMediaUrl(user.value.photo_external_id, 'low')
   }
   return null
 })

@@ -141,27 +141,43 @@ export function useMediaApi() {
    * Construit l'URL complète d'un média
    * Accepte soit un objet MediaRead/MediaUploadResponse, soit un ID string
    * Note: Utilise des URLs relatives pour que nginx puisse les proxier
+   * @param variant - Optionnel: 'low' (480px), 'medium' (1200px) ou 'original' (défaut)
    */
-  function getMediaUrl(mediaOrId: MediaRead | MediaUploadResponse | string | null): string | null {
+  function getMediaUrl(
+    mediaOrId: MediaRead | MediaUploadResponse | string | null,
+    variant?: 'low' | 'medium' | 'original',
+  ): string | null {
     if (!mediaOrId) return null
+
+    let url: string | null = null
 
     // Si c'est un ID (string UUID), utiliser l'endpoint public de download
     if (typeof mediaOrId === 'string') {
       // Vérifier que c'est un UUID valide (éviter les chemins relatifs)
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
       if (uuidRegex.test(mediaOrId)) {
-        return `/api/public/media/${mediaOrId}/download`
+        url = `/api/public/media/${mediaOrId}/download`
       }
-      return null
+      else {
+        return null
+      }
     }
-
     // Si c'est déjà une URL complète
-    if (mediaOrId.url.startsWith('http://') || mediaOrId.url.startsWith('https://')) {
+    else if (mediaOrId.url.startsWith('http://') || mediaOrId.url.startsWith('https://')) {
       return mediaOrId.url
     }
-
     // Sinon, retourner l'URL relative (nginx proxiera vers le backend)
-    return mediaOrId.url
+    else {
+      url = mediaOrId.url
+    }
+
+    // Ajouter le variant si spécifié et différent de 'original'
+    if (variant && variant !== 'original' && url) {
+      const separator = url.includes('?') ? '&' : '?'
+      url = `${url}${separator}variant=${variant}`
+    }
+
+    return url
   }
 
   /**

@@ -572,7 +572,7 @@ const toggleSemester = (num: number) => {
                   <div class="overflow-hidden h-32">
                     <img
                       :src="related.cover_image_external_id
-                        ? `/api/public/media/${related.cover_image_external_id}/download`
+                        ? `/api/public/media/${related.cover_image_external_id}/download?variant=low`
                         : `https://picsum.photos/seed/${related.slug}/400/200`"
                       :alt="getLocalizedTitleFor(related)"
                       class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"

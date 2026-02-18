@@ -111,7 +111,7 @@ const missionTitle = computed(() => getContent('about.mission.title'))
 const missionContent = computed(() => getContent('about.mission.content'))
 const missionImage = computed(() => {
   const imageMediaId = getRawContent('about.mission.image')
-  return imageMediaId ? getMediaUrl(imageMediaId) : undefined
+  return imageMediaId ? getMediaUrl(imageMediaId, 'medium') : undefined
 })
 
 // Engagements title

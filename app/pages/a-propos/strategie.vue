@@ -89,7 +89,7 @@ const targetIndicators = computed(() => [
     <StrategyStrategicPlanSection
       :title="getContent('strategy.plan.title')"
       :summary="getContent('strategy.plan.summary')"
-      :cover-image="getMediaUrl(getRawContent('strategy.plan.image') ?? '') || 'https://picsum.photos/seed/strategic-plan-cover/800/600'"
+      :cover-image="getMediaUrl(getRawContent('strategy.plan.image') ?? '', 'medium') || 'https://picsum.photos/seed/strategic-plan-cover/800/600'"
       :pdf-url="getMediaUrl(getRawContent('strategy.plan.download_url') ?? '') || getRawContent('strategy.plan.download_url') || '/documents/plan-strategique-2024-2030.pdf'"
       :pdf-label="getContent('strategy.plan.download')"
     />

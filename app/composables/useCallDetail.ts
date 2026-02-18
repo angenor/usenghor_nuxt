@@ -76,7 +76,7 @@ export function useCallDetail(call: Ref<ApplicationCallPublicWithDetails | null>
   // Get call image from media service or fallback to placeholder
   const getCallImage = (callData: ApplicationCallPublicWithDetails) => {
     if (callData.cover_image_external_id) {
-      return `/api/public/media/${callData.cover_image_external_id}/download`
+      return `/api/public/media/${callData.cover_image_external_id}/download?variant=medium`
     }
     return `https://picsum.photos/seed/${callData.slug}/800/450`
   }

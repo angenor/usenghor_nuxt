@@ -100,7 +100,7 @@ export function usePublicPartnersApi() {
       id: partner.id,
       name: partner.name,
       description: partner.description,
-      logo_url: partner.logo_external_id ? getMediaUrl(partner.logo_external_id) : null,
+      logo_url: partner.logo_external_id ? getMediaUrl(partner.logo_external_id, 'low') : null,
       website: partner.website,
       type: partner.type,
       country_iso_code: country?.iso_code || null,

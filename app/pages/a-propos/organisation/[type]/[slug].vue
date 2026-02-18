@@ -754,7 +754,7 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
               >
                 <div v-if="achievement.cover_image_external_id" class="relative h-40 overflow-hidden">
                   <img
-                    :src="getMediaUrl(achievement.cover_image_external_id) ?? undefined"
+                    :src="getMediaUrl(achievement.cover_image_external_id, 'medium') ?? undefined"
                     :alt="achievement.title"
                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
@@ -811,7 +811,7 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
               >
                 <div v-if="project.cover_image_external_id" class="relative h-40 overflow-hidden">
                   <img
-                    :src="getMediaUrl(project.cover_image_external_id) ?? undefined"
+                    :src="getMediaUrl(project.cover_image_external_id, 'medium') ?? undefined"
                     :alt="project.title"
                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
@@ -880,7 +880,7 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                 <div class="relative h-40 overflow-hidden">
                   <img
                     v-if="program.cover_image_external_id"
-                    :src="getMediaUrl(program.cover_image_external_id) ?? undefined"
+                    :src="getMediaUrl(program.cover_image_external_id, 'medium') ?? undefined"
                     :alt="program.title"
                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"

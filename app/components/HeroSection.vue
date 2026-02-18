@@ -58,7 +58,7 @@ const slides = computed(() => {
       if (!imageMediaId) return null
 
       return {
-        image: getMediaUrl(imageMediaId),
+        image: getMediaUrl(imageMediaId, 'medium'),
         editorialTitleKey: config.editorialTitleKey,
         editorialSubtitleKey: config.editorialSubtitleKey,
         editorialCta1TextKey: config.editorialCta1TextKey,

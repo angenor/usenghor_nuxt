@@ -68,7 +68,7 @@ const formationImage = computed(() => {
   if (isApiCall.value) {
     const apiCall = props.formation as ApplicationCallPublic
     return apiCall.cover_image_external_id
-      ? `/api/public/media/${apiCall.cover_image_external_id}/download`
+      ? `/api/public/media/${apiCall.cover_image_external_id}/download?variant=medium`
       : `https://picsum.photos/seed/${apiCall.slug}/800/600`
   }
   const mockFormation = props.formation as CampusFormationRealisee

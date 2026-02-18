@@ -204,7 +204,7 @@ export function useCampusTeamApi() {
             last_name: user.last_name,
             email: user.email,
             photo_url: user.photo_external_id
-              ? `/api/public/media/${user.photo_external_id}/download`
+              ? `/api/public/media/${user.photo_external_id}/download?variant=low`
               : null,
             salutation: user.salutation,
           })
@@ -266,7 +266,7 @@ export function useCampusTeamApi() {
         last_name: user.last_name,
         email: user.email,
         photo_url: user.photo_external_id
-          ? `/api/public/media/${user.photo_external_id}/download`
+          ? `/api/public/media/${user.photo_external_id}/download?variant=low`
           : null,
         salutation: user.salutation,
       }))

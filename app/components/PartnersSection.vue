@@ -11,7 +11,7 @@ const { getMediaUrl } = useMediaApi()
 // Image de la section (éditorial avec fallback sur image statique)
 const sectionImage = computed(() => {
   const imageMediaId = getRawContent('governance.image')
-  return (imageMediaId ? getMediaUrl(imageMediaId) : null) ?? '/images/gallery/gallery4.jpg'
+  return (imageMediaId ? getMediaUrl(imageMediaId, 'medium') : null) ?? '/images/gallery/gallery4.jpg'
 })
 
 const { elementRef: headerRef } = useScrollAnimation({ animation: 'fadeInDown' })

@@ -14,7 +14,7 @@ function resolveImage(editorialKey: string, fallbackSrc: string, fallbackAlt: st
   const mediaId = getRawContent(editorialKey)
   return {
     type: 'image' as const,
-    src: mediaId ? (getMediaUrl(mediaId) || fallbackSrc) : fallbackSrc,
+    src: mediaId ? (getMediaUrl(mediaId, 'medium') || fallbackSrc) : fallbackSrc,
     alt: fallbackAlt,
   }
 }

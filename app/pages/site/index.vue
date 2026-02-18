@@ -141,7 +141,7 @@ const getFacilityImages = (facility: SiteFacility): string[] => {
       try {
         const mediaIds: string[] = JSON.parse(raw)
         if (mediaIds.length > 0) {
-          return mediaIds.map(id => getMediaUrl(id))
+          return mediaIds.map(id => getMediaUrl(id, 'medium'))
         }
       }
       catch {

@@ -15,7 +15,7 @@ const localePath = useLocalePath()
 
 const getCallImage = (call: ApplicationCallPublicWithDetails) => {
   if (call.cover_image_external_id) {
-    return `/api/public/media/${call.cover_image_external_id}/download`
+    return `/api/public/media/${call.cover_image_external_id}/download?variant=low`
   }
   return `https://picsum.photos/seed/${call.slug}/400/200`
 }
