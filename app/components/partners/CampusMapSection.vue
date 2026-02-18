@@ -411,7 +411,7 @@ const handleImageError = (e: Event) => {
         <!-- Map and Card Container -->
         <div ref="mapRef" class="relative flex flex-col lg:flex-row lg:items-center gap-6 lg:gap-0">
           <!-- Map Container -->
-          <div class="relative flex-1 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-3xl p-4 lg:p-8 border border-gray-200/50 dark:border-gray-700/50 shadow-xl ltr:lg:mr-[-80px] rtl:lg:ml-[-80px] z-10">
+          <div class="relative flex-1 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl ltr:lg:mr-[-80px] rtl:lg:ml-[-80px] z-10 overflow-hidden">
             <!-- Map -->
             <div class="map-container relative" @mousemove="handleMouseMove">
               <!-- ViewBox ajusté pour afficher Europe, Afrique, Asie, Océanie (sans Amériques) -->

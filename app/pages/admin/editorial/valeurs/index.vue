@@ -3,6 +3,8 @@ import type {
   EditorialContentRead,
   EditorialHistoryRead,
   EditorialValuesStats,
+  Testimonial,
+  TestimonialData,
 } from '~/types/api'
 import type { PageSectionField } from '~/composables/editorial-pages-config'
 
@@ -18,6 +20,12 @@ const {
   getValuesCategory,
   getValuesStats,
   getContentHistory,
+  getTestimonials,
+  createTestimonial,
+  updateTestimonial,
+  deleteTestimonial,
+  reorderTestimonials,
+  getNextTestimonialOrder,
   frontOfficePages,
 } = useEditorialValuesApi()
 
@@ -47,8 +55,17 @@ const globalStats = ref<EditorialValuesStats>({
   sections_count: 0,
   core_values_count: 0,
   active_core_values: 0,
+  testimonials_count: 0,
+  featured_testimonials: 0,
   last_updated: null,
 })
+
+// Testimonials state
+const testimonials = ref<Testimonial[]>([])
+const showTestimonialModal = ref(false)
+const editingTestimonial = ref<Testimonial | null>(null)
+const showDeleteTestimonialModal = ref(false)
+const deletingTestimonial = ref<Testimonial | null>(null)
 
 // === METHODS ===
 
@@ -71,6 +88,7 @@ async function loadData() {
       contentsResponse.items.map(c => [c.key, c]),
     )
 
+    testimonials.value = await getTestimonials(true)
     globalStats.value = await getValuesStats()
   }
   catch (err) {
@@ -155,10 +173,7 @@ async function handleSaveField(key: string, value: string, valueType: 'text' | '
     }
 
     globalStats.value = await getValuesStats()
-
-    // Invalider le cache du front-office pour que les modifications soient visibles immédiatement
     editorialContentStore.invalidateCache()
-
     showSuccess('Champ enregistré avec succès')
   }
   catch (err) {
@@ -167,6 +182,119 @@ async function handleSaveField(key: string, value: string, valueType: 'text' | '
   }
   finally {
     isSaving.value = false
+  }
+}
+
+// === TESTIMONIALS CRUD ===
+
+function handleAddTestimonial() {
+  editingTestimonial.value = null
+  showTestimonialModal.value = true
+}
+
+function handleEditTestimonial(testimonial: Testimonial) {
+  editingTestimonial.value = testimonial
+  showTestimonialModal.value = true
+}
+
+async function handleSaveTestimonial(data: TestimonialData) {
+  if (!categoryId.value) return
+
+  isSaving.value = true
+  error.value = null
+
+  try {
+    if (editingTestimonial.value) {
+      await updateTestimonial(editingTestimonial.value.id, data)
+      showSuccess('Témoignage modifié avec succès')
+    }
+    else {
+      const nextOrder = await getNextTestimonialOrder()
+      await createTestimonial({ ...data, display_order: nextOrder }, categoryId.value)
+      showSuccess('Témoignage ajouté avec succès')
+    }
+
+    testimonials.value = await getTestimonials(true)
+    globalStats.value = await getValuesStats()
+    editorialContentStore.invalidateCache()
+    showTestimonialModal.value = false
+  }
+  catch (err) {
+    console.error('Erreur sauvegarde témoignage:', err)
+    error.value = 'Erreur lors de la sauvegarde du témoignage'
+  }
+  finally {
+    isSaving.value = false
+  }
+}
+
+function handleRequestDeleteTestimonial(testimonial: Testimonial) {
+  deletingTestimonial.value = testimonial
+  showDeleteTestimonialModal.value = true
+}
+
+async function handleConfirmDeleteTestimonial() {
+  if (!deletingTestimonial.value) return
+
+  isSaving.value = true
+  error.value = null
+
+  try {
+    await deleteTestimonial(deletingTestimonial.value.id)
+    testimonials.value = await getTestimonials(true)
+    globalStats.value = await getValuesStats()
+    editorialContentStore.invalidateCache()
+    showDeleteTestimonialModal.value = false
+    deletingTestimonial.value = null
+    showSuccess('Témoignage supprimé')
+  }
+  catch (err) {
+    console.error('Erreur suppression témoignage:', err)
+    error.value = 'Erreur lors de la suppression'
+  }
+  finally {
+    isSaving.value = false
+  }
+}
+
+async function handleMoveTestimonial(index: number, direction: 'up' | 'down') {
+  const items = [...testimonials.value]
+  const targetIndex = direction === 'up' ? index - 1 : index + 1
+  if (targetIndex < 0 || targetIndex >= items.length) return
+
+  const temp = items[index]!
+  items[index] = items[targetIndex]!
+  items[targetIndex] = temp
+
+  testimonials.value = items
+
+  try {
+    await reorderTestimonials(items.map(t => t.id))
+    editorialContentStore.invalidateCache()
+  }
+  catch (err) {
+    console.error('Erreur réordonnement:', err)
+    testimonials.value = await getTestimonials(true)
+  }
+}
+
+async function handleTestimonialHistory(testimonial: Testimonial) {
+  selectedHistoryItem.value = {
+    id: testimonial.id,
+    name: `${testimonial.first_name} ${testimonial.last_name}`,
+  }
+  showHistoryModal.value = true
+  isLoadingHistory.value = true
+
+  try {
+    historyItems.value = await getContentHistory(testimonial.id)
+  }
+  catch (err) {
+    console.error('Erreur chargement historique:', err)
+    historyItems.value = []
+  }
+  finally {
+    isLoadingHistory.value = false
   }
 }
 
@@ -261,6 +389,16 @@ function closeHistoryModal() {
         :stats="globalStats"
       />
 
+      <!-- Testimonials Section -->
+      <AdminEditorialTestimonialsList
+        :testimonials="testimonials"
+        @add="handleAddTestimonial"
+        @edit="handleEditTestimonial"
+        @delete="handleRequestDeleteTestimonial"
+        @move="handleMoveTestimonial"
+        @history="handleTestimonialHistory"
+      />
+
       <!-- Pages Sections -->
       <AdminEditorialPageSections
         :pages="frontOfficePages"
@@ -270,6 +408,56 @@ function closeHistoryModal() {
         @open-history="openFieldHistory"
       />
     </template>
+
+    <!-- Testimonial Modal -->
+    <AdminEditorialTestimonialModal
+      :show="showTestimonialModal"
+      :editing-testimonial="editingTestimonial"
+      :is-saving="isSaving"
+      @close="showTestimonialModal = false"
+      @save="handleSaveTestimonial"
+    />
+
+    <!-- Delete Testimonial Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showDeleteTestimonialModal && deletingTestimonial"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        @click.self="showDeleteTestimonialModal = false"
+      >
+        <div class="w-full max-w-md rounded-xl bg-white shadow-xl dark:bg-gray-800">
+          <div class="p-6 text-center">
+            <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+              <font-awesome-icon :icon="['fas', 'exclamation-triangle']" class="h-6 w-6 text-red-600 dark:text-red-400" />
+            </div>
+            <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+              Supprimer ce témoignage ?
+            </h3>
+            <p class="mb-6 text-gray-500 dark:text-gray-400">
+              Êtes-vous sûr de vouloir supprimer le témoignage de
+              <span class="font-medium text-gray-700 dark:text-gray-300">{{ deletingTestimonial.first_name }} {{ deletingTestimonial.last_name }}</span> ?
+              Cette action est irréversible.
+            </p>
+            <div class="flex justify-center gap-3">
+              <button
+                class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors"
+                @click="showDeleteTestimonialModal = false"
+              >
+                Annuler
+              </button>
+              <button
+                class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+                :disabled="isSaving"
+                @click="handleConfirmDeleteTestimonial"
+              >
+                <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 
     <!-- History Modal -->
     <AdminEditorialHistoryModal

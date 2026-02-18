@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import type { Alumnus } from '~/composables/useMockData'
+import type { Testimonial, TestimonialData } from '~/types/api'
+import { TESTIMONIAL_KEY_PREFIX } from '~/composables/editorial-values-config'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const {
   getAllAlumni,
-  getFeaturedAlumni,
   getAlumniStats,
   getAlumniGraduationYears,
   getAlumniCountries,
@@ -18,11 +19,42 @@ const { getContent, loadContent } = useEditorialContent('alumni')
 // Chiffres-clés depuis l'admin
 const { getFigure, loadKeyFigures } = useKeyFigures()
 
+// API publique pour les témoignages
+const { getContentsByCategory } = usePublicEditorialApi()
+
+// Témoignages depuis le backend
+const testimonials = ref<Testimonial[]>([])
+const isLoadingTestimonials = ref(true)
+
+async function loadTestimonials() {
+  isLoadingTestimonials.value = true
+  try {
+    const contents = await getContentsByCategory('values')
+    testimonials.value = contents
+      .filter(c => c.key.startsWith(TESTIMONIAL_KEY_PREFIX) && c.value_type === 'json' && c.value)
+      .map((c) => {
+        const data = JSON.parse(c.value!) as TestimonialData
+        return { ...data, id: c.key, created_at: '', updated_at: '' } as Testimonial
+      })
+      .filter(t => t.is_active)
+      .sort((a, b) => a.display_order - b.display_order)
+  }
+  catch (err) {
+    console.error('Erreur chargement témoignages:', err)
+  }
+  finally {
+    isLoadingTestimonials.value = false
+  }
+}
+
+const featuredTestimonials = computed(() =>
+  testimonials.value.filter(t => t.is_featured),
+)
+
 onMounted(() => {
-  // Charger les contenus éditoriaux (non-bloquant)
   loadContent()
-  // Charger les chiffres-clés (non-bloquant)
   loadKeyFigures()
+  loadTestimonials()
 })
 
 // SEO
@@ -33,7 +65,6 @@ useSeoMeta({
 
 // Get data
 const allAlumni = computed(() => getAllAlumni())
-const featuredAlumni = computed(() => getFeaturedAlumni())
 const alumniStats = computed(() => getAlumniStats())
 const graduationYears = computed(() => getAlumniGraduationYears())
 const countries = computed(() => getAlumniCountries())
@@ -109,16 +140,16 @@ const visibleAlumni = computed(() => {
 })
 
 // Localization helpers
-const getLocalizedPosition = (alumnus: Alumnus) => {
-  if (locale.value === 'en' && alumnus.current_position_en) return alumnus.current_position_en
-  if (locale.value === 'ar' && alumnus.current_position_ar) return alumnus.current_position_ar
-  return alumnus.current_position_fr
+const getLocalizedPosition = (item: Alumnus | Testimonial) => {
+  if (locale.value === 'en' && item.current_position_en) return item.current_position_en
+  if (locale.value === 'ar' && item.current_position_ar) return item.current_position_ar
+  return item.current_position_fr
 }
 
-const getLocalizedTestimonial = (alumnus: Alumnus) => {
-  if (locale.value === 'en' && alumnus.testimonial_en) return alumnus.testimonial_en
-  if (locale.value === 'ar' && alumnus.testimonial_ar) return alumnus.testimonial_ar
-  return alumnus.testimonial_fr
+const getLocalizedTestimonialText = (item: Testimonial) => {
+  if (locale.value === 'en' && item.testimonial_en) return item.testimonial_en
+  if (locale.value === 'ar' && item.testimonial_ar) return item.testimonial_ar
+  return item.testimonial_fr
 }
 
 const getDepartmentName = (deptId: string) => {
