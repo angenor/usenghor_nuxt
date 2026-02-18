@@ -224,7 +224,7 @@ const resetFilters = () => {
     </section>
 
     <!-- Testimonials / Success Stories -->
-    <section v-if="featuredAlumni.length > 0" class="py-16 bg-gray-50 dark:bg-gray-900 bg-grid-pattern">
+    <section v-if="isLoadingTestimonials || featuredTestimonials.length > 0" class="py-16 bg-gray-50 dark:bg-gray-900 bg-grid-pattern">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -235,10 +235,29 @@ const resetFilters = () => {
           </p>
         </div>
 
-        <div class="grid md:grid-cols-2 gap-8">
+        <!-- Loading skeleton -->
+        <div v-if="isLoadingTestimonials" class="grid md:grid-cols-2 gap-8">
+          <div v-for="n in 2" :key="n" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 animate-pulse">
+            <div class="h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded mb-6" />
+            <div class="space-y-3 mb-6">
+              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full" />
+              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6" />
+              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/6" />
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full" />
+              <div class="space-y-2">
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32" />
+                <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-24" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="grid md:grid-cols-2 gap-8">
           <article
-            v-for="alumnus in featuredAlumni"
-            :key="alumnus.id"
+            v-for="testimonial in featuredTestimonials"
+            :key="testimonial.id"
             class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden"
           >
             <div class="p-8">
@@ -250,37 +269,41 @@ const resetFilters = () => {
 
               <!-- Testimonial -->
               <blockquote class="text-gray-700 dark:text-gray-300 text-lg leading-relaxed mb-6">
-                "{{ getLocalizedTestimonial(alumnus) }}"
+                "{{ getLocalizedTestimonialText(testimonial) }}"
               </blockquote>
 
               <!-- Alumni info -->
               <div class="flex items-center gap-4">
                 <img
-                  :src="alumnus.photo"
-                  :alt="`${alumnus.first_name} ${alumnus.last_name}`"
+                  v-if="testimonial.photo"
+                  :src="testimonial.photo"
+                  :alt="`${testimonial.first_name} ${testimonial.last_name}`"
                   class="w-16 h-16 rounded-full object-cover ring-2 ring-brand-blue-400"
                   loading="lazy"
                 >
+                <div v-else class="w-16 h-16 rounded-full bg-brand-blue-100 dark:bg-brand-blue-900/30 flex items-center justify-center ring-2 ring-brand-blue-400">
+                  <font-awesome-icon icon="fa-solid fa-user" class="w-8 h-8 text-brand-blue-400" />
+                </div>
                 <div>
                   <h3 class="font-bold text-gray-900 dark:text-white">
-                    {{ alumnus.civility }} {{ alumnus.first_name }} {{ alumnus.last_name }}
+                    {{ testimonial.civility }} {{ testimonial.first_name }} {{ testimonial.last_name }}
                   </h3>
                   <p class="text-brand-blue-600 dark:text-brand-blue-400 font-medium">
-                    {{ getLocalizedPosition(alumnus) }}
+                    {{ getLocalizedPosition(testimonial) }}
                   </p>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ alumnus.organization }} • {{ alumnus.country }}
+                    {{ testimonial.organization }} • {{ testimonial.country }}
                   </p>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ alumnus.promotion }}
+                    {{ testimonial.promotion }}
                   </p>
                 </div>
               </div>
 
               <!-- LinkedIn link -->
               <a
-                v-if="alumnus.linkedin"
-                :href="alumnus.linkedin"
+                v-if="testimonial.linkedin"
+                :href="testimonial.linkedin"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="inline-flex items-center gap-2 mt-4 text-sm text-gray-600 dark:text-gray-400 hover:text-brand-blue-600 dark:hover:text-brand-blue-400 transition-colors"
