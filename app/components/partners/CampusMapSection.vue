@@ -2,6 +2,8 @@
 import World from '@svg-maps/world'
 import type { CampusPublic } from '~/composables/usePublicCampusApi'
 import type { OutputData } from '@editorjs/editorjs'
+import type { MapViewBox } from '~/composables/useMapSettings'
+import { DEFAULT_VIEWBOX, DEFAULT_EXCLUDED_COUNTRIES } from '~/composables/useMapSettings'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
@@ -12,6 +14,7 @@ const {
   getFlagEmoji,
   getCampusLocation,
 } = usePublicCampusApi()
+const { loadMapSettings, viewBoxToString } = useMapSettings()
 
 const { elementRef: headerRef } = useScrollAnimation({ animation: 'fadeInDown' })
 const { elementRef: mapRef } = useScrollAnimation({ animation: 'fadeInLeft', threshold: 0.1 })
@@ -28,29 +31,28 @@ const campusCardRef = ref<HTMLElement | null>(null)
 // World map data
 const map = World
 
-// Countries to exclude (Americas + Greenland)
-const excludedCountries = new Set([
-  // Greenland
-  'gl',
-  // North America
-  'us', 'ca', 'mx',
-  // Central America
-  'gt', 'bz', 'hn', 'sv', 'ni', 'cr', 'pa',
-  // Caribbean
-  'cu', 'jm', 'ht', 'do', 'pr', 'bs', 'tt', 'bb', 'gd', 'vc', 'lc', 'dm', 'ag', 'kn',
-  // South America
-  'br', 'ar', 'co', 'pe', 've', 'cl', 'ec', 'bo', 'py', 'uy', 'gy', 'sr', 'gf',
-])
+// Configuration dynamique de la carte (chargée depuis l'API)
+const mapViewBox = ref<MapViewBox>({ ...DEFAULT_VIEWBOX })
+const excludedCountriesSet = ref<Set<string>>(new Set(DEFAULT_EXCLUDED_COUNTRIES))
 
-// Filtered map locations (without Americas and Greenland)
+// ViewBox string pour le SVG
+const viewBoxString = computed(() => viewBoxToString(mapViewBox.value))
+
+// Filtered map locations (sans les pays exclus)
 const filteredLocations = computed(() => {
-  return map.locations.filter(location => !excludedCountries.has(location.id.toLowerCase()))
+  return map.locations.filter(location => !excludedCountriesSet.value.has(location.id.toLowerCase()))
 })
 
 // === CHARGEMENT DES DONNÉES ===
 onMounted(async () => {
   try {
-    campusesData.value = await getAllCampuses()
+    const [campusResult, settingsResult] = await Promise.all([
+      getAllCampuses(),
+      loadMapSettings(),
+    ])
+    campusesData.value = campusResult
+    mapViewBox.value = settingsResult.viewBox
+    excludedCountriesSet.value = new Set(settingsResult.excludedCountries)
   }
   catch (e) {
     console.error('Erreur chargement campus:', e)
@@ -414,7 +416,7 @@ const handleImageError = (e: Event) => {
             <div class="map-container relative" @mousemove="handleMouseMove">
               <!-- ViewBox ajusté pour afficher Europe, Afrique, Asie, Océanie (sans Amériques) -->
               <svg
-                viewBox="420 55 590 540"
+                :viewBox="viewBoxString"
                 class="world-map w-full h-auto"
                 xmlns="http://www.w3.org/2000/svg"
               >

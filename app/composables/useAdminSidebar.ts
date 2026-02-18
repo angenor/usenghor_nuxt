@@ -268,6 +268,14 @@ export function useAdminSidebar() {
           route: '/admin/campus/equipes',
           permissions: ['campuses.view'],
           description: 'Personnel par campus'
+        },
+        {
+          id: 'campus-map',
+          label: 'Carte du monde',
+          icon: 'fa-solid fa-globe-africa',
+          route: '/admin/campus/carte',
+          permissions: ['campuses.view'],
+          description: 'Zone visible et pays affichés'
         }
       ]
     },
