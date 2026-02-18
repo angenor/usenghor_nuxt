@@ -357,7 +357,7 @@ const getLocalizedTitle = (p: ProgramPublic) => {
 // Get thumbnail version of image
 const getThumbnail = (p: ProgramPublic) => {
   if (p.cover_image_external_id) {
-    return `/api/public/media/${p.cover_image_external_id}/download?w=100&h=100`
+    return `/api/public/media/${p.cover_image_external_id}/download?variant=low`
   }
   return `https://picsum.photos/seed/${p.slug}/100/100`
 }
@@ -603,7 +603,7 @@ onMounted(() => {
                 <div class="relative h-48 overflow-hidden">
                   <img
                     :src="program.cover_image_external_id
-                      ? `/api/public/media/${program.cover_image_external_id}/download`
+                      ? `/api/public/media/${program.cover_image_external_id}/download?variant=medium`
                       : `https://picsum.photos/seed/${program.slug}/600/400`"
                     :alt="getLocalizedTitle(program)"
                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
