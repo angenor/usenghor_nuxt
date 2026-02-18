@@ -140,13 +140,13 @@ const positions = computed(() => {
             <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
               {{ getContent('careers.teachers.cta.text') }}
             </p>
-            <a
-              :href="`mailto:${getContent('careers.teachers.cta.email')}`"
+            <NuxtLink
+              to="/actualites/appels?type=recruitment"
               class="inline-flex items-center gap-2 px-6 py-3 bg-lime-600 hover:bg-lime-700 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-lime-500/30 hover:-translate-y-0.5"
             >
               <font-awesome-icon icon="fa-solid fa-paper-plane" class="w-4 h-4" />
               {{ getContent('careers.teachers.cta.button') }}
-            </a>
+            </NuxtLink>
           </div>
         </div>
       </div>
