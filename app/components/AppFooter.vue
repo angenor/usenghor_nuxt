@@ -112,7 +112,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <footer class="relative bg-gray-900 dark:bg-gray-950 text-white overflow-hidden">
+  <footer id="footer" class="relative bg-gray-900 dark:bg-gray-950 text-white overflow-hidden">
     <!-- Decorative Background -->
     <div class="absolute inset-0 overflow-hidden">
       <div class="absolute -top-40 -right-40 w-80 h-80 bg-brand-blue-500/10 rounded-full blur-3xl"></div>

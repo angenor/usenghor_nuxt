@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import type { SiteFacility } from '~/composables/useMockData'
-import type { ContactInfo } from '~/composables/useContactApi'
+import { useFooterDataStore } from '~/stores/footerData'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getAllSiteFacilities } = useMockData()
-const { getContactInfo, getGoogleMapsUrlWithCoords } = useContactApi()
 const { getMediaUrl } = useMediaApi()
+
+// Données de contact centralisées (même source que le Footer)
+const footerStore = useFooterDataStore()
 
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, loadContent } = useEditorialContent('site')
@@ -20,56 +22,51 @@ useSeoMeta({
   description: () => t('site.seo.description')
 })
 
-// Contact info (centralisé depuis /admin/editorial/contact)
-const contactInfo = ref<ContactInfo | null>(null)
-
-onMounted(async () => {
+onMounted(() => {
   // Charger les contenus éditoriaux (non-bloquant)
   loadContent()
   // Charger les chiffres-clés (non-bloquant)
   loadKeyFigures()
-
-  try {
-    contactInfo.value = await getContactInfo()
-  }
-  catch (e) {
-    console.warn('Informations de contact non disponibles, utilisation des fallbacks')
-  }
+  // Charger les données de contact (partagées avec le Footer)
+  footerStore.fetchData()
 })
 
-// Computed contact data avec fallbacks
+// Computed contact data depuis le footerStore (même source que le Footer)
 const locationAddress = computed(() => {
-  if (contactInfo.value?.address) {
-    const { street, postal_code, city, country } = contactInfo.value.address
-    return [street, postal_code, city, country].filter(Boolean).join(', ')
+  const addr = footerStore.contactAddress
+  if (addr) {
+    return `${addr.street}, ${addr.postal_code ? addr.postal_code + ' ' : ''}${addr.city}, ${addr.country}`
   }
-  return 'Université Senghor, Alexandrie, Égypte'
+  return t('footer.contact.address')
 })
 
 const locationCoordinates = computed(() => {
-  if (contactInfo.value?.address) {
-    const { latitude, longitude } = contactInfo.value.address
-    if (latitude && longitude) {
-      return `${latitude}, ${longitude}`
-    }
+  const addr = footerStore.contactAddress
+  if (addr?.latitude && addr?.longitude) {
+    return `${addr.latitude}, ${addr.longitude}`
   }
   return '31.2018, 29.9158'
 })
 
 const locationPhone = computed(() => {
-  return contactInfo.value?.phones?.main || '+20 3 484 3562'
+  return footerStore.contactPhones?.main || t('footer.contact.phone')
 })
 
 const locationEmail = computed(() => {
-  return contactInfo.value?.emails?.general || 'info@usenghor.org'
+  return footerStore.contactEmails?.general || t('footer.contact.email')
 })
 
 const mapsUrl = computed(() => {
-  if (contactInfo.value?.address) {
-    return getGoogleMapsUrlWithCoords(contactInfo.value.address)
+  const addr = footerStore.contactAddress
+  if (addr?.latitude && addr?.longitude) {
+    return `https://www.google.com/maps/@${addr.latitude},${addr.longitude},17z`
   }
   return 'https://www.google.com/maps/place/Senghor+University/@31.2018,29.9158,17z'
 })
+
+const scrollToFooter = () => {
+  document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })
+}
 
 // Get data
 const facilities = computed(() => getAllSiteFacilities())
@@ -660,13 +657,12 @@ const getNextBgColor = (index: number, isDark: boolean) => {
           {{ getContent('site.cta.description') }}
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <NuxtLink
-            :to="localePath('/contact')"
-            class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-brand-blue-600 font-semibold rounded-lg hover:bg-brand-blue-50 transition-colors shadow-lg"
+          <button
+            class="inline-flex items-center justify-center px-8 py-4 bg-white text-brand-blue-600 font-semibold rounded-lg hover:bg-brand-blue-50 transition-colors shadow-lg"
+            @click="scrollToFooter"
           >
             {{ getContent('site.cta.contactButton') }}
-            <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
-          </NuxtLink>
+          </button>
         </div>
       </div>
     </section>
