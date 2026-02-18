@@ -14,16 +14,11 @@ const loading = ref(false)
 const error = ref('')
 const showPassword = ref(false)
 
-// Rôles avec accès au panneau d'administration
-const adminRoleCodes = ['super_admin', 'admin', 'campus_admin', 'editor', 'moderator']
-
-function isAdminUser() {
-  const roles = authStore.user?.roles || []
-  return roles.some(r => adminRoleCodes.includes(r.code))
-}
+const { userPermissions } = usePermissions()
 
 function getRedirectPath() {
-  return isAdminUser() ? '/admin/candidatures/appels' : '/profil'
+  // Si l'utilisateur a des permissions admin, rediriger vers le tableau de bord
+  return userPermissions.value.length > 0 ? '/admin' : '/profil'
 }
 
 // Si déjà connecté, rediriger

@@ -15,8 +15,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo('/admin/login')
   }
 
-  // Charger les données utilisateur si pas encore chargées
-  if (!authStore.user) {
+  // Charger les données utilisateur complètes (avec rôles/permissions)
+  // Le cache cookie ne contient que les données minimales (sans rôles),
+  // donc on vérifie que les rôles sont bien chargés
+  if (!authStore.user?.roles?.length) {
     await authStore.fetchCurrentUser()
   }
 
@@ -24,6 +26,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const alwaysAllowed = ['/admin', '/admin/profil', '/admin/parametres', '/admin/acces-refuse']
   const cleanPath = to.path.endsWith('/') ? to.path.slice(0, -1) : to.path
   if (alwaysAllowed.includes(cleanPath)) {
+    return
+  }
+
+  // Si les rôles ne sont toujours pas disponibles (erreur réseau SSR),
+  // laisser passer — le client-side re-vérifiera
+  if (!authStore.user?.roles?.length) {
     return
   }
 
