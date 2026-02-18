@@ -544,6 +544,10 @@ export function useUsersManagement() {
           active: formData.value.active,
           photo_external_id: formData.value.photo_external_id,
         }
+        // Inclure le mot de passe uniquement s'il a été renseigné
+        if (formData.value.password) {
+          updateData.password = formData.value.password
+        }
         await updateUser(userId, updateData)
         await updateUserRoles(userId, formData.value.role_ids)
       }

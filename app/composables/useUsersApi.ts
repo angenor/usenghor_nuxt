@@ -86,6 +86,7 @@ export interface UserCreatePayload {
 
 export interface UserUpdatePayload {
   email?: string
+  password?: string
   last_name?: string
   first_name?: string
   salutation?: UserSalutation | null
