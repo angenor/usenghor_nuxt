@@ -381,23 +381,69 @@
               </h3>
             </div>
             <form @submit.prevent="handleCreatePermission" class="p-6 space-y-4">
-              <!-- Code -->
-              <div>
-                <label for="create-code" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Code <span class="text-red-500">*</span>
+              <!-- Catégorie + Action côte à côte -->
+              <div class="grid grid-cols-2 gap-4">
+                <!-- Catégorie -->
+                <div>
+                  <label for="create-category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Catégorie <span class="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="create-category"
+                    v-model="createForm.category"
+                    required
+                    class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  >
+                    <option value="">Sélectionner...</option>
+                    <option v-for="cat in categories" :key="cat" :value="cat">
+                      {{ permissionCategoryLabels[cat] || cat }}
+                    </option>
+                  </select>
+                </div>
+
+                <!-- Action -->
+                <div>
+                  <label for="create-action" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Action <span class="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="create-action"
+                    v-model="createForm.action"
+                    required
+                    class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  >
+                    <option value="">Sélectionner...</option>
+                    <option v-for="action in actionOptions" :key="action.code" :value="action.code">
+                      {{ action.label }}
+                    </option>
+                    <option value="_custom">Autre (personnalisé)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Action personnalisée (si "Autre" est sélectionné) -->
+              <div v-if="createForm.action === '_custom'">
+                <label for="create-custom-action" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Action personnalisée <span class="text-red-500">*</span>
                 </label>
                 <input
-                  id="create-code"
-                  v-model="createForm.code"
+                  id="create-custom-action"
+                  v-model="createForm.customAction"
                   type="text"
                   required
-                  placeholder="category.action (ex: projects.view)"
+                  placeholder="ex: approve, archive, duplicate..."
                   class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Format: catégorie.action (ex: users.view, programs.create)
+                  Lettres minuscules et underscores uniquement
                 </p>
-                <p v-if="createFormErrors.code" class="mt-1 text-xs text-red-500">
+              </div>
+
+              <!-- Aperçu du code généré -->
+              <div v-if="generatedCode" class="rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 p-3">
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Code généré</p>
+                <code class="text-sm font-mono text-brand-blue-600 dark:text-brand-blue-400">{{ generatedCode }}</code>
+                <p v-if="createFormErrors.code" class="mt-1.5 text-xs text-red-500">
                   {{ createFormErrors.code }}
                 </p>
               </div>
@@ -405,34 +451,18 @@
               <!-- Nom français -->
               <div>
                 <label for="create-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Nom français <span class="text-red-500">*</span>
+                  Nom affiché
                 </label>
                 <input
                   id="create-name"
                   v-model="createForm.name_fr"
                   type="text"
-                  required
-                  placeholder="Voir les projets"
+                  :placeholder="suggestedName || 'Nom de la permission'"
                   class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
-              </div>
-
-              <!-- Catégorie -->
-              <div>
-                <label for="create-category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Catégorie <span class="text-red-500">*</span>
-                </label>
-                <select
-                  id="create-category"
-                  v-model="createForm.category"
-                  required
-                  class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                >
-                  <option value="">Sélectionner une catégorie</option>
-                  <option v-for="cat in categories" :key="cat" :value="cat">
-                    {{ permissionCategoryLabels[cat] || cat }}
-                  </option>
-                </select>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Laissez vide pour utiliser le nom suggéré
+                </p>
               </div>
 
               <!-- Description -->
@@ -443,8 +473,8 @@
                 <textarea
                   id="create-description"
                   v-model="createForm.description"
-                  rows="3"
-                  placeholder="Description de la permission..."
+                  rows="2"
+                  placeholder="Description optionnelle..."
                   class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
                 />
               </div>
@@ -459,7 +489,7 @@
                 </button>
                 <button
                   type="submit"
-                  :disabled="isSaving"
+                  :disabled="isSaving || !generatedCode"
                   class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50"
                 >
                   <span v-if="isSaving">Création...</span>
@@ -642,12 +672,42 @@ const filters = reactive({
   category: ''
 })
 
+// Actions prédéfinies pour le sélecteur
+const actionOptions = [
+  { code: 'view', label: 'Voir' },
+  { code: 'create', label: 'Créer' },
+  { code: 'edit', label: 'Modifier' },
+  { code: 'delete', label: 'Supprimer' },
+  { code: 'export', label: 'Exporter' },
+  { code: 'evaluate', label: 'Évaluer' },
+  { code: 'send', label: 'Envoyer' },
+  { code: 'manage', label: 'Gérer' },
+]
+
 // Formulaires
 const createForm = reactive({
-  code: '',
-  name_fr: '',
   category: '',
-  description: ''
+  action: '',
+  customAction: '',
+  name_fr: '',
+  description: '',
+})
+
+// Code auto-généré à partir de catégorie + action
+const generatedCode = computed(() => {
+  const action = createForm.action === '_custom' ? createForm.customAction.toLowerCase().trim() : createForm.action
+  if (!createForm.category || !action) return ''
+  return `${createForm.category}.${action}`
+})
+
+// Nom français auto-suggéré
+const suggestedName = computed(() => {
+  const actionLabel = createForm.action === '_custom'
+    ? createForm.customAction.trim()
+    : actionOptions.find(a => a.code === createForm.action)?.label || ''
+  const categoryLabel = permissionCategoryLabels[createForm.category] || createForm.category
+  if (!actionLabel || !categoryLabel) return ''
+  return `${actionLabel} les ${categoryLabel.toLowerCase()}`
 })
 
 const createFormErrors = reactive({
@@ -861,13 +921,18 @@ async function loadPermissionRoles(permissionId: string) {
 function validateCreateForm(): boolean {
   createFormErrors.code = ''
 
-  if (!validatePermissionCode(createForm.code)) {
-    createFormErrors.code = 'Format invalide. Utilisez le format: catégorie.action'
+  if (!generatedCode.value) {
+    createFormErrors.code = 'Sélectionnez une catégorie et une action'
     return false
   }
 
-  if (isCodeTaken(createForm.code, permissions.value)) {
-    createFormErrors.code = 'Ce code est déjà utilisé'
+  if (!validatePermissionCode(generatedCode.value)) {
+    createFormErrors.code = 'Le code généré est invalide. Vérifiez l\'action personnalisée (lettres et underscores uniquement).'
+    return false
+  }
+
+  if (isCodeTaken(generatedCode.value, permissions.value)) {
+    createFormErrors.code = 'Cette permission existe déjà'
     return false
   }
 
@@ -880,16 +945,17 @@ async function handleCreatePermission() {
   isSaving.value = true
   try {
     await createPermission({
-      code: createForm.code.toLowerCase(),
-      name_fr: createForm.name_fr,
+      code: generatedCode.value,
+      name_fr: createForm.name_fr || suggestedName.value,
       category: createForm.category,
       description: createForm.description || null,
     })
 
     // Reset form
-    createForm.code = ''
-    createForm.name_fr = ''
     createForm.category = ''
+    createForm.action = ''
+    createForm.customAction = ''
+    createForm.name_fr = ''
     createForm.description = ''
 
     showCreateModal.value = false
