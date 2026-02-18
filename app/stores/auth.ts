@@ -1,12 +1,9 @@
 import { defineStore } from 'pinia'
 import type { TokenResponse, UserMe } from '~/types/api'
 
-// Type minimal pour le cache cookie (évite les problèmes de taille)
+// Type minimal pour le cache cookie (seul l'id est stocké — pas de données personnelles)
 interface UserCacheData {
   id: string
-  email: string
-  first_name?: string | null
-  last_name?: string | null
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -58,12 +55,9 @@ export const useAuthStore = defineStore('auth', () => {
         headers: { Authorization: `Bearer ${token.value}` },
       })
       user.value = userData
-      // Sauvegarder seulement les données minimales dans le cookie (évite les problèmes de taille)
+      // Sauvegarder uniquement l'id dans le cookie (pas de données personnelles)
       userCacheCookie.value = {
         id: userData.id,
-        email: userData.email,
-        first_name: userData.first_name,
-        last_name: userData.last_name,
       }
       return userData
     }
