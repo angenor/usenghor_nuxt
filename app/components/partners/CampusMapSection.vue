@@ -409,7 +409,7 @@ const handleImageError = (e: Event) => {
         </div>
 
         <!-- Map and Card Container -->
-        <div ref="mapRef" class="relative flex flex-col lg:flex-row gap-6 lg:gap-0">
+        <div ref="mapRef" class="relative flex flex-col lg:flex-row lg:items-center gap-6 lg:gap-0">
           <!-- Map Container -->
           <div class="relative flex-1 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-3xl p-4 lg:p-8 border border-gray-200/50 dark:border-gray-700/50 shadow-xl ltr:lg:mr-[-80px] rtl:lg:ml-[-80px] z-10">
             <!-- Map -->
@@ -460,7 +460,7 @@ const handleImageError = (e: Event) => {
           </div>
 
           <!-- Campus Card -->
-          <div v-if="selectedCampus" ref="campusCardRef" class="lg:w-[400px] lg:flex-shrink-0 z-20 lg:mt-8">
+          <div v-if="selectedCampus" ref="campusCardRef" class="lg:w-[400px] lg:flex-shrink-0 z-20">
             <Transition
               mode="out-in"
               enter-active-class="animate__animated animate__fadeInRight animate__faster"

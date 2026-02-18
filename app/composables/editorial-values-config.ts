@@ -45,6 +45,25 @@ export const valueSectionColors: Partial<Record<ValueSectionKey, string>> = {
 // Clés des sections (ordre d'affichage)
 export const sectionKeys: ValueSectionKey[] = ['mission', 'vision', 'history', 'rector_message']
 
+// Préfixe pour les clés de témoignages alumni
+export const TESTIMONIAL_KEY_PREFIX = 'testimonial_'
+
+// Civilités disponibles pour les témoignages
+export const testimonialCivilities = [
+  { value: 'M.', label: 'M.' },
+  { value: 'Mme', label: 'Mme' },
+  { value: 'Dr', label: 'Dr' },
+  { value: 'Pr', label: 'Pr' },
+]
+
+// Départements disponibles pour les témoignages
+export const testimonialDepartments = [
+  { value: 'Culture', label: 'Culture' },
+  { value: 'Environnement', label: 'Environnement' },
+  { value: 'Administration-Gestion', label: 'Administration-Gestion' },
+  { value: 'Santé', label: 'Santé' },
+]
+
 // Icônes disponibles pour les valeurs fondamentales
 export const coreValueAvailableIcons: Array<{ value: string, label: string }> = [
   { value: 'star', label: 'Étoile' },

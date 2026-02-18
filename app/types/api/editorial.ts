@@ -599,6 +599,38 @@ export interface CoreValue extends CoreValueData {
 }
 
 // ============================================================================
+// Alumni Testimonials (stored as JSON in editorial contents)
+// ============================================================================
+
+export interface TestimonialData {
+  civility: string
+  first_name: string
+  last_name: string
+  photo: string
+  graduation_year: number
+  promotion: string
+  department: string
+  current_position_fr: string
+  current_position_en: string
+  current_position_ar: string
+  organization: string
+  country: string
+  testimonial_fr: string
+  testimonial_en: string
+  testimonial_ar: string
+  is_featured: boolean
+  is_active: boolean
+  linkedin: string
+  display_order: number
+}
+
+export interface Testimonial extends TestimonialData {
+  id: string
+  created_at: string
+  updated_at: string
+}
+
+// ============================================================================
 // Statistics
 // ============================================================================
 
@@ -606,5 +638,7 @@ export interface EditorialValuesStats {
   sections_count: number
   core_values_count: number
   active_core_values: number
+  testimonials_count: number
+  featured_testimonials: number
   last_updated: string | null
 }

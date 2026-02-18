@@ -17,6 +17,8 @@ import type {
   EditorialValueType,
   MessageResponse,
   PaginatedResponse,
+  Testimonial,
+  TestimonialData,
   ValueSection,
   ValueSectionKey,
 } from '~/types/api'
@@ -25,12 +27,15 @@ import type {
 import {
   VALUES_CATEGORY_CODE,
   CORE_VALUE_KEY_PREFIX,
+  TESTIMONIAL_KEY_PREFIX,
   valueSectionLabels,
   valueSectionDescriptions,
   valueSectionIcons,
   valueSectionColors,
   sectionKeys,
   coreValueAvailableIcons,
+  testimonialCivilities,
+  testimonialDepartments,
 } from '~/composables/editorial-values-config'
 
 import {
@@ -270,20 +275,130 @@ export function useEditorialValuesApi() {
   }
 
   // ============================================================================
+  // TESTIMONIALS (Témoignages alumni)
+  // ============================================================================
+
+  async function getTestimonials(includeInactive = true): Promise<Testimonial[]> {
+    const response = await listContents({
+      category_code: VALUES_CATEGORY_CODE,
+      value_type: 'json',
+      limit: 100,
+    })
+
+    const testimonials: Testimonial[] = []
+    for (const content of response.items) {
+      if (content.key.startsWith(TESTIMONIAL_KEY_PREFIX)) {
+        const testimonial = contentToTestimonial(content)
+        if (testimonial && (includeInactive || testimonial.is_active)) {
+          testimonials.push(testimonial)
+        }
+      }
+    }
+
+    return testimonials.sort((a, b) => a.display_order - b.display_order)
+  }
+
+  async function getTestimonialById(id: string): Promise<Testimonial | null> {
+    try {
+      const content = await getContentById(id)
+      return contentToTestimonial(content)
+    }
+    catch {
+      return null
+    }
+  }
+
+  async function createTestimonial(data: TestimonialData, categoryId: string): Promise<Testimonial> {
+    const key = `${TESTIMONIAL_KEY_PREFIX}${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
+
+    const response = await createContent({
+      key,
+      value: JSON.stringify(data),
+      value_type: 'json',
+      category_id: categoryId,
+      description: `${data.first_name} ${data.last_name}`,
+      admin_editable: true,
+    })
+
+    const content = await getContentById(response.id)
+    return contentToTestimonial(content)!
+  }
+
+  async function updateTestimonial(id: string, data: Partial<TestimonialData>): Promise<Testimonial> {
+    const current = await getTestimonialById(id)
+    if (!current) {
+      throw new Error('Témoignage non trouvé')
+    }
+
+    const newData: TestimonialData = {
+      civility: data.civility ?? current.civility,
+      first_name: data.first_name ?? current.first_name,
+      last_name: data.last_name ?? current.last_name,
+      photo: data.photo ?? current.photo,
+      graduation_year: data.graduation_year ?? current.graduation_year,
+      promotion: data.promotion ?? current.promotion,
+      department: data.department ?? current.department,
+      current_position_fr: data.current_position_fr ?? current.current_position_fr,
+      current_position_en: data.current_position_en ?? current.current_position_en,
+      current_position_ar: data.current_position_ar ?? current.current_position_ar,
+      organization: data.organization ?? current.organization,
+      country: data.country ?? current.country,
+      testimonial_fr: data.testimonial_fr ?? current.testimonial_fr,
+      testimonial_en: data.testimonial_en ?? current.testimonial_en,
+      testimonial_ar: data.testimonial_ar ?? current.testimonial_ar,
+      is_featured: data.is_featured ?? current.is_featured,
+      is_active: data.is_active ?? current.is_active,
+      linkedin: data.linkedin ?? current.linkedin,
+      display_order: data.display_order ?? current.display_order,
+    }
+
+    const updated = await updateContent(id, {
+      value: JSON.stringify(newData),
+      description: `${newData.first_name} ${newData.last_name}`,
+    })
+
+    return contentToTestimonial(updated)!
+  }
+
+  async function deleteTestimonial(id: string): Promise<MessageResponse> {
+    return deleteContent(id)
+  }
+
+  async function reorderTestimonials(orderedIds: string[]): Promise<void> {
+    for (let i = 0; i < orderedIds.length; i++) {
+      const id = orderedIds[i]
+      if (!id) continue
+      const current = await getTestimonialById(id)
+      if (current && current.display_order !== i + 1) {
+        await updateTestimonial(id, { display_order: i + 1 })
+      }
+    }
+  }
+
+  async function getNextTestimonialOrder(): Promise<number> {
+    const testimonials = await getTestimonials(true)
+    const maxOrder = Math.max(...testimonials.map(t => t.display_order), 0)
+    return maxOrder + 1
+  }
+
+  // ============================================================================
   // STATISTICS
   // ============================================================================
 
   async function getValuesStats(): Promise<EditorialValuesStats> {
-    const [sections, coreValues] = await Promise.all([
+    const [sections, coreValues, testimonials] = await Promise.all([
       getValueSections(),
       getCoreValues(true),
+      getTestimonials(true),
     ])
 
     const activeCoreValues = coreValues.filter(v => v.is_active).length
+    const featuredTestimonials = testimonials.filter(t => t.is_featured && t.is_active).length
 
     const allDates = [
       ...sections.map(s => s.updated_at),
       ...coreValues.map(v => v.updated_at),
+      ...testimonials.map(t => t.updated_at),
     ]
     const lastUpdated = allDates.length > 0
       ? allDates.reduce((latest, current) =>
@@ -295,6 +410,8 @@ export function useEditorialValuesApi() {
       sections_count: sections.length,
       core_values_count: coreValues.length,
       active_core_values: activeCoreValues,
+      testimonials_count: testimonials.length,
+      featured_testimonials: featuredTestimonials,
       last_updated: lastUpdated,
     }
   }
@@ -378,6 +495,24 @@ export function useEditorialValuesApi() {
     }
   }
 
+  function contentToTestimonial(content: EditorialContentRead): Testimonial | null {
+    if (!content.value) return null
+
+    try {
+      const data = JSON.parse(content.value) as TestimonialData
+      return {
+        id: content.id,
+        ...data,
+        created_at: content.created_at,
+        updated_at: content.updated_at,
+      }
+    }
+    catch {
+      console.error('Erreur de parsing JSON pour témoignage:', content.key)
+      return null
+    }
+  }
+
   return {
     // Categories
     listCategoriesWithCount,
@@ -405,6 +540,15 @@ export function useEditorialValuesApi() {
     deleteCoreValue,
     reorderCoreValues,
 
+    // Testimonials
+    getTestimonials,
+    getTestimonialById,
+    createTestimonial,
+    updateTestimonial,
+    deleteTestimonial,
+    reorderTestimonials,
+    getNextTestimonialOrder,
+
     // Statistics
     getValuesStats,
 
@@ -425,6 +569,8 @@ export function useEditorialValuesApi() {
     valueSectionColors,
     sectionKeys,
     coreValueAvailableIcons,
+    testimonialCivilities,
+    testimonialDepartments,
 
     // Structure par pages (front-office)
     frontOfficePages,
