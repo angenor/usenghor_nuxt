@@ -215,21 +215,23 @@ watch(() => editorialStore.isLoading, (loading, wasLoading) => {
   }
 })
 
-onMounted(async () => {
+onMounted(() => {
   window.addEventListener('scroll', handleScroll)
   handleScroll()
-  await loadContent()
-  updateApplyButtonValues()
+  // Chargement non-bloquant : la navbar s'affiche immédiatement avec i18n
+  loadContent().then(() => {
+    updateApplyButtonValues()
 
-  // Debug: afficher les valeurs chargées
-  if (import.meta.dev) {
-    console.log('[Navbar Editorial] Contenus chargés:', {
-      'navbar.apply.text': getRawContent('navbar.apply.text'),
-      'navbar.apply.link': getRawContent('navbar.apply.link'),
-      'applyButtonText': applyButtonText.value,
-      'applyButtonLink': applyButtonLink.value,
-    })
-  }
+    // Debug: afficher les valeurs chargées
+    if (import.meta.dev) {
+      console.log('[Navbar Editorial] Contenus chargés:', {
+        'navbar.apply.text': getRawContent('navbar.apply.text'),
+        'navbar.apply.link': getRawContent('navbar.apply.link'),
+        'applyButtonText': applyButtonText.value,
+        'applyButtonLink': applyButtonLink.value,
+      })
+    }
+  })
 })
 
 onUnmounted(() => {

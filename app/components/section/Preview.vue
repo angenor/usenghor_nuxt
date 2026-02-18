@@ -88,6 +88,7 @@ const colors = computed(() => colorClasses[props.color] || colorClasses.blue)
               :src="props.image"
               :alt="props.title"
               class="w-full h-auto object-cover aspect-[4/3]"
+              loading="lazy"
             />
             <!-- Decorative overlay -->
             <div

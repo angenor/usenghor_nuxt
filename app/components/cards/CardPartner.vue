@@ -45,6 +45,7 @@ const typeLabel = computed(() => {
         :src="partner.logo"
         :alt="getLocalizedName"
         class="max-h-24 max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+        loading="lazy"
       >
       <!-- Strategic Badge -->
       <div

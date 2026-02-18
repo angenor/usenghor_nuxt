@@ -77,9 +77,15 @@ const formatFileSize = (bytes?: number) => {
                 <!-- Face avant -->
                 <div
                   class="flip-card-front"
-                  :style="doc.cover_image ? { backgroundImage: `url(${doc.cover_image})` } : {}"
                   :class="!doc.cover_image ? 'bg-gray-700 dark:bg-gray-800' : ''"
                 >
+                  <img
+                    v-if="doc.cover_image"
+                    :src="doc.cover_image"
+                    :alt="doc.title_fr"
+                    class="absolute inset-0 w-full h-full object-cover"
+                    loading="lazy"
+                  >
                   <div class="flip-card-inner">
                     <div class="w-14 h-14 bg-brand-red-500/80 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4">
                       <font-awesome-icon icon="fa-solid fa-file-pdf" class="text-white text-2xl" />
@@ -97,9 +103,15 @@ const formatFileSize = (bytes?: number) => {
                 <!-- Face arrière -->
                 <div
                   class="flip-card-back"
-                  :style="doc.cover_image ? { backgroundImage: `url(${doc.cover_image})` } : {}"
                   :class="!doc.cover_image ? 'bg-gray-700 dark:bg-gray-800' : ''"
                 >
+                  <img
+                    v-if="doc.cover_image"
+                    :src="doc.cover_image"
+                    :alt="doc.title_fr"
+                    class="absolute inset-0 w-full h-full object-cover"
+                    loading="lazy"
+                  >
                   <div class="flip-card-inner">
                     <h4 class="text-white font-bold text-base leading-tight mb-3 line-clamp-2">
                       {{ doc.title_fr }}
@@ -175,8 +187,6 @@ const formatFileSize = (bytes?: number) => {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   border-radius: 1rem;
-  background-size: cover;
-  background-position: center;
   overflow: hidden;
 }
 

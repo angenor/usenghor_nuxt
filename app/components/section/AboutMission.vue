@@ -51,6 +51,7 @@ const scrollToSection = () => {
               :src="props.illustration"
               :alt="props.title"
               class="w-full h-auto object-cover aspect-[4/3]"
+              loading="lazy"
             />
             <!-- Gradient overlay -->
             <div class="absolute inset-0 bg-gradient-to-t from-brand-blue-900/30 to-transparent"></div>

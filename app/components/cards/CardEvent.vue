@@ -71,6 +71,7 @@ const typeIcons: Record<string, string> = {
         :src="event.image"
         :alt="getLocalizedTitle"
         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        loading="lazy"
       >
       <div v-else class="w-full h-full bg-gradient-to-br from-brand-blue-400 to-brand-blue-600 flex items-center justify-center">
         <font-awesome-icon :icon="typeIcons[event.type]" class="w-12 h-12 text-white/50" />

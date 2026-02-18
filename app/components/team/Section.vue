@@ -264,6 +264,7 @@ watch(filteredMembers, () => {
                 :src="member.user.photo_url"
                 :alt="getFullName(member.user)"
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                loading="lazy"
               />
               <div
                 v-else
