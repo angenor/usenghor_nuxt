@@ -115,9 +115,10 @@ watch([selectedCategory, selectedStatus], async () => {
   await loadData()
 }, { immediate: false })
 
+// Chargement SSR du contenu éditorial
+await useAsyncData('editorial-projects', () => loadContent())
+
 onMounted(async () => {
-  // Charger les contenus éditoriaux (non-bloquant)
-  loadContent()
   // Charger les chiffres-clés (non-bloquant)
   loadKeyFigures()
   // Charger les données

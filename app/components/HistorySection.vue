@@ -3,7 +3,7 @@ const { t } = useI18n()
 const localePath = useLocalePath()
 
 // Contenus éditoriaux avec fallback sur i18n
-const { getContent, loadContent } = useEditorialContent('homepage')
+const { getContent } = useEditorialContent('homepage')
 
 const { elementRef: headerRef } = useScrollAnimation({ animation: 'fadeInDown' })
 const { elementRef: genesisRef } = useScrollAnimation({ animation: 'fadeInLeft', threshold: 0.15 })
@@ -18,10 +18,7 @@ const founders = [
   { name: 'René-Jean Dupuy', role: 'history.founders.dupuy.role', icon: 'fa-solid fa-scale-balanced' },
 ]
 
-onMounted(() => {
-  // Charger les contenus éditoriaux (non-bloquant)
-  loadContent()
-})
+// Contenus éditoriaux chargés par la page parente via SSR
 </script>
 
 <template>

@@ -13,6 +13,9 @@ import type { EditorialContentPublic } from '~/composables/usePublicEditorialApi
 const CACHE_TTL = 5 * 60 * 1000
 
 export const useEditorialContentStore = defineStore('editorialContent', () => {
+  // API éditoriale initialisée dans le scope setup (compatible SSR)
+  const { getContentsByKeys } = usePublicEditorialApi()
+
   // Cache des contenus par clé
   const contents = ref<Map<string, EditorialContentPublic>>(new Map())
 
@@ -103,7 +106,6 @@ export const useEditorialContentStore = defineStore('editorialContent', () => {
     error.value = null
 
     try {
-      const { getContentsByKeys } = usePublicEditorialApi()
       const loadedContents = await getContentsByKeys(keys)
 
       console.log('[EditorialStore] Contenus chargés pour', pageId, ':', loadedContents.length, loadedContents)

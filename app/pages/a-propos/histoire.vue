@@ -9,6 +9,9 @@ const { t } = useI18n()
 const { getContent, getRawContent, loadContent } = useEditorialContent('history')
 const { getMediaUrl } = useMediaApi()
 
+// Chargement SSR du contenu éditorial
+await useAsyncData('editorial-history', () => loadContent())
+
 // Résoudre une image éditoriale avec fallback null
 function resolveImage(editorialKey: string, fallbackSrc: string | null, fallbackAlt: string) {
   const mediaId = getRawContent(editorialKey)
@@ -156,9 +159,6 @@ const splitIntoWords = (text: string): string[] => {
 }
 
 onMounted(() => {
-  // Charger les contenus éditoriaux (non-bloquant)
-  loadContent()
-
   if (import.meta.server) return
 
   // Scroll to top on page load with smooth animation

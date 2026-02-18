@@ -1,5 +1,7 @@
 <script setup lang="ts">
-// Home page - composed of sections
+// Chargement SSR du contenu éditorial pour tous les composants homepage
+const { loadContent } = useEditorialContent('homepage')
+await useAsyncData('editorial-homepage', () => loadContent())
 </script>
 
 <template>

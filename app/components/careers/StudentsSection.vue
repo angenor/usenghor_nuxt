@@ -250,7 +250,7 @@ const imageUrl = computed(() => props.image || '/images/bg/backgroud_senghor1.jp
     100% calc(100% - var(--overlap)),
     var(--arrow-size) 100%
   );
-  color: #1a1a1a;
+  color: #fff;
   text-decoration: none;
   transition: transform 0.3s ease, filter 0.3s ease;
 }
@@ -355,6 +355,7 @@ const imageUrl = computed(() => props.image || '/images/bg/backgroud_senghor1.jp
   font-weight: 600;
   margin-bottom: 0.25rem;
   transition: transform 0.3s ease;
+  color: #fff;
 }
 
 .infographic-item:hover .infographic-title {

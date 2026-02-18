@@ -22,12 +22,12 @@ useSeoMeta({
   description: () => t('site.seo.description')
 })
 
+// Chargement SSR du contenu éditorial
+await useAsyncData('editorial-site', () => loadContent())
+
 onMounted(() => {
-  // Charger les contenus éditoriaux (non-bloquant)
-  loadContent()
-  // Charger les chiffres-clés (non-bloquant)
+  // Charger les chiffres-clés et données de contact (client-side)
   loadKeyFigures()
-  // Charger les données de contact (partagées avec le Footer)
   footerStore.fetchData()
 })
 

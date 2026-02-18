@@ -2,7 +2,7 @@
 const localePath = useLocalePath()
 
 // Contenus éditoriaux avec fallback sur i18n
-const { getContent, getRawContent, loadContent } = useEditorialContent('homepage')
+const { getContent, getRawContent } = useEditorialContent('homepage')
 
 // API Media pour résoudre les URLs des images
 const { getMediaUrl } = useMediaApi()
@@ -153,12 +153,11 @@ const startCarousel = () => {
   }
 }
 
+// Démarrer le carousel dès que les slides sont prêts (uniquement côté client)
 onMounted(() => {
-  // Chargement non-bloquant : le hero s'affiche immédiatement avec i18n
-  // Les slides apparaissent dès que les contenus éditoriaux sont prêts
-  loadContent().then(() => {
-    startCarousel()
-  })
+  watch(slidesReady, (ready) => {
+    if (ready) startCarousel()
+  }, { immediate: true })
 })
 
 onUnmounted(() => {

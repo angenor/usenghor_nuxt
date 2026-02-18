@@ -15,9 +15,8 @@ const { selectedPays, openDrawer, closeDrawer } = useCountryDrawer()
 // Contenus éditoriaux avec fallback i18n
 const { getContent, getRawContent, loadContent } = useEditorialContent('governance')
 
-onMounted(() => {
-  loadContent()
-})
+// Chargement SSR du contenu éditorial
+await useAsyncData('editorial-governance', () => loadContent())
 
 // SEO
 useSeoMeta({

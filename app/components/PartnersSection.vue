@@ -3,7 +3,7 @@ const { t } = useI18n()
 const localePath = useLocalePath()
 
 // Contenus éditoriaux avec fallback sur i18n
-const { getContent, getRawContent, loadContent } = useEditorialContent('homepage')
+const { getContent, getRawContent } = useEditorialContent('homepage')
 
 // API Media pour résoudre l'URL de l'image
 const { getMediaUrl } = useMediaApi()
@@ -35,10 +35,7 @@ const getFlagUrl = (code: string) => {
   return `https://flagcdn.com/w160/${code.toLowerCase()}.png`
 }
 
-onMounted(() => {
-  // Charger les contenus éditoriaux (non-bloquant)
-  loadContent()
-})
+// Contenus éditoriaux chargés par la page parente via SSR
 </script>
 
 <template>

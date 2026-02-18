@@ -216,6 +216,11 @@ export function useEditorialContent(pageId: string, options: UseEditorialContent
    */
   const isLoading = computed(() => store.isLoading)
 
+  /**
+   * Indique si les contenus éditoriaux de cette page sont prêts (chargés et en cache)
+   */
+  const isPageReady = computed(() => store.isPageLoaded(pageId))
+
   // ==========================================================================
   // MÉTHODES
   // ==========================================================================
@@ -304,6 +309,7 @@ export function useEditorialContent(pageId: string, options: UseEditorialContent
     pageConfig,
     pageKeys,
     isLoading,
+    isPageReady,
 
     // Méthodes
     loadContent,

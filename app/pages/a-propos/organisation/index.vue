@@ -7,10 +7,8 @@ const isRtl = computed(() => locale.value === 'ar')
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, loadContent } = useEditorialContent('organization')
 
-onMounted(() => {
-  // Charger les contenus éditoriaux (non-bloquant)
-  loadContent()
-})
+// Chargement SSR du contenu éditorial
+await useAsyncData('editorial-organization', () => loadContent())
 
 // SEO
 useSeoMeta({

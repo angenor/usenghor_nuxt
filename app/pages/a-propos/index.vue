@@ -33,12 +33,11 @@ const keyFigures = ref({
   stats_programs: '',
 })
 
-// Load key figures and editorial content on mount
-onMounted(async () => {
-  // Charger les contenus éditoriaux (non-bloquant)
-  loadContent()
+// Chargement SSR du contenu éditorial
+await useAsyncData('editorial-about', () => loadContent())
 
-  // Charger les chiffres clés
+// Charger les chiffres clés (client-side)
+onMounted(async () => {
   try {
     const response = await listContents({ value_type: 'number', limit: 50 })
     for (const item of response.items) {

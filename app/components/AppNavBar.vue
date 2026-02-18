@@ -208,30 +208,17 @@ function updateApplyButtonValues() {
   if (linkValue) applyButtonLink.value = linkValue
 }
 
-// Mise à jour quand le chargement se termine
-watch(() => editorialStore.isLoading, (loading, wasLoading) => {
-  if (wasLoading && !loading) {
-    updateApplyButtonValues()
-  }
-})
+// Chargement SSR non-bloquant du contenu éditorial (ne bloque pas le rendu de la page)
+useLazyAsyncData('editorial-global', () => loadContent())
+
+// Mise à jour du bouton quand les données éditoriales sont prêtes
+watch(() => editorialStore.isPageLoaded('global'), (ready) => {
+  if (ready) updateApplyButtonValues()
+}, { immediate: true })
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
   handleScroll()
-  // Chargement non-bloquant : la navbar s'affiche immédiatement avec i18n
-  loadContent().then(() => {
-    updateApplyButtonValues()
-
-    // Debug: afficher les valeurs chargées
-    if (import.meta.dev) {
-      console.log('[Navbar Editorial] Contenus chargés:', {
-        'navbar.apply.text': getRawContent('navbar.apply.text'),
-        'navbar.apply.link': getRawContent('navbar.apply.link'),
-        'applyButtonText': applyButtonText.value,
-        'applyButtonLink': applyButtonLink.value,
-      })
-    }
-  })
 })
 
 onUnmounted(() => {

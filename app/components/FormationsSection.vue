@@ -10,7 +10,7 @@ const {
 } = usePublicProgramsApi()
 
 // Contenus éditoriaux avec fallback sur i18n
-const { getContent, loadContent } = useEditorialContent('homepage')
+const { getContent } = useEditorialContent('homepage')
 
 const { elementRef: headerRef } = useScrollAnimation({ animation: 'fadeInDown' })
 const { elementRef: cardsRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.1 })
@@ -20,10 +20,7 @@ const featuredPrograms = ref<ProgramPublic[]>([])
 const loading = ref(true)
 
 onMounted(async () => {
-  // Charger les contenus éditoriaux (non-bloquant)
-  loadContent()
-
-  // Charger les programmes à la une depuis l'API
+  // Charger les programmes à la une depuis l'API (contenus éditoriaux chargés par la page parente via SSR)
   try {
     featuredPrograms.value = await listFeaturedPrograms(4)
   } catch (e) {

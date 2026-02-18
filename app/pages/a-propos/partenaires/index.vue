@@ -5,10 +5,8 @@ const localePath = useLocalePath()
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, loadContent } = useEditorialContent('partners')
 
-onMounted(() => {
-  // Charger les contenus éditoriaux (non-bloquant)
-  loadContent()
-})
+// Chargement SSR du contenu éditorial
+await useAsyncData('editorial-partners', () => loadContent())
 
 // SEO
 useSeoMeta({

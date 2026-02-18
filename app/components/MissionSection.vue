@@ -2,7 +2,7 @@
 const { t } = useI18n()
 
 // Contenus éditoriaux avec fallback sur i18n
-const { getContent, loadContent } = useEditorialContent('homepage')
+const { getContent } = useEditorialContent('homepage')
 
 // Chiffres clés depuis la BDD (avec fallback hardcodé)
 const keyFiguresStore = useKeyFiguresStore()
@@ -53,8 +53,7 @@ const startAnimation = () => {
 let observer: IntersectionObserver | null = null
 
 onMounted(async () => {
-  // Charger les contenus éditoriaux et les chiffres clés en parallèle (non-bloquant)
-  loadContent()
+  // Charger les chiffres clés (contenus éditoriaux chargés par la page parente via SSR)
   keyFiguresStore.fetchFigures()
 
   observer = new IntersectionObserver(

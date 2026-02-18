@@ -51,8 +51,11 @@ const featuredTestimonials = computed(() =>
   testimonials.value.filter(t => t.is_featured),
 )
 
+// Chargement SSR du contenu éditorial
+await useAsyncData('editorial-alumni', () => loadContent())
+
 onMounted(() => {
-  loadContent()
+  // Charger les chiffres clés et témoignages (client-side)
   loadKeyFigures()
   loadTestimonials()
 })

@@ -5,10 +5,8 @@ const { t } = useI18n()
 const { getContent, getRawContent, loadContent } = useEditorialContent('strategy')
 const { getMediaUrl } = useMediaApi()
 
-onMounted(() => {
-  // Charger les contenus éditoriaux (non-bloquant)
-  loadContent()
-})
+// Chargement SSR du contenu éditorial
+await useAsyncData('editorial-strategy', () => loadContent())
 
 // SEO
 useSeoMeta({
