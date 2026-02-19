@@ -625,6 +625,16 @@ onMounted(() => {
                   <div v-else class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                     <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
                   </div>
+                  <!-- Voyant vert appel en cours -->
+                  <span
+                    v-if="programIdsWithOngoingCall.has(program.id)"
+                    class="absolute top-3 right-3 z-10 flex h-4 w-4"
+                    :title="t('formations.callOngoing')"
+                  >
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                    <span class="relative inline-flex rounded-full h-4 w-4 bg-green-500 shadow-lg" />
+                  </span>
+
                   <!-- Gradient overlay -->
                   <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
