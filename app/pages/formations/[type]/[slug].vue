@@ -686,7 +686,7 @@ const toggleSemester = (num: number) => {
                   <!-- No calls message -->
                   <div v-else class="text-center py-4">
                     <font-awesome-icon icon="fa-solid fa-calendar-xmark" class="w-8 h-8 text-gray-300 dark:text-gray-600 mb-2" />
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <p class="text-sm font-bold text-brand-red-600 dark:text-brand-red-400">
                       {{ t('formations.detail.noOpenCalls') }}
                     </p>
                     <NuxtLink

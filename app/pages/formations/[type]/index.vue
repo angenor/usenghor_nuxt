@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ProgramFieldPublic, ProgramPublic, ServicePublicSimple } from '~/composables/usePublicProgramsApi'
 import type { SectorPublic } from '~/composables/usePublicOrganizationApi'
+import type { ApplicationCallPublic } from '~/types/api'
 
 // Extraire le texte brut d'un contenu EditorJS (pour les aperçus)
 const extractPlainText = (content: string | null | undefined): string => {
@@ -39,6 +40,7 @@ const {
 } = usePublicProgramsApi()
 
 const { listSectors } = usePublicOrganizationApi()
+const { listOngoingCalls } = usePublicCallsApi()
 
 // Palette de couleurs par secteur (même que OrganigrammeSection)
 const sectorColors = [
@@ -95,6 +97,16 @@ const programFields = ref<ProgramFieldPublic[]>([])
 
 // Services (pour filtre par service)
 const services = ref<ServicePublicSimple[]>([])
+
+// Appels en cours (pour voyant vert sur les cards)
+const ongoingCalls = ref<ApplicationCallPublic[]>([])
+const programIdsWithOngoingCall = computed(() => {
+  return new Set(
+    ongoingCalls.value
+      .map(call => call.program_external_id)
+      .filter((id): id is string => !!id),
+  )
+})
 
 // Secteurs (pour résoudre les couleurs des services)
 const sectors = ref<SectorPublic[]>([])
@@ -250,14 +262,16 @@ const fetchPrograms = async () => {
       }
     }
 
-    // Charger les services et secteurs pour le filtre coloré
+    // Charger les services, secteurs et appels en cours
     try {
-      const [svcData, sectorData] = await Promise.all([
+      const [svcData, sectorData, callsData] = await Promise.all([
         listPublicServices(),
         listSectors(),
+        listOngoingCalls(),
       ])
       services.value = svcData
       sectors.value = sectorData
+      ongoingCalls.value = callsData
     }
     catch (e) {
       console.error('Erreur chargement services/secteurs:', e)

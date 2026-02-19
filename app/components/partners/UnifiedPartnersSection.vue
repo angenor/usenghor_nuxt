@@ -167,7 +167,6 @@ const uniqueCountriesCount = computed(() => {
                 loading="lazy"
                 @error="($event.target as HTMLImageElement).style.display = 'none'"
               >
-              <font-awesome-icon icon="fa-solid fa-handshake" class="absolute w-8 h-8 text-gray-400 dark:text-gray-500" />
             </div>
             <span class="text-xs font-medium text-gray-700 dark:text-gray-300 text-center line-clamp-2 w-28">
               {{ partner.name }}
@@ -197,7 +196,6 @@ const uniqueCountriesCount = computed(() => {
                 loading="lazy"
                 @error="($event.target as HTMLImageElement).style.display = 'none'"
               >
-              <font-awesome-icon icon="fa-solid fa-handshake" class="absolute w-8 h-8 text-gray-400 dark:text-gray-500" />
             </div>
             <span class="text-xs font-medium text-gray-700 dark:text-gray-300 text-center line-clamp-2 w-28">
               {{ partner.name }}
@@ -319,7 +317,6 @@ const uniqueCountriesCount = computed(() => {
                   loading="lazy"
                   @error="($event.target as HTMLImageElement).style.display = 'none'"
                 >
-                <font-awesome-icon icon="fa-solid fa-handshake" class="absolute w-8 h-8 text-gray-400 dark:text-gray-500" />
               </div>
 
               <!-- Name -->
