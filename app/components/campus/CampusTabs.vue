@@ -26,34 +26,22 @@ const getTabUrl = (tabId: string) => {
 <template>
   <div class="sticky top-20 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <nav class="flex overflow-x-auto scrollbar-hide -mb-px">
+      <nav class="flex flex-wrap justify-center -mb-px">
         <NuxtLink
           v-for="tab in tabs"
           :key="tab.id"
           :to="getTabUrl(tab.id)"
-          class="flex-shrink-0 flex items-center gap-2 px-4 py-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
+          class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm font-medium border-b-2 transition-colors"
           :class="[
             activeTab === tab.id
               ? 'border-brand-blue-500 text-brand-blue-600 dark:text-brand-blue-400'
               : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
           ]"
         >
-          <font-awesome-icon :icon="tab.icon" class="w-4 h-4" />
-          <span class="hidden sm:inline">{{ tab.label() }}</span>
+          <font-awesome-icon :icon="tab.icon" class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <span>{{ tab.label() }}</span>
         </NuxtLink>
       </nav>
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Hide scrollbar but keep functionality */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-</style>
