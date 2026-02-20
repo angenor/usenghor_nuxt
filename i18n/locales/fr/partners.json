@@ -36,6 +36,8 @@
       "noEvents": "Aucun événement à venir",
       "noNews": "Aucune actualité récente",
       "noMedia": "Aucun média disponible",
+      "noFormations": "Aucune formation associée",
+      "noDescription": "Aucune description disponible",
       "tabs": {
         "presentation": "Présentation",
         "formations": "Formations",

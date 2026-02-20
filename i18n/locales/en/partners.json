@@ -36,6 +36,8 @@
       "noEvents": "No upcoming events",
       "noNews": "No recent news",
       "noMedia": "No media available",
+      "noFormations": "No programs associated with this campus",
+      "noDescription": "No description available",
       "tabs": {
         "presentation": "Overview",
         "formations": "Programs",
