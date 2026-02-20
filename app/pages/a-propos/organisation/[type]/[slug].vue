@@ -25,28 +25,27 @@ const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 const { getAlbumById: getPublicAlbumById } = usePublicAlbumsApi()
 const { listProgramsByService, publicProgramTypeLabels, publicProgramTypeColors, formatDuration, programTypeToUrlSlug } = usePublicProgramsApi()
 
-// Scroll detection for sticky title
-const heroRef = ref<HTMLElement | null>(null)
+// Scroll detection for sticky title — observe un marqueur placé dans le hero
+const heroTitleRef = ref<HTMLElement | null>(null)
 const showTitleInNav = ref(false)
+let titleObserver: IntersectionObserver | null = null
 
-onMounted(() => {
-  const observer = new IntersectionObserver(
-    (entries) => {
-      const entry = entries[0]
+watch(heroTitleRef, (el) => {
+  titleObserver?.disconnect()
+  if (!el) return
+  titleObserver = new IntersectionObserver(
+    ([entry]) => {
       if (entry) {
-        showTitleInNav.value = entry.intersectionRatio < 0.2
+        showTitleInNav.value = !entry.isIntersecting
       }
     },
-    { threshold: [0, 0.2, 0.5, 1] },
+    { threshold: 0 },
   )
+  titleObserver.observe(el)
+})
 
-  if (heroRef.value) {
-    observer.observe(heroRef.value)
-  }
-
-  onUnmounted(() => {
-    observer.disconnect()
-  })
+onUnmounted(() => {
+  titleObserver?.disconnect()
 })
 
 // Get route params
@@ -352,18 +351,20 @@ const breadcrumb = computed(() => [
 ])
 
 // Active tab
-const activeTab = ref('missions')
+const activeTab = ref('presentation')
 const tabs = computed(() => {
   if (entityType === 'secteur') {
-    // Secteurs: services list + actualités
+    // Secteurs: présentation + missions + services list + actualités
     return [
+      { key: 'presentation', icon: 'fa-solid fa-info-circle' },
       { key: 'missions', icon: 'fa-solid fa-bullseye' },
       { key: 'services', icon: 'fa-solid fa-building' },
       { key: 'news', icon: 'fa-solid fa-newspaper' },
     ]
   }
-  // Services: full tabs + formations conditionnelles + actualités + médiathèque
+  // Services: présentation + full tabs + formations conditionnelles + actualités + médiathèque
   const serviceTabs = [
+    { key: 'presentation', icon: 'fa-solid fa-info-circle' },
     { key: 'missions', icon: 'fa-solid fa-bullseye' },
     { key: 'team', icon: 'fa-solid fa-users' },
     { key: 'achievements', icon: 'fa-solid fa-trophy' },
@@ -473,7 +474,7 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
     <!-- Content -->
     <div v-else>
       <!-- Hero Section with Image -->
-      <div ref="heroRef">
+      <div>
         <PageHero
           :title="entityName"
           :subtitle="entityDescriptionText"
@@ -488,49 +489,52 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
             </span>
           </template>
         </PageHero>
+        <!-- Sentinel : quand il quitte le viewport, le titre sticky apparaît -->
+        <div ref="heroTitleRef" aria-hidden="true" />
+      </div>
+
+      <!-- Sticky Title Bar (appears when hero scrolls out) -->
+      <div
+        class="sticky top-20 z-40 border-b border-gray-200 dark:border-gray-700 transition-all duration-300"
+        :class="showTitleInNav
+          ? 'opacity-100 translate-y-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-sm'
+          : 'opacity-0 -translate-y-2 pointer-events-none'"
+      >
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-center gap-3">
+          <span
+            class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+            :class="colorClasses.bgLight"
+          >
+            <font-awesome-icon :icon="entityType === 'secteur' ? 'fa-solid fa-layer-group' : 'fa-solid fa-building'" class="w-4 h-4" :class="colorClasses.text" />
+          </span>
+          <span class="font-semibold text-gray-900 dark:text-white truncate">
+            {{ entityName }}
+          </span>
+        </div>
       </div>
 
       <!-- Tabs Navigation -->
-      <div class="sticky top-20 z-40">
+      <div class="sticky z-40" :class="showTitleInNav ? 'top-[7.75rem]' : 'top-20'">
         <nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
           <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 relative tab-nav-container">
-            <div class="flex items-center gap-2 sm:gap-4">
-              <!-- Title (appears on scroll) - hidden on mobile -->
-              <div
-                class="hidden sm:flex items-center gap-3 py-3 transition-all duration-300 overflow-hidden"
-                :class="showTitleInNav ? 'opacity-100 max-w-xs lg:max-w-md' : 'opacity-0 max-w-0'"
+            <div class="flex items-center overflow-x-auto scrollbar-hide snap-x snap-mandatory justify-center">
+              <button
+                v-for="tab in tabs"
+                :key="tab.key"
+                type="button"
+                class="group flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-4 text-xs sm:text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200 snap-start flex-shrink-0"
+                :class="activeTab === tab.key
+                  ? `${colorClasses.border} ${colorClasses.text}`
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
+                @click="activeTab = tab.key"
               >
-                <div
-                  class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  :class="colorClasses.bgLight"
-                >
-                  <font-awesome-icon :icon="entityType === 'secteur' ? 'fa-solid fa-layer-group' : 'fa-solid fa-building'" class="w-4 h-4" :class="colorClasses.text" />
-                </div>
-                <span class="font-semibold text-gray-900 dark:text-white truncate text-sm lg:text-base">
-                  {{ entityName }}
-                </span>
-              </div>
-
-              <!-- Tabs -->
-              <div class="flex-1 flex items-center overflow-x-auto scrollbar-hide snap-x snap-mandatory sm:justify-center">
-                <button
-                  v-for="tab in tabs"
-                  :key="tab.key"
-                  type="button"
-                  class="group flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-4 text-xs sm:text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200 snap-start flex-shrink-0"
-                  :class="activeTab === tab.key
-                    ? `${colorClasses.border} ${colorClasses.text}`
-                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                  @click="activeTab = tab.key"
-                >
-                  <font-awesome-icon
-                    :icon="tab.icon"
-                    class="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors duration-200"
-                    :class="activeTab === tab.key ? colorClasses.text : 'text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300'"
-                  />
-                  <span class="hidden sm:inline">{{ t(`organizationDetail.tabs.${tab.key}`) }}</span>
-                </button>
-              </div>
+                <font-awesome-icon
+                  :icon="tab.icon"
+                  class="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors duration-200"
+                  :class="activeTab === tab.key ? colorClasses.text : 'text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300'"
+                />
+                <span class="hidden sm:inline">{{ t(`organizationDetail.tabs.${tab.key}`) }}</span>
+              </button>
             </div>
           </div>
         </nav>
@@ -539,6 +543,42 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
       <!-- Tab Content -->
       <section class="py-12 lg:py-16 bg-gray-50 dark:bg-gray-800 min-h-[60vh]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <!-- Presentation Tab -->
+          <div v-if="activeTab === 'presentation'" class="animate__animated animate__fadeIn">
+            <div class="mb-8">
+              <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                {{ t('organizationDetail.presentation.title') }}
+              </h2>
+              <p class="text-gray-600 dark:text-gray-400">{{ t('organizationDetail.presentation.subtitle') }}</p>
+            </div>
+
+            <!-- Description Card -->
+            <div v-if="entityDescription" class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-sm mb-8">
+              <div class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+                <EditorJSRenderer :data="entityDescription" />
+              </div>
+            </div>
+
+            <!-- Empty state -->
+            <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">
+              <font-awesome-icon icon="fa-solid fa-info-circle" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
+              <p class="text-gray-500 dark:text-gray-400 text-lg">{{ t('organizationDetail.presentation.empty') }}</p>
+            </div>
+
+            <!-- Next Tab Button -->
+            <div v-if="nextTab" class="mt-12 flex justify-end">
+              <button
+                type="button"
+                class="group inline-flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                :class="`${colorClasses.bgLight} ${colorClasses.text}`"
+                @click="goToNextTab"
+              >
+                <span>{{ t(`organizationDetail.tabs.${nextTab.key}`) }}</span>
+                <font-awesome-icon :icon="nextTab.icon" class="w-5 h-5 transition-transform group-hover:translate-x-1" />
+              </button>
+            </div>
+          </div>
+
           <!-- Missions Tab -->
           <div v-if="activeTab === 'missions'" class="animate__animated animate__fadeIn">
             <div class="mb-8">
@@ -555,16 +595,6 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
               </h3>
               <div class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
                 <EditorJSRenderer :data="entityMission" />
-              </div>
-            </div>
-
-            <!-- Description Card -->
-            <div v-if="entityDescription" class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-sm mb-8">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                {{ t('organizationDetail.missions.description') || 'Description' }}
-              </h3>
-              <div class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-                <EditorJSRenderer :data="entityDescription" />
               </div>
             </div>
 

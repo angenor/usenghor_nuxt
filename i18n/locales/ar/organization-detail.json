@@ -13,6 +13,7 @@
       "sector": "قطاع"
     },
     "tabs": {
+      "presentation": "تقديم",
       "missions": "المهام",
       "team": "الفريق",
       "services": "الخدمات",
@@ -21,6 +22,11 @@
       "news": "الأخبار",
       "formations": "البرامج التكوينية",
       "media": "الوسائط"
+    },
+    "presentation": {
+      "title": "تقديم",
+      "subtitle": "اكتشف هذا الكيان بالتفصيل",
+      "empty": "سيكون التقديم متاحاً قريباً."
     },
     "missions": {
       "title": "مهامنا",

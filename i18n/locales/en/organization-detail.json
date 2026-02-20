@@ -13,6 +13,7 @@
       "sector": "Sector"
     },
     "tabs": {
+      "presentation": "Overview",
       "missions": "Missions",
       "team": "Team",
       "services": "Services",
@@ -21,6 +22,11 @@
       "news": "News",
       "formations": "Programs",
       "media": "Media"
+    },
+    "presentation": {
+      "title": "Overview",
+      "subtitle": "Discover this entity in detail",
+      "empty": "The overview will be available soon."
     },
     "missions": {
       "title": "Our missions",

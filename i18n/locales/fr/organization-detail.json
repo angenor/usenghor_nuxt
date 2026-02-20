@@ -13,6 +13,7 @@
       "sector": "Secteur"
     },
     "tabs": {
+      "presentation": "Présentation",
       "missions": "Missions",
       "team": "Équipe",
       "services": "Services",
@@ -21,6 +22,11 @@
       "news": "Actualités",
       "formations": "Formations",
       "media": "Médiathèque"
+    },
+    "presentation": {
+      "title": "Présentation",
+      "subtitle": "Découvrez cette entité en détail",
+      "empty": "La présentation sera bientôt disponible."
     },
     "missions": {
       "title": "Nos missions",
