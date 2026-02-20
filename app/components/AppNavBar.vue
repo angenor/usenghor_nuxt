@@ -267,7 +267,7 @@ onUnmounted(() => {
           <div
             v-for="item in primaryNavItems"
             :key="item.key"
-            class="relative"
+            class="relative group/primary"
             @mouseenter="openDropdown(item.key)"
             @mouseleave="closeDropdown"
           >
@@ -294,20 +294,14 @@ onUnmounted(() => {
               />
             </NuxtLink>
 
-            <!-- Mega Menu Dropdown -->
-            <Transition
-              enter-active-class="transition duration-300 ease-out"
-              enter-from-class="opacity-0 -translate-y-4"
-              enter-to-class="opacity-100 translate-y-0"
-              leave-active-class="transition duration-200 ease-in"
-              leave-from-class="opacity-100 translate-y-0"
-              leave-to-class="opacity-0 -translate-y-4"
+            <!-- Mega Menu Dropdown — CSS hover (pré-hydratation) + JS state (post-hydratation) -->
+            <div
+              class="absolute top-full left-1/2 -translate-x-1/2 pt-4 transition-all duration-300 ease-out"
+              :class="activeDropdown === item.key
+                ? 'opacity-100 visible translate-y-0 pointer-events-auto'
+                : 'opacity-0 invisible -translate-y-4 pointer-events-none group-hover/primary:opacity-100 group-hover/primary:visible group-hover/primary:translate-y-0 group-hover/primary:pointer-events-auto'"
             >
-              <div
-                v-if="activeDropdown === item.key"
-                class="absolute top-full left-1/2 -translate-x-1/2 pt-4"
-              >
-                <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl shadow-black/15 dark:shadow-black/40 border border-gray-100 dark:border-gray-800 overflow-hidden w-[700px]">
+              <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl shadow-black/15 dark:shadow-black/40 border border-gray-100 dark:border-gray-800 overflow-hidden w-[700px]">
                   <div class="flex">
                     <!-- Featured Section -->
                     <div class="w-64 relative overflow-hidden">
@@ -371,9 +365,8 @@ onUnmounted(() => {
                       </div>
                     </div>
                   </div>
-                </div>
               </div>
-            </Transition>
+            </div>
           </div>
 
           <!-- Separator -->
@@ -381,7 +374,7 @@ onUnmounted(() => {
 
           <!-- More Menu (Secondary Items) -->
           <div
-            class="relative"
+            class="relative group/more"
             @mouseenter="isMoreMenuOpen = true"
             @mouseleave="isMoreMenuOpen = false"
           >
@@ -406,20 +399,14 @@ onUnmounted(() => {
               />
             </button>
 
-            <!-- More Menu Dropdown -->
-            <Transition
-              enter-active-class="transition duration-300 ease-out"
-              enter-from-class="opacity-0 -translate-y-4"
-              enter-to-class="opacity-100 translate-y-0"
-              leave-active-class="transition duration-200 ease-in"
-              leave-from-class="opacity-100 translate-y-0"
-              leave-to-class="opacity-0 -translate-y-4"
+            <!-- More Menu Dropdown — CSS hover (pré-hydratation) + JS state (post-hydratation) -->
+            <div
+              class="absolute top-full right-0 pt-4 transition-all duration-300 ease-out"
+              :class="isMoreMenuOpen
+                ? 'opacity-100 visible translate-y-0 pointer-events-auto'
+                : 'opacity-0 invisible -translate-y-4 pointer-events-none group-hover/more:opacity-100 group-hover/more:visible group-hover/more:translate-y-0 group-hover/more:pointer-events-auto'"
             >
-              <div
-                v-if="isMoreMenuOpen"
-                class="absolute top-full right-0 pt-4"
-              >
-                <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl shadow-black/15 dark:shadow-black/40 border border-gray-100 dark:border-gray-800 overflow-hidden w-[420px] p-3">
+              <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl shadow-black/15 dark:shadow-black/40 border border-gray-100 dark:border-gray-800 overflow-hidden w-[420px] p-3">
                   <!-- Categories Grid -->
                   <div class="grid grid-cols-1 gap-2">
                     <!-- Single Link Block (like "Nous connaître") -->
@@ -479,9 +466,8 @@ onUnmounted(() => {
                       </div>
                     </template>
                   </div>
-                </div>
               </div>
-            </Transition>
+            </div>
           </div>
         </div>
 

@@ -290,8 +290,8 @@ const hasAssociations = (item: NewsDisplay) => {
                 >
                   <div class="overflow-hidden rounded-lg mb-3">
                     <img
-                      v-if="getCoverImageUrl(item, 'low')"
-                      :src="getCoverImageUrl(item, 'low')!"
+                      v-if="getCoverImageUrl(item, 'medium')"
+                      :src="getCoverImageUrl(item, 'medium')!"
                       :alt="getLocalizedTitle(item)"
                       class="w-full h-32 object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"

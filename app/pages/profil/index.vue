@@ -13,7 +13,7 @@ const router = useRouter()
 const { apiFetch } = useApi()
 const { getUserProfile } = usePublicUserApi()
 const { getCountriesForSelect, getFlagEmoji } = useCountriesApi()
-const { uploadMediaVariants, getMediaUrl } = useMediaApi()
+const { getMediaUrl } = useMediaApi()
 const { userPermissions } = usePermissions()
 
 // === STATE ===
@@ -354,17 +354,17 @@ async function saveEditedPhoto(variants) {
   clearMessages()
   try {
     const originalName = pendingPhotoFile.value?.name || 'avatar.jpg'
-    const baseName = originalName.replace(/\.[^.]+$/, '')
+    const ext = originalName.split('.').pop() || 'jpg'
 
-    const response = await uploadMediaVariants(variants, baseName, {
-      folder: 'users/avatars',
-    })
+    const formData = new FormData()
+    formData.append('original', new File([variants.original], `original.${ext}`, { type: variants.original.type }))
+    formData.append('low', new File([variants.low], `low.${ext}`, { type: variants.low.type }))
+    formData.append('medium', new File([variants.medium], `medium.${ext}`, { type: variants.medium.type }))
+    formData.append('folder', 'users/avatars')
 
-    await apiFetch('/api/auth/me', {
-      method: 'PUT',
-      body: {
-        photo_external_id: response.original.id,
-      },
+    await apiFetch('/api/auth/me/photo', {
+      method: 'POST',
+      body: formData,
     })
 
     showPhotoEditor.value = false
