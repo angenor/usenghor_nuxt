@@ -5,7 +5,7 @@ const localePath = useLocalePath()
 const { getCampusBySlug, getCoverImageUrl, getCampusFlagEmoji } = usePublicCampusApi()
 
 // Valid tabs (in display order)
-const validTabs = ['calls', 'events', 'news', 'partners', 'team', 'media']
+const validTabs = ['presentation', 'formations', 'calls', 'events', 'news', 'partners', 'team', 'media']
 
 // Get campus code from slug
 const slug = computed(() => route.params.slug as string)
@@ -42,10 +42,10 @@ const breadcrumb = computed(() => [
   { label: campus.value?.name || '' }
 ])
 
-// Active tab based on URL hash (default: calls)
+// Active tab based on URL hash (default: presentation)
 const activeTab = computed(() => {
-  const hash = route.hash?.replace('#', '') || 'calls'
-  return validTabs.includes(hash) ? hash : 'calls'
+  const hash = route.hash?.replace('#', '') || 'presentation'
+  return validTabs.includes(hash) ? hash : 'presentation'
 })
 </script>
 
@@ -66,9 +66,21 @@ const activeTab = computed(() => {
     <!-- Tab Content -->
     <div class="bg-gray-50 dark:bg-gray-950 min-h-[400px] bg-grid-pattern">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Calls Tab (default) -->
+        <!-- Presentation Tab (default) -->
+        <CampusPresentation
+          v-if="activeTab === 'presentation'"
+          :campus="campus"
+        />
+
+        <!-- Formations Tab -->
+        <CampusFormations
+          v-else-if="activeTab === 'formations'"
+          :campus-id="campus.id"
+        />
+
+        <!-- Calls Tab -->
         <CampusCalls
-          v-if="activeTab === 'calls'"
+          v-else-if="activeTab === 'calls'"
           :campus-id="campus.id"
         />
 

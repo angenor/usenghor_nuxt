@@ -7,9 +7,14 @@ export default <RouterConfig>{
       return savedPosition
     }
 
-    // Ancre dans l'URL
+    // Ancre dans l'URL : Lenis gère le scroll hash dans app.vue
     if (to.hash) {
-      return { el: to.hash, behavior: 'smooth' }
+      // Navigation cross-page : d'abord scroll en haut, puis Lenis scrollera vers l'ancre
+      if (to.path !== _from.path) {
+        return { top: 0 }
+      }
+      // Navigation same-page : ne pas interférer, Lenis gère
+      return false
     }
 
     // Toujours remonter en haut pour une nouvelle page

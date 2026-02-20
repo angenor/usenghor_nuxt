@@ -7,6 +7,7 @@
  */
 
 import type { PaginatedResponse } from '~/types/api'
+import type { ProgramPublic } from '~/composables/usePublicProgramsApi'
 
 // ============================================================================
 // TYPES
@@ -188,6 +189,13 @@ export function usePublicCampusApi() {
   }
 
   /**
+   * Récupère les programmes publiés associés à un campus
+   */
+  async function getCampusPrograms(campusId: string): Promise<ProgramPublic[]> {
+    return $fetch<ProgramPublic[]>(`${baseUrl}/api/public/campuses/${campusId}/programs`)
+  }
+
+  /**
    * Récupère les albums publiés d'un campus avec leurs médias
    */
   async function getCampusAlbums(campusId: string): Promise<AlbumPublicWithMedia[]> {
@@ -277,6 +285,7 @@ export function usePublicCampusApi() {
     getCampusBySlug,
     getCampusPartners,
     getCampusTeam,
+    getCampusPrograms,
     getCampusAlbums,
 
     // Helpers

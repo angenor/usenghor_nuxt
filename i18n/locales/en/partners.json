@@ -37,11 +37,13 @@
       "noNews": "No recent news",
       "noMedia": "No media available",
       "tabs": {
-        "partners": "Partners",
-        "team": "Team",
+        "presentation": "Overview",
+        "formations": "Programs",
         "calls": "Current Calls",
         "events": "Events",
         "news": "News",
+        "partners": "Partners",
+        "team": "Team",
         "media": "Media Library"
       },
       "team": {

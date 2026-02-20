@@ -37,11 +37,13 @@
       "noNews": "Aucune actualité récente",
       "noMedia": "Aucun média disponible",
       "tabs": {
-        "partners": "Partenaires",
-        "team": "Équipe",
+        "presentation": "Présentation",
+        "formations": "Formations",
         "calls": "Appels en cours",
         "events": "Événements",
         "news": "Actualités",
+        "partners": "Partenaires",
+        "team": "Équipe",
         "media": "Médiathèque"
       },
       "team": {

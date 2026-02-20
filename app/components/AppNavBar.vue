@@ -183,6 +183,18 @@ const closeDropdown = () => {
   activeDropdown.value = null
 }
 
+// Empêche la navigation directe sur les items avec dropdown :
+// 1er clic → ouvre le dropdown, 2e clic → ferme le dropdown
+// La navigation se fait via les liens dans le dropdown ("Explorer tout" ou sous-items)
+const handleNavItemClick = (event: Event, itemKey: string) => {
+  event.preventDefault()
+  if (activeDropdown.value === itemKey) {
+    activeDropdown.value = null
+  } else {
+    activeDropdown.value = itemKey
+  }
+}
+
 const toggleMobileSubmenu = (key: string) => {
   const index = expandedMobileMenus.value.indexOf(key)
   if (index === -1) {
@@ -271,6 +283,7 @@ onUnmounted(() => {
                     ? 'bg-white text-gray-900 shadow-lg'
                     : 'bg-white/15 text-white backdrop-blur-sm hover:bg-white hover:text-gray-900'
               ]"
+              @click="handleNavItemClick($event, item.key)"
             >
               <font-awesome-icon :icon="item.icon" class="w-4 h-4" />
               <span>{{ t(`nav.${item.key}`) }}</span>
