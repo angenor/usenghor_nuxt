@@ -473,7 +473,7 @@ onMounted(() => {
     </section>
 
     <!-- Content -->
-    <section v-else class="py-12 bg-white dark:bg-gray-950 bg-grid-pattern">
+    <section v-else class="pb-12 bg-white dark:bg-gray-950 bg-grid-pattern">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col lg:flex-row gap-8">
           <!-- Main Content -->
