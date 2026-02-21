@@ -478,6 +478,24 @@ onMounted(() => {
         <div class="flex flex-col lg:flex-row gap-8">
           <!-- Main Content -->
           <div class="flex-1">
+            <!-- Type heading -->
+            <div class="mb-6 flex items-center gap-3">
+              <span
+                class="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-md"
+                :class="typeConfig.bgColor"
+              >
+                <font-awesome-icon :icon="typeConfig.icon" class="w-5 h-5" />
+              </span>
+              <div>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                  {{ t(`formations.types.${typeSlug}`) }}
+                </h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ t('formations.filters.resultsCount', { count: programs.length }) }}
+                </p>
+              </div>
+            </div>
+
             <!-- Search and Filters -->
             <div class="mb-8 space-y-4">
               <!-- Search bar -->
