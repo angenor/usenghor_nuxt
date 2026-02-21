@@ -153,12 +153,19 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
             <!-- Meta info -->
             <div class="flex flex-wrap items-center gap-3 mb-4">
               <span
-                v-for="(name, idx) in news.campus_names"
+                v-for="(name, idx) in news.campus_names.slice(0, 2)"
                 :key="idx"
                 class="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-blue-600 text-white text-sm font-medium rounded-full"
               >
                 <font-awesome-icon icon="fa-solid fa-building-columns" class="w-3 h-3" />
                 {{ name }}
+              </span>
+              <span
+                v-if="news.campus_names?.length > 2"
+                class="inline-flex items-center px-3 py-1 bg-brand-blue-600 text-white text-sm font-medium rounded-full"
+                :title="news.campus_names.slice(2).join(', ')"
+              >
+                +{{ news.campus_names.length - 2 }}
               </span>
               <span class="text-white/70 text-sm">{{ formatDate(news.published_at) }}</span>
             </div>
@@ -204,8 +211,21 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
                 <font-awesome-icon icon="fa-solid fa-building-columns" class="w-4 h-4" />
                 Campus
               </div>
-              <div class="font-bold text-gray-900 dark:text-white text-sm">
-                {{ news.campus_names.join(', ') }}
+              <div class="flex flex-wrap gap-1">
+                <span
+                  v-for="campusName in news.campus_names.slice(0, 2)"
+                  :key="campusName"
+                  class="inline-block px-2 py-0.5 text-xs font-bold text-gray-900 dark:text-white bg-gray-200 dark:bg-gray-700 rounded-full"
+                >
+                  {{ campusName }}
+                </span>
+                <span
+                  v-if="news.campus_names.length > 2"
+                  class="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-full"
+                  :title="news.campus_names.slice(2).join(', ')"
+                >
+                  +{{ news.campus_names.length - 2 }}
+                </span>
               </div>
             </div>
 
@@ -217,11 +237,18 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
               </div>
               <div class="flex flex-wrap gap-1">
                 <span
-                  v-for="serviceName in news.service_names"
+                  v-for="serviceName in news.service_names.slice(0, 2)"
                   :key="serviceName"
                   class="inline-block px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
                 >
                   {{ serviceName }}
+                </span>
+                <span
+                  v-if="news.service_names.length > 2"
+                  class="inline-block px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
+                  :title="news.service_names.slice(2).join(', ')"
+                >
+                  +{{ news.service_names.length - 2 }}
                 </span>
               </div>
             </div>
