@@ -43,10 +43,19 @@ const breadcrumb = computed(() => [
 ])
 
 // Active tab based on URL hash (default: presentation)
-const activeTab = computed(() => {
+// Le hash n'est pas disponible en SSR, on utilise un ref hydraté côté client
+const activeTab = ref('presentation')
+
+function syncTabFromHash() {
   const hash = route.hash?.replace('#', '') || 'presentation'
-  return validTabs.includes(hash) ? hash : 'presentation'
-})
+  activeTab.value = validTabs.includes(hash) ? hash : 'presentation'
+}
+
+// Hydrater au montage client (le hash n'existe pas en SSR)
+onMounted(syncTabFromHash)
+
+// Réagir aux changements de hash (navigation par onglets)
+watch(() => route.hash, syncTabFromHash)
 </script>
 
 <template>
