@@ -164,7 +164,7 @@ function renderBlock(type: string, data: BlockData): string {
 
       // Ajouter table-layout: fixed si des largeurs sont définies
       const tableStyle = columnWidths.length > 0 ? 'style="table-layout: fixed;"' : ''
-      return `<table class="w-full border-collapse" ${tableStyle}>${colgroup}${tableRows}</table>`
+      return `<div class="table-scroll-wrapper"><table class="w-full border-collapse" ${tableStyle}>${colgroup}${tableRows}</table></div>`
 
     case 'linkTool':
       return `
@@ -253,6 +253,16 @@ const renderedHtml = computed(() => {
 
 .editorjs-renderer table {
   @apply my-6;
+}
+
+.editorjs-renderer .table-scroll-wrapper {
+  @apply overflow-x-auto -mx-1 px-1 my-6;
+  -webkit-overflow-scrolling: touch;
+}
+
+.editorjs-renderer .table-scroll-wrapper table {
+  @apply my-0;
+  min-width: 600px;
 }
 
 .editorjs-renderer a {

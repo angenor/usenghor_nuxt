@@ -558,52 +558,6 @@ const toggleSemester = (num: number) => {
               </NuxtLink>
             </div>
 
-            <!-- Related formations -->
-            <section v-if="relatedPrograms.length > 0" class="mt-12">
-              <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                <span class="relative inline-block">
-                  {{ t('formations.detail.relatedFormations') }}
-                  <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full" />
-                </span>
-              </h2>
-
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <NuxtLink
-                  v-for="related in relatedPrograms"
-                  :key="related.id"
-                  :to="getProgramUrl(related)"
-                  class="group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-200 dark:border-gray-700"
-                >
-                  <div class="overflow-hidden h-32">
-                    <img
-                      v-if="related.cover_image_external_id"
-                      :src="`/api/public/media/${related.cover_image_external_id}/download?variant=low`"
-                      :alt="getLocalizedTitleFor(related)"
-                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
-                    >
-                    <div
-                      v-else
-                      class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
-                    >
-                      <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-8 h-8 text-gray-400 dark:text-gray-500" />
-                    </div>
-                  </div>
-
-                  <div class="p-4">
-                    <div class="flex items-center gap-2 mb-2">
-                      <span class="inline-block px-2 py-0.5 text-xs font-medium text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded">
-                        {{ t(`formations.types.${related.type}`) }}
-                      </span>
-                    </div>
-
-                    <h3 class="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
-                      {{ getLocalizedTitleFor(related) }}
-                    </h3>
-                  </div>
-                </NuxtLink>
-              </div>
-            </section>
           </article>
 
           <!-- Sidebar -->
@@ -715,6 +669,53 @@ const toggleSemester = (num: number) => {
             </div>
           </aside>
         </div>
+
+        <!-- Related formations (après les deux colonnes) -->
+        <section v-if="relatedPrograms.length > 0" class="mt-12">
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            <span class="relative inline-block">
+              {{ t('formations.detail.relatedFormations') }}
+              <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full" />
+            </span>
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <NuxtLink
+              v-for="related in relatedPrograms"
+              :key="related.id"
+              :to="getProgramUrl(related)"
+              class="group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-200 dark:border-gray-700"
+            >
+              <div class="overflow-hidden h-32">
+                <img
+                  v-if="related.cover_image_external_id"
+                  :src="`/api/public/media/${related.cover_image_external_id}/download?variant=low`"
+                  :alt="getLocalizedTitleFor(related)"
+                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                >
+                <div
+                  v-else
+                  class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+                >
+                  <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                </div>
+              </div>
+
+              <div class="p-4">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="inline-block px-2 py-0.5 text-xs font-medium text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded">
+                    {{ t(`formations.types.${related.type}`) }}
+                  </span>
+                </div>
+
+                <h3 class="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
+                  {{ getLocalizedTitleFor(related) }}
+                </h3>
+              </div>
+            </NuxtLink>
+          </div>
+        </section>
       </div>
     </div>
   </div>

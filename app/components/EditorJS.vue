@@ -725,13 +725,16 @@ h4.ce-header {
   position: relative;
   width: 100%;
   margin: 1rem 0;
-  overflow: visible;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
   padding-top: 50px; /* Espace pour la toolbar flottante */
 }
 
 /* Tableau principal */
 .mt-table {
   width: 100%;
+  min-width: 600px;
   border-collapse: collapse;
   font-size: 0.875rem;
   line-height: 1.5;
