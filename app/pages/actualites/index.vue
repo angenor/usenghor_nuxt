@@ -249,13 +249,23 @@ const hasAssociations = (item: NewsDisplay) => {
                       <font-awesome-icon icon="fa-solid fa-building" class="w-2.5 h-2.5" />
                       {{ featuredNews.sector_name }}
                     </span>
-                    <span
-                      v-if="featuredNews.service_names?.length"
-                      class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
-                    >
-                      <font-awesome-icon icon="fa-solid fa-cogs" class="w-2.5 h-2.5" />
-                      {{ featuredNews.service_names?.join(', ') }}
-                    </span>
+                    <template v-if="featuredNews.service_names?.length">
+                      <span
+                        v-for="serviceName in featuredNews.service_names.slice(0, 2)"
+                        :key="serviceName"
+                        class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
+                      >
+                        <font-awesome-icon icon="fa-solid fa-cogs" class="w-2.5 h-2.5" />
+                        {{ serviceName }}
+                      </span>
+                      <span
+                        v-if="featuredNews.service_names.length > 2"
+                        class="inline-flex items-center px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
+                        :title="featuredNews.service_names.slice(2).join(', ')"
+                      >
+                        +{{ featuredNews.service_names.length - 2 }}
+                      </span>
+                    </template>
                     <span
                       v-if="featuredNews.project_name"
                       class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 rounded-full"
@@ -313,12 +323,22 @@ const hasAssociations = (item: NewsDisplay) => {
                     >
                       {{ item.sector_name }}
                     </span>
-                    <span
-                      v-if="item.service_names?.length"
-                      class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
-                    >
-                      {{ item.service_names?.join(', ') }}
-                    </span>
+                    <template v-if="item.service_names?.length">
+                      <span
+                        v-for="serviceName in item.service_names.slice(0, 2)"
+                        :key="serviceName"
+                        class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
+                      >
+                        {{ serviceName }}
+                      </span>
+                      <span
+                        v-if="item.service_names.length > 2"
+                        class="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
+                        :title="item.service_names.slice(2).join(', ')"
+                      >
+                        +{{ item.service_names.length - 2 }}
+                      </span>
+                    </template>
                     <span
                       v-if="item.project_name"
                       class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 rounded-full"
@@ -378,12 +398,22 @@ const hasAssociations = (item: NewsDisplay) => {
                 >
                   {{ item.sector_name }}
                 </span>
-                <span
-                  v-if="item.service_names?.length"
-                  class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
-                >
-                  {{ item.service_names?.join(', ') }}
-                </span>
+                <template v-if="item.service_names?.length">
+                  <span
+                    v-for="serviceName in item.service_names.slice(0, 2)"
+                    :key="serviceName"
+                    class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
+                  >
+                    {{ serviceName }}
+                  </span>
+                  <span
+                    v-if="item.service_names.length > 2"
+                    class="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
+                    :title="item.service_names.slice(2).join(', ')"
+                  >
+                    +{{ item.service_names.length - 2 }}
+                  </span>
+                </template>
                 <span
                   v-if="item.project_name"
                   class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 rounded-full"

@@ -215,8 +215,14 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
                 <font-awesome-icon icon="fa-solid fa-sitemap" class="w-4 h-4" />
                 Services
               </div>
-              <div class="font-bold text-gray-900 dark:text-white text-sm">
-                {{ news.service_names.join(', ') }}
+              <div class="flex flex-wrap gap-1">
+                <span
+                  v-for="serviceName in news.service_names"
+                  :key="serviceName"
+                  class="inline-block px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
+                >
+                  {{ serviceName }}
+                </span>
               </div>
             </div>
 
