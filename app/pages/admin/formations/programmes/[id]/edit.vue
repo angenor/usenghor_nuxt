@@ -99,6 +99,7 @@ const filteredServices = computed(() => {
 
 // États
 const loading = ref(true)
+const initialLoadDone = ref(false)
 const isSubmitting = ref(false)
 const program = ref<ProgramWithDetails | null>(null)
 
@@ -203,6 +204,8 @@ async function loadProgram() {
       status: program.value.status,
       is_featured: program.value.is_featured || false,
     }
+    await nextTick()
+    initialLoadDone.value = true
   } catch (e) {
     console.error('Erreur lors du chargement du programme:', e)
     alert('Programme non trouvé')
@@ -546,6 +549,26 @@ const generateSlug = (title: string) => {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '')
 }
+
+// Génération de code (initiales des mots significatifs)
+const generateCode = (title: string): string => {
+  if (!title.trim()) return ''
+  const stopWords = new Set(['de', 'du', 'des', 'le', 'la', 'les', 'en', 'et', 'a', 'au', 'aux', 'un', 'une', 'pour', 'par', 'sur', 'dans', 'avec', 'sans', 'sous', 'entre', 'd', 'l', 'n'])
+  return title
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .split(/[\s''-]+/)
+    .filter(word => word.length > 0 && !stopWords.has(word.toLowerCase()))
+    .map(word => word[0].toUpperCase())
+    .join('')
+}
+
+// Auto-génération du code et slug quand le titre change
+watch(() => form.value.title, (newTitle) => {
+  if (!initialLoadDone.value) return
+  form.value.code = generateCode(newTitle)
+  form.value.slug = generateSlug(newTitle)
+})
 
 // États de modification
 const hasChanges = ref(false)
