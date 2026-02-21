@@ -440,7 +440,7 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
 </script>
 
 <template>
-  <div class="bg-grid-pattern">
+  <div>
     <!-- Loading state -->
     <div v-if="loading" class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
       <div class="text-center">
@@ -541,7 +541,7 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
       </div>
 
       <!-- Tab Content -->
-      <section class="py-12 lg:py-16 bg-gray-50 dark:bg-gray-800 min-h-[60vh]">
+      <section class="py-12 lg:py-16 bg-gray-50 dark:bg-gray-800 bg-grid-pattern min-h-[60vh]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <!-- Presentation Tab -->
           <div v-if="activeTab === 'presentation'" class="animate__animated animate__fadeIn">
