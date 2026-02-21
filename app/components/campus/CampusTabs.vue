@@ -7,6 +7,7 @@ const props = defineProps<Props>()
 
 const { t } = useI18n()
 const route = useRoute()
+const router = useRouter()
 
 const tabs = [
   { id: 'presentation', label: () => t('partners.campus.tabs.presentation'), icon: 'fa-solid fa-info-circle' },
@@ -19,9 +20,9 @@ const tabs = [
   { id: 'media', label: () => t('partners.campus.tabs.media'), icon: 'fa-solid fa-photo-film' },
 ]
 
-// Build tab URL with hash anchor
-const getTabUrl = (tabId: string) => {
-  return `${route.path}#${tabId}`
+// Navigate to tab using router.replace to ensure hash reactivity
+function switchTab(tabId: string) {
+  router.replace({ path: route.path, hash: `#${tabId}` })
 }
 </script>
 
@@ -29,20 +30,21 @@ const getTabUrl = (tabId: string) => {
   <div class="sticky top-20 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <nav class="flex flex-wrap justify-center -mb-px">
-        <NuxtLink
+        <button
           v-for="tab in tabs"
           :key="tab.id"
-          :to="getTabUrl(tab.id)"
+          type="button"
           class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm font-medium border-b-2 transition-colors"
           :class="[
             activeTab === tab.id
               ? 'border-brand-blue-500 text-brand-blue-600 dark:text-brand-blue-400'
               : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
           ]"
+          @click="switchTab(tab.id)"
         >
           <font-awesome-icon :icon="tab.icon" class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           <span>{{ tab.label() }}</span>
-        </NuxtLink>
+        </button>
       </nav>
     </div>
   </div>
