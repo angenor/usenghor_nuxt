@@ -125,6 +125,10 @@ const navItems = [
   ...secondaryNavItems.map(item => ({ ...item, hasDropdown: true, megaMenu: false }))
 ]
 
+// Dropdowns déroulés par défaut en mobile
+const defaultExpandedMenus = navItems.filter(item => item.hasDropdown && !('singleLink' in item && item.singleLink)).map(item => item.key)
+expandedMobileMenus.value = defaultExpandedMenus
+
 const isMoreMenuOpen = ref(false)
 const isSearchOpen = ref(false)
 
@@ -143,7 +147,7 @@ const handleScroll = () => {
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
   if (!isMobileMenuOpen.value) {
-    expandedMobileMenus.value = []
+    expandedMobileMenus.value = [...defaultExpandedMenus]
   }
 }
 
