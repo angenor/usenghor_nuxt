@@ -13,14 +13,19 @@ const emit = defineEmits<{
   openHistory: [field: PageSectionField]
 }>()
 
-const selectedPage = ref<FrontOfficePage | null>(null)
+const selectedPageId = ref<string | null>(null)
 const expandedSections = ref<Set<string>>(new Set())
 const editingFieldKey = ref<string | null>(null)
+
+// Page sélectionnée dérivée des props (réactive aux changements de noms de sections)
+const selectedPage = computed(() =>
+  props.pages.find(p => p.id === selectedPageId.value) ?? null,
+)
 
 // Sélectionner la première page par défaut
 onMounted(() => {
   if (props.pages.length > 0) {
-    selectedPage.value = props.pages[0] ?? null
+    selectedPageId.value = props.pages[0]?.id ?? null
   }
 })
 
@@ -78,7 +83,7 @@ function handleFieldHistory(field: PageSectionField) {
         :class="selectedPage?.id === page.id
           ? 'border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
           : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'"
-        @click="selectedPage = page"
+        @click="selectedPageId = page.id"
       >
         <font-awesome-icon :icon="['fas', page.icon]" class="h-4 w-4" />
         {{ page.name }}

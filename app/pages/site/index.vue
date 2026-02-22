@@ -130,6 +130,16 @@ const facilityFeaturesKeyMap: Record<string, string> = {
   'facility-hotel': 'site.facility.hotel.features',
 }
 
+// Mapping facility ID → clé éditoriale pour la capacité
+const facilityCapacityKeyMap: Record<string, string> = {
+  'facility-housing': 'site.facility.housing.capacity',
+  'facility-library': 'site.facility.library.capacity',
+  'facility-conference': 'site.facility.conference.capacity',
+  'facility-academic': 'site.facility.academic.capacity',
+  'facility-pool': 'site.facility.pool.capacity',
+  'facility-hotel': 'site.facility.hotel.capacity',
+}
+
 // Récupère les images d'une installation (éditorial avec fallback mock)
 const getFacilityImages = (facility: SiteFacility): string[] => {
   const editorialKey = facilityEditorialKeyMap[facility.id]
@@ -179,6 +189,19 @@ const getLocalizedFacilityFeatures = (facility: SiteFacility): string[] => {
   if (locale.value === 'en') return facility.features_en
   if (locale.value === 'ar') return facility.features_ar
   return facility.features_fr
+}
+
+// Récupère la capacité d'une installation (éditorial avec fallback mock)
+const getFacilityCapacity = (facility: SiteFacility): string | undefined => {
+  const editorialKey = facilityCapacityKeyMap[facility.id]
+  if (editorialKey) {
+    const raw = getContent(editorialKey)
+    // getContent retourne la clé i18n en fallback — on vérifie que c'est un vrai contenu
+    if (raw && raw !== editorialKey && !raw.startsWith('site.facility.')) {
+      return raw
+    }
+  }
+  return facility.capacity
 }
 
 // Stats - labels depuis éditorial, valeurs depuis chiffres-clés avec fallback i18n
@@ -507,11 +530,11 @@ const getNextBgColor = (index: number, isDark: boolean) => {
 
               <!-- Capacity if available -->
               <div
-                v-if="facility.capacity"
+                v-if="getFacilityCapacity(facility)"
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/60 dark:bg-gray-800/60"
               >
                 <font-awesome-icon icon="fa-solid fa-users" class="w-4 h-4" />
-                {{ getContent('site.facilities.capacity') }}: {{ facility.capacity }}
+                {{ getContent('site.facilities.capacity') }}: {{ getFacilityCapacity(facility) }}
               </div>
             </div>
           </div>
