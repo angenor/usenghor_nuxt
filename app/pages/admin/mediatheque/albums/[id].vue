@@ -19,6 +19,8 @@ const {
 
 const {
   listMedia,
+  uploadMultipleMedia,
+  validateFile,
   getMediaUrl,
   formatFileSize,
   formatDuration
@@ -67,7 +69,16 @@ const isSaving = ref(false)
 const showAddMediaModal = ref(false)
 const showRemoveMediaModal = ref(false)
 const showEditInfoModal = ref(false)
+const showUploadModal = ref(false)
 const selectedMediaToRemove = ref<MediaRead | null>(null)
+
+// Upload
+const uploadFiles = ref<File[]>([])
+const isUploading = ref(false)
+const uploadProgress = ref(0)
+const uploadError = ref<string | null>(null)
+const isDraggingUpload = ref(false)
+const uploadFileInput = ref<HTMLInputElement | null>(null)
 
 // Sélection pour ajout
 const selectedMediaIds = ref<string[]>([])
@@ -305,6 +316,125 @@ const moveToLast = async (index: number) => {
   album.value.media_items = items
   await saveReorder(items)
 }
+
+// === UPLOAD MODAL ===
+const openUploadModal = () => {
+  uploadFiles.value = []
+  uploadError.value = null
+  uploadProgress.value = 0
+  isUploading.value = false
+  showUploadModal.value = true
+}
+
+const closeUploadModal = () => {
+  if (isUploading.value) return
+  showUploadModal.value = false
+  uploadFiles.value = []
+  uploadError.value = null
+}
+
+const handleUploadDragEnter = (e: DragEvent) => {
+  e.preventDefault()
+  isDraggingUpload.value = true
+}
+
+const handleUploadDragLeave = (e: DragEvent) => {
+  e.preventDefault()
+  isDraggingUpload.value = false
+}
+
+const handleUploadDragOver = (e: DragEvent) => {
+  e.preventDefault()
+}
+
+const handleUploadDrop = (e: DragEvent) => {
+  e.preventDefault()
+  isDraggingUpload.value = false
+  const droppedFiles = e.dataTransfer?.files
+  if (droppedFiles) {
+    addFiles(Array.from(droppedFiles))
+  }
+}
+
+const triggerUploadInput = () => {
+  uploadFileInput.value?.click()
+}
+
+const handleUploadInputChange = (e: Event) => {
+  const input = e.target as HTMLInputElement
+  if (input.files) {
+    addFiles(Array.from(input.files))
+    input.value = ''
+  }
+}
+
+const addFiles = (newFiles: File[]) => {
+  uploadError.value = null
+  for (const file of newFiles) {
+    const validation = validateFile(file, {
+      maxSizeMB: 50,
+      allowedTypes: ['image/*', 'video/*', 'audio/*', 'application/pdf'],
+    })
+    if (!validation.valid) {
+      uploadError.value = `${file.name} : ${validation.error}`
+      continue
+    }
+    const alreadyAdded = uploadFiles.value.some(
+      f => f.name === file.name && f.size === file.size
+    )
+    if (!alreadyAdded) {
+      uploadFiles.value.push(file)
+    }
+  }
+}
+
+const removeUploadFile = (index: number) => {
+  uploadFiles.value.splice(index, 1)
+  uploadError.value = null
+}
+
+const handleUploadAndAdd = async () => {
+  if (uploadFiles.value.length === 0) return
+
+  isUploading.value = true
+  uploadError.value = null
+  uploadProgress.value = 0
+
+  // Progression simulée
+  const progressInterval = setInterval(() => {
+    if (uploadProgress.value < 60) {
+      uploadProgress.value += 5
+    }
+  }, 200)
+
+  try {
+    const responses = await uploadMultipleMedia(uploadFiles.value, 'albums')
+    uploadProgress.value = 80
+
+    const mediaIds = responses.map(r => r.id)
+    if (mediaIds.length > 0) {
+      album.value = await addMediaToAlbum(albumId.value, mediaIds)
+    }
+
+    uploadProgress.value = 100
+    clearInterval(progressInterval)
+
+    // Recharger l'album pour garantir la mise à jour
+    await loadAlbum()
+
+    isUploading.value = false
+    setTimeout(() => {
+      showUploadModal.value = false
+      uploadFiles.value = []
+      uploadError.value = null
+    }, 800)
+  } catch (error: any) {
+    clearInterval(progressInterval)
+    console.error('Erreur upload:', error)
+    uploadError.value = error?.data?.detail || 'Erreur lors de l\'upload. Veuillez réessayer.'
+    isUploading.value = false
+  }
+}
 </script>
 
 <template>
@@ -367,6 +497,13 @@ const moveToLast = async (index: number) => {
             Modifier les infos
           </button>
           <button
+            class="inline-flex items-center gap-2 rounded-lg border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-600 dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/30"
+            @click="openUploadModal"
+          >
+            <font-awesome-icon icon="fa-solid fa-cloud-arrow-up" class="h-4 w-4" />
+            Uploader des fichiers
+          </button>
+          <button
             class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
             @click="openAddMediaModal"
           >
@@ -419,15 +556,24 @@ const moveToLast = async (index: number) => {
           <font-awesome-icon icon="fa-solid fa-images" class="mb-4 h-16 w-16 text-gray-300 dark:text-gray-600" />
           <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">Aucun média</h3>
           <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
-            Ajoutez des médias à cet album depuis votre médiathèque
+            Ajoutez des médias à cet album depuis votre médiathèque ou uploadez de nouveaux fichiers
           </p>
-          <button
-            class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-            @click="openAddMediaModal"
-          >
-            <font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4" />
-            Ajouter des médias
-          </button>
+          <div class="flex gap-2">
+            <button
+              class="inline-flex items-center gap-2 rounded-lg border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-600 dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/30"
+              @click="openUploadModal"
+            >
+              <font-awesome-icon icon="fa-solid fa-cloud-arrow-up" class="h-4 w-4" />
+              Uploader des fichiers
+            </button>
+            <button
+              class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+              @click="openAddMediaModal"
+            >
+              <font-awesome-icon icon="fa-solid fa-plus" class="h-4 w-4" />
+              Ajouter des médias
+            </button>
+          </div>
         </div>
 
         <!-- Liste des médias -->
@@ -800,6 +946,186 @@ const moveToLast = async (index: number) => {
               </button>
             </div>
           </form>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Modal upload fichiers -->
+    <Teleport to="body">
+      <div
+        v-if="showUploadModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        @click.self="closeUploadModal"
+      >
+        <div class="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-lg bg-white shadow-xl dark:bg-gray-800">
+          <!-- Header -->
+          <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+            <div>
+              <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                Uploader des fichiers
+              </h2>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Les fichiers seront automatiquement ajoutés à l'album
+              </p>
+            </div>
+            <button
+              class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
+              :disabled="isUploading"
+              @click="closeUploadModal"
+            >
+              <font-awesome-icon icon="fa-solid fa-times" class="h-5 w-5" />
+            </button>
+          </div>
+
+          <!-- Contenu -->
+          <div class="flex-1 overflow-y-auto p-6">
+            <!-- Zone drag-and-drop -->
+            <div
+              class="mb-4 rounded-lg border-2 border-dashed p-8 text-center transition-all"
+              :class="isDraggingUpload
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                : 'border-gray-300 hover:border-blue-400 dark:border-gray-600'"
+              @dragenter="handleUploadDragEnter"
+              @dragleave="handleUploadDragLeave"
+              @dragover="handleUploadDragOver"
+              @drop="handleUploadDrop"
+            >
+              <font-awesome-icon
+                icon="fa-solid fa-cloud-arrow-up"
+                class="mb-3 h-12 w-12 text-gray-400"
+              />
+              <p class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                Glissez-déposez vos fichiers ici
+              </p>
+              <p class="mb-3 text-xs text-gray-500 dark:text-gray-400">ou</p>
+              <button
+                type="button"
+                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                :disabled="isUploading"
+                @click="triggerUploadInput"
+              >
+                Parcourir
+              </button>
+              <p class="mt-3 text-xs text-gray-400 dark:text-gray-500">
+                Images, vidéos, audio, PDF — 50 Mo max par fichier
+              </p>
+            </div>
+
+            <!-- Input file caché -->
+            <input
+              ref="uploadFileInput"
+              type="file"
+              multiple
+              accept="image/*,video/*,audio/*,application/pdf"
+              class="hidden"
+              @change="handleUploadInputChange"
+            />
+
+            <!-- Liste des fichiers sélectionnés -->
+            <div v-if="uploadFiles.length > 0" class="space-y-2">
+              <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ uploadFiles.length }} fichier{{ uploadFiles.length > 1 ? 's' : '' }} sélectionné{{ uploadFiles.length > 1 ? 's' : '' }}
+              </p>
+              <div class="max-h-48 space-y-1 overflow-y-auto">
+                <div
+                  v-for="(file, index) in uploadFiles"
+                  :key="`${file.name}-${file.size}`"
+                  class="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-700/50"
+                >
+                  <div class="flex items-center gap-2 overflow-hidden">
+                    <font-awesome-icon
+                      :icon="`fa-solid ${file.type.startsWith('image/') ? 'fa-image' : file.type.startsWith('video/') ? 'fa-video' : file.type.startsWith('audio/') ? 'fa-music' : 'fa-file'}`"
+                      class="h-4 w-4 shrink-0 text-gray-400"
+                    />
+                    <span class="truncate text-sm text-gray-700 dark:text-gray-300">
+                      {{ file.name }}
+                    </span>
+                    <span class="shrink-0 text-xs text-gray-400">
+                      {{ formatFileSize(file.size) }}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    class="ml-2 shrink-0 rounded p-1 text-gray-400 transition-colors hover:bg-gray-200 hover:text-red-600 dark:hover:bg-gray-600"
+                    :disabled="isUploading"
+                    @click="removeUploadFile(index)"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-times" class="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Barre de progression -->
+            <div v-if="isUploading" class="mt-4">
+              <div class="mb-2 flex items-center justify-between text-sm">
+                <span class="text-gray-600 dark:text-gray-400">Upload en cours...</span>
+                <span class="font-medium text-blue-600 dark:text-blue-400">{{ uploadProgress }}%</span>
+              </div>
+              <div class="h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                <div
+                  class="h-full rounded-full bg-blue-500 transition-all duration-500"
+                  :style="{ width: `${uploadProgress}%` }"
+                />
+              </div>
+            </div>
+
+            <!-- Erreur -->
+            <div
+              v-if="uploadError"
+              class="mt-4 flex items-start gap-2 rounded-lg bg-red-50 p-3 dark:bg-red-900/20"
+            >
+              <font-awesome-icon
+                icon="fa-solid fa-circle-exclamation"
+                class="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400"
+              />
+              <p class="text-sm text-red-600 dark:text-red-400">{{ uploadError }}</p>
+            </div>
+
+            <!-- Succès -->
+            <div
+              v-if="uploadProgress === 100 && !uploadError"
+              class="mt-4 flex items-center gap-2 rounded-lg bg-green-50 p-3 dark:bg-green-900/20"
+            >
+              <font-awesome-icon
+                icon="fa-solid fa-check-circle"
+                class="h-4 w-4 text-green-600 dark:text-green-400"
+              />
+              <p class="text-sm text-green-600 dark:text-green-400">
+                {{ uploadFiles.length }} fichier{{ uploadFiles.length > 1 ? 's' : '' }}
+                uploadé{{ uploadFiles.length > 1 ? 's' : '' }} et ajouté{{ uploadFiles.length > 1 ? 's' : '' }} à l'album
+              </p>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="flex justify-end gap-3 border-t border-gray-200 px-6 py-4 dark:border-gray-700">
+            <button
+              class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              :disabled="isUploading"
+              @click="closeUploadModal"
+            >
+              Annuler
+            </button>
+            <button
+              class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              :disabled="uploadFiles.length === 0 || isUploading"
+              @click="handleUploadAndAdd"
+            >
+              <font-awesome-icon
+                v-if="isUploading"
+                icon="fa-solid fa-spinner"
+                class="mr-2 h-4 w-4 animate-spin"
+              />
+              <font-awesome-icon
+                v-else
+                icon="fa-solid fa-cloud-arrow-up"
+                class="mr-2 h-4 w-4"
+              />
+              Uploader {{ uploadFiles.length > 0 ? uploadFiles.length : '' }}
+              fichier{{ uploadFiles.length > 1 ? 's' : '' }}
+            </button>
+          </div>
         </div>
       </div>
     </Teleport>
