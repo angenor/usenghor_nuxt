@@ -570,6 +570,11 @@ export type ValueSectionKey =
   // Éléments globaux - Navbar
   | 'navbar.apply.text'
   | 'navbar.apply.link'
+  // Éléments globaux - Navbar sous-menus secondaires
+  | 'navbar.secondary.about.children'
+  | 'navbar.secondary.projects.children'
+  | 'navbar.secondary.alumni.children'
+  | 'navbar.secondary.site.children'
 
 export interface ValueSection {
   id: string

@@ -142,7 +142,7 @@ async function handleSaveField(key: string, value: string, valueType: 'text' | '
     const valueAsString = String(value)
 
     // Forcer le type JSON pour les clés stockées en JSON (documents, pays, galeries d'images)
-    const actualValueType = (key.endsWith('.documents') || key.endsWith('.countries') || key.endsWith('.images')) ? 'json' as const : valueType
+    const actualValueType = (key.endsWith('.documents') || key.endsWith('.countries') || key.endsWith('.images') || key.endsWith('.children')) ? 'json' as const : valueType
 
     // Si le contenu n'est pas dans le cache local, vérifier s'il existe en BDD
     if (!existingContent) {

@@ -68,14 +68,29 @@ const primaryNavItems = [
   }
 ]
 
-// Secondary nav items (grouped in "More" dropdown)
+// Type pour les enfants de navigation (avec _label optionnel pour overrides éditoriaux)
+interface NavChild {
+  key: string
+  route: string
+  icon: string
+  badge?: string
+  _label?: string
+}
+
+interface SecondaryNavItem {
+  key: string
+  route: string
+  icon: string
+  children: NavChild[]
+}
+
+// Secondary nav items par défaut (grouped in "More" dropdown)
 // Based on carte_mentale_senghor.md structure
-const secondaryNavItems = [
+const defaultSecondaryNavItems: SecondaryNavItem[] = [
   {
     key: 'about',
     route: '/a-propos',
     icon: 'fa-solid fa-info-circle',
-    singleLink: true, // Tout le bloc est un seul lien cliquable
     children: [
       { key: 'mission', route: '/a-propos', icon: 'fa-solid fa-bullseye' },
       { key: 'history', route: '/a-propos', icon: 'fa-solid fa-landmark' },
@@ -86,7 +101,6 @@ const secondaryNavItems = [
     key: 'projects',
     route: '/projets',
     icon: 'fa-solid fa-rocket',
-    singleLink: true, // Tout le bloc est un seul lien cliquable
     children: [
       { key: 'transformAction', route: '/projets/transformaction', icon: 'fa-solid fa-rocket', badge: 'flagship' },
       { key: 'kreAfrika', route: '/projets/kreafrika', icon: 'fa-solid fa-lightbulb' },
@@ -97,7 +111,6 @@ const secondaryNavItems = [
     key: 'alumni',
     route: '/alumni',
     icon: 'fa-solid fa-user-graduate',
-    singleLink: true, // Tout le bloc est un seul lien cliquable
     children: [
       { key: 'alumniNetwork', route: '/alumni/reseau', icon: 'fa-solid fa-users', badge: '4200+' },
       { key: 'alumniProgram', route: '/alumni/programme', icon: 'fa-solid fa-star' }
@@ -107,7 +120,6 @@ const secondaryNavItems = [
     key: 'site',
     route: '/site',
     icon: 'fa-solid fa-building-columns',
-    singleLink: true, // Tout le bloc est un seul lien cliquable
     children: [
       { key: 'housing', route: '/site', icon: 'fa-solid fa-house' },
       { key: 'library', route: '/site', icon: 'fa-solid fa-book' },
@@ -119,14 +131,17 @@ const secondaryNavItems = [
   }
 ]
 
+// Réactif pour permettre les overrides éditoriaux
+const secondaryNavItems = ref<SecondaryNavItem[]>(defaultSecondaryNavItems)
+
 // For mobile menu compatibility
-const navItems = [
+const navItems = computed(() => [
   ...primaryNavItems,
-  ...secondaryNavItems.map(item => ({ ...item, hasDropdown: true, megaMenu: false }))
-]
+  ...secondaryNavItems.value.map(item => ({ ...item, hasDropdown: true, megaMenu: false }))
+])
 
 // Dropdowns déroulés par défaut en mobile
-const defaultExpandedMenus = navItems.filter(item => item.hasDropdown && !('singleLink' in item && item.singleLink)).map(item => item.key)
+const defaultExpandedMenus = navItems.value.filter(item => item.hasDropdown).map(item => item.key)
 expandedMobileMenus.value = defaultExpandedMenus
 
 const isMoreMenuOpen = ref(false)
@@ -224,12 +239,52 @@ function updateApplyButtonValues() {
   if (linkValue) applyButtonLink.value = linkValue
 }
 
+// Fonction pour mettre à jour les sous-menus secondaires depuis les overrides éditoriaux
+function updateSecondaryNavItems() {
+  secondaryNavItems.value = defaultSecondaryNavItems.map((section) => {
+    const editorialJson = getRawContent(`navbar.secondary.${section.key}.children` as any)
+    if (!editorialJson) return section
+
+    try {
+      const editorialChildren = JSON.parse(editorialJson) as Array<{
+        id: string
+        label: string
+        route: string
+        icon: string
+        badge?: string
+        sort_order: number
+      }>
+
+      if (!Array.isArray(editorialChildren) || editorialChildren.length === 0) return section
+
+      return {
+        ...section,
+        children: editorialChildren
+          .sort((a, b) => a.sort_order - b.sort_order)
+          .map(child => ({
+            key: child.id,
+            route: child.route,
+            icon: child.icon,
+            badge: child.badge,
+            _label: child.label,
+          })),
+      }
+    }
+    catch {
+      return section
+    }
+  })
+}
+
 // Chargement SSR non-bloquant du contenu éditorial (ne bloque pas le rendu de la page)
 useLazyAsyncData('editorial-global', () => loadContent())
 
-// Mise à jour du bouton quand les données éditoriales sont prêtes
+// Mise à jour quand les données éditoriales sont prêtes
 watch(() => editorialStore.isPageLoaded('global'), (ready) => {
-  if (ready) updateApplyButtonValues()
+  if (ready) {
+    updateApplyButtonValues()
+    updateSecondaryNavItems()
+  }
 }, { immediate: true })
 
 onMounted(() => {
@@ -413,33 +468,8 @@ onUnmounted(() => {
               <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl shadow-black/15 dark:shadow-black/40 border border-gray-100 dark:border-gray-800 overflow-hidden w-[420px] p-3">
                   <!-- Categories Grid -->
                   <div class="grid grid-cols-1 gap-2">
-                    <!-- Single Link Block (like "Nous connaître") -->
                     <template v-for="section in secondaryNavItems" :key="section.key">
-                      <NuxtLink
-                        v-if="section.singleLink"
-                        :to="localePath(section.route)"
-                        class="group block p-3 rounded-xl bg-gray-50/50 dark:bg-gray-800/50 hover:bg-brand-blue-50 dark:hover:bg-brand-blue-900/20 transition-all duration-200 cursor-pointer"
-                      >
-                        <div class="flex items-center gap-2 mb-3 text-sm font-semibold text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
-                          <font-awesome-icon :icon="section.icon" class="w-4 h-4 text-brand-blue-500" />
-                          {{ t(`nav.${section.key}`) }}
-                          <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                        <div class="grid grid-cols-2 gap-1">
-                          <div
-                            v-for="child in section.children"
-                            :key="child.key"
-                            class="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-600 dark:text-gray-400 group-hover:text-brand-blue-600/80 dark:group-hover:text-brand-blue-400/80 transition-colors"
-                          >
-                            <font-awesome-icon :icon="child.icon" class="w-3 h-3 opacity-50 group-hover:opacity-100" />
-                            <span>{{ t(`nav.dropdowns.${section.key}.${child.key}`) }}</span>
-                          </div>
-                        </div>
-                      </NuxtLink>
-
-                      <!-- Regular Block with individual links -->
                       <div
-                        v-else
                         class="p-3 rounded-xl bg-gray-50/50 dark:bg-gray-800/50"
                       >
                         <NuxtLink
@@ -458,7 +488,7 @@ onUnmounted(() => {
                             class="group flex items-center gap-2 px-2 py-1.5 text-xs text-gray-600 dark:text-gray-400 hover:text-brand-blue-600 dark:hover:text-brand-blue-400 rounded-lg hover:bg-white dark:hover:bg-gray-700 transition-all duration-200"
                           >
                             <font-awesome-icon :icon="child.icon" class="w-3 h-3 opacity-50 group-hover:opacity-100" />
-                            <span>{{ t(`nav.dropdowns.${section.key}.${child.key}`) }}</span>
+                            <span>{{ child._label || t(`nav.dropdowns.${section.key}.${child.key}`) }}</span>
                             <span
                               v-if="child.badge"
                               class="ml-auto px-1 py-0.5 text-[8px] font-semibold uppercase rounded bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-300"
@@ -632,29 +662,6 @@ onUnmounted(() => {
               {{ t(`nav.${item.key}`) }}
             </NuxtLink>
 
-            <!-- Single Link Item (like "Nous connaître") -->
-            <NuxtLink
-              v-else-if="item.singleLink"
-              :to="localePath(item.route)"
-              class="group block px-4 py-3.5 rounded-xl hover:bg-brand-blue-50 dark:hover:bg-brand-blue-900/20 transition-all duration-200"
-              @click="isMobileMenuOpen = false"
-            >
-              <div class="flex items-center justify-between text-gray-700 dark:text-gray-200 font-medium group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
-                <span>{{ t(`nav.${item.key}`) }}</span>
-                <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <div class="mt-2 flex flex-wrap gap-2">
-                <span
-                  v-for="child in item.children"
-                  :key="child.key"
-                  class="inline-flex items-center gap-1.5 px-2 py-1 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-md group-hover:bg-brand-blue-100 dark:group-hover:bg-brand-blue-900/30 group-hover:text-brand-blue-700 dark:group-hover:text-brand-blue-400 transition-colors"
-                >
-                  <font-awesome-icon :icon="child.icon" class="w-3 h-3" />
-                  {{ t(`nav.dropdowns.${item.key}.${child.key}`) }}
-                </span>
-              </div>
-            </NuxtLink>
-
             <!-- Menu Item with Dropdown -->
             <div v-else class="rounded-xl overflow-hidden">
               <button
@@ -695,7 +702,7 @@ onUnmounted(() => {
                         <font-awesome-icon :icon="child.icon" class="text-gray-400 dark:text-gray-500 text-sm" />
                       </div>
                       <div class="flex-1">
-                        <span class="text-sm font-medium">{{ t(`nav.dropdowns.${item.key}.${child.key}`) }}</span>
+                        <span class="text-sm font-medium">{{ child._label || t(`nav.dropdowns.${item.key}.${child.key}`) }}</span>
                       </div>
                       <span
                         v-if="child.badge"

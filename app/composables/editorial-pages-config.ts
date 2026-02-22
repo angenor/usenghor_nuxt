@@ -23,7 +23,7 @@ export interface PageSectionField {
   key: string
   label: string
   description: string
-  type: 'text' | 'textarea' | 'number' | 'html' | 'image' | 'file' | 'list' | 'documents' | 'countries' | 'gallery'
+  type: 'text' | 'textarea' | 'number' | 'html' | 'image' | 'file' | 'list' | 'documents' | 'countries' | 'gallery' | 'navitems'
   i18nKey?: string
   editorialKey?: ValueSectionKey
   editable: boolean
@@ -1157,10 +1157,18 @@ export const globalElementsSections: PageSection[] = [
     description: 'Éléments de la barre de navigation principale',
     icon: 'bars',
     color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
-    editorialKeys: ['navbar.apply.text', 'navbar.apply.link'],
+    editorialKeys: [
+      'navbar.apply.text', 'navbar.apply.link',
+      'navbar.secondary.about.children', 'navbar.secondary.projects.children',
+      'navbar.secondary.alumni.children', 'navbar.secondary.site.children',
+    ],
     fields: [
       { key: 'navbar.apply.text', label: 'Bouton Candidater - Texte', description: 'Texte affiché sur le bouton principal de candidature', type: 'text', editorialKey: 'navbar.apply.text', editable: true },
       { key: 'navbar.apply.link', label: 'Bouton Candidater - Lien', description: 'URL de destination du bouton (ex: /carrieres, /formations/postuler)', type: 'text', editorialKey: 'navbar.apply.link', editable: true },
+      { key: 'navbar.secondary.about.children', label: 'Sous-menu « Nous connaitre » - Sous-items', description: 'Liste des liens dans le sous-menu « Nous connaitre ». Chaque item a un libelle, une route et une icone.', type: 'navitems', editorialKey: 'navbar.secondary.about.children', editable: true },
+      { key: 'navbar.secondary.projects.children', label: 'Sous-menu « Nos projets » - Sous-items', description: 'Liste des liens dans le sous-menu « Nos projets ».', type: 'navitems', editorialKey: 'navbar.secondary.projects.children', editable: true },
+      { key: 'navbar.secondary.alumni.children', label: 'Sous-menu « Nos alumni » - Sous-items', description: 'Liste des liens dans le sous-menu « Nos alumni ».', type: 'navitems', editorialKey: 'navbar.secondary.alumni.children', editable: true },
+      { key: 'navbar.secondary.site.children', label: 'Sous-menu « Notre site » - Sous-items', description: 'Liste des liens dans le sous-menu « Notre site ».', type: 'navitems', editorialKey: 'navbar.secondary.site.children', editable: true },
     ],
   },
 ]
