@@ -84,51 +84,13 @@ interface SecondaryNavItem {
   children: NavChild[]
 }
 
-// Secondary nav items par défaut (grouped in "More" dropdown)
-// Based on carte_mentale_senghor.md structure
+// Secondary nav items (grouped in "More" dropdown)
+// Les children sont chargés dynamiquement depuis le contenu éditorial
 const defaultSecondaryNavItems: SecondaryNavItem[] = [
-  {
-    key: 'about',
-    route: '/a-propos',
-    icon: 'fa-solid fa-info-circle',
-    children: [
-      { key: 'mission', route: '/a-propos', icon: 'fa-solid fa-bullseye' },
-      { key: 'history', route: '/a-propos', icon: 'fa-solid fa-landmark' },
-      { key: 'governance', route: '/a-propos', icon: 'fa-solid fa-sitemap' }
-    ]
-  },
-  {
-    key: 'projects',
-    route: '/projets',
-    icon: 'fa-solid fa-rocket',
-    children: [
-      { key: 'transformAction', route: '/projets/transformaction', icon: 'fa-solid fa-rocket', badge: 'flagship' },
-      { key: 'kreAfrika', route: '/projets/kreafrika', icon: 'fa-solid fa-lightbulb' },
-      { key: 'fundraising', route: '/projets/levee-de-fonds', icon: 'fa-solid fa-hand-holding-dollar' }
-    ]
-  },
-  {
-    key: 'alumni',
-    route: '/alumni',
-    icon: 'fa-solid fa-user-graduate',
-    children: [
-      { key: 'alumniNetwork', route: '/alumni/reseau', icon: 'fa-solid fa-users', badge: '4200+' },
-      { key: 'alumniProgram', route: '/alumni/programme', icon: 'fa-solid fa-star' }
-    ]
-  },
-  {
-    key: 'site',
-    route: '/site',
-    icon: 'fa-solid fa-building-columns',
-    children: [
-      { key: 'housing', route: '/site', icon: 'fa-solid fa-house' },
-      { key: 'library', route: '/site', icon: 'fa-solid fa-book' },
-      { key: 'conferenceHall', route: '/site', icon: 'fa-solid fa-microphone' },
-      { key: 'academicSpaces', route: '/site', icon: 'fa-solid fa-chalkboard' },
-      { key: 'sports', route: '/site', icon: 'fa-solid fa-futbol' },
-      { key: 'hotel', route: '/site', icon: 'fa-solid fa-hotel' }
-    ]
-  }
+  { key: 'about', route: '/a-propos', icon: 'fa-solid fa-info-circle', children: [] },
+  { key: 'projects', route: '/projets', icon: 'fa-solid fa-rocket', children: [] },
+  { key: 'alumni', route: '/alumni', icon: 'fa-solid fa-user-graduate', children: [] },
+  { key: 'site', route: '/site', icon: 'fa-solid fa-building-columns', children: [] },
 ]
 
 // Réactif pour permettre les overrides éditoriaux
@@ -480,7 +442,7 @@ onUnmounted(() => {
                           {{ t(`nav.${section.key}`) }}
                           <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3 ml-auto opacity-0 group-hover:opacity-100" />
                         </NuxtLink>
-                        <div class="grid grid-cols-2 gap-1">
+                        <div v-if="section.children.length > 0" class="grid grid-cols-2 gap-1">
                           <NuxtLink
                             v-for="child in section.children"
                             :key="child.key"
@@ -652,9 +614,9 @@ onUnmounted(() => {
       >
         <div class="px-4 py-6 space-y-1">
           <template v-for="item in navItems" :key="item.key">
-            <!-- Menu Item without Dropdown -->
+            <!-- Menu Item without Dropdown or without children -->
             <NuxtLink
-              v-if="!item.hasDropdown"
+              v-if="!item.hasDropdown || !item.children || item.children.length === 0"
               :to="localePath(item.route)"
               class="flex items-center px-4 py-3.5 text-gray-700 dark:text-gray-200 font-medium rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-all duration-200"
               @click="isMobileMenuOpen = false"
@@ -662,7 +624,7 @@ onUnmounted(() => {
               {{ t(`nav.${item.key}`) }}
             </NuxtLink>
 
-            <!-- Menu Item with Dropdown -->
+            <!-- Menu Item with Dropdown and children -->
             <div v-else class="rounded-xl overflow-hidden">
               <button
                 @click="toggleMobileSubmenu(item.key)"

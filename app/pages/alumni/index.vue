@@ -205,7 +205,7 @@ const resetFilters = () => {
     </section>
 
     <!-- Stats Section -->
-    <section class="py-16 bg-white dark:bg-gray-950 bg-grid-pattern">
+    <section id="reseau" class="py-16 bg-white dark:bg-gray-950 bg-grid-pattern scroll-mt-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-3xl mx-auto mb-12">
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -227,7 +227,7 @@ const resetFilters = () => {
     </section>
 
     <!-- Testimonials / Success Stories -->
-    <section v-if="isLoadingTestimonials || featuredTestimonials.length > 0" class="py-16 bg-gray-50 dark:bg-gray-900 bg-grid-pattern">
+    <section id="temoignages" v-if="isLoadingTestimonials || featuredTestimonials.length > 0" class="py-16 bg-gray-50 dark:bg-gray-900 bg-grid-pattern scroll-mt-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -321,7 +321,7 @@ const resetFilters = () => {
     </section>
 
     <!-- All Alumni List -->
-    <section class="py-16 bg-white dark:bg-gray-950 bg-grid-pattern">
+    <section id="annuaire" class="py-16 bg-white dark:bg-gray-950 bg-grid-pattern scroll-mt-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">
           {{ getContent('alumni.list.title') }}
