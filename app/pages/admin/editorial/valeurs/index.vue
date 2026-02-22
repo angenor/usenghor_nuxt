@@ -32,6 +32,28 @@ const {
 // Store du front-office pour invalider le cache après sauvegarde
 const editorialContentStore = useEditorialContentStore()
 
+// Mapping des sections timeline vers leurs clés éditoriales d'année
+const timelineYearKeys: Record<string, string> = {
+  'historypage-timeline-1989': 'history.timeline.1989.year',
+  'historypage-timeline-2002': 'history.timeline.2002.year',
+  'historypage-timeline-2016': 'history.timeline.2016.year',
+  'historypage-timeline-2020': 'history.timeline.2020.year',
+}
+
+// Pages avec noms de sections timeline dynamiques (reflètent l'année éditée)
+const dynamicFrontOfficePages = computed(() =>
+  frontOfficePages.map(page => ({
+    ...page,
+    sections: page.sections.map((section) => {
+      const yearKey = timelineYearKeys[section.id]
+      if (!yearKey) return section
+      const yearContent = allContents.value.get(yearKey)
+      const year = yearContent?.value || section.name.replace('Timeline - ', '')
+      return { ...section, name: `Timeline - ${year}` }
+    }),
+  })),
+)
+
 // === STATE ===
 const isLoading = ref(true)
 const isSaving = ref(false)
@@ -391,7 +413,7 @@ function closeHistoryModal() {
 
       <!-- Pages Sections -->
       <AdminEditorialPageSections
-        :pages="frontOfficePages"
+        :pages="dynamicFrontOfficePages"
         :all-contents="allContents"
         :is-saving="isSaving"
         @save-field="handleSaveField"
