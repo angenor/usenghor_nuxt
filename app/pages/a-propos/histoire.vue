@@ -57,7 +57,7 @@ const phaseColors: Record<string, string> = {
 // Timeline events data from editorial content (4 étapes clés)
 const timelineEvents = computed(() => [
   {
-    year: '1989',
+    year: getRawContent('history.timeline.1989.year') || '1989',
     title: getContent('history.timeline.1989.title'),
     description: getContent('history.timeline.1989.description'),
     bgColor: phaseColors[getContent('history.timeline.1989.phase')] || '#FDF6E3',
@@ -68,7 +68,7 @@ const timelineEvents = computed(() => [
     ]
   },
   {
-    year: '2002',
+    year: getRawContent('history.timeline.2002.year') || '2002',
     title: getContent('history.timeline.2002.title'),
     description: getContent('history.timeline.2002.description'),
     bgColor: phaseColors[getContent('history.timeline.2002.phase')] || '#E8F5E9',
@@ -79,7 +79,7 @@ const timelineEvents = computed(() => [
     ]
   },
   {
-    year: '2016',
+    year: getRawContent('history.timeline.2016.year') || '2016',
     title: getContent('history.timeline.2016.title'),
     description: getContent('history.timeline.2016.description'),
     bgColor: phaseColors[getContent('history.timeline.2016.phase')] || '#FCE4EC',
@@ -90,7 +90,7 @@ const timelineEvents = computed(() => [
     ]
   },
   {
-    year: '2020',
+    year: getRawContent('history.timeline.2020.year') || '2020',
     title: getContent('history.timeline.2020.title'),
     description: getContent('history.timeline.2020.description'),
     bgColor: phaseColors[getContent('history.timeline.2020.phase')] || '#FCE4EC',
@@ -102,8 +102,9 @@ const timelineEvents = computed(() => [
   }
 ])
 
-// Current year for display
-let currentYear = '1989'
+// Current year for display (initialisé depuis le premier événement éditorial)
+const firstYear = computed(() => timelineEvents.value[0]?.year || '1989')
+let currentYear = getRawContent('history.timeline.1989.year') || '1989'
 
 // Refs
 const yearDisplayRef = ref<HTMLElement | null>(null)
@@ -248,7 +249,7 @@ onMounted(() => {
         },
         onLeaveBack: () => {
           const prev = timelineEvents.value[index - 1]
-          const prevYear = prev?.year || '1989'
+          const prevYear = prev?.year || firstYear.value
           const prevColor = prev?.bgColor || '#ffffff'
 
           animateYearRoll(currentYear, prevYear, 'down')
@@ -360,10 +361,10 @@ onUnmounted(() => {
         class="year-display"
       >
         <span class="year-bg">
-          <span class="digit">1</span>
-          <span class="digit">9</span>
-          <span class="digit">8</span>
-          <span class="digit">9</span>
+          <span class="digit">{{ firstYear[0] }}</span>
+          <span class="digit">{{ firstYear[1] }}</span>
+          <span class="digit">{{ firstYear[2] }}</span>
+          <span class="digit">{{ firstYear[3] }}</span>
         </span>
       </div>
 
