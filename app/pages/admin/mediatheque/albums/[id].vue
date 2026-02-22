@@ -99,7 +99,7 @@ async function loadAlbum() {
 
 async function loadAvailableMedia() {
   try {
-    const allMedia = await listMedia({ limit: 1000 })
+    const allMedia = await listMedia({ limit: 500 })
     const albumMediaIds = album.value?.media_items.map(m => m.id) || []
     availableMedia.value = allMedia.items.filter(m => !albumMediaIds.includes(m.id))
   } catch (error) {

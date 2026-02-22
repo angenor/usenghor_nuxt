@@ -50,6 +50,7 @@
       "allFields": "All fields",
       "service": "Service",
       "allServices": "All services",
+      "allCampuses": "All campuses",
       "reset": "Reset",
       "resultsCount": "{count} program(s) found",
       "noResults": "No results",

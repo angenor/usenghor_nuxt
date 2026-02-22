@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { ProgramFieldPublic, ProgramPublic, ServicePublicSimple } from '~/composables/usePublicProgramsApi'
-import type { SectorPublic } from '~/composables/usePublicOrganizationApi'
+import type { ProgramFieldPublic, ProgramPublic } from '~/composables/usePublicProgramsApi'
 import type { ApplicationCallPublic } from '~/types/api'
 
 // Extraire le texte brut d'un contenu EditorJS (pour les aperçus)
@@ -33,47 +32,20 @@ const localePath = useLocalePath()
 const {
   listProgramsByType,
   listPublicFields,
-  listPublicServices,
   urlSlugToProgramType,
   programTypeToUrlSlug,
   publicProgramTypeColors,
 } = usePublicProgramsApi()
 
-const { listSectors } = usePublicOrganizationApi()
 const { listOngoingCalls } = usePublicCallsApi()
 
-// Palette de couleurs par secteur (même que OrganigrammeSection)
-const sectorColors = [
-  {
-    bg: 'bg-brand-blue-500',
-    bgLight: 'bg-brand-blue-100 dark:bg-brand-blue-900/30',
-    text: 'text-brand-blue-600 dark:text-brand-blue-400',
-    selectedBg: 'bg-brand-blue-600 text-white shadow-md',
-  },
-  {
-    bg: 'bg-purple-500',
-    bgLight: 'bg-purple-100 dark:bg-purple-900/30',
-    text: 'text-purple-600 dark:text-purple-400',
-    selectedBg: 'bg-purple-600 text-white shadow-md',
-  },
-  {
-    bg: 'bg-brand-red-500',
-    bgLight: 'bg-brand-red-100 dark:bg-brand-red-900/30',
-    text: 'text-brand-red-600 dark:text-brand-red-400',
-    selectedBg: 'bg-brand-red-600 text-white shadow-md',
-  },
-  {
-    bg: 'bg-teal-500',
-    bgLight: 'bg-teal-100 dark:bg-teal-900/30',
-    text: 'text-teal-600 dark:text-teal-400',
-    selectedBg: 'bg-teal-600 text-white shadow-md',
-  },
-  {
-    bg: 'bg-amber-500',
-    bgLight: 'bg-amber-100 dark:bg-amber-900/30',
-    text: 'text-amber-600 dark:text-amber-400',
-    selectedBg: 'bg-amber-600 text-white shadow-md',
-  },
+// Palette de couleurs pour les campus (rotation cyclique)
+const campusColors = [
+  'bg-brand-blue-600 text-white shadow-md',
+  'bg-purple-600 text-white shadow-md',
+  'bg-teal-600 text-white shadow-md',
+  'bg-amber-600 text-white shadow-md',
+  'bg-brand-red-600 text-white shadow-md',
 ]
 
 // Valid types for route validation
@@ -95,9 +67,6 @@ const isCertificate = computed(() => typeSlug.value === 'certifiantes')
 // Champs disciplinaires (pour filtre certificats)
 const programFields = ref<ProgramFieldPublic[]>([])
 
-// Services (pour filtre par service)
-const services = ref<ServicePublicSimple[]>([])
-
 // Appels en cours (pour voyant vert sur les cards)
 const ongoingCalls = ref<ApplicationCallPublic[]>([])
 const programIdsWithOngoingCall = computed(() => {
@@ -108,60 +77,28 @@ const programIdsWithOngoingCall = computed(() => {
   )
 })
 
-// Secteurs (pour résoudre les couleurs des services)
-const sectors = ref<SectorPublic[]>([])
-
-// Mapping sectorId → index de couleur (basé sur l'ordre d'affichage)
-const sectorColorMap = computed(() => {
-  const map = new Map<string, number>()
-  sectors.value.forEach((sector, index) => {
-    map.set(sector.id, index % sectorColors.length)
-  })
-  return map
+// Campus distincts présents dans les programmes du type courant
+const campusesWithPrograms = computed(() => {
+  const seen = new Map<string, string>()
+  for (const p of programs.value) {
+    if (p.campus_external_id && p.campus_name && !seen.has(p.campus_external_id)) {
+      seen.set(p.campus_external_id, p.campus_name)
+    }
+  }
+  return Array.from(seen, ([id, name]) => ({ id, name }))
 })
 
-// Obtenir la couleur d'un service via son sector_id (fallback palette)
-const getServiceColor = (service: ServicePublicSimple) => {
-  if (service.sector_id) {
-    const index = sectorColorMap.value.get(service.sector_id)
-    if (index !== undefined) return sectorColors[index]
-  }
-  return sectorColors[0]
-}
-
-// Obtenir la couleur hex d'un service (priorité : service.color > palette secteur)
-const getServiceHexColor = (service: ServicePublicSimple): string | null => {
-  return service.color || null
-}
-
-// Obtenir la couleur d'un programme via son service_external_id
-const getProgramServiceColor = (program: ProgramPublic) => {
-  if (!program.service_external_id) return null
-  const svc = services.value.find(s => s.id === program.service_external_id)
-  if (svc) return getServiceColor(svc)
-  return sectorColors[0]
-}
-
-// Obtenir la couleur hex d'un programme via son service
-const getProgramServiceHexColor = (program: ProgramPublic): string | null => {
-  if (!program.service_external_id) return null
-  const svc = services.value.find(s => s.id === program.service_external_id)
-  if (svc) return getServiceHexColor(svc)
-  return null
-}
-
-// Obtenir le sigle d'un programme via son service
-const getProgramServiceSigle = (program: ProgramPublic): string | null => {
-  if (!program.service_external_id) return null
-  const svc = services.value.find(s => s.id === program.service_external_id)
-  return svc?.sigle || null
+// Couleur d'un campus par index dans la liste
+const getCampusSelectedColor = (campusId: string): string => {
+  const idx = campusesWithPrograms.value.findIndex(c => c.id === campusId)
+  return campusColors[idx % campusColors.length] || campusColors[0]
 }
 
 // Search and filters state
 const searchQuery = ref('')
 const selectedDuration = ref<'all' | 'short' | 'long'>('all')
 const selectedFieldId = ref<string>('all')
-const selectedServiceId = ref<string>('all')
+const selectedCampusId = ref<string>('all')
 
 // Duration filter options
 const durationFilters = [
@@ -200,27 +137,17 @@ const filteredPrograms = computed(() => {
     result = result.filter(program => program.field_id === selectedFieldId.value)
   }
 
-  // Service filter
-  if (selectedServiceId.value !== 'all') {
-    result = result.filter(program => program.service_external_id === selectedServiceId.value)
+  // Campus filter
+  if (selectedCampusId.value !== 'all') {
+    result = result.filter(program => program.campus_external_id === selectedCampusId.value)
   }
 
   return result
 })
 
-// Services qui ont au moins une formation dans le type courant
-const servicesWithPrograms = computed(() => {
-  const serviceIds = new Set(
-    programs.value
-      .map(p => p.service_external_id)
-      .filter((id): id is string => !!id),
-  )
-  return services.value.filter(s => serviceIds.has(s.id))
-})
-
 // Check if any filters are active
 const hasActiveFilters = computed(() => {
-  return searchQuery.value.trim() !== '' || selectedDuration.value !== 'all' || selectedFieldId.value !== 'all' || selectedServiceId.value !== 'all'
+  return searchQuery.value.trim() !== '' || selectedDuration.value !== 'all' || selectedFieldId.value !== 'all' || selectedCampusId.value !== 'all'
 })
 
 // Reset all filters
@@ -228,7 +155,7 @@ const resetFilters = () => {
   searchQuery.value = ''
   selectedDuration.value = 'all'
   selectedFieldId.value = 'all'
-  selectedServiceId.value = 'all'
+  selectedCampusId.value = 'all'
 }
 
 // Other types data for sidebar
@@ -262,19 +189,12 @@ const fetchPrograms = async () => {
       }
     }
 
-    // Charger les services, secteurs et appels en cours
+    // Charger les appels en cours
     try {
-      const [svcData, sectorData, callsData] = await Promise.all([
-        listPublicServices(),
-        listSectors(),
-        listOngoingCalls(),
-      ])
-      services.value = svcData
-      sectors.value = sectorData
-      ongoingCalls.value = callsData
+      ongoingCalls.value = await listOngoingCalls()
     }
     catch (e) {
-      console.error('Erreur chargement services/secteurs:', e)
+      console.error('Erreur chargement appels en cours:', e)
     }
 
     // Fetch other types for sidebar
@@ -583,34 +503,33 @@ onMounted(() => {
                 </div>
               </div>
 
-              <!-- Service filter (si au moins 1 service avec des formations) -->
-              <div v-if="servicesWithPrograms.length >= 1" class="flex flex-wrap items-center gap-3">
+              <!-- Campus filter (si au moins 1 campus avec des formations) -->
+              <div v-if="campusesWithPrograms.length >= 1" class="flex flex-wrap items-center gap-3">
                 <span class="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  {{ t('formations.filters.service') }} :
+                  {{ t('formations.filters.campus') }} :
                 </span>
                 <div class="flex flex-wrap gap-2">
                   <button
                     type="button"
                     class="px-4 py-2 text-sm font-medium rounded-full transition-all"
-                    :class="selectedServiceId === 'all'
+                    :class="selectedCampusId === 'all'
                       ? 'bg-gray-700 dark:bg-gray-200 text-white dark:text-gray-900 shadow-md'
                       : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
-                    @click="selectedServiceId = 'all'"
+                    @click="selectedCampusId = 'all'"
                   >
-                    {{ t('formations.filters.allServices') }}
+                    {{ t('formations.filters.allCampuses') }}
                   </button>
                   <button
-                    v-for="svc in servicesWithPrograms"
-                    :key="svc.id"
+                    v-for="campus in campusesWithPrograms"
+                    :key="campus.id"
                     type="button"
                     class="px-4 py-2 text-sm font-medium rounded-full transition-all"
-                    :class="selectedServiceId === svc.id
-                      ? (svc.color ? 'text-white shadow-md' : getServiceColor(svc).selectedBg)
+                    :class="selectedCampusId === campus.id
+                      ? getCampusSelectedColor(campus.id)
                       : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
-                    :style="selectedServiceId === svc.id && svc.color ? { backgroundColor: svc.color } : {}"
-                    @click="selectedServiceId = svc.id"
+                    @click="selectedCampusId = campus.id"
                   >
-                    {{ svc.name }}<span v-if="svc.sigle">&nbsp;({{ svc.sigle }})</span>
+                    {{ campus.name }}
                   </button>
                 </div>
               </div>
@@ -656,7 +575,7 @@ onMounted(() => {
                   <!-- Gradient overlay -->
                   <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                  <!-- Type + Service badges -->
+                  <!-- Type + Campus badges -->
                   <div class="absolute bottom-3 left-3 flex items-center gap-2">
                     <span
                       class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-white rounded-full shadow-lg backdrop-blur-sm"
@@ -666,12 +585,12 @@ onMounted(() => {
                       {{ t(`formations.types.${program.type}`) }}
                     </span>
                     <span
-                      v-if="getProgramServiceSigle(program)"
-                      class="inline-flex items-center px-2.5 py-1.5 text-xs font-bold text-white rounded-full shadow-lg backdrop-blur-sm"
-                      :style="{ backgroundColor: getProgramServiceHexColor(program) || 'rgba(255,255,255,0.25)' }"
-                      :title="program.service_name || ''"
+                      v-if="program.campus_name"
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-bold text-white rounded-full shadow-lg backdrop-blur-sm bg-white/20"
+                      :title="program.campus_name"
                     >
-                      {{ getProgramServiceSigle(program) }}
+                      <font-awesome-icon icon="fa-solid fa-location-dot" class="w-2.5 h-2.5" />
+                      {{ program.campus_name }}
                     </span>
                   </div>
                 </div>

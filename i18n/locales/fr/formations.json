@@ -50,6 +50,7 @@
       "allFields": "Tous les champs",
       "service": "Service",
       "allServices": "Tous les services",
+      "allCampuses": "Tous les campus",
       "reset": "Réinitialiser",
       "resultsCount": "{count} formation(s) trouvée(s)",
       "noResults": "Aucun résultat",

@@ -144,7 +144,20 @@ onMounted(() => {
   fetchCalls()
   fetchStats()
   fetchCampuses()
+
+  document.addEventListener('visibilitychange', onVisibilityChange)
 })
+
+onUnmounted(() => {
+  document.removeEventListener('visibilitychange', onVisibilityChange)
+})
+
+function onVisibilityChange() {
+  if (document.visibilityState === 'visible') {
+    fetchCalls()
+    fetchStats()
+  }
+}
 
 // === METHODS ===
 // Gestion de la sélection
@@ -192,7 +205,8 @@ const viewCall = (call: ApplicationCallRead) => {
 }
 
 const editCall = (call: ApplicationCallRead) => {
-  router.push(`/admin/candidatures/appels/${call.id}/edit`)
+  const route = router.resolve(`/admin/candidatures/appels/${call.id}/edit`)
+  window.open(route.href, '_blank')
 }
 
 const navigateToCreate = () => {

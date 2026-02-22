@@ -22,6 +22,8 @@ export interface ProgramPublic {
   sector_external_id: string | null
   service_external_id: string | null
   service_name: string | null
+  campus_external_id: string | null
+  campus_name: string | null
   field_id: string | null
   field_name: string | null
   type: ProgramType
