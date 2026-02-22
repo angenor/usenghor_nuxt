@@ -155,7 +155,20 @@ watch([searchQuery, filterType, filterStatus], () => {
 
 watch(currentPage, loadPrograms)
 
-onMounted(loadPrograms)
+onMounted(() => {
+  loadPrograms()
+  document.addEventListener('visibilitychange', onVisibilityChange)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('visibilitychange', onVisibilityChange)
+})
+
+function onVisibilityChange() {
+  if (document.visibilityState === 'visible') {
+    loadPrograms()
+  }
+}
 
 // === COMPUTED ===
 // Stats (calculées depuis les données chargées - approximatif car paginé)
@@ -361,7 +374,8 @@ function viewProgram(program: ProgramRead) {
 }
 
 function editProgram(program: ProgramRead) {
-  router.push(`/admin/formations/programmes/${program.id}/edit`)
+  const route = router.resolve(`/admin/formations/programmes/${program.id}/edit`)
+  window.open(route.href, '_blank')
 }
 
 // Actions CRUD
