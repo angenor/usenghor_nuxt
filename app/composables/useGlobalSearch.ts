@@ -134,7 +134,7 @@ const staticPages: SearchResult[] = [
     subtitle: 'Nos installations et équipements',
     description: 'Visitez notre campus historique au coeur d\'Alexandrie en Égypte',
     icon: 'fa-solid fa-building-columns',
-    route: '/site',
+    route: '/siege',
     score: 0
   },
   {
@@ -274,7 +274,7 @@ const staticPages: SearchResult[] = [
     subtitle: 'Centre de ressources documentaires',
     description: 'Notre bibliothèque universitaire et ses ressources',
     icon: 'fa-solid fa-book',
-    route: '/site#bibliotheque',
+    route: '/siege#bibliotheque',
     score: 0
   },
   {
@@ -284,7 +284,7 @@ const staticPages: SearchResult[] = [
     subtitle: 'Logement étudiant',
     description: 'Solutions d\'hébergement pour les étudiants sur le campus',
     icon: 'fa-solid fa-house',
-    route: '/site#hebergement',
+    route: '/siege#hebergement',
     score: 0
   }
 ]
@@ -496,7 +496,7 @@ export function useGlobalSearch() {
     { title: 'Candidatures', icon: 'fa-solid fa-bullhorn', route: '/actualites/appels' },
     { title: 'Événements', icon: 'fa-solid fa-calendar-days', route: '/actualites/evenements' },
     { title: 'Alumni', icon: 'fa-solid fa-user-graduate', route: '/alumni' },
-    { title: 'Campus', icon: 'fa-solid fa-building-columns', route: '/site' }
+    { title: 'Campus', icon: 'fa-solid fa-building-columns', route: '/siege' }
   ])
 
   return {

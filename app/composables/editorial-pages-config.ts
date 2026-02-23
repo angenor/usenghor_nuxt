@@ -1277,7 +1277,7 @@ export const frontOfficePages: FrontOfficePage[] = [
   {
     id: 'site',
     name: 'Page Site / Campus',
-    slug: '/site',
+    slug: '/siege',
     description: 'Présentation du campus, infrastructures et localisation',
     icon: 'building',
     sections: sitePageSections,
