@@ -20,7 +20,7 @@ useSeoMeta({
 // Fallback values for stats (used if editorial API not available)
 const statsFallback = ref({
   stats_years: '30+',
-  stats_donor_countries: '15',
+  stats_donor_countries: '6',
   stats_alumni: '4200+',
   stats_programs: '50+',
 })
