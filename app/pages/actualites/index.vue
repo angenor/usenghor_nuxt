@@ -457,7 +457,7 @@ const hasAssociations = (item: NewsDisplay) => {
     </div>
 
     <!-- Section 3: Upcoming Events (fond bleu) -->
-    <section v-if="upcomingEvents.length > 0" class="bg-brand-blue-50 dark:bg-brand-blue-950/30 py-16">
+    <section v-if="upcomingEvents.length > 0" class="bg-brand-blue-50 dark:bg-gray-800/90 py-16">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-8">
           <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
