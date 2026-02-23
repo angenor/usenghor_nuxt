@@ -1028,7 +1028,7 @@ export function useServicesApi() {
    * Génère un ID de service (côté client, pour preview).
    */
   function generateServiceId(): string {
-    return crypto.randomUUID()
+    return self.crypto?.randomUUID?.() ?? Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('')
   }
 
   /**

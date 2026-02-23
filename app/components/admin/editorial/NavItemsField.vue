@@ -109,7 +109,7 @@ function confirmAddItem() {
   if (!formData.value.label || !formData.value.route) return
 
   const newItem: NavSubItem = {
-    id: crypto.randomUUID(),
+    id: self.crypto?.randomUUID?.() ?? Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join(''),
     label: formData.value.label!,
     route: formData.value.route!,
     icon: formData.value.icon || 'fa-solid fa-link',

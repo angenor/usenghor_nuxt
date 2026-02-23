@@ -118,7 +118,7 @@ function confirmAddDocument() {
   if (!formData.value.title_fr || !formData.value.file_url) return
 
   const newDoc: FoundingDocument = {
-    id: crypto.randomUUID(),
+    id: self.crypto?.randomUUID?.() ?? Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join(''),
     title_fr: formData.value.title_fr!,
     title_en: formData.value.title_en || undefined,
     description_fr: formData.value.description_fr || undefined,
