@@ -108,7 +108,7 @@ const formatDate = (dateStr?: string) => {
 // Breadcrumb
 const breadcrumb = computed(() => [
   { label: t('nav.home'), to: '/' },
-  { label: t('nav.training'), to: '/carrieres#etudiants' },
+  { label: t('nav.training'), to: '/nousrejoindre#etudiants' },
   { label: t('formations.candidature.hero.title') }
 ])
 </script>
@@ -559,7 +559,7 @@ const breadcrumb = computed(() => [
 
               <!-- Back Link -->
               <NuxtLink
-                :to="localePath('/carrieres') + '#etudiants'"
+                :to="localePath('/nousrejoindre') + '#etudiants'"
                 class="flex items-center gap-2 text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 font-medium transition-colors"
               >
                 <font-awesome-icon icon="fa-solid fa-arrow-left" class="w-4 h-4" />

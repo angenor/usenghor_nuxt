@@ -191,7 +191,7 @@ const isMobileSubmenuExpanded = (key: string) => {
 
 // Bouton Candidater - valeurs éditables avec fallback
 const applyButtonText = ref(t('nav.apply'))
-const applyButtonLink = ref('/carrieres')
+const applyButtonLink = ref('/nousrejoindre')
 
 // Fonction pour mettre à jour les valeurs depuis le store
 function updateApplyButtonValues() {

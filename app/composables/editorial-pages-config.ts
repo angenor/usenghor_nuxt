@@ -1164,7 +1164,7 @@ export const globalElementsSections: PageSection[] = [
     ],
     fields: [
       { key: 'navbar.apply.text', label: 'Bouton Candidater - Texte', description: 'Texte affiché sur le bouton principal de candidature', type: 'text', editorialKey: 'navbar.apply.text', editable: true },
-      { key: 'navbar.apply.link', label: 'Bouton Candidater - Lien', description: 'URL de destination du bouton (ex: /carrieres, /formations/postuler)', type: 'text', editorialKey: 'navbar.apply.link', editable: true },
+      { key: 'navbar.apply.link', label: 'Bouton Candidater - Lien', description: 'URL de destination du bouton (ex: /nousrejoindre, /formations/postuler)', type: 'text', editorialKey: 'navbar.apply.link', editable: true },
       { key: 'navbar.secondary.about.children', label: 'Sous-menu « Nous connaitre » - Sous-items', description: 'Liste des liens dans le sous-menu « Nous connaitre ». Chaque item a un libelle, une route et une icone.', type: 'navitems', editorialKey: 'navbar.secondary.about.children', editable: true },
       { key: 'navbar.secondary.projects.children', label: 'Sous-menu « Nos projets » - Sous-items', description: 'Liste des liens dans le sous-menu « Nos projets ».', type: 'navitems', editorialKey: 'navbar.secondary.projects.children', editable: true },
       { key: 'navbar.secondary.alumni.children', label: 'Sous-menu « Nos alumni » - Sous-items', description: 'Liste des liens dans le sous-menu « Nos alumni ».', type: 'navitems', editorialKey: 'navbar.secondary.alumni.children', editable: true },
@@ -1253,7 +1253,7 @@ export const frontOfficePages: FrontOfficePage[] = [
   {
     id: 'careers',
     name: 'Page Carrières',
-    slug: '/carrieres',
+    slug: '/nousrejoindre',
     description: 'Opportunités pour enseignants, étudiants et partenaires',
     icon: 'briefcase',
     sections: careersPageSections,

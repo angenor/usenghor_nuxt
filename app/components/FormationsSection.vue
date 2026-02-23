@@ -95,7 +95,7 @@ const getImageUrl = (program: ProgramPublic) => {
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
       <div ref="headerRef" class="text-center mb-12 lg:mb-16">
         <NuxtLink
-          :to="localePath('/carrieres') + '#etudiants'"
+          :to="localePath('/nousrejoindre') + '#etudiants'"
           class="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 mb-4 hover:bg-brand-blue-200 dark:hover:bg-brand-blue-900/50 transition-colors cursor-pointer"
         >
           <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-3.5 h-3.5 mr-2" />
@@ -185,7 +185,7 @@ const getImageUrl = (program: ProgramPublic) => {
       <!-- CTA Button -->
       <div class="text-center relative z-10">
         <NuxtLink
-          :to="localePath('/carrieres') + '#etudiants'"
+          :to="localePath('/nousrejoindre') + '#etudiants'"
           class="inline-flex items-center gap-2 px-8 py-4 bg-brand-blue-600 hover:bg-brand-blue-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
         >
           {{ getContent('formations.cta', 'formations.index.viewAll') }}

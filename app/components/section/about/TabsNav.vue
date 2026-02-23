@@ -11,7 +11,7 @@ const tabs = computed(() => [
   { key: 'organization', label: t('about.tabs.organization'), to: '/a-propos/organisation', icon: 'fa-solid fa-sitemap' },
   { key: 'team', label: t('about.tabs.team'), to: '/a-propos/equipe', icon: 'fa-solid fa-users' },
   { key: 'partners', label: t('partners.hero.title'), to: '/a-propos/partenaires', icon: 'fa-solid fa-handshake' },
-  { key: 'careers', label: t('about.tabs.careers'), to: '/carrieres', icon: 'fa-solid fa-briefcase' }
+  { key: 'careers', label: t('about.tabs.careers'), to: '/nousrejoindre', icon: 'fa-solid fa-briefcase' }
 ])
 
 // Sub-tabs for detailed pages (histoire, gouvernance)

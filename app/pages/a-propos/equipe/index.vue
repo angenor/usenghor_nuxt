@@ -55,7 +55,7 @@ const { elementRef: ctaRef } = useScrollAnimation({ animation: 'zoomIn', thresho
             {{ getContent('team.cta.text') }}
           </p>
           <NuxtLink
-            :to="localePath('/carrieres')"
+            :to="localePath('/nousrejoindre')"
             class="group inline-flex items-center gap-3 px-8 py-4 bg-brand-blue-500 hover:bg-brand-blue-600 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-brand-blue-500/30 hover:-translate-y-0.5"
           >
             <font-awesome-icon icon="fa-solid fa-briefcase" class="w-5 h-5" />

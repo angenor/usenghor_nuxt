@@ -32,7 +32,7 @@ const links = computed(() => [
     key: 'careers',
     title: t('about.tabs.careers'),
     summary: t('about.preview.careers.summary'),
-    to: '/carrieres',
+    to: '/nousrejoindre',
     icon: 'fa-solid fa-briefcase'
   }
 ])

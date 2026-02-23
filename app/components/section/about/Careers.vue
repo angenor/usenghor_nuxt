@@ -6,7 +6,7 @@ const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', t
 
 <template>
   <section
-    id="carrieres"
+    id="nousrejoindre"
     ref="sectionRef"
     class="py-16 lg:py-20 bg-white dark:bg-gray-900 bg-grid-pattern transition-colors duration-300"
   >
@@ -40,7 +40,7 @@ const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', t
           </p>
 
           <NuxtLink
-            :to="localePath('/carrieres')"
+            :to="localePath('/nousrejoindre')"
             class="group inline-flex items-center gap-2 px-6 py-3 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 bg-lime-600 hover:bg-lime-700 hover:shadow-lime-500/30"
           >
             <span>{{ t('common.discover') }}</span>

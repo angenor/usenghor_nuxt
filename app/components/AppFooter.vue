@@ -303,7 +303,7 @@ onMounted(() => {
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink :to="localePath('/carrieres')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
+                <NuxtLink :to="localePath('/nousrejoindre')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.resources.jobs') }}
                 </NuxtLink>
               </li>

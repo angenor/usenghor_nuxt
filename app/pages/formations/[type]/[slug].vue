@@ -211,7 +211,7 @@ const typeConfig = computed(() => {
 // Breadcrumb
 const breadcrumb = computed(() => [
   { label: t('nav.home'), to: '/' },
-  { label: t('nav.training'), to: '/carrieres#etudiants' },
+  { label: t('nav.training'), to: '/nousrejoindre#etudiants' },
   { label: t(`formations.types.${program.value?.type || typeSlug.value}`), to: `/formations/${typeSlug.value}` },
   { label: getLocalizedTitle.value },
 ])
