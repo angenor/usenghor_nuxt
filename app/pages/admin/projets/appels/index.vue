@@ -85,7 +85,18 @@ const loadProjects = async () => {
 onMounted(() => {
   loadData()
   loadProjects()
+  document.addEventListener('visibilitychange', onVisibilityChange)
 })
+
+onUnmounted(() => {
+  document.removeEventListener('visibilitychange', onVisibilityChange)
+})
+
+function onVisibilityChange() {
+  if (document.visibilityState === 'visible') {
+    loadData()
+  }
+}
 
 // Recharger quand les filtres changent (avec debounce pour la recherche)
 let searchTimeout: ReturnType<typeof setTimeout> | null = null
@@ -592,6 +603,7 @@ const projectCallTypeColors: Record<ProjectCallType, string> = {
                   </NuxtLink>
                   <NuxtLink
                     :to="`/admin/projets/appels/${call.id}/edit`"
+                    target="_blank"
                     class="rounded p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-700"
                     title="Modifier"
                   >

@@ -153,7 +153,19 @@ const loadNews = async () => {
 // Charger au montage
 onMounted(async () => {
   await Promise.all([loadTags(), loadStats(), loadNews(), getCampuses(), getUsers()])
+  document.addEventListener('visibilitychange', onVisibilityChange)
 })
+
+onUnmounted(() => {
+  document.removeEventListener('visibilitychange', onVisibilityChange)
+})
+
+function onVisibilityChange() {
+  if (document.visibilityState === 'visible') {
+    loadNews()
+    loadStats()
+  }
+}
 
 // Recharger quand les filtres changent
 watch(
@@ -239,7 +251,8 @@ const viewNews = (news: NewsDisplay) => {
 }
 
 const editNews = (news: NewsDisplay) => {
-  router.push(`/admin/contenus/actualites/${news.id}/edit`)
+  const route = router.resolve(`/admin/contenus/actualites/${news.id}/edit`)
+  window.open(route.href, '_blank')
 }
 
 const createNews = () => {

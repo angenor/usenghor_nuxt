@@ -185,7 +185,8 @@ const viewEvent = (event: EventRead) => {
 }
 
 const editEvent = (event: EventRead) => {
-  router.push(`/admin/contenus/evenements/${event.id}/edit`)
+  const route = router.resolve(`/admin/contenus/evenements/${event.id}/edit`)
+  window.open(route.href, '_blank')
 }
 
 const createEvent = () => {
@@ -302,7 +303,18 @@ watch([filterType, filterStatus, filterPeriod, filterCampus], () => {
 // Chargement initial
 onMounted(() => {
   fetchEvents()
+  document.addEventListener('visibilitychange', onVisibilityChange)
 })
+
+onUnmounted(() => {
+  document.removeEventListener('visibilitychange', onVisibilityChange)
+})
+
+function onVisibilityChange() {
+  if (document.visibilityState === 'visible') {
+    fetchEvents()
+  }
+}
 </script>
 
 <template>
