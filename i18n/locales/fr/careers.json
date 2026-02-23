@@ -163,6 +163,53 @@
         "success": "Merci ! Votre message a été envoyé.",
         "error": "Une erreur est survenue. Veuillez réessayer."
       }
+    },
+    "application": {
+      "seo": {
+        "title": "Candidature enseignant | Université Senghor",
+        "description": "Soumettez votre candidature spontanée pour rejoindre l'équipe pédagogique de l'Université Senghor."
+      },
+      "hero": {
+        "title": "Candidature spontanée",
+        "subtitle": "Enseignants & Chercheurs"
+      },
+      "breadcrumb": "Candidature enseignant",
+      "form": {
+        "title": "Votre candidature",
+        "subtitle": "Remplissez ce formulaire pour soumettre votre candidature spontanée.",
+        "callsHint": "Vous pouvez aussi consulter nos",
+        "callsLink": "offres de recrutement en cours",
+        "personalInfo": "Informations personnelles",
+        "professionalInfo": "Informations professionnelles",
+        "civilite": "Civilité",
+        "mr": "M.",
+        "mme": "Mme",
+        "nom": "Nom",
+        "prenom": "Prénom",
+        "email": "Email",
+        "telephone": "Téléphone",
+        "pays": "Pays de résidence",
+        "selectCountry": "Sélectionnez un pays",
+        "institution": "Institution actuelle",
+        "fonction": "Titre / Fonction",
+        "specialite": "Spécialité / Domaine d'expertise",
+        "motivation": "Lettre de motivation",
+        "motivationPlaceholder": "Décrivez votre intérêt pour rejoindre l'équipe pédagogique de l'Université Senghor...",
+        "cv": "Curriculum Vitae (PDF)",
+        "selectFile": "Cliquez pour sélectionner votre CV",
+        "maxSize": "Max : 5 Mo",
+        "submit": "Envoyer ma candidature",
+        "submitting": "Envoi en cours..."
+      },
+      "success": {
+        "title": "Candidature envoyée !",
+        "message": "Votre candidature spontanée a été reçue. Notre équipe l'examinera et vous contactera dans les meilleurs délais.",
+        "reference": "Référence de votre candidature :",
+        "back": "Retour à Nous rejoindre"
+      },
+      "error": "Une erreur est survenue. Veuillez réessayer.",
+      "cvSizeError": "Le fichier ne doit pas dépasser 5 Mo.",
+      "cvTypeError": "Seuls les fichiers PDF sont acceptés."
     }
   }
 }

@@ -359,6 +359,7 @@ const getStatusColor = (status: ApplicationStatus) => {
             class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           >
             <option value="all">Tous les appels</option>
+            <option value="spontaneous">Candidatures spontanées</option>
             <option v-for="call in allCalls" :key="call.id" :value="call.id">
               {{ call.title }}
             </option>

@@ -163,6 +163,53 @@
         "success": "Thank you! Your message has been sent.",
         "error": "An error occurred. Please try again."
       }
+    },
+    "application": {
+      "seo": {
+        "title": "Teacher Application | Senghor University",
+        "description": "Submit your spontaneous application to join the teaching team at Senghor University."
+      },
+      "hero": {
+        "title": "Spontaneous Application",
+        "subtitle": "Teachers & Researchers"
+      },
+      "breadcrumb": "Teacher application",
+      "form": {
+        "title": "Your application",
+        "subtitle": "Fill out this form to submit your spontaneous application.",
+        "callsHint": "You can also check our",
+        "callsLink": "current recruitment offers",
+        "personalInfo": "Personal information",
+        "professionalInfo": "Professional information",
+        "civilite": "Title",
+        "mr": "Mr.",
+        "mme": "Mrs.",
+        "nom": "Last name",
+        "prenom": "First name",
+        "email": "Email",
+        "telephone": "Phone",
+        "pays": "Country of residence",
+        "selectCountry": "Select a country",
+        "institution": "Current institution",
+        "fonction": "Title / Position",
+        "specialite": "Specialty / Area of expertise",
+        "motivation": "Cover letter",
+        "motivationPlaceholder": "Describe your interest in joining the teaching team at Senghor University...",
+        "cv": "Curriculum Vitae (PDF)",
+        "selectFile": "Click to select your CV",
+        "maxSize": "Max: 5 MB",
+        "submit": "Submit my application",
+        "submitting": "Submitting..."
+      },
+      "success": {
+        "title": "Application sent!",
+        "message": "Your spontaneous application has been received. Our team will review it and contact you as soon as possible.",
+        "reference": "Your application reference:",
+        "back": "Back to Join Us"
+      },
+      "error": "An error occurred. Please try again.",
+      "cvSizeError": "File must not exceed 5 MB.",
+      "cvTypeError": "Only PDF files are accepted."
     }
   }
 }

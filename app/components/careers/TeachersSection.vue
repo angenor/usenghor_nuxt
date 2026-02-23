@@ -6,6 +6,7 @@ const props = withDefaults(defineProps<{
 })
 
 const { tm } = useI18n()
+const localePath = useLocalePath()
 const { getContent, getRawContent } = useEditorialContent('careers')
 const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.1 })
 
@@ -141,7 +142,7 @@ const positions = computed(() => {
               {{ getContent('careers.teachers.cta.text') }}
             </p>
             <NuxtLink
-              to="/actualites/appels?type=recruitment"
+              :to="localePath('/nousrejoindre/candidature-enseignant')"
               class="inline-flex items-center gap-2 px-6 py-3 bg-lime-600 hover:bg-lime-700 text-white font-semibold rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-lime-500/30 hover:-translate-y-0.5"
             >
               <font-awesome-icon icon="fa-solid fa-paper-plane" class="w-4 h-4" />

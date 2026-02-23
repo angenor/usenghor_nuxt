@@ -347,10 +347,6 @@ const toggleSemester = (num: number) => {
                 </div>
               </div>
 
-              <!-- Description -->
-              <div v-if="parsedDescription" class="mt-6">
-                <EditorJSRenderer :data="parsedDescription" />
-              </div>
             </div>
 
             <!-- Info cards -->
@@ -420,6 +416,11 @@ const toggleSemester = (num: number) => {
                   {{ program.service_name }}
                 </div>
               </div>
+            </div>
+
+            <!-- Description -->
+            <div v-if="parsedDescription" class="mb-8">
+              <EditorJSRenderer :data="parsedDescription" />
             </div>
 
             <!-- Skills section -->

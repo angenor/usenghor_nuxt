@@ -90,7 +90,7 @@ async function fetchCalls() {
 async function fetchStats() {
   try {
     // Faire un appel sans filtre pour compter le total
-    const all = await listCalls({ page: 1, limit: 1000 })
+    const all = await listCalls({ page: 1, limit: 500 })
     const items = all.items
     stats.value = {
       total: all.total,
