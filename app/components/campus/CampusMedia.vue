@@ -11,11 +11,11 @@ const { getCampusAlbums } = usePublicCampusApi()
 const config = useRuntimeConfig()
 const baseUrl = (config.public.apiBase || config.public.apiBaseUrl || 'http://localhost:8000') as string
 
-// Fetch albums from API
-const { data: albums, pending, error } = await useAsyncData(
+// Fetch albums from API (pas de await — le composant est monté conditionnellement via v-if)
+const { data: albums, pending, error } = useLazyAsyncData(
   `campus-${props.campusId}-albums`,
   () => getCampusAlbums(props.campusId),
-  { lazy: true, default: () => [] }
+  { server: false, default: () => [] as AlbumPublicWithMedia[] }
 )
 
 // Resolve media URL
