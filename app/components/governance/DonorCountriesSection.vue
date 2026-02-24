@@ -84,7 +84,8 @@ const sectionDescription = computed(() => props.description || t('governance.don
           <div class="absolute bottom-0 left-0 w-32 h-32 bg-black/10 rounded-full translate-y-1/2 -translate-x-1/2"></div>
 
           <div class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
-            <span class="text-6xl sm:text-7xl">{{ getFlagEmoji(props.egypte.code) }}</span>
+            <img v-if="props.egypte.flag_image" :src="props.egypte.flag_image" :alt="props.egypte.name_fr" class="w-16 h-12 sm:w-20 sm:h-14 object-cover rounded-md shadow-sm">
+            <span v-else class="text-6xl sm:text-7xl">{{ getFlagEmoji(props.egypte.code) }}</span>
             <div class="flex-1">
               <div class="flex flex-wrap items-center gap-3 mb-2">
                 <h4 class="text-2xl sm:text-3xl font-bold">{{ props.egypte.name_fr }}</h4>
@@ -118,7 +119,8 @@ const sectionDescription = computed(() => props.description || t('governance.don
             class="founder-card group"
             @click="emit('openDrawer', pays)"
           >
-            <span class="text-4xl sm:text-5xl block mb-3 group-hover:scale-110 transition-transform duration-300">
+            <img v-if="pays.flag_image" :src="pays.flag_image" :alt="pays.name_fr" class="w-12 h-8 sm:w-14 sm:h-10 object-cover rounded-md shadow-sm mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+            <span v-else class="text-4xl sm:text-5xl block mb-3 group-hover:scale-110 transition-transform duration-300">
               {{ getFlagEmoji(pays.code) }}
             </span>
             <h4 class="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">

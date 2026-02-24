@@ -19,6 +19,8 @@ export interface PaysBailleur {
   capital?: string
   // Coordonnées GPS de la capitale (pour la carte Leaflet)
   location?: { lat: number; lng: number }
+  // Image de drapeau personnalisée (pour les entités non-étatiques sans emoji drapeau)
+  flag_image?: string
 }
 
 export const mockPaysBailleurs: PaysBailleur[] = [
@@ -62,7 +64,8 @@ export const mockPaysBailleurs: PaysBailleur[] = [
     is_active: true,
     description_fr: 'La Fédération Wallonie-Bruxelles, communauté francophone de Belgique, soutient l\'Université par ses programmes de coopération universitaire et culturelle.',
     capital: 'Bruxelles',
-    location: { lat: 50.8503, lng: 4.3517 }
+    location: { lat: 50.8503, lng: 4.3517 },
+    flag_image: '/images/flags/wallonie-bruxelles.svg'
   },
   {
     id: 'pb-ch',

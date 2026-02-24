@@ -28,7 +28,8 @@ const { getFlagEmoji } = useMockData()
           <!-- Header -->
           <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center gap-4">
-              <span class="text-5xl">{{ getFlagEmoji(props.pays.code) }}</span>
+              <img v-if="props.pays.flag_image" :src="props.pays.flag_image" :alt="props.pays.name_fr" class="w-14 h-10 object-cover rounded-md shadow-sm">
+              <span v-else class="text-5xl">{{ getFlagEmoji(props.pays.code) }}</span>
               <div>
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">
                   {{ props.pays.name_fr }}

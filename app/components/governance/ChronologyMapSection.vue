@@ -53,7 +53,8 @@ const { mapRef, activeStep } = useScrollytellingMap({
               {{ pays.member_since }}
             </h3>
             <h4 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2 mt-1">
-              <span class="text-3xl">{{ getFlagEmoji(pays.code) }}</span>
+              <img v-if="pays.flag_image" :src="pays.flag_image" :alt="pays.name_fr" class="w-10 h-7 object-cover rounded inline-block">
+              <span v-else class="text-3xl">{{ getFlagEmoji(pays.code) }}</span>
               {{ pays.name_fr }}
             </h4>
             <p class="text-gray-700 dark:text-gray-300 mt-3 leading-relaxed text-sm">
@@ -80,7 +81,8 @@ const { mapRef, activeStep } = useScrollytellingMap({
               :key="pays.id"
               class="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700"
             >
-              <span class="text-3xl">{{ getFlagEmoji(pays.code) }}</span>
+              <img v-if="pays.flag_image" :src="pays.flag_image" :alt="pays.name_fr" class="w-10 h-7 object-cover rounded inline-block">
+              <span v-else class="text-3xl">{{ getFlagEmoji(pays.code) }}</span>
               <h4 class="font-semibold mt-2">{{ pays.name_fr }}</h4>
               <p class="text-sm text-gray-500">Membre depuis {{ pays.member_since }}</p>
             </div>
