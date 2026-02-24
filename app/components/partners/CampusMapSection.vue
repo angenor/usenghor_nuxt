@@ -495,7 +495,7 @@ const getCampusDescriptionData = (campus: CampusItem): OutputData | undefined =>
                   <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">
                     {{ getCampusName(selectedCampus) }}
                   </h3>
-                  <div v-if="getCampusDescriptionData(selectedCampus)" class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-5">
+                  <div v-if="getCampusDescriptionData(selectedCampus)" class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-5 max-h-40 overflow-y-auto">
                     <EditorJSRenderer :data="getCampusDescriptionData(selectedCampus)" />
                   </div>
 
