@@ -510,7 +510,7 @@ const getCampusDescriptionData = (campus: CampusItem): OutputData | undefined =>
                   </NuxtLink>
                   <NuxtLink
                     v-else
-                    :to="localePath(`/a-propos/partenaires/campus/${selectedCampus.code.toLowerCase()}`) + '#calls'"
+                    :to="localePath(`/a-propos/partenaires/campus/${selectedCampus.code.toLowerCase()}`) + '#presentation'"
                     class="inline-flex items-center justify-center w-full px-5 py-3 rounded-xl bg-gradient-to-r from-brand-blue-500 to-brand-blue-600 text-white font-semibold text-sm transition-all duration-300 hover:from-brand-blue-600 hover:to-brand-blue-700 hover:shadow-lg hover:shadow-brand-blue-500/25"
                   >
                     {{ t('partners.campus.viewDetails') }}
