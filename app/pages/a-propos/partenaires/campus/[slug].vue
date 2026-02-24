@@ -72,56 +72,71 @@ watch(() => route.hash, syncTabFromHash)
     <!-- Tabs Navigation -->
     <CampusTabs :active-tab="activeTab" />
 
-    <!-- Tab Content -->
+    <!-- Tab Content + Sidebar -->
     <div class="bg-gray-50 dark:bg-gray-950 min-h-[400px] bg-grid-pattern">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Presentation Tab (default) -->
-        <CampusPresentation
-          v-if="activeTab === 'presentation'"
-          :campus="campus"
-        />
+        <div class="flex flex-col lg:flex-row gap-8">
+          <!-- Contenu principal -->
+          <div class="flex-1 min-w-0">
+            <!-- Presentation Tab (default) -->
+            <CampusPresentation
+              v-if="activeTab === 'presentation'"
+              :campus="campus"
+            />
 
-        <!-- Formations Tab -->
-        <CampusFormations
-          v-else-if="activeTab === 'formations'"
-          :campus-id="campus.id"
-        />
+            <!-- Formations Tab -->
+            <CampusFormations
+              v-else-if="activeTab === 'formations'"
+              :campus-id="campus.id"
+            />
 
-        <!-- Calls Tab -->
-        <CampusCalls
-          v-else-if="activeTab === 'calls'"
-          :campus-id="campus.id"
-        />
+            <!-- Calls Tab -->
+            <CampusCalls
+              v-else-if="activeTab === 'calls'"
+              :campus-id="campus.id"
+            />
 
-        <!-- Events Tab -->
-        <CampusEvents
-          v-else-if="activeTab === 'events'"
-          :campus-id="campus.id"
-        />
+            <!-- Events Tab -->
+            <CampusEvents
+              v-else-if="activeTab === 'events'"
+              :campus-id="campus.id"
+            />
 
-        <!-- News Tab -->
-        <CampusNews
-          v-else-if="activeTab === 'news'"
-          :campus-id="campus.id"
-        />
+            <!-- News Tab -->
+            <CampusNews
+              v-else-if="activeTab === 'news'"
+              :campus-id="campus.id"
+            />
 
-        <!-- Partners Tab -->
-        <CampusPartners
-          v-else-if="activeTab === 'partners'"
-          :campus-id="campus.id"
-        />
+            <!-- Partners Tab -->
+            <CampusPartners
+              v-else-if="activeTab === 'partners'"
+              :campus-id="campus.id"
+            />
 
-        <!-- Team Tab -->
-        <CampusTeam
-          v-else-if="activeTab === 'team'"
-          :campus-id="campus.id"
-        />
+            <!-- Team Tab -->
+            <CampusTeam
+              v-else-if="activeTab === 'team'"
+              :campus-id="campus.id"
+            />
 
-        <!-- Media Tab -->
-        <CampusMedia
-          v-else-if="activeTab === 'media'"
-          :campus-id="campus.id"
-        />
+            <!-- Media Tab -->
+            <CampusMedia
+              v-else-if="activeTab === 'media'"
+              :campus-id="campus.id"
+            />
+          </div>
+
+          <!-- Sidebar -->
+          <div class="lg:w-80 xl:w-96 shrink-0">
+            <div class="lg:sticky lg:top-36 py-8 lg:py-12">
+              <CampusSidebar
+                :campus-id="campus.id"
+                :active-tab="activeTab"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

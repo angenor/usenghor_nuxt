@@ -117,6 +117,16 @@
         "title": "البرامج المنجزة",
         "graduates": "خريجين",
         "noFormations": "لا توجد برامج منجزة"
+      },
+      "sidebar": {
+        "formations": "البرامج التكوينية",
+        "viewAllFormations": "عرض جميع البرامج",
+        "ongoingCalls": "الدعوات الجارية",
+        "viewAllCalls": "عرض جميع الدعوات",
+        "upcomingEvents": "الفعاليات القادمة",
+        "viewAllEvents": "عرض جميع الفعاليات",
+        "recentNews": "آخر الأخبار",
+        "viewAllNews": "عرض جميع الأخبار"
       }
     },
     "externalCampus": {

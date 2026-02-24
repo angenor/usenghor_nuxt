@@ -117,6 +117,16 @@
         "title": "Completed Programs",
         "graduates": "graduates",
         "noFormations": "No completed programs"
+      },
+      "sidebar": {
+        "formations": "Programs",
+        "viewAllFormations": "View all programs",
+        "ongoingCalls": "Current Calls",
+        "viewAllCalls": "View all calls",
+        "upcomingEvents": "Upcoming Events",
+        "viewAllEvents": "View all events",
+        "recentNews": "Recent News",
+        "viewAllNews": "View all news"
       }
     },
     "externalCampus": {

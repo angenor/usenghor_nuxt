@@ -117,6 +117,16 @@
         "title": "Formations réalisées",
         "graduates": "diplômés",
         "noFormations": "Aucune formation réalisée"
+      },
+      "sidebar": {
+        "formations": "Formations",
+        "viewAllFormations": "Voir toutes les formations",
+        "ongoingCalls": "Appels en cours",
+        "viewAllCalls": "Voir tous les appels",
+        "upcomingEvents": "Événements à venir",
+        "viewAllEvents": "Voir tous les événements",
+        "recentNews": "Actualités récentes",
+        "viewAllNews": "Voir toutes les actualités"
       }
     },
     "externalCampus": {
