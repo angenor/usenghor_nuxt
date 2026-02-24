@@ -436,11 +436,11 @@ onUnmounted(() => {
                       >
                         <NuxtLink
                           :to="localePath(section.route)"
-                          class="flex items-center gap-2 mb-3 text-sm font-semibold text-gray-900 dark:text-white hover:text-brand-blue-600 dark:hover:text-brand-blue-400 transition-colors"
+                          class="group/section flex items-center gap-2 mb-3 text-sm font-semibold text-gray-900 dark:text-white hover:text-brand-blue-600 dark:hover:text-brand-blue-400 transition-colors"
                         >
                           <font-awesome-icon :icon="section.icon" class="w-4 h-4 text-brand-blue-500" />
                           {{ t(`nav.${section.key}`) }}
-                          <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3 ml-auto opacity-0 group-hover:opacity-100" />
+                          <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3 text-gray-400 dark:text-gray-500 group-hover/section:text-brand-blue-500 group-hover/section:translate-x-0.5 transition-all duration-200" />
                         </NuxtLink>
                         <div v-if="section.children.length > 0" class="grid grid-cols-2 gap-1">
                           <NuxtLink
