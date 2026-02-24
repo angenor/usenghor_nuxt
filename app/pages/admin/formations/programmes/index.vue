@@ -112,7 +112,34 @@ const programForm = ref({
   sector_id: '',
   service_id: '',
   field_id: null as string | null,
+  objectives: '',
+  target_audience: '',
+  format: '',
 })
+
+// Options du format
+const formatOptions = [
+  { value: 'presential', label: 'Présentiel' },
+  { value: 'distance', label: 'Distanciel' },
+  { value: 'hybrid', label: 'Hybride' },
+  { value: 'elearning', label: 'E-learning' },
+]
+
+// Modalités d'évaluation (liste dynamique)
+const evaluationMethods = ref<string[]>([])
+const newEvaluationMethod = ref('')
+
+function addEvaluationMethod() {
+  const value = newEvaluationMethod.value.trim()
+  if (value && !evaluationMethods.value.includes(value)) {
+    evaluationMethods.value.push(value)
+    newEvaluationMethod.value = ''
+  }
+}
+
+function removeEvaluationMethod(index: number) {
+  evaluationMethods.value.splice(index, 1)
+}
 
 // État de l'upload d'image
 const pendingCoverFile = ref<File | null>(null)
@@ -297,15 +324,20 @@ function openCreateModal() {
     credits: 120,
     degree_awarded: 'Master professionnel',
     required_degree: 'Bac+4 minimum',
-    status: 'draft',
+    status: 'draft' as PublicationStatus,
     is_featured: false,
     cover_image: '',
-    cover_image_external_id: null,
+    cover_image_external_id: null as string | null,
     campus_id: '',
     sector_id: '',
     service_id: '',
-    field_id: null,
+    field_id: null as string | null,
+    objectives: '',
+    target_audience: '',
+    format: '',
   }
+  evaluationMethods.value = []
+  newEvaluationMethod.value = ''
   pendingCoverFile.value = null
   showCreateModal.value = true
 }
@@ -400,6 +432,10 @@ async function handleCreateProgram() {
       sector_external_id: programForm.value.sector_id || null,
       service_external_id: programForm.value.service_id || null,
       field_id: programForm.value.type === 'certificate' ? programForm.value.field_id : null,
+      objectives: programForm.value.objectives || null,
+      target_audience: programForm.value.target_audience || null,
+      format: programForm.value.format || null,
+      evaluation_methods: evaluationMethods.value.length > 0 ? JSON.stringify(evaluationMethods.value) : null,
     }
     const result = await createProgram(payload)
     closeCreateModal()
@@ -1127,6 +1163,92 @@ async function bulkDelete() {
                 placeholder="Décrivez brièvement la formation..."
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
+            </div>
+
+            <!-- Objectifs -->
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Objectifs
+              </label>
+              <textarea
+                v-model="programForm.objectives"
+                rows="3"
+                placeholder="Objectifs de la formation..."
+                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+
+            <!-- Public cible et Format -->
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Public cible
+                </label>
+                <textarea
+                  v-model="programForm.target_audience"
+                  rows="2"
+                  placeholder="À qui s'adresse cette formation..."
+                  class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Format
+                </label>
+                <select
+                  v-model="programForm.format"
+                  class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="">-- Aucun --</option>
+                  <option v-for="opt in formatOptions" :key="opt.value" :value="opt.value">
+                    {{ opt.label }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Modalités d'évaluation -->
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Modalités d'évaluation
+              </label>
+              <div class="space-y-2">
+                <!-- Liste des modalités -->
+                <div
+                  v-for="(method, index) in evaluationMethods"
+                  :key="index"
+                  class="flex items-center gap-2"
+                >
+                  <span class="flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                    {{ method }}
+                  </span>
+                  <button
+                    type="button"
+                    class="rounded p-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                    @click="removeEvaluationMethod(index)"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-xmark" class="h-3 w-3" />
+                  </button>
+                </div>
+                <!-- Ajout -->
+                <div class="flex gap-2">
+                  <input
+                    v-model="newEvaluationMethod"
+                    type="text"
+                    placeholder="Ex: Contrôle continu, Examen final..."
+                    class="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    @keydown.enter.prevent="addEvaluationMethod"
+                  />
+                  <button
+                    type="button"
+                    class="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                    @click="addEvaluationMethod"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-plus" class="h-3 w-3" />
+                    Ajouter
+                  </button>
+                </div>
+              </div>
             </div>
 
             <!-- Statut et À la une -->

@@ -97,6 +97,42 @@ const filteredServices = computed(() => {
   return allServices.value.filter(s => s.sector_id === form.value.sector_id)
 })
 
+// Options du format
+const formatOptions = [
+  { value: 'presential', label: 'Présentiel' },
+  { value: 'distance', label: 'Distanciel' },
+  { value: 'hybrid', label: 'Hybride' },
+  { value: 'elearning', label: 'E-learning' },
+]
+
+// Modalités d'évaluation (liste dynamique, stockée en JSON)
+const evaluationMethods = ref<string[]>([])
+const newEvaluationMethod = ref('')
+
+function parseEvaluationMethods(raw: string | null | undefined): string[] {
+  if (!raw) return []
+  try {
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) return parsed
+  } catch {
+    // Texte brut : séparer par virgule/point-virgule
+    if (raw.trim()) return raw.split(/[;,]\s*/).filter(Boolean)
+  }
+  return []
+}
+
+function addEvaluationMethod() {
+  const value = newEvaluationMethod.value.trim()
+  if (value && !evaluationMethods.value.includes(value)) {
+    evaluationMethods.value.push(value)
+    newEvaluationMethod.value = ''
+  }
+}
+
+function removeEvaluationMethod(index: number) {
+  evaluationMethods.value.splice(index, 1)
+}
+
 // États
 const loading = ref(true)
 const initialLoadDone = ref(false)
@@ -111,6 +147,9 @@ const form = ref<{
   slug: string
   description: OutputData | undefined
   teaching_methods: string
+  objectives: string
+  target_audience: string
+  format: string
   cover_image: string
   cover_image_external_id: string | null
   campus_id: string
@@ -131,6 +170,9 @@ const form = ref<{
   slug: '',
   description: undefined,
   teaching_methods: '',
+  objectives: '',
+  target_audience: '',
+  format: '',
   cover_image: '',
   cover_image_external_id: null,
   campus_id: '',
@@ -188,6 +230,9 @@ async function loadProgram() {
       slug: program.value.slug,
       description: parseEditorContent(program.value.description),
       teaching_methods: program.value.teaching_methods || '',
+      objectives: program.value.objectives || '',
+      target_audience: program.value.target_audience || '',
+      format: program.value.format || '',
       cover_image_external_id: program.value.cover_image_external_id || null,
       cover_image: program.value.cover_image_external_id
         ? (getMediaUrl(program.value.cover_image_external_id) || '')
@@ -204,6 +249,7 @@ async function loadProgram() {
       status: program.value.status,
       is_featured: program.value.is_featured || false,
     }
+    evaluationMethods.value = parseEvaluationMethods(program.value.evaluation_methods)
     await nextTick()
     initialLoadDone.value = true
   } catch (e) {
@@ -597,6 +643,10 @@ const submitForm = async () => {
       slug: form.value.slug,
       description: descriptionJson,
       teaching_methods: form.value.teaching_methods || null,
+      objectives: form.value.objectives || null,
+      target_audience: form.value.target_audience || null,
+      format: form.value.format || null,
+      evaluation_methods: evaluationMethods.value.length > 0 ? JSON.stringify(evaluationMethods.value) : null,
       cover_image_external_id: form.value.cover_image_external_id,
       campus_external_id: form.value.campus_id || null,
       sector_external_id: form.value.sector_id || null,
@@ -996,6 +1046,92 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
               placeholder="Décrivez les méthodes pédagogiques utilisées..."
               class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
+          </div>
+
+          <div>
+            <label for="objectives" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Objectifs
+            </label>
+            <textarea
+              id="objectives"
+              v-model="form.objectives"
+              rows="4"
+              placeholder="Objectifs de la formation..."
+              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label for="target_audience" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Public cible
+              </label>
+              <textarea
+                id="target_audience"
+                v-model="form.target_audience"
+                rows="3"
+                placeholder="À qui s'adresse cette formation..."
+                class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+            <div>
+              <label for="format" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Format
+              </label>
+              <select
+                id="format"
+                v-model="form.format"
+                class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              >
+                <option value="">-- Aucun --</option>
+                <option v-for="opt in formatOptions" :key="opt.value" :value="opt.value">
+                  {{ opt.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Modalités d'évaluation
+            </label>
+            <div class="space-y-2">
+              <!-- Liste des modalités -->
+              <div
+                v-for="(method, index) in evaluationMethods"
+                :key="index"
+                class="flex items-center gap-2"
+              >
+                <span class="flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                  {{ method }}
+                </span>
+                <button
+                  type="button"
+                  class="rounded p-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                  @click="removeEvaluationMethod(index)"
+                >
+                  <font-awesome-icon icon="fa-solid fa-xmark" class="h-3 w-3" />
+                </button>
+              </div>
+              <!-- Ajout -->
+              <div class="flex gap-2">
+                <input
+                  v-model="newEvaluationMethod"
+                  type="text"
+                  placeholder="Ex: Contrôle continu, Examen final..."
+                  class="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  @keydown.enter.prevent="addEvaluationMethod"
+                />
+                <button
+                  type="button"
+                  class="inline-flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                  @click="addEvaluationMethod"
+                >
+                  <font-awesome-icon icon="fa-solid fa-plus" class="h-3 w-3" />
+                  Ajouter
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
