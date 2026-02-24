@@ -4,6 +4,7 @@ import type { PageSectionField } from '~/composables/editorial-pages-config'
 interface NavSubItem {
   id: string
   label: string
+  description?: string
   route: string
   icon: string
   badge?: string
@@ -87,6 +88,7 @@ function startAddItem() {
   isAddingNew.value = true
   formData.value = {
     label: '',
+    description: '',
     route: '',
     icon: 'fa-solid fa-link',
     badge: '',
@@ -111,6 +113,7 @@ function confirmAddItem() {
   const newItem: NavSubItem = {
     id: self.crypto?.randomUUID?.() ?? Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join(''),
     label: formData.value.label!,
+    description: formData.value.description || undefined,
     route: formData.value.route!,
     icon: formData.value.icon || 'fa-solid fa-link',
     badge: formData.value.badge || undefined,
@@ -132,6 +135,7 @@ function confirmEditItem() {
     id: existing.id,
     sort_order: existing.sort_order,
     label: formData.value.label!,
+    description: formData.value.description || undefined,
     route: formData.value.route!,
     icon: formData.value.icon || 'fa-solid fa-link',
     badge: formData.value.badge || undefined,
@@ -235,6 +239,9 @@ function moveDown(index: number) {
               <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
                 {{ item.label }}
               </p>
+              <p v-if="item.description" class="text-xs text-gray-400 dark:text-gray-500 truncate">
+                {{ item.description }}
+              </p>
               <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
                 {{ item.route }}
                 <span v-if="item.badge" class="ml-1 px-1 py-0.5 text-[8px] font-semibold uppercase rounded bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300">{{ item.badge }}</span>
@@ -306,7 +313,7 @@ function moveDown(index: number) {
             <!-- Libelle -->
             <div>
               <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
-                Libelle <span class="text-red-500">*</span>
+                Libellé <span class="text-red-500">*</span>
               </label>
               <input
                 v-model="formData.label"
@@ -328,6 +335,19 @@ function moveDown(index: number) {
                 placeholder="Ex: /a-propos"
               />
             </div>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
+              Description (optionnelle)
+            </label>
+            <input
+              v-model="formData.description"
+              type="text"
+              class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              placeholder="Ex: Courte description affichée sous le libellé"
+            />
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -437,6 +457,7 @@ function moveDown(index: number) {
           >
             <font-awesome-icon :icon="item.icon" class="h-3.5 w-3.5 text-indigo-500 flex-shrink-0" />
             <span class="text-gray-700 dark:text-gray-300 truncate">{{ item.label }}</span>
+            <span v-if="item.description" class="text-xs text-gray-400 dark:text-gray-500 truncate">— {{ item.description }}</span>
             <span class="text-xs text-gray-400 dark:text-gray-500">{{ item.route }}</span>
           </div>
         </div>

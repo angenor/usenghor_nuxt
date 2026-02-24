@@ -27,6 +27,8 @@ export interface PageSectionField {
   i18nKey?: string
   editorialKey?: ValueSectionKey
   editable: boolean
+  /** Valeur par défaut affichée quand aucun contenu éditorial n'existe en BDD */
+  defaultValue?: string
 }
 
 export interface FrontOfficePage {
@@ -1178,12 +1180,26 @@ export const globalElementsSections: PageSection[] = [
     color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
     editorialKeys: [
       'navbar.apply.text', 'navbar.apply.link',
+      'navbar.primary.training.children', 'navbar.primary.news.children',
       'navbar.secondary.about.children', 'navbar.secondary.projects.children',
       'navbar.secondary.alumni.children', 'navbar.secondary.site.children',
     ],
     fields: [
       { key: 'navbar.apply.text', label: 'Bouton Candidater - Texte', description: 'Texte affiché sur le bouton principal de candidature', type: 'text', editorialKey: 'navbar.apply.text', editable: true },
       { key: 'navbar.apply.link', label: 'Bouton Candidater - Lien', description: 'URL de destination du bouton (ex: /nousrejoindre, /formations/postuler)', type: 'text', editorialKey: 'navbar.apply.link', editable: true },
+      { key: 'navbar.primary.training.children', label: 'Sous-menu « Se former » - Sous-items', description: 'Liste des liens dans le sous-menu « Se former ». Chaque item a un libellé, une route, une icône et une description.', type: 'navitems', editorialKey: 'navbar.primary.training.children', editable: true, defaultValue: JSON.stringify([
+        { id: 'doctorate', label: 'Doctorat', description: 'Programme doctoral en partenariat avec l\'École doctorale', route: '/formations/doctorat', icon: 'fa-solid fa-book-open', sort_order: 1 },
+        { id: 'masters', label: 'Masters', description: 'Programmes de Master en 2 ans', route: '/formations/masters', icon: 'fa-solid fa-graduation-cap', badge: 'popular', sort_order: 2 },
+        { id: 'universityDiplomas', label: 'Diplômes universitaires', description: 'Formations spécialisées d\'une année académique', route: '/formations/diplomes-universitaires', icon: 'fa-solid fa-award', sort_order: 3 },
+        { id: 'certifications', label: 'Certifiantes', description: 'Certifications professionnelles courtes et intensives', route: '/formations/certifiantes', icon: 'fa-solid fa-certificate', sort_order: 4 },
+        { id: 'externalCampus', label: 'Campus externalisés', description: 'Formations délocalisées dans nos campus partenaires', route: '/a-propos/partenaires#campus-externalises', icon: 'fa-solid fa-building-columns', sort_order: 5 },
+      ]) },
+      { key: 'navbar.primary.news.children', label: 'Sous-menu « Actualités » - Sous-items', description: 'Liste des liens dans le sous-menu « Actualités ».', type: 'navitems', editorialKey: 'navbar.primary.news.children', editable: true, defaultValue: JSON.stringify([
+        { id: 'callsForApplications', label: 'Appels à candidatures', description: 'Postulez aux programmes de formation et bourses disponibles', route: '/actualites/appels', icon: 'fa-solid fa-bullhorn', sort_order: 1 },
+        { id: 'recruitment', label: 'Recrutement', description: 'Opportunités professionnelles au sein de notre réseau', route: '/actualites/appels?type=recruitment', icon: 'fa-solid fa-briefcase', sort_order: 2 },
+        { id: 'events', label: 'Événements', description: 'Conférences, séminaires et rencontres à venir', route: '/actualites/evenements', icon: 'fa-solid fa-calendar-days', sort_order: 3 },
+        { id: 'allNews', label: 'Toutes les actualités', description: 'Voir l\'ensemble des actualités de l\'Université', route: '/actualites', icon: 'fa-solid fa-newspaper', sort_order: 4 },
+      ]) },
       { key: 'navbar.secondary.about.children', label: 'Sous-menu « Nous connaitre » - Sous-items', description: 'Liste des liens dans le sous-menu « Nous connaitre ». Chaque item a un libelle, une route et une icone.', type: 'navitems', editorialKey: 'navbar.secondary.about.children', editable: true },
       { key: 'navbar.secondary.projects.children', label: 'Sous-menu « Nos projets » - Sous-items', description: 'Liste des liens dans le sous-menu « Nos projets ».', type: 'navitems', editorialKey: 'navbar.secondary.projects.children', editable: true },
       { key: 'navbar.secondary.alumni.children', label: 'Sous-menu « Nos alumni » - Sous-items', description: 'Liste des liens dans le sous-menu « Nos alumni ».', type: 'navitems', editorialKey: 'navbar.secondary.alumni.children', editable: true },

@@ -24,9 +24,30 @@ const isMobileMenuOpen = ref(false)
 const activeDropdown = ref<string | null>(null)
 const expandedMobileMenus = ref<string[]>([])
 
+// Type pour les enfants de navigation (avec _label optionnel pour overrides éditoriaux)
+interface NavChild {
+  key: string
+  route: string
+  icon: string
+  badge?: string
+  _label?: string
+  _description?: string
+}
+
+interface PrimaryNavItem {
+  key: string
+  route: string
+  hasDropdown: boolean
+  megaMenu: boolean
+  icon: string
+  accent: boolean
+  featured: { image: string, titleKey: string, descKey: string }
+  children: NavChild[]
+}
+
 // Primary nav items (displayed first with accent styling)
 // Based on carte_mentale_senghor.md structure
-const primaryNavItems = [
+const defaultPrimaryNavItems: PrimaryNavItem[] = [
   {
     key: 'training',
     route: '/formations',
@@ -68,14 +89,8 @@ const primaryNavItems = [
   }
 ]
 
-// Type pour les enfants de navigation (avec _label optionnel pour overrides éditoriaux)
-interface NavChild {
-  key: string
-  route: string
-  icon: string
-  badge?: string
-  _label?: string
-}
+// Réactif pour permettre les overrides éditoriaux
+const primaryNavItems = ref<PrimaryNavItem[]>(defaultPrimaryNavItems)
 
 interface SecondaryNavItem {
   key: string
@@ -98,7 +113,7 @@ const secondaryNavItems = ref<SecondaryNavItem[]>(defaultSecondaryNavItems)
 
 // For mobile menu compatibility
 const navItems = computed(() => [
-  ...primaryNavItems,
+  ...primaryNavItems.value,
   ...secondaryNavItems.value.map(item => ({ ...item, hasDropdown: true, megaMenu: false }))
 ])
 
@@ -201,6 +216,45 @@ function updateApplyButtonValues() {
   if (linkValue) applyButtonLink.value = linkValue
 }
 
+// Fonction pour mettre à jour les sous-menus primaires depuis les overrides éditoriaux
+function updatePrimaryNavItems() {
+  primaryNavItems.value = defaultPrimaryNavItems.map((item) => {
+    const editorialJson = getRawContent(`navbar.primary.${item.key}.children` as any)
+    if (!editorialJson) return item
+
+    try {
+      const editorialChildren = JSON.parse(editorialJson) as Array<{
+        id: string
+        label: string
+        description?: string
+        route: string
+        icon: string
+        badge?: string
+        sort_order: number
+      }>
+
+      if (!Array.isArray(editorialChildren) || editorialChildren.length === 0) return item
+
+      return {
+        ...item,
+        children: editorialChildren
+          .sort((a, b) => a.sort_order - b.sort_order)
+          .map(child => ({
+            key: child.id,
+            route: child.route,
+            icon: child.icon,
+            badge: child.badge,
+            _label: child.label,
+            _description: child.description,
+          })),
+      }
+    }
+    catch {
+      return item
+    }
+  })
+}
+
 // Fonction pour mettre à jour les sous-menus secondaires depuis les overrides éditoriaux
 function updateSecondaryNavItems() {
   secondaryNavItems.value = defaultSecondaryNavItems.map((section) => {
@@ -245,6 +299,7 @@ useLazyAsyncData('editorial-global', () => loadContent())
 watch(() => editorialStore.isPageLoaded('global'), (ready) => {
   if (ready) {
     updateApplyButtonValues()
+    updatePrimaryNavItems()
     updateSecondaryNavItems()
   }
 }, { immediate: true })
@@ -368,7 +423,7 @@ onUnmounted(() => {
                           <div class="flex-1 min-w-0 pt-0.5">
                             <div class="flex items-center gap-2">
                               <span class="block text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
-                                {{ t(`nav.dropdowns.${item.key}.${child.key}`) }}
+                                {{ child._label || t(`nav.dropdowns.${item.key}.${child.key}`) }}
                               </span>
                               <span
                                 v-if="child.badge"
@@ -378,8 +433,8 @@ onUnmounted(() => {
                                 {{ child.badge === 'new' ? t('nav.badges.new') : child.badge === 'popular' ? t('nav.badges.popular') : child.badge }}
                               </span>
                             </div>
-                            <span class="block text-xs text-gray-400 dark:text-gray-500 mt-0.5 line-clamp-1 group-hover:text-gray-500 dark:group-hover:text-gray-400 transition-colors">
-                              {{ t(`nav.dropdowns.${item.key}.${child.key}Desc`) }}
+                            <span v-if="child._description || !child._label" class="block text-xs text-gray-400 dark:text-gray-500 mt-0.5 line-clamp-1 group-hover:text-gray-500 dark:group-hover:text-gray-400 transition-colors">
+                              {{ child._description || t(`nav.dropdowns.${item.key}.${child.key}Desc`) }}
                             </span>
                           </div>
                         </NuxtLink>

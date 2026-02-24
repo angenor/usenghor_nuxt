@@ -49,7 +49,7 @@ const countEditableFields = (pageSection: PageSection) => {
 const getFieldValue = (field: PageSectionField): string => {
   if (!field.editorialKey) return ''
   const content = props.allContents.get(field.editorialKey)
-  return content?.value || ''
+  return content?.value || field.defaultValue || ''
 }
 
 function startEditingField(field: PageSectionField) {

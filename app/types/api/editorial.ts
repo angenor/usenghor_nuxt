@@ -570,6 +570,9 @@ export type ValueSectionKey =
   // Éléments globaux - Navbar
   | 'navbar.apply.text'
   | 'navbar.apply.link'
+  // Éléments globaux - Navbar sous-menus primaires
+  | 'navbar.primary.training.children'
+  | 'navbar.primary.news.children'
   // Éléments globaux - Navbar sous-menus secondaires
   | 'navbar.secondary.about.children'
   | 'navbar.secondary.projects.children'
