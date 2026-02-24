@@ -8,7 +8,7 @@ interface Props {
 
 const props = defineProps<Props>()
 const { t } = useI18n()
-const { getCoverImageUrl, getCampusLocation, getCampusFlagEmoji } = usePublicCampusApi()
+const { getCampusLocation, getCampusFlagEmoji } = usePublicCampusApi()
 
 // Convertir une string en OutputData
 const parseEditorContent = (content: string | null | undefined): OutputData | undefined => {
@@ -33,7 +33,6 @@ const parseEditorContent = (content: string | null | undefined): OutputData | un
 const descriptionData = computed(() => parseEditorContent(props.campus.description))
 const location = computed(() => getCampusLocation(props.campus))
 const flagEmoji = computed(() => getCampusFlagEmoji(props.campus))
-const coverImage = computed(() => getCoverImageUrl(props.campus))
 </script>
 
 <template>
@@ -67,15 +66,6 @@ const coverImage = computed(() => getCoverImageUrl(props.campus))
 
       <!-- Info card -->
       <div class="space-y-6">
-        <!-- Cover image -->
-        <div v-if="coverImage" class="rounded-2xl overflow-hidden shadow-sm">
-          <img
-            :src="coverImage"
-            :alt="campus.name"
-            class="w-full aspect-[4/3] object-cover"
-          />
-        </div>
-
         <!-- Contact -->
         <div v-if="campus.email || campus.phone || campus.address" class="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm space-y-4">
           <h3 class="font-semibold text-gray-900 dark:text-white">

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { CampusPublic } from '~/composables/usePublicCampusApi'
-import type { OutputData } from '@editorjs/editorjs'
 
 interface Props {
   campus: CampusPublic
@@ -18,29 +17,6 @@ const flagEmoji = computed(() => getCampusFlagEmoji(props.campus))
 
 // Location (city, country)
 const location = computed(() => getCampusLocation(props.campus))
-
-// Convertir une string (potentiellement JSON ou texte brut) en OutputData
-const parseEditorContent = (content: string | null | undefined): OutputData | undefined => {
-  if (!content) return undefined
-  try {
-    const parsed = JSON.parse(content)
-    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
-      return parsed as OutputData
-    }
-  } catch {
-    if (content.trim()) {
-      return {
-        time: Date.now(),
-        blocks: [{ type: 'paragraph', data: { text: content } }],
-        version: '2.28.0'
-      }
-    }
-  }
-  return undefined
-}
-
-// Description parsée pour EditorJSRenderer
-const descriptionData = computed(() => parseEditorContent(props.campus.description))
 
 // Expose title ref for intersection observer
 const titleRef = ref<HTMLElement | null>(null)
@@ -85,11 +61,6 @@ defineExpose({ titleRef })
           <div v-if="location" class="flex items-center gap-2 text-xl text-blue-200 mb-6">
             <font-awesome-icon icon="fa-solid fa-location-dot" class="w-5 h-5" />
             {{ location }}
-          </div>
-
-          <!-- Description -->
-          <div v-if="descriptionData" class="text-lg text-gray-200 leading-relaxed mb-8 max-w-2xl">
-            <EditorJSRenderer :data="descriptionData" />
           </div>
 
           <!-- Contact -->
