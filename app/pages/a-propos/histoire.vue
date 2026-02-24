@@ -256,12 +256,15 @@ onMounted(() => {
     })
 
     // Create timeline with ScrollTrigger
+    // Offset = navbar (80px) + tabs nav (~108px) = 188px
+    const navOffset = 188
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
-        start: 'top top',
+        start: `top top+=${navOffset}`,
         end: '+=100%',
         pin: true,
+        pinSpacing: true,
         scrub: true,
         onEnter: () => {
           animateYearRoll(currentYear, newYear, 'up')
@@ -395,19 +398,19 @@ onUnmounted(() => {
       </div>
 
       <!-- Timeline Section -->
-      <div ref="timelineRef" class="timeline pt-[10vw]">
+      <div ref="timelineRef" class="timeline">
       <!-- Year Sections -->
       <section
         v-for="(event, index) in timelineEvents"
         :key="index"
         :ref="(el) => setSectionRef(el, index)"
-        class="year-section h-screen flex px-8 py-12 md:py-4"
+        class="year-section flex px-8 py-4"
         :data-year="event.year"
         :data-color="event.bgColor"
       >
         <div class="grid grid-rows-[1fr_auto] md:grid-rows-1 md:grid-cols-2 gap-8 w-full h-full">
           <!-- Media Stack -->
-          <div class="media-stack relative w-full h-full flex items-center justify-center p-4 md:p-12 order-1 md:order-2">
+          <div class="media-stack relative w-full h-full flex items-start justify-center pt-0 px-4 md:px-8 order-1 md:order-2">
             <template v-for="(media, mediaIndex) in event.media" :key="mediaIndex">
               <img
                 v-if="media.type === 'image' && media.src"
@@ -457,29 +460,24 @@ onUnmounted(() => {
   position: relative;
 }
 
-/* Sticky year display - visible from start, becomes sticky below navbar */
+/* Sticky year display - visible from start, becomes sticky below navbar + tabs */
 .year-display {
   position: -webkit-sticky; /* Safari */
   position: sticky;
-  top: 80px; /* Hauteur exacte du navbar */
-  z-index: 40;
+  top: 188px; /* Navbar (80px) + TabsNav (108px) */
+  z-index: 35; /* Sous la tabs nav (z-40) */
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 2rem 0 4rem; /* Plus d'espace en bas sur mobile */
+  padding: 0.5rem 0;
+  margin-bottom: -3rem; /* Overlap sur la section suivante */
   font-family: var(--font-pixel, 'JetBrains Mono', monospace);
-  font-size: clamp(2rem, 6vw, 5rem);
+  font-size: clamp(1.5rem, 4vw, 3.5rem);
   font-weight: 300;
   line-height: 1;
   color: rgba(0, 0, 0, 0.7);
   pointer-events: none;
   user-select: none;
-}
-
-@media (min-width: 768px) {
-  .year-display {
-    padding: 2rem 0; /* Padding normal sur desktop */
-  }
 }
 
 .dark .year-display {
@@ -503,5 +501,17 @@ onUnmounted(() => {
   width: 0.7em;
   text-align: center;
   overflow: hidden;
+}
+
+/* Hauteur des sections timeline = viewport - navbar - tabs */
+.year-section {
+  height: calc(100vh - 188px);
+  min-height: auto;
+}
+
+/* Media stack : aligner les images en haut pour être au niveau de la date */
+.year-section :deep(.media-stack) {
+  align-items: flex-start;
+  padding-top: 0;
 }
 </style>
