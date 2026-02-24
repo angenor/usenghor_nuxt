@@ -48,43 +48,36 @@ const flagEmoji = computed(() => getCampusFlagEmoji(props.campus))
       </p>
     </div>
 
-    <div class="grid lg:grid-cols-3 gap-8">
-      <!-- Description -->
-      <div class="lg:col-span-2">
-        <div v-if="descriptionData" class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-sm">
-          <div class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-            <EditorJSRenderer :data="descriptionData" />
-          </div>
-        </div>
-        <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">
-          <font-awesome-icon icon="fa-solid fa-info-circle" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
-          <p class="text-gray-500 dark:text-gray-400 text-lg">
-            {{ t('partners.campus.noDescription') || 'Aucune description disponible' }}
-          </p>
-        </div>
+    <!-- Contact info (bandeau horizontal) -->
+    <div
+      v-if="campus.email || campus.phone || campus.address"
+      class="flex flex-wrap items-center gap-x-6 gap-y-2 bg-white dark:bg-gray-900 rounded-xl px-6 py-4 shadow-sm mb-8"
+    >
+      <div v-if="campus.email" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+        <font-awesome-icon icon="fa-solid fa-envelope" class="w-4 h-4 text-brand-blue-500" />
+        <a :href="`mailto:${campus.email}`" class="hover:text-brand-blue-600 transition-colors">{{ campus.email }}</a>
       </div>
+      <div v-if="campus.phone" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+        <font-awesome-icon icon="fa-solid fa-phone" class="w-4 h-4 text-brand-blue-500" />
+        <a :href="`tel:${campus.phone}`" class="hover:text-brand-blue-600 transition-colors">{{ campus.phone }}</a>
+      </div>
+      <div v-if="campus.address" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+        <font-awesome-icon icon="fa-solid fa-map-marker-alt" class="w-4 h-4 text-brand-blue-500" />
+        <span>{{ campus.address }}</span>
+      </div>
+    </div>
 
-      <!-- Info card -->
-      <div class="space-y-6">
-        <!-- Contact -->
-        <div v-if="campus.email || campus.phone || campus.address" class="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm space-y-4">
-          <h3 class="font-semibold text-gray-900 dark:text-white">
-            {{ t('partners.campus.tabs.presentation') }}
-          </h3>
-          <div v-if="campus.email" class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-            <font-awesome-icon icon="fa-solid fa-envelope" class="w-4 h-4 text-brand-blue-500" />
-            <a :href="`mailto:${campus.email}`" class="hover:text-brand-blue-600 transition-colors">{{ campus.email }}</a>
-          </div>
-          <div v-if="campus.phone" class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-            <font-awesome-icon icon="fa-solid fa-phone" class="w-4 h-4 text-brand-blue-500" />
-            <a :href="`tel:${campus.phone}`" class="hover:text-brand-blue-600 transition-colors">{{ campus.phone }}</a>
-          </div>
-          <div v-if="campus.address" class="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400">
-            <font-awesome-icon icon="fa-solid fa-map-marker-alt" class="w-4 h-4 text-brand-blue-500 mt-0.5" />
-            <span>{{ campus.address }}</span>
-          </div>
-        </div>
+    <!-- Description (pleine largeur) -->
+    <div v-if="descriptionData" class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-sm">
+      <div class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+        <EditorJSRenderer :data="descriptionData" />
       </div>
+    </div>
+    <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">
+      <font-awesome-icon icon="fa-solid fa-info-circle" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
+      <p class="text-gray-500 dark:text-gray-400 text-lg">
+        {{ t('partners.campus.noDescription') || 'Aucune description disponible' }}
+      </p>
     </div>
   </section>
 </template>
