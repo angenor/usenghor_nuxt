@@ -237,50 +237,6 @@ export const mockSiteFacilities: SiteFacility[] = [
     sort_order: 5
   },
   {
-    id: 'facility-pool',
-    slug: 'piscine',
-    icon: 'fa-solid fa-water-ladder',
-    name_fr: 'Piscine',
-    name_en: 'Swimming Pool',
-    name_ar: 'حمام السباحة',
-    description_fr: 'La piscine du campus offre un espace de détente et de sport aquatique. Elle est accessible aux étudiants et au personnel tout au long de l\'année.',
-    description_en: 'The campus swimming pool offers a space for relaxation and water sports. It is accessible to students and staff throughout the year.',
-    description_ar: 'يوفر حمام السباحة في الحرم الجامعي مساحة للاسترخاء والرياضات المائية. وهو متاح للطلاب والموظفين على مدار العام.',
-    features_fr: [
-      'Piscine semi-olympique (25m)',
-      'Eau traitée et contrôlée',
-      'Horaires réservés femmes/hommes',
-      'Cours de natation disponibles',
-      'Vestiaires séparés',
-      'Surveillance par maître-nageur'
-    ],
-    features_en: [
-      'Semi-Olympic pool (25m)',
-      'Treated and controlled water',
-      'Reserved hours for women/men',
-      'Swimming lessons available',
-      'Separate changing rooms',
-      'Lifeguard supervision'
-    ],
-    features_ar: [
-      'مسبح شبه أولمبي (25 متر)',
-      'مياه معالجة ومراقبة',
-      'ساعات مخصصة للنساء/الرجال',
-      'دروس سباحة متاحة',
-      'غرف تبديل ملابس منفصلة',
-      'إشراف منقذ'
-    ],
-    image: '',
-    images: [
-      '',
-      '',
-      '',
-      ''
-    ],
-    capacity: '50 nageurs',
-    sort_order: 6
-  },
-  {
     id: 'facility-hotel',
     slug: 'hotel',
     icon: 'fa-solid fa-hotel',

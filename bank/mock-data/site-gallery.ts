@@ -147,18 +147,6 @@ export const mockSiteGallery: SiteGalleryItem[] = [
     sort_order: 11
   },
   {
-    id: 'gallery-12',
-    type: 'photo',
-    title_fr: 'Piscine du campus',
-    title_en: 'Campus swimming pool',
-    title_ar: 'مسبح الحرم الجامعي',
-    url: '',
-    thumbnail: '',
-    facility_id: 'facility-pool',
-    date: '2024-04-15',
-    sort_order: 12
-  },
-  {
     id: 'gallery-13',
     type: 'photo',
     title_fr: 'Terrain de sport',

@@ -948,21 +948,6 @@ export const sitePageSections: PageSection[] = [
     ],
   },
   {
-    id: 'site-facility-pool',
-    name: 'Installation: Piscine',
-    description: 'Piscine semi-olympique du campus',
-    icon: 'water-ladder',
-    color: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300',
-    editorialKeys: ['site.facility.pool.name', 'site.facility.pool.description', 'site.facility.pool.features', 'site.facility.pool.capacity', 'site.facility.pool.images'],
-    fields: [
-      { key: 'site.facility.pool.name', label: 'Nom', description: 'Nom de l\'installation (ex: Piscine)', type: 'text', editorialKey: 'site.facility.pool.name', editable: true },
-      { key: 'site.facility.pool.description', label: 'Description', description: 'Description détaillée de la piscine', type: 'textarea', editorialKey: 'site.facility.pool.description', editable: true },
-      { key: 'site.facility.pool.features', label: 'Caractéristiques', description: 'Liste des caractéristiques (une par ligne)', type: 'list', editorialKey: 'site.facility.pool.features', editable: true },
-      { key: 'site.facility.pool.capacity', label: 'Capacité', description: 'Capacité d\'accueil (ex: 50 nageurs)', type: 'text', editorialKey: 'site.facility.pool.capacity', editable: true },
-      { key: 'site.facility.pool.images', label: 'Images', description: 'Galerie d\'images de l\'installation (format 4:3 recommandé)', type: 'gallery', editorialKey: 'site.facility.pool.images', editable: true },
-    ],
-  },
-  {
     id: 'site-facility-hotel',
     name: 'Installation: Hôtel',
     description: 'Hébergement pour visiteurs et partenaires',

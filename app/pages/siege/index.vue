@@ -115,7 +115,6 @@ const facilityEditorialKeyMap: Record<string, string> = {
   'facility-conference': 'site.facility.conference.images',
   'facility-academic': 'site.facility.academic.images',
   'facility-sports': 'site.facility.sports.images',
-  'facility-pool': 'site.facility.pool.images',
   'facility-hotel': 'site.facility.hotel.images',
 }
 
@@ -126,7 +125,6 @@ const facilityFeaturesKeyMap: Record<string, string> = {
   'facility-conference': 'site.facility.conference.features',
   'facility-academic': 'site.facility.academic.features',
   'facility-sports': 'site.facility.sports.features',
-  'facility-pool': 'site.facility.pool.features',
   'facility-hotel': 'site.facility.hotel.features',
 }
 
@@ -136,7 +134,6 @@ const facilityCapacityKeyMap: Record<string, string> = {
   'facility-library': 'site.facility.library.capacity',
   'facility-conference': 'site.facility.conference.capacity',
   'facility-academic': 'site.facility.academic.capacity',
-  'facility-pool': 'site.facility.pool.capacity',
   'facility-hotel': 'site.facility.hotel.capacity',
 }
 
@@ -261,14 +258,6 @@ const facilityColors = [
     bgDarkHex: '#991b1b',
     textDark: 'dark:text-brand-red-200',
     iconBg: 'bg-brand-red-400'
-  },
-  {
-    bgLight: 'bg-brand-blue-100',
-    bgDark: 'dark:bg-brand-blue-900',
-    bgLightHex: '#dbe4f8',
-    bgDarkHex: '#1a2e73',
-    textDark: 'dark:text-brand-blue-100',
-    iconBg: 'bg-brand-blue-500'
   }
 ]
 
