@@ -93,7 +93,8 @@ export const mockPaysBailleurs: PaysBailleur[] = [
     is_active: true,
     description_fr: 'Le Québec, cœur francophone de l\'Amérique du Nord, apporte son expertise en matière d\'éducation et de culture française, contribuant activement à la mission de l\'Université.',
     capital: 'Québec',
-    location: { lat: 46.8139, lng: -71.2080 }
+    location: { lat: 46.8139, lng: -71.2080 },
+    flag_image: '/images/flags/quebec.png'
   },
   {
     id: 'pb-eg',
