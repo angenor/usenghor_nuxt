@@ -13,7 +13,7 @@ const { getCampusTeam, getTeamMemberPhotoUrl, getTeamMemberFullName } = usePubli
 const { data: teamData, pending } = await useAsyncData(
   `campus-team-${props.campusId}`,
   () => getCampusTeam(props.campusId),
-  { server: true }
+  { lazy: true }
 )
 
 const teamMembers = computed(() => teamData.value || [])

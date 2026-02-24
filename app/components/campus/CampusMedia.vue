@@ -15,7 +15,7 @@ const baseUrl = (config.public.apiBase || config.public.apiBaseUrl || 'http://lo
 const { data: albums, pending, error } = await useAsyncData(
   `campus-${props.campusId}-albums`,
   () => getCampusAlbums(props.campusId),
-  { server: true, default: () => [] }
+  { lazy: true, default: () => [] }
 )
 
 // Resolve media URL

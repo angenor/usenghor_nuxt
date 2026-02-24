@@ -13,7 +13,7 @@ const { getCampusPartners, getPartnerLogoUrl, getPartnerFlagEmoji } = usePublicC
 const { data: partners, pending } = await useAsyncData(
   `campus-partners-${props.campusId}`,
   () => getCampusPartners(props.campusId),
-  { server: true }
+  { lazy: true }
 )
 
 const campusPartners = computed(() => partners.value || [])

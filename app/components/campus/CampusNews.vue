@@ -15,7 +15,7 @@ const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 const { data: newsResponse, pending } = await useAsyncData(
   `campus-news-${props.campusId}`,
   () => listPublishedNews({ campus_id: props.campusId, limit: 20 }),
-  { server: true }
+  { lazy: true }
 )
 
 const news = computed(() => newsResponse.value?.items || [])

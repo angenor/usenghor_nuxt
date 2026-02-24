@@ -14,7 +14,7 @@ const { listPublishedEvents } = usePublicEventsApi()
 const { data: eventsResponse, pending } = await useAsyncData(
   `campus-events-${props.campusId}`,
   () => listPublishedEvents({ campus_id: props.campusId, limit: 20 }),
-  { server: true }
+  { lazy: true }
 )
 
 const events = computed(() => eventsResponse.value?.items || [])
