@@ -410,7 +410,7 @@ onUnmounted(() => {
       >
         <div class="grid grid-rows-[1fr_auto] md:grid-rows-1 md:grid-cols-2 gap-8 w-full h-full">
           <!-- Media Stack -->
-          <div class="media-stack relative w-full h-full flex items-start justify-center pt-0 px-4 md:px-8 order-1 md:order-2">
+          <div class="media-stack relative w-full h-full flex items-center justify-center px-4 md:px-8 order-1 md:order-2">
             <template v-for="(media, mediaIndex) in event.media" :key="mediaIndex">
               <img
                 v-if="media.type === 'image' && media.src"
@@ -509,9 +509,8 @@ onUnmounted(() => {
   min-height: auto;
 }
 
-/* Media stack : aligner les images en haut pour être au niveau de la date */
+/* Media stack : centrer verticalement les images pendant le défilement */
 .year-section :deep(.media-stack) {
-  align-items: flex-start;
-  padding-top: 0;
+  align-items: center;
 }
 </style>
