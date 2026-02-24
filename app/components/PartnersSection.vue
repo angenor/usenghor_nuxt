@@ -32,6 +32,9 @@ const getFlagUrl = (code: string) => {
   if (code === 'QC') {
     return 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Flag_of_Quebec.svg/200px-Flag_of_Quebec.svg.png'
   }
+  if (code === 'BE') {
+    return '/images/flags/wallonie-bruxelles.svg'
+  }
   return `https://flagcdn.com/w160/${code.toLowerCase()}.png`
 }
 
