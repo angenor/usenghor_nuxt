@@ -88,6 +88,15 @@
       "careerOpportunities": "الفرص المهنية",
       "teachingMethods": "طرق التدريس",
       "requiredDegree": "المتطلبات الأساسية",
+      "targetAudience": "الفئة المستهدفة",
+      "format": "الصيغة",
+      "evaluationMethods": "طرق التقييم",
+      "formatLabels": {
+        "presential": "حضوري",
+        "distance": "عن بُعد",
+        "hybrid": "هجين",
+        "elearning": "تعليم إلكتروني"
+      },
       "associatedCalls": "التقدم للدعوة الجارية لهذا البرنامج",
       "callStatus": {
         "ongoing": "جارٍ",

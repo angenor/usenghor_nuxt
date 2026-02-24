@@ -18,6 +18,10 @@ export interface ProgramPublic {
   slug: string
   description: string | null
   teaching_methods: string | null
+  objectives: string | null
+  target_audience: string | null
+  format: string | null
+  evaluation_methods: string | null
   cover_image_external_id: string | null
   sector_external_id: string | null
   service_external_id: string | null

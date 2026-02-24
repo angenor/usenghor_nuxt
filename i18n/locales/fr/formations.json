@@ -88,6 +88,15 @@
       "careerOpportunities": "Débouchés professionnels",
       "teachingMethods": "Méthodes pédagogiques",
       "requiredDegree": "Prérequis",
+      "targetAudience": "Public cible",
+      "format": "Format",
+      "evaluationMethods": "Modalités d'évaluation",
+      "formatLabels": {
+        "presential": "Présentiel",
+        "distance": "Distanciel",
+        "hybrid": "Hybride",
+        "elearning": "E-learning"
+      },
       "associatedCalls": "Postuler à l'appel en cours de cette formation",
       "callStatus": {
         "ongoing": "En cours",

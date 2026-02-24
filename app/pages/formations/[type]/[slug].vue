@@ -188,6 +188,25 @@ const getLocalizedDescription = computed(() => {
 // Description parsée pour EditorJSRenderer
 const parsedDescription = computed(() => parseEditorContent(program.value?.description))
 
+// Modalités d'évaluation (parsées depuis JSON)
+const parsedEvaluationMethods = computed<string[]>(() => {
+  const raw = program.value?.evaluation_methods
+  if (!raw) return []
+  try {
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) return parsed
+  } catch {
+    if (raw.trim()) return raw.split(/[;,]\s*/).filter(Boolean)
+  }
+  return []
+})
+
+// Label du format
+const formatLabel = computed(() => {
+  if (!program.value?.format) return null
+  return t(`formations.detail.formatLabels.${program.value.format}`)
+})
+
 const getLocalizedDuration = computed(() => {
   if (!program.value) return ''
   return formatDuration(program.value.duration_months, locale.value)
@@ -406,6 +425,17 @@ const toggleSemester = (num: number) => {
                 </div>
               </div>
 
+              <!-- Format -->
+              <div v-if="formatLabel" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
+                  <font-awesome-icon icon="fa-solid fa-laptop-house" class="w-4 h-4" />
+                  {{ t('formations.detail.format') }}
+                </div>
+                <div class="font-bold text-gray-900 dark:text-white text-sm">
+                  {{ formatLabel }}
+                </div>
+              </div>
+
               <!-- Service -->
               <div v-if="program.service_name" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
                 <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
@@ -421,6 +451,31 @@ const toggleSemester = (num: number) => {
             <!-- Description -->
             <div v-if="parsedDescription" class="mb-8">
               <EditorJSRenderer :data="parsedDescription" />
+            </div>
+
+            <!-- Objectifs -->
+            <div v-if="program.objectives" class="mb-8">
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                {{ t('formations.detail.objectives') }}
+              </h2>
+              <div class="prose dark:prose-invert max-w-none">
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                  {{ program.objectives }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Public cible -->
+            <div v-if="program.target_audience" class="mb-8">
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                {{ t('formations.detail.targetAudience') }}
+              </h2>
+              <div class="flex items-start gap-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 p-5">
+                <font-awesome-icon icon="fa-solid fa-users" class="w-5 h-5 text-brand-blue-500 mt-0.5 flex-shrink-0" />
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                  {{ program.target_audience }}
+                </p>
+              </div>
             </div>
 
             <!-- Skills section -->
@@ -546,6 +601,26 @@ const toggleSemester = (num: number) => {
                   {{ program.teaching_methods }}
                 </p>
               </div>
+            </div>
+
+            <!-- Modalités d'évaluation -->
+            <div v-if="parsedEvaluationMethods.length > 0" class="mb-8">
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                {{ t('formations.detail.evaluationMethods') }}
+              </h2>
+              <ul class="space-y-3">
+                <li
+                  v-for="(method, index) in parsedEvaluationMethods"
+                  :key="index"
+                  class="flex items-start gap-3 text-gray-700 dark:text-gray-300"
+                >
+                  <font-awesome-icon
+                    icon="fa-solid fa-clipboard-check"
+                    class="w-5 h-5 text-brand-blue-500 mt-0.5 flex-shrink-0"
+                  />
+                  <span class="font-medium">{{ method }}</span>
+                </li>
+              </ul>
             </div>
 
             <!-- Back button -->

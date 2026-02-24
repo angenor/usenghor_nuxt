@@ -88,6 +88,15 @@
       "careerOpportunities": "Career Opportunities",
       "teachingMethods": "Teaching Methods",
       "requiredDegree": "Prerequisites",
+      "targetAudience": "Target Audience",
+      "format": "Format",
+      "evaluationMethods": "Assessment Methods",
+      "formatLabels": {
+        "presential": "In-person",
+        "distance": "Distance Learning",
+        "hybrid": "Hybrid",
+        "elearning": "E-learning"
+      },
       "associatedCalls": "Apply to the current call for this program",
       "callStatus": {
         "ongoing": "Ongoing",
