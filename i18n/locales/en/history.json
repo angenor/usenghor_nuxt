@@ -93,6 +93,16 @@
         "title": "30 Years of Excellence",
         "description": "Senghor University celebrates three decades of training African executives.",
         "phase": "Current"
+      },
+      "2025": {
+        "title": "Consolidation (2021-2025)",
+        "description": "Building on the previous period, the University restructures and refines its priorities around training excellence, entrepreneurial university status and strategic partnerships, adopting a new internal organization with new cross-cutting services.",
+        "phase": "Consolidation"
+      },
+      "2030": {
+        "title": "Transformation (2026-2030)",
+        "description": "Supported by the new Borg El Arab campus, the University undertakes an institutional scaling-up around three integrating axes — training, governing, outreach — to establish itself as an African and Francophone center of excellence with measurable continental impact.",
+        "phase": "Transformation"
       }
     },
     "leadership": {

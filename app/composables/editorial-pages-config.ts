@@ -1065,6 +1065,40 @@ export const historyPageSections: PageSection[] = [
       { key: 'history.timeline.2020.image3', label: 'Image 3', description: 'Troisième image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.2020.image3', editable: true },
     ],
   },
+  {
+    id: 'historypage-timeline-2025',
+    name: 'Timeline - 2025',
+    description: 'Consolidation (2021-2025)',
+    icon: 'calendar',
+    color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
+    editorialKeys: ['history.timeline.2025.year', 'history.timeline.2025.title', 'history.timeline.2025.description', 'history.timeline.2025.phase', 'history.timeline.2025.image1', 'history.timeline.2025.image2', 'history.timeline.2025.image3'],
+    fields: [
+      { key: 'history.timeline.2025.year', label: 'Année', description: 'Année affichée dans la timeline (ex: 2025)', type: 'text', editorialKey: 'history.timeline.2025.year', editable: true },
+      { key: 'history.timeline.2025.title', label: 'Titre', description: 'Titre de l\'événement 2025', type: 'text', editorialKey: 'history.timeline.2025.title', editable: true },
+      { key: 'history.timeline.2025.description', label: 'Description', description: 'Description de l\'événement', type: 'textarea', editorialKey: 'history.timeline.2025.description', editable: true },
+      { key: 'history.timeline.2025.phase', label: 'Phase', description: 'Phase historique (ex: Consolidation)', type: 'text', editorialKey: 'history.timeline.2025.phase', editable: true },
+      { key: 'history.timeline.2025.image1', label: 'Image 1', description: 'Première image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.2025.image1', editable: true },
+      { key: 'history.timeline.2025.image2', label: 'Image 2', description: 'Deuxième image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.2025.image2', editable: true },
+      { key: 'history.timeline.2025.image3', label: 'Image 3', description: 'Troisième image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.2025.image3', editable: true },
+    ],
+  },
+  {
+    id: 'historypage-timeline-2030',
+    name: 'Timeline - 2030',
+    description: 'Transformation (2026-2030)',
+    icon: 'calendar',
+    color: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+    editorialKeys: ['history.timeline.2030.year', 'history.timeline.2030.title', 'history.timeline.2030.description', 'history.timeline.2030.phase', 'history.timeline.2030.image1', 'history.timeline.2030.image2', 'history.timeline.2030.image3'],
+    fields: [
+      { key: 'history.timeline.2030.year', label: 'Année', description: 'Année affichée dans la timeline (ex: 2030)', type: 'text', editorialKey: 'history.timeline.2030.year', editable: true },
+      { key: 'history.timeline.2030.title', label: 'Titre', description: 'Titre de l\'événement 2030', type: 'text', editorialKey: 'history.timeline.2030.title', editable: true },
+      { key: 'history.timeline.2030.description', label: 'Description', description: 'Description de l\'événement', type: 'textarea', editorialKey: 'history.timeline.2030.description', editable: true },
+      { key: 'history.timeline.2030.phase', label: 'Phase', description: 'Phase historique (ex: Transformation)', type: 'text', editorialKey: 'history.timeline.2030.phase', editable: true },
+      { key: 'history.timeline.2030.image1', label: 'Image 1', description: 'Première image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.2030.image1', editable: true },
+      { key: 'history.timeline.2030.image2', label: 'Image 2', description: 'Deuxième image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.2030.image2', editable: true },
+      { key: 'history.timeline.2030.image3', label: 'Image 3', description: 'Troisième image illustrative (ratio 16:9)', type: 'image', editorialKey: 'history.timeline.2030.image3', editable: true },
+    ],
+  },
 ]
 
 // ============================================================================

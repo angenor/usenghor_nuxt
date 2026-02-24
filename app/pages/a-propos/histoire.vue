@@ -51,7 +51,11 @@ const phaseColors: Record<string, string> = {
   'الإشعاع': '#E3F2FD',
   'Actuel': '#FCE4EC',        // Rose - Phase actuelle
   'Current': '#FCE4EC',
-  'الحالي': '#FCE4EC'
+  'الحالي': '#FCE4EC',
+  'Consolidation': '#E8EAF6', // Indigo clair - Phase consolidation
+  'التعزيز': '#E8EAF6',
+  'Transformation': '#FFF3E0', // Orange clair - Phase transformation
+  'التحول': '#FFF3E0',
 }
 
 // Timeline events data from editorial content (4 étapes clés)
@@ -98,6 +102,28 @@ const timelineEvents = computed(() => [
       resolveImage('history.timeline.2020.image1', null, '30 ans'),
       resolveImage('history.timeline.2020.image2', null, 'Alumni'),
       resolveImage('history.timeline.2020.image3', null, 'Impact'),
+    ]
+  },
+  {
+    year: getRawContent('history.timeline.2025.year') || '2025',
+    title: getContent('history.timeline.2025.title'),
+    description: getContent('history.timeline.2025.description'),
+    bgColor: phaseColors[getContent('history.timeline.2025.phase')] || '#E8EAF6',
+    media: [
+      resolveImage('history.timeline.2025.image1', null, 'Consolidation'),
+      resolveImage('history.timeline.2025.image2', null, 'Excellence'),
+      resolveImage('history.timeline.2025.image3', null, 'Restructuration'),
+    ]
+  },
+  {
+    year: getRawContent('history.timeline.2030.year') || '2030',
+    title: getContent('history.timeline.2030.title'),
+    description: getContent('history.timeline.2030.description'),
+    bgColor: phaseColors[getContent('history.timeline.2030.phase')] || '#FFF3E0',
+    media: [
+      resolveImage('history.timeline.2030.image1', null, 'Borg El Arab'),
+      resolveImage('history.timeline.2030.image2', null, 'Transformation'),
+      resolveImage('history.timeline.2030.image3', null, 'Impact continental'),
     ]
   }
 ])
@@ -179,9 +205,9 @@ onMounted(() => {
   if (timelineRef.value) {
     ScrollTrigger.create({
       trigger: timelineRef.value,
-      // Start après toutes les sections pinnées (4 sections x 100% = 400%)
-      start: 'bottom+=400% bottom',
-      end: 'bottom+=400% top',
+      // Start après toutes les sections pinnées (6 sections x 100% = 600%)
+      start: 'bottom+=600% bottom',
+      end: 'bottom+=600% top',
       onEnter: () => {
         // Quand on quitte la timeline, transformer sticky en relative pour scroller avec footer
         if (yearDisplayRef.value) {

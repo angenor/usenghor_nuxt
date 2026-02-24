@@ -38,6 +38,8 @@ const timelineYearKeys: Record<string, string> = {
   'historypage-timeline-2002': 'history.timeline.2002.year',
   'historypage-timeline-2016': 'history.timeline.2016.year',
   'historypage-timeline-2020': 'history.timeline.2020.year',
+  'historypage-timeline-2025': 'history.timeline.2025.year',
+  'historypage-timeline-2030': 'history.timeline.2030.year',
 }
 
 // Pages avec noms de sections timeline dynamiques (reflètent l'année éditée)

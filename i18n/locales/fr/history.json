@@ -93,6 +93,16 @@
         "title": "30 ans d'excellence",
         "description": "L'Université Senghor célèbre trois décennies de formation de cadres africains.",
         "phase": "Actuel"
+      },
+      "2025": {
+        "title": "Consolidation (2021-2025)",
+        "description": "En continuité avec la période précédente, l'Université restructure et affine ses priorités autour de l'excellence des formations, du statut d'université entrepreneuriale et du partenariat stratégique et adopte une nouvelle organisation interne comprenant des nouveaux services transversaux.",
+        "phase": "Consolidation"
+      },
+      "2030": {
+        "title": "Transformation (2026-2030)",
+        "description": "Appuyée sur le nouveau campus de Borg El Arab, l'Université engage une montée en puissance institutionnelle autour de trois axes intégrateurs — former, gouverner, rayonner — pour s'affirmer comme centre d'excellence africain et francophone à impact continental mesurable.",
+        "phase": "Transformation"
       }
     },
     "leadership": {
