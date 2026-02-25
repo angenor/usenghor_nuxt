@@ -119,6 +119,33 @@ const engagementsTitle = computed(() => getContent('about.engagements.title'))
 // Charter
 const charterDownload = computed(() => getContent('about.charter.download'))
 
+// Discover links (editorial overrides)
+const discoverTitle = computed(() => getContent('about.discover.title'))
+const discoverStrategyLink = computed(() => ({
+  icon: getRawContent('about.discover.strategy.icon') || undefined,
+  title: getRawContent('about.discover.strategy.title') || undefined,
+  description: getRawContent('about.discover.strategy.description') || undefined,
+  url: getRawContent('about.discover.strategy.url') || undefined,
+}))
+const discoverEngagementsLink = computed(() => ({
+  icon: getRawContent('about.discover.engagements.icon') || undefined,
+  title: getRawContent('about.discover.engagements.title') || undefined,
+  description: getRawContent('about.discover.engagements.description') || undefined,
+  url: getRawContent('about.discover.engagements.url') || undefined,
+}))
+const discoverOrganizationLink = computed(() => ({
+  icon: getRawContent('about.discover.organization.icon') || undefined,
+  title: getRawContent('about.discover.organization.title') || undefined,
+  description: getRawContent('about.discover.organization.description') || undefined,
+  url: getRawContent('about.discover.organization.url') || undefined,
+}))
+const discoverCareersLink = computed(() => ({
+  icon: getRawContent('about.discover.careers.icon') || undefined,
+  title: getRawContent('about.discover.careers.title') || undefined,
+  description: getRawContent('about.discover.careers.description') || undefined,
+  url: getRawContent('about.discover.careers.url') || undefined,
+}))
+
 // Breadcrumb
 const breadcrumb = computed(() => [
   { label: t('nav.home'), to: '/' },
@@ -153,7 +180,13 @@ const breadcrumb = computed(() => [
     <SectionStats :stats="stats" />
 
     <!-- Links to other sections -->
-    <SectionAboutLinks />
+    <SectionAboutLinks
+      :section-title="discoverTitle"
+      :strategy-link="discoverStrategyLink"
+      :engagements-link="discoverEngagementsLink"
+      :organization-link="discoverOrganizationLink"
+      :careers-link="discoverCareersLink"
+    />
 
     <!-- Engagements Section -->
     <SectionEngagements

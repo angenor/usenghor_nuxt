@@ -266,6 +266,43 @@ export const aboutPageSections: PageSection[] = [
     ],
   },
   {
+    id: 'about-discover',
+    name: 'Découvrir l\'Université (Liens)',
+    description: 'Les 4 cartes de navigation vers les sous-pages (icône, titre, description, lien)',
+    icon: 'compass',
+    color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
+    editorialKeys: [
+      'about.discover.title',
+      'about.discover.strategy.icon', 'about.discover.strategy.title', 'about.discover.strategy.description', 'about.discover.strategy.url',
+      'about.discover.engagements.icon', 'about.discover.engagements.title', 'about.discover.engagements.description', 'about.discover.engagements.url',
+      'about.discover.organization.icon', 'about.discover.organization.title', 'about.discover.organization.description', 'about.discover.organization.url',
+      'about.discover.careers.icon', 'about.discover.careers.title', 'about.discover.careers.description', 'about.discover.careers.url',
+    ],
+    fields: [
+      { key: 'about.discover.title', label: 'Titre de la section', description: 'Ex: "Découvrir l\'Université"', type: 'text', editorialKey: 'about.discover.title', editable: true },
+      // Stratégie
+      { key: 'about.discover.strategy.icon', label: 'Stratégie - Icône', description: 'Classe Font Awesome (ex: fa-solid fa-chess)', type: 'text', editorialKey: 'about.discover.strategy.icon', editable: true },
+      { key: 'about.discover.strategy.title', label: 'Stratégie - Titre', description: 'Titre de la carte Stratégie', type: 'text', editorialKey: 'about.discover.strategy.title', editable: true },
+      { key: 'about.discover.strategy.description', label: 'Stratégie - Description', description: 'Résumé affiché sur la carte', type: 'textarea', editorialKey: 'about.discover.strategy.description', editable: true },
+      { key: 'about.discover.strategy.url', label: 'Stratégie - Lien', description: 'URL de destination (ex: /a-propos/strategie)', type: 'text', editorialKey: 'about.discover.strategy.url', editable: true },
+      // Engagements
+      { key: 'about.discover.engagements.icon', label: 'Engagements - Icône', description: 'Classe Font Awesome (ex: fa-solid fa-heart)', type: 'text', editorialKey: 'about.discover.engagements.icon', editable: true },
+      { key: 'about.discover.engagements.title', label: 'Engagements - Titre', description: 'Titre de la carte Engagements', type: 'text', editorialKey: 'about.discover.engagements.title', editable: true },
+      { key: 'about.discover.engagements.description', label: 'Engagements - Description', description: 'Résumé affiché sur la carte', type: 'textarea', editorialKey: 'about.discover.engagements.description', editable: true },
+      { key: 'about.discover.engagements.url', label: 'Engagements - Lien', description: 'URL ou ancre (ex: #engagements)', type: 'text', editorialKey: 'about.discover.engagements.url', editable: true },
+      // Organisation
+      { key: 'about.discover.organization.icon', label: 'Organisation - Icône', description: 'Classe Font Awesome (ex: fa-solid fa-sitemap)', type: 'text', editorialKey: 'about.discover.organization.icon', editable: true },
+      { key: 'about.discover.organization.title', label: 'Organisation - Titre', description: 'Titre de la carte Organisation', type: 'text', editorialKey: 'about.discover.organization.title', editable: true },
+      { key: 'about.discover.organization.description', label: 'Organisation - Description', description: 'Résumé affiché sur la carte', type: 'textarea', editorialKey: 'about.discover.organization.description', editable: true },
+      { key: 'about.discover.organization.url', label: 'Organisation - Lien', description: 'URL de destination (ex: /a-propos/organisation)', type: 'text', editorialKey: 'about.discover.organization.url', editable: true },
+      // Nous rejoindre
+      { key: 'about.discover.careers.icon', label: 'Nous rejoindre - Icône', description: 'Classe Font Awesome (ex: fa-solid fa-briefcase)', type: 'text', editorialKey: 'about.discover.careers.icon', editable: true },
+      { key: 'about.discover.careers.title', label: 'Nous rejoindre - Titre', description: 'Titre de la carte Nous rejoindre', type: 'text', editorialKey: 'about.discover.careers.title', editable: true },
+      { key: 'about.discover.careers.description', label: 'Nous rejoindre - Description', description: 'Résumé affiché sur la carte', type: 'textarea', editorialKey: 'about.discover.careers.description', editable: true },
+      { key: 'about.discover.careers.url', label: 'Nous rejoindre - Lien', description: 'URL de destination (ex: /nousrejoindre)', type: 'text', editorialKey: 'about.discover.careers.url', editable: true },
+    ],
+  },
+  {
     id: 'about-engagements',
     name: 'Section Engagements & Valeurs',
     description: 'Les 5 valeurs fondamentales et la charte éthique',

@@ -1,40 +1,61 @@
 <script setup lang="ts">
+interface DiscoverLink {
+  icon: string
+  title: string
+  description: string
+  url: string
+}
+
+const props = withDefaults(defineProps<{
+  sectionTitle?: string
+  strategyLink?: Partial<DiscoverLink>
+  engagementsLink?: Partial<DiscoverLink>
+  organizationLink?: Partial<DiscoverLink>
+  careersLink?: Partial<DiscoverLink>
+}>(), {
+  sectionTitle: '',
+  strategyLink: () => ({}),
+  engagementsLink: () => ({}),
+  organizationLink: () => ({}),
+  careersLink: () => ({}),
+})
+
 const { t } = useI18n()
 const localePath = useLocalePath()
 
 const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.2 })
 
-// Links configuration matching TabsNav (excluding current page)
+// Links configuration with editorial overrides (fallback to i18n)
 const links = computed(() => [
   {
     key: 'strategy',
-    title: t('about.tabs.strategy'),
-    summary: t('about.preview.strategy.summary'),
-    to: '/a-propos/strategie',
-    icon: 'fa-solid fa-chess'
+    title: props.strategyLink.title || t('about.tabs.strategy'),
+    summary: props.strategyLink.description || t('about.preview.strategy.summary'),
+    to: props.strategyLink.url || '/a-propos/strategie',
+    icon: props.strategyLink.icon || 'fa-solid fa-chess',
   },
   {
     key: 'engagements',
-    title: t('about.tabs.engagements'),
-    summary: t('about.preview.governance.summary'),
-    to: '#engagements',
-    icon: 'fa-solid fa-heart',
-    isAnchor: true
+    title: props.engagementsLink.title || t('about.tabs.engagements'),
+    summary: props.engagementsLink.description || t('about.preview.governance.summary'),
+    to: props.engagementsLink.url || '#engagements',
+    icon: props.engagementsLink.icon || 'fa-solid fa-heart',
+    isAnchor: (props.engagementsLink.url || '#engagements').startsWith('#'),
   },
   {
     key: 'organization',
-    title: t('about.tabs.organization'),
-    summary: t('about.preview.organization.summary'),
-    to: '/a-propos/organisation',
-    icon: 'fa-solid fa-sitemap'
+    title: props.organizationLink.title || t('about.tabs.organization'),
+    summary: props.organizationLink.description || t('about.preview.organization.summary'),
+    to: props.organizationLink.url || '/a-propos/organisation',
+    icon: props.organizationLink.icon || 'fa-solid fa-sitemap',
   },
   {
     key: 'careers',
-    title: t('about.tabs.careers'),
-    summary: t('about.preview.careers.summary'),
-    to: '/nousrejoindre',
-    icon: 'fa-solid fa-briefcase'
-  }
+    title: props.careersLink.title || t('about.tabs.careers'),
+    summary: props.careersLink.description || t('about.preview.careers.summary'),
+    to: props.careersLink.url || '/nousrejoindre',
+    icon: props.careersLink.icon || 'fa-solid fa-briefcase',
+  },
 ])
 
 // Scroll to anchor
@@ -56,7 +77,7 @@ const scrollToAnchor = (anchor: string) => {
       <div class="text-center mb-12">
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
           <span class="relative inline-block">
-            {{ t('about.preview.title') }}
+            {{ sectionTitle || t('about.preview.title') }}
             <span class="absolute -bottom-2 left-0 w-1/3 h-1 bg-gradient-to-r from-brand-blue-500 to-brand-blue-300 rounded-full"></span>
           </span>
         </h2>
