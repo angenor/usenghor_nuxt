@@ -76,6 +76,8 @@
       "diploma": "Diplôme",
       "department": "Département",
       "service": "Service",
+      "campus": "Campus",
+      "country": "Pays",
       "field": "Champ disciplinaire",
       "apply": "Candidater",
       "applicationDeadline": "Date limite de candidature",

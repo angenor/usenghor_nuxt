@@ -28,6 +28,8 @@ export interface ProgramPublic {
   service_name: string | null
   campus_external_id: string | null
   campus_name: string | null
+  campus_city: string | null
+  country_name: string | null
   field_id: string | null
   field_name: string | null
   type: ProgramType

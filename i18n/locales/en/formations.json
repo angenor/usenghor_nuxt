@@ -76,6 +76,8 @@
       "diploma": "Degree",
       "department": "Department",
       "service": "Service",
+      "campus": "Campus",
+      "country": "Country",
       "field": "Disciplinary field",
       "apply": "Apply Now",
       "applicationDeadline": "Application Deadline",
