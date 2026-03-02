@@ -112,6 +112,14 @@ const typeBadgeColors: Record<string, string> = {
   other: 'bg-gray-600'
 }
 
+// Normaliser l'URL du lien d'inscription (ajouter https:// si absent)
+const normalizedRegistrationLink = computed(() => {
+  const link = event.value?.registration_link
+  if (!link) return null
+  if (/^https?:\/\//i.test(link)) return link
+  return `https://${link}`
+})
+
 // Related events (upcoming, excluding current)
 const relatedEvents = computed(() => relatedEventsData.value)
 
@@ -459,8 +467,8 @@ const parsedContent = computed(() => {
 
               <!-- Lien externe -->
               <a
-                v-if="event.registration_link"
-                :href="event.registration_link"
+                v-if="normalizedRegistrationLink"
+                :href="normalizedRegistrationLink"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-blue-700"

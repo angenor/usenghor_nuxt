@@ -284,7 +284,9 @@ const saveForm = async () => {
       latitude: form.value.latitude ?? null,
       longitude: form.value.longitude ?? null,
       registration_required: form.value.registration_required,
-      registration_link: form.value.registration_link || null,
+      registration_link: form.value.registration_link
+        ? (/^https?:\/\//i.test(form.value.registration_link) ? form.value.registration_link : `https://${form.value.registration_link}`)
+        : null,
       max_attendees: form.value.max_attendees ?? null,
       // Les champs external_id doivent être des UUIDs valides ou null
       cover_image_external_id: toUuidOrNull(form.value.cover_image_external_id),
