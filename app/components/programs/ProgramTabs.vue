@@ -36,7 +36,7 @@ const getTabUrl = (tabId: string) => {
           ]"
         >
           <font-awesome-icon :icon="tab.icon" class="w-4 h-4" />
-          <span class="hidden sm:inline">{{ tab.label() }}</span>
+          <span>{{ tab.label() }}</span>
         </NuxtLink>
       </nav>
     </div>

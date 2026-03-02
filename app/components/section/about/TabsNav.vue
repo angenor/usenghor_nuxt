@@ -88,7 +88,7 @@ const scrollToAnchor = async (anchor: string, anchorPage?: string) => {
                 :icon="tab.icon"
                 class="w-4 h-4 text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300 transition-colors duration-200"
               />
-              <span class="hidden sm:inline">{{ tab.label }}</span>
+              <span>{{ tab.label }}</span>
             </button>
 
             <!-- Route link -->
@@ -109,7 +109,7 @@ const scrollToAnchor = async (anchor: string, anchorPage?: string) => {
                   isActive(tab.to, tab.exact) || (tab.key === 'about' && isOnSubPage) ? 'text-brand-blue-500' : 'text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300'
                 ]"
               />
-              <span class="hidden sm:inline">{{ tab.label }}</span>
+              <span>{{ tab.label }}</span>
             </NuxtLink>
           </template>
         </div>
