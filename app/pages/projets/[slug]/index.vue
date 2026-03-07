@@ -285,13 +285,19 @@ const breadcrumb = computed(() => [
                 </div>
 
                 <!-- Beneficiaries -->
-                <div v-if="project.beneficiaries?.length" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-                  <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
+                <div v-if="project.beneficiaries?.length" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 col-span-2 md:col-span-4">
+                  <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-2">
                     <font-awesome-icon icon="fa-solid fa-users" class="w-4 h-4" />
                     {{ t('projets.detail.beneficiaries') }}
                   </div>
-                  <div class="font-bold text-gray-900 dark:text-white text-sm">
-                    {{ project.beneficiaries.join(', ') }}
+                  <div class="flex flex-wrap gap-2">
+                    <span
+                      v-for="b in project.beneficiaries"
+                      :key="b"
+                      class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-brand-blue-100 text-brand-blue-800 dark:bg-brand-blue-900/30 dark:text-brand-blue-300"
+                    >
+                      {{ b }}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -381,9 +387,6 @@ const breadcrumb = computed(() => [
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
                   {{ getLocalizedTitle }}
                 </h3>
-                <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">
-                  {{ getLocalizedSummary }}
-                </p>
                 <div class="space-y-3 text-sm">
                   <div class="flex items-center justify-between">
                     <span class="text-gray-500 dark:text-gray-400">{{ t('projets.filters.status') }}</span>
@@ -405,11 +408,17 @@ const breadcrumb = computed(() => [
                       {{ firstCategoryName }}
                     </span>
                   </div>
-                  <div v-if="project.beneficiaries?.length" class="flex items-center justify-between">
+                  <div v-if="project.beneficiaries?.length">
                     <span class="text-gray-500 dark:text-gray-400">{{ t('projets.detail.beneficiaries') }}</span>
-                    <span class="font-medium text-gray-900 dark:text-white">
-                      {{ project.beneficiaries.join(', ') }}
-                    </span>
+                    <div class="mt-1.5 flex flex-wrap gap-1.5">
+                      <span
+                        v-for="b in project.beneficiaries"
+                        :key="b"
+                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-brand-blue-100 text-brand-blue-800 dark:bg-brand-blue-900/30 dark:text-brand-blue-300"
+                      >
+                        {{ b }}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
