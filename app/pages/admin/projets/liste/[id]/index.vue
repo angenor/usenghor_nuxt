@@ -228,12 +228,14 @@ const parsedDescription = computed<OutputData | null>(() => {
         </div>
 
         <!-- Bénéficiaires -->
-        <div v-if="project.beneficiaries" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+        <div v-if="project.beneficiaries?.length" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
           <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
             <font-awesome-icon :icon="['fas', 'users']" class="h-5 w-5 text-teal-500" />
             Bénéficiaires
           </h2>
-          <p class="text-gray-600 dark:text-gray-300">{{ project.beneficiaries }}</p>
+          <ul class="list-inside list-disc space-y-1 text-gray-600 dark:text-gray-300">
+            <li v-for="b in project.beneficiaries" :key="b">{{ b }}</li>
+          </ul>
         </div>
 
         <!-- Partenaires -->

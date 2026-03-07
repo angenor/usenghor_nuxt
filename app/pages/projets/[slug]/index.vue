@@ -285,13 +285,13 @@ const breadcrumb = computed(() => [
                 </div>
 
                 <!-- Beneficiaries -->
-                <div v-if="project.beneficiaries" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                <div v-if="project.beneficiaries?.length" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
                   <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
                     <font-awesome-icon icon="fa-solid fa-users" class="w-4 h-4" />
                     {{ t('projets.detail.beneficiaries') }}
                   </div>
                   <div class="font-bold text-gray-900 dark:text-white text-sm">
-                    {{ project.beneficiaries }}
+                    {{ project.beneficiaries.join(', ') }}
                   </div>
                 </div>
               </div>
@@ -405,10 +405,10 @@ const breadcrumb = computed(() => [
                       {{ firstCategoryName }}
                     </span>
                   </div>
-                  <div v-if="project.beneficiaries" class="flex items-center justify-between">
+                  <div v-if="project.beneficiaries?.length" class="flex items-center justify-between">
                     <span class="text-gray-500 dark:text-gray-400">{{ t('projets.detail.beneficiaries') }}</span>
                     <span class="font-medium text-gray-900 dark:text-white">
-                      {{ project.beneficiaries }}
+                      {{ project.beneficiaries.join(', ') }}
                     </span>
                   </div>
                 </div>

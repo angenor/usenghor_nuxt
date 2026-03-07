@@ -57,7 +57,7 @@ export interface ProjectRead {
   end_date: string | null
   budget: number | null
   currency: string
-  beneficiaries: string | null
+  beneficiaries: string[] | null
   status: ProjectStatus
   publication_status: PublicationStatus
   is_fundraising_featured: boolean
@@ -87,7 +87,7 @@ export interface ProjectCreatePayload {
   end_date?: string | null
   budget?: number | null
   currency?: string
-  beneficiaries?: string | null
+  beneficiaries?: string[] | null
   status?: ProjectStatus
   publication_status?: PublicationStatus
   category_ids?: string[] | null
@@ -109,7 +109,7 @@ export interface ProjectUpdatePayload {
   end_date?: string | null
   budget?: number | null
   currency?: string
-  beneficiaries?: string | null
+  beneficiaries?: string[] | null
   status?: ProjectStatus
   publication_status?: PublicationStatus
   category_ids?: string[] | null

@@ -49,7 +49,7 @@ const form = reactive({
   end_date: '',
   budget: null as number | null,
   currency: 'EUR',
-  beneficiaries: '',
+  beneficiaries: [] as string[],
   category_ids: [] as string[],
   status: 'planned' as ProjectStatus,
   publication_status: 'draft' as PublicationStatus,
@@ -65,6 +65,19 @@ watch(() => form.title, (title) => {
     form.slug = slugify(title)
   }
 })
+
+// === GESTION DES BÉNÉFICIAIRES ===
+const newBeneficiary = ref('')
+const addBeneficiary = () => {
+  const value = newBeneficiary.value.trim()
+  if (value && !form.beneficiaries.includes(value)) {
+    form.beneficiaries.push(value)
+  }
+  newBeneficiary.value = ''
+}
+const removeBeneficiary = (index: number) => {
+  form.beneficiaries.splice(index, 1)
+}
 
 // === GESTION DES CATÉGORIES ===
 const toggleCategory = (categoryId: string) => {
@@ -162,7 +175,7 @@ const saveForm = async () => {
       end_date: form.end_date || null,
       budget: form.budget,
       currency: form.currency,
-      beneficiaries: form.beneficiaries || null,
+      beneficiaries: form.beneficiaries.length > 0 ? form.beneficiaries : null,
       category_ids: form.category_ids.length > 0 ? form.category_ids : null,
       status: form.status,
       publication_status: form.publication_status,
@@ -393,12 +406,38 @@ const tabs = [
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Bénéficiaires
             </label>
-            <textarea
-              v-model="form.beneficiaries"
-              rows="2"
-              placeholder="Décrivez les bénéficiaires du projet..."
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            />
+            <div class="flex gap-2">
+              <input
+                v-model="newBeneficiary"
+                type="text"
+                placeholder="Ajouter un bénéficiaire..."
+                class="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                @keydown.enter.prevent="addBeneficiary"
+              />
+              <button
+                type="button"
+                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                @click="addBeneficiary"
+              >
+                Ajouter
+              </button>
+            </div>
+            <div v-if="form.beneficiaries.length > 0" class="mt-2 flex flex-wrap gap-2">
+              <span
+                v-for="(b, index) in form.beneficiaries"
+                :key="index"
+                class="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+              >
+                {{ b }}
+                <button
+                  type="button"
+                  class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
+                  @click="removeBeneficiary(index)"
+                >
+                  <font-awesome-icon :icon="['fas', 'xmark']" class="h-3 w-3" />
+                </button>
+              </span>
+            </div>
           </div>
         </div>
       </div>
