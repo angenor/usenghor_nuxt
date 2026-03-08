@@ -271,7 +271,7 @@ function getStatusColor(published: boolean) {
           <div class="mb-4 flex items-center justify-between">
             <h2 class="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
               <font-awesome-icon icon="fa-solid fa-star" class="w-5 h-5 text-yellow-500" />
-              Compétences acquises
+              Compétences visées
               <span class="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-sm font-normal text-gray-600 dark:bg-gray-700 dark:text-gray-400">
                 {{ skills.length }}
               </span>

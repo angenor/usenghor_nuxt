@@ -329,7 +329,7 @@ onMounted(async () => {
           Compétences par programme
         </h1>
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Gérez les compétences acquises pour chaque programme de formation
+          Gérez les compétences visées pour chaque programme de formation
         </p>
       </div>
 
