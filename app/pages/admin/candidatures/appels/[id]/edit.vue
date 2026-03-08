@@ -341,6 +341,38 @@ const removeCoverage = (index: number) => {
   coverageItems.value.splice(index, 1)
 }
 
+const showCoverageModal = ref(false)
+const editingCoverageIndex = ref<number | null>(null)
+const editingCoverage = ref({ item: '', description: '' })
+
+const openEditCoverageModal = (index: number) => {
+  const c = coverageItems.value[index]
+  if (!c) return
+  editingCoverageIndex.value = index
+  editingCoverage.value = {
+    item: c.item,
+    description: c.description || '',
+  }
+  showCoverageModal.value = true
+}
+
+const closeCoverageModal = () => {
+  showCoverageModal.value = false
+  editingCoverageIndex.value = null
+  editingCoverage.value = { item: '', description: '' }
+}
+
+const saveCoverageItem = () => {
+  if (!editingCoverage.value.item.trim()) return
+  if (editingCoverageIndex.value === null) return
+  const c = coverageItems.value[editingCoverageIndex.value]
+  if (c) {
+    c.item = editingCoverage.value.item
+    c.description = editingCoverage.value.description || null
+  }
+  closeCoverageModal()
+}
+
 // === GESTION DES DOCUMENTS ===
 const newDocument = ref({
   document_name: '',
@@ -1076,12 +1108,22 @@ const tabs = [
                 <p class="font-medium text-gray-700 dark:text-gray-300">{{ item.item }}</p>
                 <p v-if="item.description" class="text-sm text-gray-500 dark:text-gray-400">{{ item.description }}</p>
               </div>
-              <button
-                class="text-red-500 hover:text-red-700"
-                @click="removeCoverage(index)"
-              >
-                <font-awesome-icon icon="fa-solid fa-trash" class="h-4 w-4" />
-              </button>
+              <div class="flex gap-2">
+                <button
+                  class="text-blue-500 hover:text-blue-700"
+                  title="Modifier"
+                  @click="openEditCoverageModal(index)"
+                >
+                  <font-awesome-icon icon="fa-solid fa-pen" class="h-4 w-4" />
+                </button>
+                <button
+                  class="text-red-500 hover:text-red-700"
+                  title="Supprimer"
+                  @click="removeCoverage(index)"
+                >
+                  <font-awesome-icon icon="fa-solid fa-trash" class="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1390,6 +1432,77 @@ const tabs = [
       </div>
     </div>
   </div>
+
+  <!-- Modal d'édition d'une prise en charge -->
+  <Teleport to="body">
+    <div
+      v-if="showCoverageModal"
+      class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4"
+      @click.self="closeCoverageModal"
+    >
+      <div class="w-full max-w-lg rounded-lg bg-white shadow-xl dark:bg-gray-800">
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+            Modifier la prise en charge
+          </h3>
+          <button
+            type="button"
+            class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+            @click="closeCoverageModal"
+          >
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div class="space-y-4 p-4">
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Élément <span class="text-red-500">*</span>
+            </label>
+            <input
+              v-model="editingCoverage.item"
+              type="text"
+              placeholder="Élément (ex: Frais de scolarité)"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Description
+            </label>
+            <input
+              v-model="editingCoverage.description"
+              type="text"
+              placeholder="Description (optionnel)"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex justify-end gap-3 border-t border-gray-200 p-4 dark:border-gray-700">
+          <button
+            type="button"
+            class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+            @click="closeCoverageModal"
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            @click="saveCoverageItem"
+          >
+            Enregistrer
+          </button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 
   <!-- Modal d'édition d'une étape du calendrier -->
   <Teleport to="body">
