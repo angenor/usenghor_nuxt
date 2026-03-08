@@ -723,7 +723,7 @@ const toggleSemester = (num: number) => {
 
                 <!-- Associated application calls -->
                 <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                  <h4 class="text-base font-bold text-brand-red-600 dark:text-brand-red-400 mb-4">
+                  <h4 class="text-base font-bold text-brand-red-600 dark:text-brand-red-400 mb-4 text-center">
                     {{ t('formations.detail.associatedCalls') }}
                   </h4>
 
@@ -812,7 +812,7 @@ const toggleSemester = (num: number) => {
               <div class="overflow-hidden h-32">
                 <img
                   v-if="related.cover_image_external_id"
-                  :src="`/api/public/media/${related.cover_image_external_id}/download?variant=low`"
+                  :src="`/api/public/media/${related.cover_image_external_id}/download?variant=medium`"
                   :alt="getLocalizedTitleFor(related)"
                   class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
