@@ -97,6 +97,19 @@ const filteredServices = computed(() => {
   return allServices.value.filter(s => s.sector_id === form.value.sector_id)
 })
 
+// === GESTION DU PUBLIC CIBLE ===
+const newTargetAudience = ref('')
+const addTargetAudience = () => {
+  const value = newTargetAudience.value.trim()
+  if (value && !form.value.target_audience.includes(value)) {
+    form.value.target_audience.push(value)
+  }
+  newTargetAudience.value = ''
+}
+const removeTargetAudience = (index: number) => {
+  form.value.target_audience.splice(index, 1)
+}
+
 // Options du format
 const formatOptions = [
   { value: 'presential', label: 'Présentiel' },
@@ -148,7 +161,7 @@ const form = ref<{
   description: OutputData | undefined
   teaching_methods: string
   objectives: string
-  target_audience: string
+  target_audience: string[]
   format: string
   cover_image: string
   cover_image_external_id: string | null
@@ -171,7 +184,7 @@ const form = ref<{
   description: undefined,
   teaching_methods: '',
   objectives: '',
-  target_audience: '',
+  target_audience: [],
   format: '',
   cover_image: '',
   cover_image_external_id: null,
@@ -231,7 +244,7 @@ async function loadProgram() {
       description: parseEditorContent(program.value.description),
       teaching_methods: program.value.teaching_methods || '',
       objectives: program.value.objectives || '',
-      target_audience: program.value.target_audience || '',
+      target_audience: program.value.target_audience || [],
       format: program.value.format || '',
       cover_image_external_id: program.value.cover_image_external_id || null,
       cover_image: program.value.cover_image_external_id
@@ -644,7 +657,7 @@ const submitForm = async () => {
       description: descriptionJson,
       teaching_methods: form.value.teaching_methods || null,
       objectives: form.value.objectives || null,
-      target_audience: form.value.target_audience || null,
+      target_audience: form.value.target_audience.length > 0 ? form.value.target_audience : null,
       format: form.value.format || null,
       evaluation_methods: evaluationMethods.value.length > 0 ? JSON.stringify(evaluationMethods.value) : null,
       cover_image_external_id: form.value.cover_image_external_id,
@@ -1066,13 +1079,39 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
               <label for="target_audience" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Public cible
               </label>
-              <textarea
-                id="target_audience"
-                v-model="form.target_audience"
-                rows="3"
-                placeholder="À qui s'adresse cette formation..."
-                class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              />
+              <div class="flex gap-2">
+                <input
+                  id="target_audience"
+                  v-model="newTargetAudience"
+                  type="text"
+                  placeholder="Ajouter un public cible..."
+                  class="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  @keydown.enter.prevent="addTargetAudience"
+                />
+                <button
+                  type="button"
+                  class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                  @click="addTargetAudience"
+                >
+                  Ajouter
+                </button>
+              </div>
+              <div v-if="form.target_audience.length > 0" class="mt-2 flex flex-wrap gap-2">
+                <span
+                  v-for="(item, index) in form.target_audience"
+                  :key="index"
+                  class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1 text-sm text-gray-800 dark:border-gray-600 dark:text-gray-200"
+                >
+                  {{ item }}
+                  <button
+                    type="button"
+                    class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    @click="removeTargetAudience(index)"
+                  >
+                    <font-awesome-icon :icon="['fas', 'xmark']" class="h-3 w-3" />
+                  </button>
+                </span>
+              </div>
             </div>
             <div>
               <label for="format" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">

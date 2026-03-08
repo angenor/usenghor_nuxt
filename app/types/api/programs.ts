@@ -98,7 +98,7 @@ export interface ProgramRead {
   description: string | null
   teaching_methods: string | null
   objectives: string | null
-  target_audience: string | null
+  target_audience: string[] | null
   format: string | null
   evaluation_methods: string | null
   cover_image_external_id: string | null
@@ -137,7 +137,7 @@ export interface ProgramCreatePayload {
   description?: string | null
   teaching_methods?: string | null
   objectives?: string | null
-  target_audience?: string | null
+  target_audience?: string[] | null
   format?: string | null
   evaluation_methods?: string | null
   cover_image_external_id?: string | null
@@ -163,7 +163,7 @@ export interface ProgramUpdatePayload {
   description?: string | null
   teaching_methods?: string | null
   objectives?: string | null
-  target_audience?: string | null
+  target_audience?: string[] | null
   format?: string | null
   evaluation_methods?: string | null
   cover_image_external_id?: string | null

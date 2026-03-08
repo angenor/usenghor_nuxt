@@ -113,7 +113,7 @@ const programForm = ref({
   service_id: '',
   field_id: null as string | null,
   objectives: '',
-  target_audience: '',
+  target_audience: [] as string[],
   format: '',
 })
 
@@ -124,6 +124,19 @@ const formatOptions = [
   { value: 'hybrid', label: 'Hybride' },
   { value: 'elearning', label: 'E-learning' },
 ]
+
+// === GESTION DU PUBLIC CIBLE ===
+const newTargetAudience = ref('')
+const addTargetAudience = () => {
+  const value = newTargetAudience.value.trim()
+  if (value && !programForm.value.target_audience.includes(value)) {
+    programForm.value.target_audience.push(value)
+  }
+  newTargetAudience.value = ''
+}
+const removeTargetAudience = (index: number) => {
+  programForm.value.target_audience.splice(index, 1)
+}
 
 // Modalités d'évaluation (liste dynamique)
 const evaluationMethods = ref<string[]>([])
@@ -333,7 +346,7 @@ function openCreateModal() {
     service_id: '',
     field_id: null as string | null,
     objectives: '',
-    target_audience: '',
+    target_audience: [] as string[],
     format: '',
   }
   evaluationMethods.value = []
@@ -433,7 +446,7 @@ async function handleCreateProgram() {
       service_external_id: programForm.value.service_id || null,
       field_id: programForm.value.type === 'certificate' ? programForm.value.field_id : null,
       objectives: programForm.value.objectives || null,
-      target_audience: programForm.value.target_audience || null,
+      target_audience: programForm.value.target_audience.length > 0 ? programForm.value.target_audience : null,
       format: programForm.value.format || null,
       evaluation_methods: evaluationMethods.value.length > 0 ? JSON.stringify(evaluationMethods.value) : null,
     }
@@ -1184,12 +1197,38 @@ async function bulkDelete() {
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Public cible
                 </label>
-                <textarea
-                  v-model="programForm.target_audience"
-                  rows="2"
-                  placeholder="À qui s'adresse cette formation..."
-                  class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
+                <div class="flex gap-2">
+                  <input
+                    v-model="newTargetAudience"
+                    type="text"
+                    placeholder="Ajouter un public cible..."
+                    class="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    @keydown.enter.prevent="addTargetAudience"
+                  />
+                  <button
+                    type="button"
+                    class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                    @click="addTargetAudience"
+                  >
+                    Ajouter
+                  </button>
+                </div>
+                <div v-if="programForm.target_audience.length > 0" class="mt-2 flex flex-wrap gap-2">
+                  <span
+                    v-for="(item, index) in programForm.target_audience"
+                    :key="index"
+                    class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1 text-sm text-gray-800 dark:border-gray-600 dark:text-gray-200"
+                  >
+                    {{ item }}
+                    <button
+                      type="button"
+                      class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      @click="removeTargetAudience(index)"
+                    >
+                      <font-awesome-icon :icon="['fas', 'xmark']" class="h-3 w-3" />
+                    </button>
+                  </span>
+                </div>
               </div>
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">

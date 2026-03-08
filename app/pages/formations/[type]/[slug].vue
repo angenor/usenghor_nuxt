@@ -491,15 +491,21 @@ const toggleSemester = (num: number) => {
             </div>
 
             <!-- Public cible -->
-            <div v-if="program.target_audience" class="mb-8">
+            <div v-if="program.target_audience?.length" class="mb-8">
               <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 {{ t('formations.detail.targetAudience') }}
               </h2>
               <div class="flex items-start gap-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 p-5">
                 <font-awesome-icon icon="fa-solid fa-users" class="w-5 h-5 text-brand-blue-500 mt-0.5 flex-shrink-0" />
-                <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-                  {{ program.target_audience }}
-                </p>
+                <div class="flex flex-wrap gap-2">
+                  <span
+                    v-for="item in program.target_audience"
+                    :key="item"
+                    class="inline-flex items-center rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1 text-sm text-gray-800 dark:text-gray-200"
+                  >
+                    {{ item }}
+                  </span>
+                </div>
               </div>
             </div>
 
