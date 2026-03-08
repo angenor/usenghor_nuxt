@@ -527,24 +527,26 @@ const toggleSemester = (num: number) => {
               <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 {{ t('formations.detail.skills') }}
               </h2>
-              <ul class="space-y-3">
-                <li
-                  v-for="skill in program.skills"
-                  :key="skill.id"
-                  class="flex items-start gap-3 text-gray-700 dark:text-gray-300"
-                >
-                  <font-awesome-icon
-                    icon="fa-solid fa-check-circle"
-                    class="w-5 h-5 text-brand-blue-500 mt-0.5 flex-shrink-0"
-                  />
-                  <div>
-                    <span class="font-medium">{{ skill.title }}</span>
-                    <p v-if="skill.description" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      {{ skill.description }}
-                    </p>
-                  </div>
-                </li>
-              </ul>
+              <div class="rounded-xl bg-gray-50 dark:bg-gray-800 p-5">
+                <ul class="space-y-3">
+                  <li
+                    v-for="skill in program.skills"
+                    :key="skill.id"
+                    class="flex items-start gap-3 text-gray-700 dark:text-gray-300"
+                  >
+                    <font-awesome-icon
+                      icon="fa-solid fa-check-circle"
+                      class="w-5 h-5 text-brand-blue-500 mt-0.5 flex-shrink-0"
+                    />
+                    <div>
+                      <span class="font-medium">{{ skill.title }}</span>
+                      <p v-if="skill.description" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        {{ skill.description }}
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
             </div>
 
             <!-- Program / Curriculum -->
@@ -615,24 +617,26 @@ const toggleSemester = (num: number) => {
               <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 {{ t('formations.detail.careerOpportunities') }}
               </h2>
-              <ul class="space-y-3">
-                <li
-                  v-for="opportunity in program.career_opportunities"
-                  :key="opportunity.id"
-                  class="flex items-start gap-3 text-gray-700 dark:text-gray-300"
-                >
-                  <font-awesome-icon
-                    icon="fa-solid fa-briefcase"
-                    class="w-5 h-5 text-brand-red-500 mt-0.5 flex-shrink-0"
-                  />
-                  <div>
-                    <span class="font-medium">{{ opportunity.title }}</span>
-                    <p v-if="opportunity.description" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      {{ opportunity.description }}
-                    </p>
-                  </div>
-                </li>
-              </ul>
+              <div class="rounded-xl bg-gray-50 dark:bg-gray-800 p-5">
+                <ul class="space-y-3">
+                  <li
+                    v-for="opportunity in program.career_opportunities"
+                    :key="opportunity.id"
+                    class="flex items-start gap-3 text-gray-700 dark:text-gray-300"
+                  >
+                    <font-awesome-icon
+                      icon="fa-solid fa-briefcase"
+                      class="w-5 h-5 text-brand-red-500 mt-0.5 flex-shrink-0"
+                    />
+                    <div>
+                      <span class="font-medium">{{ opportunity.title }}</span>
+                      <p v-if="opportunity.description" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        {{ opportunity.description }}
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
             </div>
 
             <!-- Teaching Methods -->
@@ -652,19 +656,21 @@ const toggleSemester = (num: number) => {
               <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 {{ t('formations.detail.evaluationMethods') }}
               </h2>
-              <ul class="space-y-3">
-                <li
-                  v-for="(method, index) in parsedEvaluationMethods"
-                  :key="index"
-                  class="flex items-start gap-3 text-gray-700 dark:text-gray-300"
-                >
-                  <font-awesome-icon
-                    icon="fa-solid fa-clipboard-check"
-                    class="w-5 h-5 text-brand-blue-500 mt-0.5 flex-shrink-0"
-                  />
-                  <span class="font-medium">{{ method }}</span>
-                </li>
-              </ul>
+              <div class="rounded-xl bg-gray-50 dark:bg-gray-800 p-5">
+                <ul class="space-y-3">
+                  <li
+                    v-for="(method, index) in parsedEvaluationMethods"
+                    :key="index"
+                    class="flex items-start gap-3 text-gray-700 dark:text-gray-300"
+                  >
+                    <font-awesome-icon
+                      icon="fa-solid fa-clipboard-check"
+                      class="w-5 h-5 text-brand-blue-500 mt-0.5 flex-shrink-0"
+                    />
+                    <span class="font-medium">{{ method }}</span>
+                  </li>
+                </ul>
+              </div>
             </div>
 
             <!-- Back button -->
