@@ -97,6 +97,19 @@ const filteredServices = computed(() => {
   return allServices.value.filter(s => s.sector_id === form.value.sector_id)
 })
 
+// === GESTION DES OBJECTIFS ===
+const newObjective = ref('')
+const addObjective = () => {
+  const value = newObjective.value.trim()
+  if (value && !form.value.objectives.includes(value)) {
+    form.value.objectives.push(value)
+  }
+  newObjective.value = ''
+}
+const removeObjective = (index: number) => {
+  form.value.objectives.splice(index, 1)
+}
+
 // === GESTION DU PUBLIC CIBLE ===
 const newTargetAudience = ref('')
 const addTargetAudience = () => {
@@ -160,7 +173,7 @@ const form = ref<{
   slug: string
   description: OutputData | undefined
   teaching_methods: string
-  objectives: string
+  objectives: string[]
   target_audience: string[]
   format: string
   cover_image: string
@@ -183,7 +196,7 @@ const form = ref<{
   slug: '',
   description: undefined,
   teaching_methods: '',
-  objectives: '',
+  objectives: [],
   target_audience: [],
   format: '',
   cover_image: '',
@@ -243,7 +256,7 @@ async function loadProgram() {
       slug: program.value.slug,
       description: parseEditorContent(program.value.description),
       teaching_methods: program.value.teaching_methods || '',
-      objectives: program.value.objectives || '',
+      objectives: program.value.objectives || [],
       target_audience: program.value.target_audience || [],
       format: program.value.format || '',
       cover_image_external_id: program.value.cover_image_external_id || null,
@@ -656,7 +669,7 @@ const submitForm = async () => {
       slug: form.value.slug,
       description: descriptionJson,
       teaching_methods: form.value.teaching_methods || null,
-      objectives: form.value.objectives || null,
+      objectives: form.value.objectives.length > 0 ? form.value.objectives : null,
       target_audience: form.value.target_audience.length > 0 ? form.value.target_audience : null,
       format: form.value.format || null,
       evaluation_methods: evaluationMethods.value.length > 0 ? JSON.stringify(evaluationMethods.value) : null,
@@ -1065,13 +1078,39 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
             <label for="objectives" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Objectifs
             </label>
-            <textarea
-              id="objectives"
-              v-model="form.objectives"
-              rows="4"
-              placeholder="Objectifs de la formation..."
-              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            />
+            <div class="flex gap-2">
+              <input
+                id="objectives"
+                v-model="newObjective"
+                type="text"
+                placeholder="Ajouter un objectif..."
+                class="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                @keydown.enter.prevent="addObjective"
+              />
+              <button
+                type="button"
+                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                @click="addObjective"
+              >
+                Ajouter
+              </button>
+            </div>
+            <div v-if="form.objectives.length > 0" class="mt-2 flex flex-wrap gap-2">
+              <span
+                v-for="(item, index) in form.objectives"
+                :key="index"
+                class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1 text-sm text-gray-800 dark:border-gray-600 dark:text-gray-200"
+              >
+                {{ item }}
+                <button
+                  type="button"
+                  class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  @click="removeObjective(index)"
+                >
+                  <font-awesome-icon :icon="['fas', 'xmark']" class="h-3 w-3" />
+                </button>
+              </span>
+            </div>
           </div>
 
           <div class="grid gap-4 sm:grid-cols-2">

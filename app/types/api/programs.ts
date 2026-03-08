@@ -97,7 +97,7 @@ export interface ProgramRead {
   slug: string
   description: string | null
   teaching_methods: string | null
-  objectives: string | null
+  objectives: string[] | null
   target_audience: string[] | null
   format: string | null
   evaluation_methods: string | null
@@ -136,7 +136,7 @@ export interface ProgramCreatePayload {
   slug: string
   description?: string | null
   teaching_methods?: string | null
-  objectives?: string | null
+  objectives?: string[] | null
   target_audience?: string[] | null
   format?: string | null
   evaluation_methods?: string | null
@@ -162,7 +162,7 @@ export interface ProgramUpdatePayload {
   slug?: string
   description?: string | null
   teaching_methods?: string | null
-  objectives?: string | null
+  objectives?: string[] | null
   target_audience?: string[] | null
   format?: string | null
   evaluation_methods?: string | null

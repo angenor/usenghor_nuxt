@@ -246,6 +246,26 @@ function getStatusColor(published: boolean) {
           </div>
         </div>
 
+        <!-- Objectifs -->
+        <div v-if="program.objectives?.length" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+          <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+            <font-awesome-icon icon="fa-solid fa-bullseye" class="w-5 h-5 text-green-500" />
+            Objectifs
+            <span class="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-sm font-normal text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+              {{ program.objectives.length }}
+            </span>
+          </h2>
+          <div class="flex flex-wrap gap-2">
+            <span
+              v-for="item in program.objectives"
+              :key="item"
+              class="inline-flex items-center rounded-md border border-gray-300 px-3 py-1 text-sm text-gray-800 dark:border-gray-600 dark:text-gray-200"
+            >
+              {{ item }}
+            </span>
+          </div>
+        </div>
+
         <!-- Compétences -->
         <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
           <div class="mb-4 flex items-center justify-between">

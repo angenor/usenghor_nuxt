@@ -293,15 +293,19 @@ const breadcrumb = computed(() => [
                     <font-awesome-icon icon="fa-solid fa-users" class="w-5 h-5 text-brand-blue-500" />
                     {{ t('projets.detail.beneficiaries') }}
                   </div>
-                  <div class="flex flex-wrap gap-2">
-                    <span
+                  <ul class="space-y-3">
+                    <li
                       v-for="b in project.beneficiaries"
                       :key="b"
-                      class="inline-flex items-center px-3 py-1 rounded-md text-sm border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200"
+                      class="flex items-start gap-3 text-gray-700 dark:text-gray-300"
                     >
-                      {{ b }}
-                    </span>
-                  </div>
+                      <font-awesome-icon
+                        icon="fa-solid fa-users"
+                        class="w-5 h-5 text-brand-blue-500 mt-0.5 flex-shrink-0"
+                      />
+                      <span>{{ b }}</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
 

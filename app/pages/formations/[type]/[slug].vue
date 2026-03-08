@@ -479,14 +479,18 @@ const toggleSemester = (num: number) => {
             </div>
 
             <!-- Objectifs -->
-            <div v-if="program.objectives" class="mb-8">
+            <div v-if="program.objectives?.length" class="mb-8">
               <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 {{ t('formations.detail.objectives') }}
               </h2>
-              <div class="prose dark:prose-invert max-w-none bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-5">
-                <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-                  {{ program.objectives }}
-                </p>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  v-for="item in program.objectives"
+                  :key="item"
+                  class="inline-flex items-center rounded-md border border-gray-300 dark:border-gray-600 px-3 py-1 text-sm text-gray-800 dark:text-gray-200"
+                >
+                  {{ item }}
+                </span>
               </div>
             </div>
 
