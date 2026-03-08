@@ -664,50 +664,41 @@ const toggleSemester = (num: number) => {
           <!-- Sidebar -->
           <aside class="lg:w-1/3">
             <div class="sticky top-24 space-y-6">
-              <!-- Formation summary card -->
+              <!-- Formation info card -->
               <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
                   {{ getLocalizedTitle }}
                 </h3>
-                <p v-if="getLocalizedDescription" class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
-                  {{ getLocalizedDescription }}
-                </p>
                 <div class="space-y-3 text-sm">
-                  <div v-if="program.duration_months" class="flex items-center justify-between">
-                    <span class="text-gray-500 dark:text-gray-400">{{ t('formations.detail.duration') }}</span>
-                    <span class="font-medium text-gray-900 dark:text-white">
-                      {{ getLocalizedDuration }}
-                    </span>
+                  <div v-if="program.duration_months" class="flex items-baseline gap-1">
+                    <span class="text-gray-500 dark:text-gray-400 shrink-0">{{ t('formations.detail.duration') }}</span>
+                    <span class="flex-1 border-b border-gray-300 dark:border-gray-600" />
+                    <span class="font-medium text-gray-900 dark:text-white shrink-0">{{ getLocalizedDuration }}</span>
                   </div>
-                  <div v-if="program.credits" class="flex items-center justify-between">
-                    <span class="text-gray-500 dark:text-gray-400">{{ t('formations.detail.credits') }}</span>
-                    <span class="font-medium text-gray-900 dark:text-white">
-                      {{ program.credits }} ECTS
-                    </span>
+                  <div v-if="program.credits" class="flex items-baseline gap-1">
+                    <span class="text-gray-500 dark:text-gray-400 shrink-0">{{ t('formations.detail.credits') }}</span>
+                    <span class="flex-1 border-b border-gray-300 dark:border-gray-600" />
+                    <span class="font-medium text-gray-900 dark:text-white shrink-0">{{ program.credits }} ECTS</span>
                   </div>
-                  <div v-if="program.field_name" class="flex items-center justify-between">
-                    <span class="text-gray-500 dark:text-gray-400">{{ t('formations.detail.field') }}</span>
-                    <span class="font-medium text-gray-900 dark:text-white">
-                      {{ program.field_name }}
-                    </span>
+                  <div v-if="program.field_name" class="flex items-baseline gap-1">
+                    <span class="text-gray-500 dark:text-gray-400 shrink-0">{{ t('formations.detail.field') }}</span>
+                    <span class="flex-1 border-b border-gray-300 dark:border-gray-600" />
+                    <span class="font-medium text-gray-900 dark:text-white shrink-0">{{ program.field_name }}</span>
                   </div>
-                  <div v-if="program.service_name" class="flex items-center justify-between">
-                    <span class="text-gray-500 dark:text-gray-400">{{ t('formations.detail.service') }}</span>
-                    <span class="font-medium text-gray-900 dark:text-white">
-                      {{ program.service_name }}
-                    </span>
+                  <div v-if="program.service_name" class="flex items-baseline gap-1">
+                    <span class="text-gray-500 dark:text-gray-400 shrink-0">{{ t('formations.detail.service') }}</span>
+                    <span class="flex-1 border-b border-gray-300 dark:border-gray-600" />
+                    <span class="font-medium text-gray-900 dark:text-white shrink-0">{{ program.service_name }}</span>
                   </div>
-                  <div v-if="program.campus_name" class="flex items-center justify-between">
-                    <span class="text-gray-500 dark:text-gray-400">{{ t('formations.detail.campus') }}</span>
-                    <span class="font-medium text-gray-900 dark:text-white">
-                      {{ program.campus_name }}
-                    </span>
+                  <div v-if="program.campus_name" class="flex items-baseline gap-1">
+                    <span class="text-gray-500 dark:text-gray-400 shrink-0">{{ t('formations.detail.campus') }}</span>
+                    <span class="flex-1 border-b border-gray-300 dark:border-gray-600" />
+                    <span class="font-medium text-gray-900 dark:text-white shrink-0">{{ program.campus_name }}</span>
                   </div>
-                  <div v-if="program.country_name" class="flex items-center justify-between">
-                    <span class="text-gray-500 dark:text-gray-400">{{ t('formations.detail.country') }}</span>
-                    <span class="font-medium text-gray-900 dark:text-white">
-                      {{ program.country_name }}
-                    </span>
+                  <div v-if="program.country_name" class="flex items-baseline gap-1">
+                    <span class="text-gray-500 dark:text-gray-400 shrink-0">{{ t('formations.detail.country') }}</span>
+                    <span class="flex-1 border-b border-gray-300 dark:border-gray-600" />
+                    <span class="font-medium text-gray-900 dark:text-white shrink-0">{{ program.country_name }}</span>
                   </div>
                 </div>
 
