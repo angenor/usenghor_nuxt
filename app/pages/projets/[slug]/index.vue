@@ -284,20 +284,25 @@ const breadcrumb = computed(() => [
                   </div>
                 </div>
 
-                <!-- Beneficiaries -->
-                <div v-if="project.beneficiaries?.length" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 col-span-2 md:col-span-4">
-                  <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-2">
-                    <font-awesome-icon icon="fa-solid fa-users" class="w-4 h-4" />
-                    {{ t('projets.detail.beneficiaries') }}
-                  </div>
-                  <div class="flex flex-wrap gap-2">
-                    <span
-                      v-for="b in project.beneficiaries"
-                      :key="b"
-                      class="inline-flex items-center px-3 py-1 rounded-md text-sm border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200"
-                    >
-                      {{ b }}
-                    </span>
+              </div>
+
+              <!-- Bénéficiaires -->
+              <div v-if="project.beneficiaries?.length" class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                  {{ t('projets.detail.beneficiaries') }}
+                </h2>
+                <div class="rounded-xl bg-blue-50 dark:bg-blue-900/20 p-5">
+                  <div class="flex items-start gap-3">
+                    <font-awesome-icon icon="fa-solid fa-users" class="w-5 h-5 text-brand-blue-500 mt-0.5 flex-shrink-0" />
+                    <div class="flex flex-wrap gap-2">
+                      <span
+                        v-for="b in project.beneficiaries"
+                        :key="b"
+                        class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 shadow-sm"
+                      >
+                        {{ b }}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
