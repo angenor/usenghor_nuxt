@@ -791,8 +791,8 @@ const toggleSemester = (num: number) => {
                   :to="localePath(`/formations/${typeSlug}`)"
                   class="inline-flex items-center gap-2 text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 font-medium transition-colors"
                 >
+                  <font-awesome-icon icon="fa-solid fa-arrow-left" class="w-4 h-4" />
                   {{ t('formations.detail.back') }}
-                  <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
                 </NuxtLink>
               </div>
             </div>
