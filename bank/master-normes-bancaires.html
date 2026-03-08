@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Normes Bancaires & Régulation Financière — Université Senghor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1410;
+    --gold: #b8892a;
+    --gold-light: #e8c97a;
+    --ivory: #f8f4ed;
+    --cream: #f0e9dc;
+    --sienna: #7a3b1e;
+    --steel: #2d3a4a;
+    --muted: #7a7060;
+    --rule: rgba(184,137,42,0.25);
+    --tag-bg: #2d3a4a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--ivory);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--steel);
+    color: white;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 48px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+  }
+
+  .header-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: white;
+  }
+
+  .header-badge {
+    background: var(--gold);
+    color: var(--ink);
+    padding: 4px 12px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+  }
+
+  .header-body {
+    padding: 56px 48px 52px;
+    max-width: 900px;
+  }
+
+  .header-label {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 18px;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 4vw, 46px);
+    font-weight: 600;
+    line-height: 1.15;
+    color: white;
+    margin-bottom: 20px;
+  }
+
+  h1 em {
+    color: var(--gold-light);
+    font-style: italic;
+  }
+
+  .header-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 28px;
+  }
+
+  .meta-chip {
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .meta-chip strong {
+    color: var(--gold-light);
+    font-weight: 500;
+  }
+
+  /* ── LAYOUT ── */
+  .page {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 0;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 48px 48px 80px;
+    align-items: start;
+  }
+
+  .main { padding-right: 48px; border-right: 1px solid var(--rule); }
+  .aside { padding-left: 36px; position: sticky; top: 24px; }
+
+  /* ── SECTION BLOCKS ── */
+  .section { margin-bottom: 52px; }
+
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--steel);
+    margin-bottom: 16px;
+    line-height: 1.3;
+  }
+
+  h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--steel);
+    margin: 24px 0 10px;
+  }
+
+  p { margin-bottom: 14px; color: #3a342c; }
+
+  /* ── INTRO BOX ── */
+  .intro-box {
+    background: var(--cream);
+    border-left: 3px solid var(--gold);
+    padding: 22px 24px;
+    margin-bottom: 32px;
+    font-size: 15px;
+    line-height: 1.8;
+  }
+
+  /* ── CONTEXT LIST ── */
+  .context-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .context-item {
+    background: var(--cream);
+    padding: 14px 16px;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.2s;
+  }
+
+  .context-item:hover { border-color: var(--gold); }
+
+  .context-item .ci-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .context-item .ci-value {
+    font-size: 13.5px;
+    color: var(--ink);
+  }
+
+  /* ── COMPETENCES ── */
+  .competence-block {
+    border: 1px solid var(--rule);
+    padding: 18px 20px;
+    margin-bottom: 10px;
+    cursor: default;
+  }
+
+  .competence-block:hover { background: var(--cream); }
+
+  .comp-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .comp-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--rule);
+    line-height: 1;
+    min-width: 28px;
+  }
+
+  .comp-title {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--steel);
+    line-height: 1.4;
+  }
+
+  .comp-subs {
+    margin-top: 10px;
+    margin-left: 42px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .sub-tag {
+    font-size: 11.5px;
+    background: var(--ivory);
+    border: 1px solid var(--rule);
+    padding: 3px 10px;
+    color: var(--muted);
+  }
+
+  /* ── PROGRAMME ── */
+  .ue-block {
+    margin-bottom: 20px;
+  }
+
+  .ue-header {
+    background: var(--steel);
+    color: white;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .ue-modules {
+    border: 1px solid var(--rule);
+    border-top: none;
+  }
+
+  .module-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 13.5px;
+  }
+
+  .module-row:last-child { border-bottom: none; }
+
+  .module-row:hover { background: var(--cream); }
+
+  .module-code {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    color: var(--gold);
+    font-weight: 600;
+    min-width: 36px;
+    flex-shrink: 0;
+  }
+
+  /* ── TIMELINE ── */
+  .timeline { position: relative; padding-left: 24px; }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 6px;
+    bottom: 6px;
+    width: 1px;
+    background: var(--rule);
+  }
+
+  .tl-item {
+    position: relative;
+    padding: 0 0 20px 18px;
+  }
+
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: 2px solid var(--ivory);
+    box-shadow: 0 0 0 1px var(--gold);
+  }
+
+  .tl-date {
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 3px;
+  }
+
+  .tl-label {
+    font-size: 13.5px;
+    color: var(--ink);
+  }
+
+  /* ── ADMISSION STEPS ── */
+  .steps {
+    counter-reset: step;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .step {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--cream);
+    align-items: flex-start;
+    counter-increment: step;
+  }
+
+  .step-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+    min-width: 24px;
+  }
+
+  .step-text { font-size: 13.5px; line-height: 1.6; }
+  .step-text strong { color: var(--steel); display: block; margin-bottom: 3px; }
+
+  /* ── ASIDE CARDS ── */
+  .aside-card {
+    background: white;
+    border: 1px solid var(--rule);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .aside-card-title {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .aside-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 13px;
+  }
+
+  .aside-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .aside-row .ar-key { color: var(--muted); }
+  .aside-row .ar-val { font-weight: 500; color: var(--steel); text-align: right; max-width: 55%; }
+
+  .cta-btn {
+    display: block;
+    width: 100%;
+    background: var(--gold);
+    color: var(--ink);
+    text-align: center;
+    padding: 13px;
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    margin-top: 8px;
+    transition: background 0.2s;
+  }
+
+  .cta-btn:hover { background: var(--gold-light); }
+
+  .tamus-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    margin-top: 10px;
+  }
+
+  .tamus-table th {
+    background: var(--steel);
+    color: white;
+    padding: 7px 10px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    text-align: left;
+  }
+
+  .tamus-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--rule);
+    color: var(--ink);
+  }
+
+  .tamus-table tr:last-child td { border-bottom: none; }
+  .tamus-table tr:nth-child(even) td { background: var(--cream); }
+
+  .score-green { color: #2a7a3b; font-weight: 500; }
+  .score-orange { color: #a05a10; font-weight: 500; }
+  .score-red { color: var(--sienna); font-weight: 500; }
+
+  .contact-block {
+    background: var(--steel);
+    color: white;
+    padding: 18px 20px;
+    margin-top: 16px;
+    font-size: 12.5px;
+    line-height: 1.8;
+  }
+
+  .contact-block .cb-title {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+
+  .contact-block a { color: var(--gold-light); text-decoration: none; }
+
+  /* ── PEDAGOGY TAGS ── */
+  .method-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .method-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13.5px;
+  }
+
+  .method-bullet {
+    width: 6px;
+    height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 7px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--steel);
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    padding: 24px 48px;
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+  }
+
+  footer strong { color: var(--gold); }
+
+  @media (max-width: 760px) {
+    .page { grid-template-columns: 1fr; padding: 24px 20px; }
+    .main { padding-right: 0; border-right: none; }
+    .aside { padding-left: 0; margin-top: 32px; position: static; }
+    .context-grid { grid-template-columns: 1fr; }
+    header { padding: 0; }
+    .header-top, .header-body { padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════ HEADER ══════════════════════════════════ -->
+<header>
+  <div class="header-top">
+    <span class="header-logo">Université Senghor · Alexandrie</span>
+    <span style="color:rgba(255,255,255,0.4)">Opérateur direct de la Francophonie</span>
+    <span class="header-badge">Campus Sénégal · Dakar</span>
+  </div>
+  <div class="header-body">
+    <span class="header-label">Master executive · 60 ECTS</span>
+    <h1>Normes Bancaires &amp;<br><em>Régulation Financière</em><br>et Diplomatie Bancaire</h1>
+    <p style="color:rgba(255,255,255,0.65); max-width:600px; font-size:14px; line-height:1.7;">
+      Formation professionnalisante de haut niveau pour les cadres du secteur bancaire, financier et réglementaire en Afrique francophone. Co-délivrée avec l'IDG Dakar.
+    </p>
+    <div class="header-meta">
+      <div class="meta-chip">⏱ Durée <strong>1 an</strong></div>
+      <div class="meta-chip">🎓 Niveau <strong>Bac+4 min.</strong></div>
+      <div class="meta-chip">📍 Lieu <strong>Dakar, Sénégal</strong></div>
+      <div class="meta-chip">🏛 Diplôme <strong>Master Professionnel Senghor</strong></div>
+      <div class="meta-chip">👥 Places <strong>30 maximum</strong></div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════ BODY ══════════════════════════════════ -->
+<div class="page">
+<main class="main">
+
+  <!-- CONTEXTE -->
+  <section class="section">
+    <div class="section-label">Pourquoi cette formation</div>
+    <div class="intro-box">
+      Le secteur bancaire de l'UEMOA est en transformation rapide : normes prudentielles plus complexes, extension des obligations IFRS, lutte renforcée contre le blanchiment, montée des fintechs et des risques cyber. Il existe <strong>très peu de formations diplômantes</strong> sur ces thématiques en Afrique francophone. Ce master y répond directement, avec une approche contextualisée aux réalités africaines.
+    </div>
+    <div class="context-grid">
+      <div class="context-item">
+        <div class="ci-label">Pression réglementaire accrue</div>
+        <div class="ci-value">Inspections BCEAO / Commission Bancaire plus fréquentes et exigeantes</div>
+      </div>
+      <div class="context-item">
+        <div class="ci-label">Normes prudentielles</div>
+        <div class="ci-value">Bâle II/III, IFRS 9, stress tests, classification des risques</div>
+      </div>
+      <div class="context-item">
+        <div class="ci-label">Conformité & LCB-FT</div>
+        <div class="ci-value">Obligations AML/CFT et KYC renforcées dans toute la sous-région</div>
+      </div>
+      <div class="context-item">
+        <div class="ci-label">Nouveaux risques</div>
+        <div class="ci-value">Cybercriminalité, risque opérationnel, réputation, fintechs</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPÉTENCES -->
+  <section class="section">
+    <div class="section-label">Compétences visées</div>
+    <h2>Ce que les auditeurs sauront faire</h2>
+
+    <div class="competence-block">
+      <div class="comp-header">
+        <div class="comp-num">1</div>
+        <div class="comp-title">Maîtriser le cadre prudentiel et réglementaire bancaire</div>
+      </div>
+      <div class="comp-subs">
+        <span class="sub-tag">Bâle II/III</span><span class="sub-tag">IFRS 9</span>
+        <span class="sub-tag">Architecture UEMOA</span><span class="sub-tag">Reportings prudentiels</span>
+      </div>
+    </div>
+
+    <div class="competence-block">
+      <div class="comp-header">
+        <div class="comp-num">2</div>
+        <div class="comp-title">Structurer et piloter les dispositifs risques &amp; conformité</div>
+      </div>
+      <div class="comp-subs">
+        <span class="sub-tag">Cartographie des risques</span><span class="sub-tag">AML/CFT · KYC</span>
+        <span class="sub-tag">Contrôle interne</span><span class="sub-tag">Audit réglementaire</span>
+      </div>
+    </div>
+
+    <div class="competence-block">
+      <div class="comp-header">
+        <div class="comp-num">3</div>
+        <div class="comp-title">Renforcer la gouvernance et la supervision interne</div>
+      </div>
+      <div class="comp-subs">
+        <span class="sub-tag">Comités risques</span><span class="sub-tag">Impacts réglementaires</span>
+        <span class="sub-tag">Standards de supervision</span>
+      </div>
+    </div>
+
+    <div class="competence-block">
+      <div class="comp-header">
+        <div class="comp-num">4</div>
+        <div class="comp-title">Développer des compétences en diplomatie bancaire</div>
+      </div>
+      <div class="comp-subs">
+        <span class="sub-tag">Relations régulateurs</span><span class="sub-tag">Communication institutionnelle</span>
+        <span class="sub-tag">Gestion de crise réglementaire</span>
+      </div>
+    </div>
+
+    <div class="competence-block">
+      <div class="comp-header">
+        <div class="comp-num">5</div>
+        <div class="comp-title">Mobiliser des compétences transversales professionnelles</div>
+      </div>
+      <div class="comp-subs">
+        <span class="sub-tag">Communication précise</span><span class="sub-tag">Esprit critique</span>
+        <span class="sub-tag">Travail en contexte régulé</span><span class="sub-tag">Leadership adapté</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PUBLIC CIBLE -->
+  <section class="section">
+    <div class="section-label">À qui s'adresse ce master</div>
+    <h2>Public cible</h2>
+    <p>Ce master s'adresse à des <strong>décideurs et cadres en activité</strong> dans les secteurs bancaire, financier et réglementaire :</p>
+    <div class="method-list">
+      <div class="method-item"><div class="method-bullet"></div><span>Cadres en gestion des risques, conformité, audit, contrôle interne ou supervision bancaire</span></div>
+      <div class="method-item"><div class="method-bullet"></div><span>Responsables amenés à interagir avec les régulateurs ou à préparer des inspections</span></div>
+      <div class="method-item"><div class="method-bullet"></div><span>Cadres de fintechs et établissements de paiement soumis à des obligations prudentielles</span></div>
+      <div class="method-item"><div class="method-bullet"></div><span>Professionnels d'institutions financières publiques ou d'autorités de régulation</span></div>
+    </div>
+    <p style="margin-top:14px">Issus de banques, sociétés de microfinance, fintechs, cabinets de conseil ou structures de supervision. <strong>Entre 25 et 30 auditeurs</strong> sélectionnés par appel à candidatures.</p>
+  </section>
+
+  <!-- PROGRAMME -->
+  <section class="section">
+    <div class="section-label">Programme — 21 modules · 60 ECTS</div>
+    <h2>Maquette pédagogique</h2>
+
+    <div class="ue-block">
+      <div class="ue-header"><span>UE 1 — Normes prudentielles et cadre réglementaire</span></div>
+      <div class="ue-modules">
+        <div class="module-row"><span class="module-code">M1</span><span>Architecture du système financier et cadre prudentiel</span></div>
+        <div class="module-row"><span class="module-code">M2</span><span>Normes prudentielles Bâle II / Bâle III</span></div>
+        <div class="module-row"><span class="module-code">M3</span><span>IFRS 9 : classification et pertes de crédit attendues</span></div>
+        <div class="module-row"><span class="module-code">M4</span><span>Ratios prudentiels appliqués</span></div>
+        <div class="module-row"><span class="module-code">M5</span><span>Études de cas prudentiels</span></div>
+      </div>
+    </div>
+
+    <div class="ue-block">
+      <div class="ue-header"><span>UE 2 — Régulation, supervision et gouvernance bancaire</span></div>
+      <div class="ue-modules">
+        <div class="module-row"><span class="module-code">M6</span><span>Réglementation BCEAO, Commission Bancaire et CREPMF</span></div>
+        <div class="module-row"><span class="module-code">M7</span><span>Gouvernance bancaire et responsabilités prudentielles</span></div>
+        <div class="module-row"><span class="module-code">M8</span><span>Inspection bancaire et supervision sur place</span></div>
+        <div class="module-row"><span class="module-code">M9</span><span>Veille et analyse réglementaire</span></div>
+      </div>
+    </div>
+
+    <div class="ue-block">
+      <div class="ue-header"><span>UE 3 — Conformité, contrôle et compétences transversales</span></div>
+      <div class="ue-modules">
+        <div class="module-row"><span class="module-code">M11</span><span>Dispositifs AML/CFT et sanctions internationales</span></div>
+        <div class="module-row"><span class="module-code">M12</span><span>Contrôle interne et contrôle permanent</span></div>
+        <div class="module-row"><span class="module-code">M13</span><span>Compétences transversales</span></div>
+      </div>
+    </div>
+
+    <div class="ue-block">
+      <div class="ue-header"><span>UE 4 — Audit, reporting réglementaire et contrôle interne</span></div>
+      <div class="ue-modules">
+        <div class="module-row"><span class="module-code">M14</span><span>Audit réglementaire et organisationnel</span></div>
+        <div class="module-row"><span class="module-code">M15</span><span>Reporting prudentiel et réglementaire</span></div>
+        <div class="module-row"><span class="module-code">M16</span><span>Suivi des non-conformités et plans d'action</span></div>
+      </div>
+    </div>
+
+    <div class="ue-block">
+      <div class="ue-header"><span>UE 5 — Diplomatie bancaire et communication institutionnelle</span></div>
+      <div class="ue-modules">
+        <div class="module-row"><span class="module-code">M17</span><span>Relations avec les régulateurs et partenaires institutionnels</span></div>
+        <div class="module-row"><span class="module-code">M18</span><span>Communication institutionnelle en contexte régulé</span></div>
+        <div class="module-row"><span class="module-code">M19</span><span>Gestion de crise réglementaire et réputationnelle</span></div>
+      </div>
+    </div>
+
+    <div class="ue-block">
+      <div class="ue-header"><span>UE 6 — Mémoire professionnel</span></div>
+      <div class="ue-modules">
+        <div class="module-row"><span class="module-code">—</span><span>Méthodologie de rédaction</span></div>
+        <div class="module-row"><span class="module-code">—</span><span>Mémoire professionnel sur une problématique réelle de l'organisation</span></div>
+        <div class="module-row"><span class="module-code">—</span><span>Soutenance (après 3 mois de rédaction)</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODALITÉS PÉDAGOGIQUES -->
+  <section class="section">
+    <div class="section-label">Comment on enseigne</div>
+    <h2>Modalités pédagogiques</h2>
+    <p>Format <strong>hybride</strong> (présentiel + distanciel synchrone et asynchrone), en <strong>cours du soir</strong> (3–4 h/jour), avec séminaires intensifs ponctuels. Conçu pour les professionnels en activité qui ne peuvent pas interrompre leur carrière.</p>
+    <div class="method-list" style="margin-top:14px">
+      <div class="method-item"><div class="method-bullet"></div><span>Études de cas tirées de banques africaines et internationales</span></div>
+      <div class="method-item"><div class="method-bullet"></div><span>Simulations d'inspections, de comités risques et de réunions avec le régulateur</span></div>
+      <div class="method-item"><div class="method-bullet"></div><span>Exercices d'application Bâle II/III et IFRS 9</span></div>
+      <div class="method-item"><div class="method-bullet"></div><span>Ateliers pratiques : AML/CFT, reporting prudentiel</span></div>
+      <div class="method-item"><div class="method-bullet"></div><span>Exercices de gestion de crise et diplomatie bancaire</span></div>
+      <div class="method-item"><div class="method-bullet"></div><span>Accès à la plateforme numérique de l'Université Senghor</span></div>
+    </div>
+    <p style="margin-top:14px; font-style:italic; color:var(--muted);">Chaque auditeur rédige un mémoire professionnel sur une problématique réelle de son organisation, visant une solution concrète et opérationnelle.</p>
+  </section>
+
+  <!-- ADMISSION -->
+  <section class="section">
+    <div class="section-label">Comment candidater</div>
+    <h2>Processus d'admission en 4 étapes</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text"><strong>Dépôt du dossier de candidature</strong>CV, lettre de motivation, diplôme légalisé (et lettre d'employeur si salarié). Via la plateforme en ligne de l'Université Senghor.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text"><strong>Test TAMUS (100 €, non remboursable)</strong>45 questions en ligne · 75 min. Culture générale (30%), management de projet (60%), spécialité (10%). Seuil d'admission : ≥ 10/20.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>Paiement des frais d'inscription</strong>Première tranche ou totalité : 1 350 000 FCFA. Facilités de paiement possibles (350 000 + 10 × 100 000 FCFA).</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text"><strong>Vérification finale et notification d'admission</strong>Convention signée + justificatif de versement à adresser à Mme Seynabou Senghor (scolarite@akademiadakar.edu.sn) dans les 3 semaines suivant la pré-admission.</div>
+      </div>
+    </div>
+
+    <h3>Conditions de diplôme (Bac+4 ou Bac+3 + VAP)</h3>
+    <p><strong>Catégorie 1 (Bac+4) :</strong> diplôme dans le domaine de la spécialité + TAMUS.</p>
+    <p><strong>Catégorie 2 (Bac+3) :</strong> validation des acquis professionnels sur justificatif (≥ 3 ans d'expérience) + TAMUS.</p>
+    <p style="color:var(--sienna)">⚠ Aucun remboursement de scolarité en cas de démission.</p>
+  </section>
+
+</main>
+
+<!-- ══════════════════════════════════ ASIDE ══════════════════════════════════ -->
+<aside class="aside">
+
+  <div class="aside-card">
+    <div class="aside-card-title">Fiche synthétique</div>
+    <div class="aside-row"><span class="ar-key">Durée</span><span class="ar-val">1 an (M2 executive)</span></div>
+    <div class="aside-row"><span class="ar-key">Crédits</span><span class="ar-val">60 ECTS · LMD</span></div>
+    <div class="aside-row"><span class="ar-key">Diplôme</span><span class="ar-val">Master Professionnel Senghor / IDG</span></div>
+    <div class="aside-row"><span class="ar-key">Niveau requis</span><span class="ar-val">Bac+4 (ou Bac+3 + 3 ans expérience)</span></div>
+    <div class="aside-row"><span class="ar-key">Format</span><span class="ar-val">Hybride · Cours du soir</span></div>
+    <div class="aside-row"><span class="ar-key">Lieu</span><span class="ar-val">Dakar, Sénégal (Akademia Dakar, Point E)</span></div>
+    <div class="aside-row"><span class="ar-key">Places</span><span class="ar-val">30 maximum</span></div>
+    <div class="aside-row"><span class="ar-key">Scolarité</span><span class="ar-val">1 350 000 FCFA</span></div>
+    <div class="aside-row"><span class="ar-key">TAMUS</span><span class="ar-val">100 € (non remboursable)</span></div>
+  </div>
+
+  <div class="aside-card">
+    <div class="aside-card-title">Calendrier 2026</div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-date">14 janvier 2026</div>
+        <div class="tl-label">Lancement de l'appel à candidatures</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">19 février 2026</div>
+        <div class="tl-label">Date limite de candidature</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">8 mars 2026</div>
+        <div class="tl-label">Test TAMUS</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">9 mars 2026</div>
+        <div class="tl-label">Communication des résultats</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">9 – 29 mars 2026</div>
+        <div class="tl-label">Paiement des frais d'inscription</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">30 mars 2026</div>
+        <div class="tl-label">Webinaire d'accueil</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">9 avril 2026</div>
+        <div class="tl-label"><strong>Rentrée officielle</strong></div>
+      </div>
+    </div>
+    <p style="font-size:11.5px; color:var(--muted); margin-top:10px; font-style:italic;">Les inscriptions ferment dès les 30 places confirmées.</p>
+  </div>
+
+  <div class="aside-card">
+    <div class="aside-card-title">Grille TAMUS</div>
+    <table class="tamus-table">
+      <thead>
+        <tr><th>Score</th><th>Résultat</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="score-green">≥ 16/20</td><td>Admis sans condition</td></tr>
+        <tr><td class="score-orange">≥ 13/20</td><td>Admis avec réserves</td></tr>
+        <tr><td style="color:#7a5a10; font-weight:500">≥ 10/20</td><td>Admis sous suivi (entretien)</td></tr>
+        <tr><td class="score-red">&lt; 10/20</td><td>Non admis — repassage recommandé</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:11px; color:var(--muted); margin-top:8px;">Structure : 20 q. culture générale (30%) · 20 q. management (60%) · 5 q. spécialité (10%)</p>
+  </div>
+
+  <div class="contact-block">
+    <div class="cb-title">Contact & Scolarité</div>
+    <p><strong style="color:white">Dépôt de dossier</strong><br>M. Christ Baker<br>Admissions & Orientation, Akademia Dakar</p>
+    <p style="margin-top:10px"><strong style="color:white">Scolarité & Inscription</strong><br>Mme Seynabou Senghor<br><a href="mailto:scolarite@akademiadakar.edu.sn">scolarite@akademiadakar.edu.sn</a><br><a href="tel:+221785911879">+221 78 591 18 79</a></p>
+    <p style="margin-top:10px; color:rgba(255,255,255,0.5); font-size:11px;">Akademia Dakar · Point E Villa n° 368<br>Rue A × Rue 5, Dakar (Sénégal)</p>
+  </div>
+
+</aside>
+</div>
+
+<footer>
+  <strong>Université Senghor · Opérateur direct de la Francophonie</strong> — Nouvelle ville de Borg El-Arab, Alexandrie, Égypte<br>
+  Formation délocalisée sur le <strong>Campus Senghor Sénégal</strong> en partenariat avec l'<strong>Institut du Développement et de la Gouvernance (IDG) Dakar</strong>
+</footer>
+
+</body>
+</html>
