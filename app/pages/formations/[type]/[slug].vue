@@ -689,6 +689,60 @@ const toggleSemester = (num: number) => {
           <!-- Sidebar -->
           <aside class="lg:w-1/3">
             <div class="sticky top-24 space-y-6">
+              <!-- Associated application calls -->
+              <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
+                <h4 class="text-base font-bold text-brand-red-600 dark:text-brand-red-400 mb-4 text-center">
+                  {{ t('formations.detail.associatedCalls') }}
+                </h4>
+
+                <!-- Show calls if any -->
+                <div v-if="associatedCalls.length > 0" class="space-y-3">
+                  <NuxtLink
+                    v-for="call in associatedCalls"
+                    :key="call.id"
+                    :to="localePath(`/actualites/appels/${call.slug}`)"
+                    class="call-card-animated group"
+                  >
+                    <div class="call-card-content">
+                      <div class="flex items-center gap-2 mb-2">
+                        <span
+                          class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full"
+                          :class="callStatusColors[call.status]"
+                        >
+                          {{ t(`formations.detail.callStatus.${call.status}`) }}
+                        </span>
+                        <font-awesome-icon
+                          v-if="call.status === 'ongoing'"
+                          icon="fa-solid fa-arrow-right"
+                          class="w-3 h-3 text-brand-blue-500 animate-bounce-x"
+                        />
+                      </div>
+                      <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors line-clamp-2">
+                        {{ call.title }}
+                      </p>
+                      <p v-if="call.deadline" class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+                        <font-awesome-icon icon="fa-solid fa-clock" class="w-3 h-3" />
+                        {{ t('formations.detail.deadline') }}: {{ new Date(call.deadline).toLocaleDateString(locale) }}
+                      </p>
+                    </div>
+                  </NuxtLink>
+                </div>
+
+                <!-- No calls message -->
+                <div v-else class="text-center py-4">
+                  <font-awesome-icon icon="fa-solid fa-calendar-xmark" class="w-8 h-8 text-gray-300 dark:text-gray-600 mb-2" />
+                  <p class="text-sm font-bold text-brand-red-600 dark:text-brand-red-400">
+                    {{ t('formations.detail.noOpenCalls') }}
+                  </p>
+                  <NuxtLink
+                    :to="localePath('/actualites/appels')"
+                    class="inline-block mt-2 text-sm text-brand-blue-600 dark:text-brand-blue-400 hover:underline"
+                  >
+                    {{ t('formations.detail.viewAllCalls') }}
+                  </NuxtLink>
+                </div>
+              </div>
+
               <!-- Formation info card -->
               <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
@@ -724,60 +778,6 @@ const toggleSemester = (num: number) => {
                     <span class="text-gray-500 dark:text-gray-400 shrink-0">{{ t('formations.detail.country') }}</span>
                     <span class="flex-1 border-b border-gray-300 dark:border-gray-600" />
                     <span class="font-medium text-gray-900 dark:text-white shrink-0">{{ program.country_name }}</span>
-                  </div>
-                </div>
-
-                <!-- Associated application calls -->
-                <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                  <h4 class="text-base font-bold text-brand-red-600 dark:text-brand-red-400 mb-4 text-center">
-                    {{ t('formations.detail.associatedCalls') }}
-                  </h4>
-
-                  <!-- Show calls if any -->
-                  <div v-if="associatedCalls.length > 0" class="space-y-3">
-                    <NuxtLink
-                      v-for="call in associatedCalls"
-                      :key="call.id"
-                      :to="localePath(`/actualites/appels/${call.slug}`)"
-                      class="call-card-animated group"
-                    >
-                      <div class="call-card-content">
-                        <div class="flex items-center gap-2 mb-2">
-                          <span
-                            class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full"
-                            :class="callStatusColors[call.status]"
-                          >
-                            {{ t(`formations.detail.callStatus.${call.status}`) }}
-                          </span>
-                          <font-awesome-icon
-                            v-if="call.status === 'ongoing'"
-                            icon="fa-solid fa-arrow-right"
-                            class="w-3 h-3 text-brand-blue-500 animate-bounce-x"
-                          />
-                        </div>
-                        <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors line-clamp-2">
-                          {{ call.title }}
-                        </p>
-                        <p v-if="call.deadline" class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
-                          <font-awesome-icon icon="fa-solid fa-clock" class="w-3 h-3" />
-                          {{ t('formations.detail.deadline') }}: {{ new Date(call.deadline).toLocaleDateString(locale) }}
-                        </p>
-                      </div>
-                    </NuxtLink>
-                  </div>
-
-                  <!-- No calls message -->
-                  <div v-else class="text-center py-4">
-                    <font-awesome-icon icon="fa-solid fa-calendar-xmark" class="w-8 h-8 text-gray-300 dark:text-gray-600 mb-2" />
-                    <p class="text-sm font-bold text-brand-red-600 dark:text-brand-red-400">
-                      {{ t('formations.detail.noOpenCalls') }}
-                    </p>
-                    <NuxtLink
-                      :to="localePath('/actualites/appels')"
-                      class="inline-block mt-2 text-sm text-brand-blue-600 dark:text-brand-blue-400 hover:underline"
-                    >
-                      {{ t('formations.detail.viewAllCalls') }}
-                    </NuxtLink>
                   </div>
                 </div>
               </div>
