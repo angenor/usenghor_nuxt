@@ -41,8 +41,14 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
     '@nuxtjs/i18n',
+    '@nuxtjs/sitemap',
     '@nuxt/test-utils/module'
   ],
+  sitemap: {
+    sources: ['/api/__sitemap__/urls'],
+    exclude: ['/admin/**'],
+    autoI18n: true
+  },
   css: [
     '~/assets/css/main.css',
     '~/assets/css/timeline.css',
