@@ -553,67 +553,59 @@ const saveForm = async () => {
     })
 
     // 2) Sync sub-entities: delete all existing, then re-create
-    const deletePromises: Promise<unknown>[] = []
-
-    // Delete existing criteria
+    // Sérialisé pour éviter de saturer le serveur (503 en production)
     if (existingCall.value) {
       for (const c of existingCall.value.eligibility_criteria || []) {
-        deletePromises.push(apiDeleteCriterion(callId, c.id))
+        await apiDeleteCriterion(callId, c.id)
       }
       for (const c of existingCall.value.coverage || []) {
-        deletePromises.push(apiDeleteCoverage(callId, c.id))
+        await apiDeleteCoverage(callId, c.id)
       }
       for (const d of existingCall.value.required_documents || []) {
-        deletePromises.push(apiDeleteRequiredDocument(callId, d.id))
+        await apiDeleteRequiredDocument(callId, d.id)
       }
       for (const s of existingCall.value.schedule || []) {
-        deletePromises.push(apiDeleteScheduleItem(callId, s.id))
+        await apiDeleteScheduleItem(callId, s.id)
       }
     }
 
-    await Promise.all(deletePromises)
-
-    // 3) Re-create all sub-entities
-    const createPromises: Promise<unknown>[] = []
-
+    // 3) Re-create all sub-entities (sérialisé)
     for (const c of criteria.value) {
-      createPromises.push(apiAddCriterion(callId, {
+      await apiAddCriterion(callId, {
         criterion: c.criterion,
         is_mandatory: c.is_mandatory,
         display_order: c.display_order,
-      }))
+      })
     }
 
     for (const c of coverageItems.value) {
-      createPromises.push(apiAddCoverage(callId, {
+      await apiAddCoverage(callId, {
         item: c.item,
         description: c.description,
         display_order: c.display_order,
-      }))
+      })
     }
 
     for (const d of documents.value) {
-      createPromises.push(apiAddRequiredDocument(callId, {
+      await apiAddRequiredDocument(callId, {
         document_name: d.document_name,
         description: d.description,
         is_mandatory: d.is_mandatory,
         accepted_formats: d.accepted_formats,
         max_size_mb: d.max_size_mb,
         display_order: d.display_order,
-      }))
+      })
     }
 
     for (const s of scheduleItems.value) {
-      createPromises.push(apiAddScheduleItem(callId, {
+      await apiAddScheduleItem(callId, {
         step: s.step,
         start_date: s.start_date,
         end_date: s.end_date,
         description: s.description,
         display_order: s.display_order,
-      }))
+      })
     }
-
-    await Promise.all(createPromises)
 
     // 4) Rediriger vers le détail
     router.push(`/admin/candidatures/appels/${callId}`)
