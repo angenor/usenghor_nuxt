@@ -673,8 +673,8 @@ const toggleSemester = (num: number) => {
               </div>
             </div>
 
-            <!-- Back button -->
-            <div class="pt-8 border-t border-gray-200 dark:border-gray-700">
+            <!-- Back button (hidden on mobile, sidebar has its own) -->
+            <div class="hidden lg:block pt-8 border-t border-gray-200 dark:border-gray-700">
               <NuxtLink
                 :to="localePath(`/formations/${typeSlug}`)"
                 class="inline-flex items-center gap-2 text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 font-medium transition-colors"
