@@ -483,7 +483,7 @@ const toggleSemester = (num: number) => {
               <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 {{ t('formations.detail.objectives') }}
               </h2>
-              <div class="prose dark:prose-invert max-w-none">
+              <div class="prose dark:prose-invert max-w-none bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-5">
                 <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
                   {{ program.objectives }}
                 </p>
