@@ -67,7 +67,7 @@
     },
     "detail": {
       "overview": "Présentation",
-      "objectives": "Objectifs",
+      "objectives": "Objectif général",
       "program": "Programme",
       "admission": "Admission",
       "career": "Débouchés",
@@ -88,7 +88,7 @@
       "downloadPdf": "PDF",
       "skills": "Compétences acquises",
       "careerOpportunities": "Débouchés professionnels",
-      "teachingMethods": "Méthodes pédagogiques",
+      "teachingMethods": "Modalités de mise en œuvre",
       "requiredDegree": "Prérequis",
       "targetAudience": "Public cible",
       "format": "Format",
