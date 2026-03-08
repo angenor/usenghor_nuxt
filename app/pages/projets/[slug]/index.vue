@@ -294,7 +294,7 @@ const breadcrumb = computed(() => [
                     <span
                       v-for="b in project.beneficiaries"
                       :key="b"
-                      class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-brand-blue-100 text-brand-blue-800 dark:bg-brand-blue-900/30 dark:text-brand-blue-300"
+                      class="inline-flex items-center px-3 py-1 rounded-sm text-sm font-medium bg-brand-blue-100 text-brand-blue-800 dark:bg-brand-blue-900/30 dark:text-brand-blue-300"
                     >
                       {{ b }}
                     </span>
@@ -414,7 +414,7 @@ const breadcrumb = computed(() => [
                       <span
                         v-for="b in project.beneficiaries"
                         :key="b"
-                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-brand-blue-100 text-brand-blue-800 dark:bg-brand-blue-900/30 dark:text-brand-blue-300"
+                        class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-brand-blue-100 text-brand-blue-800 dark:bg-brand-blue-900/30 dark:text-brand-blue-300"
                       >
                         {{ b }}
                       </span>
