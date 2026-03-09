@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { CampusWithTeam } from '~/composables/useCampusApi'
 import type { CountryRead } from '~/composables/useCountriesApi'
-import type { OutputData } from '@editorjs/editorjs'
 import type { ImageVariants } from '~/types/api'
 
 definePageMeta({
@@ -74,7 +73,8 @@ const activeTab = ref<'general' | 'location' | 'contact' | 'settings'>('general'
 const form = reactive({
   code: '',
   name: '',
-  description: undefined as OutputData | undefined,
+  description_md: '',
+  description_html: '',
   cover_image: '', // URL d'aperçu local
   cover_image_external_id: '' as string | null,
   country_external_id: '' as string | null,
@@ -95,16 +95,9 @@ const loadCampusData = () => {
   if (originalCampus.value) {
     form.code = originalCampus.value.code
     form.name = originalCampus.value.name
-    // Parser la description JSON si elle existe
-    if (originalCampus.value.description) {
-      try {
-        form.description = JSON.parse(originalCampus.value.description) as OutputData
-      } catch {
-        form.description = undefined
-      }
-    } else {
-      form.description = undefined
-    }
+    // Charger la description markdown si elle existe
+    form.description_md = originalCampus.value.description_md || ''
+    form.description_html = originalCampus.value.description_html || ''
     form.cover_image_external_id = originalCampus.value.cover_image_external_id || ''
     // Initialiser l'aperçu de l'image si elle existe
     if (originalCampus.value.cover_image_external_id) {
@@ -214,15 +207,11 @@ const submitForm = async () => {
   submitError.value = null
 
   try {
-    // Convertir les OutputData en JSON string pour l'API
-    const descriptionJson = form.description && form.description.blocks?.length
-      ? JSON.stringify(form.description)
-      : null
-
     const campusData = {
       code: form.code,
       name: form.name,
-      description: descriptionJson,
+      description_html: form.description_html || null,
+      description_md: form.description_md || null,
       cover_image_external_id: form.cover_image_external_id || null,
       country_external_id: form.country_external_id || null,
       city: form.city || null,
@@ -449,13 +438,11 @@ function removeCoverImage() {
           <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
             Description
           </label>
-          <ClientOnly>
-            <EditorJS
-              v-model="form.description"
-              placeholder="Description du campus..."
-              :min-height="150"
-            />
-          </ClientOnly>
+          <ToastUIEditor
+            v-model="form.description_md"
+            placeholder="Description du campus..."
+            @update:html="form.description_html = $event"
+          />
         </div>
 
         <!-- Image de couverture -->

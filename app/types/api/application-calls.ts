@@ -60,7 +60,8 @@ export interface ApplicationCallRead {
   id: string
   title: string
   slug: string
-  description: string | null
+  description_html: string | null
+  description_md: string | null
   cover_image_external_id: string | null
   program_external_id: string | null
   campus_external_id: string | null
@@ -73,7 +74,8 @@ export interface ApplicationCallRead {
   deadline: string | null
   program_start_date: string | null
   program_end_date: string | null
-  target_audience: string | null
+  target_audience_html: string | null
+  target_audience_md: string | null
   registration_fee: number | null
   currency: string
   external_form_url: string | null
@@ -98,7 +100,8 @@ export interface ApplicationCallPublic {
   id: string
   title: string
   slug: string
-  description: string | null
+  description_html: string | null
+  description_md: string | null
   cover_image_external_id: string | null
   program_external_id: string | null
   campus_external_id: string | null
@@ -110,7 +113,8 @@ export interface ApplicationCallPublic {
   deadline: string | null
   program_start_date: string | null
   program_end_date: string | null
-  target_audience: string | null
+  target_audience_html: string | null
+  target_audience_md: string | null
   registration_fee: number | null
   currency: string
   external_form_url: string | null
@@ -131,7 +135,8 @@ export interface ApplicationCallPublicWithDetails extends ApplicationCallPublic 
 export interface ApplicationCallCreatePayload {
   title: string
   slug: string
-  description?: string | null
+  description_html?: string | null
+  description_md?: string | null
   cover_image_external_id?: string | null
   program_external_id?: string | null
   campus_external_id?: string | null
@@ -143,7 +148,8 @@ export interface ApplicationCallCreatePayload {
   deadline?: string | null
   program_start_date?: string | null
   program_end_date?: string | null
-  target_audience?: string | null
+  target_audience_html?: string | null
+  target_audience_md?: string | null
   registration_fee?: number | null
   currency?: string
   external_form_url?: string | null
@@ -154,7 +160,8 @@ export interface ApplicationCallCreatePayload {
 export interface ApplicationCallUpdatePayload {
   title?: string
   slug?: string
-  description?: string | null
+  description_html?: string | null
+  description_md?: string | null
   cover_image_external_id?: string | null
   program_external_id?: string | null
   campus_external_id?: string | null
@@ -166,7 +173,8 @@ export interface ApplicationCallUpdatePayload {
   deadline?: string | null
   program_start_date?: string | null
   program_end_date?: string | null
-  target_audience?: string | null
+  target_audience_html?: string | null
+  target_audience_md?: string | null
   registration_fee?: number | null
   currency?: string
   external_form_url?: string | null

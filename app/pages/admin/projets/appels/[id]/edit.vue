@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { OutputData } from '@editorjs/editorjs'
 import type { ImageVariants, ProjectCallRead, ProjectCallType, ProjectCallStatus } from '~/types/api'
 
 definePageMeta({
@@ -23,9 +22,11 @@ const { uploadMediaVariants, getMediaUrl } = useMediaApi()
 // Projets disponibles pour le select
 const projects = ref<{ id: string; title: string }[]>([])
 
-// Contenu EditorJS (séparé du formulaire pour éviter les problèmes de réactivité)
-const description = ref<OutputData | undefined>(undefined)
-const conditions = ref<OutputData | undefined>(undefined)
+// Contenu éditeur (séparé du formulaire pour éviter les problèmes de réactivité)
+const descriptionMd = ref('')
+const descriptionHtml = ref('')
+const conditionsMd = ref('')
+const conditionsHtml = ref('')
 
 // État du formulaire
 const form = reactive({
@@ -129,33 +130,11 @@ onMounted(async () => {
       form.deadline = call.deadline.slice(0, 16)
     }
 
-    // Parser le contenu EditorJS
-    if (call.description) {
-      try {
-        description.value = JSON.parse(call.description) as OutputData
-      }
-      catch {
-        // Si ce n'est pas du JSON valide, créer un bloc paragraphe
-        description.value = {
-          time: Date.now(),
-          blocks: [{ type: 'paragraph', data: { text: call.description } }],
-          version: '2.28.2',
-        }
-      }
-    }
-
-    if (call.conditions) {
-      try {
-        conditions.value = JSON.parse(call.conditions) as OutputData
-      }
-      catch {
-        conditions.value = {
-          time: Date.now(),
-          blocks: [{ type: 'paragraph', data: { text: call.conditions } }],
-          version: '2.28.2',
-        }
-      }
-    }
+    // Charger le contenu éditeur
+    descriptionMd.value = call.description_md || ''
+    descriptionHtml.value = call.description_html || ''
+    conditionsMd.value = call.conditions_md || ''
+    conditionsHtml.value = call.conditions_html || ''
   }
   catch (err: any) {
     console.error('Erreur chargement appel:', err)
@@ -184,15 +163,13 @@ const saveForm = async () => {
   error.value = null
 
   try {
-    // Sérialiser le contenu EditorJS en JSON
-    const descriptionJson = description.value ? JSON.stringify(description.value) : null
-    const conditionsJson = conditions.value ? JSON.stringify(conditions.value) : null
-
     await updateCall(callId.value, {
       title: form.title,
-      description: descriptionJson,
+      description_html: descriptionHtml.value || null,
+      description_md: descriptionMd.value || null,
       cover_image_external_id: form.cover_image_external_id,
-      conditions: conditionsJson,
+      conditions_html: conditionsHtml.value || null,
+      conditions_md: conditionsMd.value || null,
       type: form.type,
       status: form.status,
       deadline: form.deadline ? new Date(form.deadline).toISOString() : null,
@@ -472,24 +449,26 @@ const formatDate = (date: string | undefined) => {
 
       <!-- Description détaillée -->
       <AdminRichTextEditor
-        v-model="description"
+        v-model="descriptionMd"
+        v-model:html-value="descriptionHtml"
         title="Description détaillée"
         description="Décrivez l'appel en détail : contexte, objectifs, profils recherchés..."
         icon="fa-solid fa-file-lines"
         icon-color="text-blue-500"
         placeholder="Rédigez la description complète de l'appel..."
-        :min-height="300"
+        height="300px"
       />
 
       <!-- Conditions de participation -->
       <AdminRichTextEditor
-        v-model="conditions"
+        v-model="conditionsMd"
+        v-model:html-value="conditionsHtml"
         title="Conditions de participation"
         description="Précisez les critères d'éligibilité et les conditions de participation"
         icon="fa-solid fa-clipboard-check"
         icon-color="text-green-500"
         placeholder="Listez les conditions de participation..."
-        :min-height="250"
+        height="250px"
       />
 
       <!-- Footer actions -->

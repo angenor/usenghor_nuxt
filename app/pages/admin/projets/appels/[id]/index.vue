@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { OutputData } from '@editorjs/editorjs'
 import type { ProjectCallRead, ProjectCallStatus } from '~/types/api'
 
 definePageMeta({
@@ -126,26 +125,6 @@ const getDaysUntilDeadline = (deadline: string | null | undefined) => {
   return Math.ceil(diff / (1000 * 60 * 60 * 24))
 }
 
-// Parser le contenu JSON en OutputData pour l'éditeur
-const parsedDescription = computed<OutputData | null>(() => {
-  if (!call.value?.description) return null
-  try {
-    return JSON.parse(call.value.description) as OutputData
-  }
-  catch {
-    return null
-  }
-})
-
-const parsedConditions = computed<OutputData | null>(() => {
-  if (!call.value?.conditions) return null
-  try {
-    return JSON.parse(call.value.conditions) as OutputData
-  }
-  catch {
-    return null
-  }
-})
 
 // URL de l'image de couverture (chargée de manière asynchrone)
 const coverImageUrl = ref<string | null>(null)
@@ -334,46 +313,26 @@ const projectCallTypeColors: Record<string, string> = {
         />
       </div>
 
-      <!-- Description détaillée (EditorJS) -->
-      <div v-if="parsedDescription" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+      <!-- Description détaillée -->
+      <div v-if="call.description_html" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
         <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
           <font-awesome-icon :icon="['fas', 'file-lines']" class="text-blue-500" />
           Description détaillée
         </h2>
         <div class="prose prose-sm max-w-none dark:prose-invert">
-          <EditorJSRenderer :data="parsedDescription" />
+          <RichTextRenderer :html="call.description_html" />
         </div>
       </div>
-      <!-- Fallback texte brut si description n'est pas du JSON -->
-      <div v-else-if="call.description" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
-        <h2 class="mb-3 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
-          <font-awesome-icon :icon="['fas', 'align-left']" class="text-gray-400" />
-          Description
-        </h2>
-        <p class="whitespace-pre-wrap text-gray-600 dark:text-gray-300">
-          {{ call.description }}
-        </p>
-      </div>
 
-      <!-- Conditions de participation (EditorJS) -->
-      <div v-if="parsedConditions" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+      <!-- Conditions de participation -->
+      <div v-if="call.conditions_html" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
         <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
           <font-awesome-icon :icon="['fas', 'clipboard-check']" class="text-green-500" />
           Conditions de participation
         </h2>
         <div class="prose prose-sm max-w-none dark:prose-invert">
-          <EditorJSRenderer :data="parsedConditions" />
+          <RichTextRenderer :html="call.conditions_html" />
         </div>
-      </div>
-      <!-- Fallback texte brut si conditions n'est pas du JSON -->
-      <div v-else-if="call.conditions" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
-        <h2 class="mb-3 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
-          <font-awesome-icon :icon="['fas', 'clipboard-check']" class="text-green-500" />
-          Conditions de participation
-        </h2>
-        <p class="whitespace-pre-wrap text-gray-600 dark:text-gray-300">
-          {{ call.conditions }}
-        </p>
       </div>
 
       <!-- Métadonnées techniques -->

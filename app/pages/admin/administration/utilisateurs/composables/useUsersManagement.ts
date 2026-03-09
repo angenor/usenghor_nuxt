@@ -60,7 +60,8 @@ export interface UserFormData {
   phone_whatsapp: string
   linkedin: string
   facebook: string
-  biography: string
+  biography_html: string
+  biography_md: string
   city: string
   address: string
   role_ids: string[]
@@ -89,7 +90,8 @@ const defaultFormData: UserFormData = {
   phone_whatsapp: '',
   linkedin: '',
   facebook: '',
-  biography: '',
+  biography_html: '',
+  biography_md: '',
   city: '',
   address: '',
   role_ids: [],
@@ -392,7 +394,8 @@ export function useUsersManagement() {
       phone_whatsapp: user.phone_whatsapp || '',
       linkedin: user.linkedin || '',
       facebook: user.facebook || '',
-      biography: user.biography || '',
+      biography_html: user.biography_html || '',
+      biography_md: user.biography_md || '',
       city: user.city || '',
       address: user.address || '',
       role_ids: user.roles.map(r => r.id),
@@ -538,7 +541,8 @@ export function useUsersManagement() {
           phone_whatsapp: formData.value.phone_whatsapp || null,
           linkedin: formData.value.linkedin || null,
           facebook: formData.value.facebook || null,
-          biography: formData.value.biography || null,
+          biography_html: formData.value.biography_html || null,
+          biography_md: formData.value.biography_md || null,
           city: formData.value.city || null,
           address: formData.value.address || null,
           active: formData.value.active,
@@ -563,7 +567,8 @@ export function useUsersManagement() {
           phone_whatsapp: formData.value.phone_whatsapp || null,
           linkedin: formData.value.linkedin || null,
           facebook: formData.value.facebook || null,
-          biography: formData.value.biography || null,
+          biography_html: formData.value.biography_html || null,
+          biography_md: formData.value.biography_md || null,
           city: formData.value.city || null,
           address: formData.value.address || null,
           photo_external_id: formData.value.photo_external_id,

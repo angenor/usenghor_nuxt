@@ -3,13 +3,11 @@
  * ==================================
  *
  * Gestion des actualités via l'API backend FastAPI.
- * Gère la transformation du contenu multilingue EditorJS.
+ * Utilise content_html / content_md pour le contenu riche (TOAST UI Editor).
  */
 
 import type { IdResponse, MessageResponse, PaginatedResponse } from '~/types/api'
 import type {
-  EditorJSContent,
-  MultilingualContent,
   NewsCreatePayload,
   NewsDisplay,
   NewsFilters,
@@ -65,72 +63,21 @@ export function useAdminNewsApi() {
   // =========================================================================
 
   /**
-   * Parse le contenu JSON multilingue depuis le backend.
-   */
-  function parseMultilingualContent(content: string | null): MultilingualContent {
-    if (!content) {
-      return { fr: null, en: null, ar: null }
-    }
-    try {
-      const parsed = JSON.parse(content)
-      // Si c'est déjà un objet multilingue
-      if (parsed && (parsed.fr || parsed.en || parsed.ar)) {
-        return {
-          fr: parsed.fr || null,
-          en: parsed.en || null,
-          ar: parsed.ar || null,
-        }
-      }
-      // Si c'est un contenu EditorJS simple, le considérer comme FR
-      if (parsed && parsed.blocks) {
-        return { fr: parsed, en: null, ar: null }
-      }
-      return { fr: null, en: null, ar: null }
-    }
-    catch {
-      return { fr: null, en: null, ar: null }
-    }
-  }
-
-  /**
-   * Stringify le contenu multilingue pour envoi au backend.
-   */
-  function stringifyMultilingualContent(
-    contentFr: EditorJSContent | null,
-    contentEn: EditorJSContent | null,
-    contentAr: EditorJSContent | null,
-  ): string | null {
-    // Vérifier si au moins un contenu existe
-    const hasFr = contentFr && contentFr.blocks && contentFr.blocks.length > 0
-    const hasEn = contentEn && contentEn.blocks && contentEn.blocks.length > 0
-    const hasAr = contentAr && contentAr.blocks && contentAr.blocks.length > 0
-
-    if (!hasFr && !hasEn && !hasAr) {
-      return null
-    }
-
-    return JSON.stringify({
-      fr: hasFr ? contentFr : null,
-      en: hasEn ? contentEn : null,
-      ar: hasAr ? contentAr : null,
-    })
-  }
-
-  /**
    * Transforme NewsWithTags (backend) vers NewsDisplay (frontend).
    */
   function transformToDisplay(news: NewsWithTags): NewsDisplay {
-    const multilingual = parseMultilingualContent(news.content)
-
     return {
       id: news.id,
       slug: news.slug,
       title: news.title,
       summary: news.summary,
-      // Contenu multilingue parsé
-      content: multilingual.fr,
-      content_en: multilingual.en,
-      content_ar: multilingual.ar,
+      // Contenu legacy (non utilisé avec TOAST UI)
+      content: null,
+      content_en: null,
+      content_ar: null,
+      // Contenu TOAST UI Editor (HTML + Markdown)
+      content_html: news.content_html || null,
+      content_md: news.content_md || null,
       // Médias
       video_url: news.video_url,
       cover_image: news.cover_image_external_id
@@ -266,9 +213,8 @@ export function useAdminNewsApi() {
     title: string
     slug: string
     summary?: string | null
-    content?: EditorJSContent | null
-    content_en?: EditorJSContent | null
-    content_ar?: EditorJSContent | null
+    content_html?: string | null
+    content_md?: string | null
     video_url?: string | null
     highlight_status?: NewsHighlightStatus
     cover_image_external_id?: string | null
@@ -289,11 +235,8 @@ export function useAdminNewsApi() {
       title: data.title,
       slug: data.slug,
       summary: data.summary,
-      content: stringifyMultilingualContent(
-        data.content || null,
-        data.content_en || null,
-        data.content_ar || null,
-      ),
+      content_html: data.content_html || null,
+      content_md: data.content_md || null,
       video_url: data.video_url,
       highlight_status: data.highlight_status || 'standard',
       cover_image_external_id: data.cover_image_external_id,
@@ -324,9 +267,8 @@ export function useAdminNewsApi() {
     title?: string
     slug?: string
     summary?: string | null
-    content?: EditorJSContent | null
-    content_en?: EditorJSContent | null
-    content_ar?: EditorJSContent | null
+    content_html?: string | null
+    content_md?: string | null
     video_url?: string | null
     highlight_status?: NewsHighlightStatus
     cover_image_external_id?: string | null
@@ -365,14 +307,9 @@ export function useAdminNewsApi() {
     if (data.campus_external_ids !== undefined) payload.campus_external_ids = data.campus_external_ids
     if (data.service_external_ids !== undefined) payload.service_external_ids = data.service_external_ids
 
-    // Gérer le contenu multilingue si au moins un champ content est fourni
-    if (data.content !== undefined || data.content_en !== undefined || data.content_ar !== undefined) {
-      payload.content = stringifyMultilingualContent(
-        data.content || null,
-        data.content_en || null,
-        data.content_ar || null,
-      )
-    }
+    // Contenu HTML/Markdown (TOAST UI Editor)
+    if (data.content_html !== undefined) payload.content_html = data.content_html
+    if (data.content_md !== undefined) payload.content_md = data.content_md
 
     const news = await apiFetch<NewsWithTags>(`/api/admin/news/${id}`, {
       method: 'PUT',
@@ -572,8 +509,6 @@ export function useAdminNewsApi() {
 
     // Transformations
     transformToDisplay,
-    parseMultilingualContent,
-    stringifyMultilingualContent,
 
     // Helpers
     slugify,

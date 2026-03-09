@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { OutputData, API } from '@editorjs/editorjs'
-
 type Language = 'fr' | 'en' | 'ar'
 
 interface Props {
@@ -12,20 +10,26 @@ interface Props {
   icon?: string
   /** Couleur de l'icône (classe Tailwind, ex: "text-indigo-500") */
   iconColor?: string
-  /** v-model pour le contenu FR */
-  modelValue?: OutputData
-  /** v-model pour le contenu EN (optionnel, active les tabs multilingues) */
-  modelValueEn?: OutputData
-  /** v-model pour le contenu AR (optionnel, active les tabs multilingues avec arabe) */
-  modelValueAr?: OutputData
+  /** v-model pour le contenu Markdown FR */
+  modelValue?: string
+  /** v-model pour le contenu Markdown EN */
+  modelValueEn?: string
+  /** v-model pour le contenu Markdown AR */
+  modelValueAr?: string
+  /** v-model pour le contenu HTML FR */
+  htmlValue?: string
+  /** v-model pour le contenu HTML EN */
+  htmlValueEn?: string
+  /** v-model pour le contenu HTML AR */
+  htmlValueAr?: string
   /** Placeholder pour l'éditeur FR */
   placeholder?: string
   /** Placeholder pour l'éditeur EN */
   placeholderEn?: string
   /** Placeholder pour l'éditeur AR */
   placeholderAr?: string
-  /** Hauteur minimale de l'éditeur */
-  minHeight?: number
+  /** Hauteur de l'éditeur */
+  height?: string
   /** Afficher dans une carte avec styling de section admin */
   showCard?: boolean
   /** Label pour l'éditeur simple (sans tabs) */
@@ -37,11 +41,14 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'update:modelValue', data: OutputData | undefined): void
-  (e: 'update:modelValueEn', data: OutputData | undefined): void
-  (e: 'update:modelValueAr', data: OutputData | undefined): void
+  (e: 'update:modelValue', data: string): void
+  (e: 'update:modelValueEn', data: string): void
+  (e: 'update:modelValueAr', data: string): void
+  (e: 'update:htmlValue', data: string): void
+  (e: 'update:htmlValueEn', data: string): void
+  (e: 'update:htmlValueAr', data: string): void
   (e: 'change'): void
-  (e: 'ready', api: API): void
+  (e: 'ready'): void
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -49,17 +56,20 @@ const props = withDefaults(defineProps<Props>(), {
   description: '',
   icon: 'fa-solid fa-file-lines',
   iconColor: 'text-indigo-500',
-  modelValue: undefined,
+  modelValue: '',
   modelValueEn: undefined,
   modelValueAr: undefined,
+  htmlValue: '',
+  htmlValueEn: undefined,
+  htmlValueAr: undefined,
   placeholder: 'Commencez à écrire...',
   placeholderEn: 'Start writing...',
   placeholderAr: 'ابدأ في الكتابة هنا...',
-  minHeight: 300,
+  height: '400px',
   showCard: true,
   label: '',
   required: false,
-  languages: undefined
+  languages: undefined,
 })
 
 const emit = defineEmits<Emits>()
@@ -71,10 +81,10 @@ const availableLanguages = computed<Language[]>(() => {
   }
   // Auto-détection basée sur les props fournis
   const langs: Language[] = ['fr']
-  if (props.modelValueEn !== undefined || props.placeholderEn !== 'Start writing...') {
+  if (props.modelValueEn !== undefined) {
     langs.push('en')
   }
-  if (props.modelValueAr !== undefined || props.placeholderAr !== 'ابدأ بالكتابة...') {
+  if (props.modelValueAr !== undefined) {
     langs.push('ar')
   }
   return langs
@@ -86,49 +96,43 @@ const isMultilingual = computed(() => availableLanguages.value.length > 1)
 // Tab active pour l'éditeur multilingue
 const activeTab = ref<Language>('fr')
 
-// Valeurs locales pour v-model
-const contentFr = ref<OutputData | undefined>(props.modelValue)
-const contentEn = ref<OutputData | undefined>(props.modelValueEn)
-const contentAr = ref<OutputData | undefined>(props.modelValueAr)
-
-// Sync props -> local
-watch(() => props.modelValue, (val) => {
-  contentFr.value = val
-}, { deep: true })
-
-watch(() => props.modelValueEn, (val) => {
-  contentEn.value = val
-}, { deep: true })
-
-watch(() => props.modelValueAr, (val) => {
-  contentAr.value = val
-}, { deep: true })
-
-// Handlers
-const onContentFrChange = () => {
-  emit('update:modelValue', contentFr.value)
+// Handlers pour les changements de contenu
+function onMdChangeFr(md: string) {
+  emit('update:modelValue', md)
   emit('change')
 }
 
-const onContentEnChange = () => {
-  emit('update:modelValueEn', contentEn.value)
+function onHtmlChangeFr(html: string) {
+  emit('update:htmlValue', html)
+}
+
+function onMdChangeEn(md: string) {
+  emit('update:modelValueEn', md)
   emit('change')
 }
 
-const onContentArChange = () => {
-  emit('update:modelValueAr', contentAr.value)
+function onHtmlChangeEn(html: string) {
+  emit('update:htmlValueEn', html)
+}
+
+function onMdChangeAr(md: string) {
+  emit('update:modelValueAr', md)
   emit('change')
 }
 
-const onReady = (api: API) => {
-  emit('ready', api)
+function onHtmlChangeAr(html: string) {
+  emit('update:htmlValueAr', html)
+}
+
+function onReady() {
+  emit('ready')
 }
 
 // Configuration des onglets
-const tabConfig: Record<Language, { label: string; icon: string; loadingText: string }> = {
-  fr: { label: 'Français', icon: 'fa-solid fa-flag', loadingText: 'Chargement de l\'éditeur...' },
-  en: { label: 'English', icon: 'fa-solid fa-globe', loadingText: 'Loading editor...' },
-  ar: { label: 'العربية', icon: 'fa-solid fa-language', loadingText: 'جارٍ تحميل المحرر...' }
+const tabConfig: Record<Language, { label: string; icon: string }> = {
+  fr: { label: 'Français', icon: 'fa-solid fa-flag' },
+  en: { label: 'English', icon: 'fa-solid fa-globe' },
+  ar: { label: 'العربية', icon: 'fa-solid fa-language' },
 }
 </script>
 
@@ -167,98 +171,57 @@ const tabConfig: Record<Language, { label: string; icon: string; loadingText: st
 
       <!-- Éditeur Français -->
       <div v-if="availableLanguages.includes('fr')" v-show="activeTab === 'fr'">
-        <ClientOnly>
-          <EditorJS
-            v-model="contentFr"
-            :placeholder="placeholder"
-            :min-height="minHeight"
-            @change="onContentFrChange"
-            @ready="onReady"
-          />
-          <template #fallback>
-            <div
-              class="flex items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
-              :style="{ minHeight: `${minHeight}px` }"
-            >
-              <div class="text-center">
-                <font-awesome-icon icon="fa-solid fa-spinner" class="h-6 w-6 animate-spin text-gray-400" />
-                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ tabConfig.fr.loadingText }}</p>
-              </div>
-            </div>
-          </template>
-        </ClientOnly>
+        <ToastUIEditor
+          :model-value="modelValue"
+          :placeholder="placeholder"
+          :height="height"
+          language="fr-FR"
+          direction="ltr"
+          @update:model-value="onMdChangeFr"
+          @update:html="onHtmlChangeFr"
+          @ready="onReady"
+        />
       </div>
 
       <!-- Éditeur Anglais -->
       <div v-if="availableLanguages.includes('en')" v-show="activeTab === 'en'">
-        <ClientOnly>
-          <EditorJS
-            v-model="contentEn"
-            :placeholder="placeholderEn"
-            :min-height="minHeight"
-            @change="onContentEnChange"
-          />
-          <template #fallback>
-            <div
-              class="flex items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
-              :style="{ minHeight: `${minHeight}px` }"
-            >
-              <div class="text-center">
-                <font-awesome-icon icon="fa-solid fa-spinner" class="h-6 w-6 animate-spin text-gray-400" />
-                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ tabConfig.en.loadingText }}</p>
-              </div>
-            </div>
-          </template>
-        </ClientOnly>
+        <ToastUIEditor
+          :model-value="modelValueEn"
+          :placeholder="placeholderEn"
+          :height="height"
+          language="fr-FR"
+          direction="ltr"
+          @update:model-value="onMdChangeEn"
+          @update:html="onHtmlChangeEn"
+        />
       </div>
 
       <!-- Éditeur Arabe (RTL) -->
-      <div v-if="availableLanguages.includes('ar')" v-show="activeTab === 'ar'" dir="rtl">
-        <ClientOnly>
-          <EditorJS
-            v-model="contentAr"
-            :placeholder="placeholderAr"
-            :min-height="minHeight"
-            class="editor-rtl"
-            @change="onContentArChange"
-          />
-          <template #fallback>
-            <div
-              class="flex items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
-              :style="{ minHeight: `${minHeight}px` }"
-            >
-              <div class="text-center">
-                <font-awesome-icon icon="fa-solid fa-spinner" class="h-6 w-6 animate-spin text-gray-400" />
-                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ tabConfig.ar.loadingText }}</p>
-              </div>
-            </div>
-          </template>
-        </ClientOnly>
+      <div v-if="availableLanguages.includes('ar')" v-show="activeTab === 'ar'">
+        <ToastUIEditor
+          :model-value="modelValueAr"
+          :placeholder="placeholderAr"
+          :height="height"
+          language="fr-FR"
+          direction="rtl"
+          @update:model-value="onMdChangeAr"
+          @update:html="onHtmlChangeAr"
+        />
       </div>
     </template>
 
     <!-- Mode mono-langue -->
     <template v-else>
-      <ClientOnly>
-        <EditorJS
-          v-model="contentFr"
-          :placeholder="placeholder"
-          :min-height="minHeight"
-          @change="onContentFrChange"
-          @ready="onReady"
-        />
-        <template #fallback>
-          <div
-            class="flex items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
-            :style="{ minHeight: `${minHeight}px` }"
-          >
-            <div class="text-center">
-              <font-awesome-icon icon="fa-solid fa-spinner" class="h-6 w-6 animate-spin text-gray-400" />
-              <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ tabConfig.fr.loadingText }}</p>
-            </div>
-          </div>
-        </template>
-      </ClientOnly>
+      <ToastUIEditor
+        :model-value="modelValue"
+        :placeholder="placeholder"
+        :height="height"
+        language="fr-FR"
+        direction="ltr"
+        @update:model-value="onMdChangeFr"
+        @update:html="onHtmlChangeFr"
+        @ready="onReady"
+      />
     </template>
   </div>
 
@@ -268,79 +231,15 @@ const tabConfig: Record<Language, { label: string; icon: string; loadingText: st
       {{ label }}
       <span v-if="required" class="text-red-500">*</span>
     </label>
-    <ClientOnly>
-      <EditorJS
-        v-model="contentFr"
-        :placeholder="placeholder"
-        :min-height="minHeight"
-        @change="onContentFrChange"
-        @ready="onReady"
-      />
-      <template #fallback>
-        <div
-          class="flex items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
-          :style="{ minHeight: `${minHeight}px` }"
-        >
-          <div class="text-center">
-            <font-awesome-icon icon="fa-solid fa-spinner" class="h-6 w-6 animate-spin text-gray-400" />
-            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ tabConfig.fr.loadingText }}</p>
-          </div>
-        </div>
-      </template>
-    </ClientOnly>
+    <ToastUIEditor
+      :model-value="modelValue"
+      :placeholder="placeholder"
+      :height="height"
+      language="fr-FR"
+      direction="ltr"
+      @update:model-value="onMdChangeFr"
+      @update:html="onHtmlChangeFr"
+      @ready="onReady"
+    />
   </div>
 </template>
-
-<style scoped>
-/* Styles RTL pour l'éditeur arabe */
-.editor-rtl :deep(.codex-editor) {
-  direction: rtl;
-  text-align: right;
-}
-
-.editor-rtl :deep(.ce-block__content) {
-  direction: rtl;
-  text-align: right;
-}
-
-.editor-rtl :deep(.ce-paragraph) {
-  direction: rtl;
-  text-align: right;
-}
-
-.editor-rtl :deep(.ce-header) {
-  direction: rtl;
-  text-align: right;
-}
-
-.editor-rtl :deep(.cdx-list) {
-  direction: rtl;
-  text-align: right;
-  padding-right: 40px;
-  padding-left: 0;
-}
-
-.editor-rtl :deep(.cdx-quote__text) {
-  direction: rtl;
-  text-align: right;
-  border-right: 4px solid;
-  border-left: none;
-  padding-right: 1rem;
-  padding-left: 0;
-}
-
-.editor-rtl :deep(.ce-toolbar) {
-  left: auto;
-  right: 0;
-}
-
-.editor-rtl :deep(.ce-toolbar__plus) {
-  left: auto;
-  right: -34px;
-}
-
-.editor-rtl :deep(.ce-toolbar__actions) {
-  right: auto;
-  left: 0;
-}
-</style>

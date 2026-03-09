@@ -20,7 +20,8 @@ export interface RegisterFormData {
   birthday_month: number | null
   photo_external_id: string | null
   photo_base64: string | null
-  biography: string
+  biography_html: string
+  biography_md: string
   linkedin_url: string
   facebook_url: string
 }
@@ -68,7 +69,8 @@ const defaultFormData: RegisterFormData = {
   birthday_month: null,
   photo_external_id: null,
   photo_base64: null,
-  biography: '',
+  biography_html: '',
+  biography_md: '',
   linkedin_url: '',
   facebook_url: '',
 }
@@ -291,7 +293,8 @@ export function useAdminRegistration() {
           birthday_day: formData.value.birthday_day,
           birthday_month: formData.value.birthday_month,
           photo_base64: formData.value.photo_base64,
-          biography: formData.value.biography || null,
+          biography_html: formData.value.biography_html || null,
+          biography_md: formData.value.biography_md || null,
           linkedin_url: formData.value.linkedin_url || null,
           facebook_url: formData.value.facebook_url || null,
         },

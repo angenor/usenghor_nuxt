@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { UserPublicProfile } from '~/composables/usePublicUserApi'
-import type { OutputData } from '@editorjs/editorjs'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -8,30 +7,6 @@ const localePath = useLocalePath()
 const { getUserProfile, getFullName } = usePublicUserApi()
 
 const userId = route.params.id as string
-
-/**
- * Parse un contenu qui peut être du JSON EditorJS ou du texte brut.
- */
-function parseEditorContent(content: string | null | undefined): OutputData | null {
-  if (!content) return null
-  try {
-    const parsed = JSON.parse(content)
-    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
-      return parsed as OutputData
-    }
-  }
-  catch {
-    // Texte brut → encapsulé en bloc paragraphe
-    if (content.trim()) {
-      return {
-        time: Date.now(),
-        blocks: [{ id: '1', type: 'paragraph', data: { text: content } }],
-        version: '2.28.0',
-      }
-    }
-  }
-  return null
-}
 
 // State
 const profile = ref<UserPublicProfile | null>(null)
@@ -74,8 +49,6 @@ const primaryPosition = computed(() => {
   }
   return ''
 })
-
-const parsedBiography = computed(() => parseEditorContent(profile.value?.biography))
 
 const hasContactInfo = computed(() => {
   if (!profile.value) return false
@@ -244,8 +217,8 @@ useSeoMeta({
                   {{ t('team.profile.sections.biography') }}
                 </h2>
 
-                <div v-if="parsedBiography" class="prose prose-lg dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 leading-relaxed">
-                  <EditorJSRenderer :data="parsedBiography" />
+                <div v-if="profile.biography_html" class="prose prose-lg dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 leading-relaxed">
+                  <RichTextRenderer :html="profile.biography_html" />
                 </div>
                 <p v-else class="text-gray-400 dark:text-gray-500 italic">
                   {{ t('team.profile.empty.biography') }}

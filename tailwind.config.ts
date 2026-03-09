@@ -1,5 +1,6 @@
 import type { Config } from 'tailwindcss'
 import heroPatterns from 'tailwindcss-hero-patterns'
+import typography from '@tailwindcss/typography'
 
 export default {
   darkMode: 'class',
@@ -59,5 +60,5 @@ export default {
       }
     }
   },
-  plugins: [heroPatterns]
+  plugins: [heroPatterns, typography]
 } satisfies Config

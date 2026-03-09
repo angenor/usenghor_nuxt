@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { OutputData } from '@editorjs/editorjs'
 import type { CallType, PublicationStatus, CallEligibilityCriteriaCreate, CallCoverageCreate, CallRequiredDocumentCreate, CallScheduleCreate, ImageVariants } from '~/types/api'
 
 definePageMeta({
@@ -111,7 +110,8 @@ const genKey = () => ++nextKey
 const form = ref({
   title: '',
   slug: '',
-  description: undefined as OutputData | undefined,
+  description_md: '',
+  description_html: '',
   type: 'application' as CallType,
   status: 'upcoming' as const,
   campus_external_id: '' as string,
@@ -122,7 +122,8 @@ const form = ref({
   deadline: '',
   program_start_date: '',
   program_end_date: '',
-  target_audience: '',
+  target_audience_md: '',
+  target_audience_html: '',
   registration_fee: undefined as number | undefined,
   currency: 'EUR',
   use_internal_form: true,
@@ -320,7 +321,8 @@ const saveForm = async () => {
     const result = await apiCreateCall({
       title: form.value.title,
       slug: form.value.slug,
-      description: form.value.description ? JSON.stringify(form.value.description) : null,
+      description_html: form.value.description_html || null,
+      description_md: form.value.description_md || null,
       type: form.value.type,
       status: form.value.status,
       campus_external_id: form.value.campus_external_id || null,
@@ -332,7 +334,8 @@ const saveForm = async () => {
       deadline: form.value.deadline || null,
       program_start_date: form.value.program_start_date || null,
       program_end_date: form.value.program_end_date || null,
-      target_audience: form.value.target_audience || null,
+      target_audience_html: form.value.target_audience_html || null,
+      target_audience_md: form.value.target_audience_md || null,
       registration_fee: form.value.registration_fee || null,
       currency: form.value.currency,
       use_internal_form: form.value.use_internal_form,
@@ -585,11 +588,12 @@ const tabs = [
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Public cible
             </label>
-            <input
-              v-model="form.target_audience"
-              type="text"
+            <AdminRichTextEditor
+              v-model="form.target_audience_md"
+              v-model:html-value="form.target_audience_html"
+              :show-card="false"
               placeholder="Ex: Cadres africains titulaires d'un Bac+4"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              height="150px"
             />
           </div>
 
@@ -690,19 +694,13 @@ const tabs = [
             <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Description
             </label>
-            <ClientOnly>
-              <AdminRichTextEditor
-                v-model="form.description"
-                :show-card="false"
-                placeholder="Description détaillée de l'appel..."
-                :min-height="200"
-              />
-              <template #fallback>
-                <div class="flex h-[200px] items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
-                  <font-awesome-icon icon="fa-solid fa-spinner" class="h-6 w-6 animate-spin text-gray-400" />
-                </div>
-              </template>
-            </ClientOnly>
+            <AdminRichTextEditor
+              v-model="form.description_md"
+              v-model:html-value="form.description_html"
+              :show-card="false"
+              placeholder="Description détaillée de l'appel..."
+              height="200px"
+            />
           </div>
         </div>
       </div>

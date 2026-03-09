@@ -13,31 +13,6 @@ export type NewsStatus = PublicationStatus
 export type NewsHighlightStatus = 'standard' | 'featured' | 'headline'
 
 // ============================================================================
-// EditorJS Types
-// ============================================================================
-
-export interface EditorJSBlock {
-  id?: string
-  type: string
-  data: Record<string, unknown>
-}
-
-export interface EditorJSContent {
-  time?: number
-  blocks: EditorJSBlock[]
-  version?: string
-}
-
-/**
- * Contenu multilingue stocké en JSON dans le champ `content`
- */
-export interface MultilingualContent {
-  fr?: EditorJSContent | null
-  en?: EditorJSContent | null
-  ar?: EditorJSContent | null
-}
-
-// ============================================================================
 // Tags
 // ============================================================================
 
@@ -73,7 +48,12 @@ export interface NewsRead {
   title: string
   slug: string
   summary: string | null
-  content: string | null // JSON stringifié contenant MultilingualContent
+  content_html: string | null
+  content_md: string | null
+  content_en_html: string | null
+  content_en_md: string | null
+  content_ar_html: string | null
+  content_ar_md: string | null
   video_url: string | null
   cover_image_external_id: string | null
   sector_external_id: string | null
@@ -124,10 +104,13 @@ export interface NewsDisplay {
   slug: string
   title: string
   summary: string | null
-  // Contenu EditorJS parsé
-  content: EditorJSContent | null
-  content_en: EditorJSContent | null
-  content_ar: EditorJSContent | null
+  // Contenu HTML + Markdown (TOAST UI Editor)
+  content_html: string | null
+  content_md: string | null
+  content_en_html: string | null
+  content_en_md: string | null
+  content_ar_html: string | null
+  content_ar_md: string | null
   // Médias
   video_url: string | null
   cover_image: string | null // URL résolue ou placeholder
@@ -199,7 +182,12 @@ export interface NewsCreatePayload {
   title: string
   slug: string
   summary?: string | null
-  content?: string | null // JSON stringifié
+  content_html?: string | null
+  content_md?: string | null
+  content_en_html?: string | null
+  content_en_md?: string | null
+  content_ar_html?: string | null
+  content_ar_md?: string | null
   video_url?: string | null
   highlight_status?: NewsHighlightStatus
   cover_image_external_id?: string | null
@@ -221,7 +209,12 @@ export interface NewsUpdatePayload {
   title?: string
   slug?: string
   summary?: string | null
-  content?: string | null
+  content_html?: string | null
+  content_md?: string | null
+  content_en_html?: string | null
+  content_en_md?: string | null
+  content_ar_html?: string | null
+  content_ar_md?: string | null
   video_url?: string | null
   highlight_status?: NewsHighlightStatus
   cover_image_external_id?: string | null

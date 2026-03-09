@@ -10,8 +10,10 @@ export interface SectorRead {
   id: string
   code: string
   name: string
-  description: string | null
-  mission: string | null
+  description_html: string | null
+  description_md: string | null
+  mission_html: string | null
+  mission_md: string | null
   icon_external_id: string | null
   cover_image_external_id: string | null
   head_external_id: string | null
@@ -24,8 +26,10 @@ export interface SectorRead {
 export interface SectorCreate {
   code: string
   name: string
-  description?: string | null
-  mission?: string | null
+  description_html?: string | null
+  description_md?: string | null
+  mission_html?: string | null
+  mission_md?: string | null
   icon_external_id?: string | null
   cover_image_external_id?: string | null
   head_external_id?: string | null
@@ -36,8 +40,10 @@ export interface SectorCreate {
 export interface SectorUpdate {
   code?: string
   name?: string
-  description?: string | null
-  mission?: string | null
+  description_html?: string | null
+  description_md?: string | null
+  mission_html?: string | null
+  mission_md?: string | null
   icon_external_id?: string | null
   cover_image_external_id?: string | null
   head_external_id?: string | null
@@ -58,8 +64,10 @@ export interface ServiceRead {
   name: string
   sigle: string | null
   color: string | null
-  description: string | null
-  mission: string | null
+  description_html: string | null
+  description_md: string | null
+  mission_html: string | null
+  mission_md: string | null
   email: string | null
   phone: string | null
   sector_id: string | null

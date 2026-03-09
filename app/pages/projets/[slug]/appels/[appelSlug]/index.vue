@@ -180,7 +180,7 @@ const breadcrumb = computed(() => [
             </div>
 
             <!-- Description -->
-            <CallsDescriptionSection v-if="call.description" :description="call.description" />
+            <CallsDescriptionSection v-if="call.description_html" :description="call.description_html" />
 
             <!-- Details cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

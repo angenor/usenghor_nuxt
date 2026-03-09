@@ -3,19 +3,6 @@
  * Gestion complète des actualités pour le back-office
  */
 
-// Type pour le contenu EditorJS
-export interface EditorJSBlock {
-  id?: string
-  type: string
-  data: Record<string, unknown>
-}
-
-export interface EditorJSContent {
-  time?: number
-  blocks: EditorJSBlock[]
-  version?: string
-}
-
 // Types
 export type NewsStatus = 'draft' | 'published' | 'archived'
 export type HighlightStatus = 'standard' | 'featured' | 'headline'
@@ -47,14 +34,18 @@ export interface News {
   slug: string
   title: string
   summary?: string
-  /** Contenu riche FR (EditorJS format) */
-  content: EditorJSContent
-  /** Contenu riche EN (EditorJS format) */
-  content_en?: EditorJSContent
-  /** Contenu riche AR (EditorJS format) */
-  content_ar?: EditorJSContent
-  /** Contenu HTML legacy (pour migration) */
+  /** Contenu HTML FR */
   content_html?: string
+  /** Contenu Markdown FR */
+  content_md?: string
+  /** Contenu HTML EN */
+  content_en_html?: string
+  /** Contenu Markdown EN */
+  content_en_md?: string
+  /** Contenu HTML AR */
+  content_ar_html?: string
+  /** Contenu Markdown AR */
+  content_ar_md?: string
   video_url?: string
   cover_image?: string
   cover_image_alt?: string
@@ -141,58 +132,7 @@ export const mockNews: News[] = [
     slug: '35-ans-universite-senghor',
     title: 'L\'Université Senghor célèbre ses 35 ans au service de la Francophonie',
     summary: 'L\'Université Senghor d\'Alexandrie a célébré son 35e anniversaire en présence de nombreuses personnalités de la Francophonie.',
-    content: {
-      time: 1705747200000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 'b1',
-          type: 'paragraph',
-          data: {
-            text: 'L\'Université Senghor d\'Alexandrie a célébré son 35e anniversaire lors d\'une cérémonie officielle qui s\'est tenue le 20 janvier 2025. Cet événement a réuni de nombreuses personnalités de la Francophonie, dont la Secrétaire générale de l\'OIF.'
-          }
-        },
-        {
-          id: 'b2',
-          type: 'header',
-          data: {
-            text: '35 ans d\'excellence académique',
-            level: 2
-          }
-        },
-        {
-          id: 'b3',
-          type: 'paragraph',
-          data: {
-            text: 'Depuis sa création en 1990, l\'Université Senghor a formé plus de 3 000 cadres africains dans les domaines de la gouvernance, de la culture, de la santé et de l\'environnement.'
-          }
-        },
-        {
-          id: 'b4',
-          type: 'quote',
-          data: {
-            text: 'Notre université incarne la vision du Président Léopold Sédar Senghor : former les élites africaines de demain.',
-            caption: 'Le Recteur, lors de son discours d\'ouverture',
-            alignment: 'left'
-          }
-        },
-        {
-          id: 'b5',
-          type: 'header',
-          data: {
-            text: 'Perspectives d\'avenir',
-            level: 2
-          }
-        },
-        {
-          id: 'b6',
-          type: 'paragraph',
-          data: {
-            text: 'À l\'occasion de cet anniversaire, plusieurs nouveaux programmes ont été annoncés, notamment un Master en Intelligence Artificielle et Développement, ainsi que l\'ouverture prochaine d\'un nouveau campus à Nairobi.'
-          }
-        }
-      ]
-    },
+    content_html: '<p>L\'Université Senghor d\'Alexandrie a célébré son 35e anniversaire lors d\'une cérémonie officielle qui s\'est tenue le 20 janvier 2025. Cet événement a réuni de nombreuses personnalités de la Francophonie, dont la Secrétaire générale de l\'OIF.</p><h2>35 ans d\'excellence académique</h2><p>Depuis sa création en 1990, l\'Université Senghor a formé plus de 3 000 cadres africains dans les domaines de la gouvernance, de la culture, de la santé et de l\'environnement.</p><blockquote><p>Notre université incarne la vision du Président Léopold Sédar Senghor : former les élites africaines de demain.</p><footer>Le Recteur, lors de son discours d\'ouverture</footer></blockquote><h2>Perspectives d\'avenir</h2><p>À l\'occasion de cet anniversaire, plusieurs nouveaux programmes ont été annoncés, notamment un Master en Intelligence Artificielle et Développement, ainsi que l\'ouverture prochaine d\'un nouveau campus à Nairobi.</p>',
     video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     cover_image: '',
     cover_image_alt: 'Cérémonie des 35 ans de l\'Université Senghor',
@@ -216,47 +156,7 @@ export const mockNews: News[] = [
     slug: 'nouveau-partenariat-oif',
     title: 'Nouveau partenariat stratégique avec l\'OIF',
     summary: 'L\'Université Senghor renforce sa collaboration avec l\'Organisation Internationale de la Francophonie pour développer de nouveaux programmes.',
-    content: {
-      time: 1705660800000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 'oif1',
-          type: 'paragraph',
-          data: {
-            text: 'L\'Université Senghor et l\'Organisation Internationale de la Francophonie (OIF) ont signé un nouvel accord de partenariat stratégique visant à renforcer leur collaboration dans plusieurs domaines.'
-          }
-        },
-        {
-          id: 'oif2',
-          type: 'header',
-          data: {
-            text: 'Objectifs du partenariat',
-            level: 2
-          }
-        },
-        {
-          id: 'oif3',
-          type: 'list',
-          data: {
-            style: 'unordered',
-            items: [
-              'Développement de nouveaux programmes de formation',
-              'Renforcement des capacités des institutions francophones',
-              'Promotion de la mobilité académique',
-              'Soutien à la recherche sur les enjeux africains'
-            ]
-          }
-        },
-        {
-          id: 'oif4',
-          type: 'paragraph',
-          data: {
-            text: 'Ce partenariat prévoit également la création d\'un fonds de bourses destiné aux étudiants méritants issus des pays les moins avancés de l\'espace francophone.'
-          }
-        }
-      ]
-    },
+    content_html: '<p>L\'Université Senghor et l\'Organisation Internationale de la Francophonie (OIF) ont signé un nouvel accord de partenariat stratégique visant à renforcer leur collaboration dans plusieurs domaines.</p><h2>Objectifs du partenariat</h2><ul><li>Développement de nouveaux programmes de formation</li><li>Renforcement des capacités des institutions francophones</li><li>Promotion de la mobilité académique</li><li>Soutien à la recherche sur les enjeux africains</li></ul><p>Ce partenariat prévoit également la création d\'un fonds de bourses destiné aux étudiants méritants issus des pays les moins avancés de l\'espace francophone.</p>',
     cover_image: '',
     author: mockNewsAuthors[2],
     tags: [mockNewsTags[1], mockNewsTags[4]],
@@ -274,49 +174,7 @@ export const mockNews: News[] = [
     slug: 'rentree-academique-2024-2025',
     title: 'Rentrée académique 2024-2025 : record d\'inscriptions',
     summary: 'L\'Université Senghor accueille cette année un nombre record d\'étudiants venus de 35 pays francophones.',
-    content: {
-      time: 1704700800000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 'r1',
-          type: 'paragraph',
-          data: {
-            text: 'L\'année académique 2024-2025 marque un tournant dans l\'histoire de l\'Université Senghor avec un nombre record d\'inscriptions. Plus de 450 étudiants venus de 35 pays francophones ont rejoint nos programmes de Master.'
-          }
-        },
-        {
-          id: 'r2',
-          type: 'header',
-          data: {
-            text: 'Répartition par département',
-            level: 2
-          }
-        },
-        {
-          id: 'r3',
-          type: 'paragraph',
-          data: {
-            text: 'Le département Administration-Gestion reste le plus attractif avec 35% des inscriptions, suivi du département Culture (25%), Santé (22%) et Environnement (18%).'
-          }
-        },
-        {
-          id: 'r4',
-          type: 'header',
-          data: {
-            text: 'Nouveaux pays représentés',
-            level: 2
-          }
-        },
-        {
-          id: 'r5',
-          type: 'paragraph',
-          data: {
-            text: 'Pour la première fois, nous accueillons des étudiants de Sainte-Lucie et de Dominique, élargissant ainsi notre représentation géographique aux Caraïbes francophones.'
-          }
-        }
-      ]
-    },
+    content_html: '<p>L\'année académique 2024-2025 marque un tournant dans l\'histoire de l\'Université Senghor avec un nombre record d\'inscriptions. Plus de 450 étudiants venus de 35 pays francophones ont rejoint nos programmes de Master.</p><h2>Répartition par département</h2><p>Le département Administration-Gestion reste le plus attractif avec 35% des inscriptions, suivi du département Culture (25%), Santé (22%) et Environnement (18%).</p><h2>Nouveaux pays représentés</h2><p>Pour la première fois, nous accueillons des étudiants de Sainte-Lucie et de Dominique, élargissant ainsi notre représentation géographique aux Caraïbes francophones.</p>',
     cover_image: '',
     author: mockNewsAuthors[1],
     tags: [mockNewsTags[0], mockNewsTags[6]],
@@ -332,55 +190,7 @@ export const mockNews: News[] = [
     slug: 'kreafrika-festival-cannes-2025',
     title: 'KreAfrika au Festival de Cannes 2025',
     summary: 'KreAfrika sera présent au Marché du Film de Cannes 2025 pour accompagner 10 professionnels africains du cinéma.',
-    content: {
-      time: 1704441600000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 'k1',
-          type: 'paragraph',
-          data: {
-            text: 'Le programme KreAfrika de l\'Université Senghor sera présent au Marché du Film du Festival de Cannes 2025, qui se tiendra du 14 au 25 mai.'
-          }
-        },
-        {
-          id: 'k2',
-          type: 'header',
-          data: {
-            text: 'Délégation africaine',
-            level: 2
-          }
-        },
-        {
-          id: 'k3',
-          type: 'paragraph',
-          data: {
-            text: 'Dix professionnels africains du cinéma et de l\'audiovisuel, sélectionnés parmi les bénéficiaires du programme, seront accompagnés pour développer leurs réseaux et présenter leurs projets aux producteurs internationaux.'
-          }
-        },
-        {
-          id: 'k4',
-          type: 'header',
-          data: {
-            text: 'Programme d\'activités',
-            level: 2
-          }
-        },
-        {
-          id: 'k5',
-          type: 'list',
-          data: {
-            style: 'unordered',
-            items: [
-              'Pitch sessions avec des producteurs internationaux',
-              'Networking avec les professionnels du secteur',
-              'Participation aux conférences professionnelles',
-              'Visite du Marché du Film'
-            ]
-          }
-        }
-      ]
-    },
+    content_html: '<p>Le programme KreAfrika de l\'Université Senghor sera présent au Marché du Film du Festival de Cannes 2025, qui se tiendra du 14 au 25 mai.</p><h2>Délégation africaine</h2><p>Dix professionnels africains du cinéma et de l\'audiovisuel, sélectionnés parmi les bénéficiaires du programme, seront accompagnés pour développer leurs réseaux et présenter leurs projets aux producteurs internationaux.</p><h2>Programme d\'activités</h2><ul><li>Pitch sessions avec des producteurs internationaux</li><li>Networking avec les professionnels du secteur</li><li>Participation aux conférences professionnelles</li><li>Visite du Marché du Film</li></ul>',
     cover_image: '',
     author: mockNewsAuthors[4],
     tags: [mockNewsTags[8], mockNewsTags[4], mockNewsTags[7]],
@@ -400,26 +210,7 @@ export const mockNews: News[] = [
     slug: 'visite-secretaire-general-oif',
     title: 'Visite officielle du Secrétaire général de la Francophonie',
     summary: 'Le Secrétaire général de l\'OIF a effectué une visite de travail à l\'Université Senghor.',
-    content: {
-      time: 1702627200000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 'v1',
-          type: 'paragraph',
-          data: {
-            text: 'Le Secrétaire général de l\'Organisation Internationale de la Francophonie a effectué une visite officielle à l\'Université Senghor le 15 décembre 2024.'
-          }
-        },
-        {
-          id: 'v2',
-          type: 'paragraph',
-          data: {
-            text: 'Au programme : visite des installations, rencontre avec les étudiants et signature de conventions de partenariat.'
-          }
-        }
-      ]
-    },
+    content_html: '<p>Le Secrétaire général de l\'Organisation Internationale de la Francophonie a effectué une visite officielle à l\'Université Senghor le 15 décembre 2024.</p><p>Au programme : visite des installations, rencontre avec les étudiants et signature de conventions de partenariat.</p>',
     cover_image: '',
     author: mockNewsAuthors[0],
     tags: [mockNewsTags[4], mockNewsTags[1]],
@@ -435,49 +226,7 @@ export const mockNews: News[] = [
     slug: 'master-ia-developpement',
     title: 'Lancement du nouveau Master en Intelligence Artificielle et Développement',
     summary: 'L\'Université Senghor lance un programme innovant alliant IA et problématiques de développement en Afrique.',
-    content: {
-      time: 1701388800000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 'ia1',
-          type: 'paragraph',
-          data: {
-            text: 'L\'Université Senghor est fière d\'annoncer le lancement de son nouveau Master en Intelligence Artificielle et Développement pour la rentrée 2025-2026.'
-          }
-        },
-        {
-          id: 'ia2',
-          type: 'header',
-          data: {
-            text: 'Un programme unique en son genre',
-            level: 2
-          }
-        },
-        {
-          id: 'ia3',
-          type: 'paragraph',
-          data: {
-            text: 'Ce programme de deux ans combine une formation technique en IA avec une compréhension approfondie des enjeux de développement du continent africain.'
-          }
-        },
-        {
-          id: 'ia4',
-          type: 'header',
-          data: {
-            text: 'Partenariats académiques',
-            level: 2
-          }
-        },
-        {
-          id: 'ia5',
-          type: 'paragraph',
-          data: {
-            text: 'Le programme est développé en partenariat avec l\'Université de Montréal et le MIT Africa Initiative.'
-          }
-        }
-      ]
-    },
+    content_html: '<p>L\'Université Senghor est fière d\'annoncer le lancement de son nouveau Master en Intelligence Artificielle et Développement pour la rentrée 2025-2026.</p><h2>Un programme unique en son genre</h2><p>Ce programme de deux ans combine une formation technique en IA avec une compréhension approfondie des enjeux de développement du continent africain.</p><h2>Partenariats académiques</h2><p>Le programme est développé en partenariat avec l\'Université de Montréal et le MIT Africa Initiative.</p>',
     cover_image: '',
     author: mockNewsAuthors[1],
     tags: [mockNewsTags[6], mockNewsTags[7], mockNewsTags[3]],
@@ -495,26 +244,7 @@ export const mockNews: News[] = [
     slug: 'conference-gouvernance-afrique',
     title: 'Conférence internationale sur la gouvernance en Afrique',
     summary: 'L\'Université Senghor a organisé une conférence réunissant experts et décideurs autour des enjeux de gouvernance.',
-    content: {
-      time: 1699171200000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 'g1',
-          type: 'paragraph',
-          data: {
-            text: 'Du 3 au 5 novembre 2024, l\'Université Senghor a accueilli la 12e Conférence internationale sur la gouvernance en Afrique.'
-          }
-        },
-        {
-          id: 'g2',
-          type: 'paragraph',
-          data: {
-            text: 'Plus de 200 participants venus de 25 pays ont échangé sur les défis et opportunités de la gouvernance publique sur le continent.'
-          }
-        }
-      ]
-    },
+    content_html: '<p>Du 3 au 5 novembre 2024, l\'Université Senghor a accueilli la 12e Conférence internationale sur la gouvernance en Afrique.</p><p>Plus de 200 participants venus de 25 pays ont échangé sur les défis et opportunités de la gouvernance publique sur le continent.</p>',
     cover_image: '',
     author: mockNewsAuthors[2],
     tags: [mockNewsTags[9], mockNewsTags[2]],
@@ -530,19 +260,7 @@ export const mockNews: News[] = [
     slug: 'accord-universite-caire',
     title: 'Signature d\'un accord avec l\'Université du Caire',
     summary: 'Un accord de coopération académique a été signé avec l\'Université du Caire.',
-    content: {
-      time: 1698217200000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 'c1',
-          type: 'paragraph',
-          data: {
-            text: 'L\'Université Senghor et l\'Université du Caire ont signé un accord de coopération académique portant sur les échanges d\'étudiants et d\'enseignants, ainsi que sur des projets de recherche conjoints.'
-          }
-        }
-      ]
-    },
+    content_html: '<p>L\'Université Senghor et l\'Université du Caire ont signé un accord de coopération académique portant sur les échanges d\'étudiants et d\'enseignants, ainsi que sur des projets de recherche conjoints.</p>',
     cover_image: '',
     author: mockNewsAuthors[3],
     tags: [mockNewsTags[1], mockNewsTags[4]],
@@ -558,26 +276,7 @@ export const mockNews: News[] = [
     slug: 'campus-abidjan-masa-2025',
     title: 'Le campus d\'Abidjan accueille le MASA 2025',
     summary: 'Le campus sera partenaire officiel du Marché des Arts du Spectacle Africain en mars 2025.',
-    content: {
-      time: 1704355200000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 'm1',
-          type: 'paragraph',
-          data: {
-            text: 'Le campus d\'Abidjan de l\'Université Senghor sera partenaire officiel du Marché des Arts du Spectacle Africain (MASA) en mars 2025.'
-          }
-        },
-        {
-          id: 'm2',
-          type: 'paragraph',
-          data: {
-            text: 'Cette collaboration permettra aux étudiants de participer activement à l\'organisation de cet événement majeur de la scène culturelle africaine.'
-          }
-        }
-      ]
-    },
+    content_html: '<p>Le campus d\'Abidjan de l\'Université Senghor sera partenaire officiel du Marché des Arts du Spectacle Africain (MASA) en mars 2025.</p><p>Cette collaboration permettra aux étudiants de participer activement à l\'organisation de cet événement majeur de la scène culturelle africaine.</p>',
     cover_image: '',
     author: mockNewsAuthors[0],
     tags: [mockNewsTags[8], mockNewsTags[2]],
@@ -595,34 +294,7 @@ export const mockNews: News[] = [
     slug: 'transformaction-cohorte-2024',
     title: 'Clôture de la Cohorte 2024 : 45 Transform\'acteurs diplômés',
     summary: 'La cérémonie de clôture de la Cohorte 2024 a célébré 45 cadres dirigeants venus de 12 pays africains.',
-    content: {
-      time: 1704700800000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 't1',
-          type: 'paragraph',
-          data: {
-            text: 'La Cohorte 2024 du programme Transform\'Action Africa s\'est achevée avec succès le 10 janvier 2025.'
-          }
-        },
-        {
-          id: 't2',
-          type: 'header',
-          data: {
-            text: 'Une promotion exceptionnelle',
-            level: 2
-          }
-        },
-        {
-          id: 't3',
-          type: 'paragraph',
-          data: {
-            text: '45 cadres dirigeants venus de 12 pays africains sont désormais équipés pour conduire le changement dans leurs organisations.'
-          }
-        }
-      ]
-    },
+    content_html: '<p>La Cohorte 2024 du programme Transform\'Action Africa s\'est achevée avec succès le 10 janvier 2025.</p><h2>Une promotion exceptionnelle</h2><p>45 cadres dirigeants venus de 12 pays africains sont désormais équipés pour conduire le changement dans leurs organisations.</p>',
     cover_image: '',
     author: mockNewsAuthors[4],
     tags: [mockNewsTags[6], mockNewsTags[9]],
@@ -642,26 +314,7 @@ export const mockNews: News[] = [
     slug: 'ouverture-campus-nairobi',
     title: 'Ouverture prochaine du campus de Nairobi',
     summary: 'L\'Université Senghor annoncera bientôt l\'ouverture de son nouveau campus au Kenya.',
-    content: {
-      time: 1705737600000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 'n1',
-          type: 'paragraph',
-          data: {
-            text: 'BROUILLON - Contenu à compléter...'
-          }
-        },
-        {
-          id: 'n2',
-          type: 'paragraph',
-          data: {
-            text: 'Annonce officielle prévue pour février 2025.'
-          }
-        }
-      ]
-    },
+    content_html: '<p>BROUILLON - Contenu à compléter...</p><p>Annonce officielle prévue pour février 2025.</p>',
     cover_image: '',
     author: mockNewsAuthors[0],
     tags: [mockNewsTags[4], mockNewsTags[7]],
@@ -676,19 +329,7 @@ export const mockNews: News[] = [
     slug: 'nouveau-programme-sante',
     title: 'Nouveau programme en Santé Numérique',
     summary: 'Un nouveau Master en Santé Numérique sera lancé à la rentrée 2025.',
-    content: {
-      time: 1705564800000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 's1',
-          type: 'paragraph',
-          data: {
-            text: 'BROUILLON - En cours de rédaction...'
-          }
-        }
-      ]
-    },
+    content_html: '<p>BROUILLON - En cours de rédaction...</p>',
     author: mockNewsAuthors[1],
     tags: [mockNewsTags[6], mockNewsTags[7]],
     media: [],
@@ -706,19 +347,7 @@ export const mockNews: News[] = [
     slug: 'rentree-academique-2023-2024',
     title: 'Rentrée académique 2023-2024',
     summary: 'Retour sur la rentrée académique de l\'année précédente.',
-    content: {
-      time: 1696118400000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 'a1',
-          type: 'paragraph',
-          data: {
-            text: 'Article archivé - Rentrée académique 2023-2024.'
-          }
-        }
-      ]
-    },
+    content_html: '<p>Article archivé - Rentrée académique 2023-2024.</p>',
     cover_image: '',
     author: mockNewsAuthors[0],
     tags: [mockNewsTags[0]],

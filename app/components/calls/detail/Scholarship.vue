@@ -60,7 +60,7 @@ const daysUntilDeadline = computed(() => {
     />
 
     <!-- Description -->
-    <CallsDescriptionSection :description="call.description" />
+    <CallsDescriptionSection :description="call.description_html" />
 
     <!-- Coverage/Benefits (MAIN SECTION for scholarships) -->
     <CallsCoverageSection

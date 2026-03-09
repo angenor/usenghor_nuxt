@@ -272,8 +272,8 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
               {{ getLocalizedExcerpt }}
             </p>
 
-            <!-- Contenu EditorJS -->
-            <EditorJSRenderer v-if="news.content" :data="news.content" />
+            <!-- Contenu riche -->
+            <RichTextRenderer v-if="news.content_html" :html="news.content_html" />
 
             <!-- Fallback si pas de contenu -->
             <p v-else class="text-gray-500 dark:text-gray-400 italic">

@@ -50,7 +50,8 @@ export interface UserRead {
   phone_whatsapp: string | null
   linkedin: string | null
   facebook: string | null
-  biography: string | null
+  biography_html: string | null
+  biography_md: string | null
   city: string | null
   address: string | null
   active: boolean
@@ -78,7 +79,8 @@ export interface UserCreatePayload {
   phone_whatsapp?: string | null
   linkedin?: string | null
   facebook?: string | null
-  biography?: string | null
+  biography_html?: string | null
+  biography_md?: string | null
   city?: string | null
   address?: string | null
   photo_external_id?: string | null
@@ -95,7 +97,8 @@ export interface UserUpdatePayload {
   phone_whatsapp?: string | null
   linkedin?: string | null
   facebook?: string | null
-  biography?: string | null
+  biography_html?: string | null
+  biography_md?: string | null
   city?: string | null
   address?: string | null
   active?: boolean

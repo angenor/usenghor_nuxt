@@ -30,6 +30,8 @@ export interface UserPublicProfile {
   last_name: string
   salutation: string | null
   biography: string | null
+  biography_html: string | null
+  biography_md: string | null
   photo_url: string | null
   email: string | null
   phone: string | null

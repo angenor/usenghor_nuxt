@@ -20,6 +20,8 @@ export interface EventPublic {
   slug: string
   description: string | null
   content: string | null
+  content_html: string | null
+  content_md: string | null
   type: EventType
   type_other: string | null
   start_date: string

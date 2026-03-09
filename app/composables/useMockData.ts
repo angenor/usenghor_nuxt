@@ -172,8 +172,6 @@ import {
   type HighlightStatus,
   type NewsStats,
   type NewsFilters,
-  type EditorJSContent,
-  type EditorJSBlock
 } from '@bank/mock-data/news'
 import {
   mockTags,
@@ -2448,8 +2446,6 @@ export type {
   HighlightStatus,
   NewsStats,
   NewsFilters,
-  EditorJSContent,
-  EditorJSBlock,
   Tag,
   TagStats,
   Event,

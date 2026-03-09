@@ -6,28 +6,10 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getAllPublishedNews } = usePublicNewsApi()
 
-// Extraire le texte brut d'un contenu EditorJS
+// Extraire le texte brut d'un contenu HTML
 const extractPlainText = (content: string | null | undefined): string => {
   if (!content) return ''
-  try {
-    const parsed = JSON.parse(content)
-    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
-      return parsed.blocks
-        .map((block: { type: string; data: { text?: string } }) => {
-          if (block.data?.text) {
-            // Supprimer les balises HTML éventuelles
-            return block.data.text.replace(/<[^>]*>/g, '')
-          }
-          return ''
-        })
-        .filter(Boolean)
-        .join(' ')
-    }
-  } catch {
-    // Si ce n'est pas du JSON valide, retourner tel quel
-    return content
-  }
-  return content
+  return content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
 }
 const { getUpcomingEvents: getApiUpcomingEvents } = usePublicEventsApi()
 const { listOngoingCalls } = usePublicCallsApi()
@@ -576,8 +558,8 @@ const hasAssociations = (item: NewsDisplay) => {
                 {{ call.title }}
               </h3>
 
-              <p v-if="call.description" class="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                {{ extractPlainText(call.description) }}
+              <p v-if="call.description_html" class="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                {{ extractPlainText(call.description_html) }}
               </p>
 
               <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">

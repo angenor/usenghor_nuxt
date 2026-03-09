@@ -1,51 +1,11 @@
 <script setup lang="ts">
 import type { ProgramPublic, ProgramPublicWithDetails } from '~/composables/usePublicProgramsApi'
 import type { ApplicationCallPublic } from '~/types/api'
-import type { OutputData } from '@editorjs/editorjs'
 
-// Parser le contenu JSON EditorJS
-const parseEditorContent = (content: string | null | undefined): OutputData | null => {
-  if (!content) return null
-  try {
-    const parsed = JSON.parse(content)
-    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
-      return parsed as OutputData
-    }
-  } catch {
-    // Si ce n'est pas du JSON valide, créer un bloc paragraphe
-    if (content.trim()) {
-      return {
-        time: Date.now(),
-        blocks: [{ type: 'paragraph', data: { text: content } }],
-        version: '2.28.0'
-      }
-    }
-  }
-  return null
-}
-
-// Extraire le texte brut d'un contenu EditorJS (pour les aperçus)
-const extractPlainText = (content: string | null | undefined): string => {
-  if (!content) return ''
-  try {
-    const parsed = JSON.parse(content)
-    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
-      return parsed.blocks
-        .map((block: { type: string; data: { text?: string } }) => {
-          if (block.data?.text) {
-            // Supprimer les balises HTML éventuelles
-            return block.data.text.replace(/<[^>]*>/g, '')
-          }
-          return ''
-        })
-        .filter(Boolean)
-        .join(' ')
-    }
-  } catch {
-    // Si ce n'est pas du JSON valide, retourner tel quel
-    return content
-  }
-  return content
+// Extraire le texte brut d'un contenu HTML (pour les aperçus SEO)
+const extractPlainText = (html: string | null | undefined): string => {
+  if (!html) return ''
+  return html.replace(/<[^>]*>/g, '').trim()
 }
 
 const route = useRoute()
@@ -182,11 +142,8 @@ const getLocalizedTitle = computed(() => {
 // Texte brut pour SEO et aperçus
 const getLocalizedDescription = computed(() => {
   if (!program.value) return ''
-  return extractPlainText(program.value.description)
+  return extractPlainText(program.value.description_html)
 })
-
-// Description parsée pour EditorJSRenderer
-const parsedDescription = computed(() => parseEditorContent(program.value?.description))
 
 // Modalités d'évaluation (parsées depuis JSON)
 const parsedEvaluationMethods = computed<string[]>(() => {
@@ -474,8 +431,8 @@ const toggleSemester = (num: number) => {
             </div>
 
             <!-- Description -->
-            <div v-if="parsedDescription" class="mb-8">
-              <EditorJSRenderer :data="parsedDescription" />
+            <div v-if="program.description_html" class="mb-8">
+              <RichTextRenderer :html="program.description_html" />
             </div>
 
             <!-- Objectifs -->

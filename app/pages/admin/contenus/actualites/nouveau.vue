@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { NewsStatus, NewsHighlightStatus, TagRead } from '~/types/news'
-import type { OutputData } from '@editorjs/editorjs'
 import type { ImageVariants } from '~/types/api'
 import { useAuthStore } from '~/stores/auth'
 
@@ -60,10 +59,13 @@ const showTagModal = ref(false)
 const newTagName = ref('')
 const error = ref<string | null>(null)
 
-// Contenu EditorJS (séparé du formulaire pour éviter les problèmes de réactivité)
-const content = ref<OutputData | undefined>(undefined)
-const contentEn = ref<OutputData | undefined>(undefined)
-const contentAr = ref<OutputData | undefined>(undefined)
+// Contenu TOAST UI Editor (markdown + html par langue)
+const contentMd = ref('')
+const contentMdEn = ref('')
+const contentMdAr = ref('')
+const contentHtml = ref('')
+const contentHtmlEn = ref('')
+const contentHtmlAr = ref('')
 
 // Form data
 const form = reactive({
@@ -146,9 +148,9 @@ const selectedTags = computed(() => {
   return allTags.value.filter(t => form.tags.includes(t.id))
 })
 
-// Validation - vérifie que le contenu EditorJS a au moins un bloc
+// Validation - vérifie que le contenu a du texte
 const hasContent = computed(() => {
-  return content.value?.blocks && content.value.blocks.length > 0
+  return contentMd.value.trim().length > 0 || contentHtml.value.trim().length > 0
 })
 
 const isValid = computed(() => {
@@ -265,9 +267,12 @@ async function submitForm() {
       title: form.title,
       slug: form.slug,
       summary: form.summary || null,
-      content: content.value || null,
-      content_en: contentEn.value || null,
-      content_ar: contentAr.value || null,
+      content_html: contentHtml.value || null,
+      content_md: contentMd.value || null,
+      content_en_html: contentHtmlEn.value || null,
+      content_en_md: contentMdEn.value || null,
+      content_ar_html: contentHtmlAr.value || null,
+      content_ar_md: contentMdAr.value || null,
       video_url: form.video_url || null,
       highlight_status: form.highlight_status,
       // Filtrer les IDs mock - seuls les vrais UUIDs sont envoyés
@@ -423,9 +428,12 @@ async function createTag() {
 
       <!-- Contenu détaillé -->
       <AdminRichTextEditor
-        v-model="content"
-        v-model:model-value-en="contentEn"
-        v-model:model-value-ar="contentAr"
+        v-model="contentMd"
+        v-model:model-value-en="contentMdEn"
+        v-model:model-value-ar="contentMdAr"
+        v-model:html-value="contentHtml"
+        v-model:html-value-en="contentHtmlEn"
+        v-model:html-value-ar="contentHtmlAr"
         title="Contenu de l'actualité"
         description="Rédigez le contenu complet de l'actualité avec l'éditeur riche (titres, listes, images, citations, etc.)"
         icon="fa-solid fa-file-lines"
@@ -433,7 +441,7 @@ async function createTag() {
         placeholder="Commencez à rédiger le contenu de l'actualité..."
         placeholder-en="Start writing the news content..."
         placeholder-ar="ابدأ في كتابة محتوى الخبر..."
-        :min-height="400"
+        height="400px"
         required
       />
 

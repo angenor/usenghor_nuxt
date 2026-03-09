@@ -48,26 +48,23 @@ const localFormData = computed({
   set: (value) => emit('update:formData', value),
 })
 
-// Biographie avec EditorJS
-const biographyData = computed({
-  get: () => {
-    if (!props.formData.biography) {
-      return { time: Date.now(), blocks: [], version: '2.28.0' }
-    }
-    try {
-      return JSON.parse(props.formData.biography)
-    }
-    catch {
-      return { time: Date.now(), blocks: [], version: '2.28.0' }
-    }
-  },
-  set: (value: { time: number, blocks: unknown[], version: string }) => {
+// Biographie avec ToastUI Editor (markdown + HTML)
+const biographyMd = computed({
+  get: () => props.formData.biography_md || '',
+  set: (value: string) => {
     localFormData.value = {
       ...props.formData,
-      biography: JSON.stringify(value),
+      biography_md: value,
     }
   },
 })
+
+function onBiographyHtmlUpdate(html: string) {
+  localFormData.value = {
+    ...props.formData,
+    biography_html: html,
+  }
+}
 </script>
 
 <template>
@@ -340,10 +337,11 @@ const biographyData = computed({
               Biographie
             </h4>
             <div class="rounded-lg border border-gray-300 dark:border-gray-600">
-              <EditorJS
-                v-model="biographyData"
+              <ToastUIEditor
+                v-model="biographyMd"
                 placeholder="Quelques mots sur vous..."
-                :min-height="150"
+                height="250px"
+                @update:html="onBiographyHtmlUpdate"
               />
             </div>
           </div>

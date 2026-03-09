@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { SectorPublicWithServices, ServicePublic } from '~/composables/usePublicOrganizationApi'
-import type { OutputData } from '@editorjs/editorjs'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -133,26 +132,6 @@ const getSectorColors = (index: number) => {
   return sectorColors[index % sectorColors.length]
 }
 
-// Convertir une string (potentiellement JSON ou texte brut) en OutputData
-const parseEditorContent = (content: string | null | undefined): OutputData | undefined => {
-  if (!content) return undefined
-  try {
-    const parsed = JSON.parse(content)
-    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
-      return parsed as OutputData
-    }
-  } catch {
-    if (content.trim()) {
-      return {
-        time: Date.now(),
-        blocks: [{ type: 'paragraph', data: { text: content } }],
-        version: '2.28.0'
-      }
-    }
-  }
-  return undefined
-}
-
 // Generate service URL
 const getServiceUrl = (service: ServicePublic) => {
   return localePath(`/a-propos/organisation/service/${slugify(service.name)}`)
@@ -243,10 +222,10 @@ const getSectorUrl = (sector: SectorPublicWithServices) => {
 
           <!-- Sector Description -->
           <div
-            v-if="sector.description"
+            v-if="sector.description_html"
             class="text-center text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto"
           >
-            <EditorJSRenderer :data="parseEditorContent(sector.description)" />
+            <RichTextRenderer :html="sector.description_html" />
           </div>
 
           <!-- Services Grid -->

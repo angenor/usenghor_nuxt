@@ -343,25 +343,6 @@ export function useEditorialApi() {
             if (name) return name.length > maxLength ? `${name.substring(0, maxLength)}...` : name
           }
 
-          // Si c'est un format EditorJS (avec blocks)
-          if (parsed.blocks && Array.isArray(parsed.blocks)) {
-            const textContent = parsed.blocks
-              .map((b: { data?: { text?: string } }) => b.data?.text || '')
-              .filter((t: string) => t)
-              .join(' ')
-              .replace(/<[^>]*>/g, '')
-              .replace(/&nbsp;/g, ' ')
-              .replace(/&amp;/g, '&')
-              .replace(/&lt;/g, '<')
-              .replace(/&gt;/g, '>')
-              .replace(/&quot;/g, '"')
-              .trim()
-            if (textContent) {
-              return textContent.length > maxLength ? `${textContent.substring(0, maxLength)}...` : textContent
-            }
-            return '[Contenu riche]'
-          }
-
           // Pour les objets simples, afficher un résumé des clés/valeurs
           if (typeof parsed === 'object' && !Array.isArray(parsed)) {
             const keys = Object.keys(parsed)

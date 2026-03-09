@@ -50,6 +50,8 @@ export interface UserMe {
   linkedin: string | null
   facebook: string | null
   biography: string | null
+  biography_html: string | null
+  biography_md: string | null
   city: string | null
   address: string | null
   active: boolean

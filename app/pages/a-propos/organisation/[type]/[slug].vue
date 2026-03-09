@@ -7,7 +7,6 @@ import type {
   ServiceProjectPublic,
   ServiceTeamMemberPublic,
 } from '~/composables/usePublicOrganizationApi'
-import type { OutputData } from '@editorjs/editorjs'
 import type { NewsDisplay } from '~/types/news'
 import type { AlbumWithMedia } from '~/types/api/media'
 import type { ProgramPublic } from '~/composables/usePublicProgramsApi'
@@ -205,63 +204,16 @@ const entityName = computed(() => {
   return entity.value.name
 })
 
-// Convertir une string (potentiellement JSON ou texte brut) en OutputData
-const parseEditorContent = (content: string | null | undefined): OutputData | undefined => {
-  if (!content) return undefined
-  try {
-    const parsed = JSON.parse(content)
-    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
-      return parsed as OutputData
-    }
-  } catch {
-    // Si ce n'est pas du JSON valide, créer un bloc paragraphe avec le texte
-    if (content.trim()) {
-      return {
-        time: Date.now(),
-        blocks: [{ type: 'paragraph', data: { text: content } }],
-        version: '2.28.0'
-      }
-    }
-  }
-  return undefined
-}
-
-// Extraire le texte brut d'un contenu EditorJS pour les previews
-const extractPlainText = (content: string | null | undefined): string => {
-  if (!content) return ''
-  try {
-    const parsed = JSON.parse(content)
-    if (parsed && Array.isArray(parsed.blocks)) {
-      return parsed.blocks
-        .filter((block: { type: string }) => block.type === 'paragraph')
-        .map((block: { data: { text: string } }) => block.data.text)
-        .join(' ')
-        .replace(/<[^>]*>/g, '') // Enlever les balises HTML
-        .substring(0, 200)
-    }
-  } catch {
-    // Si ce n'est pas du JSON, retourner le texte tel quel
-    return content.substring(0, 200)
-  }
-  return ''
+// Extraire le texte brut d'un contenu HTML (pour les previews)
+const extractPlainText = (html: string | null | undefined): string => {
+  if (!html) return ''
+  return html.replace(/<[^>]*>/g, '').trim().substring(0, 200)
 }
 
 // Get entity description (string pour le hero subtitle)
 const entityDescriptionText = computed(() => {
   if (!entity.value) return ''
-  return extractPlainText(entity.value.description)
-})
-
-// Get entity description (OutputData pour le rendu riche)
-const entityDescription = computed(() => {
-  if (!entity.value) return undefined
-  return parseEditorContent(entity.value.description)
-})
-
-// Get entity mission (OutputData pour le rendu riche)
-const entityMission = computed(() => {
-  if (!entity.value) return undefined
-  return parseEditorContent(entity.value.mission)
+  return extractPlainText(entity.value.description_html)
 })
 
 // Objectives (only for services)
@@ -553,9 +505,9 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
             </div>
 
             <!-- Description Card -->
-            <div v-if="entityDescription" class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-sm mb-8">
+            <div v-if="entity?.description_html" class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-sm mb-8">
               <div class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-                <EditorJSRenderer :data="entityDescription" />
+                <RichTextRenderer :html="entity.description_html" />
               </div>
             </div>
 
@@ -589,12 +541,12 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
             </div>
 
             <!-- Mission Card -->
-            <div v-if="entityMission" class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-sm mb-8">
+            <div v-if="entity?.mission_html" class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-sm mb-8">
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 {{ t('organizationDetail.missions.mission') || 'Mission' }}
               </h3>
               <div class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-                <EditorJSRenderer :data="entityMission" />
+                <RichTextRenderer :html="entity.mission_html" />
               </div>
             </div>
 

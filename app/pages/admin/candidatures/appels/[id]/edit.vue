@@ -9,28 +9,6 @@ import type {
   CallScheduleRead,
   ImageVariants,
 } from '~/types/api'
-import type { OutputData } from '@editorjs/editorjs'
-
-// Parser le contenu JSON EditorJS
-const parseEditorContent = (content: string | null | undefined): OutputData | undefined => {
-  if (!content) return undefined
-  try {
-    const parsed = JSON.parse(content)
-    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
-      return parsed as OutputData
-    }
-  } catch {
-    if (content.trim()) {
-      return {
-        time: Date.now(),
-        blocks: [{ type: 'paragraph', data: { text: content } }],
-        version: '2.28.0'
-      }
-    }
-  }
-  return undefined
-}
-
 definePageMeta({
   layout: 'admin',
 })
@@ -182,7 +160,8 @@ const genKey = () => ++nextKey
 const form = ref({
   title: '',
   slug: '',
-  description: undefined as OutputData | undefined,
+  description_md: '',
+  description_html: '',
   type: 'application' as CallType,
   status: 'upcoming' as const,
   campus_external_id: '' as string,
@@ -193,7 +172,8 @@ const form = ref({
   deadline: '',
   program_start_date: '',
   program_end_date: '',
-  target_audience: '',
+  target_audience_md: '',
+  target_audience_html: '',
   registration_fee: undefined as number | undefined,
   currency: 'EUR',
   use_internal_form: true,
@@ -226,7 +206,8 @@ async function fetchCall() {
     form.value = {
       title: call.title,
       slug: call.slug,
-      description: parseEditorContent(call.description),
+      description_md: call.description_md || '',
+      description_html: call.description_html || '',
       type: call.type,
       status: call.status,
       campus_external_id: call.campus_external_id || '',
@@ -237,7 +218,8 @@ async function fetchCall() {
       deadline: call.deadline?.split('T')[0] || '',
       program_start_date: call.program_start_date?.split('T')[0] || '',
       program_end_date: call.program_end_date?.split('T')[0] || '',
-      target_audience: call.target_audience || '',
+      target_audience_md: call.target_audience_md || '',
+      target_audience_html: call.target_audience_html || '',
       registration_fee: call.registration_fee ?? undefined,
       currency: call.currency,
       use_internal_form: call.use_internal_form,
@@ -523,16 +505,12 @@ const saveForm = async () => {
   error.value = null
 
   try {
-    // Sérialiser la description EditorJS
-    const descriptionJson = form.value.description && form.value.description.blocks?.length
-      ? JSON.stringify(form.value.description)
-      : null
-
     // 1) PUT les données de base
     await apiUpdateCall(callId, {
       title: form.value.title,
       slug: form.value.slug,
-      description: descriptionJson,
+      description_html: form.value.description_html || null,
+      description_md: form.value.description_md || null,
       type: form.value.type,
       status: form.value.status,
       campus_external_id: form.value.campus_external_id || null,
@@ -544,7 +522,8 @@ const saveForm = async () => {
       deadline: form.value.deadline || null,
       program_start_date: form.value.program_start_date || null,
       program_end_date: form.value.program_end_date || null,
-      target_audience: form.value.target_audience || null,
+      target_audience_html: form.value.target_audience_html || null,
+      target_audience_md: form.value.target_audience_md || null,
       registration_fee: form.value.registration_fee || null,
       currency: form.value.currency,
       use_internal_form: form.value.use_internal_form,
@@ -809,15 +788,16 @@ const tabs = [
             <p class="mt-1 text-xs text-gray-500">Cette formation sera présélectionnée dans le formulaire de candidature</p>
           </div>
 
-          <div>
+          <div class="sm:col-span-2">
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Public cible
             </label>
-            <input
-              v-model="form.target_audience"
-              type="text"
+            <AdminRichTextEditor
+              v-model="form.target_audience_md"
+              v-model:html-value="form.target_audience_html"
+              :show-card="false"
               placeholder="Ex: Cadres africains titulaires d'un Bac+4"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              height="150px"
             />
           </div>
 
@@ -918,13 +898,13 @@ const tabs = [
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Description
             </label>
-            <ClientOnly>
-              <EditorJS
-                v-model="form.description"
-                placeholder="Description détaillée de l'appel..."
-                :min-height="200"
-              />
-            </ClientOnly>
+            <AdminRichTextEditor
+              v-model="form.description_md"
+              v-model:html-value="form.description_html"
+              :show-card="false"
+              placeholder="Description détaillée de l'appel..."
+              height="200px"
+            />
           </div>
         </div>
       </div>

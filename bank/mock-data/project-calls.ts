@@ -3,8 +3,6 @@
  * Gestion des appels liés aux projets institutionnels
  */
 
-import type { EditorJSContent } from './news'
-
 // Types d'appels (alignés avec la BDD)
 export type ProjectCallType = 'application' | 'scholarship' | 'project' | 'recruitment' | 'training'
 export type ProjectCallStatus = 'upcoming' | 'ongoing' | 'closed'
@@ -15,12 +13,14 @@ export interface ProjectCall {
   project_title?: string  // Dénormalisé pour l'affichage
   title: string
   description?: string
-  /** Description riche FR (EditorJS format) */
-  description_rich?: EditorJSContent
-  /** Conditions de participation (EditorJS format) */
-  conditions?: EditorJSContent
-  /** Conditions HTML legacy */
+  /** Description riche HTML */
+  description_html?: string
+  /** Description riche Markdown */
+  description_md?: string
+  /** Conditions de participation HTML */
   conditions_html?: string
+  /** Conditions de participation Markdown */
+  conditions_md?: string
   type: ProjectCallType
   status: ProjectCallStatus
   deadline?: string
@@ -91,66 +91,8 @@ export const mockProjectCalls: ProjectCall[] = [
     project_title: "Transform'Action Africa",
     title: "Appel à candidatures - Cohorte 2025",
     description: "Recrutement de 30 cadres dirigeants du secteur public africain pour la cohorte 2025 du programme Transform'Action Africa.",
-    description_rich: {
-      time: Date.now(),
-      blocks: [
-        {
-          type: 'paragraph',
-          data: {
-            text: "L'Université Senghor lance un appel à candidatures pour la cohorte 2025 du programme Transform'Action Africa."
-          }
-        },
-        {
-          type: 'paragraph',
-          data: {
-            text: "Ce programme de formation vise à renforcer les compétences managériales et de leadership des cadres du secteur public en Afrique francophone."
-          }
-        },
-        {
-          type: 'header',
-          data: {
-            text: 'Profil recherché',
-            level: 3
-          }
-        },
-        {
-          type: 'list',
-          data: {
-            style: 'unordered',
-            items: [
-              'Cadres dirigeants du secteur public',
-              'Minimum 5 ans d\'expérience',
-              'Projet de transformation identifié'
-            ]
-          }
-        }
-      ],
-      version: '2.28.0'
-    },
-    conditions: {
-      time: Date.now(),
-      blocks: [
-        {
-          type: 'paragraph',
-          data: {
-            text: "Pour être éligible, les candidats doivent :"
-          }
-        },
-        {
-          type: 'list',
-          data: {
-            style: 'ordered',
-            items: [
-              'Être cadre dirigeant d\'une organisation publique africaine',
-              'Avoir au minimum 5 années d\'expérience professionnelle',
-              'Maîtriser le français (niveau C1 minimum)',
-              'Avoir l\'accord de son employeur pour participer aux sessions'
-            ]
-          }
-        }
-      ],
-      version: '2.28.0'
-    },
+    description_html: '<p>L\'Université Senghor lance un appel à candidatures pour la cohorte 2025 du programme Transform\'Action Africa.</p><p>Ce programme de formation vise à renforcer les compétences managériales et de leadership des cadres du secteur public en Afrique francophone.</p><h3>Profil recherché</h3><ul><li>Cadres dirigeants du secteur public</li><li>Minimum 5 ans d\'expérience</li><li>Projet de transformation identifié</li></ul>',
+    conditions_html: '<p>Pour être éligible, les candidats doivent :</p><ol><li>Être cadre dirigeant d\'une organisation publique africaine</li><li>Avoir au minimum 5 années d\'expérience professionnelle</li><li>Maîtriser le français (niveau C1 minimum)</li><li>Avoir l\'accord de son employeur pour participer aux sessions</li></ol>',
     type: 'training',
     status: 'ongoing',
     deadline: '2025-03-31T23:59:59Z',
@@ -163,24 +105,7 @@ export const mockProjectCalls: ProjectCall[] = [
     project_title: 'KreAfrika',
     title: "Appel à participation - Bootcamp Marseille 2025",
     description: "Sélection de 25 professionnels des industries créatives africaines pour le Bootcamp de Marseille.",
-    description_rich: {
-      time: Date.now(),
-      blocks: [
-        {
-          type: 'paragraph',
-          data: {
-            text: "Le projet KreAfrika organise son premier Bootcamp européen à Marseille en juin 2025."
-          }
-        },
-        {
-          type: 'paragraph',
-          data: {
-            text: "Ce Bootcamp de 5 jours réunira 25 professionnels des industries culturelles et créatives africaines pour des sessions de formation, networking et développement de projets."
-          }
-        }
-      ],
-      version: '2.28.0'
-    },
+    description_html: '<p>Le projet KreAfrika organise son premier Bootcamp européen à Marseille en juin 2025.</p><p>Ce Bootcamp de 5 jours réunira 25 professionnels des industries culturelles et créatives africaines pour des sessions de formation, networking et développement de projets.</p>',
     type: 'application',
     status: 'upcoming',
     deadline: '2025-04-15T23:59:59Z',
@@ -193,60 +118,8 @@ export const mockProjectCalls: ProjectCall[] = [
     project_title: "Programme de bourses d'excellence",
     title: "Bourses d'excellence 2025-2026",
     description: "Attribution de 100 bourses d'excellence pour l'année académique 2025-2026.",
-    description_rich: {
-      time: Date.now(),
-      blocks: [
-        {
-          type: 'paragraph',
-          data: {
-            text: "L'Université Senghor ouvre les candidatures pour ses bourses d'excellence 2025-2026."
-          }
-        },
-        {
-          type: 'header',
-          data: {
-            text: 'Types de bourses disponibles',
-            level: 3
-          }
-        },
-        {
-          type: 'list',
-          data: {
-            style: 'unordered',
-            items: [
-              'Bourses complètes (frais de scolarité + hébergement)',
-              'Bourses partielles (frais de scolarité)',
-              'Bourses de mobilité'
-            ]
-          }
-        }
-      ],
-      version: '2.28.0'
-    },
-    conditions: {
-      time: Date.now(),
-      blocks: [
-        {
-          type: 'paragraph',
-          data: {
-            text: "Critères d'éligibilité :"
-          }
-        },
-        {
-          type: 'list',
-          data: {
-            style: 'ordered',
-            items: [
-              'Être ressortissant d\'un pays membre de l\'OIF',
-              'Être titulaire d\'un diplôme de niveau Bac+4 minimum',
-              'Avoir moins de 35 ans au 1er octobre 2025',
-              'Maîtriser parfaitement le français'
-            ]
-          }
-        }
-      ],
-      version: '2.28.0'
-    },
+    description_html: '<p>L\'Université Senghor ouvre les candidatures pour ses bourses d\'excellence 2025-2026.</p><h3>Types de bourses disponibles</h3><ul><li>Bourses complètes (frais de scolarité + hébergement)</li><li>Bourses partielles (frais de scolarité)</li><li>Bourses de mobilité</li></ul>',
+    conditions_html: '<p>Critères d\'éligibilité :</p><ol><li>Être ressortissant d\'un pays membre de l\'OIF</li><li>Être titulaire d\'un diplôme de niveau Bac+4 minimum</li><li>Avoir moins de 35 ans au 1er octobre 2025</li><li>Maîtriser parfaitement le français</li></ol>',
     type: 'scholarship',
     status: 'ongoing',
     deadline: '2025-05-15T23:59:59Z',
@@ -259,38 +132,7 @@ export const mockProjectCalls: ProjectCall[] = [
     project_title: 'Africa Digital Leaders',
     title: "Recrutement formateurs - Africa Digital Leaders",
     description: "Recrutement de 10 formateurs experts pour le programme Africa Digital Leaders.",
-    description_rich: {
-      time: Date.now(),
-      blocks: [
-        {
-          type: 'paragraph',
-          data: {
-            text: "Dans le cadre du lancement du programme Africa Digital Leaders, l'Université Senghor recrute des formateurs experts."
-          }
-        },
-        {
-          type: 'header',
-          data: {
-            text: 'Domaines recherchés',
-            level: 3
-          }
-        },
-        {
-          type: 'list',
-          data: {
-            style: 'unordered',
-            items: [
-              'Intelligence artificielle et machine learning',
-              'Cybersécurité',
-              'Stratégie digitale',
-              'Leadership tech',
-              'Entrepreneuriat numérique'
-            ]
-          }
-        }
-      ],
-      version: '2.28.0'
-    },
+    description_html: '<p>Dans le cadre du lancement du programme Africa Digital Leaders, l\'Université Senghor recrute des formateurs experts.</p><h3>Domaines recherchés</h3><ul><li>Intelligence artificielle et machine learning</li><li>Cybersécurité</li><li>Stratégie digitale</li><li>Leadership tech</li><li>Entrepreneuriat numérique</li></ul>',
     type: 'recruitment',
     status: 'upcoming',
     deadline: '2025-02-28T23:59:59Z',
@@ -303,68 +145,8 @@ export const mockProjectCalls: ProjectCall[] = [
     project_title: 'Réseau de recherche francophone',
     title: "Appel à projets de recherche 2025",
     description: "Financement de 15 projets de recherche collaborative sur les thématiques du développement durable.",
-    description_rich: {
-      time: Date.now(),
-      blocks: [
-        {
-          type: 'paragraph',
-          data: {
-            text: "Le Réseau de recherche francophone lance son appel à projets annuel pour 2025."
-          }
-        },
-        {
-          type: 'paragraph',
-          data: {
-            text: "Cet appel vise à financer des projets de recherche collaborative entre institutions membres du réseau."
-          }
-        },
-        {
-          type: 'header',
-          data: {
-            text: 'Thématiques prioritaires',
-            level: 3
-          }
-        },
-        {
-          type: 'list',
-          data: {
-            style: 'unordered',
-            items: [
-              'Changement climatique et adaptation',
-              'Santé publique et épidémiologie',
-              'Gouvernance et politiques publiques',
-              'Transformation digitale',
-              'Industries culturelles et créatives'
-            ]
-          }
-        }
-      ],
-      version: '2.28.0'
-    },
-    conditions: {
-      time: Date.now(),
-      blocks: [
-        {
-          type: 'paragraph',
-          data: {
-            text: "Conditions de participation :"
-          }
-        },
-        {
-          type: 'list',
-          data: {
-            style: 'ordered',
-            items: [
-              'Projet porté par au moins 2 institutions de pays différents',
-              'Budget demandé entre 10 000 et 50 000 EUR',
-              'Durée du projet : 12 à 24 mois',
-              'Implication d\'au moins un doctorant'
-            ]
-          }
-        }
-      ],
-      version: '2.28.0'
-    },
+    description_html: '<p>Le Réseau de recherche francophone lance son appel à projets annuel pour 2025.</p><p>Cet appel vise à financer des projets de recherche collaborative entre institutions membres du réseau.</p><h3>Thématiques prioritaires</h3><ul><li>Changement climatique et adaptation</li><li>Santé publique et épidémiologie</li><li>Gouvernance et politiques publiques</li><li>Transformation digitale</li><li>Industries culturelles et créatives</li></ul>',
+    conditions_html: '<p>Conditions de participation :</p><ol><li>Projet porté par au moins 2 institutions de pays différents</li><li>Budget demandé entre 10 000 et 50 000 EUR</li><li>Durée du projet : 12 à 24 mois</li><li>Implication d\'au moins un doctorant</li></ol>',
     type: 'project',
     status: 'closed',
     deadline: '2024-12-15T23:59:59Z',

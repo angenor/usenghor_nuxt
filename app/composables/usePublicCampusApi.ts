@@ -21,6 +21,8 @@ export interface CampusPublic {
   code: string // Utilisé comme slug
   name: string
   description: string | null
+  description_html: string | null
+  description_md: string | null
   cover_image_url: string | null
   city: string | null
   email: string | null

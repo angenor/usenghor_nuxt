@@ -153,13 +153,6 @@ function formatDate(dateString?: string | null) {
   return formatNewsDateTime(dateString)
 }
 
-// Contenu EditorJS formaté pour le composant renderer
-const editorContent = computed(() => {
-  if (!newsItem.value?.content || !newsItem.value.content.blocks || newsItem.value.content.blocks.length === 0) {
-    return null
-  }
-  return newsItem.value.content
-})
 </script>
 
 <template>
@@ -316,9 +309,9 @@ const editorContent = computed(() => {
           <h2 class="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
             Contenu
           </h2>
-          <EditorJSRenderer
-            v-if="editorContent"
-            :data="editorContent"
+          <RichTextRenderer
+            v-if="newsItem.content_html"
+            :html="newsItem.content_html"
           />
           <p v-else class="text-gray-500 italic dark:text-gray-400">
             Aucun contenu

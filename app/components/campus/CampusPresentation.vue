@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { CampusPublic } from '~/composables/usePublicCampusApi'
-import type { OutputData } from '@editorjs/editorjs'
 
 interface Props {
   campus: CampusPublic
@@ -10,27 +9,6 @@ const props = defineProps<Props>()
 const { t } = useI18n()
 const { getCampusLocation, getCampusFlagEmoji } = usePublicCampusApi()
 
-// Convertir une string en OutputData
-const parseEditorContent = (content: string | null | undefined): OutputData | undefined => {
-  if (!content) return undefined
-  try {
-    const parsed = JSON.parse(content)
-    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
-      return parsed as OutputData
-    }
-  } catch {
-    if (content.trim()) {
-      return {
-        time: Date.now(),
-        blocks: [{ type: 'paragraph', data: { text: content } }],
-        version: '2.28.0',
-      }
-    }
-  }
-  return undefined
-}
-
-const descriptionData = computed(() => parseEditorContent(props.campus.description))
 const location = computed(() => getCampusLocation(props.campus))
 const flagEmoji = computed(() => getCampusFlagEmoji(props.campus))
 </script>
@@ -68,9 +46,9 @@ const flagEmoji = computed(() => getCampusFlagEmoji(props.campus))
     </div>
 
     <!-- Description (pleine largeur) -->
-    <div v-if="descriptionData" class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-sm">
+    <div v-if="campus.description_html" class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-sm">
       <div class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-        <EditorJSRenderer :data="descriptionData" />
+        <RichTextRenderer :html="campus.description_html" />
       </div>
     </div>
     <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">

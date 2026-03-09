@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { SectorDisplay, SectorUsage } from '~/composables/useSectorsApi'
-import type { OutputData } from '@editorjs/editorjs'
 
 definePageMeta({
   layout: 'admin'
@@ -47,15 +46,19 @@ const error = ref<string | null>(null)
 const newSector = ref<{
   name: string
   code: string
-  description: OutputData | undefined
-  mission: OutputData | undefined
+  description_md: string
+  description_html: string
+  mission_md: string
+  mission_html: string
   head_id: string
   active: boolean
 }>({
   name: '',
   code: '',
-  description: undefined,
-  mission: undefined,
+  description_md: '',
+  description_html: '',
+  mission_md: '',
+  mission_html: '',
   head_id: '',
   active: true
 })
@@ -209,34 +212,14 @@ const openAddModal = () => {
   newSector.value = {
     name: '',
     code: '',
-    description: undefined,
-    mission: undefined,
+    description_md: '',
+    description_html: '',
+    mission_md: '',
+    mission_html: '',
     head_id: '',
     active: true
   }
   showAddModal.value = true
-}
-
-// Convertir une string (potentiellement JSON ou texte brut) en OutputData
-const parseEditorContent = (content: string | null | undefined): OutputData | undefined => {
-  if (!content) return undefined
-  try {
-    const parsed = JSON.parse(content)
-    // Vérifier que c'est bien un OutputData valide
-    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
-      return parsed as OutputData
-    }
-  } catch {
-    // Si ce n'est pas du JSON valide, créer un bloc paragraphe avec le texte
-    if (content.trim()) {
-      return {
-        time: Date.now(),
-        blocks: [{ type: 'paragraph', data: { text: content } }],
-        version: '2.28.0'
-      }
-    }
-  }
-  return undefined
 }
 
 const openEditModal = (sector: SectorDisplay) => {
@@ -244,8 +227,10 @@ const openEditModal = (sector: SectorDisplay) => {
   newSector.value = {
     name: sector.name,
     code: sector.code,
-    description: parseEditorContent(sector.description),
-    mission: parseEditorContent(sector.mission),
+    description_md: (sector as any).description_md || '',
+    description_html: (sector as any).description_html || '',
+    mission_md: (sector as any).mission_md || '',
+    mission_html: (sector as any).mission_html || '',
     head_id: sector.head_external_id || '',
     active: sector.active
   }
@@ -275,19 +260,13 @@ const saveSector = async () => {
   error.value = null
 
   try {
-    // Convertir les OutputData en JSON string pour l'API
-    const descriptionJson = newSector.value.description && newSector.value.description.blocks?.length
-      ? JSON.stringify(newSector.value.description)
-      : null
-    const missionJson = newSector.value.mission && newSector.value.mission.blocks?.length
-      ? JSON.stringify(newSector.value.mission)
-      : null
-
     const payload = {
       code: newSector.value.code,
       name: newSector.value.name,
-      description: descriptionJson,
-      mission: missionJson,
+      description_html: newSector.value.description_html || null,
+      description_md: newSector.value.description_md || null,
+      mission_html: newSector.value.mission_html || null,
+      mission_md: newSector.value.mission_md || null,
       head_external_id: newSector.value.head_id || null,
       active: newSector.value.active,
     }
@@ -833,13 +812,12 @@ const goToServices = (sectorId: string) => {
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Description
               </label>
-              <ClientOnly>
-                <EditorJS
-                  v-model="newSector.description"
-                  placeholder="Description courte du secteur..."
-                  :min-height="150"
-                />
-              </ClientOnly>
+              <ToastUIEditor
+                v-model="newSector.description_md"
+                placeholder="Description courte du secteur..."
+                :min-height="150"
+                @update:html="newSector.description_html = $event"
+              />
             </div>
 
             <!-- Mission -->
@@ -847,13 +825,12 @@ const goToServices = (sectorId: string) => {
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Mission
               </label>
-              <ClientOnly>
-                <EditorJS
-                  v-model="newSector.mission"
-                  placeholder="Mission et objectifs du secteur..."
-                  :min-height="200"
-                />
-              </ClientOnly>
+              <ToastUIEditor
+                v-model="newSector.mission_md"
+                placeholder="Mission et objectifs du secteur..."
+                :min-height="200"
+                @update:html="newSector.mission_html = $event"
+              />
             </div>
 
             <!-- Responsable -->

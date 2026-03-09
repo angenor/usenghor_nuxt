@@ -69,7 +69,12 @@ export interface EventRead {
   title: string
   slug: string
   description: string | null
-  content: string | null
+  content_html: string | null
+  content_md: string | null
+  content_en_html: string | null
+  content_en_md: string | null
+  content_ar_html: string | null
+  content_ar_md: string | null
   cover_image_external_id: string | null
   country_external_id: string | null
   campus_external_id: string | null
@@ -109,7 +114,12 @@ export interface EventCreatePayload {
   title: string
   slug: string
   description?: string | null
-  content?: string | null
+  content_html?: string | null
+  content_md?: string | null
+  content_en_html?: string | null
+  content_en_md?: string | null
+  content_ar_html?: string | null
+  content_ar_md?: string | null
   cover_image_external_id?: string | null
   country_external_id?: string | null
   campus_external_id?: string | null
@@ -138,7 +148,12 @@ export interface EventUpdatePayload {
   title?: string
   slug?: string
   description?: string | null
-  content?: string | null
+  content_html?: string | null
+  content_md?: string | null
+  content_en_html?: string | null
+  content_en_md?: string | null
+  content_ar_html?: string | null
+  content_ar_md?: string | null
   cover_image_external_id?: string | null
   country_external_id?: string | null
   campus_external_id?: string | null

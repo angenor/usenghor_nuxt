@@ -8,7 +8,6 @@
 
 import type { PaginatedResponse } from '~/types/api'
 import type {
-  MultilingualContent,
   NewsDisplay,
   NewsHighlightStatus,
   NewsPublicEnriched,
@@ -22,53 +21,26 @@ export function usePublicNewsApi() {
   const baseURL = useApiBase()
 
   // =========================================================================
-  // Transformations (réutilisées depuis useAdminNewsApi)
+  // Transformations
   // =========================================================================
-
-  /**
-   * Parse le contenu JSON multilingue depuis le backend.
-   */
-  function parseMultilingualContent(content: string | null): MultilingualContent {
-    if (!content) {
-      return { fr: null, en: null, ar: null }
-    }
-    try {
-      const parsed = JSON.parse(content)
-      // Si c'est déjà un objet multilingue
-      if (parsed && (parsed.fr || parsed.en || parsed.ar)) {
-        return {
-          fr: parsed.fr || null,
-          en: parsed.en || null,
-          ar: parsed.ar || null,
-        }
-      }
-      // Si c'est un contenu EditorJS simple, le considérer comme FR
-      if (parsed && parsed.blocks) {
-        return { fr: parsed, en: null, ar: null }
-      }
-      return { fr: null, en: null, ar: null }
-    }
-    catch {
-      return { fr: null, en: null, ar: null }
-    }
-  }
 
   /**
    * Transforme NewsPublicEnriched (backend) vers NewsDisplay (frontend).
    * Le backend retourne maintenant les noms des entités associées.
    */
   function transformToDisplay(news: NewsPublicEnriched): NewsDisplay {
-    const multilingual = parseMultilingualContent(news.content)
-
     return {
       id: news.id,
       slug: news.slug,
       title: news.title,
       summary: news.summary,
-      // Contenu multilingue parsé
-      content: multilingual.fr,
-      content_en: multilingual.en,
-      content_ar: multilingual.ar,
+      // Contenu legacy (non utilisé avec TOAST UI)
+      content: null,
+      content_en: null,
+      content_ar: null,
+      // Contenu HTML (TOAST UI Editor)
+      content_html: news.content_html,
+      content_md: news.content_md,
       // Médias
       video_url: news.video_url,
       cover_image: news.cover_image_external_id
@@ -275,7 +247,6 @@ export function usePublicNewsApi() {
 
     // Transformations
     transformToDisplay,
-    parseMultilingualContent,
 
     // Helpers
     formatNewsDate,

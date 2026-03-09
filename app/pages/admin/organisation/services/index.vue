@@ -5,7 +5,6 @@ import type {
   ServiceStats,
   ServicesBySector,
 } from '~/composables/useServicesApi'
-import type { OutputData } from '@editorjs/editorjs'
 
 definePageMeta({
   layout: 'admin'
@@ -84,8 +83,10 @@ const newService = ref<{
   sigle: string
   color: string
   sector_id: string
-  description: OutputData | undefined
-  mission: OutputData | undefined
+  description_md: string
+  description_html: string
+  mission_md: string
+  mission_html: string
   head_external_id: string
   album_external_id: string
   email: string
@@ -96,8 +97,10 @@ const newService = ref<{
   sigle: '',
   color: '',
   sector_id: '',
-  description: undefined,
-  mission: undefined,
+  description_md: '',
+  description_html: '',
+  mission_md: '',
+  mission_html: '',
   head_external_id: '',
   album_external_id: '',
   email: '',
@@ -336,50 +339,6 @@ const collapseAllSectors = () => {
   expandedSectors.value.clear()
 }
 
-// Convertir une string (potentiellement JSON ou texte brut) en OutputData
-const parseEditorContent = (content: string | null | undefined): OutputData | undefined => {
-  if (!content) return undefined
-  try {
-    const parsed = JSON.parse(content)
-    // Vérifier que c'est bien un OutputData valide
-    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
-      return parsed as OutputData
-    }
-  } catch {
-    // Si ce n'est pas du JSON valide, créer un bloc paragraphe avec le texte
-    if (content.trim()) {
-      return {
-        time: Date.now(),
-        blocks: [{ type: 'paragraph', data: { text: content } }],
-        version: '2.28.0'
-      }
-    }
-  }
-  return undefined
-}
-
-// Extraire le texte brut d'un contenu EditorJS (string JSON) pour l'affichage dans la liste
-const getPlainText = (content: string | null | undefined): string => {
-  if (!content) return ''
-  try {
-    const parsed = JSON.parse(content)
-    if (parsed && Array.isArray(parsed.blocks)) {
-      return parsed.blocks
-        .filter((block: { type: string; data?: { text?: string } }) => block.type === 'paragraph' && block.data?.text)
-        .map((block: { data: { text: string } }) => {
-          // Supprimer les balises HTML du texte
-          return block.data.text.replace(/<[^>]*>/g, '')
-        })
-        .join(' ')
-        .slice(0, 200) // Limiter à 200 caractères
-    }
-  } catch {
-    // Si ce n'est pas du JSON, retourner le texte tel quel
-    return content.slice(0, 200)
-  }
-  return ''
-}
-
 // Modals
 const openAddModal = () => {
   newService.value = {
@@ -387,8 +346,10 @@ const openAddModal = () => {
     sigle: '',
     color: '',
     sector_id: filterSector.value || '',
-    description: undefined,
-    mission: undefined,
+    description_md: '',
+    description_html: '',
+    mission_md: '',
+    mission_html: '',
     head_external_id: '',
     album_external_id: '',
     email: '',
@@ -405,8 +366,10 @@ const openEditModal = (service: ServiceDisplay) => {
     sigle: service.sigle || '',
     color: service.color || '',
     sector_id: service.sector_id || '',
-    description: parseEditorContent(service.description),
-    mission: parseEditorContent(service.mission),
+    description_md: (service as any).description_md || '',
+    description_html: (service as any).description_html || '',
+    mission_md: (service as any).mission_md || '',
+    mission_html: (service as any).mission_html || '',
     head_external_id: service.head_external_id || '',
     album_external_id: service.album_external_id || '',
     email: service.email || '',
@@ -435,21 +398,15 @@ const closeModals = () => {
 const saveService = async () => {
   isSaving.value = true
   try {
-    // Convertir les OutputData en JSON string pour l'API
-    const descriptionJson = newService.value.description && newService.value.description.blocks?.length
-      ? JSON.stringify(newService.value.description)
-      : null
-    const missionJson = newService.value.mission && newService.value.mission.blocks?.length
-      ? JSON.stringify(newService.value.mission)
-      : null
-
     const serviceData = {
       name: newService.value.name,
       sigle: newService.value.sigle || null,
       color: newService.value.color || null,
       sector_id: newService.value.sector_id || null,
-      description: descriptionJson,
-      mission: missionJson,
+      description_html: newService.value.description_html || null,
+      description_md: newService.value.description_md || null,
+      mission_html: newService.value.mission_html || null,
+      mission_md: newService.value.mission_md || null,
       head_external_id: newService.value.head_external_id || null,
       album_external_id: newService.value.album_external_id || null,
       email: newService.value.email || null,
@@ -871,8 +828,8 @@ const handleDragEnd = () => {
                       {{ service.name }}
                       <span v-if="service.sigle && !service.color" class="text-xs text-gray-400 dark:text-gray-500 font-normal ml-1">({{ service.sigle }})</span>
                     </p>
-                    <p v-if="getPlainText(service.description)" class="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
-                      {{ getPlainText(service.description) }}
+                    <p v-if="service.description" class="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
+                      {{ service.description }}
                     </p>
                   </div>
                 </div>
@@ -1312,13 +1269,12 @@ const handleDragEnd = () => {
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Description
               </label>
-              <ClientOnly>
-                <EditorJS
-                  v-model="newService.description"
-                  placeholder="Description du service..."
-                  :min-height="150"
-                />
-              </ClientOnly>
+              <ToastUIEditor
+                v-model="newService.description_md"
+                placeholder="Description du service..."
+                :min-height="150"
+                @update:html="newService.description_html = $event"
+              />
             </div>
 
             <!-- Mission -->
@@ -1326,13 +1282,12 @@ const handleDragEnd = () => {
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Mission
               </label>
-              <ClientOnly>
-                <EditorJS
-                  v-model="newService.mission"
-                  placeholder="Mission et objectifs du service..."
-                  :min-height="200"
-                />
-              </ClientOnly>
+              <ToastUIEditor
+                v-model="newService.mission_md"
+                placeholder="Mission et objectifs du service..."
+                :min-height="200"
+                @update:html="newService.mission_html = $event"
+              />
             </div>
 
             <!-- Responsable -->

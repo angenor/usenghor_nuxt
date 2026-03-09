@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import World from '@svg-maps/world'
 import type { CampusPublic } from '~/composables/usePublicCampusApi'
-import type { OutputData } from '@editorjs/editorjs'
 import type { MapViewBox } from '~/composables/useMapSettings'
 import { DEFAULT_VIEWBOX, DEFAULT_EXCLUDED_COUNTRIES } from '~/composables/useMapSettings'
 
@@ -142,6 +141,7 @@ interface CampusItem {
   country_iso_code: string | null
   country_name: string | null
   description: string | null
+  description_html: string | null
   image: string | null
   is_headquarters: boolean
 }
@@ -155,6 +155,7 @@ const transformCampus = (campus: CampusPublic): CampusItem => ({
   country_iso_code: campus.country_iso_code,
   country_name: campus.country_name_fr,
   description: campus.description,
+  description_html: campus.description_html,
   image: getCoverImageUrl(campus),
   is_headquarters: campus.is_headquarters,
 })
@@ -302,30 +303,6 @@ const getCampusLocationText = (campus: CampusItem): string => {
   return parts.join(', ')
 }
 
-// Convertir une string (potentiellement JSON ou texte brut) en OutputData
-const parseEditorContent = (content: string | null | undefined): OutputData | undefined => {
-  if (!content) return undefined
-  try {
-    const parsed = JSON.parse(content)
-    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
-      return parsed as OutputData
-    }
-  } catch {
-    if (content.trim()) {
-      return {
-        time: Date.now(),
-        blocks: [{ type: 'paragraph', data: { text: content } }],
-        version: '2.28.0'
-      }
-    }
-  }
-  return undefined
-}
-
-// Helper pour obtenir la description du campus parsée
-const getCampusDescriptionData = (campus: CampusItem): OutputData | undefined => {
-  return parseEditorContent(campus.description)
-}
 
 </script>
 
@@ -495,8 +472,8 @@ const getCampusDescriptionData = (campus: CampusItem): OutputData | undefined =>
                   <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">
                     {{ getCampusName(selectedCampus) }}
                   </h3>
-                  <div v-if="getCampusDescriptionData(selectedCampus)" class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-5 max-h-40 overflow-y-auto">
-                    <EditorJSRenderer :data="getCampusDescriptionData(selectedCampus)" />
+                  <div v-if="selectedCampus.description_html" class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-5 max-h-40 overflow-y-auto">
+                    <RichTextRenderer :html="selectedCampus.description_html" />
                   </div>
 
                   <!-- CTA -->

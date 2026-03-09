@@ -3,8 +3,6 @@
  * Gestion complète des projets institutionnels pour le back-office
  */
 
-import type { EditorJSContent } from './news'
-
 // Types
 export type ProjectStatus = 'planned' | 'ongoing' | 'completed' | 'suspended'
 export type PublicationStatus = 'draft' | 'published' | 'archived'
@@ -33,16 +31,18 @@ export interface Project {
   summary_fr?: string
   summary_en?: string
   summary_ar?: string
-  /** Contenu riche FR (EditorJS format) */
-  description_fr?: EditorJSContent
-  /** Contenu riche EN (EditorJS format) */
-  description_en?: EditorJSContent
-  /** Contenu riche AR (EditorJS format) */
-  description_ar?: EditorJSContent
-  /** Legacy: description texte brut (pour migration) */
-  description_text_fr?: string
-  description_text_en?: string
-  description_text_ar?: string
+  /** Contenu HTML FR */
+  description_html?: string
+  /** Contenu Markdown FR */
+  description_md?: string
+  /** Contenu HTML EN */
+  description_en_html?: string
+  /** Contenu Markdown EN */
+  description_en_md?: string
+  /** Contenu HTML AR */
+  description_ar_html?: string
+  /** Contenu Markdown AR */
+  description_ar_md?: string
   cover_image?: string
   cover_image_alt?: string
   gallery?: string[]
@@ -165,75 +165,7 @@ export const mockProjects: Project[] = [
     summary_fr: 'Transform\'Action Africa est un parcours pédagogique, collectif et créatif, conçu pour les leaders qui conduisent des dynamiques de transformation structurelle au sein des organisations publiques africaines.',
     summary_en: 'Transform\'Action Africa is a pedagogical, collective and creative pathway designed for leaders driving structural transformation dynamics within African public organizations.',
     summary_ar: 'ترانسفورم أكشن أفريكا هو مسار تعليمي جماعي وإبداعي، مصمم للقادة الذين يقودون ديناميكيات التحول الهيكلي داخل المنظمات العامة الأفريقية.',
-    description_fr: {
-      time: 1705747200000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 'ta1',
-          type: 'paragraph',
-          data: {
-            text: '<b>Transform\'Action Africa</b> est un parcours pédagogique, collectif et créatif, conçu pour les leaders qui conduisent des dynamiques de transformation structurelle au sein des organisations publiques africaines, au service de la transition sociale et écologique.'
-          }
-        },
-        {
-          id: 'ta2',
-          type: 'header',
-          data: {
-            text: 'Notre mission',
-            level: 2
-          }
-        },
-        {
-          id: 'ta3',
-          type: 'paragraph',
-          data: {
-            text: 'Former les cadres publics qui transforment l\'Afrique en renforçant les compétences managériales et de leadership des cadres du secteur public en Afrique francophone, pour améliorer leurs pratiques professionnelles et la performance de leurs organisations.'
-          }
-        },
-        {
-          id: 'ta4',
-          type: 'header',
-          data: {
-            text: 'Format du programme',
-            level: 2
-          }
-        },
-        {
-          id: 'ta5',
-          type: 'list',
-          data: {
-            style: 'unordered',
-            items: [
-              '<b>Durée</b> : 30 jours répartis sur 6 mois',
-              '<b>Modalités</b> : 3 semaines de sessions résidentielles en présentiel combinées à des modules de formation à distance',
-              '<b>Adaptation</b> : Programme personnalisé pour refléter les spécificités culturelles et contextuelles des organisations africaines'
-            ]
-          }
-        },
-        {
-          id: 'ta6',
-          type: 'header',
-          data: {
-            text: 'Approche pédagogique',
-            level: 2
-          }
-        },
-        {
-          id: 'ta7',
-          type: 'list',
-          data: {
-            style: 'unordered',
-            items: [
-              '<b>Apprentissage par l\'action</b> : Les participants travaillent sur des projets concrets de transformation de leurs organisations',
-              '<b>Intelligence collective</b> : Échanges entre pairs et co-construction de solutions',
-              '<b>Créativité</b> : Méthodes de design thinking et d\'innovation sociale',
-              '<b>Résolution collective de problèmes</b> : Méthodologies créatives adaptées au contexte africain'
-            ]
-          }
-        }
-      ]
-    },
+    description_html: '<p><b>Transform\'Action Africa</b> est un parcours pédagogique, collectif et créatif, conçu pour les leaders qui conduisent des dynamiques de transformation structurelle au sein des organisations publiques africaines, au service de la transition sociale et écologique.</p><h2>Notre mission</h2><p>Former les cadres publics qui transforment l\'Afrique en renforçant les compétences managériales et de leadership des cadres du secteur public en Afrique francophone, pour améliorer leurs pratiques professionnelles et la performance de leurs organisations.</p><h2>Format du programme</h2><ul><li><b>Durée</b> : 30 jours répartis sur 6 mois</li><li><b>Modalités</b> : 3 semaines de sessions résidentielles en présentiel combinées à des modules de formation à distance</li><li><b>Adaptation</b> : Programme personnalisé pour refléter les spécificités culturelles et contextuelles des organisations africaines</li></ul><h2>Approche pédagogique</h2><ul><li><b>Apprentissage par l\'action</b> : Les participants travaillent sur des projets concrets de transformation de leurs organisations</li><li><b>Intelligence collective</b> : Échanges entre pairs et co-construction de solutions</li><li><b>Créativité</b> : Méthodes de design thinking et d\'innovation sociale</li><li><b>Résolution collective de problèmes</b> : Méthodologies créatives adaptées au contexte africain</li></ul>',
     cover_image: '',
     cover_image_alt: 'Programme Transform\'Action Africa',
     gallery: [
@@ -283,59 +215,7 @@ export const mockProjects: Project[] = [
     summary_fr: 'KreAfrika est un projet qui vise à renforcer les compétences des professionnels des Industries Culturelles et Créatives en Afrique.',
     summary_en: 'KreAfrika is a project aimed at strengthening the skills of professionals in Cultural and Creative Industries in Africa.',
     summary_ar: 'كري أفريكا هو مشروع يهدف إلى تعزيز مهارات المهنيين في الصناعات الثقافية والإبداعية في أفريقيا.',
-    description_fr: {
-      time: 1705747200000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 'ka1',
-          type: 'paragraph',
-          data: {
-            text: '<b>KreAfrika</b> est un projet mis en œuvre par l\'Université Senghor, le groupe médiatique TRACE et le Campus Groupe AFD, qui vise à renforcer les compétences des professionnels des Industries Culturelles et Créatives (ICC) en Afrique.'
-          }
-        },
-        {
-          id: 'ka2',
-          type: 'header',
-          data: {
-            text: 'Objectifs',
-            level: 2
-          }
-        },
-        {
-          id: 'ka3',
-          type: 'list',
-          data: {
-            style: 'unordered',
-            items: [
-              'Renforcer les compétences des professionnels des ICC en Afrique',
-              'Réduire les inégalités de genre dans les industries culturelles et créatives africaines',
-              'Favoriser l\'échange des pratiques et savoir-faire dans le domaine des industries créatives'
-            ]
-          }
-        },
-        {
-          id: 'ka4',
-          type: 'header',
-          data: {
-            text: 'Séminaires régionaux',
-            level: 2
-          }
-        },
-        {
-          id: 'ka5',
-          type: 'list',
-          data: {
-            style: 'unordered',
-            items: [
-              '<b>Dakar</b> : Politiques publiques dans les ICC',
-              '<b>Kinshasa & Nairobi</b> : Gestion des équipements culturels',
-              '<b>Abidjan & Alexandrie-Le Caire</b> : Entrepreneuriat et financement'
-            ]
-          }
-        }
-      ]
-    },
+    description_html: '<p><b>KreAfrika</b> est un projet mis en oeuvre par l\'Université Senghor, le groupe médiatique TRACE et le Campus Groupe AFD, qui vise à renforcer les compétences des professionnels des Industries Culturelles et Créatives (ICC) en Afrique.</p><h2>Objectifs</h2><ul><li>Renforcer les compétences des professionnels des ICC en Afrique</li><li>Réduire les inégalités de genre dans les industries culturelles et créatives africaines</li><li>Favoriser l\'échange des pratiques et savoir-faire dans le domaine des industries créatives</li></ul><h2>Séminaires régionaux</h2><ul><li><b>Dakar</b> : Politiques publiques dans les ICC</li><li><b>Kinshasa &amp; Nairobi</b> : Gestion des équipements culturels</li><li><b>Abidjan &amp; Alexandrie-Le Caire</b> : Entrepreneuriat et financement</li></ul>',
     cover_image: '',
     cover_image_alt: 'Programme KreAfrika',
     gallery: [
@@ -378,40 +258,7 @@ export const mockProjects: Project[] = [
     summary_fr: 'Campagne de mobilisation de ressources pour soutenir les bourses d\'excellence et les projets d\'innovation.',
     summary_en: 'Resource mobilization campaign to support excellence scholarships and innovation projects.',
     summary_ar: 'حملة تعبئة الموارد لدعم منح التميز ومشاريع الابتكار.',
-    description_fr: {
-      time: 1705747200000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 'lf1',
-          type: 'paragraph',
-          data: {
-            text: 'La campagne de levée de fonds de l\'Université Senghor vise à mobiliser des ressources pour soutenir ses missions fondamentales.'
-          }
-        },
-        {
-          id: 'lf2',
-          type: 'header',
-          data: {
-            text: 'Objectifs de la campagne',
-            level: 2
-          }
-        },
-        {
-          id: 'lf3',
-          type: 'list',
-          data: {
-            style: 'unordered',
-            items: [
-              'Financer 100 bourses d\'excellence par an',
-              'Soutenir les projets de recherche innovants',
-              'Moderniser les infrastructures numériques',
-              'Développer de nouveaux programmes de formation'
-            ]
-          }
-        }
-      ]
-    },
+    description_html: '<p>La campagne de levée de fonds de l\'Université Senghor vise à mobiliser des ressources pour soutenir ses missions fondamentales.</p><h2>Objectifs de la campagne</h2><ul><li>Financer 100 bourses d\'excellence par an</li><li>Soutenir les projets de recherche innovants</li><li>Moderniser les infrastructures numériques</li><li>Développer de nouveaux programmes de formation</li></ul>',
     cover_image: '',
     category_ids: ['cat-1'],
     status: 'ongoing',
@@ -441,60 +288,7 @@ export const mockProjects: Project[] = [
     summary_fr: 'Programme de bourses destiné aux étudiants les plus méritants de l\'espace francophone africain.',
     summary_en: 'Scholarship program for the most deserving students from the African French-speaking world.',
     summary_ar: 'برنامج منح للطلاب الأكثر استحقاقاً من العالم الأفريقي الناطق بالفرنسية.',
-    description_fr: {
-      time: 1705747200000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 'be1',
-          type: 'paragraph',
-          data: {
-            text: 'Le programme de bourses d\'excellence de l\'Université Senghor permet chaque année à des étudiants talentueux de poursuivre leurs études.'
-          }
-        },
-        {
-          id: 'be2',
-          type: 'header',
-          data: {
-            text: 'Critères d\'éligibilité',
-            level: 2
-          }
-        },
-        {
-          id: 'be3',
-          type: 'list',
-          data: {
-            style: 'unordered',
-            items: [
-              'Excellence académique',
-              'Projet professionnel cohérent',
-              'Engagement citoyen démontré',
-              'Potentiel de leadership'
-            ]
-          }
-        },
-        {
-          id: 'be4',
-          type: 'header',
-          data: {
-            text: 'Types de bourses',
-            level: 2
-          }
-        },
-        {
-          id: 'be5',
-          type: 'list',
-          data: {
-            style: 'unordered',
-            items: [
-              'Bourses complètes (frais de scolarité + hébergement)',
-              'Bourses partielles (frais de scolarité)',
-              'Bourses de mobilité'
-            ]
-          }
-        }
-      ]
-    },
+    description_html: '<p>Le programme de bourses d\'excellence de l\'Université Senghor permet chaque année à des étudiants talentueux de poursuivre leurs études.</p><h2>Critères d\'éligibilité</h2><ul><li>Excellence académique</li><li>Projet professionnel cohérent</li><li>Engagement citoyen démontré</li><li>Potentiel de leadership</li></ul><h2>Types de bourses</h2><ul><li>Bourses complètes (frais de scolarité + hébergement)</li><li>Bourses partielles (frais de scolarité)</li><li>Bourses de mobilité</li></ul>',
     cover_image: '',
     category_ids: ['cat-1'],
     status: 'ongoing',
@@ -524,41 +318,7 @@ export const mockProjects: Project[] = [
     summary_fr: 'Réseau collaboratif de recherche sur les grands défis du développement en Afrique francophone.',
     summary_en: 'Collaborative research network on major development challenges in French-speaking Africa.',
     summary_ar: 'شبكة بحثية تعاونية حول تحديات التنمية الكبرى في أفريقيا الناطقة بالفرنسية.',
-    description_fr: {
-      time: 1705747200000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 'rf1',
-          type: 'paragraph',
-          data: {
-            text: 'Le Réseau de recherche francophone rassemble des chercheurs de l\'espace francophone autour de thématiques communes.'
-          }
-        },
-        {
-          id: 'rf2',
-          type: 'header',
-          data: {
-            text: 'Axes de recherche',
-            level: 2
-          }
-        },
-        {
-          id: 'rf3',
-          type: 'list',
-          data: {
-            style: 'unordered',
-            items: [
-              'Gouvernance et développement',
-              'Santé publique et systèmes de santé',
-              'Environnement et changement climatique',
-              'Industries culturelles et créatives',
-              'Transformation digitale'
-            ]
-          }
-        }
-      ]
-    },
+    description_html: '<p>Le Réseau de recherche francophone rassemble des chercheurs de l\'espace francophone autour de thématiques communes.</p><h2>Axes de recherche</h2><ul><li>Gouvernance et développement</li><li>Santé publique et systèmes de santé</li><li>Environnement et changement climatique</li><li>Industries culturelles et créatives</li><li>Transformation digitale</li></ul>',
     cover_image: '',
     category_ids: ['cat-4'],
     status: 'ongoing',
@@ -589,62 +349,7 @@ export const mockProjects: Project[] = [
     summary_fr: 'Programme de formation des futurs leaders du numérique en Afrique.',
     summary_en: 'Training program for future digital leaders in Africa.',
     summary_ar: 'برنامج تدريب قادة المستقبل الرقميين في أفريقيا.',
-    description_fr: {
-      time: 1705747200000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 'ad1',
-          type: 'paragraph',
-          data: {
-            text: 'Africa Digital Leaders est un programme intensif de formation au leadership numérique.'
-          }
-        },
-        {
-          id: 'ad2',
-          type: 'header',
-          data: {
-            text: 'Programme',
-            level: 2
-          }
-        },
-        {
-          id: 'ad3',
-          type: 'list',
-          data: {
-            style: 'unordered',
-            items: [
-              '6 mois de formation intensive',
-              'Modules en ligne et présentiels',
-              'Mentorat par des leaders du secteur',
-              'Projet d\'entreprise accompagné'
-            ]
-          }
-        },
-        {
-          id: 'ad4',
-          type: 'header',
-          data: {
-            text: 'Compétences développées',
-            level: 2
-          }
-        },
-        {
-          id: 'ad5',
-          type: 'list',
-          data: {
-            style: 'unordered',
-            items: [
-              'Leadership et management',
-              'Stratégie digitale',
-              'Intelligence artificielle',
-              'Cybersécurité',
-              'Entrepreneuriat tech'
-            ]
-          }
-        }
-      ]
-    },
+    description_html: '<p>Africa Digital Leaders est un programme intensif de formation au leadership numérique.</p><h2>Programme</h2><ul><li>6 mois de formation intensive</li><li>Modules en ligne et présentiels</li><li>Mentorat par des leaders du secteur</li><li>Projet d\'entreprise accompagné</li></ul><h2>Compétences développées</h2><ul><li>Leadership et management</li><li>Stratégie digitale</li><li>Intelligence artificielle</li><li>Cybersécurité</li><li>Entrepreneuriat tech</li></ul>',
     cover_image: '',
     category_ids: ['cat-5'],
     status: 'planned',
@@ -700,40 +405,7 @@ export const mockProjects: Project[] = [
     summary_fr: 'Programme de formation intensive en gouvernance publique pour les cadres africains - Cohorte 2023.',
     summary_en: 'Intensive public governance training program for African executives - 2023 Cohort.',
     summary_ar: 'برنامج تدريب مكثف في الحوكمة العامة للمديرين الأفارقة - دفعة 2023.',
-    description_fr: {
-      time: 1705747200000,
-      version: '2.28.2',
-      blocks: [
-        {
-          id: 'fg1',
-          type: 'paragraph',
-          data: {
-            text: 'La cohorte 2023 du programme de formation en gouvernance publique a permis de former 45 cadres dirigeants issus de 15 pays africains.'
-          }
-        },
-        {
-          id: 'fg2',
-          type: 'header',
-          data: {
-            text: 'Résultats',
-            level: 2
-          }
-        },
-        {
-          id: 'fg3',
-          type: 'list',
-          data: {
-            style: 'unordered',
-            items: [
-              '45 cadres formés',
-              '15 pays représentés',
-              '12 projets de transformation initiés',
-              '95% de satisfaction des participants'
-            ]
-          }
-        }
-      ]
-    },
+    description_html: '<p>La cohorte 2023 du programme de formation en gouvernance publique a permis de former 45 cadres dirigeants issus de 15 pays africains.</p><h2>Résultats</h2><ul><li>45 cadres formés</li><li>15 pays représentés</li><li>12 projets de transformation initiés</li><li>95% de satisfaction des participants</li></ul>',
     cover_image: '',
     category_ids: ['cat-8', 'cat-1'],
     department_id: 'dep-admin',

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { OutputData } from '@editorjs/editorjs'
 import type { ImageVariants, ProjectCategoryRead, ProjectStatus, PublicationStatus } from '~/types/api'
 
 definePageMeta({
@@ -41,7 +40,8 @@ const form = reactive({
   title: '',
   slug: '',
   summary: '',
-  description: undefined as OutputData | undefined,
+  descriptionMd: '',
+  descriptionHtml: '',
   cover_image_external_id: null as string | null,
   sector_external_id: null as string | null,
   manager_external_id: null as string | null,
@@ -160,14 +160,12 @@ const saveForm = async () => {
   error.value = null
 
   try {
-    // Sérialiser la description EditorJS en JSON
-    const descriptionJson = form.description ? JSON.stringify(form.description) : null
-
     await createProject({
       title: form.title,
       slug: form.slug,
       summary: form.summary || null,
-      description: descriptionJson,
+      description_html: form.descriptionHtml || null,
+      description_md: form.descriptionMd || null,
       cover_image_external_id: form.cover_image_external_id,
       sector_external_id: form.sector_external_id,
       manager_external_id: form.manager_external_id,
@@ -393,11 +391,12 @@ const tabs = [
           <!-- Description (Rich Text Editor) -->
           <div class="sm:col-span-2">
             <AdminRichTextEditor
-              v-model="form.description"
+              v-model="form.descriptionMd"
+              v-model:html-value="form.descriptionHtml"
               label="Description détaillée"
               placeholder="Description complète du projet : contexte, objectifs, méthodologie..."
               :show-card="false"
-              :min-height="250"
+              height="250px"
             />
           </div>
 

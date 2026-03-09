@@ -1,26 +1,5 @@
 <script setup lang="ts">
 import type { ProgramType, ProgramWithDetails, ProgramFieldRead, PublicationStatus, ProgramSkillRead, ProgramCareerOpportunityRead, ImageVariants } from '~/types/api'
-import type { OutputData } from '@editorjs/editorjs'
-
-// Convertir une string (potentiellement JSON ou texte brut) en OutputData
-const parseEditorContent = (content: string | null | undefined): OutputData | undefined => {
-  if (!content) return undefined
-  try {
-    const parsed = JSON.parse(content)
-    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
-      return parsed as OutputData
-    }
-  } catch {
-    if (content.trim()) {
-      return {
-        time: Date.now(),
-        blocks: [{ type: 'paragraph', data: { text: content } }],
-        version: '2.28.0'
-      }
-    }
-  }
-  return undefined
-}
 
 definePageMeta({
   layout: 'admin'
@@ -171,7 +150,8 @@ const form = ref<{
   title: string
   subtitle: string
   slug: string
-  description: OutputData | undefined
+  description_md: string
+  description_html: string
   teaching_methods: string
   objectives: string[]
   target_audience: string[]
@@ -194,7 +174,8 @@ const form = ref<{
   title: '',
   subtitle: '',
   slug: '',
-  description: undefined,
+  description_md: '',
+  description_html: '',
   teaching_methods: '',
   objectives: [],
   target_audience: [],
@@ -254,7 +235,8 @@ async function loadProgram() {
       title: program.value.title,
       subtitle: program.value.subtitle || '',
       slug: program.value.slug,
-      description: parseEditorContent(program.value.description),
+      description_md: program.value.description_md || '',
+      description_html: program.value.description_html || '',
       teaching_methods: program.value.teaching_methods || '',
       objectives: program.value.objectives || [],
       target_audience: program.value.target_audience || [],
@@ -657,17 +639,13 @@ const submitForm = async () => {
 
   isSubmitting.value = true
   try {
-    // Convertir la description OutputData en JSON string pour l'API
-    const descriptionJson = form.value.description && form.value.description.blocks?.length
-      ? JSON.stringify(form.value.description)
-      : null
-
     await updateProgram(program.value.id, {
       code: form.value.code,
       title: form.value.title,
       subtitle: form.value.subtitle || null,
       slug: form.value.slug,
-      description: descriptionJson,
+      description_html: form.value.description_html || null,
+      description_md: form.value.description_md || null,
       teaching_methods: form.value.teaching_methods || null,
       objectives: form.value.objectives.length > 0 ? form.value.objectives : null,
       target_audience: form.value.target_audience.length > 0 ? form.value.target_audience : null,
@@ -1052,13 +1030,13 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
             <label for="description" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Description complète
             </label>
-            <ClientOnly>
-              <EditorJS
-                v-model="form.description"
-                placeholder="Décrivez le programme en détail..."
-                :min-height="200"
-              />
-            </ClientOnly>
+            <AdminRichTextEditor
+              v-model="form.description_md"
+              v-model:html-value="form.description_html"
+              :show-card="false"
+              placeholder="Décrivez le programme en détail..."
+              height="200px"
+            />
           </div>
 
           <div>

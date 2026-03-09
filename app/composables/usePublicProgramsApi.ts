@@ -17,11 +17,19 @@ export interface ProgramPublic {
   subtitle: string | null
   slug: string
   description: string | null
+  description_html: string | null
+  description_md: string | null
   teaching_methods: string | null
+  teaching_methods_html: string | null
+  teaching_methods_md: string | null
   objectives: string | null
   target_audience: string | null
   format: string | null
+  format_html: string | null
+  format_md: string | null
   evaluation_methods: string | null
+  evaluation_methods_html: string | null
+  evaluation_methods_md: string | null
   cover_image_external_id: string | null
   sector_external_id: string | null
   service_external_id: string | null

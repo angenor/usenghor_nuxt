@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { CountryRead } from '~/composables/useCountriesApi'
-import type { OutputData } from '@editorjs/editorjs'
 import type { ImageVariants } from '~/types/api'
 
 definePageMeta({
@@ -73,7 +72,8 @@ const activeTab = ref<'general' | 'location' | 'contact' | 'settings'>('general'
 const form = reactive({
   code: '',
   name: '',
-  description: undefined as OutputData | undefined,
+  description_md: '',
+  description_html: '',
   cover_image: '', // URL d'aperçu local
   cover_image_external_id: null as string | null,
   country_external_id: '',
@@ -215,15 +215,11 @@ const submitForm = async () => {
   submitError.value = null
 
   try {
-    // Convertir les OutputData en JSON string pour l'API
-    const descriptionJson = form.description && form.description.blocks?.length
-      ? JSON.stringify(form.description)
-      : undefined
-
     const campusData = {
       code: form.code.trim(),
       name: form.name.trim(),
-      description: descriptionJson,
+      description_html: form.description_html || undefined,
+      description_md: form.description_md || undefined,
       cover_image_external_id: form.cover_image_external_id || undefined,
       country_external_id: form.country_external_id || undefined,
       head_external_id: form.head_external_id || undefined,
@@ -392,13 +388,11 @@ const tabs = [
             <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Description
             </label>
-            <ClientOnly>
-              <EditorJS
-                v-model="form.description"
-                placeholder="Description du campus..."
-                :min-height="150"
-              />
-            </ClientOnly>
+            <ToastUIEditor
+              v-model="form.description_md"
+              placeholder="Description du campus..."
+              @update:html="form.description_html = $event"
+            />
           </div>
 
           <!-- Image de couverture -->

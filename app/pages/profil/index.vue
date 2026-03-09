@@ -421,28 +421,6 @@ function handleLogout() {
 }
 
 // === HELPERS ===
-function parseBiography(bio) {
-  if (!bio) return null
-  try {
-    const parsed = JSON.parse(bio)
-    if (parsed && Array.isArray(parsed.blocks) && parsed.blocks.length > 0) {
-      return parsed
-    }
-  }
-  catch {
-    if (bio.trim()) {
-      return {
-        time: Date.now(),
-        blocks: [{ id: '1', type: 'paragraph', data: { text: bio } }],
-        version: '2.28.0',
-      }
-    }
-  }
-  return null
-}
-
-const parsedBiography = computed(() => parseBiography(user.value?.biography))
-
 function formatDate(dateStr) {
   if (!dateStr) return '-'
   try {
@@ -925,13 +903,8 @@ function getCampusBadgeColor(code) {
             </div>
 
             <div class="p-6">
-              <ClientOnly>
-                <EditorJSRenderer v-if="parsedBiography" :data="parsedBiography" />
-                <template #fallback>
-                  <div class="h-8 w-full animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-                </template>
-              </ClientOnly>
-              <p v-if="!parsedBiography" class="text-sm italic text-gray-400 dark:text-gray-500">
+              <RichTextRenderer v-if="user?.biography_html" :html="user.biography_html" />
+              <p v-else class="text-sm italic text-gray-400 dark:text-gray-500">
                 Aucune biographie renseignée. Cliquez sur Modifier pour en ajouter une.
               </p>
             </div>
@@ -1149,22 +1122,12 @@ function getCampusBadgeColor(code) {
             </div>
             <!-- Éditeur -->
             <div class="flex-1 overflow-y-auto p-6">
-              <ClientOnly>
-                <AdminRichTextEditor
-                  v-model="biographyData"
-                  :show-card="false"
-                  placeholder="Quelques mots sur vous..."
-                  :min-height="300"
-                />
-                <template #fallback>
-                  <div
-                    class="flex items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
-                    style="min-height: 300px"
-                  >
-                    <font-awesome-icon :icon="['fas', 'spinner']" class="h-6 w-6 animate-spin text-gray-400" />
-                  </div>
-                </template>
-              </ClientOnly>
+              <AdminRichTextEditor
+                v-model="biographyData"
+                :show-card="false"
+                placeholder="Quelques mots sur vous..."
+                :min-height="300"
+              />
             </div>
             <!-- Pied de modal -->
             <div class="flex justify-end gap-3 border-t border-gray-200 px-6 py-4 dark:border-gray-700">

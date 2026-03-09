@@ -189,16 +189,6 @@ function closeRegistrationModal() {
   registrationError.value = null
 }
 
-// Parser le contenu EditorJS
-const parsedContent = computed(() => {
-  if (!event.value?.content) return null
-  try {
-    return JSON.parse(event.value.content)
-  }
-  catch {
-    return null
-  }
-})
 </script>
 
 <template>
@@ -361,9 +351,9 @@ const parsedContent = computed(() => {
               {{ event.description }}
             </p>
 
-            <!-- Contenu riche EditorJS -->
-            <div v-if="parsedContent" class="mt-8">
-              <EditorJSRenderer :data="parsedContent" />
+            <!-- Contenu riche -->
+            <div v-if="event.content_html" class="mt-8">
+              <RichTextRenderer :html="event.content_html" />
             </div>
           </div>
 

@@ -48,7 +48,8 @@ export interface ProjectRead {
   title: string
   slug: string
   summary: string | null
-  description: string | null
+  description_html: string | null
+  description_md: string | null
   cover_image_external_id: string | null
   sector_external_id: string | null
   manager_external_id: string | null
@@ -78,7 +79,8 @@ export interface ProjectCreatePayload {
   title: string
   slug: string
   summary?: string | null
-  description?: string | null
+  description_html?: string | null
+  description_md?: string | null
   cover_image_external_id?: string | null
   sector_external_id?: string | null
   manager_external_id?: string | null
@@ -100,7 +102,8 @@ export interface ProjectUpdatePayload {
   title?: string
   slug?: string
   summary?: string | null
-  description?: string | null
+  description_html?: string | null
+  description_md?: string | null
   cover_image_external_id?: string | null
   sector_external_id?: string | null
   manager_external_id?: string | null
@@ -184,9 +187,11 @@ export interface ProjectCallRead {
   id: string
   project_id: string
   title: string
-  description: string | null
+  description_html: string | null
+  description_md: string | null
   cover_image_external_id: string | null
-  conditions: string | null
+  conditions_html: string | null
+  conditions_md: string | null
   type: ProjectCallType | null
   deadline: string | null
   status: ProjectCallStatus
@@ -196,9 +201,11 @@ export interface ProjectCallRead {
 
 export interface ProjectCallCreate {
   title: string
-  description?: string | null
+  description_html?: string | null
+  description_md?: string | null
   cover_image_external_id?: string | null
-  conditions?: string | null
+  conditions_html?: string | null
+  conditions_md?: string | null
   type?: ProjectCallType | null
   deadline?: string | null
   status?: ProjectCallStatus
@@ -206,9 +213,11 @@ export interface ProjectCallCreate {
 
 export interface ProjectCallUpdate {
   title?: string
-  description?: string | null
+  description_html?: string | null
+  description_md?: string | null
   cover_image_external_id?: string | null
-  conditions?: string | null
+  conditions_html?: string | null
+  conditions_md?: string | null
   type?: ProjectCallType | null
   deadline?: string | null
   status?: ProjectCallStatus

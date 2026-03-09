@@ -7,6 +7,8 @@ export interface ServiceObjectivePublic {
   service_id: string
   title: string
   description: string | null
+  description_html: string | null
+  description_md: string | null
   display_order: number
 }
 
@@ -15,6 +17,8 @@ export interface ServiceAchievementPublic {
   service_id: string
   title: string
   description: string | null
+  description_html: string | null
+  description_md: string | null
   type: string | null
   cover_image_external_id: string | null
   achievement_date: string | null
@@ -26,6 +30,8 @@ export interface ServiceProjectPublic {
   service_id: string
   title: string
   description: string | null
+  description_html: string | null
+  description_md: string | null
   cover_image_external_id: string | null
   progress: number
   status: 'ongoing' | 'completed' | 'suspended' | 'planned'
@@ -60,7 +66,11 @@ export interface SectorPublic {
   code: string
   name: string
   description: string | null
+  description_html: string | null
+  description_md: string | null
   mission: string | null
+  mission_html: string | null
+  mission_md: string | null
   icon_external_id: string | null
   cover_image_external_id: string | null
   display_order: number
@@ -72,7 +82,11 @@ export interface ServicePublic {
   sigle: string | null
   color: string | null
   description: string | null
+  description_html: string | null
+  description_md: string | null
   mission: string | null
+  mission_html: string | null
+  mission_md: string | null
   email: string | null
   phone: string | null
   sector_id: string | null

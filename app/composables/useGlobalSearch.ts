@@ -23,41 +23,10 @@ export interface SearchResult {
   score: number
 }
 
-// Extrait le texte brut d'un contenu EditorJS (JSON)
-function extractTextFromEditorJS(content: string | null | undefined): string {
+// Extrait le texte brut d'un contenu HTML (supprime les balises)
+function extractPlainText(content: string | null | undefined): string {
   if (!content) return ''
-
-  // Si c'est déjà du texte simple (pas de JSON)
-  if (!content.trim().startsWith('{')) {
-    return content
-  }
-
-  try {
-    const parsed = JSON.parse(content)
-    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
-      return parsed.blocks
-        .map((block: { type: string; data: { text?: string; items?: Array<{ content?: string }> } }) => {
-          // Paragraphes et headers
-          if (block.data?.text) {
-            return block.data.text.replace(/<[^>]*>/g, '') // Supprimer les balises HTML
-          }
-          // Listes
-          if (block.data?.items) {
-            return block.data.items
-              .map((item: { content?: string }) => item.content || '')
-              .join(' ')
-          }
-          return ''
-        })
-        .filter(Boolean)
-        .join(' ')
-        .trim()
-    }
-  } catch {
-    // Si le parsing échoue, retourner tel quel ou vide
-    return content.startsWith('{') ? '' : content
-  }
-  return ''
+  return content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
 // Normalise le texte pour la recherche (supprime accents, met en minuscules)
@@ -398,7 +367,7 @@ export function useGlobalSearch() {
         type: 'formation',
         title: program.title,
         subtitle: `${typeLabels.formation} • ${duration}`,
-        description: extractTextFromEditorJS(program.description) || program.subtitle || '',
+        description: extractPlainText(program.description_html) || program.subtitle || '',
         icon: formationIcons[program.type] || 'fa-solid fa-graduation-cap',
         route: `/formations/${typeSlug}/${program.slug}`,
         image: program.cover_image_external_id
@@ -415,7 +384,7 @@ export function useGlobalSearch() {
         type: 'event',
         title: event.title,
         subtitle: `${typeLabels.event} • ${new Date(event.start_date).toLocaleDateString('fr-FR')}`,
-        description: extractTextFromEditorJS(event.description),
+        description: extractPlainText(event.description_html),
         icon: eventIcons[event.type] || 'fa-solid fa-calendar-days',
         route: `/actualites/evenements/${event.slug}`,
         image: event.cover_image || undefined,
@@ -431,7 +400,7 @@ export function useGlobalSearch() {
         type: 'call',
         title: call.title,
         subtitle: `${typeLabels.call} • ${call.deadline ? `Date limite: ${new Date(call.deadline).toLocaleDateString('fr-FR')}` : 'En cours'}`,
-        description: extractTextFromEditorJS(call.description),
+        description: extractPlainText(call.description_html),
         icon: callIcons[call.type] || 'fa-solid fa-bullhorn',
         route: `/actualites/appels/${call.slug}`,
         date: call.deadline || undefined,
@@ -446,7 +415,7 @@ export function useGlobalSearch() {
         type: 'news',
         title: newsItem.title,
         subtitle: `${typeLabels.news} • ${new Date(newsItem.published_at || newsItem.created_at).toLocaleDateString('fr-FR')}`,
-        description: extractTextFromEditorJS(newsItem.summary) || '',
+        description: extractPlainText(newsItem.summary) || '',
         icon: 'fa-solid fa-newspaper',
         route: `/actualites/${newsItem.slug}`,
         image: newsItem.cover_image || undefined,

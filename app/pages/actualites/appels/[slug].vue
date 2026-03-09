@@ -2,26 +2,10 @@
 import type { ApplicationCallPublicWithDetails } from '~/types/api'
 import { useCallDetail } from '~/composables/useCallDetail'
 
-// Extraire le texte brut d'un contenu EditorJS (pour le SEO)
+// Extraire le texte brut d'un contenu HTML (pour le SEO)
 const extractPlainText = (content: string | null | undefined): string => {
   if (!content) return ''
-  try {
-    const parsed = JSON.parse(content)
-    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
-      return parsed.blocks
-        .map((block: { type: string; data: { text?: string } }) => {
-          if (block.data?.text) {
-            return block.data.text.replace(/<[^>]*>/g, '')
-          }
-          return ''
-        })
-        .filter(Boolean)
-        .join(' ')
-    }
-  } catch {
-    return content
-  }
-  return content
+  return content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
 const route = useRoute()
@@ -104,7 +88,7 @@ watch(() => route.hash, () => {
 // SEO
 useSeoMeta({
   title: () => call.value ? `${call.value.title} | ${t('actualites.calls.title')}` : t('actualites.calls.title'),
-  description: () => extractPlainText(call.value?.description) || t('actualites.calls.subtitle'),
+  description: () => extractPlainText(call.value?.description_html) || t('actualites.calls.subtitle'),
   ogImage: () => call.value?.cover_image_external_id
     ? `/api/public/media/${call.value.cover_image_external_id}/download`
     : undefined

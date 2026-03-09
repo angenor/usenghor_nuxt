@@ -79,33 +79,26 @@ const currentStepData = computed(() => steps[currentStep.value - 1]!)
 const progress = computed(() => (currentStep.value / totalSteps) * 100)
 const transitionName = computed(() => direction.value === 'forward' ? 'slide-left' : 'slide-right')
 
-// Biographie avec EditorJS dans un modal
+// Biographie avec ToastUI Editor dans un modal
 const showBiographyModal = ref(false)
-const biographyData = computed({
-  get: () => {
-    if (!formData.value.biography) {
-      return { time: Date.now(), blocks: [], version: '2.28.0' }
-    }
-    try {
-      return JSON.parse(formData.value.biography)
-    }
-    catch {
-      return { time: Date.now(), blocks: [], version: '2.28.0' }
-    }
-  },
-  set: (value) => {
-    formData.value.biography = JSON.stringify(value)
+
+const biographyMd = computed({
+  get: () => formData.value.biography_md || '',
+  set: (value: string) => {
+    formData.value.biography_md = value
   },
 })
 
+function onBiographyHtmlUpdate(html: string) {
+  formData.value.biography_html = html
+}
+
 const biographyPreview = computed(() => {
-  const blocks = biographyData.value?.blocks
-  if (!blocks || blocks.length === 0) return ''
-  return blocks
-    .filter((b: { type: string }) => b.type === 'paragraph')
-    .map((b: { data?: { text?: string } }) => b.data?.text || '')
-    .join(' ')
-    .replace(/<[^>]*>/g, '')
+  if (!formData.value.biography_md) return ''
+  return formData.value.biography_md
+    .replace(/[#*_~`>\-\[\]()!|]/g, '')
+    .replace(/\n+/g, ' ')
+    .trim()
     .slice(0, 150)
 })
 
@@ -896,22 +889,12 @@ onMounted(() => {
             </div>
             <!-- Éditeur -->
             <div class="flex-1 overflow-y-auto p-6">
-              <ClientOnly>
-                <AdminRichTextEditor
-                  v-model="biographyData"
-                  :show-card="false"
-                  placeholder="Quelques mots sur vous..."
-                  :min-height="300"
-                />
-                <template #fallback>
-                  <div
-                    class="flex items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
-                    style="min-height: 300px"
-                  >
-                    <font-awesome-icon :icon="['fas', 'spinner']" class="h-6 w-6 animate-spin text-gray-400" />
-                  </div>
-                </template>
-              </ClientOnly>
+              <ToastUIEditor
+                v-model="biographyMd"
+                placeholder="Quelques mots sur vous..."
+                height="300px"
+                @update:html="onBiographyHtmlUpdate"
+              />
             </div>
             <!-- Pied de modal -->
             <div class="flex justify-end border-t border-gray-200 px-6 py-4 dark:border-gray-700">

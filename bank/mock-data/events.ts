@@ -3,8 +3,6 @@
  * Gestion complète des événements pour le back-office
  */
 
-import type { EditorJSContent } from './news'
-
 export type EventType = 'conference' | 'workshop' | 'ceremony' | 'seminar' | 'symposium' | 'other'
 export type EventStatus = 'draft' | 'published' | 'archived'
 
@@ -25,14 +23,18 @@ export interface Event {
   type: EventType
   type_other?: string
   description?: string
-  /** Contenu riche FR (EditorJS format) */
-  content?: EditorJSContent
-  /** Contenu riche EN (EditorJS format) */
-  content_en?: EditorJSContent
-  /** Contenu riche AR (EditorJS format) */
-  content_ar?: EditorJSContent
-  /** Contenu HTML legacy (pour migration) */
+  /** Contenu HTML FR */
   content_html?: string
+  /** Contenu Markdown FR */
+  content_md?: string
+  /** Contenu HTML EN */
+  content_en_html?: string
+  /** Contenu Markdown EN */
+  content_en_md?: string
+  /** Contenu HTML AR */
+  content_ar_html?: string
+  /** Contenu Markdown AR */
+  content_ar_md?: string
   cover_image?: string
 
   // Dates
@@ -140,7 +142,7 @@ export const mockEvents: Event[] = [
     slug: 'conference-inaugurale-francophonie-afrique-2026',
     type: 'conference',
     description: 'Grande conférence réunissant des experts internationaux pour discuter des enjeux et perspectives de la Francophonie africaine.',
-    content: '<p>Cette conférence exceptionnelle réunira des experts internationaux, des décideurs politiques et des acteurs du développement pour discuter des enjeux majeurs de la Francophonie en Afrique.</p><h3>Thèmes abordés</h3><ul><li>L\'avenir de la langue française en Afrique</li><li>Les défis de l\'éducation francophone</li><li>La coopération universitaire</li></ul>',
+    content_html: '<p>Cette conférence exceptionnelle réunira des experts internationaux, des décideurs politiques et des acteurs du développement pour discuter des enjeux majeurs de la Francophonie en Afrique.</p><h3>Thèmes abordés</h3><ul><li>L\'avenir de la langue française en Afrique</li><li>Les défis de l\'éducation francophone</li><li>La coopération universitaire</li></ul>',
     cover_image: null,
     start_date: '2026-01-25T09:00:00Z',
     end_date: '2026-01-25T17:00:00Z',
@@ -176,7 +178,7 @@ export const mockEvents: Event[] = [
     slug: 'atelier-formation-leadership-2026',
     type: 'workshop',
     description: 'Atelier intensif de trois jours sur le développement du leadership pour les futurs décideurs africains.',
-    content: '<p>Cet atelier intensif permettra aux participants de développer leurs compétences en leadership et management.</p>',
+    content_html: '<p>Cet atelier intensif permettra aux participants de développer leurs compétences en leadership et management.</p>',
     cover_image: null,
     start_date: '2026-02-10T09:00:00Z',
     end_date: '2026-02-12T17:00:00Z',

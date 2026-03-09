@@ -30,31 +30,16 @@ const getLocalizedTitle = computed(() => {
   return mockFormation.title_fr
 })
 
-// Extract plain text from EditorJS JSON or return as-is
+// Extraire le texte brut d'un contenu HTML
 const extractPlainText = (content: string | null | undefined): string => {
   if (!content) return ''
-  try {
-    const parsed = JSON.parse(content)
-    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
-      return parsed.blocks
-        .filter((block: { type: string }) => block.type === 'paragraph' || block.type === 'header')
-        .map((block: { data: { text: string } }) => {
-          const text = block.data?.text || ''
-          return text.replace(/<[^>]*>/g, '')
-        })
-        .join(' ')
-        .trim()
-    }
-  } catch {
-    // Not JSON, return as-is
-  }
-  return content
+  return content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
 // Get localized description
 const getLocalizedDescription = computed(() => {
   if (isApiCall.value) {
-    return extractPlainText((props.formation as ApplicationCallPublic).description)
+    return extractPlainText((props.formation as ApplicationCallPublic).description_html)
   }
   const mockFormation = props.formation as CampusFormationRealisee
   if (locale.value === 'en' && mockFormation.description_en) {

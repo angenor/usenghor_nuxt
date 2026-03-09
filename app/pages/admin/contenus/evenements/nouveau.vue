@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { EventCreatePayload, EventType, PublicationStatus, ImageVariants } from '~/types/api'
-import type { OutputData } from '@editorjs/editorjs'
 
 const { uploadMediaVariants } = useMediaApi()
 
@@ -32,10 +31,13 @@ const {
 // Onglet actif
 const activeTab = ref<'general' | 'datetime' | 'location' | 'registration' | 'associations' | 'options'>('general')
 
-// Contenu EditorJS (séparé du formulaire pour éviter les problèmes de réactivité)
-const content = ref<OutputData | undefined>(undefined)
-const contentEn = ref<OutputData | undefined>(undefined)
-const contentAr = ref<OutputData | undefined>(undefined)
+// Contenu TOAST UI Editor (markdown + html par langue)
+const contentMd = ref('')
+const contentMdEn = ref('')
+const contentMdAr = ref('')
+const contentHtml = ref('')
+const contentHtmlEn = ref('')
+const contentHtmlAr = ref('')
 
 // État pour l'éditeur d'image de couverture
 const showCoverEditor = ref(false)
@@ -177,7 +179,12 @@ const saveForm = async () => {
       title: form.value.title,
       slug: form.value.slug,
       description: form.value.description || null,
-      content: content.value ? JSON.stringify(content.value) : null,
+      content_html: contentHtml.value || null,
+      content_md: contentMd.value || null,
+      content_en_html: contentHtmlEn.value || null,
+      content_en_md: contentMdEn.value || null,
+      content_ar_html: contentHtmlAr.value || null,
+      content_ar_md: contentMdAr.value || null,
       type: form.value.type,
       type_other: form.value.type === 'other' ? form.value.type_other : null,
       start_date: form.value.start_date ? new Date(form.value.start_date).toISOString() : '',
@@ -731,9 +738,12 @@ const tabs = [
 
     <!-- Contenu détaillé -->
     <AdminRichTextEditor
-      v-model="content"
-      v-model:model-value-en="contentEn"
-      v-model:model-value-ar="contentAr"
+      v-model="contentMd"
+      v-model:model-value-en="contentMdEn"
+      v-model:model-value-ar="contentMdAr"
+      v-model:html-value="contentHtml"
+      v-model:html-value-en="contentHtmlEn"
+      v-model:html-value-ar="contentHtmlAr"
       title="Contenu détaillé"
       description="Rédigez le contenu complet de l'événement : programme, intervenants, informations pratiques..."
       icon="fa-solid fa-file-lines"
@@ -741,7 +751,7 @@ const tabs = [
       placeholder="Décrivez en détail l'événement..."
       placeholder-en="Describe the event in detail..."
       placeholder-ar="صف الحدث بالتفصيل..."
-      :min-height="400"
+      height="400px"
     />
 
     <!-- Footer actions -->
