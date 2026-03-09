@@ -13,6 +13,8 @@ interface Props {
   language?: string
   direction?: 'ltr' | 'rtl'
   disabled?: boolean
+  mode?: 'inline' | 'modal'
+  label?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -23,6 +25,8 @@ const props = withDefaults(defineProps<Props>(), {
   language: 'fr-FR',
   direction: 'ltr',
   disabled: false,
+  mode: 'modal',
+  label: '',
 })
 
 const emit = defineEmits<{
@@ -36,7 +40,42 @@ const editorRef = ref<HTMLDivElement>()
 const editorInstance = shallowRef<Editor | null>(null)
 const isUpdating = ref(false)
 
+// Modal mode state
+const isModalOpen = ref(false)
+
+function onModalConfirm(payload: { markdown: string, html: string }) {
+  emit('update:modelValue', payload.markdown)
+  emit('update:html', payload.html)
+  isModalOpen.value = false
+}
+
+function onModalCancel() {
+  isModalOpen.value = false
+}
+
+// Aperçu du contenu pour le bouton modal
+const contentPreview = computed(() => {
+  if (!props.modelValue) return ''
+  // Strip basic markdown syntax for plain text preview
+  return props.modelValue
+    .replace(/#{1,6}\s/g, '')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/~~(.+?)~~/g, '$1')
+    .replace(/`(.+?)`/g, '$1')
+    .replace(/\[(.+?)\]\(.+?\)/g, '$1')
+    .replace(/!\[.*?\]\(.+?\)/g, '')
+    .replace(/^[-*+]\s/gm, '')
+    .replace(/^\d+\.\s/gm, '')
+    .replace(/^>\s/gm, '')
+    .replace(/\n{2,}/g, ' ')
+    .replace(/\n/g, ' ')
+    .trim()
+    .slice(0, 100)
+})
+
 onMounted(async () => {
+  if (props.mode === 'modal') return
   await nextTick()
   if (!editorRef.value) return
 
@@ -156,7 +195,46 @@ defineExpose({
 </script>
 
 <template>
-  <div ref="editorRef" class="toastui-editor-wrapper" />
+  <!-- Mode modal : bouton d'ouverture + modale plein écran -->
+  <div v-if="mode === 'modal'">
+    <button
+      type="button"
+      class="group w-full rounded-lg border-2 border-dashed border-gray-300 p-4 text-left transition-colors hover:border-brand-red-400 hover:bg-gray-50 dark:border-gray-600 dark:hover:border-brand-red-500 dark:hover:bg-gray-800"
+      @click="isModalOpen = true"
+    >
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-400 group-hover:bg-brand-red-50 group-hover:text-brand-red-500 dark:bg-gray-700 dark:group-hover:bg-brand-red-900/30">
+          <font-awesome-icon :icon="['fas', 'pen-to-square']" class="h-5 w-5" />
+        </div>
+        <div class="min-w-0 flex-1">
+          <p v-if="label" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {{ label }}
+          </p>
+          <p v-if="contentPreview" class="line-clamp-2 text-sm text-gray-500 dark:text-gray-400">
+            {{ contentPreview }}{{ modelValue && modelValue.length > 100 ? '...' : '' }}
+          </p>
+          <p v-else class="text-sm italic text-gray-400 dark:text-gray-500">
+            Aucun contenu
+          </p>
+        </div>
+        <font-awesome-icon :icon="['fas', 'expand']" class="h-4 w-4 flex-shrink-0 text-gray-400 group-hover:text-brand-red-500" />
+      </div>
+    </button>
+
+    <LazyAdminRichTextEditorModal
+      v-if="isModalOpen"
+      :initial-markdown="modelValue"
+      :label="label"
+      :direction="direction"
+      :placeholder="placeholder"
+      :language="language"
+      @confirm="onModalConfirm"
+      @cancel="onModalCancel"
+    />
+  </div>
+
+  <!-- Mode inline : éditeur direct (comportement original) -->
+  <div v-else ref="editorRef" class="toastui-editor-wrapper" />
 </template>
 
 <style>

@@ -341,6 +341,7 @@ function onBiographyHtmlUpdate(html: string) {
                 v-model="biographyMd"
                 placeholder="Quelques mots sur vous..."
                 height="250px"
+                mode="inline"
                 @update:html="onBiographyHtmlUpdate"
               />
             </div>

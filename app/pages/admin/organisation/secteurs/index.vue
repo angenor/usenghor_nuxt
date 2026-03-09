@@ -816,6 +816,7 @@ const goToServices = (sectorId: string) => {
                 v-model="newSector.description_md"
                 placeholder="Description courte du secteur..."
                 :min-height="150"
+                mode="inline"
                 @update:html="newSector.description_html = $event"
               />
             </div>
@@ -829,6 +830,7 @@ const goToServices = (sectorId: string) => {
                 v-model="newSector.mission_md"
                 placeholder="Mission et objectifs du secteur..."
                 :min-height="200"
+                mode="inline"
                 @update:html="newSector.mission_html = $event"
               />
             </div>

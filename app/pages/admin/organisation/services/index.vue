@@ -1273,6 +1273,7 @@ const handleDragEnd = () => {
                 v-model="newService.description_md"
                 placeholder="Description du service..."
                 :min-height="150"
+                mode="inline"
                 @update:html="newService.description_html = $event"
               />
             </div>
@@ -1286,6 +1287,7 @@ const handleDragEnd = () => {
                 v-model="newService.mission_md"
                 placeholder="Mission et objectifs du service..."
                 :min-height="200"
+                mode="inline"
                 @update:html="newService.mission_html = $event"
               />
             </div>
