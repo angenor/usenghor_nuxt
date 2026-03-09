@@ -1,0 +1,75 @@
+diff --git a/dist/esm/index.js b/dist/esm/index.js
+index d966ba81c2e5d17b395a3d0d1e0bca88537274ed..0fb5bcd97c5a92affbfa0da8554a33c9f035d731 100644
+--- a/dist/esm/index.js
++++ b/dist/esm/index.js
+@@ -16267,26 +16267,23 @@ function createTableFragment(tableHead, tableBody) {
+     }
+     return Fragment.from(fragment);
+ }
+-var CellSelection = /** @class */ (function (_super) {
+-    __extends$1(CellSelection, _super);
+-    function CellSelection(startCellPos, endCellPos) {
++var CellSelection = /** @class - patched to ES6 for prosemirror-state>=1.4.0 compat */ class extends Selection {
++    constructor(startCellPos, endCellPos) {
+         if (endCellPos === void 0) { endCellPos = startCellPos; }
+-        var _this = this;
+         var doc = startCellPos.node(0);
+         var map = TableOffsetMap.create(startCellPos);
+         var selectionInfo = map.getRectOffsets(startCellPos, endCellPos);
+         var ranges = getSelectionRanges(doc, map, selectionInfo);
+-        _this = _super.call(this, ranges[0].$from, ranges[0].$to, ranges) || this;
+-        _this.startCell = startCellPos;
+-        _this.endCell = endCellPos;
+-        _this.offsetMap = map;
+-        _this.isCellSelection = true;
++        super(ranges[0].$from, ranges[0].$to, ranges);
++        this.startCell = startCellPos;
++        this.endCell = endCellPos;
++        this.offsetMap = map;
++        this.isCellSelection = true;
+         // This property is the api of the 'Selection' in prosemirror,
+         // and is used to disable the text selection.
+-        _this.visible = false;
+-        return _this;
++        this.visible = false;
+     }
+-    CellSelection.prototype.map = function (doc, mapping) {
++    map(doc, mapping) {
+         var startPos = this.startCell.pos;
+         var endPos = this.endCell.pos;
+         var startCell = doc.resolve(mapping.map(startPos));
+@@ -16303,13 +16300,13 @@ var CellSelection = /** @class */ (function (_super) {
+             return TextSelection.create(doc, from);
+         }
+         return new CellSelection(startCell, endCell);
+-    };
+-    CellSelection.prototype.eq = function (cell) {
++    }
++    eq(cell) {
+         return (cell instanceof CellSelection &&
+             cell.startCell.pos === this.startCell.pos &&
+             cell.endCell.pos === this.endCell.pos);
+-    };
+-    CellSelection.prototype.content = function () {
++    }
++    content() {
+         var table = this.startCell.node(-2);
+         var tableOffset = this.startCell.start(-2);
+         var row = table.child(1).firstChild;
+@@ -16341,12 +16338,11 @@ var CellSelection = /** @class */ (function (_super) {
+             targetNode.content = targetNode.content.append(Fragment.from(copiedRow));
+         }
+         return new Slice(createTableFragment(tableHead, tableBody), 1, 1);
+-    };
+-    CellSelection.prototype.toJSON = function () {
++    }
++    toJSON() {
+         return JSON.stringify(this);
+-    };
+-    return CellSelection;
+-}(Selection));
++    }
++};
+ 
+ function createTableHeadRow(columnCount, schema, data) {
+     var _a = schema.nodes, tableRow = _a.tableRow, tableHeadCell = _a.tableHeadCell, paragraph = _a.paragraph;

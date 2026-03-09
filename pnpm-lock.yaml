@@ -4,6 +4,14 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  prosemirror-state: ^1.4.4
+
+patchedDependencies:
+  '@toast-ui/editor@3.2.2':
+    hash: ba31d5a2370644cfeaeb7f4195d734ccf05b72875be7f51b5a2f6d3a44a89f0d
+    path: patches/@toast-ui__editor@3.2.2.patch
+
 importers:
 
   .:
@@ -55,7 +63,7 @@ importers:
         version: 2.0.0
       '@toast-ui/editor':
         specifier: ^3.2.2
-        version: 3.2.2
+        version: 3.2.2(patch_hash=ba31d5a2370644cfeaeb7f4195d734ccf05b72875be7f51b5a2f6d3a44a89f0d)
       '@toast-ui/editor-plugin-table-merged-cell':
         specifier: ^3.1.0
         version: 3.1.0
@@ -9613,7 +9621,7 @@ snapshots:
 
   '@toast-ui/editor-plugin-table-merged-cell@3.1.0': {}
 
-  '@toast-ui/editor@3.2.2':
+  '@toast-ui/editor@3.2.2(patch_hash=ba31d5a2370644cfeaeb7f4195d734ccf05b72875be7f51b5a2f6d3a44a89f0d)':
     dependencies:
       dompurify: 2.5.9
       prosemirror-commands: 1.7.1
