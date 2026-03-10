@@ -110,10 +110,9 @@ async function loadSemesters(programId: string) {
 }
 
 // === COMPUTED ===
-// Liste des programmes (masters et doctorats principalement)
+// Liste de tous les programmes
 const availablePrograms = computed(() => {
   return programs.value
-    .filter(p => p.type === 'master' || p.type === 'doctorate')
     .sort((a, b) => a.title.localeCompare(b.title))
 })
 
