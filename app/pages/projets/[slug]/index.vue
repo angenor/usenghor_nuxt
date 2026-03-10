@@ -143,8 +143,28 @@ const formatDeadline = (dateStr: string | null) => {
   const date = new Date(dateStr)
   return date.toLocaleDateString(
     locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
-    { day: 'numeric', month: 'short' },
+    { day: 'numeric', month: 'long', year: 'numeric' },
   )
+}
+
+// Helpers pour l'affichage des appels (style /actualites/appels)
+const extractPlainText = (content: string | null | undefined): string => {
+  if (!content) return ''
+  return content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+}
+
+const getCallImage = (call: ApplicationCallPublic): string | null => {
+  if (call.cover_image_external_id) {
+    return `/api/public/media/${call.cover_image_external_id}/download?variant=medium`
+  }
+  return null
+}
+
+const daysUntilDeadline = (deadlineStr: string | null) => {
+  if (!deadlineStr) return 0
+  const deadline = new Date(deadlineStr)
+  const diffTime = deadline.getTime() - Date.now()
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 }
 
 // Period string
@@ -316,35 +336,111 @@ const breadcrumb = computed(() => [
               </h2>
 
               <!-- Liste des appels -->
-              <div v-if="projectCalls.length > 0" class="space-y-4">
+              <div v-if="projectCalls.length > 0" class="space-y-6">
                 <NuxtLink
                   v-for="call in projectCalls"
                   :key="call.id"
                   :to="localePath(`/actualites/appels/${call.slug}`)"
-                  class="block rounded-xl border border-gray-200 dark:border-gray-700 p-5 transition-shadow hover:shadow-md"
+                  class="group rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border block"
+                  :class="call.status === 'closed'
+                    ? 'bg-gray-50 dark:bg-gray-800/50 border-gray-300 dark:border-gray-600 opacity-80 hover:opacity-100'
+                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'"
                 >
-                  <div class="flex items-start justify-between gap-4">
-                    <div class="flex-1">
-                      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                        {{ call.title }}
-                      </h3>
-                      <div class="mt-2 flex flex-wrap items-center gap-2">
-                        <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                  <div class="flex flex-col md:flex-row">
+                    <!-- Image -->
+                    <div class="md:w-1/3 overflow-hidden relative">
+                      <img
+                        v-if="getCallImage(call)"
+                        :src="getCallImage(call)!"
+                        :alt="call.title"
+                        class="w-full h-48 md:h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        :class="call.status === 'closed' ? 'grayscale group-hover:grayscale-0' : ''"
+                        loading="lazy"
+                      >
+                      <div v-else class="w-full h-48 md:h-full min-h-[140px] bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                        <font-awesome-icon icon="fa-solid fa-bullhorn" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                      </div>
+                      <!-- Closed overlay -->
+                      <div
+                        v-if="call.status === 'closed'"
+                        class="absolute inset-0 bg-gray-900/20 dark:bg-gray-900/40 flex items-center justify-center"
+                      >
+                        <span class="px-3 py-1.5 bg-gray-700 dark:bg-gray-600 text-white text-sm font-semibold rounded-full">
+                          {{ callStatusLabels.closed }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="md:w-2/3 p-6">
+                      <div class="flex flex-wrap items-center gap-2 mb-3">
+                        <span
+                          class="inline-block px-2 py-0.5 text-xs font-medium rounded"
+                          :class="call.status === 'closed'
+                            ? 'text-gray-600 dark:text-gray-400 bg-gray-200 dark:bg-gray-700'
+                            : 'text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30'"
+                        >
                           {{ callTypeLabels[call.type] }}
                         </span>
                         <span
-                          class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full"
-                          :class="callStatusColors[call.status]"
+                          v-if="call.status === 'ongoing' && call.deadline && daysUntilDeadline(call.deadline) <= 7 && daysUntilDeadline(call.deadline) > 0"
+                          class="inline-block px-2 py-0.5 text-xs font-medium text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded animate-pulse"
                         >
-                          {{ callStatusLabels[call.status] }}
+                          {{ daysUntilDeadline(call.deadline) }} jours restants
+                        </span>
+                        <span
+                          v-else-if="call.status === 'ongoing'"
+                          class="inline-block px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded"
+                        >
+                          {{ callStatusLabels.ongoing }}
+                        </span>
+                        <span
+                          v-else-if="call.status === 'upcoming'"
+                          class="inline-block px-2 py-0.5 text-xs font-medium text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30 rounded"
+                        >
+                          {{ callStatusLabels.upcoming }}
                         </span>
                       </div>
-                      <p v-if="call.deadline" class="mt-2 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-                        <font-awesome-icon icon="fa-solid fa-calendar" class="w-3.5 h-3.5" />
-                        {{ t('projets.appels.deadline') }}: {{ formatDeadline(call.deadline) }}
+
+                      <h3
+                        class="text-xl font-bold leading-tight transition-colors"
+                        :class="call.status === 'closed'
+                          ? 'text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200'
+                          : 'text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400'"
+                      >
+                        {{ call.title }}
+                      </h3>
+
+                      <p
+                        v-if="call.description_html"
+                        class="mt-3 line-clamp-3"
+                        :class="call.status === 'closed' ? 'text-gray-500 dark:text-gray-500' : 'text-gray-600 dark:text-gray-400'"
+                      >
+                        {{ extractPlainText(call.description_html) }}
                       </p>
+
+                      <div class="flex items-center justify-between mt-6 pt-4 border-t" :class="call.status === 'closed' ? 'border-gray-300 dark:border-gray-600' : 'border-gray-200 dark:border-gray-700'">
+                        <div v-if="call.deadline" class="text-sm">
+                          <span class="text-gray-500 dark:text-gray-400">{{ t('projets.appels.deadline') }} :</span>
+                          <span
+                            class="ml-1 font-semibold"
+                            :class="call.status === 'closed' ? 'text-gray-400 dark:text-gray-500 line-through' : 'text-red-600 dark:text-red-400'"
+                          >
+                            {{ formatDeadline(call.deadline) }}
+                          </span>
+                        </div>
+
+                        <span
+                          class="inline-flex items-center gap-2 px-4 py-2 font-medium rounded-lg"
+                          :class="call.status === 'closed'
+                            ? 'bg-gray-500 text-white'
+                            : 'bg-brand-blue-600 text-white'"
+                        >
+                          {{ call.status === 'closed' ? 'Voir l\'archive' : 'En savoir plus' }}
+                          <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4" />
+                        </span>
+                      </div>
                     </div>
-                    <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 text-gray-400 mt-1.5 flex-shrink-0" />
                   </div>
                 </NuxtLink>
               </div>
