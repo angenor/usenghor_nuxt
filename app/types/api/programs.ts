@@ -101,7 +101,8 @@ export interface ProgramRead {
   teaching_methods_md: string | null
   objectives: string[] | null
   target_audience: string[] | null
-  format: string | null
+  format_html: string | null
+  format_md: string | null
   evaluation_methods_html: string | null
   evaluation_methods_md: string | null
   cover_image_external_id: string | null
@@ -143,7 +144,8 @@ export interface ProgramCreatePayload {
   teaching_methods_md?: string | null
   objectives?: string[] | null
   target_audience?: string[] | null
-  format?: string | null
+  format_html?: string | null
+  format_md?: string | null
   evaluation_methods_html?: string | null
   evaluation_methods_md?: string | null
   cover_image_external_id?: string | null
@@ -172,7 +174,8 @@ export interface ProgramUpdatePayload {
   teaching_methods_md?: string | null
   objectives?: string[] | null
   target_audience?: string[] | null
-  format?: string | null
+  format_html?: string | null
+  format_md?: string | null
   evaluation_methods_html?: string | null
   evaluation_methods_md?: string | null
   cover_image_external_id?: string | null

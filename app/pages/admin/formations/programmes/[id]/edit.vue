@@ -240,7 +240,7 @@ async function loadProgram() {
       teaching_methods: program.value.teaching_methods || '',
       objectives: program.value.objectives || [],
       target_audience: program.value.target_audience || [],
-      format: program.value.format || '',
+      format: program.value.format_md || '',
       cover_image_external_id: program.value.cover_image_external_id || null,
       cover_image: program.value.cover_image_external_id
         ? (getMediaUrl(program.value.cover_image_external_id) || '')
@@ -649,7 +649,8 @@ const submitForm = async () => {
       teaching_methods: form.value.teaching_methods || null,
       objectives: form.value.objectives.length > 0 ? form.value.objectives : null,
       target_audience: form.value.target_audience.length > 0 ? form.value.target_audience : null,
-      format: form.value.format || null,
+      format_md: form.value.format || null,
+      format_html: form.value.format || null,
       evaluation_methods: evaluationMethods.value.length > 0 ? JSON.stringify(evaluationMethods.value) : null,
       cover_image_external_id: form.value.cover_image_external_id,
       campus_external_id: form.value.campus_id || null,

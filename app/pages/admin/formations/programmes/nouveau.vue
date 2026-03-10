@@ -242,7 +242,8 @@ async function submitForm() {
       field_id: form.value.type === 'certificate' ? form.value.field_id : null,
       objectives: form.value.objectives.length > 0 ? form.value.objectives : null,
       target_audience: form.value.target_audience.length > 0 ? form.value.target_audience : null,
-      format: form.value.format || null,
+      format_md: form.value.format || null,
+      format_html: form.value.format || null,
       evaluation_methods_html: evaluationMethods.value.length > 0 ? `<ul>${evaluationMethods.value.map(m => `<li>${m}</li>`).join('')}</ul>` : null,
       evaluation_methods_md: evaluationMethods.value.length > 0 ? evaluationMethods.value.map(m => `- ${m}`).join('\n') : null,
     }

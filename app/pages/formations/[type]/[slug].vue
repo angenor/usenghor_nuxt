@@ -160,8 +160,8 @@ const parsedEvaluationMethods = computed<string[]>(() => {
 
 // Label du format
 const formatLabel = computed(() => {
-  if (!program.value?.format) return null
-  return t(`formations.detail.formatLabels.${program.value.format}`)
+  if (!program.value?.format_md) return null
+  return t(`formations.detail.formatLabels.${program.value.format_md}`)
 })
 
 const getLocalizedDuration = computed(() => {

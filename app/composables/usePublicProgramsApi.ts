@@ -24,7 +24,6 @@ export interface ProgramPublic {
   teaching_methods_md: string | null
   objectives: string | null
   target_audience: string | null
-  format: string | null
   format_html: string | null
   format_md: string | null
   evaluation_methods: string | null
