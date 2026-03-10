@@ -20,7 +20,7 @@ const {
 
 const { getUsersForSelect } = useUsersApi()
 const { uploadMediaVariants, getMediaUrl } = useMediaApi()
-const { sectors } = useReferenceData()
+const { getServices, services } = useReferenceData()
 
 // Données de référence
 const categories = ref<ProjectCategoryRead[]>([])
@@ -71,6 +71,7 @@ onMounted(async () => {
       getAllCategories(),
       getProjectById(projectId.value),
       getUsersForSelect(),
+      getServices(),
     ])
 
     usersForSelect.value = users
@@ -524,18 +525,18 @@ const tabs = [
           </div>
         </div>
 
-        <!-- Département -->
+        <!-- Service porteur -->
         <div>
           <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Département porteur
+            Service porteur
           </label>
           <select
             v-model="form.sector_external_id"
             class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           >
-            <option :value="null">Sélectionnez un secteur</option>
-            <option v-for="sec in sectors" :key="sec.id" :value="sec.id">
-              {{ sec.name }}
+            <option :value="null">Sélectionnez un service</option>
+            <option v-for="svc in services" :key="svc.id" :value="svc.id">
+              {{ svc.name }}
             </option>
           </select>
         </div>
