@@ -501,7 +501,6 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
               <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 {{ t('organizationDetail.presentation.title') }}
               </h2>
-              <p class="text-gray-600 dark:text-gray-400">{{ t('organizationDetail.presentation.subtitle') }}</p>
             </div>
 
             <!-- Description Card -->
