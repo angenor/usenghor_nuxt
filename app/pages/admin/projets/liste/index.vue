@@ -21,7 +21,7 @@ const {
   formatBudget,
 } = useProjectsApi()
 
-const { sectors } = useReferenceData()
+const { getServices, services } = useReferenceData()
 
 // === ÉTAT ===
 const isLoading = ref(true)
@@ -104,6 +104,7 @@ onMounted(async () => {
     loadProjects(),
     loadCategories(),
     loadStats(),
+    getServices(),
   ])
 })
 
@@ -225,10 +226,10 @@ const getExtraCategoriesCount = (project: ProjectDisplay) => {
   return project.categories.length - 2
 }
 
-const getSectorName = (sectorId: string | null) => {
-  if (!sectorId) return '-'
-  const sec = sectors.value?.find((d: any) => d.id === sectorId)
-  return sec?.name || '-'
+const getServiceName = (serviceId: string | null) => {
+  if (!serviceId) return '-'
+  const svc = services.value?.find((d: any) => d.id === serviceId)
+  return svc?.name || '-'
 }
 </script>
 
@@ -329,14 +330,14 @@ const getSectorName = (sectorId: string | null) => {
           </option>
         </select>
 
-        <!-- Secteur -->
+        <!-- Service -->
         <select
           v-model="filterSector"
           class="rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
         >
-          <option value="all">Tous secteurs</option>
-          <option v-for="sec in sectors" :key="sec.id" :value="sec.id">
-            {{ sec.name }}
+          <option value="all">Tous services</option>
+          <option v-for="svc in services" :key="svc.id" :value="svc.id">
+            {{ svc.name }}
           </option>
         </select>
 
@@ -419,7 +420,7 @@ const getSectorName = (sectorId: string | null) => {
                 Catégories
               </th>
               <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Département
+                Service
               </th>
               <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Statut
@@ -495,7 +496,7 @@ const getSectorName = (sectorId: string | null) => {
               </td>
               <td class="px-4 py-3">
                 <span class="text-sm text-gray-600 dark:text-gray-300">
-                  {{ getSectorName(project.sector_external_id) }}
+                  {{ getServiceName(project.sector_external_id) }}
                 </span>
               </td>
               <td class="px-4 py-3">

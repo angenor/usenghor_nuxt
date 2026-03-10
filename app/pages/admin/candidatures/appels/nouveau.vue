@@ -122,8 +122,6 @@ const form = ref({
   deadline: '',
   program_start_date: '',
   program_end_date: '',
-  target_audience_md: '',
-  target_audience_html: '',
   registration_fee: undefined as number | undefined,
   currency: 'EUR',
   use_internal_form: true,
@@ -334,8 +332,6 @@ const saveForm = async () => {
       deadline: form.value.deadline || null,
       program_start_date: form.value.program_start_date || null,
       program_end_date: form.value.program_end_date || null,
-      target_audience_html: form.value.target_audience_html || null,
-      target_audience_md: form.value.target_audience_md || null,
       registration_fee: form.value.registration_fee || null,
       currency: form.value.currency,
       use_internal_form: form.value.use_internal_form,
@@ -582,19 +578,6 @@ const tabs = [
               </option>
             </select>
             <p class="mt-1 text-xs text-gray-500">Cette formation sera présélectionnée dans le formulaire de candidature</p>
-          </div>
-
-          <div>
-            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Public cible
-            </label>
-            <AdminRichTextEditor
-              v-model="form.target_audience_md"
-              v-model:html-value="form.target_audience_html"
-              :show-card="false"
-              placeholder="Ex: Cadres africains titulaires d'un Bac+4"
-              height="150px"
-            />
           </div>
 
           <div>

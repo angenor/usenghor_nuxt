@@ -557,13 +557,17 @@ const tabs = [
                 Associations disponibles après création
               </h3>
               <p class="mt-1 text-sm text-amber-700 dark:text-amber-300">
-                Vous pourrez associer des <strong>partenaires</strong> et des <strong>albums de la médiathèque</strong>
+                Vous pourrez associer des <strong>partenaires</strong>, des <strong>pays concernés</strong> et des <strong>albums de la médiathèque</strong>
                 à ce projet après l'avoir créé. Enregistrez d'abord le projet, puis revenez sur cette page pour gérer les associations.
               </p>
               <div class="mt-4 flex flex-wrap gap-4">
                 <div class="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
                   <font-awesome-icon :icon="['fas', 'handshake']" class="h-4 w-4" />
                   <span>Partenaires</span>
+                </div>
+                <div class="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
+                  <font-awesome-icon :icon="['fas', 'globe-africa']" class="h-4 w-4" />
+                  <span>Pays concernés</span>
                 </div>
                 <div class="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
                   <font-awesome-icon :icon="['fas', 'images']" class="h-4 w-4" />

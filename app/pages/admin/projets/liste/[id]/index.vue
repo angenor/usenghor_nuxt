@@ -22,7 +22,7 @@ const {
 } = useProjectsApi()
 
 const { getUserById, getFullName } = useUsersApi()
-const { sectors } = useReferenceData()
+const { getServices, services } = useReferenceData()
 
 // Données du manager
 const managerName = ref<string | null>(null)
@@ -38,7 +38,11 @@ const projectId = computed(() => route.params.id as string)
 
 onMounted(async () => {
   try {
-    project.value = await getProjectById(projectId.value)
+    const [projectData] = await Promise.all([
+      getProjectById(projectId.value),
+      getServices(),
+    ])
+    project.value = projectData
 
     // Charger le nom du manager si défini
     if (project.value?.manager_external_id) {
@@ -65,10 +69,10 @@ const goBack = () => router.push('/admin/projets/liste')
 const goToEdit = () => router.push(`/admin/projets/liste/${projectId.value}/edit`)
 
 // Helpers
-const getSectorName = (sectorId: string | null) => {
-  if (!sectorId) return null
-  const sec = sectors.value?.find((d: any) => d.id === sectorId)
-  return sec?.name || null
+const getServiceName = (serviceId: string | null) => {
+  if (!serviceId) return null
+  const svc = services.value?.find((d: any) => d.id === serviceId)
+  return svc?.name || null
 }
 
 const formatDateTime = (date: string | undefined) => {
@@ -270,10 +274,10 @@ const togglePublish = async () => {
                 </span>
               </dd>
             </div>
-            <div v-if="getSectorName(project.sector_external_id)">
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Secteur</dt>
+            <div v-if="getServiceName(project.sector_external_id)">
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Service porteur</dt>
               <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                {{ getSectorName(project.sector_external_id) }}
+                {{ getServiceName(project.sector_external_id) }}
               </dd>
             </div>
             <div v-if="managerName">

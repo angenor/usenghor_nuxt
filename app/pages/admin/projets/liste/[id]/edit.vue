@@ -624,11 +624,14 @@ const tabs = [
       <!-- Onglet Associations -->
       <div v-show="activeTab === 'associations'" class="space-y-6">
         <p class="text-sm text-gray-500 dark:text-gray-400">
-          Gérez les partenaires et les albums associés à ce projet.
+          Gérez les partenaires, pays et albums associés à ce projet.
         </p>
 
         <!-- Partenaires -->
         <AdminProjetsProjectPartnersSection :project-id="projectId" />
+
+        <!-- Pays concernés -->
+        <AdminProjetsProjectCountriesSection :project-id="projectId" />
 
         <!-- Albums / Médiathèque -->
         <AdminProjetsProjectMediaSection :project-id="projectId" />
