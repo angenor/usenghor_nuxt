@@ -24,6 +24,7 @@ const {
   createCourse,
   updateCourse,
   deleteCourse,
+  reorderCourses,
   getSemesterDisplayName,
   getTotalHoursForCourse,
   calculateSemesterTotals,
@@ -353,6 +354,31 @@ const deleteCourseAction = async () => {
   }
 }
 
+// === REORDER COURSES ===
+const isReordering = ref(false)
+
+const moveCourse = async (semester: ProgramSemesterWithCourses, courseIndex: number, direction: 'up' | 'down') => {
+  if (!semester.courses || !selectedProgramId.value) return
+  const targetIndex = direction === 'up' ? courseIndex - 1 : courseIndex + 1
+  if (targetIndex < 0 || targetIndex >= semester.courses.length) return
+
+  // Swap localement
+  const courses = [...semester.courses];
+  [courses[courseIndex], courses[targetIndex]] = [courses[targetIndex]!, courses[courseIndex]!]
+  semester.courses = courses
+
+  // Persister via API
+  isReordering.value = true
+  try {
+    await reorderCourses(semester.id, courses.map(c => c.id))
+  } catch (e) {
+    console.error('Erreur réordonnancement:', e)
+    await loadSemesters(selectedProgramId.value!)
+  } finally {
+    isReordering.value = false
+  }
+}
+
 // === HELPERS ===
 const getFormationTypeColor = (type: ProgramRead['type']) => {
   return programTypeColors[type] || programTypeColors.master
@@ -618,7 +644,7 @@ onMounted(loadPrograms)
                         </thead>
                         <tbody>
                           <tr
-                            v-for="course in semester.courses"
+                            v-for="(course, index) in semester.courses"
                             :key="course.id"
                             class="border-b border-gray-100 last:border-0 dark:border-gray-700/50"
                           >
@@ -651,6 +677,22 @@ onMounted(loadPrograms)
                             </td>
                             <td class="py-3 pl-4 text-right">
                               <div class="flex justify-end gap-1">
+                                <button
+                                  class="rounded p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                                  title="Monter"
+                                  :disabled="index === 0 || isReordering"
+                                  @click="moveCourse(semester, index, 'up')"
+                                >
+                                  <font-awesome-icon icon="fa-solid fa-arrow-up" class="w-3 h-3" />
+                                </button>
+                                <button
+                                  class="rounded p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed"
+                                  title="Descendre"
+                                  :disabled="index === semester.courses.length - 1 || isReordering"
+                                  @click="moveCourse(semester, index, 'down')"
+                                >
+                                  <font-awesome-icon icon="fa-solid fa-arrow-down" class="w-3 h-3" />
+                                </button>
                                 <button
                                   class="rounded p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-600 dark:hover:text-blue-400"
                                   title="Modifier"

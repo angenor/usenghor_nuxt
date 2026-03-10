@@ -84,6 +84,13 @@ export function useSemestersApi() {
     })
   }
 
+  async function reorderCourses(semesterId: string, courseIds: string[]): Promise<ProgramCourseRead[]> {
+    return apiFetch<ProgramCourseRead[]>(`/api/admin/program-semesters/${semesterId}/courses/reorder`, {
+      method: 'PUT',
+      body: { course_ids: courseIds },
+    })
+  }
+
   // =========================================================================
   // Helpers
   // =========================================================================
@@ -128,6 +135,7 @@ export function useSemestersApi() {
     createCourse,
     updateCourse,
     deleteCourse,
+    reorderCourses,
 
     // Helpers
     getSemesterDisplayName,
