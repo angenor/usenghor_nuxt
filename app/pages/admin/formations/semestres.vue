@@ -757,6 +757,7 @@ onMounted(loadPrograms)
                   v-model.number="newSemester.credits"
                   type="number"
                   min="0"
+                  step="0.5"
                   class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -837,6 +838,7 @@ onMounted(loadPrograms)
                   v-model.number="editingSemester.credits"
                   type="number"
                   min="0"
+                  step="0.5"
                   class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -964,6 +966,7 @@ onMounted(loadPrograms)
                   v-model.number="newCourse.credits"
                   type="number"
                   min="0"
+                  step="0.5"
                   class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -1103,6 +1106,7 @@ onMounted(loadPrograms)
                   v-model.number="editingCourse.credits"
                   type="number"
                   min="0"
+                  step="0.5"
                   class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
               </div>

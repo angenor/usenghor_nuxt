@@ -21,6 +21,7 @@ const {
 
 const { listCampuses } = useCampusApi()
 const { listPrograms, programTypeLabels } = useProgramsApi()
+const { listProjects } = useProjectsApi()
 const { getCountriesForSelect } = useCountriesApi()
 
 // Charger les campus pour le sélecteur
@@ -41,6 +42,15 @@ interface ProgramOption {
 }
 const programOptions = ref<ProgramOption[]>([])
 const loadingPrograms = ref(false)
+
+// Charger les projets pour le sélecteur
+interface ProjectOption {
+  id: string
+  title: string
+  slug: string
+}
+const projectOptions = ref<ProjectOption[]>([])
+const loadingProjects = ref(false)
 
 // Charger les pays pour le sélecteur
 interface CountryOption {
@@ -83,6 +93,21 @@ onMounted(async () => {
     loadingPrograms.value = false
   }
 
+  // Charger les projets
+  loadingProjects.value = true
+  try {
+    const response = await listProjects({ page: 1, limit: 100 })
+    projectOptions.value = response.items.map(p => ({
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+    }))
+  } catch {
+    console.error('Erreur lors du chargement des projets')
+  } finally {
+    loadingProjects.value = false
+  }
+
   // Charger les pays
   loadingCountries.value = true
   try {
@@ -116,6 +141,7 @@ const form = ref({
   status: 'upcoming' as const,
   campus_external_id: '' as string,
   program_external_id: '' as string,
+  project_external_id: '' as string,
   country_external_id: '' as string,
   location_address: '',
   opening_date: '',
@@ -325,6 +351,7 @@ const saveForm = async () => {
       status: form.value.status,
       campus_external_id: form.value.campus_external_id || null,
       program_external_id: form.value.program_external_id || null,
+      project_external_id: form.value.project_external_id || null,
       country_external_id: form.value.country_external_id || null,
       location_address: form.value.location_address || null,
       cover_image_external_id: form.value.cover_image_external_id,
@@ -578,6 +605,23 @@ const tabs = [
               </option>
             </select>
             <p class="mt-1 text-xs text-gray-500">Cette formation sera présélectionnée dans le formulaire de candidature</p>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Projet associé
+            </label>
+            <select
+              v-model="form.project_external_id"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              :disabled="loadingProjects"
+            >
+              <option value="">Aucun projet lié</option>
+              <option v-for="project in projectOptions" :key="project.id" :value="project.id">
+                {{ project.title }}
+              </option>
+            </select>
+            <p class="mt-1 text-xs text-gray-500">Associer cet appel à un projet existant</p>
           </div>
 
           <div>

@@ -112,6 +112,13 @@ export function usePublicCallsApi() {
   }
 
   /**
+   * Liste les appels à candidature publiés associés à un projet
+   */
+  async function listCallsByProject(projectId: string): Promise<ApplicationCallPublic[]> {
+    return publicFetch<ApplicationCallPublic[]>(`/api/public/application-calls/by-project/${projectId}`)
+  }
+
+  /**
    * Récupère les actualités associées à un appel
    */
   async function getCallNews(slug: string): Promise<unknown[]> {
@@ -130,6 +137,7 @@ export function usePublicCallsApi() {
     listOngoingCalls,
     listUpcomingCalls,
     listCallsByType,
+    listCallsByProject,
     getCallBySlug,
     getCallNews,
     getCallAlbums,

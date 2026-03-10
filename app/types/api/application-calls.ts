@@ -64,6 +64,7 @@ export interface ApplicationCallRead {
   description_md: string | null
   cover_image_external_id: string | null
   program_external_id: string | null
+  project_external_id: string | null
   campus_external_id: string | null
   country_external_id: string | null
   created_by_external_id: string | null
@@ -104,6 +105,7 @@ export interface ApplicationCallPublic {
   description_md: string | null
   cover_image_external_id: string | null
   program_external_id: string | null
+  project_external_id: string | null
   campus_external_id: string | null
   country_external_id: string | null
   location_address: string | null
@@ -139,6 +141,7 @@ export interface ApplicationCallCreatePayload {
   description_md?: string | null
   cover_image_external_id?: string | null
   program_external_id?: string | null
+  project_external_id?: string | null
   campus_external_id?: string | null
   country_external_id?: string | null
   location_address?: string | null
@@ -164,6 +167,7 @@ export interface ApplicationCallUpdatePayload {
   description_md?: string | null
   cover_image_external_id?: string | null
   program_external_id?: string | null
+  project_external_id?: string | null
   campus_external_id?: string | null
   country_external_id?: string | null
   location_address?: string | null

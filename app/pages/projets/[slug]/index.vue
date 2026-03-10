@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProjectCallRead } from '~/types/api'
+import type { ApplicationCallPublic } from '~/types/api'
 import type { ProjectPublicDisplay } from '~/composables/usePublicProjectsApi'
 
 const route = useRoute()
@@ -9,8 +9,8 @@ const {
   getProjectBySlug,
   formatDate,
   formatBudget,
-  projectCallStatusLabels,
 } = usePublicProjectsApi()
+const { listCallsByProject, callTypeLabels, callStatusLabels, callStatusColors } = usePublicCallsApi()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
 // Helper pour obtenir l'URL de l'image de couverture selon la variante souhaitée
@@ -60,6 +60,15 @@ async function loadProject() {
       })
     }
     project.value = data
+
+    // Charger les appels à candidature associés
+    if (data.id) {
+      try {
+        projectCalls.value = await listCallsByProject(data.id)
+      } catch {
+        console.error('Erreur lors du chargement des appels du projet')
+      }
+    }
   }
   catch (err: unknown) {
     const fetchError = err as { statusCode?: number }
@@ -121,12 +130,8 @@ const firstCategoryName = computed(() => {
   return project.value.categories[0]?.name || ''
 })
 
-// Calls for this project (ongoing + upcoming)
-const projectCalls = computed(() => {
-  // Note: Le backend devrait retourner les appels avec le projet via get_public_project_by_slug
-  // Pour l'instant, on simule une liste vide car le type ProjectReadWithRelations ne contient pas les calls
-  return [] as ProjectCallRead[]
-})
+// Appels à candidature associés à ce projet
+const projectCalls = ref<ApplicationCallPublic[]>([])
 
 const openCalls = computed(() =>
   projectCalls.value.filter(c => c.status === 'ongoing' || c.status === 'upcoming'),
@@ -310,8 +315,42 @@ const breadcrumb = computed(() => [
                 {{ t('projets.appels.title') }}
               </h2>
 
+              <!-- Liste des appels -->
+              <div v-if="projectCalls.length > 0" class="space-y-4">
+                <NuxtLink
+                  v-for="call in projectCalls"
+                  :key="call.id"
+                  :to="localePath(`/actualites/appels/${call.slug}`)"
+                  class="block rounded-xl border border-gray-200 dark:border-gray-700 p-5 transition-shadow hover:shadow-md"
+                >
+                  <div class="flex items-start justify-between gap-4">
+                    <div class="flex-1">
+                      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        {{ call.title }}
+                      </h3>
+                      <div class="mt-2 flex flex-wrap items-center gap-2">
+                        <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                          {{ callTypeLabels[call.type] }}
+                        </span>
+                        <span
+                          class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full"
+                          :class="callStatusColors[call.status]"
+                        >
+                          {{ callStatusLabels[call.status] }}
+                        </span>
+                      </div>
+                      <p v-if="call.deadline" class="mt-2 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                        <font-awesome-icon icon="fa-solid fa-calendar" class="w-3.5 h-3.5" />
+                        {{ t('projets.appels.deadline') }}: {{ formatDeadline(call.deadline) }}
+                      </p>
+                    </div>
+                    <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 text-gray-400 mt-1.5 flex-shrink-0" />
+                  </div>
+                </NuxtLink>
+              </div>
+
               <!-- Empty state -->
-              <div class="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-xl">
+              <div v-else class="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-xl">
                 <font-awesome-icon icon="fa-solid fa-inbox" class="w-12 h-12 text-gray-400 mb-4" />
                 <p class="text-gray-600 dark:text-gray-400">{{ t('projets.appels.noAppels') }}</p>
               </div>
@@ -442,8 +481,11 @@ const breadcrumb = computed(() => [
                       <h4 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">
                         {{ call.title }}
                       </h4>
-                      <span class="flex-shrink-0 inline-flex items-center px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded-full">
-                        {{ projectCallStatusLabels[call.status] }}
+                      <span
+                        class="flex-shrink-0 inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full"
+                        :class="callStatusColors[call.status]"
+                      >
+                        {{ callStatusLabels[call.status] }}
                       </span>
                     </div>
                     <p v-if="call.deadline" class="mt-1 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
