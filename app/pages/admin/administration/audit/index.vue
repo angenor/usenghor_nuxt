@@ -551,6 +551,7 @@ onMounted(() => {
       <div
         v-if="showDetailModal && selectedLog"
         class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4"
+        data-lenis-prevent
         @click.self="showDetailModal = false"
       >
         <div class="w-full max-w-2xl rounded-lg bg-white shadow-xl dark:bg-gray-800">
@@ -582,7 +583,7 @@ onMounted(() => {
           </div>
 
           <!-- Body -->
-          <div class="max-h-[60vh] overflow-y-auto p-4">
+          <div class="max-h-[60vh] overflow-y-auto p-4" data-lenis-prevent>
             <!-- Info Grid -->
             <div class="mb-6 grid gap-4 sm:grid-cols-2">
               <div>
