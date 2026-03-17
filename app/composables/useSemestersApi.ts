@@ -97,7 +97,7 @@ export function useSemestersApi() {
 
   function getSemesterDisplayName(semester: ProgramSemesterRead): string {
     if (semester.title) {
-      return `Semestre ${semester.number} - ${semester.title}`
+      return semester.title
     }
     return `Semestre ${semester.number}`
   }

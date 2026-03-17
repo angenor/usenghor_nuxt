@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { VueDraggable } from 'vue-draggable-plus'
 import type {
   ProgramRead,
   ProgramSemesterWithCourses,
@@ -68,7 +69,7 @@ const newCourse = ref({
   code: '',
   title: '',
   description: '',
-  credits: 3,
+  credits: null as number | null,
   lecture_hours: 20,
   tutorial_hours: 10,
   practical_hours: 0,
@@ -201,7 +202,7 @@ const openAddCourseModal = (semesterId: string) => {
     code: '',
     title: '',
     description: '',
-    credits: 3,
+    credits: null,
     lecture_hours: 20,
     tutorial_hours: 10,
     practical_hours: 0,
@@ -354,23 +355,14 @@ const deleteCourseAction = async () => {
   }
 }
 
-// === REORDER COURSES ===
+// === REORDER COURSES (drag & drop) ===
 const isReordering = ref(false)
 
-const moveCourse = async (semester: ProgramSemesterWithCourses, courseIndex: number, direction: 'up' | 'down') => {
+const onCourseDragEnd = async (semester: ProgramSemesterWithCourses) => {
   if (!semester.courses || !selectedProgramId.value) return
-  const targetIndex = direction === 'up' ? courseIndex - 1 : courseIndex + 1
-  if (targetIndex < 0 || targetIndex >= semester.courses.length) return
-
-  // Swap localement
-  const courses = [...semester.courses];
-  [courses[courseIndex], courses[targetIndex]] = [courses[targetIndex]!, courses[courseIndex]!]
-  semester.courses = courses
-
-  // Persister via API
   isReordering.value = true
   try {
-    await reorderCourses(semester.id, courses.map(c => c.id))
+    await reorderCourses(semester.id, semester.courses.map(c => c.id))
   } catch (e) {
     console.error('Erreur réordonnancement:', e)
     await loadSemesters(selectedProgramId.value!)
@@ -631,6 +623,7 @@ onMounted(loadPrograms)
                       <table class="w-full text-sm">
                         <thead>
                           <tr class="border-b border-gray-200 text-left dark:border-gray-700">
+                            <th class="w-8 pb-3"></th>
                             <th class="pb-3 pr-4 font-medium text-gray-500 dark:text-gray-400">Code</th>
                             <th class="pb-3 pr-4 font-medium text-gray-500 dark:text-gray-400">Titre</th>
                             <th class="pb-3 pr-4 text-center font-medium text-gray-500 dark:text-gray-400">Crédits</th>
@@ -642,12 +635,24 @@ onMounted(loadPrograms)
                             <th class="pb-3 pl-4 text-right font-medium text-gray-500 dark:text-gray-400">Actions</th>
                           </tr>
                         </thead>
-                        <tbody>
+                        <VueDraggable
+                          v-model="semester.courses"
+                          tag="tbody"
+                          handle=".drag-handle"
+                          :animation="150"
+                          ghost-class="opacity-30"
+                          @end="onCourseDragEnd(semester)"
+                        >
                           <tr
-                            v-for="(course, index) in semester.courses"
+                            v-for="course in semester.courses"
                             :key="course.id"
                             class="border-b border-gray-100 last:border-0 dark:border-gray-700/50"
                           >
+                            <td class="py-3 w-8">
+                              <span class="drag-handle cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                <font-awesome-icon icon="fa-solid fa-grip-vertical" class="w-3 h-3" />
+                              </span>
+                            </td>
                             <td class="py-3 pr-4 text-gray-500 dark:text-gray-400">
                               {{ course.code || '-' }}
                             </td>
@@ -678,22 +683,6 @@ onMounted(loadPrograms)
                             <td class="py-3 pl-4 text-right">
                               <div class="flex justify-end gap-1">
                                 <button
-                                  class="rounded p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed"
-                                  title="Monter"
-                                  :disabled="index === 0 || isReordering"
-                                  @click="moveCourse(semester, index, 'up')"
-                                >
-                                  <font-awesome-icon icon="fa-solid fa-arrow-up" class="w-3 h-3" />
-                                </button>
-                                <button
-                                  class="rounded p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed"
-                                  title="Descendre"
-                                  :disabled="index === semester.courses.length - 1 || isReordering"
-                                  @click="moveCourse(semester, index, 'down')"
-                                >
-                                  <font-awesome-icon icon="fa-solid fa-arrow-down" class="w-3 h-3" />
-                                </button>
-                                <button
                                   class="rounded p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-blue-600 dark:hover:bg-gray-600 dark:hover:text-blue-400"
                                   title="Modifier"
                                   @click="openEditCourseModal(course)"
@@ -710,9 +699,10 @@ onMounted(loadPrograms)
                               </div>
                             </td>
                           </tr>
-                        </tbody>
+                        </VueDraggable>
                         <tfoot>
                           <tr class="border-t-2 border-gray-200 font-medium dark:border-gray-600">
+                            <td class="py-3"></td>
                             <td colspan="2" class="py-3 pr-4 text-gray-700 dark:text-gray-300">Total</td>
                             <td class="py-3 pr-4 text-center text-gray-900 dark:text-white">
                               {{ getSemesterTotalCredits(semester) }}
@@ -807,12 +797,12 @@ onMounted(loadPrograms)
 
             <div class="mt-4">
               <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Titre (optionnel)
+                Titre personnalisé (optionnel)
               </label>
               <input
                 v-model="newSemester.title"
                 type="text"
-                placeholder="Ex: Fondamentaux, Stage et Mémoire..."
+                placeholder="Ex: Tronc commun, Module fondamental, UE1..."
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
@@ -888,11 +878,12 @@ onMounted(loadPrograms)
 
             <div class="mt-4">
               <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Titre (optionnel)
+                Titre personnalisé (optionnel)
               </label>
               <input
                 v-model="editingSemester.title"
                 type="text"
+                placeholder="Ex: Tronc commun, Module fondamental, UE1..."
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
             </div>
@@ -1005,11 +996,13 @@ onMounted(loadPrograms)
                   Crédits ECTS
                 </label>
                 <input
-                  v-model.number="newCourse.credits"
+                  :value="newCourse.credits ?? ''"
                   type="number"
                   min="0"
                   step="0.5"
+                  placeholder="Optionnel"
                   class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  @input="newCourse.credits = ($event.target as HTMLInputElement).value === '' ? null : Number(($event.target as HTMLInputElement).value)"
                 />
               </div>
             </div>
@@ -1145,11 +1138,13 @@ onMounted(loadPrograms)
                   Crédits ECTS
                 </label>
                 <input
-                  v-model.number="editingCourse.credits"
+                  :value="editingCourse.credits ?? ''"
                   type="number"
                   min="0"
                   step="0.5"
+                  placeholder="Optionnel"
                   class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  @input="editingCourse.credits = ($event.target as HTMLInputElement).value === '' ? null : Number(($event.target as HTMLInputElement).value)"
                 />
               </div>
             </div>
