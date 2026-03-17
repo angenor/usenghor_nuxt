@@ -330,6 +330,15 @@ const removeScheduleItem = (index: number) => {
 // === SAUVEGARDE ===
 const isSaving = ref(false)
 
+const extractErrorMessage = (err: unknown): string => {
+  if (err && typeof err === 'object' && 'data' in err) {
+    const data = (err as { data: { detail?: string } }).data
+    if (data?.detail) return data.detail
+  }
+  if (err instanceof Error) return err.message
+  return String(err)
+}
+
 const saveForm = async () => {
   if (!form.value.title.trim() || !form.value.slug.trim()) {
     error.value = 'Le titre et le slug sont obligatoires'
@@ -342,31 +351,69 @@ const saveForm = async () => {
 
   try {
     // 1) Créer l'appel
-    const result = await apiCreateCall({
-      title: form.value.title,
-      slug: form.value.slug,
-      description_html: form.value.description_html || null,
-      description_md: form.value.description_md || null,
-      type: form.value.type,
-      status: form.value.status,
-      campus_external_id: form.value.campus_external_id || null,
-      program_external_id: form.value.program_external_id || null,
-      project_external_id: form.value.project_external_id || null,
-      country_external_id: form.value.country_external_id || null,
-      location_address: form.value.location_address || null,
-      cover_image_external_id: form.value.cover_image_external_id,
-      opening_date: form.value.opening_date || null,
-      deadline: form.value.deadline || null,
-      program_start_date: form.value.program_start_date || null,
-      program_end_date: form.value.program_end_date || null,
-      registration_fee: form.value.registration_fee || null,
-      currency: form.value.currency,
-      use_internal_form: form.value.use_internal_form,
-      external_form_url: form.value.external_form_url || null,
-      publication_status: form.value.publication_status,
-    })
+    let callId: string
 
-    const callId = result.id
+    try {
+      const result = await apiCreateCall({
+        title: form.value.title,
+        slug: form.value.slug,
+        description_html: form.value.description_html || null,
+        description_md: form.value.description_md || null,
+        type: form.value.type,
+        status: form.value.status,
+        campus_external_id: form.value.campus_external_id || null,
+        program_external_id: form.value.program_external_id || null,
+        project_external_id: form.value.project_external_id || null,
+        country_external_id: form.value.country_external_id || null,
+        location_address: form.value.location_address || null,
+        cover_image_external_id: form.value.cover_image_external_id,
+        opening_date: form.value.opening_date || null,
+        deadline: form.value.deadline || null,
+        program_start_date: form.value.program_start_date || null,
+        program_end_date: form.value.program_end_date || null,
+        registration_fee: form.value.registration_fee || null,
+        currency: form.value.currency,
+        use_internal_form: form.value.use_internal_form,
+        external_form_url: form.value.external_form_url || null,
+        publication_status: form.value.publication_status,
+      })
+      callId = result.id
+    } catch (createErr: unknown) {
+      // Si 409 (slug déjà existant), générer un nouveau slug unique et réessayer
+      const statusCode = createErr && typeof createErr === 'object' && 'statusCode' in createErr
+        ? (createErr as { statusCode: number }).statusCode
+        : 0
+      if (statusCode === 409) {
+        const uniqueSuffix = Date.now().toString(36)
+        form.value.slug = `${form.value.slug}-${uniqueSuffix}`
+        const retryResult = await apiCreateCall({
+          title: form.value.title,
+          slug: form.value.slug,
+          description_html: form.value.description_html || null,
+          description_md: form.value.description_md || null,
+          type: form.value.type,
+          status: form.value.status,
+          campus_external_id: form.value.campus_external_id || null,
+          program_external_id: form.value.program_external_id || null,
+          project_external_id: form.value.project_external_id || null,
+          country_external_id: form.value.country_external_id || null,
+          location_address: form.value.location_address || null,
+          cover_image_external_id: form.value.cover_image_external_id,
+          opening_date: form.value.opening_date || null,
+          deadline: form.value.deadline || null,
+          program_start_date: form.value.program_start_date || null,
+          program_end_date: form.value.program_end_date || null,
+          registration_fee: form.value.registration_fee || null,
+          currency: form.value.currency,
+          use_internal_form: form.value.use_internal_form,
+          external_form_url: form.value.external_form_url || null,
+          publication_status: form.value.publication_status,
+        })
+        callId = retryResult.id
+      } else {
+        throw createErr
+      }
+    }
 
     // 2) Créer les sous-entités en parallèle
     const promises: Promise<unknown>[] = []
@@ -408,12 +455,20 @@ const saveForm = async () => {
       }))
     }
 
-    await Promise.all(promises)
+    const results = await Promise.allSettled(promises)
+    const failures = results.filter(r => r.status === 'rejected')
+
+    if (failures.length > 0) {
+      // L'appel est créé, rediriger mais avertir
+      error.value = `L'appel a été créé mais ${failures.length} élément(s) associé(s) n'ont pas pu être ajoutés. Vous pouvez les ajouter depuis la page de détail.`
+      setTimeout(() => router.push(`/admin/candidatures/appels/${callId}`), 3000)
+      return
+    }
 
     // 3) Rediriger vers le détail
     router.push(`/admin/candidatures/appels/${callId}`)
-  } catch {
-    error.value = 'Erreur lors de la création de l\'appel'
+  } catch (err: unknown) {
+    error.value = `Erreur lors de la création : ${extractErrorMessage(err)}`
   } finally {
     isSaving.value = false
   }
