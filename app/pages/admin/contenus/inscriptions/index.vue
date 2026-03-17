@@ -395,14 +395,36 @@ async function markAsAttended(registrationId: string) {
   }
 }
 
-// Export (mock pour l'instant)
-const exportRegistrations = (format: 'csv' | 'xlsx') => {
-  console.log('Exporting registrations:', {
-    format,
-    event_id: selectedEventId.value || 'all',
-    count: filteredRegistrations.value.length
-  })
-  alert(`Export ${format.toUpperCase()} - Fonctionnalité à venir`)
+// Export CSV
+const exportRegistrations = () => {
+  const data = filteredRegistrations.value
+  if (data.length === 0) return
+
+  const headers = ['Nom', 'Prénom', 'Email', 'Téléphone', 'Organisation', 'Événement', 'Statut', 'Date d\'inscription']
+  const rows = data.map(r => [
+    r.last_name || '',
+    r.first_name || '',
+    r.email,
+    r.phone || '',
+    r.organization || '',
+    r.event_title,
+    registrationStatusLabels[r.status] || r.status,
+    formatDateTime(r.registered_at),
+  ])
+
+  const csvContent = [headers, ...rows]
+    .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    .join('\n')
+
+  const BOM = '\uFEFF'
+  const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  const suffix = selectedEventId.value ? `_${selectedEvent.value?.title?.substring(0, 30) || 'evenement'}` : ''
+  link.download = `inscriptions${suffix}_${new Date().toISOString().slice(0, 10)}.csv`
+  link.click()
+  URL.revokeObjectURL(url)
 }
 
 // Can mark attendance (event date has passed or is today)
@@ -440,7 +462,7 @@ onMounted(() => {
       <div class="flex gap-2">
         <button
           class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-          @click="exportRegistrations('csv')"
+          @click="exportRegistrations"
         >
           <font-awesome-icon icon="fa-solid fa-download" />
           Exporter

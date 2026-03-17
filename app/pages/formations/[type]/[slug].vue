@@ -723,8 +723,8 @@ const toggleSemester = (num: number) => {
                   </div>
                   <div v-if="program.service_name" class="flex items-baseline gap-1">
                     <span class="text-gray-500 dark:text-gray-400 shrink-0">{{ t('formations.detail.service') }}</span>
-                    <span class="flex-1 border-b border-gray-300 dark:border-gray-600" />
-                    <span class="font-medium text-gray-900 dark:text-white shrink-0">{{ program.service_name }}</span>
+                    <span class="min-w-8 flex-1 border-b border-gray-300 dark:border-gray-600" />
+                    <span class="font-medium text-gray-900 dark:text-white text-right max-w-[60%]">{{ program.service_name }}</span>
                   </div>
                   <div v-if="program.campus_name" class="flex items-baseline gap-1">
                     <span class="text-gray-500 dark:text-gray-400 shrink-0">{{ t('formations.detail.campus') }}</span>
