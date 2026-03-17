@@ -1,0 +1,114 @@
+{
+  "leveesDeFonds": {
+    "seo": {
+      "title": "جمع التبرعات",
+      "description": "اكتشف حملات جمع التبرعات لجامعة سنغور"
+    },
+    "hero": {
+      "badge": "التمويل",
+      "title": "جمع التبرعات",
+      "subtitle": "ادعم مشاريع جامعة سنغور وساهم في تطوير التعليم العالي في أفريقيا"
+    },
+    "list": {
+      "title": "حملاتنا",
+      "empty": "لا توجد حملات جمع تبرعات متاحة حالياً.",
+      "viewDetails": "عرض التفاصيل",
+      "goalAmount": "الهدف",
+      "totalRaised": "تم جمعه",
+      "contributors": "مساهم | مساهمون",
+      "progress": "من الهدف تم تحقيقه"
+    },
+    "status": {
+      "draft": "مسودة",
+      "active": "جارية",
+      "completed": "مكتملة"
+    },
+    "detail": {
+      "breadcrumb": "جمع التبرعات",
+      "tabs": {
+        "presentation": "العرض",
+        "contributors": "المساهمون",
+        "news": "الأخبار"
+      },
+      "presentation": {
+        "title": "حول هذه الحملة",
+        "goalAmount": "الهدف المالي",
+        "totalRaised": "إجمالي المبلغ المجمع",
+        "progress": "التقدم",
+        "remaining": "المتبقي لجمعه"
+      },
+      "contributors": {
+        "title": "مساهمونا",
+        "categories": {
+          "state_organization": "الدول والمنظمات الدولية",
+          "foundation_philanthropist": "المؤسسات والمحسنون",
+          "company": "الشركات"
+        },
+        "empty": "لا يوجد مساهمون حتى الآن.",
+        "categoryEmpty": "لا يوجد مساهمون في هذه الفئة."
+      },
+      "news": {
+        "title": "الأخبار ذات الصلة",
+        "empty": "لا توجد أخبار مرتبطة بهذه الحملة حالياً.",
+        "readMore": "اقرأ المزيد",
+        "publishedAt": "نُشر في"
+      }
+    },
+    "admin": {
+      "title": "جمع التبرعات",
+      "create": "حملة جديدة",
+      "edit": "تعديل الحملة",
+      "form": {
+        "title": "العنوان",
+        "slug": "الرابط",
+        "description": "الوصف",
+        "coverImage": "صورة الغلاف",
+        "goalAmount": "الهدف المالي (يورو)",
+        "status": "الحالة",
+        "save": "حفظ",
+        "cancel": "إلغاء"
+      },
+      "contributors": {
+        "title": "المساهمون",
+        "add": "إضافة مساهم",
+        "edit": "تعديل المساهم",
+        "name": "الاسم",
+        "nameEn": "الاسم (بالإنجليزية)",
+        "nameAr": "الاسم (بالعربية)",
+        "category": "الفئة",
+        "amount": "المبلغ (يورو)",
+        "logo": "الشعار",
+        "save": "حفظ",
+        "delete": "حذف",
+        "confirmDelete": "هل أنت متأكد من حذف هذا المساهم؟"
+      },
+      "news": {
+        "title": "الأخبار المرتبطة",
+        "associate": "ربط خبر",
+        "search": "البحث عن خبر...",
+        "dissociate": "إلغاء الربط",
+        "confirmDissociate": "هل أنت متأكد من إلغاء ربط هذا الخبر؟",
+        "empty": "لا توجد أخبار مرتبطة."
+      },
+      "stats": {
+        "total": "الإجمالي",
+        "draft": "المسودات",
+        "active": "الجارية",
+        "completed": "المكتملة",
+        "totalGoal": "الهدف الإجمالي",
+        "totalRaised": "إجمالي المبلغ المجمع"
+      },
+      "messages": {
+        "created": "تم إنشاء حملة جمع التبرعات بنجاح",
+        "updated": "تم تحديث حملة جمع التبرعات بنجاح",
+        "deleted": "تم حذف حملة جمع التبرعات بنجاح",
+        "contributorAdded": "تمت إضافة المساهم بنجاح",
+        "contributorUpdated": "تم تحديث المساهم بنجاح",
+        "contributorDeleted": "تم حذف المساهم بنجاح",
+        "newsAssociated": "تم ربط الخبر بنجاح",
+        "newsDissociated": "تم إلغاء ربط الخبر بنجاح"
+      },
+      "confirmDelete": "هل أنت متأكد من حذف هذه الحملة؟"
+    }
+  }
+}

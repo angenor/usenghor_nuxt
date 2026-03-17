@@ -1,0 +1,114 @@
+{
+  "leveesDeFonds": {
+    "seo": {
+      "title": "Levées de fonds",
+      "description": "Découvrez les campagnes de levée de fonds de l'Université Senghor"
+    },
+    "hero": {
+      "badge": "Financement",
+      "title": "Levées de fonds",
+      "subtitle": "Soutenez les projets de l'Université Senghor et contribuez au développement de l'enseignement supérieur en Afrique"
+    },
+    "list": {
+      "title": "Nos campagnes",
+      "empty": "Aucune campagne de levée de fonds en cours pour le moment.",
+      "viewDetails": "Voir les détails",
+      "goalAmount": "Objectif",
+      "totalRaised": "Levés",
+      "contributors": "contributeur | contributeurs",
+      "progress": "de l'objectif atteint"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "active": "En cours",
+      "completed": "Terminée"
+    },
+    "detail": {
+      "breadcrumb": "Levées de fonds",
+      "tabs": {
+        "presentation": "Présentation",
+        "contributors": "Contributeurs",
+        "news": "Actualités"
+      },
+      "presentation": {
+        "title": "À propos de cette campagne",
+        "goalAmount": "Objectif financier",
+        "totalRaised": "Total levé",
+        "progress": "Progression",
+        "remaining": "Restant à lever"
+      },
+      "contributors": {
+        "title": "Nos contributeurs",
+        "categories": {
+          "state_organization": "États et organisations internationales",
+          "foundation_philanthropist": "Fondations et philanthropes",
+          "company": "Entreprises"
+        },
+        "empty": "Aucun contributeur pour le moment.",
+        "categoryEmpty": "Aucun contributeur dans cette catégorie."
+      },
+      "news": {
+        "title": "Actualités liées",
+        "empty": "Aucune actualité associée à cette campagne pour le moment.",
+        "readMore": "Lire la suite",
+        "publishedAt": "Publié le"
+      }
+    },
+    "admin": {
+      "title": "Levées de fonds",
+      "create": "Nouvelle levée de fonds",
+      "edit": "Modifier la levée de fonds",
+      "form": {
+        "title": "Titre",
+        "slug": "Slug",
+        "description": "Description",
+        "coverImage": "Image de couverture",
+        "goalAmount": "Objectif financier (EUR)",
+        "status": "Statut",
+        "save": "Enregistrer",
+        "cancel": "Annuler"
+      },
+      "contributors": {
+        "title": "Contributeurs",
+        "add": "Ajouter un contributeur",
+        "edit": "Modifier le contributeur",
+        "name": "Nom",
+        "nameEn": "Nom (anglais)",
+        "nameAr": "Nom (arabe)",
+        "category": "Catégorie",
+        "amount": "Montant (EUR)",
+        "logo": "Logo",
+        "save": "Enregistrer",
+        "delete": "Supprimer",
+        "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce contributeur ?"
+      },
+      "news": {
+        "title": "Actualités associées",
+        "associate": "Associer une actualité",
+        "search": "Rechercher une actualité...",
+        "dissociate": "Dissocier",
+        "confirmDissociate": "Êtes-vous sûr de vouloir dissocier cette actualité ?",
+        "empty": "Aucune actualité associée."
+      },
+      "stats": {
+        "total": "Total",
+        "draft": "Brouillons",
+        "active": "En cours",
+        "completed": "Terminées",
+        "totalGoal": "Objectif total",
+        "totalRaised": "Total levé"
+      },
+      "messages": {
+        "created": "Levée de fonds créée avec succès",
+        "updated": "Levée de fonds mise à jour avec succès",
+        "deleted": "Levée de fonds supprimée avec succès",
+        "contributorAdded": "Contributeur ajouté avec succès",
+        "contributorUpdated": "Contributeur mis à jour avec succès",
+        "contributorDeleted": "Contributeur supprimé avec succès",
+        "newsAssociated": "Actualité associée avec succès",
+        "newsDissociated": "Actualité dissociée avec succès"
+      },
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette levée de fonds ?"
+    }
+  }
+}

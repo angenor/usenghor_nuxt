@@ -21,6 +21,7 @@ import alumni from './alumni.json'
 import site from './site.json'
 import formations from './formations.json'
 import candidatures from './candidatures.json'
+import leveesDeFonds from './levees-de-fonds.json'
 
 export default {
   ...common,
@@ -45,5 +46,6 @@ export default {
   ...alumni,
   ...site,
   ...formations,
-  ...candidatures
+  ...candidatures,
+  ...leveesDeFonds
 }

@@ -169,6 +169,14 @@ export function useAdminSidebar() {
           route: '/admin/contenus/etiquettes',
           permissions: ['news.edit'],
           description: 'Catégorisation des contenus'
+        },
+        {
+          id: 'fundraisers',
+          label: 'Levées de fonds',
+          icon: 'fa-solid fa-hand-holding-dollar',
+          route: '/admin/contenus/levees-de-fonds',
+          permissions: ['news.view'],
+          description: 'Campagnes de levée de fonds'
         }
       ]
     },
