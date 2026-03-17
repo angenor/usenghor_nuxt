@@ -519,6 +519,15 @@ function removeCoverImage() {
 const isSaving = ref(false)
 const callId = route.params.id as string
 
+const extractErrorMessage = (err: unknown): string => {
+  if (err && typeof err === 'object' && 'data' in err) {
+    const data = (err as { data: { detail?: string } }).data
+    if (data?.detail) return data.detail
+  }
+  if (err instanceof Error) return err.message
+  return String(err)
+}
+
 const saveForm = async () => {
   if (!form.value.title.trim() || !form.value.slug.trim()) {
     error.value = 'Le titre et le slug sont obligatoires'
@@ -612,8 +621,8 @@ const saveForm = async () => {
 
     // 4) Rediriger vers le détail
     router.push(`/admin/candidatures/appels/${callId}`)
-  } catch {
-    error.value = 'Erreur lors de la sauvegarde'
+  } catch (err: unknown) {
+    error.value = `Erreur lors de la sauvegarde : ${extractErrorMessage(err)}`
   } finally {
     isSaving.value = false
   }
