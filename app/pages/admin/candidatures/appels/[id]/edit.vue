@@ -307,6 +307,22 @@ onMounted(() => {
   loadCountries()
 })
 
+// Auto-génération du slug à partir du titre
+const generateSlug = (title: string) => {
+  return title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
+watch(() => form.value.title, (newTitle) => {
+  if (newTitle) {
+    form.value.slug = generateSlug(newTitle)
+  }
+})
+
 // Navigation
 const goBack = () => {
   router.push(`/admin/candidatures/appels/${route.params.id}`)
