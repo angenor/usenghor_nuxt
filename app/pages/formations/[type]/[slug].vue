@@ -597,14 +597,12 @@ const toggleSemester = (num: number) => {
             </div>
 
             <!-- Teaching Methods -->
-            <div v-if="program.teaching_methods" class="mb-8">
+            <div v-if="program.teaching_methods_html" class="mb-8">
               <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 {{ t('formations.detail.teachingMethods') }}
               </h2>
-              <div class="prose dark:prose-invert max-w-none rounded-xl bg-emerald-50 dark:bg-emerald-900/20 p-5">
-                <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-                  {{ program.teaching_methods }}
-                </p>
+              <div class="rounded-xl bg-emerald-50 dark:bg-emerald-900/20 p-5">
+                <RichTextRenderer :html="program.teaching_methods_html" />
               </div>
             </div>
 
