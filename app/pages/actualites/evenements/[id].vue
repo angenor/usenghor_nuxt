@@ -202,74 +202,78 @@ function closeRegistrationModal() {
     </div>
 
     <div v-else-if="event">
-    <!-- Hero Section (PageHero style) -->
-    <section class="relative h-[50vh] min-h-[400px] max-h-[500px] overflow-hidden">
-      <!-- Background Image -->
-      <div class="absolute inset-0">
-        <img
-          v-if="getCoverImageUrl(event, 'original')"
-          :src="getCoverImageUrl(event, 'original')!"
-          :alt="getLocalizedTitle"
-          class="w-full h-full object-cover"
-        >
-        <div v-else class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-          <font-awesome-icon icon="fa-solid fa-calendar" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
-        </div>
-      </div>
+    <!-- Hero Section (même style que la page index actualités) -->
+    <section class="relative py-16 md:py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
+      <!-- Background pattern -->
+      <div class="absolute inset-0 opacity-10 heropattern-topography-brand-blue-500"></div>
 
       <!-- Content -->
-      <div class="relative z-10 h-full flex flex-col justify-center">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <!-- Breadcrumb -->
-          <nav class="mb-6">
-            <ol class="flex items-center space-x-2 text-sm">
-              <li>
-                <NuxtLink :to="localePath('/')" class="text-white/70 hover:text-white transition-colors duration-200">
-                  {{ t('nav.home') }}
-                </NuxtLink>
-              </li>
-              <li class="flex items-center">
-                <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3 mx-2 text-white/40" />
-                <NuxtLink :to="localePath('/actualites/evenements')" class="text-white/70 hover:text-white transition-colors duration-200">
-                  {{ t('actualites.events.title') }}
-                </NuxtLink>
-              </li>
-              <li class="flex items-center">
-                <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3 mx-2 text-white/40" />
-                <span class="text-brand-blue-400 font-medium truncate max-w-xs">{{ getLocalizedTitle }}</span>
-              </li>
-            </ol>
-          </nav>
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Breadcrumb -->
+        <nav class="mb-6">
+          <ol class="flex items-center space-x-2 text-sm">
+            <li>
+              <NuxtLink :to="localePath('/')" class="text-white/70 hover:text-white transition-colors duration-200">
+                {{ t('nav.home') }}
+              </NuxtLink>
+            </li>
+            <li class="flex items-center">
+              <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3 mx-2 text-white/40" />
+              <NuxtLink :to="localePath('/actualites/evenements')" class="text-white/70 hover:text-white transition-colors duration-200">
+                {{ t('actualites.events.title') }}
+              </NuxtLink>
+            </li>
+            <li class="flex items-center">
+              <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3 mx-2 text-white/40" />
+              <span class="text-brand-blue-400 font-medium truncate max-w-xs">{{ getLocalizedTitle }}</span>
+            </li>
+          </ol>
+        </nav>
 
-          <!-- Badges -->
-          <div class="flex flex-wrap items-center gap-3 mb-4">
-            <span
-              class="inline-block px-3 py-1 text-sm font-medium text-white rounded-full"
-              :class="typeBadgeColors[event.type]"
-            >
-              {{ t(`actualites.events.types.${event.type}`) }}
-            </span>
-            <span
-              v-if="isPastEvent"
-              class="inline-block px-3 py-1 text-sm font-medium bg-gray-600 text-white rounded-full"
-            >
-              {{ t('actualites.detail.event.past') }}
-            </span>
-            <span
-              v-else
-              class="inline-block px-3 py-1 text-sm font-medium bg-green-600 text-white rounded-full"
-            >
-              {{ t('actualites.detail.event.upcoming') }}
-            </span>
-          </div>
-
-          <!-- Title -->
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-4">
-            {{ getLocalizedTitle }}
-          </h1>
+        <!-- Badges -->
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+          <span
+            class="inline-block px-3 py-1 text-sm font-medium text-white rounded-full"
+            :class="typeBadgeColors[event.type]"
+          >
+            {{ t(`actualites.events.types.${event.type}`) }}
+          </span>
+          <span
+            v-if="isPastEvent"
+            class="inline-block px-3 py-1 text-sm font-medium bg-gray-600 text-white rounded-full"
+          >
+            {{ t('actualites.detail.event.past') }}
+          </span>
+          <span
+            v-else
+            class="inline-block px-3 py-1 text-sm font-medium bg-green-600 text-white rounded-full"
+          >
+            {{ t('actualites.detail.event.upcoming') }}
+          </span>
         </div>
+
+        <!-- Title -->
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-4">
+          {{ getLocalizedTitle }}
+        </h1>
+
+        <!-- Date sous le titre -->
+        <p class="text-lg text-gray-300">
+          {{ formatDate(event.start_date) }}
+          <span v-if="event.end_date && event.end_date !== event.start_date"> — {{ formatDate(event.end_date) }}</span>
+        </p>
       </div>
 
+      <!-- Ligne de séparation -->
+      <div class="absolute bottom-0 left-0 right-0">
+        <svg
+          class="w-full h-12 md:h-16 text-white dark:text-gray-950"
+          viewBox="0 0 1200 120"
+          preserveAspectRatio="none"
+        >
+          <polygon points="0,40 1200,0 1200,120 0,120" fill="currentColor" />
+        </svg>
+      </div>
     </section>
 
     <!-- Content -->
