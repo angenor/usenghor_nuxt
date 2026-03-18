@@ -68,6 +68,33 @@
       "careers": "انضم إلينا",
       "engagements": "قيمنا"
     },
+    "discover": {
+      "title": "اكتشف الجامعة",
+      "strategy": {
+        "icon": "fa-solid fa-chess",
+        "title": "استراتيجيتنا",
+        "description": "تحدد الخطة الاستراتيجية 2024-2030 طموحاتنا لتدريب قادة الغد ودعم تحول أفريقيا.",
+        "url": "/ar/a-propos/strategie"
+      },
+      "engagements": {
+        "icon": "fa-solid fa-heart",
+        "title": "قيمنا",
+        "description": "التميز والأخلاق والشمولية والابتكار والتضامن في خدمة التنمية الأفريقية.",
+        "url": "/ar/a-propos/engagements"
+      },
+      "organization": {
+        "icon": "fa-solid fa-sitemap",
+        "title": "منظمتنا",
+        "description": "5 أقسام أكاديمية، وخدمات مخصصة، وفريق ملتزم في خدمة نجاح طلابنا.",
+        "url": "/ar/a-propos/organisation"
+      },
+      "careers": {
+        "icon": "fa-solid fa-briefcase",
+        "title": "انضم إلينا",
+        "description": "انضم إلى جامعة دولية في قلب أفريقيا. فرص للأساتذة والباحثين والموظفين الإداريين.",
+        "url": "/ar/nous-rejoindre"
+      }
+    },
     "preview": {
       "title": "اكتشف الجامعة",
       "history": {

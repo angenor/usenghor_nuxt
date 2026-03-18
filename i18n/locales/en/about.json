@@ -68,6 +68,33 @@
       "careers": "Join Us",
       "engagements": "Our Values"
     },
+    "discover": {
+      "title": "Discover the University",
+      "strategy": {
+        "icon": "fa-solid fa-chess",
+        "title": "Our Strategy",
+        "description": "The Strategic Plan defines our ambitions to train tomorrow's leaders and support Africa's transformation.",
+        "url": "/about/strategy"
+      },
+      "engagements": {
+        "icon": "fa-solid fa-heart",
+        "title": "Our Values",
+        "description": "Excellence, ethics, inclusion, innovation and solidarity serving African development.",
+        "url": "/about/engagements"
+      },
+      "organization": {
+        "icon": "fa-solid fa-sitemap",
+        "title": "Our Organization",
+        "description": "5 academic departments, dedicated services, and a committed team serving our students' success.",
+        "url": "/about/organization"
+      },
+      "careers": {
+        "icon": "fa-solid fa-briefcase",
+        "title": "Join Us",
+        "description": "Join an international university at the heart of Africa. Opportunities for faculty, researchers, and administrative staff.",
+        "url": "/join-us"
+      }
+    },
     "preview": {
       "title": "Discover the University",
       "history": {

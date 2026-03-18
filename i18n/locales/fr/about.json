@@ -68,6 +68,33 @@
       "careers": "Nous rejoindre",
       "engagements": "Nos valeurs"
     },
+    "discover": {
+      "title": "Découvrir l'Université",
+      "strategy": {
+        "icon": "fa-solid fa-chess",
+        "title": "Notre stratégie",
+        "description": "Le plan stratégique 2024-2030 définit nos ambitions pour former les leaders de demain et accompagner la transformation de l'Afrique.",
+        "url": "/a-propos/strategie"
+      },
+      "engagements": {
+        "icon": "fa-solid fa-heart",
+        "title": "Nos valeurs",
+        "description": "Excellence, éthique, inclusion, innovation et solidarité au service du développement africain.",
+        "url": "/a-propos/engagements"
+      },
+      "organization": {
+        "icon": "fa-solid fa-sitemap",
+        "title": "Notre organisation",
+        "description": "5 départements académiques, des services dédiés et une équipe engagée au service de la réussite de nos étudiants.",
+        "url": "/a-propos/organisation"
+      },
+      "careers": {
+        "icon": "fa-solid fa-briefcase",
+        "title": "Nous rejoindre",
+        "description": "Rejoignez une université internationale au cœur de l'Afrique. Opportunités pour enseignants, chercheurs et personnel administratif.",
+        "url": "/nous-rejoindre"
+      }
+    },
     "preview": {
       "title": "Découvrir l'Université",
       "history": {
