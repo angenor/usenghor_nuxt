@@ -77,6 +77,27 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>()
 
+// Upload d'images via l'API média
+const { uploadMedia, getMediaUrl } = useMediaApi()
+
+async function handleImageUpload(payload: { blob: Blob, callback: (url: string, alt?: string) => void }) {
+  try {
+    const file = payload.blob instanceof File
+      ? payload.blob
+      : new File([payload.blob], `image-${Date.now()}.png`, { type: payload.blob.type })
+
+    const result = await uploadMedia(file, { folder: 'editor' })
+    const url = getMediaUrl(result)
+    if (url) {
+      payload.callback(url, file.name)
+    }
+  }
+  catch (error) {
+    console.error('Erreur upload image éditeur:', error)
+    alert('Impossible d\'uploader l\'image')
+  }
+}
+
 // Déterminer les langues disponibles
 const availableLanguages = computed<Language[]>(() => {
   if (props.languages) {
@@ -393,6 +414,7 @@ onUnmounted(() => {
                 mode="inline"
                 @update:model-value="modalMdFr = $event"
                 @update:html="modalHtmlFr = $event"
+                @image-upload="handleImageUpload"
                 @ready="onReady"
               />
             </div>
@@ -408,6 +430,7 @@ onUnmounted(() => {
                 mode="inline"
                 @update:model-value="modalMdEn = $event"
                 @update:html="modalHtmlEn = $event"
+                @image-upload="handleImageUpload"
               />
             </div>
 
@@ -422,6 +445,7 @@ onUnmounted(() => {
                 mode="inline"
                 @update:model-value="modalMdAr = $event"
                 @update:html="modalHtmlAr = $event"
+                @image-upload="handleImageUpload"
               />
             </div>
           </div>
@@ -475,6 +499,7 @@ onUnmounted(() => {
             mode="inline"
             @update:model-value="onMdChangeFr"
             @update:html="onHtmlChangeFr"
+            @image-upload="handleImageUpload"
             @ready="onReady"
           />
         </div>
@@ -490,6 +515,7 @@ onUnmounted(() => {
             mode="inline"
             @update:model-value="onMdChangeEn"
             @update:html="onHtmlChangeEn"
+            @image-upload="handleImageUpload"
           />
         </div>
 
@@ -504,6 +530,7 @@ onUnmounted(() => {
             mode="inline"
             @update:model-value="onMdChangeAr"
             @update:html="onHtmlChangeAr"
+            @image-upload="handleImageUpload"
           />
         </div>
       </template>
@@ -519,6 +546,7 @@ onUnmounted(() => {
           mode="inline"
           @update:model-value="onMdChangeFr"
           @update:html="onHtmlChangeFr"
+          @image-upload="handleImageUpload"
           @ready="onReady"
         />
       </template>

@@ -20,6 +20,27 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
+// Upload d'images via l'API média
+const { uploadMedia, getMediaUrl } = useMediaApi()
+
+async function handleImageUpload(payload: { blob: Blob, callback: (url: string, alt?: string) => void }) {
+  try {
+    const file = payload.blob instanceof File
+      ? payload.blob
+      : new File([payload.blob], `image-${Date.now()}.png`, { type: payload.blob.type })
+
+    const result = await uploadMedia(file, { folder: 'editor' })
+    const url = getMediaUrl(result)
+    if (url) {
+      payload.callback(url, file.name)
+    }
+  }
+  catch (error) {
+    console.error('Erreur upload image éditeur:', error)
+    alert('Impossible d\'uploader l\'image')
+  }
+}
+
 const editorRef = ref<{ getMarkdown: () => string, getHTML: () => string } | null>(null)
 const initialSnapshot = ref('')
 const currentMarkdown = ref('')
@@ -119,6 +140,7 @@ onUnmounted(() => {
           mode="inline"
           @update:model-value="onEditorUpdate"
           @update:html="onHtmlUpdate"
+          @image-upload="handleImageUpload"
         />
       </div>
     </div>
