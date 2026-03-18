@@ -25,12 +25,19 @@ if (error.value || (!pending.value && !campus.value)) {
   })
 }
 
+// Extraire le texte brut du HTML pour le SEO
+const descriptionPlainText = computed(() => {
+  const html = campus.value?.description_html
+  if (!html) return ''
+  return html.replace(/<[^>]*>/g, '').trim()
+})
+
 // SEO
 useSeoMeta({
   title: () => `${campus.value?.name || ''} | ${t('partners.seo.title')}`,
-  description: () => campus.value?.description || t('partners.seo.description'),
+  description: () => descriptionPlainText.value.substring(0, 160) || t('partners.seo.description'),
   ogTitle: () => `${campus.value?.name || ''} | ${t('partners.seo.title')}`,
-  ogDescription: () => campus.value?.description || t('partners.seo.description'),
+  ogDescription: () => descriptionPlainText.value.substring(0, 160) || t('partners.seo.description'),
   ogImage: () => campus.value ? (getCoverImageUrl(campus.value) ?? undefined) : undefined
 })
 

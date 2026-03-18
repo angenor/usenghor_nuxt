@@ -21,6 +21,8 @@ export interface CampusRead {
   code: string
   name: string
   description: string | null
+  description_html: string | null
+  description_md: string | null
   cover_image_external_id: string | null
   country_external_id: string | null
   head_external_id: string | null
@@ -64,6 +66,8 @@ export interface CampusCreate {
   code: string
   name: string
   description?: string | null
+  description_html?: string | null
+  description_md?: string | null
   cover_image_external_id?: string | null
   country_external_id?: string | null
   head_external_id?: string | null
@@ -83,6 +87,8 @@ export interface CampusUpdate {
   code?: string
   name?: string
   description?: string | null
+  description_html?: string | null
+  description_md?: string | null
   cover_image_external_id?: string | null
   country_external_id?: string | null
   head_external_id?: string | null
