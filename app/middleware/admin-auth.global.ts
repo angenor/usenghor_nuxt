@@ -3,7 +3,7 @@ import { getRequiredPermissions, usePermissions } from '~/composables/usePermiss
 
 export default defineNuxtRouteMiddleware(async (to) => {
   // Routes publiques de l'admin (pas besoin d'authentification)
-  const publicAdminRoutes = ['/admin/login', '/admin/register']
+  const publicAdminRoutes = ['/admin/login', '/admin/register', '/admin/forgot-password', '/admin/reset-password']
 
   if (!to.path.startsWith('/admin') || publicAdminRoutes.includes(to.path)) {
     return
