@@ -45,7 +45,8 @@ const contactForm = ref({
   facebook: '',
 })
 
-const biographyData = ref({ time: Date.now(), blocks: [], version: '2.28.0' })
+const biographyMd = ref('')
+const biographyHtml = ref('')
 const showBiographyModal = ref(false)
 
 const securityForm = ref({
@@ -198,28 +199,8 @@ function startEditing(section) {
     }
   }
   else if (section === 'biography') {
-    const bio = user.value?.biography
-    if (bio) {
-      try {
-        const parsed = JSON.parse(bio)
-        if (parsed && Array.isArray(parsed.blocks)) {
-          biographyData.value = parsed
-        }
-        else {
-          biographyData.value = { time: Date.now(), blocks: [], version: '2.28.0' }
-        }
-      }
-      catch {
-        biographyData.value = {
-          time: Date.now(),
-          blocks: bio.trim() ? [{ id: '1', type: 'paragraph', data: { text: bio } }] : [],
-          version: '2.28.0',
-        }
-      }
-    }
-    else {
-      biographyData.value = { time: Date.now(), blocks: [], version: '2.28.0' }
-    }
+    biographyMd.value = user.value?.biography_md || ''
+    biographyHtml.value = user.value?.biography_html || ''
     showBiographyModal.value = true
   }
   else if (section === 'security') {
@@ -297,7 +278,8 @@ async function saveBiography() {
     await apiFetch('/api/auth/me', {
       method: 'PUT',
       body: {
-        biography: JSON.stringify(biographyData.value),
+        biography_html: biographyHtml.value || null,
+        biography_md: biographyMd.value || null,
       },
     })
     await refreshData()
@@ -1097,63 +1079,15 @@ function getCampusBadgeColor(code) {
       </template>
     </div>
 
-    <!-- Modale biographie -->
-    <Teleport to="body">
-      <Transition name="fade">
-        <div
-          v-if="showBiographyModal"
-          class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
-          @click.self="cancelEditing"
-        >
-          <div class="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
-            <!-- En-tête -->
-            <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                <font-awesome-icon :icon="['fas', 'pen-to-square']" class="mr-2 h-4 w-4 text-brand-blue-500" />
-                Biographie
-              </h3>
-              <button
-                type="button"
-                class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
-                @click="cancelEditing"
-              >
-                <font-awesome-icon :icon="['fas', 'times']" class="h-4 w-4" />
-              </button>
-            </div>
-            <!-- Éditeur -->
-            <div class="flex-1 overflow-y-auto p-6">
-              <AdminRichTextEditor
-                v-model="biographyData"
-                :show-card="false"
-                placeholder="Quelques mots sur vous..."
-                :min-height="300"
-              />
-            </div>
-            <!-- Pied de modal -->
-            <div class="flex justify-end gap-3 border-t border-gray-200 px-6 py-4 dark:border-gray-700">
-              <button
-                type="button"
-                class="rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                :disabled="isSaving"
-                @click="cancelEditing"
-              >
-                Annuler
-              </button>
-              <button
-                type="button"
-                class="inline-flex items-center gap-2 rounded-xl bg-brand-blue-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-blue-500/25 transition hover:bg-brand-blue-600 disabled:opacity-50"
-                :disabled="isSaving"
-                @click="saveBiography"
-              >
-                <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" class="h-4 w-4 animate-spin" />
-                <font-awesome-icon v-else :icon="['fas', 'check']" class="h-3.5 w-3.5" />
-                Enregistrer
-              </button>
-            </div>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
+    <!-- Modale biographie (TOAST UI) -->
+    <AdminRichTextEditorModal
+      v-if="showBiographyModal"
+      :initial-markdown="biographyMd"
+      label="Biographie"
+      placeholder="Quelques mots sur vous..."
+      @confirm="({ markdown, html }) => { biographyMd = markdown; biographyHtml = html; saveBiography() }"
+      @cancel="cancelEditing"
+    />
 
     <!-- Modale éditeur photo -->
     <Teleport to="body">

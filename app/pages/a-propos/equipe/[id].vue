@@ -90,17 +90,24 @@ function getFlagEmoji(countryCode: string): string {
   return String.fromCodePoint(...codePoints)
 }
 
+// Extraire le texte brut du HTML pour le SEO
+const biographyPlainText = computed(() => {
+  const html = profile.value?.biography_html
+  if (!html) return ''
+  return html.replace(/<[^>]*>/g, '').trim()
+})
+
 // SEO
 useSeoMeta({
   title: () => fullName.value
     ? t('team.profile.seo.title', { name: fullName.value })
     : t('team.seo.title'),
-  description: () => profile.value?.biography?.substring(0, 160)
+  description: () => biographyPlainText.value.substring(0, 160)
     || t('team.profile.seo.description', { name: fullName.value }),
   ogTitle: () => fullName.value
     ? t('team.profile.seo.title', { name: fullName.value })
     : t('team.seo.title'),
-  ogDescription: () => profile.value?.biography?.substring(0, 160) || '',
+  ogDescription: () => biographyPlainText.value.substring(0, 160) || '',
   ogImage: () => photoUrl.value ?? undefined,
 })
 </script>
