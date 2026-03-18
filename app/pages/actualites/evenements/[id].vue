@@ -279,6 +279,81 @@ function closeRegistrationModal() {
     <!-- Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div class="flex flex-col lg:flex-row gap-12">
+        <!-- Inscription mobile (visible uniquement sur mobile, avant le contenu) -->
+        <div class="lg:hidden space-y-4">
+          <!-- Carte d'inscription mobile -->
+          <div
+            v-if="event.registration_required"
+            class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+          >
+            <div class="mb-4 flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue-100 dark:bg-brand-blue-900/30">
+                <font-awesome-icon icon="fa-solid fa-user-plus" class="h-5 w-5 text-brand-blue-600 dark:text-brand-blue-400" />
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                {{ t('actualites.detail.event.registration.title') }}
+              </h3>
+            </div>
+
+            <div v-if="isPastEvent" class="rounded-lg bg-gray-100 p-4 text-center dark:bg-gray-700">
+              <font-awesome-icon icon="fa-solid fa-clock" class="mb-2 h-6 w-6 text-gray-400" />
+              <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                {{ t('actualites.detail.event.registration.closed') }}
+              </p>
+            </div>
+
+            <template v-else>
+              <p v-if="event.max_attendees" class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+                {{ t('actualites.detail.event.registration.spots', { count: event.max_attendees }) }}
+              </p>
+
+              <a
+                v-if="normalizedRegistrationLink"
+                :href="normalizedRegistrationLink"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-blue-700"
+              >
+                <font-awesome-icon icon="fa-solid fa-arrow-up-right-from-square" class="h-4 w-4" />
+                {{ t('actualites.detail.event.registration.externalLink') }}
+              </a>
+
+              <button
+                v-else
+                class="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-blue-700"
+                @click="showRegistrationModal = true"
+              >
+                <font-awesome-icon icon="fa-solid fa-pen-to-square" class="h-4 w-4" />
+                {{ t('actualites.detail.event.registration.register') }}
+              </button>
+            </template>
+          </div>
+
+          <!-- Lien visioconférence mobile -->
+          <div
+            v-if="event.is_online && event.video_conference_link && !isPastEvent"
+            class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+          >
+            <div class="mb-3 flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+                <font-awesome-icon icon="fa-solid fa-video" class="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                {{ t('actualites.detail.event.onlineEvent') }}
+              </h3>
+            </div>
+            <a
+              :href="event.video_conference_link"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex w-full items-center justify-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-green-700"
+            >
+              <font-awesome-icon icon="fa-solid fa-arrow-up-right-from-square" class="h-4 w-4" />
+              {{ t('actualites.detail.event.joinOnline') }}
+            </a>
+          </div>
+        </div>
+
         <!-- Main content -->
         <article class="lg:w-2/3">
           <!-- Featured image -->
@@ -429,12 +504,12 @@ function closeRegistrationModal() {
           </section>
         </article>
 
-        <!-- Sidebar -->
+        <!-- Sidebar (inscription/visio masqués sur mobile car affichés au-dessus) -->
         <aside class="lg:w-1/3 space-y-6">
-          <!-- Carte d'inscription -->
+          <!-- Carte d'inscription (desktop uniquement) -->
           <div
             v-if="event.registration_required"
-            class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+            class="hidden lg:block rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
           >
             <div class="mb-4 flex items-center gap-3">
               <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue-100 dark:bg-brand-blue-900/30">
@@ -483,10 +558,10 @@ function closeRegistrationModal() {
             </template>
           </div>
 
-          <!-- Lien visioconférence -->
+          <!-- Lien visioconférence (desktop uniquement) -->
           <div
             v-if="event.is_online && event.video_conference_link && !isPastEvent"
-            class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+            class="hidden lg:block rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
           >
             <div class="mb-3 flex items-center gap-3">
               <div class="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
