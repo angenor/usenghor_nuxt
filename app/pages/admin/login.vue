@@ -191,6 +191,16 @@ async function handleLogin() {
                   </div>
                 </div>
 
+                <!-- Mot de passe oublié -->
+                <div class="text-right">
+                  <NuxtLink
+                    to="/admin/forgot-password"
+                    class="text-sm text-brand-blue-500 transition hover:text-brand-blue-600 dark:text-brand-blue-400 dark:hover:text-brand-blue-300"
+                  >
+                    Mot de passe oublié ?
+                  </NuxtLink>
+                </div>
+
                 <!-- Bouton connexion -->
                 <button
                   type="submit"
