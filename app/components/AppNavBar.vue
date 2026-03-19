@@ -482,7 +482,8 @@ onUnmounted(() => {
                 ? 'opacity-100 visible translate-y-0 pointer-events-auto'
                 : 'opacity-0 invisible -translate-y-4 pointer-events-none group-hover/more:opacity-100 group-hover/more:visible group-hover/more:translate-y-0 group-hover/more:pointer-events-auto'"
             >
-              <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl shadow-black/15 dark:shadow-black/40 border border-gray-100 dark:border-gray-800 overflow-hidden w-[420px] p-3">
+              <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl shadow-black/15 dark:shadow-black/40 border border-gray-100 dark:border-gray-800 overflow-hidden w-[420px] p-3">
+                  <UiDecorativeDiese position="bottom-right" size="md" :opacity="0.20" />
                   <!-- Categories Grid -->
                   <div class="grid grid-cols-1 gap-2">
                     <template v-for="section in secondaryNavItems" :key="section.key">

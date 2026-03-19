@@ -74,8 +74,9 @@ const colors = computed(() => colorClasses[props.color] || colorClasses.blue)
   <section
     :id="props.id"
     ref="sectionRef"
-    class="py-16 lg:py-20 bg-white dark:bg-gray-900 transition-colors duration-300"
+    class="relative overflow-hidden py-16 lg:py-20 bg-white dark:bg-gray-900 transition-colors duration-300"
   >
+    <UiDecorativeDiese position="top-right" size="md" :opacity="0.10" />
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <!-- Image -->

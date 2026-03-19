@@ -118,6 +118,7 @@ onMounted(() => {
       <div class="absolute -top-40 -right-40 w-80 h-80 bg-brand-blue-500/10 rounded-full blur-3xl"></div>
       <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-brand-red-500/10 rounded-full blur-3xl"></div>
       <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
+      <UiDecorativeDiese position="bottom-right" size="3xl" :opacity="0.20" bg="dark" />
     </div>
 
     <div class="relative">

@@ -194,6 +194,7 @@ const founders = [
         <!-- Legacy Section -->
         <div ref="legacyRef" class="mt-16 lg:mt-24">
           <div class="relative bg-gradient-to-r from-gray-900 to-gray-800 dark:from-gray-800 dark:to-gray-900 rounded-3xl overflow-hidden">
+            <UiDecorativeDiese position="bottom-right" size="2xl" :opacity="0.20" bg="dark" />
             <div class="absolute inset-0 opacity-10">
               <div class="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.1)_25%,rgba(255,255,255,0.1)_50%,transparent_50%,transparent_75%,rgba(255,255,255,0.1)_75%)] bg-[length:20px_20px]"></div>
             </div>
