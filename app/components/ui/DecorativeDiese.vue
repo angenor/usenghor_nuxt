@@ -3,6 +3,8 @@ interface Props {
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl'
   opacity?: number
+  /** Opacité spécifique en mode sombre (si différente de opacity) */
+  darkOpacity?: number
   /** 'dark' = fond toujours sombre → screen blend (couleurs rayonnent)
    *  'light' = fond toujours clair → multiply blend (blanc transparent)
    *  'auto' = suit le thème de l'utilisateur (défaut) */
@@ -26,6 +28,10 @@ const onDarkBg = computed(() =>
 // multiply: blanc devient transparent, couleurs s'imprègnent sur fond clair
 const blendMode = computed(() =>
   onDarkBg.value ? 'screen' : 'multiply',
+)
+
+const resolvedOpacity = computed(() =>
+  onDarkBg.value && props.darkOpacity !== undefined ? props.darkOpacity : props.opacity,
 )
 
 const positionClasses: Record<string, string> = {
@@ -55,7 +61,7 @@ const sizeClasses: Record<string, string> = {
       role="presentation"
       aria-hidden="true"
       :style="{
-        opacity: props.opacity,
+        opacity: resolvedOpacity,
         mixBlendMode: blendMode,
       }"
       class="w-full h-full object-contain select-none"
