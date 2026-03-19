@@ -109,6 +109,7 @@
         "deadline": "Date limite d'inscription",
         "openingDate": "Ouverture",
         "campus": "Campus",
+        "location": "Lieu",
         "type": "Type",
         "status": "Statut",
         "statusOpen": "En cours",

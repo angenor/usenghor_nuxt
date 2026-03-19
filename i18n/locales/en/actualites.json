@@ -109,6 +109,7 @@
         "deadline": "Registration deadline",
         "openingDate": "Opening date",
         "campus": "Campus",
+        "location": "Location",
         "type": "Type",
         "status": "Status",
         "statusOpen": "Open",
