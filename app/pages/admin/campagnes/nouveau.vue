@@ -32,6 +32,7 @@ const form = reactive({
   description_en: '',
   description_ar: '',
   confirmation_email_enabled: false,
+  confirmation_email_field: '',
   closes_at: '',
 })
 
@@ -93,6 +94,7 @@ async function submitForm() {
       description_ar: form.description_ar || undefined,
       survey_json: buildSurveyJson(),
       confirmation_email_enabled: form.confirmation_email_enabled,
+      confirmation_email_field: form.confirmation_email_field || undefined,
     }
     if (form.closes_at) {
       payload.closes_at = new Date(form.closes_at).toISOString()
@@ -229,6 +231,22 @@ async function submitForm() {
           <label for="confirmEmail" class="text-sm text-gray-700 dark:text-gray-300">
             Envoyer un email de confirmation au répondant
           </label>
+        </div>
+
+        <div v-if="form.confirmation_email_enabled">
+          <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Champ email du formulaire</label>
+          <select
+            v-model="form.confirmation_email_field"
+            class="w-64 rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          >
+            <option value="">Sélectionner le champ email...</option>
+            <option v-for="q in questions" :key="q.name" :value="q.name">
+              {{ q.title.fr || q.name }} ({{ q.name }})
+            </option>
+          </select>
+          <p v-if="form.confirmation_email_enabled && !form.confirmation_email_field && questions.length > 0" class="mt-1 text-xs text-yellow-600 dark:text-yellow-400">
+            Sélectionnez le champ qui contient l'email du répondant
+          </p>
         </div>
 
         <div>
