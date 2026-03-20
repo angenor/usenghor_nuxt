@@ -56,7 +56,7 @@ const sizeClasses: Record<string, string> = {
     :class="[positionClasses[position], sizeClasses[size], 'pointer-events-none print:hidden']"
   >
     <img
-      src="/images/logos/Dieese_couleur.png"
+      src=""
       alt=""
       role="presentation"
       aria-hidden="true"
