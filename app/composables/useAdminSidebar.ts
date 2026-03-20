@@ -350,6 +350,18 @@ export function useAdminSidebar() {
     },
 
     // ========================================================================
+    // SONDAGES - Campagnes de formulaires
+    // ========================================================================
+    {
+      id: 'surveys',
+      label: 'Sondages',
+      icon: 'fa-solid fa-clipboard-list',
+      route: '/admin/campagnes',
+      permissions: ['survey.manage'],
+      description: 'Campagnes de sondage et formulaires'
+    },
+
+    // ========================================================================
     // EDITORIAL - Configuration du site
     // ========================================================================
     {

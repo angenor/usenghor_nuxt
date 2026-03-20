@@ -22,6 +22,7 @@ import site from './site.json'
 import formations from './formations.json'
 import candidatures from './candidatures.json'
 import leveesDeFonds from './levees-de-fonds.json'
+import survey from './survey.json'
 
 export default {
   ...common,
@@ -47,5 +48,6 @@ export default {
   ...site,
   ...formations,
   ...candidatures,
-  ...leveesDeFonds
+  ...leveesDeFonds,
+  ...survey
 }

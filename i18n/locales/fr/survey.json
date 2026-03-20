@@ -1,0 +1,109 @@
+{
+  "survey": {
+    "title": "Campagnes de sondage",
+    "newCampaign": "Nouvelle campagne",
+    "editCampaign": "Modifier la campagne",
+    "results": "Résultats",
+    "statistics": "Statistiques",
+    "individualResponses": "Réponses individuelles",
+    "exportCsv": "Exporter en CSV",
+    "status": {
+      "draft": "Brouillon",
+      "active": "Active",
+      "paused": "En pause",
+      "closed": "Clôturée"
+    },
+    "actions": {
+      "publish": "Publier",
+      "pause": "Mettre en pause",
+      "resume": "Reprendre",
+      "close": "Clôturer",
+      "duplicate": "Dupliquer",
+      "delete": "Supprimer",
+      "save": "Enregistrer",
+      "saveDraft": "Enregistrer le brouillon",
+      "addQuestion": "Ajouter une question",
+      "removeQuestion": "Supprimer la question",
+      "moveUp": "Monter",
+      "moveDown": "Descendre"
+    },
+    "fields": {
+      "slug": "Identifiant URL",
+      "slugHelp": "Utilisé dans le lien public du formulaire",
+      "titleFr": "Titre (français)",
+      "titleEn": "Titre (anglais)",
+      "titleAr": "Titre (arabe)",
+      "descriptionFr": "Description (français)",
+      "descriptionEn": "Description (anglais)",
+      "descriptionAr": "Description (arabe)",
+      "closesAt": "Date de clôture automatique",
+      "confirmationEmail": "Envoyer un email de confirmation",
+      "confirmationEmailHelp": "Un email sera envoyé au répondant si le formulaire contient un champ email"
+    },
+    "question": {
+      "title": "Question",
+      "titleFr": "Libellé (français)",
+      "titleEn": "Libellé (anglais)",
+      "titleAr": "Libellé (arabe)",
+      "required": "Obligatoire",
+      "type": "Type de question",
+      "choices": "Choix de réponse",
+      "addChoice": "Ajouter un choix",
+      "placeholder": "Texte d'aide",
+      "types": {
+        "text": "Texte court",
+        "comment": "Texte long",
+        "radiogroup": "Choix unique",
+        "checkbox": "Choix multiples",
+        "dropdown": "Liste déroulante",
+        "tagbox": "Sélection multiple",
+        "rating": "Échelle de notation",
+        "file": "Envoi de fichier",
+        "boolean": "Oui / Non",
+        "text-date": "Date"
+      }
+    },
+    "list": {
+      "responsesCount": "réponse | réponses",
+      "noResponses": "Aucune réponse",
+      "noCampaigns": "Aucune campagne",
+      "createFirst": "Créez votre première campagne de sondage",
+      "lastResponse": "Dernière réponse",
+      "createdAt": "Créée le",
+      "searchPlaceholder": "Rechercher une campagne..."
+    },
+    "confirm": {
+      "delete": "Êtes-vous sûr de vouloir supprimer cette campagne ? Toutes les réponses seront également supprimées.",
+      "close": "Êtes-vous sûr de vouloir clôturer cette campagne ? Aucune nouvelle réponse ne sera acceptée."
+    },
+    "public": {
+      "submitSuccess": "Votre réponse a été enregistrée avec succès. Merci pour votre participation !",
+      "alreadySubmitted": "Vous avez déjà répondu à ce formulaire.",
+      "formClosed": "Ce formulaire est clôturé et n'accepte plus de réponses.",
+      "formPaused": "Ce formulaire est temporairement indisponible.",
+      "formNotFound": "Formulaire introuvable.",
+      "submit": "Envoyer"
+    },
+    "messages": {
+      "created": "Campagne créée avec succès",
+      "updated": "Campagne mise à jour avec succès",
+      "published": "Campagne publiée avec succès",
+      "paused": "Campagne mise en pause",
+      "closed": "Campagne clôturée",
+      "duplicated": "Campagne dupliquée avec succès",
+      "deleted": "Campagne supprimée"
+    },
+    "associations": {
+      "title": "Associations",
+      "addAssociation": "Associer à un élément",
+      "entityType": "Type d'élément",
+      "entityTypes": {
+        "event": "Événement",
+        "application_call": "Appel à candidature",
+        "program": "Programme"
+      },
+      "selectEntity": "Sélectionner un élément",
+      "noAssociations": "Aucune association"
+    }
+  }
+}

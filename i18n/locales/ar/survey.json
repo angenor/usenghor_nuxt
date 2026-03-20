@@ -1,0 +1,109 @@
+{
+  "survey": {
+    "title": "حملات الاستبيان",
+    "newCampaign": "حملة جديدة",
+    "editCampaign": "تعديل الحملة",
+    "results": "النتائج",
+    "statistics": "الإحصائيات",
+    "individualResponses": "الردود الفردية",
+    "exportCsv": "تصدير كـ CSV",
+    "status": {
+      "draft": "مسودة",
+      "active": "نشطة",
+      "paused": "متوقفة مؤقتاً",
+      "closed": "مغلقة"
+    },
+    "actions": {
+      "publish": "نشر",
+      "pause": "إيقاف مؤقت",
+      "resume": "استئناف",
+      "close": "إغلاق",
+      "duplicate": "تكرار",
+      "delete": "حذف",
+      "save": "حفظ",
+      "saveDraft": "حفظ المسودة",
+      "addQuestion": "إضافة سؤال",
+      "removeQuestion": "حذف السؤال",
+      "moveUp": "نقل لأعلى",
+      "moveDown": "نقل لأسفل"
+    },
+    "fields": {
+      "slug": "معرّف الرابط",
+      "slugHelp": "يُستخدم في رابط النموذج العام",
+      "titleFr": "العنوان (فرنسي)",
+      "titleEn": "العنوان (إنجليزي)",
+      "titleAr": "العنوان (عربي)",
+      "descriptionFr": "الوصف (فرنسي)",
+      "descriptionEn": "الوصف (إنجليزي)",
+      "descriptionAr": "الوصف (عربي)",
+      "closesAt": "تاريخ الإغلاق التلقائي",
+      "confirmationEmail": "إرسال بريد تأكيد",
+      "confirmationEmailHelp": "سيتم إرسال بريد إلكتروني إلى المستجيب إذا كان النموذج يحتوي على حقل بريد إلكتروني"
+    },
+    "question": {
+      "title": "سؤال",
+      "titleFr": "النص (فرنسي)",
+      "titleEn": "النص (إنجليزي)",
+      "titleAr": "النص (عربي)",
+      "required": "مطلوب",
+      "type": "نوع السؤال",
+      "choices": "خيارات الإجابة",
+      "addChoice": "إضافة خيار",
+      "placeholder": "نص المساعدة",
+      "types": {
+        "text": "نص قصير",
+        "comment": "نص طويل",
+        "radiogroup": "اختيار واحد",
+        "checkbox": "اختيار متعدد",
+        "dropdown": "قائمة منسدلة",
+        "tagbox": "اختيار متعدد من قائمة",
+        "rating": "مقياس التقييم",
+        "file": "رفع ملف",
+        "boolean": "نعم / لا",
+        "text-date": "تاريخ"
+      }
+    },
+    "list": {
+      "responsesCount": "رد | ردود",
+      "noResponses": "لا توجد ردود",
+      "noCampaigns": "لا توجد حملات",
+      "createFirst": "أنشئ أول حملة استبيان",
+      "lastResponse": "آخر رد",
+      "createdAt": "أنشئت في",
+      "searchPlaceholder": "البحث عن حملة..."
+    },
+    "confirm": {
+      "delete": "هل أنت متأكد من حذف هذه الحملة؟ سيتم حذف جميع الردود أيضاً.",
+      "close": "هل أنت متأكد من إغلاق هذه الحملة؟ لن يتم قبول ردود جديدة."
+    },
+    "public": {
+      "submitSuccess": "تم تسجيل ردك بنجاح. شكراً لمشاركتك!",
+      "alreadySubmitted": "لقد أجبت على هذا النموذج مسبقاً.",
+      "formClosed": "هذا النموذج مغلق ولم يعد يقبل الردود.",
+      "formPaused": "هذا النموذج غير متاح مؤقتاً.",
+      "formNotFound": "النموذج غير موجود.",
+      "submit": "إرسال"
+    },
+    "messages": {
+      "created": "تم إنشاء الحملة بنجاح",
+      "updated": "تم تحديث الحملة بنجاح",
+      "published": "تم نشر الحملة بنجاح",
+      "paused": "تم إيقاف الحملة مؤقتاً",
+      "closed": "تم إغلاق الحملة",
+      "duplicated": "تم تكرار الحملة بنجاح",
+      "deleted": "تم حذف الحملة"
+    },
+    "associations": {
+      "title": "الارتباطات",
+      "addAssociation": "ربط بعنصر",
+      "entityType": "نوع العنصر",
+      "entityTypes": {
+        "event": "حدث",
+        "application_call": "دعوة للترشح",
+        "program": "برنامج"
+      },
+      "selectEntity": "اختيار عنصر",
+      "noAssociations": "لا توجد ارتباطات"
+    }
+  }
+}

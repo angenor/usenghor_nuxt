@@ -1,0 +1,58 @@
+/* =============================================================================
+   Thème SurveyJS personnalisé — Université Senghor
+   Couleurs brand-blue (#1e3a5f) et brand-red (#c0392b)
+   Support dark mode + RTL
+   ============================================================================= */
+
+/* Couleurs principales */
+.sd-root-modern {
+  --sjs-primary-backcolor: #1e3a5f;
+  --sjs-primary-backcolor-light: rgba(30, 58, 95, 0.1);
+  --sjs-primary-backcolor-dark: #162d4a;
+  --sjs-primary-forecolor: #ffffff;
+  --sjs-secondary-backcolor: #c0392b;
+  --sjs-base-unit: 8px;
+  --sjs-corner-radius: 8px;
+  --sjs-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Dark mode */
+.dark .sd-root-modern {
+  --sjs-general-backcolor: #1f2937;
+  --sjs-general-backcolor-dim: #111827;
+  --sjs-general-backcolor-dim-light: #374151;
+  --sjs-general-forecolor: #f3f4f6;
+  --sjs-general-forecolor-light: #9ca3af;
+  --sjs-border-default: #4b5563;
+  --sjs-border-light: #374151;
+}
+
+/* RTL */
+[dir="rtl"] .sd-root-modern {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Bouton de soumission */
+.sd-root-modern .sd-btn--action {
+  background-color: #1e3a5f;
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 12px 32px;
+  transition: background-color 0.2s;
+}
+
+.sd-root-modern .sd-btn--action:hover {
+  background-color: #162d4a;
+}
+
+/* Étoiles de notation */
+.sd-root-modern .sd-rating__item--selected {
+  background-color: #1e3a5f;
+  color: #ffffff;
+}
+
+/* Barres de progression */
+.sd-root-modern .sd-progress__bar {
+  background-color: #1e3a5f;
+}

@@ -5,6 +5,7 @@ const route = useRoute()
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getEventBySlug, getUpcomingEvents, registerToEvent } = usePublicEventsApi()
+const { getCampaignsByEntity } = usePublicSurveyApi()
 const { getCampusById, getFlagEmoji } = useMockData()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
@@ -22,6 +23,7 @@ const slug = computed(() => route.params.id as string)
 const event = ref<EventPublic | null>(null)
 const relatedEventsData = ref<EventPublic[]>([])
 const isLoading = ref(true)
+const associatedCampaigns = ref<any[]>([])
 
 // Charger l'événement depuis l'API
 onMounted(async () => {
@@ -40,6 +42,11 @@ onMounted(async () => {
     relatedEventsData.value = upcomingEvents
       .filter(e => e.id !== event.value!.id)
       .slice(0, 3)
+
+    // Charger les formulaires associés
+    try {
+      associatedCampaigns.value = await getCampaignsByEntity('event', event.value.id)
+    } catch { /* pas de formulaire associé */ }
   } catch (error) {
     console.error('Erreur lors du chargement de l\'événement:', error)
     throw createError({
@@ -433,6 +440,28 @@ function closeRegistrationModal() {
             <!-- Contenu riche -->
             <div v-if="event.content_html" class="mt-8">
               <RichTextRenderer :html="event.content_html" />
+            </div>
+          </div>
+
+          <!-- Formulaires de sondage associés -->
+          <div v-if="associatedCampaigns.length > 0" class="mt-12">
+            <div
+              v-for="campaign in associatedCampaigns"
+              :key="campaign.id"
+              class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+            >
+              <h2 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">
+                {{ campaign[`title_${locale}`] || campaign.title_fr }}
+              </h2>
+              <p v-if="campaign[`description_${locale}`] || campaign.description_fr" class="mb-4 text-gray-600 dark:text-gray-400">
+                {{ campaign[`description_${locale}`] || campaign.description_fr }}
+              </p>
+              <NuxtLink
+                :to="`/formulaires/${campaign.slug}`"
+                class="inline-flex items-center gap-2 rounded-lg bg-brand-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-blue-700"
+              >
+                Remplir le formulaire
+              </NuxtLink>
             </div>
           </div>
 
