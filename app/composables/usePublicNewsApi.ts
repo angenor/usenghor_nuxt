@@ -32,8 +32,8 @@ export function usePublicNewsApi() {
     return {
       id: news.id,
       slug: news.slug,
-      title: news.title,
-      summary: news.summary,
+      title: sanitizeText(news.title) || news.title,
+      summary: news.summary ? sanitizeText(news.summary) : news.summary,
       // Contenu legacy (non utilisé avec TOAST UI)
       content: null,
       content_en: null,

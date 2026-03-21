@@ -64,6 +64,10 @@ export function usePublicEventsApi() {
   function transformEventForDisplay(event: EventPublic): EventPublic {
     return {
       ...event,
+      title: sanitizeText(event.title) || event.title,
+      description: event.description ? sanitizeText(event.description) : event.description,
+      venue: event.venue ? sanitizeText(event.venue) : event.venue,
+      city: event.city ? sanitizeText(event.city) : event.city,
       cover_image: event.cover_image_external_id
         ? `/api/public/media/${event.cover_image_external_id}/download`
         : null,
