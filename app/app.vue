@@ -2,6 +2,24 @@
 const { locale } = useI18n()
 const router = useRouter()
 const { $lenis } = useNuxtApp()
+const { public: { siteUrl } } = useRuntimeConfig()
+
+// Meta OG globales (SSR) — fallback pour toutes les pages
+useHead({
+  titleTemplate: '%s | Université Senghor',
+  meta: [
+    { property: 'og:site_name', content: 'Université Senghor' },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:image', content: `${siteUrl}/images/og/og-default.png` },
+    { property: 'og:image:width', content: '1200' },
+    { property: 'og:image:height', content: '630' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:image', content: `${siteUrl}/images/og/og-default.png` },
+    { property: 'og:locale', content: 'fr_FR' },
+    { property: 'og:locale:alternate', content: 'en_US' },
+    { property: 'og:locale:alternate', content: 'ar_SA' }
+  ]
+})
 
 // Set document direction based on locale
 watch(locale, (newLocale) => {

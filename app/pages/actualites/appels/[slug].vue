@@ -24,14 +24,18 @@ const updateTabFromHash = () => {
   activeTab.value = validTabs.includes(hash) ? hash : 'presentation'
 }
 
-// State
-const call = ref<ApplicationCallPublicWithDetails | null>(null)
-const relatedCalls = ref<ApplicationCallPublicWithDetails[]>([])
-const loading = ref(true)
-const error = ref<string | null>(null)
-
 // Get the slug from route
 const slug = computed(() => route.params.slug as string)
+const relatedCalls = ref<ApplicationCallPublicWithDetails[]>([])
+const error = ref<string | null>(null)
+
+// Charger l'appel depuis l'API (SSR + client)
+const { data: call, status } = await useAsyncData(
+  `call-${slug.value}`,
+  () => getCallBySlug(slug.value)
+)
+
+const loading = computed(() => status.value === 'pending')
 
 // Use composable for shared logic
 const {
@@ -42,22 +46,9 @@ const {
   getHeroImage,
 } = useCallDetail(call)
 
-// Fetch call data
-async function fetchCall() {
-  loading.value = true
-  error.value = null
-  try {
-    call.value = await getCallBySlug(slug.value)
-  } catch (e) {
-    error.value = t('actualites.detail.call.notFound')
-    console.error('Error fetching call:', e)
-  } finally {
-    loading.value = false
-  }
-}
-
-// Fetch related calls
-async function fetchRelatedCalls() {
+// Charger les données secondaires côté client
+onMounted(async () => {
+  updateTabFromHash()
   try {
     const ongoing = await listOngoingCalls()
     relatedCalls.value = ongoing
@@ -66,13 +57,6 @@ async function fetchRelatedCalls() {
   } catch (e) {
     console.error('Error fetching related calls:', e)
   }
-}
-
-// Initial fetch
-onMounted(() => {
-  updateTabFromHash()
-  fetchCall()
-  fetchRelatedCalls()
 })
 
 // Watch for slug changes

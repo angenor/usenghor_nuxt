@@ -21,41 +21,37 @@ function getCoverImageUrl(item: EventPublic, variant: 'low' | 'medium' | 'origin
 
 // Get the event
 const slug = computed(() => route.params.id as string)
-const event = ref<EventPublic | null>(null)
 const relatedEventsData = ref<EventPublic[]>([])
-const isLoading = ref(true)
 const associatedCampaigns = ref<any[]>([])
 
-// Charger l'événement depuis l'API
+// Charger l'événement depuis l'API (SSR + client)
+const { data: event, status } = await useAsyncData(
+  `event-${slug.value}`,
+  () => getEventBySlug(slug.value)
+)
+
+if (!event.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Event not found'
+  })
+}
+
+const isLoading = computed(() => status.value === 'pending')
+
+// Charger les données secondaires côté client
 onMounted(async () => {
-  try {
-    event.value = await getEventBySlug(slug.value)
+  if (event.value) {
+    try {
+      const upcomingEvents = await getUpcomingEvents(10)
+      relatedEventsData.value = upcomingEvents
+        .filter(e => e.id !== event.value!.id)
+        .slice(0, 3)
+    } catch { /* pas d'événements liés */ }
 
-    if (!event.value) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'Event not found'
-      })
-    }
-
-    // Charger les événements liés (événements à venir, excluant le courant)
-    const upcomingEvents = await getUpcomingEvents(10)
-    relatedEventsData.value = upcomingEvents
-      .filter(e => e.id !== event.value!.id)
-      .slice(0, 3)
-
-    // Charger les formulaires associés
     try {
       associatedCampaigns.value = await getCampaignsByEntity('event', event.value.id)
     } catch { /* pas de formulaire associé */ }
-  } catch (error) {
-    console.error('Erreur lors du chargement de l\'événement:', error)
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Event not found'
-    })
-  } finally {
-    isLoading.value = false
   }
 })
 

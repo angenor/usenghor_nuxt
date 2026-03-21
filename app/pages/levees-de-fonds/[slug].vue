@@ -12,8 +12,6 @@ const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA
 
 const slug = computed(() => route.params.slug as string)
 
-const fundraiser = ref<FundraiserPublicDetail | null>(null)
-const loading = ref(true)
 const activeTab = ref<'presentation' | 'contributors' | 'news'>('presentation')
 
 useSeoMeta({
@@ -87,25 +85,13 @@ const tabs = [
   { key: 'news', label: () => t('leveesDeFonds.detail.tabs.news') },
 ] as const
 
-async function loadFundraiser(newSlug: string) {
-  loading.value = true
-  activeTab.value = 'presentation'
-  fundraiser.value = null
-  try {
-    fundraiser.value = await getFundraiserBySlug(newSlug)
-  }
-  catch (e) {
-    console.error('Erreur chargement levée de fonds:', e)
-    fundraiser.value = null
-  }
-  finally {
-    loading.value = false
-  }
-}
+// Charger la levée de fonds (SSR + client)
+const { data: fundraiser, status } = await useAsyncData(
+  `fundraiser-${slug.value}`,
+  () => getFundraiserBySlug(slug.value)
+)
 
-watch(slug, (newSlug) => {
-  loadFundraiser(newSlug)
-}, { immediate: true })
+const loading = computed(() => status.value === 'pending')
 </script>
 
 <template>

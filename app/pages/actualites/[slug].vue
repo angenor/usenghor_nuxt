@@ -19,37 +19,32 @@ function getCoverImageUrl(item: NewsDisplay, variant: 'low' | 'medium' | 'origin
 
 // Get the news item
 const slug = computed(() => route.params.slug as string)
-const news = ref<NewsDisplay | null>(null)
 const relatedNewsItems = ref<NewsDisplay[]>([])
-const isLoading = ref(true)
 
-// Charger l'actualité depuis l'API
+// Charger l'actualité depuis l'API (SSR + client)
+const { data: news, status } = await useAsyncData(
+  `news-${slug.value}`,
+  () => getPublicNewsBySlug(slug.value)
+)
+
+if (!news.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Article not found'
+  })
+}
+
+const isLoading = computed(() => status.value === 'pending')
+
+// Charger les données secondaires côté client
 onMounted(async () => {
-  try {
-    news.value = await getPublicNewsBySlug(slug.value)
-
-    if (!news.value) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'Article not found'
-      })
-    }
-
-    // Charger les actualités liées (par campus commun)
-    if (news.value.campus_ids?.length > 0) {
+  if (news.value?.campus_ids?.length > 0) {
+    try {
       const allNews = await getAllPublishedNews()
       relatedNewsItems.value = allNews
         .filter(n => n.campus_ids?.some(cid => news.value!.campus_ids.includes(cid)) && n.id !== news.value!.id)
         .slice(0, 3)
-    }
-  } catch (error) {
-    console.error('Erreur lors du chargement de l\'actualité:', error)
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Article not found'
-    })
-  } finally {
-    isLoading.value = false
+    } catch { /* pas d'actualités liées */ }
   }
 })
 

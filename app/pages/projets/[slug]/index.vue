@@ -27,9 +27,7 @@ function getCoverImageUrl(project: ProjectPublicDisplay, variant: 'low' | 'mediu
 // État
 // ============================================================================
 
-const isLoading = ref(true)
 const error = ref<string | null>(null)
-const project = ref<ProjectPublicDisplay | null>(null)
 
 // Get the project slug
 const slug = computed(() => route.params.slug as string)
@@ -45,52 +43,33 @@ const updateTabFromHash = () => {
 }
 
 // ============================================================================
-// Chargement des données
+// Chargement des données (SSR + client)
 // ============================================================================
 
-async function loadProject() {
-  isLoading.value = true
-  error.value = null
+const { data: project, status } = await useAsyncData(
+  `project-${slug.value}`,
+  () => getProjectBySlug(slug.value)
+)
 
-  try {
-    const data = await getProjectBySlug(slug.value)
-    if (!data) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'Project not found',
-      })
-    }
-    project.value = data
-
-    // Charger les appels à candidature associés
-    if (data.id) {
-      try {
-        projectCalls.value = await listCallsByProject(data.id)
-      } catch {
-        console.error('Erreur lors du chargement des appels du projet')
-      }
-    }
-  }
-  catch (err: unknown) {
-    const fetchError = err as { statusCode?: number }
-    if (fetchError.statusCode === 404) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'Project not found',
-      })
-    }
-    console.error('Erreur lors du chargement du projet:', err)
-    error.value = 'Une erreur est survenue lors du chargement du projet.'
-  }
-  finally {
-    isLoading.value = false
-  }
+if (!project.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Project not found',
+  })
 }
 
-// Initialize and watch for hash changes
+const isLoading = computed(() => status.value === 'pending')
+
+// Charger les données secondaires côté client
 onMounted(async () => {
   updateTabFromHash()
-  await loadProject()
+  if (project.value?.id) {
+    try {
+      projectCalls.value = await listCallsByProject(project.value.id)
+    } catch {
+      console.error('Erreur lors du chargement des appels du projet')
+    }
+  }
 })
 
 watch(() => route.hash, () => {
