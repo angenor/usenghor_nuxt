@@ -1,5 +1,7 @@
 <script setup lang="ts">
 interface Props {
+  /** Afficher ou masquer le dièse décoratif */
+  enabled?: boolean
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl'
   opacity?: number
@@ -12,6 +14,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  enabled: false,
   position: 'bottom-right',
   size: 'lg',
   opacity: 0.15,
@@ -53,6 +56,7 @@ const sizeClasses: Record<string, string> = {
 
 <template>
   <div
+    v-if="enabled"
     :class="[positionClasses[position], sizeClasses[size], 'pointer-events-none print:hidden']"
   >
     <img
