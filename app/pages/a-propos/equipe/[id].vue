@@ -2,8 +2,9 @@
 import type { UserPublicProfile } from '~/composables/usePublicUserApi'
 
 const route = useRoute()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const localePath = useLocalePath()
+const { siteUrl } = useRuntimeConfig().public
 const { getUserProfile, getFullName } = usePublicUserApi()
 
 const userId = route.params.id as string
@@ -98,6 +99,7 @@ const biographyPlainText = computed(() => {
 })
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
 useSeoMeta({
   title: () => fullName.value
     ? t('team.profile.seo.title', { name: fullName.value })
@@ -108,7 +110,19 @@ useSeoMeta({
     ? t('team.profile.seo.title', { name: fullName.value })
     : t('team.seo.title'),
   ogDescription: () => biographyPlainText.value.substring(0, 160) || '',
-  ogImage: () => photoUrl.value ?? undefined,
+  ogUrl: () => `${siteUrl}${route.fullPath}`,
+  ogImage: () => photoUrl.value
+    ? `${siteUrl}${photoUrl.value}?variant=medium`
+    : undefined,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
+  twitterTitle: () => fullName.value
+    ? t('team.profile.seo.title', { name: fullName.value })
+    : t('team.seo.title'),
+  twitterDescription: () => biographyPlainText.value.substring(0, 160) || '',
+  twitterImage: () => photoUrl.value
+    ? `${siteUrl}${photoUrl.value}?variant=medium`
+    : undefined,
 })
 </script>
 

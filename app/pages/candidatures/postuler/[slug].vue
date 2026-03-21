@@ -3,7 +3,8 @@ import type { ApplicationCallPublicWithDetails } from '~/types/api'
 import type { ProgramPublic } from '~/composables/usePublicProgramsApi'
 
 const route = useRoute()
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const { public: { siteUrl } } = useRuntimeConfig()
 const localePath = useLocalePath()
 
 const { getCallBySlug } = usePublicCallsApi()
@@ -127,9 +128,16 @@ const breadcrumb = computed(() => [
 ])
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+
 useSeoMeta({
   title: () => call.value ? `${t('candidatures.applyTo')} ${call.value.title}` : t('candidatures.apply'),
   description: () => call.value?.description || t('candidatures.applyDescription'),
+  ogTitle: () => call.value ? `${t('candidatures.applyTo')} ${call.value.title}` : t('candidatures.apply'),
+  ogDescription: () => call.value?.description || t('candidatures.applyDescription'),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 </script>
 

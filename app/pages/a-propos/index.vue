@@ -1,6 +1,8 @@
 <script setup lang="ts">
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { listContents } = useEditorialApi()
+const { public: { siteUrl } } = useRuntimeConfig()
+const route = useRoute()
 
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, getRawContent, loadContent } = useEditorialContent('about')
@@ -9,12 +11,15 @@ const { getContent, getRawContent, loadContent } = useEditorialContent('about')
 const { getMediaUrl } = useMediaApi()
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
 useSeoMeta({
   title: () => t('about.seo.title'),
   description: () => t('about.seo.description'),
   ogTitle: () => t('about.seo.title'),
   ogDescription: () => t('about.seo.description'),
-  ogImage: undefined,
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 // Fallback values for stats (used if editorial API not available)

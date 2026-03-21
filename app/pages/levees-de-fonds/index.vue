@@ -1,13 +1,22 @@
 <script setup lang="ts">
 import type { FundraiserDisplay } from '~/types/fundraising'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const route = useRoute()
 const localePath = useLocalePath()
+const { public: { siteUrl } } = useRuntimeConfig()
 const { listPublishedFundraisers, transformToDisplay, formatCurrency } = usePublicFundraisingApi()
 
-useHead({
-  title: t('leveesDeFonds.seo.title'),
-  meta: [{ name: 'description', content: t('leveesDeFonds.seo.description') }],
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+
+useSeoMeta({
+  title: () => t('leveesDeFonds.seo.title'),
+  description: () => t('leveesDeFonds.seo.description'),
+  ogTitle: () => t('leveesDeFonds.seo.title'),
+  ogDescription: () => t('leveesDeFonds.seo.description'),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 const fundraisers = ref<FundraiserDisplay[]>([])

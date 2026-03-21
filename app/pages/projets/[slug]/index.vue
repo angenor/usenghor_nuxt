@@ -5,6 +5,7 @@ import type { ProjectPublicDisplay } from '~/composables/usePublicProjectsApi'
 const route = useRoute()
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
+const { siteUrl } = useRuntimeConfig().public
 const {
   getProjectBySlug,
   formatDate,
@@ -118,10 +119,24 @@ const getLocalizedSummary = computed(() => {
 })
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+
 useSeoMeta({
   title: () => `${getLocalizedTitle.value} | ${t('projets.hero.title')}`,
+  ogTitle: () => `${getLocalizedTitle.value} | ${t('projets.hero.title')}`,
   description: () => getLocalizedSummary.value,
-  ogImage: () => project.value ? getCoverImageUrl(project.value) ?? undefined : undefined,
+  ogDescription: () => getLocalizedSummary.value,
+  ogUrl: () => `${siteUrl}${route.fullPath}`,
+  ogImage: () => (project.value as any)?.cover_image_external_id
+    ? `${siteUrl}/api/public/media/${(project.value as any).cover_image_external_id}/download?variant=medium`
+    : undefined,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
+  twitterTitle: () => `${getLocalizedTitle.value} | ${t('projets.hero.title')}`,
+  twitterDescription: () => getLocalizedSummary.value,
+  twitterImage: () => (project.value as any)?.cover_image_external_id
+    ? `${siteUrl}/api/public/media/${(project.value as any).cover_image_external_id}/download?variant=medium`
+    : undefined,
 })
 
 // First category name

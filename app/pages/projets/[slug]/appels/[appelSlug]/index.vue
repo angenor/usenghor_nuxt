@@ -10,6 +10,7 @@
 
 const route = useRoute()
 const { t, locale } = useI18n()
+const { public: { siteUrl } } = useRuntimeConfig()
 const localePath = useLocalePath()
 const { getProjectBySlug, getOngoingCalls, getUpcomingCalls } = usePublicProjectsApi()
 
@@ -68,9 +69,16 @@ const getProjectTitle = computed(() => project.value?.title || '')
 const getCallTitle = computed(() => call.value?.title || '')
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+
 useSeoMeta({
   title: () => `${getCallTitle.value} | ${getProjectTitle.value}`,
   description: () => call.value?.description || '',
+  ogTitle: () => `${getCallTitle.value} | ${getProjectTitle.value}`,
+  ogDescription: () => call.value?.description || '',
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 // Format deadline

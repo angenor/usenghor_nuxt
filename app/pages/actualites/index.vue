@@ -4,6 +4,8 @@ import type { ApplicationCallPublic, CallType } from '~/types/api'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
+const { public: { siteUrl } } = useRuntimeConfig()
+const route = useRoute()
 const { getAllPublishedNews } = usePublicNewsApi()
 
 // Extraire le texte brut d'un contenu HTML
@@ -25,9 +27,16 @@ function getCoverImageUrl(item: NewsDisplay | any, variant: 'low' | 'medium' | '
 }
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+
 useSeoMeta({
   title: () => t('actualites.seo.title'),
-  description: () => t('actualites.seo.description')
+  description: () => t('actualites.seo.description'),
+  ogTitle: () => t('actualites.seo.title'),
+  ogDescription: () => t('actualites.seo.description'),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 // Mapping des types API vers les clés i18n

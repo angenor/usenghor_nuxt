@@ -12,13 +12,21 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const route = useRoute()
 const router = useRouter()
+const { public: { siteUrl } } = useRuntimeConfig()
 
 const { listCalls } = usePublicCallsApi()
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+
 useSeoMeta({
   title: () => `${t('actualites.calls.title')} | ${t('actualites.seo.title')}`,
-  description: () => t('actualites.calls.subtitle')
+  description: () => t('actualites.calls.subtitle'),
+  ogTitle: () => `${t('actualites.calls.title')} | ${t('actualites.seo.title')}`,
+  ogDescription: () => t('actualites.calls.subtitle'),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 // Mapping des types API vers les clés i18n

@@ -4,6 +4,7 @@ import type { Testimonial, TestimonialData } from '~/types/api'
 import { TESTIMONIAL_KEY_PREFIX } from '~/composables/editorial-values-config'
 
 const { t, locale } = useI18n()
+const { public: { siteUrl } } = useRuntimeConfig()
 const localePath = useLocalePath()
 const {
   getAllAlumni,
@@ -61,9 +62,16 @@ onMounted(() => {
 })
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+
 useSeoMeta({
   title: () => t('alumni.seo.title'),
-  description: () => t('alumni.seo.description')
+  description: () => t('alumni.seo.description'),
+  ogTitle: () => t('alumni.seo.title'),
+  ogDescription: () => t('alumni.seo.description'),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 // Get data

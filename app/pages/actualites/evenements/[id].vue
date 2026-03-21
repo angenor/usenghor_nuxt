@@ -8,6 +8,7 @@ const { getEventBySlug, getUpcomingEvents, registerToEvent } = usePublicEventsAp
 const { getCampaignsByEntity } = usePublicSurveyApi()
 const { getCampusById, getFlagEmoji } = useMockData()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
+const { siteUrl } = useRuntimeConfig().public
 
 // Helper pour obtenir l'URL de l'image de couverture selon la variante souhaitée
 function getCoverImageUrl(item: EventPublic, variant: 'low' | 'medium' | 'original' = 'medium'): string | null {
@@ -76,10 +77,25 @@ const getLocalizedLocation = computed(() => {
 })
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+
 useSeoMeta({
   title: () => `${getLocalizedTitle.value} | ${t('actualites.events.title')}`,
+  ogTitle: () => `${getLocalizedTitle.value} | ${t('actualites.events.title')}`,
   description: () => event.value?.description || '',
-  ogImage: () => event.value ? getCoverImageUrl(event.value) ?? undefined : undefined
+  ogDescription: () => event.value?.description || '',
+  ogType: 'article',
+  ogUrl: () => `${siteUrl}${route.fullPath}`,
+  ogImage: () => (event.value as any)?.cover_image_external_id
+    ? `${siteUrl}/api/public/media/${(event.value as any).cover_image_external_id}/download?variant=medium`
+    : undefined,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
+  twitterTitle: () => `${getLocalizedTitle.value} | ${t('actualites.events.title')}`,
+  twitterDescription: () => event.value?.description || '',
+  twitterImage: () => (event.value as any)?.cover_image_external_id
+    ? `${siteUrl}/api/public/media/${(event.value as any).cover_image_external_id}/download?variant=medium`
+    : undefined,
 })
 
 // Format date

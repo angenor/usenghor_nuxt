@@ -2,6 +2,8 @@
 const { t } = useI18n()
 const localePath = useLocalePath()
 const { locale } = useI18n()
+const { public: { siteUrl } } = useRuntimeConfig()
+const route = useRoute()
 const isRtl = computed(() => locale.value === 'ar')
 
 // Contenus éditoriaux avec fallback sur i18n
@@ -11,11 +13,15 @@ const { getContent, loadContent } = useEditorialContent('team')
 await useAsyncData('editorial-team', () => loadContent())
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
 useSeoMeta({
   title: () => t('team.seo.title'),
   description: () => t('team.seo.description'),
   ogTitle: () => t('team.seo.title'),
-  ogDescription: () => t('team.seo.description')
+  ogDescription: () => t('team.seo.description'),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 // Breadcrumb

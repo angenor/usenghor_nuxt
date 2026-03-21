@@ -1,5 +1,7 @@
 <script setup lang="ts">
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const { public: { siteUrl } } = useRuntimeConfig()
+const route = useRoute()
 
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, getRawContent, loadContent } = useEditorialContent('strategy')
@@ -9,11 +11,15 @@ const { getMediaUrl } = useMediaApi()
 await useAsyncData('editorial-strategy', () => loadContent())
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
 useSeoMeta({
   title: () => t('strategy.seo.title'),
   description: () => t('strategy.seo.description'),
   ogTitle: () => t('strategy.seo.title'),
-  ogDescription: () => t('strategy.seo.description')
+  ogDescription: () => t('strategy.seo.description'),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 // Breadcrumb

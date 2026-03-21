@@ -2,7 +2,8 @@
 import type { ProjectCategoryRead, ProjectStatus } from '~/types/api'
 import type { ProjectPublicDisplay } from '~/composables/usePublicProjectsApi'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const { public: { siteUrl } } = useRuntimeConfig()
 const localePath = useLocalePath()
 const {
   listProjects,
@@ -26,9 +27,16 @@ const { getContent, loadContent } = useEditorialContent('projects')
 const { getFigure, loadKeyFigures } = useKeyFigures()
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+
 useSeoMeta({
   title: () => t('projets.seo.title'),
   description: () => t('projets.seo.description'),
+  ogTitle: () => t('projets.seo.title'),
+  ogDescription: () => t('projets.seo.description'),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 // ============================================================================

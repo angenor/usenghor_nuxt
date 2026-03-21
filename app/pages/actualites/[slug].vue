@@ -6,6 +6,7 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getNewsBySlug: getPublicNewsBySlug, getAllPublishedNews } = usePublicNewsApi()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
+const { siteUrl } = useRuntimeConfig().public
 
 // Helper pour obtenir l'URL de l'image de couverture selon la variante souhaitée
 function getCoverImageUrl(item: NewsDisplay, variant: 'low' | 'medium' | 'original' = 'medium'): string | null {
@@ -74,10 +75,25 @@ const getLocalizedExcerpt = computed(() => {
 })
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+
 useSeoMeta({
   title: () => `${getLocalizedTitle.value} | ${t('actualites.seo.title')}`,
+  ogTitle: () => `${getLocalizedTitle.value} | ${t('actualites.seo.title')}`,
   description: () => getLocalizedExcerpt.value,
-  ogImage: () => news.value ? getCoverImageUrl(news.value) ?? undefined : undefined
+  ogDescription: () => getLocalizedExcerpt.value,
+  ogType: 'article',
+  ogUrl: () => `${siteUrl}${route.fullPath}`,
+  ogImage: () => news.value?.cover_image_external_id
+    ? `${siteUrl}/api/public/media/${news.value.cover_image_external_id}/download?variant=medium`
+    : undefined,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
+  twitterTitle: () => `${getLocalizedTitle.value} | ${t('actualites.seo.title')}`,
+  twitterDescription: () => getLocalizedExcerpt.value,
+  twitterImage: () => news.value?.cover_image_external_id
+    ? `${siteUrl}/api/public/media/${news.value.cover_image_external_id}/download?variant=medium`
+    : undefined,
 })
 
 // Format date

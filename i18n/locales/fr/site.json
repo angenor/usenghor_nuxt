@@ -1,4 +1,8 @@
 {
+  "og": {
+    "siteName": "Université Senghor",
+    "defaultDescription": "Université Senghor - Opérateur direct de la Francophonie à Alexandrie, Égypte"
+  },
   "site": {
     "seo": {
       "title": "Campus d'Alexandrie | Université Senghor",

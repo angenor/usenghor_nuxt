@@ -1,7 +1,8 @@
 <script setup lang="ts">
 const route = useRoute()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const localePath = useLocalePath()
+const { siteUrl } = useRuntimeConfig().public
 const { getCampusBySlug, getCoverImageUrl, getCampusFlagEmoji } = usePublicCampusApi()
 
 // Valid tabs (in display order)
@@ -33,12 +34,23 @@ const descriptionPlainText = computed(() => {
 })
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
 useSeoMeta({
   title: () => `${campus.value?.name || ''} | ${t('partners.seo.title')}`,
   description: () => descriptionPlainText.value.substring(0, 160) || t('partners.seo.description'),
   ogTitle: () => `${campus.value?.name || ''} | ${t('partners.seo.title')}`,
   ogDescription: () => descriptionPlainText.value.substring(0, 160) || t('partners.seo.description'),
-  ogImage: () => campus.value ? (getCoverImageUrl(campus.value) ?? undefined) : undefined
+  ogUrl: () => `${siteUrl}${route.fullPath}`,
+  ogImage: () => campus.value
+    ? (getCoverImageUrl(campus.value) ? `${siteUrl}${getCoverImageUrl(campus.value)}?variant=medium` : undefined)
+    : undefined,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
+  twitterTitle: () => `${campus.value?.name || ''} | ${t('partners.seo.title')}`,
+  twitterDescription: () => descriptionPlainText.value.substring(0, 160) || t('partners.seo.description'),
+  twitterImage: () => campus.value
+    ? (getCoverImageUrl(campus.value) ? `${siteUrl}${getCoverImageUrl(campus.value)}?variant=medium` : undefined)
+    : undefined,
 })
 
 // Breadcrumb

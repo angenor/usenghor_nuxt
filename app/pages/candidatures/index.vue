@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { t, locale } = useI18n()
+const { public: { siteUrl } } = useRuntimeConfig()
 
 // Liste des documents requis
 const documentsList = [
@@ -21,9 +22,16 @@ const route = useRoute()
 const { getFormationsWithOpenApplications, getFormationBySlug } = useMockData()
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+
 useSeoMeta({
   title: () => t('formations.candidature.seo.title'),
-  description: () => t('formations.candidature.seo.description')
+  description: () => t('formations.candidature.seo.description'),
+  ogTitle: () => t('formations.candidature.seo.title'),
+  ogDescription: () => t('formations.candidature.seo.description'),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 // Get formations with open applications

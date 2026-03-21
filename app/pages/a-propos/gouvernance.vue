@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { PaysBailleur } from '@bank/mock-data/pays-bailleurs'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const { public: { siteUrl } } = useRuntimeConfig()
+const route = useRoute()
 const { conseilAdministration, getCAPresident } = useMockData()
 const {
   laterMembers,
@@ -19,11 +21,15 @@ const { getContent, getRawContent, loadContent } = useEditorialContent('governan
 await useAsyncData('editorial-governance', () => loadContent())
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
 useSeoMeta({
   title: () => getContent('governance.title'),
   description: () => getContent('governance.subtitle'),
   ogTitle: () => getContent('governance.title'),
   ogDescription: () => getContent('governance.subtitle'),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 // Breadcrumb

@@ -3,7 +3,9 @@ import { computed } from 'vue'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const { public: { siteUrl } } = useRuntimeConfig()
+const route = useRoute()
 
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, getRawContent, loadContent } = useEditorialContent('history')
@@ -23,12 +25,15 @@ function resolveImage(editorialKey: string, fallbackSrc: string | null, fallback
 }
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
 useSeoMeta({
   title: () => t('history.title'),
   description: () => t('history.subtitle'),
   ogTitle: () => t('history.title'),
   ogDescription: () => t('history.subtitle'),
-  ogImage: undefined
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 // Breadcrumb

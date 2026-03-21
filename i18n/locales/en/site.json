@@ -1,4 +1,8 @@
 {
+  "og": {
+    "siteName": "Senghor University",
+    "defaultDescription": "Senghor University - Direct operator of the Francophonie in Alexandria, Egypt"
+  },
   "site": {
     "seo": {
       "title": "Alexandria Campus | Senghor University",

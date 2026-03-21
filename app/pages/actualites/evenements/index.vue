@@ -3,6 +3,8 @@ import type { EventPublic, EventType } from '~/composables/usePublicEventsApi'
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
+const { public: { siteUrl } } = useRuntimeConfig()
+const route = useRoute()
 const { getUpcomingEvents: getApiUpcomingEvents, getPastEvents: getApiPastEvents } = usePublicEventsApi()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
@@ -16,9 +18,16 @@ function getCoverImageUrl(item: EventPublic, variant: 'low' | 'medium' | 'origin
 }
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+
 useSeoMeta({
   title: () => `${t('actualites.events.title')} | ${t('actualites.seo.title')}`,
-  description: () => t('actualites.events.subtitle')
+  description: () => t('actualites.events.subtitle'),
+  ogTitle: () => `${t('actualites.events.title')} | ${t('actualites.seo.title')}`,
+  ogDescription: () => t('actualites.events.subtitle'),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 // Data loading

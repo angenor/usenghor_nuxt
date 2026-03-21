@@ -1,12 +1,21 @@
 <script setup lang="ts">
 const { t, locale } = useI18n()
+const { public: { siteUrl } } = useRuntimeConfig()
+const route = useRoute()
 const localePath = useLocalePath()
 const { uploadDocument, submitSpontaneous } = usePublicApplicationsApi()
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+
 useSeoMeta({
   title: () => t('careers.application.seo.title'),
   description: () => t('careers.application.seo.description'),
+  ogTitle: () => t('careers.application.seo.title'),
+  ogDescription: () => t('careers.application.seo.description'),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 // Breadcrumb

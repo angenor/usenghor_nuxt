@@ -11,6 +11,7 @@ const extractPlainText = (html: string | null | undefined): string => {
 const route = useRoute()
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
+const { siteUrl } = useRuntimeConfig().public
 const {
   getProgramBySlug,
   getRelatedPrograms,
@@ -170,11 +171,23 @@ const getLocalizedDuration = computed(() => {
 })
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+
 useSeoMeta({
   title: () => `${getLocalizedTitle.value} | ${t('formations.hero.title')}`,
+  ogTitle: () => `${getLocalizedTitle.value} | ${t('formations.hero.title')}`,
   description: () => getLocalizedDescription.value,
+  ogDescription: () => getLocalizedDescription.value,
+  ogUrl: () => `${siteUrl}${route.fullPath}`,
   ogImage: () => program.value?.cover_image_external_id
-    ? `/api/public/media/${program.value.cover_image_external_id}/download`
+    ? `${siteUrl}/api/public/media/${program.value.cover_image_external_id}/download?variant=medium`
+    : undefined,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
+  twitterTitle: () => `${getLocalizedTitle.value} | ${t('formations.hero.title')}`,
+  twitterDescription: () => getLocalizedDescription.value,
+  twitterImage: () => program.value?.cover_image_external_id
+    ? `${siteUrl}/api/public/media/${program.value.cover_image_external_id}/download?variant=medium`
     : undefined,
 })
 

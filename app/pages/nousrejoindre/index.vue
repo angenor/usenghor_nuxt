@@ -1,5 +1,7 @@
 <script setup lang="ts">
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const { public: { siteUrl } } = useRuntimeConfig()
+const route = useRoute()
 
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, getRawContent, loadContent } = useEditorialContent('careers')
@@ -9,11 +11,16 @@ const { getMediaUrl } = useMediaApi()
 await useAsyncData('editorial-careers', () => loadContent())
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+
 useSeoMeta({
   title: () => t('careers.seo.title'),
   description: () => t('careers.seo.description'),
   ogTitle: () => t('careers.seo.title'),
-  ogDescription: () => t('careers.seo.description')
+  ogDescription: () => t('careers.seo.description'),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 // Breadcrumb

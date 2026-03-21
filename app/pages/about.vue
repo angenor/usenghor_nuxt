@@ -1,5 +1,19 @@
 <script setup lang="ts">
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const { public: { siteUrl } } = useRuntimeConfig()
+const route = useRoute()
+
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+
+useSeoMeta({
+  title: () => t('nav.about'),
+  ogTitle: () => t('nav.about'),
+  description: () => t('mission.subtitle'),
+  ogDescription: () => t('mission.subtitle'),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
+})
 </script>
 
 <template>

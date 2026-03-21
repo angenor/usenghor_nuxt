@@ -5,7 +5,10 @@ import { contributorCategoryLabels, contributorCategoryOrder } from '~/types/fun
 const { t, locale } = useI18n()
 const route = useRoute()
 const localePath = useLocalePath()
+const { public: { siteUrl } } = useRuntimeConfig()
 const { getFundraiserBySlug, formatCurrency, resolveMediaUrl } = usePublicFundraisingApi()
+
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
 
 const slug = computed(() => route.params.slug as string)
 
@@ -13,8 +16,18 @@ const fundraiser = ref<FundraiserPublicDetail | null>(null)
 const loading = ref(true)
 const activeTab = ref<'presentation' | 'contributors' | 'news'>('presentation')
 
-useHead({
+useSeoMeta({
   title: () => fundraiser.value?.title || t('leveesDeFonds.seo.title'),
+  description: () => fundraiser.value?.summary || t('leveesDeFonds.seo.description'),
+  ogTitle: () => fundraiser.value?.title || t('leveesDeFonds.seo.title'),
+  ogDescription: () => fundraiser.value?.summary || t('leveesDeFonds.seo.description'),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogImage: () => fundraiser.value?.cover_image_external_id ? `${siteUrl}/api/public/media/${fundraiser.value.cover_image_external_id}/download?variant=medium` : undefined,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
+  twitterTitle: () => fundraiser.value?.title || t('leveesDeFonds.seo.title'),
+  twitterDescription: () => fundraiser.value?.summary || t('leveesDeFonds.seo.description'),
+  twitterImage: () => fundraiser.value?.cover_image_external_id ? `${siteUrl}/api/public/media/${fundraiser.value.cover_image_external_id}/download?variant=medium` : undefined,
 })
 
 const localeForCurrency = computed(() => {

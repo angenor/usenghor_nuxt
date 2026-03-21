@@ -9,7 +9,8 @@ const extractPlainText = (content: string | null | undefined): string => {
 }
 
 const route = useRoute()
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const { public: { siteUrl } } = useRuntimeConfig()
 const localePath = useLocalePath()
 const {
   listProgramsByType,
@@ -223,9 +224,16 @@ if (programsData.value && programsData.value.length > 0) {
 }
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+
 useSeoMeta({
   title: () => t('formations.seo.titleType', { type: t(`formations.types.${typeSlug.value}`) }),
   description: () => t('formations.seo.descriptionType', { type: t(`formations.types.${typeSlug.value}`) }),
+  ogTitle: () => t('formations.seo.titleType', { type: t(`formations.types.${typeSlug.value}`) }),
+  ogDescription: () => t('formations.seo.descriptionType', { type: t(`formations.types.${typeSlug.value}`) }),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 // Breadcrumb

@@ -3,6 +3,8 @@ import type { SiteFacility } from '~/composables/useMockData'
 import { useFooterDataStore } from '~/stores/footerData'
 
 const { t, locale } = useI18n()
+const { public: { siteUrl } } = useRuntimeConfig()
+const route = useRoute()
 const localePath = useLocalePath()
 const { getAllSiteFacilities } = useMockData()
 const { getMediaUrl } = useMediaApi()
@@ -17,9 +19,16 @@ const { getContent, loadContent } = useEditorialContent('site')
 const { getFigure, loadKeyFigures } = useKeyFigures()
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+
 useSeoMeta({
   title: () => t('site.seo.title'),
-  description: () => t('site.seo.description')
+  description: () => t('site.seo.description'),
+  ogTitle: () => t('site.seo.title'),
+  ogDescription: () => t('site.seo.description'),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 // Chargement SSR du contenu éditorial

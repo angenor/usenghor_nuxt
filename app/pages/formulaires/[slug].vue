@@ -1,7 +1,10 @@
 <script setup lang="ts">
 const route = useRoute()
-const { locale } = useI18n()
+const { locale, t } = useI18n()
+const { public: { siteUrl } } = useRuntimeConfig()
 const { getSurveyBySlug } = usePublicSurveyApi()
+
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
 
 const slug = route.params.slug as string
 
@@ -48,6 +51,16 @@ const localizedDescription = computed(() => {
   if (!campaign.value) return ''
   const key = `description_${locale.value}` as string
   return campaign.value[key] || campaign.value.description_fr
+})
+
+useSeoMeta({
+  title: () => localizedTitle.value || t('formulaires.seo.title'),
+  ogTitle: () => localizedTitle.value || t('formulaires.seo.title'),
+  description: () => localizedDescription.value || t('formulaires.seo.description'),
+  ogDescription: () => localizedDescription.value || t('formulaires.seo.description'),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 function handleComplete(data: Record<string, any>) {

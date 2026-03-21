@@ -14,6 +14,7 @@ import type { ProgramPublic } from '~/composables/usePublicProgramsApi'
 const route = useRoute()
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
+const { public: { siteUrl } } = useRuntimeConfig()
 const {
   getSectorByCode,
   findServiceBySlug,
@@ -284,6 +285,7 @@ const entityColor = computed(() => {
 const colorClasses = computed(() => colorPalette[entityColor.value] ?? colorPalette.blue)
 
 // SEO
+const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
 useSeoMeta({
   title: () => entityType === 'secteur'
     ? t('organizationDetail.seo.titleSector', { name: entityName.value })
@@ -292,6 +294,16 @@ useSeoMeta({
     type: t(`organizationDetail.types.${entityType === 'secteur' ? 'sector' : 'service'}`),
     name: entityName.value,
   }),
+  ogTitle: () => entityType === 'secteur'
+    ? t('organizationDetail.seo.titleSector', { name: entityName.value })
+    : t('organizationDetail.seo.titleService', { name: entityName.value }),
+  ogDescription: () => t('organizationDetail.seo.description', {
+    type: t(`organizationDetail.types.${entityType === 'secteur' ? 'sector' : 'service'}`),
+    name: entityName.value,
+  }),
+  ogUrl: () => siteUrl + route.fullPath,
+  ogLocale: () => localeMap[locale.value] || 'fr_FR',
+  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
 // Breadcrumb

@@ -19,9 +19,11 @@ COPY . .
 # Build arguments for environment
 ARG NUXT_PUBLIC_API_BASE=http://localhost:8000
 ARG NUXT_PUBLIC_API_BASE_URL=http://localhost:8000
+ARG NUXT_PUBLIC_SITE_URL=https://usenghor-francophonie.org
 
 ENV NUXT_PUBLIC_API_BASE=$NUXT_PUBLIC_API_BASE
 ENV NUXT_PUBLIC_API_BASE_URL=$NUXT_PUBLIC_API_BASE_URL
+ENV NUXT_PUBLIC_SITE_URL=$NUXT_PUBLIC_SITE_URL
 
 # Increase Node.js memory limit for build
 ENV NODE_OPTIONS="--max-old-space-size=3072"
