@@ -106,15 +106,6 @@ watch(selectedFilter, () => {
 // Check if charter operator (for styling)
 const isCharterOperator = (partner: PartnerPublic) => checkIsCharterOperator(partner)
 
-// Compteur de pays unique
-const uniqueCountriesCount = computed(() => {
-  const countries = new Set(
-    allPartners.value
-      .map(p => p.country_iso_code)
-      .filter(Boolean)
-  )
-  return countries.size
-})
 </script>
 
 <template>
@@ -364,21 +355,6 @@ const uniqueCountriesCount = computed(() => {
           <p class="text-gray-500 dark:text-gray-400">{{ t('partners.campus.noResults') }}</p>
         </div>
 
-        <!-- Stats -->
-        <div class="mt-12 flex flex-wrap justify-center gap-8 text-center">
-          <div>
-            <div class="text-3xl font-bold text-brand-blue-600 dark:text-brand-blue-400">{{ allPartners.length }}</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">{{ t('partners.campus.stats.institutions') }}</div>
-          </div>
-          <div>
-            <div class="text-3xl font-bold text-brand-blue-600 dark:text-brand-blue-400">{{ uniqueCountriesCount }}+</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">{{ t('partners.campus.stats.countries') }}</div>
-          </div>
-          <div>
-            <div class="text-3xl font-bold text-brand-blue-600 dark:text-brand-blue-400">5</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">{{ t('partners.campus.stats.continents') }}</div>
-          </div>
-        </div>
       </template>
     </div>
   </section>
