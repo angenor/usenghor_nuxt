@@ -257,10 +257,10 @@ export const aboutPageSections: PageSection[] = [
     description: 'Libellés des statistiques (les valeurs numériques sont dans Chiffres clés)',
     icon: 'chart-bar',
     color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-    editorialKeys: ['about.stats.years.label', 'about.stats.countries.label', 'about.stats.alumni.label', 'about.stats.programs.label'],
+    editorialKeys: ['about.stats.years.label', 'about.stats.partners.label', 'about.stats.alumni.label', 'about.stats.programs.label'],
     fields: [
       { key: 'about.stats.years.label', label: 'Libellé Années', description: 'Ex: "années d\'existence"', type: 'text', editorialKey: 'about.stats.years.label', editable: true },
-      { key: 'about.stats.countries.label', label: 'Libellé Pays', description: 'Ex: "pays bailleurs"', type: 'text', editorialKey: 'about.stats.countries.label', editable: true },
+      { key: 'about.stats.partners.label', label: 'Libellé Partenaires', description: 'Ex: "partenaires"', type: 'text', editorialKey: 'about.stats.partners.label', editable: true },
       { key: 'about.stats.alumni.label', label: 'Libellé Diplômés', description: 'Ex: "diplômés"', type: 'text', editorialKey: 'about.stats.alumni.label', editable: true },
       { key: 'about.stats.programs.label', label: 'Libellé Formations', description: 'Ex: "formations"', type: 'text', editorialKey: 'about.stats.programs.label', editable: true },
     ],

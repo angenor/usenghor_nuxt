@@ -141,7 +141,7 @@ const EDITORIAL_TO_I18N_MAP: Partial<Record<string, string>> = {
 
   // About page - Stats
   'about.stats.years.label': 'about.stats.years',
-  'about.stats.countries.label': 'about.stats.countries',
+  'about.stats.partners.label': 'about.stats.partners',
   'about.stats.alumni.label': 'about.stats.alumni',
   'about.stats.programs.label': 'about.stats.programs',
 

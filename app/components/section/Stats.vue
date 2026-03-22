@@ -2,6 +2,7 @@
 interface Stat {
   value: string
   label: string
+  to?: string
 }
 
 interface Props {
@@ -12,6 +13,8 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   backgroundImage: '/images/bg/bg_stats_section.jpeg'
 })
+
+const localePath = useLocalePath()
 
 const statsRef = ref<HTMLElement | null>(null)
 const hasAnimated = ref(false)
@@ -101,12 +104,26 @@ onUnmounted(() => {
           :class="{ 'translate-y-0 opacity-100': hasAnimated, 'translate-y-4 opacity-0': !hasAnimated }"
           :style="{ transitionDelay: `${index * 100}ms` }"
         >
-          <div class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-2 tabular-nums drop-shadow-lg">
-            {{ animatedValues[index] || 0 }}{{ getSuffix(stat.value) }}
-          </div>
-          <div class="text-white/90 text-sm sm:text-base font-medium">
-            {{ stat.label }}
-          </div>
+          <NuxtLink
+            v-if="stat.to"
+            :to="localePath(stat.to)"
+            class="block cursor-pointer hover:scale-105 transition-transform duration-300"
+          >
+            <div class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-2 tabular-nums drop-shadow-lg">
+              {{ animatedValues[index] || 0 }}{{ getSuffix(stat.value) }}
+            </div>
+            <div class="text-white/90 text-sm sm:text-base font-medium underline decoration-white/40 underline-offset-4">
+              {{ stat.label }}
+            </div>
+          </NuxtLink>
+          <template v-else>
+            <div class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-2 tabular-nums drop-shadow-lg">
+              {{ animatedValues[index] || 0 }}{{ getSuffix(stat.value) }}
+            </div>
+            <div class="text-white/90 text-sm sm:text-base font-medium">
+              {{ stat.label }}
+            </div>
+          </template>
         </div>
       </div>
     </div>

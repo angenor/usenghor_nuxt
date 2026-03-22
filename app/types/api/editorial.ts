@@ -245,7 +245,7 @@ export type ValueSectionKey =
   | 'about.mission.cta.governance'
   // Page À propos - Stats
   | 'about.stats.years.label'
-  | 'about.stats.countries.label'
+  | 'about.stats.partners.label'
   | 'about.stats.alumni.label'
   | 'about.stats.programs.label'
   // Page À propos - Engagements

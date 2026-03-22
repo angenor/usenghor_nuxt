@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const { t, locale } = useI18n()
 const { listContents } = useEditorialApi()
+const { getAllPartners } = usePublicPartnersApi()
 const { public: { siteUrl } } = useRuntimeConfig()
 const route = useRoute()
 
@@ -25,7 +26,7 @@ useSeoMeta({
 // Fallback values for stats (used if editorial API not available)
 const statsFallback = ref({
   stats_years: '30+',
-  stats_donor_countries: '6',
+  stats_partners: '0',
   stats_alumni: '4200+',
   stats_programs: '50+',
 })
@@ -33,24 +34,31 @@ const statsFallback = ref({
 // Key figures loaded from editorial API
 const keyFigures = ref({
   stats_years: '',
-  stats_donor_countries: '',
+  stats_partners: '',
   stats_alumni: '',
   stats_programs: '',
 })
 
+// Nombre de partenaires chargé depuis l'API
+const partnersCount = ref(0)
+
 // Chargement SSR du contenu éditorial
 await useAsyncData('editorial-about', () => loadContent())
 
-// Charger les chiffres clés (client-side)
+// Charger les chiffres clés et le nombre de partenaires (client-side)
 onMounted(async () => {
   try {
-    const response = await listContents({ value_type: 'number', limit: 50 })
-    for (const item of response.items) {
+    const [editorialResponse, partners] = await Promise.all([
+      listContents({ value_type: 'number', limit: 50 }),
+      getAllPartners(),
+    ])
+    for (const item of editorialResponse.items) {
       if (item.value && Object.prototype.hasOwnProperty.call(keyFigures.value, item.key)) {
         // @ts-expect-error dynamic key assignment
         keyFigures.value[item.key] = item.value
       }
     }
+    partnersCount.value = partners.length
   }
   catch {
     console.warn('Chiffres clés non disponibles, utilisation des fallbacks')
@@ -64,8 +72,9 @@ const stats = computed(() => [
     label: getContent('about.stats.years.label', 'about.stats.years'),
   },
   {
-    value: keyFigures.value.stats_donor_countries || statsFallback.value.stats_donor_countries,
-    label: getContent('about.stats.countries.label', 'about.stats.countries'),
+    value: partnersCount.value > 0 ? String(partnersCount.value) : keyFigures.value.stats_partners || statsFallback.value.stats_partners,
+    label: getContent('about.stats.partners.label', 'about.stats.partners'),
+    to: '/a-propos/partenaires',
   },
   {
     value: keyFigures.value.stats_alumni || statsFallback.value.stats_alumni,
