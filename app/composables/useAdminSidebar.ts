@@ -175,8 +175,24 @@ export function useAdminSidebar() {
           label: 'Levées de fonds',
           icon: 'fa-solid fa-hand-holding-dollar',
           route: '/admin/contenus/levees-de-fonds',
-          permissions: ['news.view'],
+          permissions: ['fundraisers.view'],
           description: 'Campagnes de levée de fonds'
+        },
+        {
+          id: 'fundraisers-interest',
+          label: 'Manifestations d\'intérêt',
+          icon: 'fa-solid fa-envelope-open-text',
+          route: '/admin/contenus/levees-de-fonds/interets',
+          permissions: ['fundraisers.view'],
+          description: 'Manifestations d\'intérêt des visiteurs'
+        },
+        {
+          id: 'fundraisers-editorial',
+          label: 'Sections éditoriales',
+          icon: 'fa-solid fa-layer-group',
+          route: '/admin/contenus/levees-de-fonds/sections-editoriales',
+          permissions: ['fundraisers.view'],
+          description: 'Contenu éditorial de la page levées de fonds'
         }
       ]
     },

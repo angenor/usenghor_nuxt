@@ -2,12 +2,35 @@
   "leveesDeFonds": {
     "seo": {
       "title": "Levées de fonds",
-      "description": "Découvrez les campagnes de levée de fonds de l'Université Senghor"
+      "description": "Découvrez les campagnes de levée de fonds de l'Université Senghor et contribuez au développement de l'enseignement supérieur en Afrique"
     },
     "hero": {
       "badge": "Financement",
       "title": "Levées de fonds",
       "subtitle": "Soutenez les projets de l'Université Senghor et contribuez au développement de l'enseignement supérieur en Afrique"
+    },
+    "anchors": {
+      "editorial": "Pourquoi contribuer",
+      "stats": "Chiffres clés",
+      "activeCampaign": "Campagne en cours",
+      "pastCampaigns": "Campagnes passées",
+      "contributors": "Contributeurs",
+      "news": "Actualités"
+    },
+    "sections": {
+      "globalStats": "Chiffres clés",
+      "totalRaised": "Total collecté",
+      "totalContributors": "Contributeurs",
+      "activeCampaigns": "Campagne active | Campagnes actives",
+      "completedCampaigns": "Campagne clôturée | Campagnes clôturées",
+      "activeCampaign": "Campagne en cours",
+      "pastCampaigns": "Campagnes passées",
+      "noPastCampaigns": "Aucune campagne passée pour le moment.",
+      "allContributors": "Nos contributeurs",
+      "allContributorsSubtitle": "Les partenaires qui soutiennent nos projets",
+      "campaignsCount": "campagne | campagnes",
+      "relatedNews": "Actualités liées",
+      "noRelatedNews": "Aucune actualité liée aux levées de fonds pour le moment."
     },
     "list": {
       "title": "Nos campagnes",
@@ -21,17 +44,20 @@
     "status": {
       "draft": "Brouillon",
       "active": "En cours",
-      "completed": "Terminée"
+      "completed": "Clôturée"
     },
     "detail": {
       "breadcrumb": "Levées de fonds",
+      "closedBadge": "Campagne clôturée",
       "tabs": {
         "presentation": "Présentation",
         "contributors": "Contributeurs",
+        "media": "Médiathèque",
         "news": "Actualités"
       },
       "presentation": {
         "title": "À propos de cette campagne",
+        "reason": "Pourquoi cette levée de fonds ?",
         "goalAmount": "Objectif financier",
         "totalRaised": "Total levé",
         "progress": "Progression",
@@ -45,7 +71,12 @@
           "company": "Entreprises"
         },
         "empty": "Aucun contributeur pour le moment.",
-        "categoryEmpty": "Aucun contributeur dans cette catégorie."
+        "categoryEmpty": "Aucun contributeur dans cette catégorie.",
+        "amountHidden": "Montant non communiqué"
+      },
+      "media": {
+        "title": "Médiathèque",
+        "empty": "Aucun média associé à cette campagne."
       },
       "news": {
         "title": "Actualités liées",
@@ -54,6 +85,23 @@
         "publishedAt": "Publié le"
       }
     },
+    "interest": {
+      "button": "Manifester mon intérêt",
+      "title": "Manifester votre intérêt",
+      "subtitle": "Remplissez le formulaire ci-dessous pour nous signaler votre intérêt à contribuer à cette campagne.",
+      "fullName": "Nom complet",
+      "fullNamePlaceholder": "Votre nom complet",
+      "email": "Adresse email",
+      "emailPlaceholder": "votre.email{'@'}exemple.com",
+      "message": "Message (optionnel)",
+      "messagePlaceholder": "Décrivez votre intérêt ou le type de contribution que vous envisagez...",
+      "submit": "Envoyer",
+      "sending": "Envoi en cours...",
+      "success": "Votre intérêt a bien été enregistré. Un email de confirmation vous a été envoyé.",
+      "updated": "Votre intérêt a été mis à jour.",
+      "error": "Une erreur est survenue. Veuillez réessayer.",
+      "spamError": "Vérification de sécurité échouée. Veuillez réessayer."
+    },
     "admin": {
       "title": "Levées de fonds",
       "create": "Nouvelle levée de fonds",
@@ -61,12 +109,22 @@
       "form": {
         "title": "Titre",
         "slug": "Slug",
+        "slugAuto": "Généré automatiquement",
         "description": "Description",
+        "descriptionFr": "Description (français)",
+        "descriptionEn": "Description (anglais)",
+        "descriptionAr": "Description (arabe)",
+        "reason": "Raison de la levée",
+        "reasonFr": "Raison (français)",
+        "reasonEn": "Raison (anglais)",
+        "reasonAr": "Raison (arabe)",
         "coverImage": "Image de couverture",
         "goalAmount": "Objectif financier (EUR)",
         "status": "Statut",
         "save": "Enregistrer",
-        "cancel": "Annuler"
+        "cancel": "Annuler",
+        "creating": "Création en cours...",
+        "saving": "Enregistrement..."
       },
       "contributors": {
         "title": "Contributeurs",
@@ -77,6 +135,7 @@
         "nameAr": "Nom (arabe)",
         "category": "Catégorie",
         "amount": "Montant (EUR)",
+        "showAmountPublicly": "Afficher le montant publiquement",
         "logo": "Logo",
         "save": "Enregistrer",
         "delete": "Supprimer",
@@ -90,13 +149,56 @@
         "confirmDissociate": "Êtes-vous sûr de vouloir dissocier cette actualité ?",
         "empty": "Aucune actualité associée."
       },
+      "interest": {
+        "title": "Manifestations d'intérêt",
+        "filterCampaign": "Filtrer par campagne",
+        "filterStatus": "Filtrer par statut",
+        "search": "Rechercher par nom ou email...",
+        "export": "Exporter CSV",
+        "markContacted": "Marquer comme contacté",
+        "markNew": "Marquer comme nouveau",
+        "empty": "Aucune manifestation d'intérêt.",
+        "newBadge": "nouveau | nouveaux",
+        "allCampaigns": "Toutes les campagnes",
+        "allStatuses": "Tous les statuts"
+      },
+      "editorial": {
+        "title": "Sections éditoriales",
+        "subtitle": "Gérez le contenu de la page principale des levées de fonds",
+        "sectionTitle": "Titre de la section",
+        "addItem": "Ajouter un item",
+        "editItem": "Modifier l'item",
+        "deleteItem": "Supprimer l'item",
+        "confirmDeleteItem": "Êtes-vous sûr de vouloir supprimer cet item ?",
+        "icon": "Icône",
+        "titleFr": "Titre (français)",
+        "titleEn": "Titre (anglais)",
+        "titleAr": "Titre (arabe)",
+        "descriptionFr": "Description (français)",
+        "descriptionEn": "Description (anglais)",
+        "descriptionAr": "Description (arabe)",
+        "displayOrder": "Ordre d'affichage",
+        "active": "Actif"
+      },
+      "media": {
+        "title": "Médiathèque",
+        "add": "Ajouter un média",
+        "captionFr": "Légende (français)",
+        "captionEn": "Légende (anglais)",
+        "captionAr": "Légende (arabe)",
+        "selectMedia": "Sélectionner un média",
+        "empty": "Aucun média associé."
+      },
       "stats": {
         "total": "Total",
         "draft": "Brouillons",
         "active": "En cours",
-        "completed": "Terminées",
+        "completed": "Clôturées",
         "totalGoal": "Objectif total",
-        "totalRaised": "Total levé"
+        "totalRaised": "Total levé",
+        "totalContributors": "Contributeurs",
+        "totalInterest": "Manifestations d'intérêt",
+        "newInterest": "Nouvelles"
       },
       "messages": {
         "created": "Levée de fonds créée avec succès",
@@ -106,7 +208,15 @@
         "contributorUpdated": "Contributeur mis à jour avec succès",
         "contributorDeleted": "Contributeur supprimé avec succès",
         "newsAssociated": "Actualité associée avec succès",
-        "newsDissociated": "Actualité dissociée avec succès"
+        "newsDissociated": "Actualité dissociée avec succès",
+        "interestStatusUpdated": "Statut mis à jour avec succès",
+        "editorialSectionUpdated": "Section mise à jour avec succès",
+        "editorialItemCreated": "Item créé avec succès",
+        "editorialItemUpdated": "Item mis à jour avec succès",
+        "editorialItemDeleted": "Item supprimé avec succès",
+        "mediaAdded": "Média ajouté avec succès",
+        "mediaUpdated": "Média mis à jour avec succès",
+        "mediaRemoved": "Média supprimé avec succès"
       },
       "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette levée de fonds ?"
     }

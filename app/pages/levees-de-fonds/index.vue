@@ -1,127 +1,232 @@
 <script setup lang="ts">
-import type { FundraiserDisplay } from '~/types/fundraising'
+import type {
+  AllContributorsItem,
+  EditorialSectionPublic,
+  FundraiserDisplay,
+  GlobalStats,
+} from '~/types/fundraising'
 
 const { t, locale } = useI18n()
-const route = useRoute()
 const localePath = useLocalePath()
-const { public: { siteUrl } } = useRuntimeConfig()
-const { listPublishedFundraisers, transformToDisplay, formatCurrency } = usePublicFundraisingApi()
+const {
+  listPublishedFundraisers,
+  getGlobalStats,
+  getAllContributors,
+  getEditorialSections,
+  transformToDisplay,
+  formatCurrency,
+} = usePublicFundraisingApi()
 
-const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
-
+// SEO
 useSeoMeta({
   title: () => t('leveesDeFonds.seo.title'),
   description: () => t('leveesDeFonds.seo.description'),
   ogTitle: () => t('leveesDeFonds.seo.title'),
   ogDescription: () => t('leveesDeFonds.seo.description'),
-  ogUrl: () => siteUrl + route.fullPath,
-  ogLocale: () => localeMap[locale.value] || 'fr_FR',
-  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
 })
 
-const fundraisers = ref<FundraiserDisplay[]>([])
+// State
 const loading = ref(true)
-const error = ref<string | null>(null)
-const currentPage = ref(1)
-const totalPages = ref(1)
+const globalStats = ref<GlobalStats | null>(null)
+const editorialSections = ref<EditorialSectionPublic[]>([])
+const activeCampaign = ref<FundraiserDisplay | null>(null)
+const pastCampaigns = ref<FundraiserDisplay[]>([])
+const allContributors = ref<AllContributorsItem[]>([])
 
-async function loadFundraisers(page: number = 1) {
+// Anchor sections for nav
+const anchorSections = computed(() => {
+  const sections = []
+  if (editorialSections.value.length > 0) {
+    sections.push({ id: 'editorial', label: t('leveesDeFonds.anchors.editorial') })
+  }
+  sections.push({ id: 'stats', label: t('leveesDeFonds.anchors.stats') })
+  if (activeCampaign.value) {
+    sections.push({ id: 'active-campaign', label: t('leveesDeFonds.anchors.activeCampaign') })
+  }
+  if (pastCampaigns.value.length > 0) {
+    sections.push({ id: 'past-campaigns', label: t('leveesDeFonds.anchors.pastCampaigns') })
+  }
+  if (allContributors.value.length > 0) {
+    sections.push({ id: 'contributors', label: t('leveesDeFonds.anchors.contributors') })
+  }
+  return sections
+})
+
+// Currency locale
+const currencyLocale = computed(() => {
+  if (locale.value === 'ar') return 'ar-EG'
+  if (locale.value === 'en') return 'en-US'
+  return 'fr-FR'
+})
+
+// Load all data
+async function loadData() {
   loading.value = true
-  error.value = null
   try {
-    const response = await listPublishedFundraisers({ page, limit: 12 })
-    fundraisers.value = response.items.map(transformToDisplay)
-    totalPages.value = response.pages
-    currentPage.value = response.page
+    const [statsData, editorialData, activeData, completedData, contributorsData] = await Promise.all([
+      getGlobalStats(),
+      getEditorialSections(),
+      listPublishedFundraisers({ status: 'active', limit: 1 }),
+      listPublishedFundraisers({ status: 'completed', limit: 6 }),
+      getAllContributors({ limit: 50 }),
+    ])
+
+    globalStats.value = statsData
+    editorialSections.value = editorialData.sections || []
+
+    if (activeData.items.length > 0) {
+      activeCampaign.value = transformToDisplay(activeData.items[0])
+    }
+    pastCampaigns.value = completedData.items.map(transformToDisplay)
+    allContributors.value = contributorsData.items || []
   }
   catch (e) {
     console.error('Erreur chargement levées de fonds:', e)
-    error.value = 'Erreur lors du chargement'
   }
   finally {
     loading.value = false
   }
 }
 
-onMounted(() => {
-  loadFundraisers()
-})
+onMounted(loadData)
 </script>
 
 <template>
-  <div class="pt-20">
+  <div>
     <!-- Hero -->
-    <PageHero
-      :title="t('leveesDeFonds.hero.title')"
-      :subtitle="t('leveesDeFonds.hero.subtitle')"
-      :breadcrumb="[
-        { label: t('nav.home'), to: localePath('/') },
-        { label: t('leveesDeFonds.hero.title') },
-      ]"
+    <FundraisingHeroSection />
+
+    <!-- Anchor Navigation -->
+    <FundraisingAnchorNav
+      v-if="!loading && anchorSections.length > 0"
+      :sections="anchorSections"
     />
 
-    <!-- Contenu -->
-    <section class="py-16 bg-gray-50 dark:bg-gray-900">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8">
-          {{ t('leveesDeFonds.list.title') }}
-        </h2>
+    <!-- Loading state -->
+    <div v-if="loading" class="flex justify-center py-20">
+      <div class="h-12 w-12 animate-spin rounded-full border-4 border-brand-blue-500 border-t-transparent" />
+    </div>
 
-        <!-- Loading -->
-        <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <div
-            v-for="i in 6"
-            :key="i"
-            class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden animate-pulse"
-          >
-            <div class="h-48 bg-gray-200 dark:bg-gray-700" />
-            <div class="p-5 space-y-3">
-              <div class="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded" />
-              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+    <template v-else>
+      <!-- Editorial Sections -->
+      <section
+        v-if="editorialSections.length > 0"
+        id="editorial"
+        class="bg-gray-50 py-16 dark:bg-gray-900 md:py-24"
+      >
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <FundraisingEditorialSection
+            v-for="section in editorialSections"
+            :key="section.slug"
+            :title="section.title"
+            :items="section.items"
+            class="mb-16 last:mb-0"
+          />
+        </div>
+      </section>
+
+      <!-- Global Stats -->
+      <section
+        v-if="globalStats"
+        id="stats"
+        class="bg-white py-16 dark:bg-gray-800 md:py-24"
+      >
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 class="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
+            {{ t('leveesDeFonds.sections.globalStats') }}
+          </h2>
+          <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
+            <div class="text-center">
+              <p class="text-3xl font-bold text-brand-blue-600 dark:text-brand-blue-400 md:text-4xl">
+                {{ formatCurrency(globalStats.total_raised_all_campaigns, currencyLocale) }}
+              </p>
+              <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                {{ t('leveesDeFonds.sections.totalRaised') }}
+              </p>
+            </div>
+            <div class="text-center">
+              <p class="text-3xl font-bold text-brand-blue-600 dark:text-brand-blue-400 md:text-4xl">
+                {{ globalStats.total_contributors }}
+              </p>
+              <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                {{ t('leveesDeFonds.sections.totalContributors') }}
+              </p>
+            </div>
+            <div class="text-center">
+              <p class="text-3xl font-bold text-green-600 dark:text-green-400 md:text-4xl">
+                {{ globalStats.active_campaigns_count }}
+              </p>
+              <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                {{ t('leveesDeFonds.sections.activeCampaigns', globalStats.active_campaigns_count) }}
+              </p>
+            </div>
+            <div class="text-center">
+              <p class="text-3xl font-bold text-blue-600 dark:text-blue-400 md:text-4xl">
+                {{ globalStats.completed_campaigns_count }}
+              </p>
+              <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                {{ t('leveesDeFonds.sections.completedCampaigns', globalStats.completed_campaigns_count) }}
+              </p>
             </div>
           </div>
         </div>
+      </section>
 
-        <!-- État vide -->
-        <div
-          v-else-if="fundraisers.length === 0"
-          class="text-center py-16"
-        >
-          <svg class="mx-auto h-16 w-16 text-gray-400 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p class="mt-4 text-lg text-gray-500 dark:text-gray-400">
-            {{ t('leveesDeFonds.list.empty') }}
-          </p>
+      <!-- Active Campaign -->
+      <section
+        v-if="activeCampaign"
+        id="active-campaign"
+        class="bg-gray-50 py-16 dark:bg-gray-900 md:py-24"
+      >
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 class="mb-8 text-center text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
+            {{ t('leveesDeFonds.sections.activeCampaign') }}
+          </h2>
+          <div class="mx-auto max-w-2xl">
+            <CardsCardFundraiser :fundraiser="activeCampaign" />
+          </div>
         </div>
+      </section>
 
-        <!-- Grille de cartes -->
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <CardsCardFundraiser
-            v-for="fundraiser in fundraisers"
-            :key="fundraiser.id"
-            :fundraiser="fundraiser"
+      <!-- Past Campaigns -->
+      <section
+        v-if="pastCampaigns.length > 0"
+        id="past-campaigns"
+        class="bg-white py-16 dark:bg-gray-800 md:py-24"
+      >
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 class="mb-8 text-center text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
+            {{ t('leveesDeFonds.sections.pastCampaigns') }}
+          </h2>
+          <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <CardsCardFundraiser
+              v-for="campaign in pastCampaigns"
+              :key="campaign.id"
+              :fundraiser="campaign"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- All Contributors -->
+      <section
+        v-if="allContributors.length > 0"
+        id="contributors"
+        class="bg-gray-50 py-16 dark:bg-gray-900 md:py-24"
+      >
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 class="mb-2 text-center text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
+            {{ t('leveesDeFonds.sections.allContributors') }}
+          </h2>
+          <p class="mb-12 text-center text-gray-600 dark:text-gray-400">
+            {{ t('leveesDeFonds.sections.allContributorsSubtitle') }}
+          </p>
+          <FundraisingContributorsList
+            :contributors="allContributors"
+            :show-campaign-count="true"
           />
         </div>
-
-        <!-- Pagination -->
-        <div v-if="totalPages > 1" class="mt-12 flex justify-center gap-2">
-          <button
-            v-for="page in totalPages"
-            :key="page"
-            :class="[
-              'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-              page === currentPage
-                ? 'bg-brand-blue-600 text-white'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
-            ]"
-            @click="loadFundraisers(page)"
-          >
-            {{ page }}
-          </button>
-        </div>
-      </div>
-    </section>
+      </section>
+    </template>
   </div>
 </template>

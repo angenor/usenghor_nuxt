@@ -2,12 +2,35 @@
   "leveesDeFonds": {
     "seo": {
       "title": "Fundraising",
-      "description": "Discover the fundraising campaigns of Senghor University"
+      "description": "Discover the fundraising campaigns of Senghor University and contribute to the development of higher education in Africa"
     },
     "hero": {
       "badge": "Funding",
       "title": "Fundraising",
       "subtitle": "Support Senghor University's projects and contribute to the development of higher education in Africa"
+    },
+    "anchors": {
+      "editorial": "Why contribute",
+      "stats": "Key figures",
+      "activeCampaign": "Current campaign",
+      "pastCampaigns": "Past campaigns",
+      "contributors": "Contributors",
+      "news": "News"
+    },
+    "sections": {
+      "globalStats": "Key figures",
+      "totalRaised": "Total raised",
+      "totalContributors": "Contributors",
+      "activeCampaigns": "Active campaign | Active campaigns",
+      "completedCampaigns": "Completed campaign | Completed campaigns",
+      "activeCampaign": "Current campaign",
+      "pastCampaigns": "Past campaigns",
+      "noPastCampaigns": "No past campaigns at the moment.",
+      "allContributors": "Our contributors",
+      "allContributorsSubtitle": "The partners who support our projects",
+      "campaignsCount": "campaign | campaigns",
+      "relatedNews": "Related news",
+      "noRelatedNews": "No news related to fundraising at the moment."
     },
     "list": {
       "title": "Our campaigns",
@@ -25,13 +48,16 @@
     },
     "detail": {
       "breadcrumb": "Fundraising",
+      "closedBadge": "Campaign completed",
       "tabs": {
         "presentation": "Presentation",
         "contributors": "Contributors",
+        "media": "Media gallery",
         "news": "News"
       },
       "presentation": {
         "title": "About this campaign",
+        "reason": "Why this fundraiser?",
         "goalAmount": "Financial goal",
         "totalRaised": "Total raised",
         "progress": "Progress",
@@ -45,7 +71,12 @@
           "company": "Companies"
         },
         "empty": "No contributors yet.",
-        "categoryEmpty": "No contributors in this category."
+        "categoryEmpty": "No contributors in this category.",
+        "amountHidden": "Amount not disclosed"
+      },
+      "media": {
+        "title": "Media gallery",
+        "empty": "No media associated with this campaign."
       },
       "news": {
         "title": "Related news",
@@ -54,6 +85,23 @@
         "publishedAt": "Published on"
       }
     },
+    "interest": {
+      "button": "Express my interest",
+      "title": "Express your interest",
+      "subtitle": "Fill in the form below to let us know your interest in contributing to this campaign.",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Your full name",
+      "email": "Email address",
+      "emailPlaceholder": "your.email{'@'}example.com",
+      "message": "Message (optional)",
+      "messagePlaceholder": "Describe your interest or the type of contribution you are considering...",
+      "submit": "Send",
+      "sending": "Sending...",
+      "success": "Your interest has been registered. A confirmation email has been sent to you.",
+      "updated": "Your interest has been updated.",
+      "error": "An error occurred. Please try again.",
+      "spamError": "Security check failed. Please try again."
+    },
     "admin": {
       "title": "Fundraising",
       "create": "New fundraiser",
@@ -61,22 +109,33 @@
       "form": {
         "title": "Title",
         "slug": "Slug",
+        "slugAuto": "Auto-generated",
         "description": "Description",
+        "descriptionFr": "Description (French)",
+        "descriptionEn": "Description (English)",
+        "descriptionAr": "Description (Arabic)",
+        "reason": "Fundraiser reason",
+        "reasonFr": "Reason (French)",
+        "reasonEn": "Reason (English)",
+        "reasonAr": "Reason (Arabic)",
         "coverImage": "Cover image",
         "goalAmount": "Financial goal (EUR)",
         "status": "Status",
         "save": "Save",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "creating": "Creating...",
+        "saving": "Saving..."
       },
       "contributors": {
         "title": "Contributors",
-        "add": "Add contributor",
+        "add": "Add a contributor",
         "edit": "Edit contributor",
         "name": "Name",
         "nameEn": "Name (English)",
         "nameAr": "Name (Arabic)",
         "category": "Category",
         "amount": "Amount (EUR)",
+        "showAmountPublicly": "Show amount publicly",
         "logo": "Logo",
         "save": "Save",
         "delete": "Delete",
@@ -90,13 +149,56 @@
         "confirmDissociate": "Are you sure you want to dissociate this news?",
         "empty": "No associated news."
       },
+      "interest": {
+        "title": "Interest expressions",
+        "filterCampaign": "Filter by campaign",
+        "filterStatus": "Filter by status",
+        "search": "Search by name or email...",
+        "export": "Export CSV",
+        "markContacted": "Mark as contacted",
+        "markNew": "Mark as new",
+        "empty": "No interest expressions.",
+        "newBadge": "new",
+        "allCampaigns": "All campaigns",
+        "allStatuses": "All statuses"
+      },
+      "editorial": {
+        "title": "Editorial sections",
+        "subtitle": "Manage the content of the main fundraising page",
+        "sectionTitle": "Section title",
+        "addItem": "Add item",
+        "editItem": "Edit item",
+        "deleteItem": "Delete item",
+        "confirmDeleteItem": "Are you sure you want to delete this item?",
+        "icon": "Icon",
+        "titleFr": "Title (French)",
+        "titleEn": "Title (English)",
+        "titleAr": "Title (Arabic)",
+        "descriptionFr": "Description (French)",
+        "descriptionEn": "Description (English)",
+        "descriptionAr": "Description (Arabic)",
+        "displayOrder": "Display order",
+        "active": "Active"
+      },
+      "media": {
+        "title": "Media gallery",
+        "add": "Add media",
+        "captionFr": "Caption (French)",
+        "captionEn": "Caption (English)",
+        "captionAr": "Caption (Arabic)",
+        "selectMedia": "Select media",
+        "empty": "No associated media."
+      },
       "stats": {
         "total": "Total",
         "draft": "Drafts",
         "active": "Active",
         "completed": "Completed",
         "totalGoal": "Total goal",
-        "totalRaised": "Total raised"
+        "totalRaised": "Total raised",
+        "totalContributors": "Contributors",
+        "totalInterest": "Interest expressions",
+        "newInterest": "New"
       },
       "messages": {
         "created": "Fundraiser created successfully",
@@ -106,7 +208,15 @@
         "contributorUpdated": "Contributor updated successfully",
         "contributorDeleted": "Contributor deleted successfully",
         "newsAssociated": "News associated successfully",
-        "newsDissociated": "News dissociated successfully"
+        "newsDissociated": "News dissociated successfully",
+        "interestStatusUpdated": "Status updated successfully",
+        "editorialSectionUpdated": "Section updated successfully",
+        "editorialItemCreated": "Item created successfully",
+        "editorialItemUpdated": "Item updated successfully",
+        "editorialItemDeleted": "Item deleted successfully",
+        "mediaAdded": "Media added successfully",
+        "mediaUpdated": "Media updated successfully",
+        "mediaRemoved": "Media removed successfully"
       },
       "confirmDelete": "Are you sure you want to delete this fundraiser?"
     }

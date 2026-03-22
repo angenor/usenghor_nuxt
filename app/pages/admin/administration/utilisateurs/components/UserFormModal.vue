@@ -49,19 +49,25 @@ const localFormData = computed({
 })
 
 // Biographie avec ToastUI Editor (markdown + HTML)
+// Le change event du ToastUI Editor émet update:modelValue (md) puis update:html
+// en séquence synchrone. On stocke le md dans une variable intermédiaire et on
+// envoie les deux valeurs ensemble dans onBiographyHtmlUpdate pour éviter que
+// le second emit écrase le premier (props pas encore mis à jour par Vue).
+let _pendingBiographyMd: string | null = null
+
 const biographyMd = computed({
   get: () => props.formData.biography_md || '',
   set: (value: string) => {
-    localFormData.value = {
-      ...props.formData,
-      biography_md: value,
-    }
+    _pendingBiographyMd = value
   },
 })
 
 function onBiographyHtmlUpdate(html: string) {
+  const updatedMd = _pendingBiographyMd ?? props.formData.biography_md ?? ''
+  _pendingBiographyMd = null
   localFormData.value = {
     ...props.formData,
+    biography_md: updatedMd,
     biography_html: html,
   }
 }

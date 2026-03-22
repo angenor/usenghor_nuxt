@@ -1,164 +1,355 @@
 <script setup lang="ts">
-import type { FundraiserCreatePayload } from '~/types/fundraising'
+import type { FundraiserCreatePayload, FundraiserStatus } from '~/types/fundraising'
 
-definePageMeta({ layout: 'admin' })
-
-const router = useRouter()
-const { createFundraiser, slugify } = useAdminFundraisingApi()
-
-const form = reactive<FundraiserCreatePayload>({
-  title: '',
-  slug: '',
-  description_html: null,
-  description_md: null,
-  description_en_html: null,
-  description_en_md: null,
-  description_ar_html: null,
-  description_ar_md: null,
-  cover_image_external_id: null,
-  goal_amount: 0,
-  status: 'draft',
+definePageMeta({
+  layout: 'admin'
 })
 
-const submitting = ref(false)
+const router = useRouter()
+const { t } = useI18n()
+
+const {
+  createFundraiser,
+  slugify,
+} = useAdminFundraisingApi()
+
+// === STATE ===
+const isSubmitting = ref(false)
+const error = ref<string | null>(null)
 const autoSlug = ref(true)
 
-watch(() => form.title, (val) => {
-  if (autoSlug.value && val) {
-    form.slug = slugify(val)
+// Tabs pour les langues (description et reason)
+const descriptionLang = ref<'fr' | 'en' | 'ar'>('fr')
+const reasonLang = ref<'fr' | 'en' | 'ar'>('fr')
+
+const form = reactive({
+  title: '',
+  slug: '',
+  goal_amount: 0,
+  status: 'draft' as FundraiserStatus,
+  cover_image_external_id: null as string | null,
+  // Description par langue
+  description_html: '',
+  description_md: '',
+  description_en_html: '',
+  description_en_md: '',
+  description_ar_html: '',
+  description_ar_md: '',
+  // Reason par langue
+  reason_html: '',
+  reason_md: '',
+  reason_en_html: '',
+  reason_en_md: '',
+  reason_ar_html: '',
+  reason_ar_md: '',
+})
+
+// === VALIDATION ===
+const validationErrors = reactive({
+  title: '',
+  goal_amount: '',
+})
+
+function validate(): boolean {
+  let valid = true
+  validationErrors.title = ''
+  validationErrors.goal_amount = ''
+
+  if (!form.title.trim()) {
+    validationErrors.title = 'Le titre est obligatoire'
+    valid = false
+  }
+  if (!form.goal_amount || form.goal_amount <= 0) {
+    validationErrors.goal_amount = 'L\'objectif doit être supérieur à 0'
+    valid = false
+  }
+  return valid
+}
+
+// === AUTO SLUG ===
+watch(() => form.title, (newTitle) => {
+  if (autoSlug.value) {
+    form.slug = slugify(newTitle)
   }
 })
 
-function onSlugInput() {
+function onSlugManualEdit() {
   autoSlug.value = false
 }
 
-const isValid = computed(() => {
-  return form.title.trim().length > 0 && form.slug.trim().length > 0 && form.goal_amount > 0
-})
-
+// === SUBMIT ===
 async function handleSubmit() {
-  if (!isValid.value || submitting.value) return
+  if (!validate()) return
 
-  submitting.value = true
+  isSubmitting.value = true
+  error.value = null
+
   try {
-    const result = await createFundraiser(form)
-    router.push(`/admin/contenus/levees-de-fonds/${result.id}/edit`)
-  }
-  catch (e) {
-    console.error('Erreur création:', e)
-  }
-  finally {
-    submitting.value = false
+    const payload: FundraiserCreatePayload = {
+      title: form.title,
+      slug: form.slug,
+      goal_amount: form.goal_amount,
+      status: form.status,
+      cover_image_external_id: form.cover_image_external_id || null,
+      description_html: form.description_html || null,
+      description_md: form.description_md || null,
+      description_en_html: form.description_en_html || null,
+      description_en_md: form.description_en_md || null,
+      description_ar_html: form.description_ar_html || null,
+      description_ar_md: form.description_ar_md || null,
+      reason_html: form.reason_html || null,
+      reason_md: form.reason_md || null,
+      reason_en_html: form.reason_en_html || null,
+      reason_en_md: form.reason_en_md || null,
+      reason_ar_html: form.reason_ar_html || null,
+      reason_ar_md: form.reason_ar_md || null,
+    }
+
+    const result = await createFundraiser(payload)
+    await router.push(`/admin/contenus/levees-de-fonds/${result.id}/edit`)
+  } catch (e: any) {
+    error.value = e?.data?.detail || 'Erreur lors de la création de la campagne'
+  } finally {
+    isSubmitting.value = false
   }
 }
+
+const langTabs = [
+  { key: 'fr', label: 'Français' },
+  { key: 'en', label: 'English' },
+  { key: 'ar', label: 'العربية' },
+] as const
 </script>
 
 <template>
-  <div class="p-6 max-w-4xl mx-auto">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Nouvelle levée de fonds</h1>
+  <div class="mx-auto max-w-4xl space-y-6">
+    <!-- Header -->
+    <div class="flex items-center gap-4">
       <NuxtLink
         to="/admin/contenus/levees-de-fonds"
-        class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+        class="inline-flex items-center gap-2 rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
       >
-        ← Retour à la liste
+        <i class="fa-solid fa-arrow-left" />
       </NuxtLink>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+          Nouvelle campagne de levée de fonds
+        </h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Remplissez les informations de la campagne
+        </p>
+      </div>
     </div>
 
+    <!-- Error -->
+    <div v-if="error" class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400">
+      <i class="fa-solid fa-circle-exclamation mr-2" />
+      {{ error }}
+    </div>
+
+    <!-- Form -->
     <form class="space-y-6" @submit.prevent="handleSubmit">
       <!-- Informations principales -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Informations principales</h2>
+      <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+        <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Informations principales</h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Titre *</label>
-            <input
-              v-model="form.title"
-              type="text"
-              required
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              placeholder="Titre de la campagne"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Slug *</label>
-            <input
-              v-model="form.slug"
-              type="text"
-              required
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              placeholder="slug-url"
-              @input="onSlugInput"
-            />
-          </div>
+        <!-- Titre -->
+        <div class="mb-4">
+          <label for="title" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Titre <span class="text-red-500">*</span>
+          </label>
+          <input
+            id="title"
+            v-model="form.title"
+            type="text"
+            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:border-brand-blue-500 focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+            :class="{ 'border-red-500': validationErrors.title }"
+            placeholder="Titre de la campagne"
+          >
+          <p v-if="validationErrors.title" class="mt-1 text-xs text-red-500">{{ validationErrors.title }}</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <!-- Slug -->
+        <div class="mb-4">
+          <label for="slug" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Slug (URL)
+          </label>
+          <input
+            id="slug"
+            v-model="form.slug"
+            type="text"
+            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:border-brand-blue-500 focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+            placeholder="slug-auto-genere"
+            @input="onSlugManualEdit"
+          >
+          <p v-if="!autoSlug" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Slug modifié manuellement.
+            <button type="button" class="text-brand-blue-600 hover:underline" @click="autoSlug = true; form.slug = slugify(form.title)">
+              Régénérer automatiquement
+            </button>
+          </p>
+        </div>
+
+        <!-- Objectif + Statut -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Objectif financier (EUR) *</label>
+            <label for="goal_amount" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Objectif (EUR) <span class="text-red-500">*</span>
+            </label>
             <input
+              id="goal_amount"
               v-model.number="form.goal_amount"
               type="number"
               min="1"
-              step="0.01"
-              required
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              placeholder="1000000"
-            />
+              step="1"
+              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-brand-blue-500 focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              :class="{ 'border-red-500': validationErrors.goal_amount }"
+            >
+            <p v-if="validationErrors.goal_amount" class="mt-1 text-xs text-red-500">{{ validationErrors.goal_amount }}</p>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Statut</label>
+            <label for="status" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Statut
+            </label>
             <select
+              id="status"
               v-model="form.status"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-brand-blue-500 focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             >
               <option value="draft">Brouillon</option>
-              <option value="active">En cours</option>
-              <option value="completed">Terminée</option>
+              <option value="active">Active</option>
+              <option value="completed">Clôturée</option>
             </select>
           </div>
         </div>
+
+        <!-- Cover image -->
+        <div class="mt-4">
+          <label for="cover_image" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Image de couverture (UUID média)
+          </label>
+          <input
+            id="cover_image"
+            v-model="form.cover_image_external_id"
+            type="text"
+            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:border-brand-blue-500 focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+            placeholder="UUID du média (optionnel)"
+          >
+        </div>
       </div>
 
-      <!-- Description enrichie -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Description</h2>
-        <AdminRichTextEditor
-          title="Description de la campagne"
-          description="Décrivez les objectifs et le contexte de la levée de fonds"
-          icon="fas fa-align-left"
-          icon-color="text-brand-blue-500"
-          :model-value="form.description_md || ''"
-          :model-value-en="form.description_en_md || ''"
-          :model-value-ar="form.description_ar_md || ''"
-          :html-value="form.description_html || ''"
-          :html-value-en="form.description_en_html || ''"
-          :html-value-ar="form.description_ar_html || ''"
-          @update:model-value="form.description_md = $event"
-          @update:model-value-en="form.description_en_md = $event"
-          @update:model-value-ar="form.description_ar_md = $event"
-          @update:html-value="form.description_html = $event"
-          @update:html-value-en="form.description_en_html = $event"
-          @update:html-value-ar="form.description_ar_html = $event"
-        />
+      <!-- Description -->
+      <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+        <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Description</h2>
+        <!-- Language tabs -->
+        <div class="mb-4 flex gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
+          <button
+            v-for="tab in langTabs"
+            :key="tab.key"
+            type="button"
+            :class="descriptionLang === tab.key
+              ? 'bg-white text-gray-900 shadow dark:bg-gray-600 dark:text-white'
+              : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'"
+            class="flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
+            @click="descriptionLang = tab.key"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
+
+        <div v-show="descriptionLang === 'fr'">
+          <textarea
+            v-model="form.description_md"
+            rows="6"
+            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:border-brand-blue-500 focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+            placeholder="Description en français (Markdown)"
+            @input="form.description_html = form.description_md"
+          />
+        </div>
+        <div v-show="descriptionLang === 'en'">
+          <textarea
+            v-model="form.description_en_md"
+            rows="6"
+            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:border-brand-blue-500 focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+            placeholder="Description in English (Markdown)"
+            @input="form.description_en_html = form.description_en_md"
+          />
+        </div>
+        <div v-show="descriptionLang === 'ar'" dir="rtl">
+          <textarea
+            v-model="form.description_ar_md"
+            rows="6"
+            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:border-brand-blue-500 focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+            placeholder="الوصف بالعربية (Markdown)"
+            @input="form.description_ar_html = form.description_ar_md"
+          />
+        </div>
       </div>
 
-      <!-- Actions -->
+      <!-- Reason -->
+      <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+        <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Pourquoi contribuer</h2>
+        <!-- Language tabs -->
+        <div class="mb-4 flex gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
+          <button
+            v-for="tab in langTabs"
+            :key="tab.key"
+            type="button"
+            :class="reasonLang === tab.key
+              ? 'bg-white text-gray-900 shadow dark:bg-gray-600 dark:text-white'
+              : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'"
+            class="flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
+            @click="reasonLang = tab.key"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
+
+        <div v-show="reasonLang === 'fr'">
+          <textarea
+            v-model="form.reason_md"
+            rows="4"
+            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:border-brand-blue-500 focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+            placeholder="Pourquoi contribuer (français, Markdown)"
+            @input="form.reason_html = form.reason_md"
+          />
+        </div>
+        <div v-show="reasonLang === 'en'">
+          <textarea
+            v-model="form.reason_en_md"
+            rows="4"
+            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:border-brand-blue-500 focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+            placeholder="Why contribute (English, Markdown)"
+            @input="form.reason_en_html = form.reason_en_md"
+          />
+        </div>
+        <div v-show="reasonLang === 'ar'" dir="rtl">
+          <textarea
+            v-model="form.reason_ar_md"
+            rows="4"
+            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:border-brand-blue-500 focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+            placeholder="لماذا تساهم (العربية، Markdown)"
+            @input="form.reason_ar_html = form.reason_ar_md"
+          />
+        </div>
+      </div>
+
+      <!-- Submit -->
       <div class="flex justify-end gap-3">
         <NuxtLink
           to="/admin/contenus/levees-de-fonds"
-          class="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+          class="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
         >
           Annuler
         </NuxtLink>
         <button
           type="submit"
-          :disabled="!isValid || submitting"
-          class="px-6 py-2 bg-brand-blue-600 text-white rounded-lg hover:bg-brand-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="isSubmitting"
+          class="inline-flex items-center gap-2 rounded-lg bg-brand-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-brand-blue-700 disabled:opacity-50 transition-colors"
         >
-          {{ submitting ? 'Création...' : 'Créer la levée de fonds' }}
+          <i v-if="isSubmitting" class="fa-solid fa-spinner fa-spin" />
+          <i v-else class="fa-solid fa-plus" />
+          Créer la campagne
         </button>
       </div>
     </form>

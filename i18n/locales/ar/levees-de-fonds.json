@@ -2,12 +2,35 @@
   "leveesDeFonds": {
     "seo": {
       "title": "جمع التبرعات",
-      "description": "اكتشف حملات جمع التبرعات لجامعة سنغور"
+      "description": "اكتشف حملات جمع التبرعات لجامعة سنغور وساهم في تطوير التعليم العالي في أفريقيا"
     },
     "hero": {
       "badge": "التمويل",
       "title": "جمع التبرعات",
       "subtitle": "ادعم مشاريع جامعة سنغور وساهم في تطوير التعليم العالي في أفريقيا"
+    },
+    "anchors": {
+      "editorial": "لماذا المساهمة",
+      "stats": "الأرقام الرئيسية",
+      "activeCampaign": "الحملة الجارية",
+      "pastCampaigns": "الحملات السابقة",
+      "contributors": "المساهمون",
+      "news": "الأخبار"
+    },
+    "sections": {
+      "globalStats": "الأرقام الرئيسية",
+      "totalRaised": "إجمالي المبلغ المجمع",
+      "totalContributors": "المساهمون",
+      "activeCampaigns": "حملة جارية | حملات جارية",
+      "completedCampaigns": "حملة مكتملة | حملات مكتملة",
+      "activeCampaign": "الحملة الجارية",
+      "pastCampaigns": "الحملات السابقة",
+      "noPastCampaigns": "لا توجد حملات سابقة حالياً.",
+      "allContributors": "مساهمونا",
+      "allContributorsSubtitle": "الشركاء الذين يدعمون مشاريعنا",
+      "campaignsCount": "حملة | حملات",
+      "relatedNews": "الأخبار ذات الصلة",
+      "noRelatedNews": "لا توجد أخبار مرتبطة بجمع التبرعات حالياً."
     },
     "list": {
       "title": "حملاتنا",
@@ -25,13 +48,16 @@
     },
     "detail": {
       "breadcrumb": "جمع التبرعات",
+      "closedBadge": "حملة مكتملة",
       "tabs": {
         "presentation": "العرض",
         "contributors": "المساهمون",
+        "media": "المكتبة الإعلامية",
         "news": "الأخبار"
       },
       "presentation": {
         "title": "حول هذه الحملة",
+        "reason": "لماذا هذه الحملة؟",
         "goalAmount": "الهدف المالي",
         "totalRaised": "إجمالي المبلغ المجمع",
         "progress": "التقدم",
@@ -45,7 +71,12 @@
           "company": "الشركات"
         },
         "empty": "لا يوجد مساهمون حتى الآن.",
-        "categoryEmpty": "لا يوجد مساهمون في هذه الفئة."
+        "categoryEmpty": "لا يوجد مساهمون في هذه الفئة.",
+        "amountHidden": "المبلغ غير معلن"
+      },
+      "media": {
+        "title": "المكتبة الإعلامية",
+        "empty": "لا توجد وسائط مرتبطة بهذه الحملة."
       },
       "news": {
         "title": "الأخبار ذات الصلة",
@@ -54,6 +85,23 @@
         "publishedAt": "نُشر في"
       }
     },
+    "interest": {
+      "button": "أبدِ اهتمامي",
+      "title": "أبدِ اهتمامك",
+      "subtitle": "املأ النموذج أدناه لإعلامنا باهتمامك بالمساهمة في هذه الحملة.",
+      "fullName": "الاسم الكامل",
+      "fullNamePlaceholder": "اسمك الكامل",
+      "email": "البريد الإلكتروني",
+      "emailPlaceholder": "بريدك{'@'}مثال.com",
+      "message": "رسالة (اختياري)",
+      "messagePlaceholder": "صف اهتمامك أو نوع المساهمة التي تفكر فيها...",
+      "submit": "إرسال",
+      "sending": "جارٍ الإرسال...",
+      "success": "تم تسجيل اهتمامك. تم إرسال بريد تأكيد إليك.",
+      "updated": "تم تحديث اهتمامك.",
+      "error": "حدث خطأ. يرجى المحاولة مرة أخرى.",
+      "spamError": "فشل التحقق الأمني. يرجى المحاولة مرة أخرى."
+    },
     "admin": {
       "title": "جمع التبرعات",
       "create": "حملة جديدة",
@@ -61,12 +109,22 @@
       "form": {
         "title": "العنوان",
         "slug": "الرابط",
+        "slugAuto": "يتم إنشاؤه تلقائياً",
         "description": "الوصف",
+        "descriptionFr": "الوصف (بالفرنسية)",
+        "descriptionEn": "الوصف (بالإنجليزية)",
+        "descriptionAr": "الوصف (بالعربية)",
+        "reason": "سبب الحملة",
+        "reasonFr": "السبب (بالفرنسية)",
+        "reasonEn": "السبب (بالإنجليزية)",
+        "reasonAr": "السبب (بالعربية)",
         "coverImage": "صورة الغلاف",
         "goalAmount": "الهدف المالي (يورو)",
         "status": "الحالة",
         "save": "حفظ",
-        "cancel": "إلغاء"
+        "cancel": "إلغاء",
+        "creating": "جارٍ الإنشاء...",
+        "saving": "جارٍ الحفظ..."
       },
       "contributors": {
         "title": "المساهمون",
@@ -77,6 +135,7 @@
         "nameAr": "الاسم (بالعربية)",
         "category": "الفئة",
         "amount": "المبلغ (يورو)",
+        "showAmountPublicly": "عرض المبلغ علنياً",
         "logo": "الشعار",
         "save": "حفظ",
         "delete": "حذف",
@@ -90,13 +149,56 @@
         "confirmDissociate": "هل أنت متأكد من إلغاء ربط هذا الخبر؟",
         "empty": "لا توجد أخبار مرتبطة."
       },
+      "interest": {
+        "title": "إبداءات الاهتمام",
+        "filterCampaign": "تصفية حسب الحملة",
+        "filterStatus": "تصفية حسب الحالة",
+        "search": "البحث بالاسم أو البريد...",
+        "export": "تصدير CSV",
+        "markContacted": "وضع علامة تم التواصل",
+        "markNew": "وضع علامة جديد",
+        "empty": "لا توجد إبداءات اهتمام.",
+        "newBadge": "جديد | جدد",
+        "allCampaigns": "جميع الحملات",
+        "allStatuses": "جميع الحالات"
+      },
+      "editorial": {
+        "title": "الأقسام التحريرية",
+        "subtitle": "إدارة محتوى الصفحة الرئيسية لجمع التبرعات",
+        "sectionTitle": "عنوان القسم",
+        "addItem": "إضافة عنصر",
+        "editItem": "تعديل العنصر",
+        "deleteItem": "حذف العنصر",
+        "confirmDeleteItem": "هل أنت متأكد من حذف هذا العنصر؟",
+        "icon": "الأيقونة",
+        "titleFr": "العنوان (بالفرنسية)",
+        "titleEn": "العنوان (بالإنجليزية)",
+        "titleAr": "العنوان (بالعربية)",
+        "descriptionFr": "الوصف (بالفرنسية)",
+        "descriptionEn": "الوصف (بالإنجليزية)",
+        "descriptionAr": "الوصف (بالعربية)",
+        "displayOrder": "ترتيب العرض",
+        "active": "نشط"
+      },
+      "media": {
+        "title": "المكتبة الإعلامية",
+        "add": "إضافة وسائط",
+        "captionFr": "التعليق (بالفرنسية)",
+        "captionEn": "التعليق (بالإنجليزية)",
+        "captionAr": "التعليق (بالعربية)",
+        "selectMedia": "اختيار وسائط",
+        "empty": "لا توجد وسائط مرتبطة."
+      },
       "stats": {
         "total": "الإجمالي",
         "draft": "المسودات",
         "active": "الجارية",
         "completed": "المكتملة",
         "totalGoal": "الهدف الإجمالي",
-        "totalRaised": "إجمالي المبلغ المجمع"
+        "totalRaised": "إجمالي المبلغ المجمع",
+        "totalContributors": "المساهمون",
+        "totalInterest": "إبداءات الاهتمام",
+        "newInterest": "الجديدة"
       },
       "messages": {
         "created": "تم إنشاء حملة جمع التبرعات بنجاح",
@@ -106,7 +208,15 @@
         "contributorUpdated": "تم تحديث المساهم بنجاح",
         "contributorDeleted": "تم حذف المساهم بنجاح",
         "newsAssociated": "تم ربط الخبر بنجاح",
-        "newsDissociated": "تم إلغاء ربط الخبر بنجاح"
+        "newsDissociated": "تم إلغاء ربط الخبر بنجاح",
+        "interestStatusUpdated": "تم تحديث الحالة بنجاح",
+        "editorialSectionUpdated": "تم تحديث القسم بنجاح",
+        "editorialItemCreated": "تم إنشاء العنصر بنجاح",
+        "editorialItemUpdated": "تم تحديث العنصر بنجاح",
+        "editorialItemDeleted": "تم حذف العنصر بنجاح",
+        "mediaAdded": "تمت إضافة الوسائط بنجاح",
+        "mediaUpdated": "تم تحديث الوسائط بنجاح",
+        "mediaRemoved": "تم حذف الوسائط بنجاح"
       },
       "confirmDelete": "هل أنت متأكد من حذف هذه الحملة؟"
     }
