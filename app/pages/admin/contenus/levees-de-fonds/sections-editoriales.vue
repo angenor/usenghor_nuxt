@@ -258,11 +258,12 @@ onMounted(() => {
           <div class="flex items-center gap-2">
             <button
               type="button"
-              class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-brand-blue-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-brand-blue-400 transition-colors"
-              title="Modifier le titre"
+              class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-brand-blue-50 hover:border-brand-blue-300 hover:text-brand-blue-600 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-brand-blue-900/30 dark:hover:border-brand-blue-500 dark:hover:text-brand-blue-400 transition-colors"
+              title="Modifier le titre de la section"
               @click.stop="openSectionEdit(section)"
             >
-              <i class="fa-solid fa-pen" />
+              <i class="fa-solid fa-pen text-[10px]" />
+              Modifier le titre
             </button>
           </div>
         </div>

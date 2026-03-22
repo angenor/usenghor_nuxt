@@ -17,6 +17,7 @@ import type {
 
 export function usePublicFundraisingApi() {
   const apiBase = useApiBase()
+  const { locale } = useI18n()
 
   function transformToDisplay(fundraiser: FundraiserPublic): FundraiserDisplay {
     return {
@@ -89,7 +90,7 @@ export function usePublicFundraisingApi() {
 
   async function getEditorialSections(): Promise<{ sections: EditorialSectionPublic[] }> {
     return await $fetch<{ sections: EditorialSectionPublic[] }>(
-      `${apiBase}/api/public/fundraisers/editorial-sections`,
+      `${apiBase}/api/public/fundraisers/editorial-sections?lang=${locale.value}`,
     )
   }
 

@@ -89,6 +89,17 @@ async function loadData() {
 }
 
 onMounted(loadData)
+
+// Recharger les sections éditoriales quand la locale change
+watch(locale, async () => {
+  try {
+    const editorialData = await getEditorialSections()
+    editorialSections.value = editorialData.sections || []
+  }
+  catch (e) {
+    console.error('Erreur rechargement sections:', e)
+  }
+})
 </script>
 
 <template>
