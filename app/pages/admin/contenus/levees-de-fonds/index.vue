@@ -238,10 +238,13 @@ onMounted(async () => {
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
             <tr v-for="item in fundraisers" :key="item.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
               <td class="whitespace-nowrap px-6 py-4">
-                <div>
-                  <p class="font-medium text-gray-900 dark:text-white">{{ item.title }}</p>
+                <NuxtLink
+                  :to="`/admin/contenus/levees-de-fonds/${item.id}/edit`"
+                  class="group block"
+                >
+                  <p class="font-medium text-gray-900 group-hover:text-brand-blue-600 dark:text-white dark:group-hover:text-brand-blue-400">{{ item.title }}</p>
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ item.slug }}</p>
-                </div>
+                </NuxtLink>
               </td>
               <td class="whitespace-nowrap px-6 py-4">
                 <span

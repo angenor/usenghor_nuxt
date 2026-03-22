@@ -18,31 +18,29 @@ const isSubmitting = ref(false)
 const error = ref<string | null>(null)
 const autoSlug = ref(true)
 
-// Tabs pour les langues (description et reason)
-const descriptionLang = ref<'fr' | 'en' | 'ar'>('fr')
-const reasonLang = ref<'fr' | 'en' | 'ar'>('fr')
-
 const form = reactive({
   title: '',
   slug: '',
   goal_amount: 0,
   status: 'draft' as FundraiserStatus,
   cover_image_external_id: null as string | null,
-  // Description par langue
-  description_html: '',
-  description_md: '',
-  description_en_html: '',
-  description_en_md: '',
-  description_ar_html: '',
-  description_ar_md: '',
-  // Reason par langue
-  reason_html: '',
-  reason_md: '',
-  reason_en_html: '',
-  reason_en_md: '',
-  reason_ar_html: '',
-  reason_ar_md: '',
 })
+
+// Contenu TOAST UI Editor (description)
+const descMd = ref('')
+const descMdEn = ref('')
+const descMdAr = ref('')
+const descHtml = ref('')
+const descHtmlEn = ref('')
+const descHtmlAr = ref('')
+
+// Contenu TOAST UI Editor (reason)
+const reasonMd = ref('')
+const reasonMdEn = ref('')
+const reasonMdAr = ref('')
+const reasonHtml = ref('')
+const reasonHtmlEn = ref('')
+const reasonHtmlAr = ref('')
 
 // === VALIDATION ===
 const validationErrors = reactive({
@@ -91,18 +89,18 @@ async function handleSubmit() {
       goal_amount: form.goal_amount,
       status: form.status,
       cover_image_external_id: form.cover_image_external_id || null,
-      description_html: form.description_html || null,
-      description_md: form.description_md || null,
-      description_en_html: form.description_en_html || null,
-      description_en_md: form.description_en_md || null,
-      description_ar_html: form.description_ar_html || null,
-      description_ar_md: form.description_ar_md || null,
-      reason_html: form.reason_html || null,
-      reason_md: form.reason_md || null,
-      reason_en_html: form.reason_en_html || null,
-      reason_en_md: form.reason_en_md || null,
-      reason_ar_html: form.reason_ar_html || null,
-      reason_ar_md: form.reason_ar_md || null,
+      description_html: descHtml.value || null,
+      description_md: descMd.value || null,
+      description_en_html: descHtmlEn.value || null,
+      description_en_md: descMdEn.value || null,
+      description_ar_html: descHtmlAr.value || null,
+      description_ar_md: descMdAr.value || null,
+      reason_html: reasonHtml.value || null,
+      reason_md: reasonMd.value || null,
+      reason_en_html: reasonHtmlEn.value || null,
+      reason_en_md: reasonMdEn.value || null,
+      reason_ar_html: reasonHtmlAr.value || null,
+      reason_ar_md: reasonMdAr.value || null,
     }
 
     const result = await createFundraiser(payload)
@@ -114,11 +112,6 @@ async function handleSubmit() {
   }
 }
 
-const langTabs = [
-  { key: 'fr', label: 'Français' },
-  { key: 'en', label: 'English' },
-  { key: 'ar', label: 'العربية' },
-] as const
 </script>
 
 <template>
@@ -238,101 +231,41 @@ const langTabs = [
         </div>
       </div>
 
-      <!-- Description -->
-      <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-        <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Description</h2>
-        <!-- Language tabs -->
-        <div class="mb-4 flex gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
-          <button
-            v-for="tab in langTabs"
-            :key="tab.key"
-            type="button"
-            :class="descriptionLang === tab.key
-              ? 'bg-white text-gray-900 shadow dark:bg-gray-600 dark:text-white'
-              : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'"
-            class="flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
-            @click="descriptionLang = tab.key"
-          >
-            {{ tab.label }}
-          </button>
-        </div>
+      <!-- Description (TOAST UI Editor trilingue) -->
+      <AdminRichTextEditor
+        v-model="descMd"
+        v-model:model-value-en="descMdEn"
+        v-model:model-value-ar="descMdAr"
+        v-model:html-value="descHtml"
+        v-model:html-value-en="descHtmlEn"
+        v-model:html-value-ar="descHtmlAr"
+        title="Description de la campagne"
+        description="Présentez la campagne de levée de fonds en détail"
+        icon="fa-solid fa-file-lines"
+        icon-color="text-indigo-500"
+        placeholder="Décrivez la campagne de levée de fonds..."
+        placeholder-en="Describe the fundraising campaign..."
+        placeholder-ar="صف حملة جمع التبرعات..."
+        height="350px"
+      />
 
-        <div v-show="descriptionLang === 'fr'">
-          <textarea
-            v-model="form.description_md"
-            rows="6"
-            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:border-brand-blue-500 focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-            placeholder="Description en français (Markdown)"
-            @input="form.description_html = form.description_md"
-          />
-        </div>
-        <div v-show="descriptionLang === 'en'">
-          <textarea
-            v-model="form.description_en_md"
-            rows="6"
-            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:border-brand-blue-500 focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-            placeholder="Description in English (Markdown)"
-            @input="form.description_en_html = form.description_en_md"
-          />
-        </div>
-        <div v-show="descriptionLang === 'ar'" dir="rtl">
-          <textarea
-            v-model="form.description_ar_md"
-            rows="6"
-            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:border-brand-blue-500 focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-            placeholder="الوصف بالعربية (Markdown)"
-            @input="form.description_ar_html = form.description_ar_md"
-          />
-        </div>
-      </div>
-
-      <!-- Reason -->
-      <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-        <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Pourquoi contribuer</h2>
-        <!-- Language tabs -->
-        <div class="mb-4 flex gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-700">
-          <button
-            v-for="tab in langTabs"
-            :key="tab.key"
-            type="button"
-            :class="reasonLang === tab.key
-              ? 'bg-white text-gray-900 shadow dark:bg-gray-600 dark:text-white'
-              : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'"
-            class="flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
-            @click="reasonLang = tab.key"
-          >
-            {{ tab.label }}
-          </button>
-        </div>
-
-        <div v-show="reasonLang === 'fr'">
-          <textarea
-            v-model="form.reason_md"
-            rows="4"
-            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:border-brand-blue-500 focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-            placeholder="Pourquoi contribuer (français, Markdown)"
-            @input="form.reason_html = form.reason_md"
-          />
-        </div>
-        <div v-show="reasonLang === 'en'">
-          <textarea
-            v-model="form.reason_en_md"
-            rows="4"
-            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:border-brand-blue-500 focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-            placeholder="Why contribute (English, Markdown)"
-            @input="form.reason_en_html = form.reason_en_md"
-          />
-        </div>
-        <div v-show="reasonLang === 'ar'" dir="rtl">
-          <textarea
-            v-model="form.reason_ar_md"
-            rows="4"
-            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:border-brand-blue-500 focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-            placeholder="لماذا تساهم (العربية، Markdown)"
-            @input="form.reason_ar_html = form.reason_ar_md"
-          />
-        </div>
-      </div>
+      <!-- Reason (TOAST UI Editor trilingue) -->
+      <AdminRichTextEditor
+        v-model="reasonMd"
+        v-model:model-value-en="reasonMdEn"
+        v-model:model-value-ar="reasonMdAr"
+        v-model:html-value="reasonHtml"
+        v-model:html-value-en="reasonHtmlEn"
+        v-model:html-value-ar="reasonHtmlAr"
+        title="Pourquoi contribuer"
+        description="Expliquez les raisons de cette levée de fonds"
+        icon="fa-solid fa-heart"
+        icon-color="text-red-500"
+        placeholder="Pourquoi contribuer à cette campagne..."
+        placeholder-en="Why contribute to this campaign..."
+        placeholder-ar="لماذا تساهم في هذه الحملة..."
+        height="300px"
+      />
 
       <!-- Submit -->
       <div class="flex justify-end gap-3">
