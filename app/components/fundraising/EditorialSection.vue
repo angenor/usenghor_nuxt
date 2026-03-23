@@ -10,6 +10,7 @@ const props = defineProps<{
 }>()
 
 const isListarStyle = computed(() => props.slug === 'engagement-examples')
+const isProductCardStyle = computed(() => props.slug === 'contribution-benefits')
 
 // Mapping Heroicons → Font Awesome pour les icônes stockées en base
 const iconMap: Record<string, string> = {
@@ -24,6 +25,18 @@ const iconMap: Record<string, string> = {
   'hand-raised': 'fa-solid fa-hand',
   'light-bulb': 'fa-solid fa-lightbulb',
   'star': 'fa-solid fa-star',
+  'shield-check': 'fa-solid fa-shield-halved',
+  'document-text': 'fa-solid fa-file-lines',
+  'chart-bar': 'fa-solid fa-chart-column',
+}
+
+// Couleurs d'accent par carte (pricing-card style)
+const cardColors = ['purple', 'red', 'green', 'blue'] as const
+
+const activeCard = ref(0)
+
+function onCardHover(index: number) {
+  activeCard.value = index
 }
 
 function resolveIcon(icon: string): string {
@@ -87,6 +100,33 @@ function resolveIcon(icon: string): string {
         </div>
       </div>
 
+      <!-- Pricing-card style (contribution-benefits) -->
+      <div v-else-if="isProductCardStyle" class="pricing-cards">
+        <div
+          v-for="(item, index) in items"
+          :key="index"
+          class="pricing-card"
+          :class="[
+            `pricing-card--${cardColors[index % cardColors.length]}`,
+            { active: activeCard === index },
+          ]"
+          @mouseover="onCardHover(index)"
+        >
+          <div class="pricing-card__outer">
+            <div class="pricing-card__inner">
+              <span class="pricing-card__icon">
+                <font-awesome-icon :icon="resolveIcon(item.icon)" />
+              </span>
+              <p class="pricing-card__title">{{ item.title }}</p>
+              <p class="pricing-card__desc">{{ item.description }}</p>
+            </div>
+            <span class="pricing-card__number">
+              {{ String(index + 1).padStart(2, '0') }}
+            </span>
+          </div>
+        </div>
+      </div>
+
       <!-- Default style cards -->
       <div v-else class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
         <div
@@ -115,7 +155,163 @@ function resolveIcon(icon: string): string {
 </template>
 
 <style scoped>
-/* === Listar Feature Card Styles === */
+/* ============================================================
+   Pricing Card Style (contribution-benefits)
+   ============================================================ */
+.pricing-cards {
+  margin-top: 2em;
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pricing-card {
+  width: 17.5rem;
+  cursor: pointer;
+}
+
+.pricing-card__outer {
+  background: #ebecee;
+  position: relative;
+  height: 23.438rem;
+  border-radius: 0.625rem;
+  display: flex;
+  align-items: flex-end;
+  padding: 1.25rem;
+  transition: 0.3s ease-in-out;
+}
+
+:root.dark .pricing-card__outer {
+  background: #374151;
+}
+
+.pricing-card__inner {
+  background: #fff;
+  position: absolute;
+  bottom: 3.75rem;
+  right: 1.25rem;
+  width: 100%;
+  height: 90%;
+  border-radius: 0.625rem;
+  padding: 1.875rem 2.188rem;
+  display: flex;
+  flex-direction: column;
+}
+
+:root.dark .pricing-card__inner {
+  background: #1f2937;
+}
+
+.pricing-card__icon {
+  display: flex;
+  align-items: flex-start;
+}
+
+.pricing-card__icon svg,
+.pricing-card__icon .svg-inline--fa {
+  width: 2.188rem;
+  height: 2.188rem;
+  margin-left: -0.188em;
+}
+
+.pricing-card__title {
+  text-transform: capitalize;
+  font-weight: bold;
+  font-size: 1.1rem;
+  display: inline-block;
+  margin-top: 0.5em;
+  margin-bottom: 0.75em;
+  line-height: 1.3;
+}
+
+:root.dark .pricing-card__title {
+  color: #f3f4f6;
+}
+
+.pricing-card__desc {
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: #666;
+  margin: 0;
+  flex: 1;
+}
+
+:root.dark .pricing-card__desc {
+  color: #9ca3af;
+}
+
+.pricing-card__number {
+  font-size: 3rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: flex-end;
+  position: relative;
+  z-index: 1;
+  transition: color 0.3s ease-in-out;
+}
+
+/* ── Couleurs par variante ── */
+.pricing-card--purple .pricing-card__icon,
+.pricing-card--purple .pricing-card__title,
+.pricing-card--purple .pricing-card__number {
+  color: #1e5a96;
+}
+
+.pricing-card--red .pricing-card__icon,
+.pricing-card--red .pricing-card__title,
+.pricing-card--red .pricing-card__number {
+  color: #c34a36;
+}
+
+.pricing-card--red .pricing-card__outer {
+  height: 25.313rem;
+}
+
+.pricing-card--green .pricing-card__icon,
+.pricing-card--green .pricing-card__title,
+.pricing-card--green .pricing-card__number {
+  color: #4ccda7;
+}
+
+.pricing-card--blue .pricing-card__icon,
+.pricing-card--blue .pricing-card__title,
+.pricing-card--blue .pricing-card__number {
+  color: #008bc9;
+}
+
+/* ── État actif (hover) ── */
+.pricing-card.active .pricing-card__number {
+  color: #fff;
+}
+
+.pricing-card--purple.active .pricing-card__outer {
+  background: #1e5a96;
+  box-shadow: 5px 18px 13px rgba(30, 90, 150, 0.43);
+}
+
+.pricing-card--red.active .pricing-card__outer {
+  background: #c34a36;
+  box-shadow: 5px 18px 13px rgba(195, 74, 54, 0.43);
+}
+
+.pricing-card--green.active .pricing-card__outer {
+  background: #4ccda7;
+  box-shadow: 5px 18px 13px rgba(76, 205, 167, 0.43);
+}
+
+.pricing-card--blue.active .pricing-card__outer {
+  background: #008bc9;
+  box-shadow: 5px 18px 13px rgba(0, 139, 201, 0.43);
+}
+
+:root.dark .pricing-card.active .pricing-card__outer {
+  box-shadow: 5px 18px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================================
+   Listar Feature Card Styles (engagement-examples)
+   ============================================================ */
 .listar-feature-items {
   display: flex;
   flex-wrap: wrap;
