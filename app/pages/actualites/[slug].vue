@@ -101,6 +101,31 @@ const formatDate = (dateStr: string | null | undefined) => {
   )
 }
 
+// Extraire l'ID YouTube depuis différents formats d'URL
+const youtubeEmbedUrl = computed(() => {
+  if (!news.value?.video_url) return null
+  const url = news.value.video_url
+  let videoId: string | null = null
+
+  // Format: https://www.youtube.com/watch?v=ID ou https://youtube.com/watch?v=ID
+  const watchMatch = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/)
+  if (watchMatch) videoId = watchMatch[1]
+
+  // Format: https://youtu.be/ID
+  if (!videoId) {
+    const shortMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/)
+    if (shortMatch) videoId = shortMatch[1]
+  }
+
+  // Format: https://www.youtube.com/embed/ID (déjà un embed)
+  if (!videoId) {
+    const embedMatch = url.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/)
+    if (embedMatch) videoId = embedMatch[1]
+  }
+
+  return videoId ? `https://www.youtube-nocookie.com/embed/${videoId}` : null
+})
+
 // Related news (same campus, excluding current)
 const relatedNews = computed(() => relatedNewsItems.value)
 
@@ -290,6 +315,25 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
             <p v-else class="text-gray-500 dark:text-gray-400 italic">
               {{ t('actualites.detail.news.noContent', 'Aucun contenu disponible pour cet article.') }}
             </p>
+          </div>
+
+          <!-- Vidéo YouTube -->
+          <div v-if="youtubeEmbedUrl" class="mt-8">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <font-awesome-icon icon="fa-solid fa-play-circle" class="w-5 h-5 text-brand-red-500" />
+              Vidéo
+            </h2>
+            <div class="relative w-full overflow-hidden rounded-xl shadow-lg" style="padding-bottom: 56.25%;">
+              <iframe
+                :src="youtubeEmbedUrl"
+                class="absolute inset-0 w-full h-full"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+                loading="lazy"
+                referrerpolicy="strict-origin-when-cross-origin"
+              />
+            </div>
           </div>
 
           <!-- Back button -->
