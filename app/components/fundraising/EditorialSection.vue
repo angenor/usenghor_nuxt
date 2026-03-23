@@ -10,6 +10,26 @@ const props = defineProps<{
 }>()
 
 const isListarStyle = computed(() => props.slug === 'engagement-examples')
+
+// Mapping Heroicons → Font Awesome pour les icônes stockées en base
+const iconMap: Record<string, string> = {
+  'currency-euro': 'fa-solid fa-euro-sign',
+  'currency-dollar': 'fa-solid fa-dollar-sign',
+  'users': 'fa-solid fa-users',
+  'briefcase': 'fa-solid fa-briefcase',
+  'academic-cap': 'fa-solid fa-graduation-cap',
+  'building-library': 'fa-solid fa-building-columns',
+  'globe-alt': 'fa-solid fa-globe',
+  'heart': 'fa-solid fa-heart',
+  'hand-raised': 'fa-solid fa-hand',
+  'light-bulb': 'fa-solid fa-lightbulb',
+  'star': 'fa-solid fa-star',
+}
+
+function resolveIcon(icon: string): string {
+  if (icon.startsWith('fa-')) return icon
+  return iconMap[icon] || `fa-solid fa-${icon}`
+}
 </script>
 
 <template>
@@ -39,7 +59,7 @@ const isListarStyle = computed(() => props.slug === 'engagement-examples')
                 <div class="listar-feature-icon-wrapper">
                   <div class="listar-feature-icon-inner">
                     <div class="listar-icon-content">
-                      <font-awesome-icon :icon="item.icon" class="listar-icon" />
+                      <font-awesome-icon :icon="resolveIcon(item.icon)" class="listar-icon" />
                     </div>
                   </div>
                 </div>
@@ -76,7 +96,7 @@ const isListarStyle = computed(() => props.slug === 'engagement-examples')
         >
           <!-- Icon -->
           <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-brand-blue-50 text-brand-blue-600 transition-transform duration-300 group-hover:scale-110 dark:bg-brand-blue-900/30 dark:text-brand-blue-400">
-            <font-awesome-icon :icon="item.icon" class="h-6 w-6" />
+            <font-awesome-icon :icon="resolveIcon(item.icon)" class="h-6 w-6" />
           </div>
 
           <!-- Title -->
