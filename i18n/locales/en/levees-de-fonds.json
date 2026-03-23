@@ -17,6 +17,22 @@
       "contributors": "Contributors",
       "news": "News"
     },
+    "contribution": {
+      "heroBadge": "Fundraising",
+      "heroTitleStart": "Investing in",
+      "heroTitleEmphasis": "the future",
+      "heroTitleEnd": "of African excellence",
+      "heroText": "Education is the fundamental pillar of sustainable development in Africa and the Francophonie. By supporting our mission, you directly participate in <strong>training exceptional talent</strong>, modernizing leading institutions, and advancing the continent's academic influence. Every contribution, regardless of its size, is a <strong>concrete act of transformation</strong>.",
+      "label": "Impact",
+      "titleStart": "Your contribution",
+      "titleEmphasis": "helps to",
+      "card1Title": "Train tomorrow's leaders",
+      "card1Desc": "Your support funds scholarships for deserving students from across Africa and the Francophonie.",
+      "card2Title": "Modernize infrastructure",
+      "card2Desc": "Contribute to the renovation and equipment of campuses to provide a quality learning environment.",
+      "card3Title": "Strengthen international cooperation",
+      "card3Desc": "Participate in the development of academic partnerships and exchange programs around the world."
+    },
     "sections": {
       "globalStats": "Key figures",
       "totalRaised": "Total raised",

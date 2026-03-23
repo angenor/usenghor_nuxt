@@ -17,6 +17,22 @@
       "contributors": "Contributeurs",
       "news": "Actualités"
     },
+    "contribution": {
+      "heroBadge": "Levée de fonds",
+      "heroTitleStart": "Investir dans",
+      "heroTitleEmphasis": "l'avenir",
+      "heroTitleEnd": "de l'excellence africaine",
+      "heroText": "L'éducation est le pilier fondamental du développement durable en Afrique et dans la Francophonie. En soutenant notre mission, vous participez directement à <strong>la formation de talents exceptionnels</strong>, à la modernisation d'établissements de référence et au rayonnement académique du continent. Chaque contribution, quelle que soit sa taille, est un <strong>acte concret de transformation</strong>.",
+      "label": "Impact",
+      "titleStart": "Votre contribution",
+      "titleEmphasis": "sert à",
+      "card1Title": "Former les leaders de demain",
+      "card1Desc": "Votre soutien finance des bourses d'études pour des étudiants méritants venus de toute l'Afrique et de la Francophonie.",
+      "card2Title": "Moderniser les infrastructures",
+      "card2Desc": "Contribuez à la rénovation et l'équipement des campus pour offrir un environnement d'apprentissage de qualité.",
+      "card3Title": "Renforcer la coopération internationale",
+      "card3Desc": "Participez au développement de partenariats académiques et de programmes d'échange à travers le monde."
+    },
     "sections": {
       "globalStats": "Chiffres clés",
       "totalRaised": "Total collecté",

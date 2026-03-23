@@ -72,7 +72,7 @@ async function loadData() {
     ])
 
     globalStats.value = statsData
-    editorialSections.value = editorialData.sections || []
+    editorialSections.value = (editorialData.sections || []).filter(s => s.slug !== 'contribution-reasons')
 
     if (activeData.items.length > 0) {
       activeCampaign.value = transformToDisplay(activeData.items[0])
@@ -94,7 +94,7 @@ onMounted(loadData)
 watch(locale, async () => {
   try {
     const editorialData = await getEditorialSections()
-    editorialSections.value = editorialData.sections || []
+    editorialSections.value = (editorialData.sections || []).filter(s => s.slug !== 'contribution-reasons')
   }
   catch (e) {
     console.error('Erreur rechargement sections:', e)
@@ -113,6 +113,9 @@ watch(locale, async () => {
       :sections="anchorSections"
     />
 
+    <!-- Contribution Cards Section -->
+    <FundraisingContributionCards />
+
     <!-- Loading state -->
     <div v-if="loading" class="flex justify-center py-20">
       <div class="h-12 w-12 animate-spin rounded-full border-4 border-brand-blue-500 border-t-transparent" />
@@ -130,6 +133,7 @@ watch(locale, async () => {
             v-for="section in editorialSections"
             :key="section.slug"
             :title="section.title"
+            :slug="section.slug"
             :items="section.items"
             class="mb-16 last:mb-0"
           />
