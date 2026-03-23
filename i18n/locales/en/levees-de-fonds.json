@@ -35,6 +35,7 @@
     },
     "sections": {
       "globalStats": "Key figures",
+      "globalStatsSubtitle": "The impact of your generosity in numbers",
       "totalRaised": "Total raised",
       "totalContributors": "Contributors",
       "activeCampaigns": "Active campaign | Active campaigns",

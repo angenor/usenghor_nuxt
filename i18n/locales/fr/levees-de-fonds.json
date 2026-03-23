@@ -35,6 +35,7 @@
     },
     "sections": {
       "globalStats": "Chiffres clés",
+      "globalStatsSubtitle": "L'impact de votre générosité en quelques chiffres",
       "totalRaised": "Total collecté",
       "totalContributors": "Contributeurs",
       "activeCampaigns": "Campagne active | Campagnes actives",

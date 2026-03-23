@@ -35,6 +35,7 @@
     },
     "sections": {
       "globalStats": "الأرقام الرئيسية",
+      "globalStatsSubtitle": "أثر كرمكم في أرقام",
       "totalRaised": "إجمالي المبلغ المجمع",
       "totalContributors": "المساهمون",
       "activeCampaigns": "حملة جارية | حملات جارية",
