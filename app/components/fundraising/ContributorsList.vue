@@ -137,12 +137,6 @@ const resetCounter = computed(() => {
                 {{ formatCurrency(getAmount(contributor)!, currencyLocale) }}
               </p>
               <p
-                v-else
-                class="text-xs text-gray-400 dark:text-gray-500 italic"
-              >
-                {{ t('leveesDeFonds.detail.contributors.amountHidden') }}
-              </p>
-              <p
                 v-if="showCampaignCount && 'campaigns_count' in contributor"
                 class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"
               >
