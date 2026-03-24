@@ -7,6 +7,7 @@
  */
 
 import type { PaginatedResponse } from '~/types/api'
+import type { PublicAlbumWithMedia } from '~/types/api/media'
 
 // ============================================================================
 // Types
@@ -154,6 +155,19 @@ export function usePublicEventsApi() {
   }
 
   /**
+   * Récupère les albums publiés associés à un événement.
+   */
+  async function getEventAlbums(slug: string): Promise<PublicAlbumWithMedia[]> {
+    try {
+      const response = await $fetch<{ albums: PublicAlbumWithMedia[] }>(`${baseURL}/api/public/events/${slug}/albums`)
+      return response.albums
+    }
+    catch {
+      return []
+    }
+  }
+
+  /**
    * S'inscrit à un événement.
    */
   async function registerToEvent(eventId: string, registration: EventRegistration): Promise<any> {
@@ -215,6 +229,7 @@ export function usePublicEventsApi() {
     getUpcomingEvents,
     getPastEvents,
     getAllPublishedEvents,
+    getEventAlbums,
     registerToEvent,
 
     // Transformations

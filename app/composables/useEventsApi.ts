@@ -17,6 +17,7 @@ import type {
   PaginatedResponse,
   PublicationStatus,
 } from '~/types/api'
+import type { ContentAlbumEntry } from '~/types/api/media'
 
 // ============================================================================
 // Labels et couleurs UI
@@ -172,33 +173,46 @@ export function useEventsApi() {
   }
 
   // =========================================================================
-  // Media Library
+  // Media Library (albums associés)
   // =========================================================================
 
   /**
-   * Liste les albums d'un événement.
+   * Liste les albums associés à un événement.
    */
-  async function getEventAlbums(eventId: string): Promise<string[]> {
-    return apiFetch<string[]>(`/api/admin/events/${eventId}/media-library`)
+  async function getEventAlbums(eventId: string): Promise<ContentAlbumEntry[]> {
+    const response = await apiFetch<{ albums: ContentAlbumEntry[] }>(`/api/admin/events/${eventId}/albums`)
+    return response.albums
   }
 
   /**
-   * Ajoute un album à la médiathèque d'un événement.
+   * Associe des albums à un événement.
    */
-  async function addEventAlbum(eventId: string, albumId: string): Promise<MessageResponse> {
-    return apiFetch<MessageResponse>(`/api/admin/events/${eventId}/media-library`, {
+  async function addAlbumsToEvent(eventId: string, albumIds: string[]): Promise<ContentAlbumEntry[]> {
+    const response = await apiFetch<{ albums: ContentAlbumEntry[] }>(`/api/admin/events/${eventId}/albums`, {
       method: 'POST',
-      body: { album_external_id: albumId },
+      body: { album_ids: albumIds },
     })
+    return response.albums
   }
 
   /**
-   * Retire un album de la médiathèque d'un événement.
+   * Dissocie un album d'un événement.
    */
-  async function removeEventAlbum(eventId: string, albumId: string): Promise<MessageResponse> {
-    return apiFetch<MessageResponse>(`/api/admin/events/${eventId}/media-library/${albumId}`, {
+  async function removeAlbumFromEvent(eventId: string, albumId: string): Promise<MessageResponse> {
+    return apiFetch<MessageResponse>(`/api/admin/events/${eventId}/albums/${albumId}`, {
       method: 'DELETE',
     })
+  }
+
+  /**
+   * Réordonne les albums d'un événement.
+   */
+  async function reorderEventAlbums(eventId: string, albumIds: string[]): Promise<ContentAlbumEntry[]> {
+    const response = await apiFetch<{ albums: ContentAlbumEntry[] }>(`/api/admin/events/${eventId}/albums/reorder`, {
+      method: 'PUT',
+      body: { album_ids: albumIds },
+    })
+    return response.albums
   }
 
   // =========================================================================
@@ -270,10 +284,11 @@ export function useEventsApi() {
     // Statistics
     getEventsStats,
 
-    // Media Library
+    // Media Library (albums)
     getEventAlbums,
-    addEventAlbum,
-    removeEventAlbum,
+    addAlbumsToEvent,
+    removeAlbumFromEvent,
+    reorderEventAlbums,
 
     // Helpers
     slugifyEvent,

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { EventType, EventUpdatePayload, PublicationStatus, ImageVariants } from '~/types/api'
+import type { ContentAlbumEntry } from '~/types/api/media'
 
 const { uploadMediaVariants, getMediaUrl } = useMediaApi()
 
@@ -19,6 +20,10 @@ const {
   toDatetimeLocal,
   eventTypeLabels,
   eventStatusLabels,
+  getEventAlbums,
+  addAlbumsToEvent,
+  removeAlbumFromEvent,
+  reorderEventAlbums,
 } = useEventsApi()
 
 const {
@@ -91,6 +96,10 @@ const notFound = ref(false)
 const error = ref<string | null>(null)
 const formInitialized = ref(false)
 
+// Albums associés (médiathèque)
+const eventAlbums = ref<ContentAlbumEntry[]>([])
+const isLoadingAlbums = ref(true)
+
 // Charger l'événement et les données de référence
 onMounted(async () => {
   try {
@@ -161,6 +170,9 @@ onMounted(async () => {
 
     // Marquer le formulaire comme initialisé (après chargement des données)
     formInitialized.value = true
+
+    // Charger les albums associés
+    loadEventAlbums()
   } catch (e) {
     console.error('Error loading event:', e)
     notFound.value = true
@@ -168,6 +180,46 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
+
+async function loadEventAlbums() {
+  try {
+    eventAlbums.value = await getEventAlbums(eventId.value)
+  }
+  catch (err) {
+    console.error('Erreur chargement albums:', err)
+  }
+  finally {
+    isLoadingAlbums.value = false
+  }
+}
+
+async function handleAddAlbums(albumIds: string[]) {
+  try {
+    eventAlbums.value = await addAlbumsToEvent(eventId.value, albumIds)
+  }
+  catch (err) {
+    console.error('Erreur ajout album:', err)
+  }
+}
+
+async function handleRemoveAlbum(albumId: string) {
+  try {
+    await removeAlbumFromEvent(eventId.value, albumId)
+    eventAlbums.value = eventAlbums.value.filter(a => a.album_external_id !== albumId)
+  }
+  catch (err) {
+    console.error('Erreur suppression album:', err)
+  }
+}
+
+async function handleReorderAlbums(albumIds: string[]) {
+  try {
+    eventAlbums.value = await reorderEventAlbums(eventId.value, albumIds)
+  }
+  catch (err) {
+    console.error('Erreur réordonnancement albums:', err)
+  }
+}
 
 // Auto-génération du slug (seulement après initialisation et si non modifié manuellement)
 const slugManuallyEdited = ref(false)
@@ -878,17 +930,15 @@ const tabs = [
               </select>
             </div>
 
-            <div>
-              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Album photos (ID)
-              </label>
-              <input
-                v-model="form.album_external_id"
-                type="text"
-                placeholder="ID de l'album"
-                class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            <!-- Médiathèque (albums associés) -->
+            <div class="sm:col-span-2">
+              <AdminAlbumSelector
+                :albums="eventAlbums"
+                :loading="isLoadingAlbums"
+                @add="handleAddAlbums"
+                @remove="handleRemoveAlbum"
+                @reorder="handleReorderAlbums"
               />
-              <p class="mt-1 text-xs text-gray-500">En production: sélecteur d'album</p>
             </div>
 
             <!-- Lien YouTube -->

@@ -102,7 +102,12 @@
       "news": {
         "breadcrumb": "خبر",
         "relatedNews": "مقالات مشابهة",
-        "backToNews": "العودة إلى الأخبار"
+        "backToNews": "العودة إلى الأخبار",
+        "tabs": {
+          "details": "التفاصيل",
+          "mediatheque": "مكتبة الوسائط"
+        },
+        "noMedia": "لا توجد ألبومات متاحة لهذا المقال."
       },
       "call": {
         "breadcrumb": "دعوة",
@@ -155,6 +160,11 @@
         "joinOnline": "الانضمام إلى المؤتمر المرئي",
         "relatedEvents": "فعاليات أخرى",
         "backToEvents": "العودة إلى الفعاليات",
+        "tabs": {
+          "details": "التفاصيل",
+          "mediatheque": "مكتبة الوسائط"
+        },
+        "noMedia": "لا توجد ألبومات متاحة لهذا الحدث.",
         "registration": {
           "title": "التسجيل",
           "register": "التسجيل",

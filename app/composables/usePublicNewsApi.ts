@@ -7,6 +7,7 @@
  */
 
 import type { PaginatedResponse } from '~/types/api'
+import type { PublicAlbumWithMedia } from '~/types/api/media'
 import type {
   NewsDisplay,
   NewsHighlightStatus,
@@ -211,6 +212,23 @@ export function usePublicNewsApi() {
   }
 
   // =========================================================================
+  // Albums
+  // =========================================================================
+
+  /**
+   * Récupère les albums publiés associés à une actualité.
+   */
+  async function getNewsAlbums(slug: string): Promise<PublicAlbumWithMedia[]> {
+    try {
+      const response = await $fetch<{ albums: PublicAlbumWithMedia[] }>(`${baseURL}/api/public/news/${slug}/albums`)
+      return response.albums
+    }
+    catch {
+      return []
+    }
+  }
+
+  // =========================================================================
   // Helpers
   // =========================================================================
 
@@ -244,6 +262,7 @@ export function usePublicNewsApi() {
     getHeadlineNews,
     getFeaturedNews,
     getAllPublishedNews,
+    getNewsAlbums,
 
     // Transformations
     transformToDisplay,

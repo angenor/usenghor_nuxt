@@ -102,7 +102,12 @@
       "news": {
         "breadcrumb": "Actualité",
         "relatedNews": "Articles similaires",
-        "backToNews": "Retour aux actualités"
+        "backToNews": "Retour aux actualités",
+        "tabs": {
+          "details": "Détails",
+          "mediatheque": "Médiathèque"
+        },
+        "noMedia": "Aucun album disponible pour cet article."
       },
       "call": {
         "breadcrumb": "Appel",
@@ -155,6 +160,11 @@
         "joinOnline": "Rejoindre la visioconférence",
         "relatedEvents": "Autres événements",
         "backToEvents": "Retour aux événements",
+        "tabs": {
+          "details": "Détails",
+          "mediatheque": "Médiathèque"
+        },
+        "noMedia": "Aucun album disponible pour cet événement.",
         "registration": {
           "title": "Inscription",
           "register": "S'inscrire",

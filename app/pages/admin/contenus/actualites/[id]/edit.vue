@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { NewsStatus, NewsHighlightStatus, NewsDisplay, TagRead } from '~/types/news'
 import type { ImageVariants } from '~/types/api'
+import type { ContentAlbumEntry } from '~/types/api/media'
 import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({
@@ -19,6 +20,10 @@ const {
   newsStatusLabels,
   highlightStatusLabels,
   slugify,
+  getNewsAlbums,
+  addAlbumsToNews,
+  removeAlbumFromNews,
+  reorderNewsAlbums,
 } = useAdminNewsApi()
 
 const { uploadMedia, uploadMediaVariants, getMediaUrl } = useMediaApi()
@@ -96,6 +101,10 @@ const form = reactive({
 // Tags from API
 const allTags = ref<TagRead[]>([])
 
+// Albums associés (médiathèque)
+const newsAlbums = ref<ContentAlbumEntry[]>([])
+const isLoadingAlbums = ref(true)
+
 // Load data on mount
 onMounted(async () => {
   isLoading.value = true
@@ -158,6 +167,9 @@ onMounted(async () => {
       contentHtmlAr.value = newsData.content_ar_html || ''
 
       formInitialized.value = true
+
+      // Charger les albums associés
+      loadNewsAlbums()
     }
   }
   catch (e: unknown) {
@@ -175,6 +187,46 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
+
+async function loadNewsAlbums() {
+  try {
+    newsAlbums.value = await getNewsAlbums(newsId.value)
+  }
+  catch (err) {
+    console.error('Erreur chargement albums:', err)
+  }
+  finally {
+    isLoadingAlbums.value = false
+  }
+}
+
+async function handleAddAlbums(albumIds: string[]) {
+  try {
+    newsAlbums.value = await addAlbumsToNews(newsId.value, albumIds)
+  }
+  catch (err) {
+    console.error('Erreur ajout album:', err)
+  }
+}
+
+async function handleRemoveAlbum(albumId: string) {
+  try {
+    await removeAlbumFromNews(newsId.value, albumId)
+    newsAlbums.value = newsAlbums.value.filter(a => a.album_external_id !== albumId)
+  }
+  catch (err) {
+    console.error('Erreur suppression album:', err)
+  }
+}
+
+async function handleReorderAlbums(albumIds: string[]) {
+  try {
+    newsAlbums.value = await reorderNewsAlbums(newsId.value, albumIds)
+  }
+  catch (err) {
+    console.error('Erreur réordonnancement albums:', err)
+  }
+}
 
 // Auto-generate slug from title (only after form is initialized)
 watch(() => form.title, (newTitle) => {
@@ -814,6 +866,15 @@ async function createTag() {
           </div>
         </div>
       </div>
+
+      <!-- Médiathèque (albums associés) -->
+      <AdminAlbumSelector
+        :albums="newsAlbums"
+        :loading="isLoadingAlbums"
+        @add="handleAddAlbums"
+        @remove="handleRemoveAlbum"
+        @reorder="handleReorderAlbums"
+      />
 
       <!-- Publication -->
       <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">

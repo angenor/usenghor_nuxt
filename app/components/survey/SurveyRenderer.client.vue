@@ -114,3 +114,29 @@ const surveyModel = computed(() => {
   --sjs-primary-forecolor: #fff;
 }
 </style>
+
+<!-- Dark mode non-scoped : html.dark est hors du scope du composant -->
+<style>
+html.dark .survey-renderer .sd-root-modern {
+  --sjs-general-backcolor: transparent;
+  --sjs-general-backcolor-dim: transparent;
+  --sjs-general-backcolor-dim-light: rgba(255, 255, 255, 0.03);
+  --sjs-general-forecolor: rgba(255, 255, 255, 0.85);
+  --sjs-general-forecolor-light: rgba(255, 255, 255, 0.5);
+  --sjs-border-default: rgba(255, 255, 255, 0.12);
+  --sjs-border-light: rgba(255, 255, 255, 0.08);
+  --sjs-editor-background: rgba(255, 255, 255, 0.06);
+  --sjs-editorpanel-backcolor: rgba(255, 255, 255, 0.04);
+  --sjs-primary-backcolor: #3b82f6;
+  --sjs-primary-backcolor-light: rgba(59, 130, 246, 0.15);
+  --sjs-primary-backcolor-dark: #2563eb;
+  --sjs-shadow-small: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --sjs-shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.35);
+  --sjs-shadow-large: 0 8px 16px rgba(0, 0, 0, 0.3);
+  --sjs-shadow-inner: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  --sjs-font-questiontitle-color: rgba(255, 255, 255, 0.9);
+  --sjs-font-questiondescription-color: rgba(255, 255, 255, 0.5);
+  --sjs-font-editorfont-color: rgba(255, 255, 255, 0.85);
+  --sjs-font-editorfont-placeholdercolor: rgba(255, 255, 255, 0.35);
+}
+</style>

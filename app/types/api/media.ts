@@ -97,3 +97,30 @@ export interface AlbumRead {
 export interface AlbumWithMedia extends AlbumRead {
   media_items: MediaRead[]
 }
+
+// ============================================================================
+// Content Album Associations (événements/actualités ↔ albums)
+// ============================================================================
+
+export interface AlbumSummary {
+  id: string
+  title: string
+  description: string | null
+  status: AlbumStatus
+  media_count: number
+  cover_url: string | null
+}
+
+export interface ContentAlbumEntry {
+  album_external_id: string
+  display_order: number
+  album: AlbumSummary | null
+}
+
+export interface PublicAlbumWithMedia {
+  id: string
+  title: string
+  description: string | null
+  display_order: number
+  media_items: MediaRead[]
+}

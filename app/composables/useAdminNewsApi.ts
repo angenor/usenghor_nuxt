@@ -7,6 +7,7 @@
  */
 
 import type { IdResponse, MessageResponse, PaginatedResponse } from '~/types/api'
+import type { ContentAlbumEntry } from '~/types/api/media'
 import type {
   NewsCreatePayload,
   NewsDisplay,
@@ -410,6 +411,49 @@ export function useAdminNewsApi() {
   }
 
   // =========================================================================
+  // Media Library (albums associés)
+  // =========================================================================
+
+  /**
+   * Liste les albums associés à une actualité.
+   */
+  async function getNewsAlbums(newsId: string): Promise<ContentAlbumEntry[]> {
+    const response = await apiFetch<{ albums: ContentAlbumEntry[] }>(`/api/admin/news/${newsId}/albums`)
+    return response.albums
+  }
+
+  /**
+   * Associe des albums à une actualité.
+   */
+  async function addAlbumsToNews(newsId: string, albumIds: string[]): Promise<ContentAlbumEntry[]> {
+    const response = await apiFetch<{ albums: ContentAlbumEntry[] }>(`/api/admin/news/${newsId}/albums`, {
+      method: 'POST',
+      body: { album_ids: albumIds },
+    })
+    return response.albums
+  }
+
+  /**
+   * Dissocie un album d'une actualité.
+   */
+  async function removeAlbumFromNews(newsId: string, albumId: string): Promise<MessageResponse> {
+    return apiFetch<MessageResponse>(`/api/admin/news/${newsId}/albums/${albumId}`, {
+      method: 'DELETE',
+    })
+  }
+
+  /**
+   * Réordonne les albums d'une actualité.
+   */
+  async function reorderNewsAlbums(newsId: string, albumIds: string[]): Promise<ContentAlbumEntry[]> {
+    const response = await apiFetch<{ albums: ContentAlbumEntry[] }>(`/api/admin/news/${newsId}/albums/reorder`, {
+      method: 'PUT',
+      body: { album_ids: albumIds },
+    })
+    return response.albums
+  }
+
+  // =========================================================================
   // Statistics
   // =========================================================================
 
@@ -503,6 +547,12 @@ export function useAdminNewsApi() {
     getAllTags,
     createTag,
     deleteTag,
+
+    // Media Library (albums)
+    getNewsAlbums,
+    addAlbumsToNews,
+    removeAlbumFromNews,
+    reorderNewsAlbums,
 
     // Statistics
     getNewsStats,
