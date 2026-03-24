@@ -23,8 +23,20 @@ const { submitResponse, uploadFile } = usePublicSurveyApi()
 const submitting = ref(false)
 const submitError = ref<string | null>(null)
 
+function normalizeSurveyJson(json: Record<string, any>): Record<string, any> {
+  const copy = JSON.parse(JSON.stringify(json))
+  const elements = copy.elements || copy.pages?.flatMap((p: any) => p.elements || []) || []
+  for (const el of elements) {
+    if (el.type === 'rating' && el.rateCount && !el.rateMax) {
+      el.rateMax = el.rateCount
+      delete el.rateCount
+    }
+  }
+  return copy
+}
+
 const surveyModel = computed(() => {
-  const model = new Model(props.surveyJson)
+  const model = new Model(normalizeSurveyJson(props.surveyJson))
 
   // Configurer la locale
   const surveyLocale = props.locale || i18nLocale.value
