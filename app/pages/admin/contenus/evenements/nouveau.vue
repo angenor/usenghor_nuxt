@@ -72,6 +72,7 @@ const form = ref({
   project_external_id: '',
   organizer_external_id: '',
   album_external_id: '',
+  youtube_link: '',
   status: 'draft' as PublicationStatus
 })
 
@@ -191,6 +192,7 @@ const saveForm = async () => {
       end_date: form.value.end_date ? new Date(form.value.end_date).toISOString() : null,
       is_online: form.value.is_online,
       video_conference_link: form.value.video_conference_link || null,
+      youtube_link: form.value.youtube_link || null,
       venue: form.value.venue || null,
       address: form.value.address || null,
       city: form.value.city || null,
@@ -731,6 +733,23 @@ const tabs = [
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
             <p class="mt-1 text-xs text-gray-500">En production: sélecteur d'album</p>
+          </div>
+
+          <!-- Lien YouTube -->
+          <div class="sm:col-span-2">
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <font-awesome-icon icon="fa-brands fa-youtube" class="mr-1 h-4 w-4 text-red-600" />
+              Lien YouTube (replay)
+            </label>
+            <input
+              v-model="form.youtube_link"
+              type="url"
+              placeholder="https://www.youtube.com/watch?v=..."
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            />
+            <p class="mt-1 text-xs text-gray-500">
+              Si renseigné, la vidéo remplacera l'image de couverture sur la page de détail lorsque l'événement sera passé
+            </p>
           </div>
         </div>
       </div>

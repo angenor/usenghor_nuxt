@@ -111,6 +111,14 @@ const isPastEvent = computed(() => {
   return endDate < new Date()
 })
 
+// Extraire l'ID YouTube d'un lien pour l'embed
+const youtubeEmbedUrl = computed(() => {
+  const link = (event.value as any)?.youtube_link
+  if (!link || !isPastEvent.value) return null
+  const match = link.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)
+  return match ? `https://www.youtube.com/embed/${match[1]}?autoplay=1&mute=1` : null
+})
+
 // Days until event
 const daysUntilEvent = computed(() => {
   if (!event.value) return 0
@@ -375,10 +383,21 @@ function closeRegistrationModal() {
 
         <!-- Main content -->
         <article class="lg:w-2/3">
-          <!-- Featured image -->
+          <!-- Featured image / YouTube embed -->
           <div class="overflow-hidden rounded-xl mb-8 shadow-lg">
+            <!-- Vidéo YouTube (événement passé + lien renseigné) -->
+            <div v-if="youtubeEmbedUrl" class="relative w-full" style="padding-bottom: 56.25%;">
+              <iframe
+                :src="youtubeEmbedUrl"
+                class="absolute inset-0 w-full h-full"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              />
+            </div>
+            <!-- Image de couverture (par défaut) -->
             <img
-              v-if="getCoverImageUrl(event, 'medium')"
+              v-else-if="getCoverImageUrl(event, 'medium')"
               :src="getCoverImageUrl(event, 'medium')!"
               :alt="getLocalizedTitle"
               class="w-full h-auto object-cover"

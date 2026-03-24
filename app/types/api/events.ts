@@ -93,6 +93,7 @@ export interface EventRead {
   longitude: number | null
   is_online: boolean
   video_conference_link: string | null
+  youtube_link: string | null
   registration_required: boolean
   registration_link: string | null
   max_attendees: number | null
@@ -138,6 +139,7 @@ export interface EventCreatePayload {
   longitude?: number | null
   is_online?: boolean
   video_conference_link?: string | null
+  youtube_link?: string | null
   registration_required?: boolean
   registration_link?: string | null
   max_attendees?: number | null
@@ -172,6 +174,7 @@ export interface EventUpdatePayload {
   longitude?: number | null
   is_online?: boolean
   video_conference_link?: string | null
+  youtube_link?: string | null
   registration_required?: boolean
   registration_link?: string | null
   max_attendees?: number | null
