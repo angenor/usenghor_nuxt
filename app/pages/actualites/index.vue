@@ -90,7 +90,7 @@ const sideNews = computed(() => {
     n.id !== featuredNews.value?.id &&
     (n.highlight_status === 'featured' || n.highlight_status === 'standard')
   )
-  return featured.slice(0, 3)
+  return featured.slice(0, 2)
 })
 
 // Latest news - avec pagination

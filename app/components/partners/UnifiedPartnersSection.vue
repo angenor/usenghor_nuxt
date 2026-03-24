@@ -106,6 +106,16 @@ watch(selectedFilter, () => {
 // Check if charter operator (for styling)
 const isCharterOperator = (partner: PartnerPublic) => checkIsCharterOperator(partner)
 
+// Marquee : diviser les partenaires en 2 lignes
+const marqueeRow1 = computed(() => {
+  const mid = Math.ceil(allPartners.value.length / 2)
+  return allPartners.value.slice(0, mid)
+})
+const marqueeRow2 = computed(() => {
+  const mid = Math.ceil(allPartners.value.length / 2)
+  return allPartners.value.slice(mid)
+})
+
 </script>
 
 <template>
@@ -135,63 +145,77 @@ const isCharterOperator = (partner: PartnerPublic) => checkIsCharterOperator(par
       <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-blue-600"></div>
     </div>
 
-    <!-- Marquee -->
-    <div v-else-if="allPartners.length > 0" class="marquee-container group/marquee">
-      <div class="marquee-track">
-        <div
-          v-for="partner in allPartners"
-          :key="`a-${partner.id}`"
-          class="marquee-item"
-        >
-          <a
-            :href="partner.website || undefined"
-            :target="partner.website ? '_blank' : undefined"
-            :rel="partner.website ? 'noopener noreferrer' : undefined"
-            class="group flex flex-col items-center p-4 rounded-xl border bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:shadow-md hover:border-brand-blue-300 dark:hover:border-brand-blue-700 transition-all duration-300"
-            :class="partner.website ? 'cursor-pointer' : 'cursor-default'"
-          >
-            <div class="relative w-16 h-16 mb-2 flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 p-2">
-              <img
-                :src="getPartnerLogoUrl(partner)"
-                :alt="partner.name"
-                class="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-110"
-                loading="lazy"
-                @error="($event.target as HTMLImageElement).style.display = 'none'"
+    <!-- Marquee : 2 lignes en sens opposés -->
+    <div v-else-if="allPartners.length > 0" class="space-y-4">
+      <!-- Ligne 1 : gauche → droite -->
+      <div class="marquee-container group/marquee">
+        <div class="marquee-track">
+          <template v-for="copy in ['a', 'b']" :key="copy">
+            <div
+              v-for="partner in marqueeRow1"
+              :key="`${copy}-1-${partner.id}`"
+              class="marquee-item"
+              :aria-hidden="copy === 'b' ? true : undefined"
+            >
+              <a
+                :href="partner.website || undefined"
+                :target="partner.website ? '_blank' : undefined"
+                :rel="partner.website ? 'noopener noreferrer' : undefined"
+                class="group flex flex-col items-center p-4 rounded-xl border bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:shadow-md hover:border-brand-blue-300 dark:hover:border-brand-blue-700 transition-all duration-300"
+                :class="partner.website ? 'cursor-pointer' : 'cursor-default'"
+                :tabindex="copy === 'b' ? -1 : undefined"
               >
+                <div class="relative w-16 h-16 mb-2 flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 p-2">
+                  <img
+                    :src="getPartnerLogoUrl(partner)"
+                    :alt="partner.name"
+                    class="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-110"
+                    loading="lazy"
+                    @error="($event.target as HTMLImageElement).style.display = 'none'"
+                  >
+                </div>
+                <span class="text-xs font-medium text-gray-700 dark:text-gray-300 text-center line-clamp-2 w-28">
+                  {{ partner.name }}
+                </span>
+              </a>
             </div>
-            <span class="text-xs font-medium text-gray-700 dark:text-gray-300 text-center line-clamp-2 w-28">
-              {{ partner.name }}
-            </span>
-          </a>
+          </template>
         </div>
-        <!-- Duplication pour boucle infinie -->
-        <div
-          v-for="partner in allPartners"
-          :key="`b-${partner.id}`"
-          class="marquee-item"
-          aria-hidden="true"
-        >
-          <a
-            :href="partner.website || undefined"
-            :target="partner.website ? '_blank' : undefined"
-            :rel="partner.website ? 'noopener noreferrer' : undefined"
-            class="group flex flex-col items-center p-4 rounded-xl border bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:shadow-md hover:border-brand-blue-300 dark:hover:border-brand-blue-700 transition-all duration-300"
-            :class="partner.website ? 'cursor-pointer' : 'cursor-default'"
-            tabindex="-1"
-          >
-            <div class="relative w-16 h-16 mb-2 flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 p-2">
-              <img
-                :src="getPartnerLogoUrl(partner)"
-                :alt="partner.name"
-                class="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-110"
-                loading="lazy"
-                @error="($event.target as HTMLImageElement).style.display = 'none'"
+      </div>
+
+      <!-- Ligne 2 : droite → gauche -->
+      <div class="marquee-container group/marquee">
+        <div class="marquee-track marquee-track--reverse">
+          <template v-for="copy in ['a', 'b']" :key="copy">
+            <div
+              v-for="partner in marqueeRow2"
+              :key="`${copy}-2-${partner.id}`"
+              class="marquee-item"
+              :aria-hidden="copy === 'b' ? true : undefined"
+            >
+              <a
+                :href="partner.website || undefined"
+                :target="partner.website ? '_blank' : undefined"
+                :rel="partner.website ? 'noopener noreferrer' : undefined"
+                class="group flex flex-col items-center p-4 rounded-xl border bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:shadow-md hover:border-brand-blue-300 dark:hover:border-brand-blue-700 transition-all duration-300"
+                :class="partner.website ? 'cursor-pointer' : 'cursor-default'"
+                :tabindex="copy === 'b' ? -1 : undefined"
               >
+                <div class="relative w-16 h-16 mb-2 flex items-center justify-center rounded-lg bg-white dark:bg-gray-700 p-2">
+                  <img
+                    :src="getPartnerLogoUrl(partner)"
+                    :alt="partner.name"
+                    class="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-110"
+                    loading="lazy"
+                    @error="($event.target as HTMLImageElement).style.display = 'none'"
+                  >
+                </div>
+                <span class="text-xs font-medium text-gray-700 dark:text-gray-300 text-center line-clamp-2 w-28">
+                  {{ partner.name }}
+                </span>
+              </a>
             </div>
-            <span class="text-xs font-medium text-gray-700 dark:text-gray-300 text-center line-clamp-2 w-28">
-              {{ partner.name }}
-            </span>
-          </a>
+          </template>
         </div>
       </div>
     </div>
@@ -393,6 +417,10 @@ const isCharterOperator = (partner: PartnerPublic) => checkIsCharterOperator(par
   animation: marquee-scroll 40s linear infinite;
 }
 
+.marquee-track--reverse {
+  animation: marquee-scroll-reverse 40s linear infinite;
+}
+
 .marquee-item {
   flex-shrink: 0;
 }
@@ -407,6 +435,15 @@ const isCharterOperator = (partner: PartnerPublic) => checkIsCharterOperator(par
   }
   100% {
     transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-scroll-reverse {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
   }
 }
 
