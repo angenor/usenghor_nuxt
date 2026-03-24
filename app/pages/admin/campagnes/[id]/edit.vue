@@ -74,7 +74,7 @@ onMounted(async () => {
         text: typeof c === 'string' ? { fr: c } : (c.text || { fr: c.value }),
       })),
       inputType: el.inputType,
-      rateCount: el.rateCount,
+      rateCount: el.rateMax || el.rateCount,
     }))
     // Charger les associations
     await loadAssociations()
@@ -108,7 +108,7 @@ function buildSurveyJson(): Record<string, any> {
         element.choices = q.choices.map(c => ({ value: c.value, text: c.text }))
       }
       if (q.type === 'rating' && q.rateCount) {
-        element.rateCount = q.rateCount
+        element.rateMax = q.rateCount
       }
       if (form.confirmation_email_enabled && form.confirmation_email_field === q.name) {
         element.inputType = 'email'

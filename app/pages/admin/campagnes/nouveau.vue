@@ -75,7 +75,7 @@ function buildSurveyJson(): Record<string, any> {
         }))
       }
       if (q.type === 'rating' && q.rateCount) {
-        element.rateCount = q.rateCount
+        element.rateMax = q.rateCount
       }
       if (form.confirmation_email_enabled && form.confirmation_email_field === q.name) {
         element.inputType = 'email'
