@@ -101,7 +101,7 @@ function handleComplete(data: Record<string, any>) {
       />
 
       <!-- Contenu -->
-      <div class="relative z-10 flex items-center px-4 sm:px-6 lg:px-8 py-14 md:py-20">
+      <div class="relative z-10 flex items-center px-4 sm:px-6 lg:px-8 pt-20 pb-14 md:pt-28 md:pb-20">
         <div class="mx-auto max-w-4xl text-center">
           <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
             {{ localizedTitle }}
@@ -171,18 +171,20 @@ function handleComplete(data: Record<string, any>) {
 
       <!-- Formulaire -->
       <template v-else-if="campaign">
-        <!-- Image de l'entité associée -->
-        <div v-if="coverImageUrl" class="mb-8 overflow-hidden rounded-xl">
-          <img :src="coverImageUrl" :alt="localizedTitle" class="w-full h-auto max-h-[360px] object-cover">
-        </div>
+        <div class="overflow-hidden rounded-xl bg-white shadow dark:bg-gray-800">
+          <!-- Image de l'entité associée -->
+          <img v-if="coverImageUrl" :src="coverImageUrl" :alt="localizedTitle" class="w-full max-h-[320px] object-cover">
 
-        <SurveyRenderer
-          :survey-json="campaign.survey_json"
-          :locale="locale"
-          :slug="slug"
-          :session-id="sessionId"
-          @complete="handleComplete"
-        />
+          <div class="p-6 md:p-8">
+            <SurveyRenderer
+              :survey-json="campaign.survey_json"
+              :locale="locale"
+              :slug="slug"
+              :session-id="sessionId"
+              @complete="handleComplete"
+            />
+          </div>
+        </div>
       </template>
     </div>
   </div>
