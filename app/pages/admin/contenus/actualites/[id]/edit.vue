@@ -624,22 +624,14 @@ async function createTag() {
         </h2>
 
         <div class="grid gap-4 md:grid-cols-2">
-          <!-- Auteur -->
+          <!-- Auteur (automatiquement l'utilisateur connecté) -->
           <div>
-            <label for="author_id" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Auteur <span class="text-red-500">*</span>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Auteur
             </label>
-            <select
-              id="author_id"
-              v-model="form.author_id"
-              required
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            >
-              <option value="">Sélectionner un auteur</option>
-              <option v-for="author in allAuthors" :key="author.id" :value="author.id">
-                {{ author.full_name }}
-              </option>
-            </select>
+            <div class="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-gray-700 dark:border-gray-600 dark:bg-gray-600 dark:text-gray-300">
+              {{ authStore.user?.full_name || authStore.user?.email || '—' }}
+            </div>
           </div>
 
           <!-- Campus associés -->
