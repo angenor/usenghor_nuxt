@@ -86,6 +86,10 @@ onMounted(async () => {
   }
 })
 
+const emailCapableQuestions = computed(() => {
+  return questions.value.filter(q => q.type === 'text' || q.type === 'comment')
+})
+
 const isValid = computed(() => {
   return form.slug.length > 0 && form.title_fr.length > 0
 })
@@ -105,6 +109,10 @@ function buildSurveyJson(): Record<string, any> {
       }
       if (q.type === 'rating' && q.rateCount) {
         element.rateCount = q.rateCount
+      }
+      if (form.confirmation_email_enabled && form.confirmation_email_field === q.name) {
+        element.inputType = 'email'
+        element.validators = [{ type: 'email' }]
       }
       return element
     }),
@@ -396,7 +404,7 @@ function getEntityTypeLabel(type: string): string {
               class="w-64 rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             >
               <option value="">Sélectionner le champ email...</option>
-              <option v-for="q in questions" :key="q.name" :value="q.name">
+              <option v-for="q in emailCapableQuestions" :key="q.name" :value="q.name">
                 {{ q.title.fr || q.name }} ({{ q.name }})
               </option>
             </select>
