@@ -29,6 +29,14 @@
     "retry": "Réessayer",
     "loadMore": "Voir plus"
   },
+  "error_page": {
+    "title": "Page introuvable",
+    "code": "404",
+    "message": "Désolé, la page que vous recherchez n'existe pas ou a été déplacée.",
+    "backHome": "Retour à l'accueil",
+    "generic_title": "Erreur",
+    "generic_message": "Une erreur inattendue est survenue. Veuillez réessayer."
+  },
   "wip": {
     "title": "Page en développement",
     "message": "Cette page est actuellement en cours de construction. Revenez bientôt pour découvrir son contenu.",
