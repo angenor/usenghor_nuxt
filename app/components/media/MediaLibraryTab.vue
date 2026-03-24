@@ -19,7 +19,9 @@ function toMediaItems(album: PublicAlbumWithMedia) {
     id: m.id,
     title_fr: m.alt_text || m.name,
     url: m.url,
-    thumbnail: m.url + '?variant=low',
+    thumbnail: m.type === 'image' ? m.url + '?variant=low' : undefined,
+    type: m.type,
+    mime_type: m.mime_type || undefined,
   }))
 }
 

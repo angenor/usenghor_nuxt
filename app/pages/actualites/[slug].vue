@@ -270,7 +270,7 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
 
           <!-- Tab: Médiathèque -->
           <div v-if="activeTab === 'mediatheque' && hasMediaLibrary" class="mb-8">
-            <MediaMediaLibraryTab :albums="newsAlbums" />
+            <MediaLibraryTab :albums="newsAlbums" />
           </div>
 
           <!-- Tab: Détails (contenu existant) -->

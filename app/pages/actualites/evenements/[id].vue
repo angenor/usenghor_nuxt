@@ -497,7 +497,7 @@ function closeRegistrationModal() {
 
           <!-- Tab: Médiathèque -->
           <div v-if="activeTab === 'mediatheque' && hasMediaLibrary" class="mb-8">
-            <MediaMediaLibraryTab :albums="eventAlbums" />
+            <MediaLibraryTab :albums="eventAlbums" />
           </div>
 
           <!-- Tab: Détails (contenu existant) -->

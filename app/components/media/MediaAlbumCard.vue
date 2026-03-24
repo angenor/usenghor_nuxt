@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { MediaType } from '~/types/api/media'
+
 interface MediaItem {
   id: string
   title_fr: string
@@ -6,6 +8,7 @@ interface MediaItem {
   url: string
   thumbnail?: string
   date?: string
+  type?: MediaType
 }
 
 interface Props {
@@ -19,9 +22,41 @@ const emit = defineEmits<{
   click: []
 }>()
 
-// Show up to 3 images in the stack
-const stackImages = computed(() => props.items.slice(0, 3))
+// Show up to 3 images in the stack (préférer les images pour la vignette)
+const imageItems = computed(() => props.items.filter(i => !i.type || i.type === 'image'))
+const stackImages = computed(() => {
+  const images = imageItems.value.slice(0, 3)
+  // Si pas assez d'images, compléter avec les autres items
+  if (images.length < 3) {
+    const others = props.items.filter(i => i.type && i.type !== 'image')
+    return [...images, ...others].slice(0, 3)
+  }
+  return images
+})
 const totalCount = computed(() => props.itemCount ?? props.items.length)
+
+// Compteurs par type
+const typeCounts = computed(() => {
+  const counts: Partial<Record<MediaType, number>> = {}
+  props.items.forEach(item => {
+    const t = item.type || 'image'
+    counts[t] = (counts[t] || 0) + 1
+  })
+  return counts
+})
+
+function getTypeIcon(type: MediaType): string {
+  switch (type) {
+    case 'image': return 'fa-solid fa-image'
+    case 'video': return 'fa-solid fa-film'
+    case 'audio': return 'fa-solid fa-headphones'
+    case 'document': return 'fa-solid fa-file-lines'
+  }
+}
+
+function isImageItem(item: MediaItem): boolean {
+  return !item.type || item.type === 'image'
+}
 </script>
 
 <template>
@@ -99,9 +134,16 @@ const totalCount = computed(() => props.itemCount ?? props.items.length)
       <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors line-clamp-2">
         {{ title }}
       </h3>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-        {{ totalCount }} {{ totalCount > 1 ? 'photos' : 'photo' }}
-      </p>
+      <div class="flex items-center gap-2 mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <span>{{ totalCount }} {{ totalCount > 1 ? 'fichiers' : 'fichier' }}</span>
+        <template v-if="Object.keys(typeCounts).length > 1">
+          <span class="text-gray-300 dark:text-gray-600">·</span>
+          <span v-for="(count, type) in typeCounts" :key="type" class="inline-flex items-center gap-0.5">
+            <font-awesome-icon :icon="getTypeIcon(type as MediaType)" class="w-3 h-3" />
+            {{ count }}
+          </span>
+        </template>
+      </div>
     </div>
   </button>
 </template>
