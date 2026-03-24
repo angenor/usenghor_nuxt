@@ -106,8 +106,11 @@ function handleComplete(data: Record<string, any>) {
     <!-- Confirmation de soumission -->
     <div v-else-if="submitted" class="py-20 text-center">
       <div class="mx-auto mb-4 text-6xl">✅</div>
-      <h1 class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Merci pour votre réponse !</h1>
-      <p class="text-gray-500 dark:text-gray-400">
+      <h1 class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Merci pour votre message !</h1>
+      <p v-if="campaign?.confirmation_email_enabled" class="text-gray-500 dark:text-gray-400">
+        Un mail de confirmation vous a été envoyé via l'email communiqué.
+      </p>
+      <p v-else class="text-gray-500 dark:text-gray-400">
         Votre réponse a bien été enregistrée.
       </p>
     </div>
