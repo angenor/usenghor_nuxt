@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import 'survey-core/survey-core.min.css'
+import 'survey-core/i18n/french'
+import 'survey-core/i18n/arabic'
 import { Model } from 'survey-core'
 import { SurveyComponent } from 'survey-vue3-ui'
 
