@@ -22,14 +22,17 @@
       "university_diploma": "Diplôme d'Université",
       "certifiante": "Formation certifiante",
       "certifiantes": "Formations certifiantes",
-      "certificate": "Formation certifiante"
+      "certificate": "Formation certifiante",
+      "clom": "CLOM",
+      "cloms": "CLOMs"
     },
     "typeDescriptions": {
       "masters": "Programmes de Master en 2 ans dispensés sur notre campus d'Alexandrie et nos campus externalisés",
       "doctorat": "L'école doctorale de l'Université Senghor",
       "doctorats": "L'école doctorale de l'Université Senghor",
       "diplomes-universitaires": "Formations spécialisées courtes sanctionnées par un diplôme d'université",
-      "certifiantes": "Certifications professionnelles courtes et intensives"
+      "certifiantes": "Certifications professionnelles courtes et intensives",
+      "cloms": "Cours en Ligne Ouverts et Massifs (CLOMs) pour se former à distance"
     },
     "campus": {
       "alexandrie": "Campus d'Alexandrie",

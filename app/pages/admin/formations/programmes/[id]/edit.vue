@@ -700,12 +700,10 @@ const regenerateSlug = () => {
 }
 
 // Options pour les selects
-const programTypes: { value: ProgramType; label: string }[] = [
-  { value: 'master', label: 'Master' },
-  { value: 'doctorate', label: 'Doctorat' },
-  { value: 'university_diploma', label: 'Diplôme d\'Université (DU)' },
-  { value: 'certificate', label: 'Formation certifiante' },
-]
+const programTypes = Object.entries(programTypeLabels).map(([value, label]) => ({
+  value: value as ProgramType,
+  label,
+}))
 
 const publicationStatuses: { value: PublicationStatus; label: string }[] = [
   { value: 'draft', label: 'Brouillon' },

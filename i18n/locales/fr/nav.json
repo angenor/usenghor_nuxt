@@ -54,6 +54,8 @@
         "universityDiplomasDesc": "Formations spécialisées d'une année académique",
         "certifications": "Formations certifiantes",
         "certificationsDesc": "Certifications professionnelles courtes et intensives",
+        "cloms": "CLOMs",
+        "clomsDesc": "Cours en Ligne Ouverts et Massifs",
         "externalCampus": "Campus externalisés",
         "externalCampusDesc": "Formations délocalisées dans nos campus partenaires"
       },

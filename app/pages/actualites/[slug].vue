@@ -51,9 +51,7 @@ onMounted(async () => {
 // Vérifier s'il y a des métadonnées d'association à afficher
 const hasAssociations = computed(() => {
   if (!news.value) return false
-  return (news.value.campus_names?.length > 0)
-    || (news.value.service_names?.length > 0)
-    || news.value.sector_name
+  return !!news.value.sector_name
 })
 
 // Localization helpers
@@ -188,21 +186,6 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
 
             <!-- Meta info -->
             <div class="flex flex-wrap items-center gap-3 mb-4">
-              <span
-                v-for="(name, idx) in news.campus_names.slice(0, 2)"
-                :key="idx"
-                class="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-blue-600 text-white text-sm font-medium rounded-full"
-              >
-                <font-awesome-icon icon="fa-solid fa-building-columns" class="w-3 h-3" />
-                {{ name }}
-              </span>
-              <span
-                v-if="news.campus_names?.length > 2"
-                class="inline-flex items-center px-3 py-1 bg-brand-blue-600 text-white text-sm font-medium rounded-full"
-                :title="news.campus_names.slice(2).join(', ')"
-              >
-                +{{ news.campus_names.length - 2 }}
-              </span>
               <span class="text-white/70 text-sm">{{ formatDate(news.published_at) }}</span>
             </div>
 
@@ -240,64 +223,12 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
           </div>
 
           <!-- Info cards : campus, services, secteur -->
-          <div v-if="hasAssociations" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-            <!-- Campus -->
-            <div v-if="news.campus_names?.length" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-              <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
-                <font-awesome-icon icon="fa-solid fa-building-columns" class="w-4 h-4" />
-                Campus
-              </div>
-              <div class="flex flex-wrap gap-1">
-                <span
-                  v-for="campusName in news.campus_names.slice(0, 2)"
-                  :key="campusName"
-                  class="inline-block px-2 py-0.5 text-xs font-bold text-gray-900 dark:text-white bg-gray-200 dark:bg-gray-700 rounded-full"
-                >
-                  {{ campusName }}
-                </span>
-                <span
-                  v-if="news.campus_names.length > 2"
-                  class="inline-block px-2 py-0.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-full"
-                  :title="news.campus_names.slice(2).join(', ')"
-                >
-                  +{{ news.campus_names.length - 2 }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Services -->
-            <div v-if="news.service_names?.length" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-              <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
-                <font-awesome-icon icon="fa-solid fa-sitemap" class="w-4 h-4" />
-                Services
-              </div>
-              <div class="flex flex-wrap gap-1">
-                <span
-                  v-for="serviceName in news.service_names.slice(0, 2)"
-                  :key="serviceName"
-                  class="inline-block px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
-                >
-                  {{ serviceName }}
-                </span>
-                <span
-                  v-if="news.service_names.length > 2"
-                  class="inline-block px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 rounded-full"
-                  :title="news.service_names.slice(2).join(', ')"
-                >
-                  +{{ news.service_names.length - 2 }}
-                </span>
-              </div>
-            </div>
-
+          <div v-if="hasAssociations" class="mb-8">
             <!-- Secteur -->
-            <div v-if="news.sector_name" class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-              <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
-                <font-awesome-icon icon="fa-solid fa-layer-group" class="w-4 h-4" />
-                Secteur
-              </div>
-              <div class="font-bold text-gray-900 dark:text-white text-sm">
-                {{ news.sector_name }}
-              </div>
+            <div v-if="news.sector_name" class="inline-flex items-center gap-2 bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3">
+              <font-awesome-icon icon="fa-solid fa-layer-group" class="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              <span class="text-sm text-gray-500 dark:text-gray-400">Secteur :</span>
+              <span class="font-bold text-gray-900 dark:text-white text-sm">{{ news.sector_name }}</span>
             </div>
           </div>
 

@@ -65,6 +65,7 @@ const defaultPrimaryNavItems: PrimaryNavItem[] = [
       { key: 'masters', route: '/formations/masters', icon: 'fa-solid fa-graduation-cap', badge: 'popular' },
       { key: 'universityDiplomas', route: '/formations/diplomes-universitaires', icon: 'fa-solid fa-award' },
       { key: 'certifications', route: '/formations/certifiantes', icon: 'fa-solid fa-certificate' },
+      { key: 'cloms', route: '/formations/cloms', icon: 'fa-solid fa-globe' },
       { key: 'externalCampus', route: '/a-propos/partenaires#campus-externalises', icon: 'fa-solid fa-building-columns' }
     ]
   },

@@ -8,7 +8,7 @@ import type { PublicationStatus } from './common'
 // Enums
 // ============================================================================
 
-export type ProgramType = 'master' | 'doctorate' | 'university_diploma' | 'certificate'
+export type ProgramType = 'master' | 'doctorate' | 'university_diploma' | 'certificate' | 'clom'
 
 // ============================================================================
 // Program Sub-entities Read

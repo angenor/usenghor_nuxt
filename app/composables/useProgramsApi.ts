@@ -18,6 +18,7 @@ export const programTypeLabels: Record<ProgramType, string> = {
   doctorate: 'Doctorat',
   university_diploma: 'DU',
   certificate: 'Certificat',
+  clom: 'CLOM',
 }
 
 export const programTypeColors: Record<ProgramType, string> = {
@@ -25,6 +26,7 @@ export const programTypeColors: Record<ProgramType, string> = {
   doctorate: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
   university_diploma: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
   certificate: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
+  clom: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400',
 }
 
 export const publicationStatusLabels: Record<PublicationStatus, string> = {

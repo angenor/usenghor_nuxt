@@ -32,7 +32,7 @@ const campusColors = [
 ]
 
 // Valid types for route validation
-const validTypes = ['masters', 'doctorat', 'diplomes-universitaires', 'certifiantes']
+const validTypes = ['masters', 'doctorat', 'diplomes-universitaires', 'certifiantes', 'cloms']
 
 // Get current type from route
 const typeSlug = computed(() => route.params.type as string)

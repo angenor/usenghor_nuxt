@@ -79,6 +79,7 @@ export const urlSlugToProgramType: Record<string, ProgramType> = {
   'doctorat': 'doctorate',
   'diplomes-universitaires': 'university_diploma',
   'certifiantes': 'certificate',
+  'cloms': 'clom',
 }
 
 // ProgramType backend vers URL slug
@@ -87,6 +88,7 @@ export const programTypeToUrlSlug: Record<ProgramType, string> = {
   'doctorate': 'doctorat',
   'university_diploma': 'diplomes-universitaires',
   'certificate': 'certifiantes',
+  'clom': 'cloms',
 }
 
 // ============================================================================
@@ -98,6 +100,7 @@ export const publicProgramTypeLabels: Record<ProgramType, string> = {
   doctorate: 'Doctorat',
   university_diploma: 'DU',
   certificate: 'Certificat',
+  clom: 'CLOM',
 }
 
 export const publicProgramTypeColors: Record<ProgramType, { icon: string; color: string; bgColor: string }> = {
@@ -120,6 +123,11 @@ export const publicProgramTypeColors: Record<ProgramType, { icon: string; color:
     icon: 'fa-solid fa-certificate',
     color: 'text-rose-600 dark:text-rose-400',
     bgColor: 'bg-rose-500',
+  },
+  clom: {
+    icon: 'fa-solid fa-globe',
+    color: 'text-teal-600 dark:text-teal-400',
+    bgColor: 'bg-teal-500',
   },
 }
 

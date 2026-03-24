@@ -42,6 +42,8 @@
         "universityDiplomasDesc": "Specialized one-year academic programs",
         "certifications": "Certifications",
         "certificationsDesc": "Short and intensive professional certifications",
+        "cloms": "MOOCs",
+        "clomsDesc": "Massive Open Online Courses",
         "doctorate": "Doctorate",
         "doctorateDesc": "Doctoral program in partnership with the Doctoral School",
         "online": "Online",

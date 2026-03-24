@@ -379,10 +379,7 @@ async function submitForm() {
                 required
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               >
-                <option value="master">Master</option>
-                <option value="doctorate">Doctorat</option>
-                <option value="university_diploma">Diplôme d'Université (DU)</option>
-                <option value="certificate">Certificat</option>
+                <option v-for="(label, value) in programTypeLabels" :key="value" :value="value">{{ label }}</option>
               </select>
             </div>
             <div>
