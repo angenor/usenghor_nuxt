@@ -77,10 +77,11 @@ function getCoverImage(item: NewsPublicEnriched): string | null {
 
     <!-- News grid -->
     <div v-else class="grid gap-6 md:grid-cols-2">
-      <article
+      <NuxtLink
         v-for="item in news"
         :key="item.id"
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow"
+        :to="localePath(`/actualites/${item.slug}`)"
+        class="group block bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow"
       >
         <!-- Image -->
         <div class="h-48 overflow-hidden">
@@ -88,7 +89,7 @@ function getCoverImage(item: NewsPublicEnriched): string | null {
             v-if="getCoverImage(item)"
             :src="getCoverImage(item)!"
             :alt="item.title"
-            class="w-full h-full object-cover"
+            class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           >
           <div
             v-else
@@ -107,7 +108,7 @@ function getCoverImage(item: NewsPublicEnriched): string | null {
           </div>
 
           <!-- Title -->
-          <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
             {{ item.title }}
           </h3>
 
@@ -116,16 +117,13 @@ function getCoverImage(item: NewsPublicEnriched): string | null {
             {{ item.summary }}
           </p>
 
-          <!-- Read more link -->
-          <NuxtLink
-            :to="localePath(`/actualites/${item.slug}`)"
-            class="inline-flex items-center gap-2 mt-4 text-brand-blue-600 dark:text-brand-blue-400 hover:text-brand-blue-700 dark:hover:text-brand-blue-300 text-sm font-medium"
-          >
+          <!-- Read more -->
+          <span class="inline-flex items-center gap-2 mt-4 text-brand-blue-600 dark:text-brand-blue-400 group-hover:text-brand-blue-700 dark:group-hover:text-brand-blue-300 text-sm font-medium">
             {{ t('actualites.readMore') }}
-            <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
-          </NuxtLink>
+            <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3 transition-transform group-hover:translate-x-1" />
+          </span>
         </div>
-      </article>
+      </NuxtLink>
     </div>
   </div>
 </template>
