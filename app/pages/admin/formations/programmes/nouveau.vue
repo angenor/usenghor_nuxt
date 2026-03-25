@@ -10,7 +10,12 @@ const router = useRouter()
 const {
   createProgram,
   programTypeLabels,
+  addPartnerToProgram,
 } = useProgramsApi()
+
+const {
+  getAllPartners,
+} = usePartnersApi()
 
 const {
   uploadMediaVariants,
@@ -48,6 +53,7 @@ onMounted(() => {
   getCampuses()
   getDepartments()
   getServices()
+  loadAllPartners()
 })
 
 // Services filtrés par secteur
@@ -55,6 +61,63 @@ const filteredServices = computed(() => {
   if (!form.value.sector_id) return []
   return allServices.value.filter(s => s.sector_id === form.value.sector_id)
 })
+
+// === PARTENAIRES (sélection locale, ajout après création) ===
+interface PartnerItem {
+  id: string
+  name: string
+  logo_external_id: string | null
+  active: boolean
+  type: string
+}
+const allPartnersList = ref<PartnerItem[]>([])
+const selectedPartners = ref<string[]>([])
+const partnerSearchQuery = ref('')
+const selectedPartnerId = ref('')
+
+async function loadAllPartners() {
+  try {
+    const results = await getAllPartners() as unknown as Array<{ id: string, name: string, logo_external_id: string | null, active: boolean, type: string }>
+    allPartnersList.value = results
+  }
+  catch (e) {
+    console.error('Erreur chargement partenaires:', e)
+  }
+}
+
+const availablePartners = computed(() => {
+  const associatedIds = new Set(selectedPartners.value)
+  const query = partnerSearchQuery.value.toLowerCase()
+  return allPartnersList.value.filter(p => {
+    if (associatedIds.has(p.id)) return false
+    if (query && !p.name.toLowerCase().includes(query)) return false
+    return true
+  })
+})
+
+const selectedPartnersDetails = computed(() => {
+  return selectedPartners.value.map(id => {
+    const detail = allPartnersList.value.find(p => p.id === id)
+    return {
+      id: id,
+      name: detail?.name || id,
+      logo_external_id: detail?.logo_external_id || null,
+    }
+  })
+})
+
+function handleAddPartnerLocal() {
+  if (!selectedPartnerId.value) return
+  if (!selectedPartners.value.includes(selectedPartnerId.value)) {
+    selectedPartners.value.push(selectedPartnerId.value)
+  }
+  selectedPartnerId.value = ''
+  partnerSearchQuery.value = ''
+}
+
+function handleRemovePartnerLocal(partnerId: string) {
+  selectedPartners.value = selectedPartners.value.filter(id => id !== partnerId)
+}
 
 // === FORM STATE ===
 const isSubmitting = ref(false)
@@ -248,6 +311,19 @@ async function submitForm() {
       evaluation_methods_md: evaluationMethods.value.length > 0 ? evaluationMethods.value.map(m => `- ${m}`).join('\n') : null,
     }
     const result = await createProgram(payload)
+
+    // Associer les partenaires sélectionnés au programme créé
+    if (selectedPartners.value.length > 0) {
+      for (const partnerId of selectedPartners.value) {
+        try {
+          await addPartnerToProgram(result.id, { partner_external_id: partnerId })
+        }
+        catch (partnerErr) {
+          console.warn(`Erreur ajout partenaire ${partnerId}:`, partnerErr)
+        }
+      }
+    }
+
     router.push(`/admin/formations/programmes/${result.id}/edit`)
   }
   catch (e: unknown) {
@@ -769,6 +845,106 @@ async function submitForm() {
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               Afficher sur la page d'accueil
             </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Partenaires -->
+      <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+        <div class="mb-6 flex items-center justify-between">
+          <h2 class="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+            <font-awesome-icon icon="fa-solid fa-handshake" class="h-5 w-5 text-brand-blue-500" />
+            Partenaires
+            <span class="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-sm font-normal text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+              {{ selectedPartners.length }}
+            </span>
+          </h2>
+        </div>
+
+        <!-- Sélecteur d'ajout -->
+        <div class="mb-4 flex gap-2">
+          <div class="relative flex-1">
+            <input
+              v-model="partnerSearchQuery"
+              type="text"
+              placeholder="Rechercher un partenaire..."
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-brand-blue-500 focus:outline-none focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              @focus="selectedPartnerId = ''"
+            />
+            <div
+              v-if="partnerSearchQuery && availablePartners.length > 0"
+              class="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-700"
+            >
+              <button
+                v-for="partner in availablePartners"
+                :key="partner.id"
+                type="button"
+                class="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600"
+                @click="selectedPartnerId = partner.id; partnerSearchQuery = partner.name"
+              >
+                <img
+                  v-if="partner.logo_external_id"
+                  :src="`/api/public/media/${partner.logo_external_id}/download`"
+                  :alt="partner.name"
+                  class="h-6 w-6 rounded object-contain"
+                />
+                <font-awesome-icon v-else icon="fa-solid fa-building" class="h-4 w-4 text-gray-400" />
+                <span class="text-gray-900 dark:text-white">{{ partner.name }}</span>
+              </button>
+            </div>
+            <div
+              v-if="partnerSearchQuery && availablePartners.length === 0"
+              class="absolute z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white p-3 text-center text-sm text-gray-500 shadow-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400"
+            >
+              Aucun partenaire trouvé
+            </div>
+          </div>
+          <button
+            type="button"
+            :disabled="!selectedPartnerId"
+            class="inline-flex items-center gap-2 rounded-lg bg-brand-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-blue-700 disabled:opacity-50"
+            @click="handleAddPartnerLocal"
+          >
+            <font-awesome-icon icon="fa-solid fa-plus" class="h-3 w-3" />
+            Ajouter
+          </button>
+        </div>
+
+        <!-- Liste vide -->
+        <div v-if="selectedPartners.length === 0" class="rounded-lg border-2 border-dashed border-gray-200 p-8 text-center dark:border-gray-700">
+          <font-awesome-icon icon="fa-solid fa-handshake" class="mb-3 h-10 w-10 text-gray-300 dark:text-gray-600" />
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Aucun partenaire sélectionné. Les partenaires seront associés après la création.
+          </p>
+        </div>
+
+        <!-- Liste des partenaires sélectionnés -->
+        <div v-else class="space-y-2">
+          <div
+            v-for="partner in selectedPartnersDetails"
+            :key="partner.id"
+            class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-700/50"
+          >
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-white dark:bg-gray-600">
+              <img
+                v-if="partner.logo_external_id"
+                :src="`/api/public/media/${partner.logo_external_id}/download`"
+                :alt="partner.name"
+                class="h-8 w-8 object-contain"
+              />
+              <font-awesome-icon v-else icon="fa-solid fa-building" class="h-5 w-5 text-gray-400" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-gray-900 dark:text-white">{{ partner.name }}</p>
+            </div>
+            <button
+              type="button"
+              class="rounded p-1.5 text-gray-400 transition-colors hover:bg-gray-200 hover:text-red-600 dark:hover:bg-gray-600 dark:hover:text-red-400"
+              title="Retirer ce partenaire"
+              @click="handleRemovePartnerLocal(partner.id)"
+            >
+              <font-awesome-icon icon="fa-solid fa-trash" class="h-3 w-3" />
+            </button>
           </div>
         </div>
       </div>

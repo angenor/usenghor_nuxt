@@ -228,15 +228,16 @@ async function handleReorderAlbums(albumIds: string[]) {
   }
 }
 
-// Auto-generate slug from title (only after form is initialized)
+// Auto-génération du slug quand le titre change
 watch(() => form.title, (newTitle) => {
-  // Ne pas auto-générer pendant le chargement initial
   if (!formInitialized.value) return
-  // Auto-générer uniquement si le slug correspond au titre précédent slugifié
-  if (!form.slug || form.slug === slugify(form.title.slice(0, -1))) {
-    form.slug = slugify(newTitle)
-  }
+  form.slug = slugify(newTitle)
 })
+
+// Régénérer le slug manuellement
+const regenerateSlug = () => {
+  form.slug = slugify(form.title)
+}
 
 // Services affichés (filtrés par secteur si sélectionné, sinon tous)
 const displayedServices = computed(() => {
@@ -538,7 +539,18 @@ async function createTag() {
                 class="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 placeholder="titre-de-lactualite"
               />
+              <button
+                type="button"
+                class="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+                title="Régénérer depuis le titre"
+                @click="regenerateSlug"
+              >
+                <font-awesome-icon icon="fa-solid fa-rotate" class="w-4 h-4" />
+              </button>
             </div>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              URL: /actualites/{{ form.slug || '...' }}
+            </p>
           </div>
 
           <!-- Résumé -->

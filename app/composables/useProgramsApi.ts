@@ -141,6 +141,30 @@ export function useProgramsApi() {
   }
 
   // =========================================================================
+  // Partners
+  // =========================================================================
+
+  async function listProgramPartners(programId: string): Promise<unknown[]> {
+    return apiFetch<unknown[]>(`/api/admin/programs/${programId}/partners`)
+  }
+
+  async function addPartnerToProgram(programId: string, data: {
+    partner_external_id: string
+    partnership_type?: string | null
+  }): Promise<unknown> {
+    return apiFetch<unknown>(`/api/admin/programs/${programId}/partners`, {
+      method: 'POST',
+      body: data,
+    })
+  }
+
+  async function removePartnerFromProgram(programId: string, partnerExternalId: string): Promise<unknown> {
+    return apiFetch<unknown>(`/api/admin/programs/${programId}/partners/${partnerExternalId}`, {
+      method: 'DELETE',
+    })
+  }
+
+  // =========================================================================
   // Helpers
   // =========================================================================
 
@@ -170,6 +194,11 @@ export function useProgramsApi() {
     // Relations
     getSkillsByProgram,
     getCareerOpportunitiesByProgram,
+
+    // Partners
+    listProgramPartners,
+    addPartnerToProgram,
+    removePartnerFromProgram,
 
     // Media Library
     getProgramAlbums,

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProgramPublic, ProgramPublicWithDetails } from '~/composables/usePublicProgramsApi'
+import type { ProgramPartnerPublic, ProgramPublic, ProgramPublicWithDetails } from '~/composables/usePublicProgramsApi'
 import type { ApplicationCallPublic } from '~/types/api'
 
 // Extraire le texte brut d'un contenu HTML (pour les aperçus SEO)
@@ -15,6 +15,7 @@ const { siteUrl } = useRuntimeConfig().public
 const {
   getProgramBySlug,
   getRelatedPrograms,
+  getProgramPartners,
   formatDuration,
   urlSlugToProgramType,
   programTypeToUrlSlug,
@@ -38,6 +39,7 @@ const isValidType = computed(() => validTypes.includes(typeSlug.value))
 const program = ref<ProgramPublicWithDetails | null>(null)
 const relatedPrograms = ref<ProgramPublic[]>([])
 const associatedCalls = ref<ApplicationCallPublic[]>([])
+const programPartners = ref<ProgramPartnerPublic[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 
@@ -67,8 +69,16 @@ const fetchProgram = async () => {
 
     program.value = data
 
-    // Fetch related programs
+    // Fetch related programs and partners
     relatedPrograms.value = await getRelatedPrograms(data, 3)
+
+    try {
+      programPartners.value = await getProgramPartners(slug.value)
+    }
+    catch (partnerErr) {
+      console.warn('Could not fetch program partners:', partnerErr)
+      programPartners.value = []
+    }
 
     // Fetch associated application calls (only ongoing or upcoming)
     try {
@@ -641,6 +651,9 @@ const toggleSemester = (num: number) => {
               </div>
             </div>
 
+            <!-- Partenaires -->
+            <ProgramsProgramPartners :partners="programPartners" />
+
             <!-- Back button (hidden on mobile, sidebar has its own) -->
             <div class="hidden lg:block pt-8 border-t border-gray-200 dark:border-gray-700">
               <NuxtLink
@@ -710,6 +723,9 @@ const toggleSemester = (num: number) => {
                   </NuxtLink>
                 </div>
               </div>
+
+              <!-- Partenaires (sidebar compact) -->
+              <ProgramsProgramPartners :partners="programPartners" compact />
 
               <!-- Formation info card -->
               <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">

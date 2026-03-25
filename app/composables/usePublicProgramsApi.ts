@@ -63,6 +63,15 @@ export interface ServicePublicSimple {
   sector_id: string | null
 }
 
+export interface ProgramPartnerPublic {
+  partner_external_id: string
+  name: string
+  logo_external_id: string | null
+  website: string | null
+  partner_type: string
+  partnership_type: string | null
+}
+
 export interface ProgramPublicWithDetails extends ProgramPublic {
   semesters: ProgramSemesterWithCourses[]
   skills: ProgramSkillRead[]
@@ -242,6 +251,13 @@ export function usePublicProgramsApi() {
   }
 
   /**
+   * Récupère les partenaires actifs d'un programme
+   */
+  async function getProgramPartners(slug: string): Promise<ProgramPartnerPublic[]> {
+    return publicFetch<ProgramPartnerPublic[]>(`/api/public/programs/${slug}/partners`)
+  }
+
+  /**
    * Récupère les actualités associées à un programme
    */
   async function getProgramNews(slug: string): Promise<unknown[]> {
@@ -281,6 +297,7 @@ export function usePublicProgramsApi() {
     // API calls
     listPrograms,
     getProgramBySlug,
+    getProgramPartners,
     listProgramsByType,
     listProgramsByDepartment,
     listProgramsByService,

@@ -430,6 +430,18 @@ export function useAdminSidebar() {
     },
 
     // ========================================================================
+    // SHORT LINKS - Liens courts
+    // ========================================================================
+    {
+      id: 'short-links',
+      label: 'Liens courts',
+      icon: 'fa-solid fa-link',
+      route: '/admin/liens-courts',
+      permissions: ['short_links.view'],
+      description: 'Réducteur de liens pour le partage'
+    },
+
+    // ========================================================================
     // CORE - Données de référence
     // ========================================================================
     {

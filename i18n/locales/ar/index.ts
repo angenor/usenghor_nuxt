@@ -23,6 +23,7 @@ import formations from './formations.json'
 import candidatures from './candidatures.json'
 import leveesDeFonds from './levees-de-fonds.json'
 import survey from './survey.json'
+import shortLinks from './short-links.json'
 
 export default {
   ...common,
@@ -49,5 +50,6 @@ export default {
   ...formations,
   ...candidatures,
   ...leveesDeFonds,
-  ...survey
+  ...survey,
+  ...shortLinks
 }

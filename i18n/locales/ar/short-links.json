@@ -1,0 +1,45 @@
+{
+  "shortLinks": {
+    "title": "الروابط القصيرة",
+    "description": "إدارة روابط إعادة التوجيه القصيرة للموقع",
+    "createLink": "إنشاء رابط قصير",
+    "noLinks": "لا توجد روابط قصيرة",
+    "noLinksDescription": "أنشئ أول رابط قصير لتسهيل مشاركة الروابط",
+    "search": "البحث بالرمز أو الرابط...",
+    "table": {
+      "code": "الرمز",
+      "targetUrl": "رابط الوجهة",
+      "shortUrl": "الرابط القصير",
+      "createdBy": "أنشأه",
+      "createdAt": "تاريخ الإنشاء",
+      "actions": "الإجراءات"
+    },
+    "form": {
+      "targetUrl": "رابط الوجهة",
+      "targetUrlPlaceholder": "مثال: /formations/master-administration أو https://exemple.com",
+      "targetUrlHelp": "مسار داخلي (يبدأ بـ /) أو رابط خارجي (نطاق مسموح)"
+    },
+    "messages": {
+      "created": "تم إنشاء الرابط القصير بنجاح",
+      "deleted": "تم حذف الرابط القصير بنجاح",
+      "copied": "تم نسخ الرابط",
+      "copyError": "تعذر نسخ الرابط"
+    },
+    "confirm": {
+      "deleteTitle": "حذف الرابط القصير",
+      "deleteMessage": "هل أنت متأكد من حذف هذا الرابط القصير؟ لن تعمل إعادة التوجيه بعد ذلك.",
+      "cancel": "إلغاء",
+      "delete": "حذف"
+    },
+    "domains": {
+      "title": "النطاقات المسموحة",
+      "description": "قائمة النطاقات الخارجية المسموح بها لروابط الوجهة",
+      "addDomain": "إضافة نطاق",
+      "domainPlaceholder": "مثال: google.com",
+      "noDomains": "لا توجد نطاقات مسموحة",
+      "noDomainsDescription": "أضف نطاقات للسماح بالروابط إلى مواقع خارجية",
+      "added": "تمت إضافة النطاق بنجاح",
+      "removed": "تم حذف النطاق بنجاح"
+    }
+  }
+}

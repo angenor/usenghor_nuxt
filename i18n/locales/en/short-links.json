@@ -1,0 +1,45 @@
+{
+  "shortLinks": {
+    "title": "Short Links",
+    "description": "Manage short redirect links for the website",
+    "createLink": "Create a short link",
+    "noLinks": "No short links created",
+    "noLinksDescription": "Create your first short link to make sharing URLs easier",
+    "search": "Search by code or URL...",
+    "table": {
+      "code": "Code",
+      "targetUrl": "Destination URL",
+      "shortUrl": "Short link",
+      "createdBy": "Created by",
+      "createdAt": "Created on",
+      "actions": "Actions"
+    },
+    "form": {
+      "targetUrl": "Destination URL",
+      "targetUrlPlaceholder": "E.g.: /programs/master-business-administration or https://example.com",
+      "targetUrlHelp": "Internal path (starts with /) or external URL (allowed domain)"
+    },
+    "messages": {
+      "created": "Short link created successfully",
+      "deleted": "Short link deleted successfully",
+      "copied": "Link copied to clipboard",
+      "copyError": "Unable to copy the link"
+    },
+    "confirm": {
+      "deleteTitle": "Delete short link",
+      "deleteMessage": "Are you sure you want to delete this short link? The redirect will no longer work.",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "domains": {
+      "title": "Allowed Domains",
+      "description": "Whitelist of external domains allowed for destination URLs",
+      "addDomain": "Add a domain",
+      "domainPlaceholder": "E.g.: google.com",
+      "noDomains": "No allowed domains",
+      "noDomainsDescription": "Add domains to allow links to external websites",
+      "added": "Domain added successfully",
+      "removed": "Domain removed successfully"
+    }
+  }
+}

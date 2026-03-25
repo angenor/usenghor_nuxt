@@ -1,0 +1,45 @@
+{
+  "shortLinks": {
+    "title": "Liens courts",
+    "description": "Gérez les liens de redirection courts pour le site",
+    "createLink": "Créer un lien court",
+    "noLinks": "Aucun lien court créé",
+    "noLinksDescription": "Créez votre premier lien court pour faciliter le partage d'URLs",
+    "search": "Rechercher par code ou URL...",
+    "table": {
+      "code": "Code",
+      "targetUrl": "URL de destination",
+      "shortUrl": "Lien court",
+      "createdBy": "Créé par",
+      "createdAt": "Date de création",
+      "actions": "Actions"
+    },
+    "form": {
+      "targetUrl": "URL de destination",
+      "targetUrlPlaceholder": "Ex: /formations/master-administration ou https://exemple.com",
+      "targetUrlHelp": "Chemin interne (commence par /) ou URL externe (domaine autorisé)"
+    },
+    "messages": {
+      "created": "Lien court créé avec succès",
+      "deleted": "Lien court supprimé avec succès",
+      "copied": "Lien copié dans le presse-papiers",
+      "copyError": "Impossible de copier le lien"
+    },
+    "confirm": {
+      "deleteTitle": "Supprimer le lien court",
+      "deleteMessage": "Êtes-vous sûr de vouloir supprimer ce lien court ? La redirection ne fonctionnera plus.",
+      "cancel": "Annuler",
+      "delete": "Supprimer"
+    },
+    "domains": {
+      "title": "Domaines autorisés",
+      "description": "Liste blanche des domaines externes autorisés pour les URLs de destination",
+      "addDomain": "Ajouter un domaine",
+      "domainPlaceholder": "Ex: google.com",
+      "noDomains": "Aucun domaine autorisé",
+      "noDomainsDescription": "Ajoutez des domaines pour autoriser les liens vers des sites externes",
+      "added": "Domaine ajouté avec succès",
+      "removed": "Domaine supprimé avec succès"
+    }
+  }
+}

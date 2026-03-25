@@ -13,7 +13,14 @@ const {
   updateProgram,
   programTypeLabels,
   publicationStatusLabels,
+  listProgramPartners,
+  addPartnerToProgram,
+  removePartnerFromProgram,
 } = useProgramsApi()
+
+const {
+  getAllPartners,
+} = usePartnersApi()
 
 const {
   listSkills,
@@ -222,6 +229,20 @@ const showDeleteCareerOpportunityModal = ref(false)
 const editingCareerOpportunity = ref<ProgramCareerOpportunityRead | null>(null)
 const deletingCareerOpportunity = ref<ProgramCareerOpportunityRead | null>(null)
 const newCareerOpportunity = ref({ title: '', description: '' })
+
+// État des partenaires
+interface PartnerItem {
+  id: string
+  name: string
+  logo_external_id: string | null
+  active: boolean
+  type: string
+}
+const programPartners = ref<Array<{ partner_external_id: string, partnership_type: string | null }>>([])
+const allPartnersList = ref<PartnerItem[]>([])
+const loadingPartners = ref(false)
+const selectedPartnerId = ref('')
+const partnerSearchQuery = ref('')
 const draggedCareerOpportunityIndex = ref<number | null>(null)
 
 // Chargement du programme
@@ -290,6 +311,7 @@ watch(program, (newProgram) => {
   if (newProgram) {
     loadSkills()
     loadCareerOpportunities()
+    loadPartners()
   }
 })
 
@@ -549,6 +571,76 @@ const onCareerOpportunityDrop = async (e: DragEvent, targetIndex: number) => {
 
 const onCareerOpportunityDragEnd = () => {
   draggedCareerOpportunityIndex.value = null
+}
+
+// === GESTION DES PARTENAIRES ===
+async function loadPartners() {
+  if (!program.value) return
+  loadingPartners.value = true
+  try {
+    const [partnersResponse, allPartnersResponse] = await Promise.all([
+      listProgramPartners(program.value.id),
+      getAllPartners(),
+    ])
+    programPartners.value = partnersResponse as Array<{ partner_external_id: string, partnership_type: string | null, program_id: string }>
+    allPartnersList.value = allPartnersResponse as unknown as PartnerItem[]
+  } catch (e) {
+    console.error('Erreur lors du chargement des partenaires:', e)
+  } finally {
+    loadingPartners.value = false
+  }
+}
+
+const availablePartners = computed(() => {
+  const associatedIds = new Set(programPartners.value.map(p => p.partner_external_id))
+  const query = partnerSearchQuery.value.toLowerCase()
+  return allPartnersList.value.filter(p => {
+    if (associatedIds.has(p.id)) return false
+    if (query && !p.name.toLowerCase().includes(query)) return false
+    return true
+  })
+})
+
+const associatedPartnersDetails = computed(() => {
+  return programPartners.value.map(pp => {
+    const detail = allPartnersList.value.find(p => p.id === pp.partner_external_id)
+    return {
+      ...pp,
+      name: detail?.name || pp.partner_external_id,
+      logo_external_id: detail?.logo_external_id || null,
+      active: detail?.active ?? true,
+    }
+  })
+})
+
+async function handleAddPartner() {
+  if (!selectedPartnerId.value || !program.value) return
+  try {
+    await addPartnerToProgram(program.value.id, {
+      partner_external_id: selectedPartnerId.value,
+    })
+    selectedPartnerId.value = ''
+    partnerSearchQuery.value = ''
+    await loadPartners()
+  } catch (e: unknown) {
+    const error = e as { data?: { detail?: string } }
+    if (error?.data?.detail?.includes('déjà')) {
+      alert('Ce partenaire est déjà associé à cette formation.')
+    } else {
+      console.error('Erreur ajout partenaire:', e)
+    }
+  }
+}
+
+async function handleRemovePartner(partnerExternalId: string) {
+  if (!program.value) return
+  if (!confirm('Retirer ce partenaire de la formation ?')) return
+  try {
+    await removePartnerFromProgram(program.value.id, partnerExternalId)
+    await loadPartners()
+  } catch (e) {
+    console.error('Erreur suppression partenaire:', e)
+  }
 }
 
 // === GESTION DE L'IMAGE DE COUVERTURE ===
@@ -1510,6 +1602,128 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
                 <font-awesome-icon icon="fa-solid fa-trash" class="h-3 w-3" />
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Partenaires -->
+      <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+        <div class="mb-6 flex items-center justify-between">
+          <h2 class="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+            <font-awesome-icon icon="fa-solid fa-handshake" class="h-5 w-5 text-brand-blue-500" />
+            Partenaires
+            <span class="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-sm font-normal text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+              {{ programPartners.length }}
+            </span>
+          </h2>
+        </div>
+
+        <!-- Sélecteur d'ajout -->
+        <div class="mb-4 flex gap-2">
+          <div class="relative flex-1">
+            <input
+              v-model="partnerSearchQuery"
+              type="text"
+              placeholder="Rechercher un partenaire..."
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-brand-blue-500 focus:outline-none focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              @focus="selectedPartnerId = ''"
+            />
+            <!-- Dropdown résultats -->
+            <div
+              v-if="partnerSearchQuery && availablePartners.length > 0"
+              class="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-700"
+            >
+              <button
+                v-for="partner in availablePartners"
+                :key="partner.id"
+                type="button"
+                class="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600"
+                @click="selectedPartnerId = partner.id; partnerSearchQuery = partner.name"
+              >
+                <img
+                  v-if="partner.logo_external_id"
+                  :src="`/api/public/media/${partner.logo_external_id}/download`"
+                  :alt="partner.name"
+                  class="h-6 w-6 rounded object-contain"
+                />
+                <font-awesome-icon v-else icon="fa-solid fa-building" class="h-4 w-4 text-gray-400" />
+                <span class="text-gray-900 dark:text-white">{{ partner.name }}</span>
+                <span v-if="!partner.active" class="ml-auto rounded bg-yellow-100 px-1.5 py-0.5 text-xs text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+                  Inactif
+                </span>
+              </button>
+            </div>
+            <div
+              v-if="partnerSearchQuery && availablePartners.length === 0"
+              class="absolute z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white p-3 text-center text-sm text-gray-500 shadow-lg dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400"
+            >
+              Aucun partenaire trouvé
+            </div>
+          </div>
+          <button
+            type="button"
+            :disabled="!selectedPartnerId"
+            class="inline-flex items-center gap-2 rounded-lg bg-brand-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-blue-700 disabled:opacity-50"
+            @click="handleAddPartner"
+          >
+            <font-awesome-icon icon="fa-solid fa-plus" class="h-3 w-3" />
+            Ajouter
+          </button>
+        </div>
+
+        <!-- Chargement -->
+        <div v-if="loadingPartners" class="flex items-center justify-center py-8">
+          <font-awesome-icon icon="fa-solid fa-spinner" class="h-6 w-6 animate-spin text-gray-400" />
+        </div>
+
+        <!-- Liste vide -->
+        <div v-else-if="programPartners.length === 0" class="rounded-lg border-2 border-dashed border-gray-200 p-8 text-center dark:border-gray-700">
+          <font-awesome-icon icon="fa-solid fa-handshake" class="mb-3 h-10 w-10 text-gray-300 dark:text-gray-600" />
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Aucun partenaire associé à cette formation.
+          </p>
+        </div>
+
+        <!-- Liste des partenaires -->
+        <div v-else class="space-y-2">
+          <div
+            v-for="partner in associatedPartnersDetails"
+            :key="partner.partner_external_id"
+            class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-700/50"
+          >
+            <!-- Logo -->
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-white dark:bg-gray-600">
+              <img
+                v-if="partner.logo_external_id"
+                :src="`/api/public/media/${partner.logo_external_id}/download`"
+                :alt="partner.name"
+                class="h-8 w-8 object-contain"
+              />
+              <font-awesome-icon v-else icon="fa-solid fa-building" class="h-5 w-5 text-gray-400" />
+            </div>
+
+            <!-- Infos -->
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-gray-900 dark:text-white">{{ partner.name }}</p>
+              <p v-if="partner.partnership_type" class="text-xs text-gray-500 dark:text-gray-400">
+                {{ partner.partnership_type }}
+              </p>
+            </div>
+
+            <!-- Badge inactif -->
+            <span v-if="!partner.active" class="rounded bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+              Inactif
+            </span>
+
+            <!-- Supprimer -->
+            <button
+              type="button"
+              class="rounded p-1.5 text-gray-400 transition-colors hover:bg-gray-200 hover:text-red-600 dark:hover:bg-gray-600 dark:hover:text-red-400"
+              title="Retirer ce partenaire"
+              @click="handleRemovePartner(partner.partner_external_id)"
+            >
+              <font-awesome-icon icon="fa-solid fa-trash" class="h-3 w-3" />
+            </button>
           </div>
         </div>
       </div>

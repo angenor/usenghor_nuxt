@@ -218,6 +218,18 @@
     "sidebar": {
       "otherTypes": "Other Programs",
       "viewAll": "View all"
+    },
+    "partners": {
+      "title": "Program Partners",
+      "empty": "No partners associated with this program.",
+      "add": "Add a partner",
+      "remove": "Remove this partner",
+      "partnershipType": "Partnership type",
+      "selectPartner": "Select a partner",
+      "alreadyAdded": "This partner is already associated with this program.",
+      "noLogo": "No logo",
+      "visitWebsite": "Visit website",
+      "inactive": "Inactive"
     }
   }
 }

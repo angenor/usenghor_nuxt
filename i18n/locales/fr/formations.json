@@ -218,6 +218,18 @@
     "sidebar": {
       "otherTypes": "Autres formations",
       "viewAll": "Voir tout"
+    },
+    "partners": {
+      "title": "Partenaires de la formation",
+      "empty": "Aucun partenaire associé à cette formation.",
+      "add": "Ajouter un partenaire",
+      "remove": "Retirer ce partenaire",
+      "partnershipType": "Type de partenariat",
+      "selectPartner": "Sélectionner un partenaire",
+      "alreadyAdded": "Ce partenaire est déjà associé à cette formation.",
+      "noLogo": "Pas de logo",
+      "visitWebsite": "Visiter le site web",
+      "inactive": "Inactif"
     }
   }
 }
