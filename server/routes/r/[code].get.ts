@@ -8,9 +8,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Lien court non trouvé' })
   }
 
+  const apiBase = process.env.NUXT_INTERNAL_API_BASE || 'http://backend:8000'
+
   try {
     const data = await $fetch<{ target_url: string }>(
-      `http://backend:8000/api/public/short-links/${code}`,
+      `${apiBase}/api/public/short-links/${code}`,
     )
     return sendRedirect(event, data.target_url, 302)
   }
