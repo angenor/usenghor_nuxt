@@ -100,6 +100,7 @@ export interface ServicePublicWithDetails extends ServicePublic {
   achievements: ServiceAchievementPublic[]
   projects: ServiceProjectPublic[]
   team: ServiceTeamMemberPublic[]
+  album_ids: string[]
 }
 
 export interface SectorPublicWithServices extends SectorPublic {

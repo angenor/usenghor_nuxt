@@ -62,7 +62,7 @@ const error = ref<string | null>(null)
 const sector = ref<SectorPublicWithServices | null>(null)
 const service = ref<ServicePublicWithDetails | null>(null)
 const relatedNews = ref<NewsDisplay[]>([])
-const serviceAlbum = ref<AlbumWithMedia | null>(null)
+const serviceAlbums = ref<AlbumWithMedia[]>([])
 const servicePrograms = ref<ProgramPublic[]>([])
 
 // Fetch entity data
@@ -106,19 +106,27 @@ const fetchRelatedNews = async () => {
   }
 }
 
-// Fetch service album (media library)
-const fetchServiceAlbum = async () => {
-  if (entityType !== 'service' || !service.value?.album_external_id) {
-    serviceAlbum.value = null
+// Fetch service albums (media library via service_media_library)
+const fetchServiceAlbums = async () => {
+  if (entityType !== 'service' || !service.value) {
+    serviceAlbums.value = []
     return
   }
 
   try {
-    serviceAlbum.value = await getPublicAlbumById(service.value.album_external_id)
+    const albumIds = service.value.album_ids || []
+    // Fallback sur album_external_id si aucun album dans service_media_library
+    if (albumIds.length === 0 && service.value.album_external_id) {
+      albumIds.push(service.value.album_external_id)
+    }
+    const results = await Promise.all(
+      albumIds.map(id => getPublicAlbumById(id)),
+    )
+    serviceAlbums.value = results.filter((a): a is AlbumWithMedia => a !== null && a.media_items.length > 0)
   }
   catch (err) {
-    console.error('Error fetching service album:', err)
-    serviceAlbum.value = null
+    console.error('Error fetching service albums:', err)
+    serviceAlbums.value = []
   }
 }
 
@@ -143,7 +151,7 @@ onMounted(async () => {
   await fetchEntity()
   await Promise.all([
     fetchRelatedNews(),
-    fetchServiceAlbum(),
+    fetchServiceAlbums(),
     fetchServicePrograms(),
   ])
 })
@@ -179,7 +187,7 @@ if (entityData.value) {
   // Charger les actualités, l'album et les formations associés (côté client)
   if (import.meta.client) {
     fetchRelatedNews()
-    fetchServiceAlbum()
+    fetchServiceAlbums()
     fetchServicePrograms()
   }
 }
@@ -1056,78 +1064,80 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
               </p>
             </div>
 
-            <!-- Album content -->
-            <div v-if="serviceAlbum && serviceAlbum.media_items.length > 0">
-              <!-- Album info -->
-              <div v-if="serviceAlbum.title || serviceAlbum.description" class="mb-6 p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
-                <h3 v-if="serviceAlbum.title" class="font-semibold text-gray-900 dark:text-white mb-2">
-                  {{ serviceAlbum.title }}
-                </h3>
-                <p v-if="serviceAlbum.description" class="text-sm text-gray-600 dark:text-gray-400">
-                  {{ serviceAlbum.description }}
+            <!-- Albums content -->
+            <div v-if="serviceAlbums.length > 0" class="space-y-10">
+              <div v-for="album in serviceAlbums" :key="album.id">
+                <!-- Album info -->
+                <div v-if="album.title || album.description" class="mb-6 p-4 bg-white dark:bg-gray-900 rounded-xl shadow-sm">
+                  <h3 v-if="album.title" class="font-semibold text-gray-900 dark:text-white mb-2">
+                    {{ album.title }}
+                  </h3>
+                  <p v-if="album.description" class="text-sm text-gray-600 dark:text-gray-400">
+                    {{ album.description }}
+                  </p>
+                </div>
+
+                <!-- Media grid -->
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  <div
+                    v-for="media in album.media_items"
+                    :key="media.id"
+                    class="group relative aspect-square overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800"
+                  >
+                    <!-- Image -->
+                    <img
+                      v-if="media.type === 'image'"
+                      :src="getImageVariantUrl(getMediaUrl(media.id) || '', 'medium')"
+                      :alt="media.alt_text || media.name"
+                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      loading="lazy"
+                    />
+
+                    <!-- Video placeholder -->
+                    <div
+                      v-else-if="media.type === 'video'"
+                      class="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-play-circle" class="w-12 h-12 text-gray-400" />
+                    </div>
+
+                    <!-- Document placeholder -->
+                    <div
+                      v-else
+                      class="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-file" class="w-12 h-12 text-gray-400" />
+                    </div>
+
+                    <!-- Overlay with info -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div class="absolute bottom-0 left-0 right-0 p-3">
+                        <p class="text-white text-sm font-medium truncate">
+                          {{ media.name }}
+                        </p>
+                        <p v-if="media.credits" class="text-white/70 text-xs truncate">
+                          © {{ media.credits }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- Download link -->
+                    <a
+                      :href="getMediaUrl(media.id) || ''"
+                      target="_blank"
+                      class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white dark:hover:bg-gray-700"
+                      :title="t('organizationDetail.media.download')"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-download" class="w-4 h-4" />
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Media count -->
+                <p class="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+                  {{ album.media_items.length }} {{ album.media_items.length > 1 ? 'médias' : 'média' }}
                 </p>
               </div>
-
-              <!-- Media grid -->
-              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <div
-                  v-for="media in serviceAlbum.media_items"
-                  :key="media.id"
-                  class="group relative aspect-square overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800"
-                >
-                  <!-- Image -->
-                  <img
-                    v-if="media.type === 'image'"
-                    :src="getImageVariantUrl(getMediaUrl(media.id) || '', 'medium')"
-                    :alt="media.alt_text || media.name"
-                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    loading="lazy"
-                  />
-
-                  <!-- Video placeholder -->
-                  <div
-                    v-else-if="media.type === 'video'"
-                    class="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-play-circle" class="w-12 h-12 text-gray-400" />
-                  </div>
-
-                  <!-- Document placeholder -->
-                  <div
-                    v-else
-                    class="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-file" class="w-12 h-12 text-gray-400" />
-                  </div>
-
-                  <!-- Overlay with info -->
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div class="absolute bottom-0 left-0 right-0 p-3">
-                      <p class="text-white text-sm font-medium truncate">
-                        {{ media.name }}
-                      </p>
-                      <p v-if="media.credits" class="text-white/70 text-xs truncate">
-                        © {{ media.credits }}
-                      </p>
-                    </div>
-                  </div>
-
-                  <!-- Download link -->
-                  <a
-                    :href="getMediaUrl(media.id) || ''"
-                    target="_blank"
-                    class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white dark:hover:bg-gray-700"
-                    :title="t('organizationDetail.media.download')"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-download" class="w-4 h-4" />
-                  </a>
-                </div>
-              </div>
-
-              <!-- Media count -->
-              <p class="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
-                {{ serviceAlbum.media_items.length }} {{ serviceAlbum.media_items.length > 1 ? 'médias' : 'média' }}
-              </p>
             </div>
 
             <!-- Empty state -->
