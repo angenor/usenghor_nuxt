@@ -109,9 +109,15 @@ async function handleDelete() {
   }
 }
 
-async function copyToClipboard(url: string) {
+const copiedLinkId = ref<string | null>(null)
+let copyTimeout: ReturnType<typeof setTimeout> | null = null
+
+async function copyToClipboard(url: string, linkId: string) {
   try {
     await navigator.clipboard.writeText(url)
+    copiedLinkId.value = linkId
+    if (copyTimeout) clearTimeout(copyTimeout)
+    copyTimeout = setTimeout(() => { copiedLinkId.value = null }, 2000)
   }
   catch {
     // Fallback silencieux
@@ -182,14 +188,14 @@ onMounted(async () => {
           class="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
           @click="showDomainsModal = true"
         >
-          <i class="fa-solid fa-globe" />
+          <font-awesome-icon :icon="['fas', 'globe']" class="h-4 w-4" />
           {{ t('shortLinks.domains.title') }}
         </button>
         <button
           class="inline-flex items-center gap-2 rounded-lg bg-brand-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-blue-700"
           @click="showCreateModal = true"
         >
-          <i class="fa-solid fa-plus" />
+          <font-awesome-icon :icon="['fas', 'plus']" class="h-4 w-4" />
           {{ t('shortLinks.createLink') }}
         </button>
       </div>
@@ -208,7 +214,7 @@ onMounted(async () => {
     <!-- Recherche -->
     <div class="flex items-center gap-4">
       <div class="relative flex-1">
-        <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <font-awesome-icon :icon="['fas', 'search']" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <input
           v-model="searchQuery"
           type="text"
@@ -224,7 +230,7 @@ onMounted(async () => {
 
     <!-- Loading -->
     <div v-if="isLoading" class="flex items-center justify-center py-12">
-      <i class="fa-solid fa-spinner fa-spin text-2xl text-brand-blue-600" />
+      <font-awesome-icon :icon="['fas', 'spinner']" spin class="h-6 w-6 text-brand-blue-600" />
     </div>
 
     <!-- État vide -->
@@ -232,7 +238,7 @@ onMounted(async () => {
       v-else-if="links.length === 0"
       class="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center dark:border-gray-600"
     >
-      <i class="fa-solid fa-link mb-4 text-4xl text-gray-400" />
+      <font-awesome-icon :icon="['fas', 'link']" class="mb-4 h-10 w-10 text-gray-400" />
       <h3 class="text-lg font-medium text-gray-900 dark:text-white">
         {{ t('shortLinks.noLinks') }}
       </h3>
@@ -243,32 +249,29 @@ onMounted(async () => {
         class="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-blue-700"
         @click="showCreateModal = true"
       >
-        <i class="fa-solid fa-plus" />
+        <font-awesome-icon :icon="['fas', 'plus']" class="h-4 w-4" />
         {{ t('shortLinks.createLink') }}
       </button>
     </div>
 
     <!-- Tableau -->
-    <div v-else class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+    <div v-else class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+      <table class="w-full divide-y divide-gray-200 dark:divide-gray-700">
         <thead class="bg-gray-50 dark:bg-gray-800">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400" style="width: 70px">
               {{ t('shortLinks.table.code') }}
             </th>
             <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
               {{ t('shortLinks.table.targetUrl') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              {{ t('shortLinks.table.shortUrl') }}
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400" style="width: 120px">
               {{ t('shortLinks.table.createdBy') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400" style="width: 150px">
               {{ t('shortLinks.table.createdAt') }}
             </th>
-            <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <th class="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400" style="width: 100px">
               {{ t('shortLinks.table.actions') }}
             </th>
           </tr>
@@ -280,21 +283,14 @@ onMounted(async () => {
                 {{ link.code }}
               </code>
             </td>
-            <td class="max-w-xs truncate px-4 py-3 text-sm text-gray-700 dark:text-gray-300" :title="link.target_url">
-              {{ link.target_url }}
-            </td>
-            <td class="whitespace-nowrap px-4 py-3">
-              <div class="flex items-center gap-2">
-                <span class="text-sm text-gray-500 dark:text-gray-400">
+            <td class="px-4 py-3">
+              <div class="max-w-md truncate text-sm text-gray-700 dark:text-gray-300" :title="link.target_url">
+                {{ link.target_url }}
+              </div>
+              <div class="mt-0.5 flex items-center gap-1.5">
+                <span class="truncate text-xs text-gray-400 dark:text-gray-500">
                   {{ link.full_short_url }}
                 </span>
-                <button
-                  class="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
-                  :title="t('shortLinks.messages.copied')"
-                  @click="copyToClipboard(link.full_short_url)"
-                >
-                  <i class="fa-solid fa-copy text-sm" />
-                </button>
               </div>
             </td>
             <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
@@ -303,13 +299,31 @@ onMounted(async () => {
             <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
               {{ formatDate(link.created_at) }}
             </td>
-            <td class="whitespace-nowrap px-4 py-3 text-right">
-              <button
-                class="rounded p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
-                @click="openDeleteModal(link)"
-              >
-                <i class="fa-solid fa-trash text-sm" />
-              </button>
+            <td class="whitespace-nowrap px-4 py-3 text-center">
+              <div class="relative flex items-center justify-center gap-1">
+                <button
+                  class="rounded p-1.5 text-brand-blue-500 hover:bg-brand-blue-50 hover:text-brand-blue-700 dark:text-brand-blue-400 dark:hover:bg-brand-blue-900/20"
+                  :title="t('shortLinks.messages.copied')"
+                  @click="copyToClipboard(link.full_short_url, link.id)"
+                >
+                  <font-awesome-icon :icon="['fas', copiedLinkId === link.id ? 'check' : 'copy']" class="h-4 w-4" />
+                </button>
+                <button
+                  class="rounded p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                  :title="t('shortLinks.confirm.deleteTitle')"
+                  @click="openDeleteModal(link)"
+                >
+                  <font-awesome-icon :icon="['fas', 'trash']" class="h-4 w-4" />
+                </button>
+                <Transition name="fade">
+                  <span
+                    v-if="copiedLinkId === link.id"
+                    class="absolute -top-8 left-1/2 -translate-x-1/2 rounded bg-gray-900 px-2 py-1 text-xs font-medium text-white shadow dark:bg-gray-700"
+                  >
+                    Copié !
+                  </span>
+                </Transition>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -373,7 +387,7 @@ onMounted(async () => {
               class="inline-flex items-center gap-2 rounded-lg bg-brand-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-blue-700 disabled:opacity-50"
               @click="handleCreate"
             >
-              <i v-if="isSaving" class="fa-solid fa-spinner fa-spin" />
+              <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" spin class="h-4 w-4" />
               {{ t('shortLinks.createLink') }}
             </button>
           </div>
@@ -406,7 +420,7 @@ onMounted(async () => {
               class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
               @click="handleDelete"
             >
-              <i v-if="isSaving" class="fa-solid fa-spinner fa-spin" />
+              <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" spin class="h-4 w-4" />
               {{ t('shortLinks.confirm.delete') }}
             </button>
           </div>
@@ -439,14 +453,14 @@ onMounted(async () => {
               class="rounded-lg bg-brand-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-blue-700 disabled:opacity-50"
               @click="handleAddDomain"
             >
-              <i v-if="isSaving" class="fa-solid fa-spinner fa-spin" />
+              <font-awesome-icon v-if="isSaving" :icon="['fas', 'spinner']" spin class="h-4 w-4" />
               <span v-else>{{ t('shortLinks.domains.addDomain') }}</span>
             </button>
           </div>
 
           <!-- Liste des domaines -->
           <div v-if="domains.length === 0" class="py-8 text-center">
-            <i class="fa-solid fa-globe mb-2 text-2xl text-gray-400" />
+            <font-awesome-icon :icon="['fas', 'globe']" class="mb-2 h-6 w-6 text-gray-400" />
             <p class="text-sm text-gray-500 dark:text-gray-400">
               {{ t('shortLinks.domains.noDomains') }}
             </p>
@@ -464,7 +478,7 @@ onMounted(async () => {
                 class="rounded p-1 text-red-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
                 @click="handleRemoveDomain(domain.id)"
               >
-                <i class="fa-solid fa-times text-sm" />
+                <font-awesome-icon :icon="['fas', 'times']" class="h-3.5 w-3.5" />
               </button>
             </li>
           </ul>
@@ -482,3 +496,14 @@ onMounted(async () => {
     </Teleport>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
