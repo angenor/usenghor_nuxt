@@ -62,7 +62,8 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxtjs/i18n',
     '@nuxtjs/sitemap',
-    '@nuxt/test-utils/module'
+    '@nuxt/test-utils/module',
+    './modules/version-generator'
   ],
   sitemap: {
     sources: ['/api/__sitemap__/urls'],

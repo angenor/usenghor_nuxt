@@ -62,6 +62,7 @@ if (import.meta.client) {
 
 <template>
   <NuxtRouteAnnouncer />
+  <AppUpdateBanner />
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
