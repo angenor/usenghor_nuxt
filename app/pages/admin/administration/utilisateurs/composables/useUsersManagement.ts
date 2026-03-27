@@ -103,6 +103,7 @@ const defaultFormData: UserFormData = {
 export function useUsersManagement() {
   const {
     listUsers,
+    getUpcomingBirthdays,
     getUserById,
     createUser,
     updateUser,
@@ -230,42 +231,42 @@ export function useUsersManagement() {
     return serviceOptions.value.filter(s => s.sector_id === sectorId)
   })
 
-  // Anniversaires à venir (dans les 7 prochains jours) — uniquement utilisateurs actifs et vérifiés
-  const upcomingBirthdays = computed(() => {
-    const today = new Date()
-    const results: Array<{ user: UserWithRoles; daysUntil: number; displayDate: string }> = []
-
-    for (const user of users.value) {
-      if (!user.birth_date || !user.active || !user.email_verified) continue
-
-      // birth_date stocké comme "2000-MM-DD"
-      const parts = user.birth_date.split('-')
-      if (parts.length < 3) continue
-      const month = parseInt(parts[1]!)
-      const day = parseInt(parts[2]!)
-      if (isNaN(month) || isNaN(day)) continue
-
-      // Calculer la prochaine occurrence de cet anniversaire
-      const thisYear = today.getFullYear()
-      let nextBirthday = new Date(thisYear, month - 1, day)
-      // Si la date est passée cette année, regarder l'année prochaine
-      if (nextBirthday.getTime() < today.getTime() - 86400000) {
-        nextBirthday = new Date(thisYear + 1, month - 1, day)
-      }
-
-      const diffMs = nextBirthday.getTime() - today.getTime()
-      const daysUntil = Math.ceil(diffMs / 86400000)
-
-      if (daysUntil >= 0 && daysUntil <= 7) {
-        const displayDate = `${day} ${['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'][month - 1]}`
-        results.push({ user, daysUntil, displayDate })
-      }
-    }
-
-    return results.sort((a, b) => a.daysUntil - b.daysUntil)
-  })
+  // Anniversaires à venir — chargés depuis l'endpoint dédié (toutes pages confondues)
+  const upcomingBirthdays = ref<Array<{ user: UserWithRoles; daysUntil: number; displayDate: string }>>([])
 
   // === METHODS ===
+  const monthNames = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre']
+
+  const loadUpcomingBirthdays = async () => {
+    try {
+      const birthdayUsers = await getUpcomingBirthdays(7)
+      const today = new Date()
+      const thisYear = today.getFullYear()
+
+      upcomingBirthdays.value = birthdayUsers
+        .map((user) => {
+          const parts = user.birth_date?.split('-')
+          if (!parts || parts.length < 3) return null
+          const month = parseInt(parts[1]!)
+          const day = parseInt(parts[2]!)
+          if (isNaN(month) || isNaN(day)) return null
+
+          let nextBirthday = new Date(thisYear, month - 1, day)
+          if (nextBirthday.getTime() < today.getTime() - 86400000) {
+            nextBirthday = new Date(thisYear + 1, month - 1, day)
+          }
+          const daysUntil = Math.ceil((nextBirthday.getTime() - today.getTime()) / 86400000)
+          const displayDate = `${day} ${monthNames[month - 1]}`
+          return { user, daysUntil, displayDate }
+        })
+        .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
+        .sort((a, b) => a.daysUntil - b.daysUntil)
+    }
+    catch (error) {
+      console.error('Erreur lors du chargement des anniversaires:', error)
+    }
+  }
+
   const loadAffectationOptions = async () => {
     try {
       // Charger secteurs, services et campus en parallèle
@@ -304,6 +305,7 @@ export function useUsersManagement() {
       const [rolesData] = await Promise.all([
         getRolesForSelect(),
         loadAffectationOptions(),
+        loadUpcomingBirthdays(),
       ])
       roleOptions.value = rolesData.map(r => ({ id: r.id, code: r.code, name_fr: r.name_fr }))
       roles.value = rolesData as unknown as RoleRead[]

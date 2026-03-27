@@ -214,6 +214,15 @@ export function useUsersApi() {
   }
 
   /**
+   * Récupère les utilisateurs dont l'anniversaire est dans les N prochains jours.
+   */
+  async function getUpcomingBirthdays(days: number = 7): Promise<UserWithRoles[]> {
+    return apiFetch<UserWithRoles[]>('/api/admin/users/upcoming-birthdays', {
+      query: { days },
+    })
+  }
+
+  /**
    * Récupère un utilisateur par son ID (avec ses rôles).
    */
   async function getUserById(id: string): Promise<UserWithRoles> {
@@ -519,6 +528,7 @@ export function useUsersApi() {
   return {
     // API - Users
     listUsers,
+    getUpcomingBirthdays,
     getUserById,
     createUser,
     updateUser,

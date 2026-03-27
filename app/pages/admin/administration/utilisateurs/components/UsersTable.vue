@@ -81,8 +81,8 @@ const emit = defineEmits<{
                 <div class="relative h-10 w-10 flex-shrink-0">
                   <!-- Photo de profil -->
                   <img
-                    v-if="user.photo_external_id && getMediaUrl(user.photo_external_id)"
-                    :src="getMediaUrl(user.photo_external_id)!"
+                    v-if="user.photo_external_id && getMediaUrl(user.photo_external_id, 'low')"
+                    :src="getMediaUrl(user.photo_external_id, 'low')!"
                     :alt="getFullName(user)"
                     class="h-10 w-10 rounded-full object-cover"
                   />
