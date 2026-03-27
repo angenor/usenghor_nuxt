@@ -16,7 +16,7 @@ const { updateAvailable, reload, dismiss } = useAppVersion()
       class="fixed top-0 inset-x-0 z-[9999] bg-brand-blue-700 text-white px-4 py-3 flex items-center justify-center gap-4 shadow-lg"
     >
       <span class="text-sm font-medium">
-        Une nouvelle version du site est disponible.
+        Une nouvelle version du site est disponible, actualisez pour profiter des dernières améliorations.
       </span>
       <button
         class="bg-white text-brand-blue-700 px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-brand-blue-50 transition-colors"
