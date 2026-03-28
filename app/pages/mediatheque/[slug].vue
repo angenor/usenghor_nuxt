@@ -177,7 +177,7 @@ function downloadMedia(item: MediaRead) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-950">
+  <div class="min-h-screen bg-white dark:bg-gray-950">
     <!-- Loading -->
     <div v-if="isLoading" class="flex items-center justify-center min-h-[60vh]">
       <div class="animate-spin w-10 h-10 border-4 border-brand-blue-600 border-t-transparent rounded-full"></div>
@@ -205,59 +205,91 @@ function downloadMedia(item: MediaRead) {
 
     <!-- Contenu de l'album -->
     <template v-else>
-      <!-- Header -->
-      <section class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Hero Section (même style que ActualitesHero / actualités détail) -->
+      <section class="relative py-16 md:py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
+        <!-- Background pattern -->
+        <div class="absolute inset-0 opacity-10 heropattern-topography-brand-blue-500"></div>
+
+        <!-- Content -->
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <!-- Breadcrumb -->
-          <nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
-            <NuxtLink
-              :to="localePath('/mediatheque')"
-              class="hover:text-brand-blue-600 dark:hover:text-brand-blue-400 transition-colors"
-            >
-              {{ t('mediatheque.title') }}
-            </NuxtLink>
-            <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3 rtl:rotate-180" />
-            <span class="text-gray-900 dark:text-white font-medium">{{ album.title }}</span>
+          <nav class="mb-6">
+            <ol class="flex items-center space-x-2 text-sm">
+              <li>
+                <NuxtLink :to="localePath('/')" class="text-white/70 hover:text-white transition-colors duration-200">
+                  {{ t('nav.home') }}
+                </NuxtLink>
+              </li>
+              <li class="flex items-center">
+                <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3 mx-2 text-white/40 rtl:rotate-180" />
+                <NuxtLink :to="localePath('/mediatheque')" class="text-white/70 hover:text-white transition-colors duration-200">
+                  {{ t('mediatheque.title') }}
+                </NuxtLink>
+              </li>
+              <li class="flex items-center">
+                <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3 mx-2 text-white/40 rtl:rotate-180" />
+                <span class="text-brand-red-400 font-medium truncate max-w-xs">{{ album.title }}</span>
+              </li>
+            </ol>
           </nav>
 
-          <!-- Titre et description -->
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            {{ album.title }}
-          </h1>
-          <p v-if="album.description" class="text-gray-600 dark:text-gray-400 max-w-3xl">
-            {{ album.description }}
-          </p>
+          <div class="text-center">
+            <!-- Badge -->
+            <span class="inline-block px-4 py-1.5 text-sm font-semibold text-brand-blue-900 bg-brand-blue-400 rounded-full mb-6">
+              <font-awesome-icon icon="fa-solid fa-images" class="w-3.5 h-3.5 mr-1.5" />
+              {{ album.media_items.length }} {{ album.media_items.length > 1 ? 'fichiers' : 'fichier' }}
+            </span>
 
-          <!-- Filtres par type -->
-          <div v-if="showFilters" class="flex flex-wrap gap-2 mt-6">
-            <button
-              type="button"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
-              :class="activeFilter === 'all'
-                ? 'bg-brand-blue-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'"
-              @click="activeFilter = 'all'"
-            >
-              {{ t('mediatheque.filters.all') }}
-              <span class="text-xs opacity-75">({{ album.media_items.length }})</span>
-            </button>
-            <button
-              v-for="type in availableTypes"
-              :key="type"
-              type="button"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
-              :class="activeFilter === type
-                ? 'bg-brand-blue-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'"
-              @click="activeFilter = type"
-            >
-              <font-awesome-icon :icon="getTypeIcon(type)" class="w-3.5 h-3.5" />
-              {{ t(`mediatheque.filters.${type}`) }}
-              <span class="text-xs opacity-75">({{ countByType(type) }})</span>
-            </button>
+            <!-- Title -->
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
+              {{ album.title }}
+            </h1>
+
+            <!-- Description -->
+            <p v-if="album.description" class="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
+              {{ album.description }}
+            </p>
           </div>
         </div>
+
+        <!-- Ligne de séparation oblique -->
+        <div class="absolute bottom-0 left-0 right-0">
+          <svg class="w-full h-12 md:h-16 text-white dark:text-gray-950" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <polygon points="0,40 1200,0 1200,120 0,120" fill="currentColor" />
+          </svg>
+        </div>
       </section>
+
+      <!-- Filtres par type -->
+      <div v-if="showFilters" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <div class="flex flex-wrap gap-2">
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
+            :class="activeFilter === 'all'
+              ? 'bg-brand-blue-600 text-white'
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'"
+            @click="activeFilter = 'all'"
+          >
+            {{ t('mediatheque.filters.all') }}
+            <span class="text-xs opacity-75">({{ album.media_items.length }})</span>
+          </button>
+          <button
+            v-for="type in availableTypes"
+            :key="type"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
+            :class="activeFilter === type
+              ? 'bg-brand-blue-600 text-white'
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'"
+            @click="activeFilter = type"
+          >
+            <font-awesome-icon :icon="getTypeIcon(type)" class="w-3.5 h-3.5" />
+            {{ t(`mediatheque.filters.${type}`) }}
+            <span class="text-xs opacity-75">({{ countByType(type) }})</span>
+          </button>
+        </div>
+      </div>
 
       <!-- Grille de médias -->
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">

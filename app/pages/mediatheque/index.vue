@@ -106,17 +106,38 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-950">
-    <!-- Hero section -->
-    <section class="relative bg-gradient-to-br from-brand-blue-900 via-brand-blue-800 to-brand-blue-700 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-16 sm:py-24">
-      <div class="absolute inset-0 bg-[url('/images/patterns/diese.svg')] bg-repeat opacity-5"></div>
-      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-          {{ t('mediatheque.title') }}
-        </h1>
-        <p class="text-lg sm:text-xl text-blue-100 dark:text-gray-300 max-w-2xl mx-auto">
-          {{ t('mediatheque.subtitle') }}
-        </p>
+  <div class="min-h-screen bg-white dark:bg-gray-950">
+    <!-- Hero section (même style que ActualitesHero) -->
+    <section class="relative py-16 md:py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
+      <!-- Background pattern -->
+      <div class="absolute inset-0 opacity-10 heropattern-topography-brand-blue-500"></div>
+
+      <!-- Content -->
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <!-- Badge -->
+          <span class="inline-block px-4 py-1.5 text-sm font-semibold text-brand-blue-900 bg-brand-blue-400 rounded-full mb-6">
+            <font-awesome-icon icon="fa-solid fa-photo-film" class="w-3.5 h-3.5 mr-1.5" />
+            {{ t('mediatheque.title') }}
+          </span>
+
+          <!-- Title -->
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
+            {{ t('mediatheque.title') }}
+          </h1>
+
+          <!-- Subtitle -->
+          <p class="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto">
+            {{ t('mediatheque.subtitle') }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Ligne de séparation oblique -->
+      <div class="absolute bottom-0 left-0 right-0">
+        <svg class="w-full h-12 md:h-16 text-white dark:text-gray-950" viewBox="0 0 1200 120" preserveAspectRatio="none">
+          <polygon points="0,40 1200,0 1200,120 0,120" fill="currentColor" />
+        </svg>
       </div>
     </section>
 
