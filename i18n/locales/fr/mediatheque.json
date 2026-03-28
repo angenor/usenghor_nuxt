@@ -1,0 +1,33 @@
+{
+  "mediatheque": {
+    "title": "Médiathèque",
+    "subtitle": "Explorez nos collections de photos, vidéos, documents et fichiers audio",
+    "searchPlaceholder": "Rechercher un album...",
+    "filters": {
+      "all": "Tous",
+      "image": "Images",
+      "video": "Vidéos",
+      "audio": "Audio",
+      "document": "Documents"
+    },
+    "pagination": {
+      "page": "Page",
+      "of": "sur",
+      "previous": "Précédent",
+      "next": "Suivant"
+    },
+    "empty": {
+      "title": "Aucun album disponible",
+      "description": "La médiathèque ne contient pas encore d'albums publiés.",
+      "noResults": "Aucun résultat pour votre recherche",
+      "noResultsDescription": "Essayez de modifier vos critères de recherche ou de filtrage."
+    },
+    "album": {
+      "files": "fichier | fichiers",
+      "download": "Télécharger",
+      "backToMediatheque": "Retour à la médiathèque",
+      "notFound": "Album non trouvé",
+      "notFoundDescription": "L'album que vous recherchez n'existe pas ou n'est plus disponible."
+    }
+  }
+}

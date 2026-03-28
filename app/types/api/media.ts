@@ -124,3 +124,35 @@ export interface PublicAlbumWithMedia {
   display_order: number
   media_items: MediaRead[]
 }
+
+// ============================================================================
+// Public Mediatheque
+// ============================================================================
+
+export interface PublicCoverMedia {
+  id: string
+  url: string
+  type: MediaType
+  name: string
+}
+
+export interface PublicAlbumListItem {
+  id: string
+  title: string
+  description: string | null
+  slug: string
+  status: AlbumStatus
+  created_at: string
+  updated_at: string
+  media_count: number
+  media_types: string[]
+  cover_media: PublicCoverMedia | null
+}
+
+export interface PublicAlbumListResponse {
+  items: PublicAlbumListItem[]
+  total: number
+  page: number
+  limit: number
+  pages: number
+}
