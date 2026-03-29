@@ -106,8 +106,8 @@ const defaultSecondaryNavItems: SecondaryNavItem[] = [
   { key: 'about', route: '/a-propos', icon: 'fa-solid fa-info-circle', children: [] },
   { key: 'projects', route: '/projets', icon: 'fa-solid fa-rocket', children: [] },
   { key: 'alumni', route: '/alumni', icon: 'fa-solid fa-user-graduate', children: [] },
-  { key: 'mediatheque', route: '/mediatheque', icon: 'fa-solid fa-photo-film', children: [] },
   { key: 'site', route: '/siege', icon: 'fa-solid fa-building-columns', children: [] },
+  { key: 'mediatheque', route: '/mediatheque', icon: 'fa-solid fa-photo-film', children: [] },
 ]
 
 // Réactif pour permettre les overrides éditoriaux
