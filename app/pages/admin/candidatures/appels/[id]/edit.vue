@@ -584,17 +584,22 @@ const saveForm = async () => {
     // Sérialisé pour éviter de saturer le serveur (503 en production)
     if (existingCall.value) {
       for (const c of existingCall.value.eligibility_criteria || []) {
-        await apiDeleteCriterion(callId, c.id)
+        try { await apiDeleteCriterion(callId, c.id) } catch { /* déjà supprimé */ }
       }
       for (const c of existingCall.value.coverage || []) {
-        await apiDeleteCoverage(callId, c.id)
+        try { await apiDeleteCoverage(callId, c.id) } catch { /* déjà supprimé */ }
       }
       for (const d of existingCall.value.required_documents || []) {
-        await apiDeleteRequiredDocument(callId, d.id)
+        try { await apiDeleteRequiredDocument(callId, d.id) } catch { /* déjà supprimé */ }
       }
       for (const s of existingCall.value.schedule || []) {
-        await apiDeleteScheduleItem(callId, s.id)
+        try { await apiDeleteScheduleItem(callId, s.id) } catch { /* déjà supprimé */ }
       }
+      // Vider les anciens IDs pour éviter les 404 en cas de ré-essai
+      existingCall.value.eligibility_criteria = []
+      existingCall.value.coverage = []
+      existingCall.value.required_documents = []
+      existingCall.value.schedule = []
     }
 
     // 3) Re-create all sub-entities (sérialisé)
