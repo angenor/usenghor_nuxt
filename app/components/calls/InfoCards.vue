@@ -6,6 +6,7 @@ interface Props {
   isDeadlinePassed: boolean
   daysUntilDeadline: number
   formatDate: (date: string | null) => string
+  formatDateTime?: (date: string | null) => string
   getTypeLabel: (type: CallType) => string
 }
 
@@ -38,7 +39,7 @@ watch(() => props.call.country_external_id, async (id) => {
         class="font-bold"
         :class="isDeadlinePassed ? 'text-gray-500 dark:text-gray-400' : 'text-red-600 dark:text-red-400'"
       >
-        {{ formatDate(call.deadline) }}
+        {{ formatDateTime ? formatDateTime(call.deadline) : formatDate(call.deadline) }}
       </div>
       <div
         v-if="!isDeadlinePassed && daysUntilDeadline <= 14 && daysUntilDeadline > 0"

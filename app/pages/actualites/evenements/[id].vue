@@ -5,7 +5,7 @@ import type { PublicAlbumWithMedia } from '~/types/api/media'
 const route = useRoute()
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
-const { getEventBySlug, getUpcomingEvents, registerToEvent, getEventAlbums } = usePublicEventsApi()
+const { getEventBySlug, getUpcomingEvents, getEventAlbums } = usePublicEventsApi()
 const { getCampaignsByEntity } = usePublicSurveyApi()
 const { getCampusById, getFlagEmoji } = useMockData()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
@@ -173,57 +173,13 @@ const formatShortDate = (dateStr: string | null | undefined) => {
   )
 }
 
-// === INSCRIPTION ===
-const showRegistrationModal = ref(false)
-const isRegistering = ref(false)
-const registrationSuccess = ref(false)
-const registrationError = ref<string | null>(null)
-const registrationForm = ref({
-  last_name: '',
-  first_name: '',
-  email: '',
-  phone: '',
-  organization: '',
+// Lien vers le formulaire survey associé (remplace l'ancien modale d'inscription)
+const registrationCampaignLink = computed(() => {
+  if (associatedCampaigns.value.length > 0) {
+    return `/formulaires/${associatedCampaigns.value[0].slug}`
+  }
+  return null
 })
-
-// Peut-on s'inscrire ? (événement à venir + inscription requise)
-const canRegister = computed(() => {
-  if (!event.value) return false
-  return event.value.registration_required && !isPastEvent.value
-})
-
-async function submitRegistration() {
-  if (!event.value) return
-  isRegistering.value = true
-  registrationError.value = null
-
-  try {
-    await registerToEvent(event.value.id, {
-      last_name: registrationForm.value.last_name || null,
-      first_name: registrationForm.value.first_name || null,
-      email: registrationForm.value.email,
-      phone: registrationForm.value.phone || null,
-      organization: registrationForm.value.organization || null,
-    })
-    registrationSuccess.value = true
-  }
-  catch (err: any) {
-    console.error('Erreur inscription:', err)
-    registrationError.value = err?.data?.detail || t('actualites.detail.event.registration.error')
-  }
-  finally {
-    isRegistering.value = false
-  }
-}
-
-function closeRegistrationModal() {
-  showRegistrationModal.value = false
-  if (registrationSuccess.value) {
-    registrationSuccess.value = false
-    registrationForm.value = { last_name: '', first_name: '', email: '', phone: '', organization: '' }
-  }
-  registrationError.value = null
-}
 
 </script>
 
@@ -354,14 +310,14 @@ function closeRegistrationModal() {
                 {{ t('actualites.detail.event.registration.externalLink') }}
               </a>
 
-              <button
-                v-else
+              <NuxtLink
+                v-else-if="registrationCampaignLink"
+                :to="registrationCampaignLink"
                 class="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-blue-700"
-                @click="showRegistrationModal = true"
               >
                 <font-awesome-icon icon="fa-solid fa-pen-to-square" class="h-4 w-4" />
                 {{ t('actualites.detail.event.registration.register') }}
-              </button>
+              </NuxtLink>
             </template>
           </div>
 
@@ -650,15 +606,15 @@ function closeRegistrationModal() {
                 {{ t('actualites.detail.event.registration.externalLink') }}
               </a>
 
-              <!-- Formulaire interne -->
-              <button
-                v-else
+              <!-- Formulaire survey associé -->
+              <NuxtLink
+                v-else-if="registrationCampaignLink"
+                :to="registrationCampaignLink"
                 class="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-blue-700"
-                @click="showRegistrationModal = true"
               >
                 <font-awesome-icon icon="fa-solid fa-pen-to-square" class="h-4 w-4" />
                 {{ t('actualites.detail.event.registration.register') }}
-              </button>
+              </NuxtLink>
             </template>
           </div>
 
@@ -690,130 +646,6 @@ function closeRegistrationModal() {
         </aside>
       </div>
     </div>
-    <!-- Modal d'inscription -->
-    <Teleport to="body">
-      <div
-        v-if="showRegistrationModal"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
-      >
-        <div class="fixed inset-0 bg-black/60 transition-opacity" @click="closeRegistrationModal" />
-        <div class="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-800">
-          <!-- Succès -->
-          <div v-if="registrationSuccess" class="text-center">
-            <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-              <font-awesome-icon icon="fa-solid fa-check" class="h-8 w-8 text-green-600 dark:text-green-400" />
-            </div>
-            <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">
-              {{ t('actualites.detail.event.registration.successTitle') }}
-            </h3>
-            <p class="mb-6 text-gray-500 dark:text-gray-400">
-              {{ t('actualites.detail.event.registration.successMessage') }}
-            </p>
-            <button
-              class="rounded-lg bg-brand-blue-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-blue-700"
-              @click="closeRegistrationModal"
-            >
-              {{ t('actualites.detail.event.registration.close') }}
-            </button>
-          </div>
-
-          <!-- Formulaire -->
-          <template v-else>
-            <div class="mb-6 flex items-center justify-between">
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white">
-                {{ t('actualites.detail.event.registration.formTitle') }}
-              </h3>
-              <button
-                class="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
-                @click="closeRegistrationModal"
-              >
-                <font-awesome-icon icon="fa-solid fa-xmark" class="h-5 w-5" />
-              </button>
-            </div>
-
-            <!-- Erreur -->
-            <div
-              v-if="registrationError"
-              class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400"
-            >
-              <div class="flex items-center gap-2">
-                <font-awesome-icon icon="fa-solid fa-circle-exclamation" class="h-4 w-4" />
-                {{ registrationError }}
-              </div>
-            </div>
-
-            <form class="space-y-4" @submit.prevent="submitRegistration">
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {{ t('actualites.detail.event.registration.lastName') }}
-                  </label>
-                  <input
-                    v-model="registrationForm.last_name"
-                    type="text"
-                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-blue-500 focus:outline-none focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {{ t('actualites.detail.event.registration.firstName') }}
-                  </label>
-                  <input
-                    v-model="registrationForm.first_name"
-                    type="text"
-                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-blue-500 focus:outline-none focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {{ t('actualites.detail.event.registration.email') }} *
-                </label>
-                <input
-                  v-model="registrationForm.email"
-                  type="email"
-                  required
-                  class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-blue-500 focus:outline-none focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
-              </div>
-
-              <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {{ t('actualites.detail.event.registration.phone') }}
-                </label>
-                <input
-                  v-model="registrationForm.phone"
-                  type="tel"
-                  class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-blue-500 focus:outline-none focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
-              </div>
-
-              <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {{ t('actualites.detail.event.registration.organization') }}
-                </label>
-                <input
-                  v-model="registrationForm.organization"
-                  type="text"
-                  class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-blue-500 focus:outline-none focus:ring-1 focus:ring-brand-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                />
-              </div>
-
-              <button
-                type="submit"
-                :disabled="isRegistering"
-                class="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-blue-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-blue-700 disabled:opacity-50"
-              >
-                <font-awesome-icon v-if="isRegistering" icon="fa-solid fa-spinner" class="h-4 w-4 animate-spin" />
-                <font-awesome-icon v-else icon="fa-solid fa-paper-plane" class="h-4 w-4" />
-                {{ isRegistering ? t('actualites.detail.event.registration.submitting') : t('actualites.detail.event.registration.submit') }}
-              </button>
-            </form>
-          </template>
-        </div>
-      </div>
-    </Teleport>
     </div>
   </div>
 </template>

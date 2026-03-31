@@ -18,6 +18,15 @@ const formatDate = (dateStr: string | null) => {
   )
 }
 
+const formatDateTime = (dateStr: string | null) => {
+  if (!dateStr) return '-'
+  const date = new Date(dateStr)
+  return date.toLocaleDateString(
+    locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
+    { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }
+  )
+}
+
 // Type mapping
 const typeToI18nKey: Record<CallType, string> = {
   application: 'candidature',
@@ -56,6 +65,7 @@ const daysUntilDeadline = computed(() => {
       :is-deadline-passed="isDeadlinePassed"
       :days-until-deadline="daysUntilDeadline"
       :format-date="formatDate"
+      :format-date-time="formatDateTime"
       :get-type-label="getTypeLabel"
     />
 

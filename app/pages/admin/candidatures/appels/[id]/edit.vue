@@ -241,7 +241,7 @@ async function fetchCall() {
       country_external_id: call.country_external_id || '',
       location_address: call.location_address || '',
       opening_date: call.opening_date?.split('T')[0] || '',
-      deadline: call.deadline?.split('T')[0] || '',
+      deadline: call.deadline ? call.deadline.slice(0, 16) : '',
       program_start_date: call.program_start_date?.split('T')[0] || '',
       program_end_date: call.program_end_date?.split('T')[0] || '',
       registration_fee: call.registration_fee ?? undefined,
@@ -987,7 +987,7 @@ const tabs = [
             </label>
             <input
               v-model="form.deadline"
-              type="date"
+              type="datetime-local"
               required
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
