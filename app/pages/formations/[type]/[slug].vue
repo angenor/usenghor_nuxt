@@ -28,7 +28,7 @@ const {
 } = usePublicCallsApi()
 
 // Valid URL types
-const validTypes = ['masters', 'doctorat', 'diplomes-universitaires', 'certifiantes']
+const validTypes = ['masters', 'doctorat', 'diplomes-universitaires', 'certifiantes', 'cloms']
 
 // Get current type and slug from route
 const typeSlug = computed(() => route.params.type as string)
