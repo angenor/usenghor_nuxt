@@ -29,9 +29,6 @@ useSeoMeta({
   ogImage: () => fundraiser.value?.cover_image_url || undefined,
 })
 
-// Active tab
-const activeTab = ref<'presentation' | 'contributors' | 'media' | 'news'>('presentation')
-
 // Currency locale
 const currencyLocale = computed(() => {
   if (locale.value === 'ar') return 'ar-EG'
@@ -77,19 +74,9 @@ const hasMedia = computed(() => {
   return fundraiser.value?.media && fundraiser.value.media.length > 0
 })
 
-// Tab list
-const tabs = computed(() => {
-  const list = [
-    { key: 'presentation', label: t('leveesDeFonds.detail.tabs.presentation') },
-    { key: 'contributors', label: t('leveesDeFonds.detail.tabs.contributors') },
-  ]
-  if (hasMedia.value) {
-    list.push({ key: 'media', label: t('leveesDeFonds.detail.tabs.media') })
-  }
-  if (fundraiser.value?.news && fundraiser.value.news.length > 0) {
-    list.push({ key: 'news', label: t('leveesDeFonds.detail.tabs.news') })
-  }
-  return list
+// Has news
+const hasNews = computed(() => {
+  return fundraiser.value?.news && fundraiser.value.news.length > 0
 })
 </script>
 
@@ -208,30 +195,12 @@ const tabs = computed(() => {
         </div>
       </div>
 
-      <!-- Tabs -->
-      <div class="mb-8 border-b border-gray-200 dark:border-gray-700">
-        <nav class="-mb-px flex gap-4 overflow-x-auto">
-          <button
-            v-for="tab in tabs"
-            :key="tab.key"
-            class="whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors"
-            :class="
-              activeTab === tab.key
-                ? 'border-brand-blue-500 text-brand-blue-600 dark:text-brand-blue-400'
-                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-            "
-            @click="activeTab = tab.key as any"
-          >
-            {{ tab.label }}
-          </button>
-        </nav>
-      </div>
-
-      <!-- Tab content -->
-      <div class="min-h-[300px]">
-        <!-- Presentation -->
-        <div v-if="activeTab === 'presentation'" class="space-y-8">
-          <div v-if="descriptionHtml">
+      <!-- Two-column layout: Main content + Sidebar -->
+      <div class="flex flex-col gap-8 lg:flex-row lg:gap-12">
+        <!-- Left: Présentation -->
+        <div class="min-w-0 flex-1">
+          <!-- Description -->
+          <div v-if="descriptionHtml" class="mb-8">
             <h2 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
               {{ t('leveesDeFonds.detail.presentation.title') }}
             </h2>
@@ -240,7 +209,9 @@ const tabs = computed(() => {
               v-html="descriptionHtml"
             />
           </div>
-          <div v-if="reasonHtml">
+
+          <!-- Reason -->
+          <div v-if="reasonHtml" class="mb-8">
             <h2 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
               {{ t('leveesDeFonds.detail.presentation.reason') }}
             </h2>
@@ -249,128 +220,128 @@ const tabs = computed(() => {
               v-html="reasonHtml"
             />
           </div>
-        </div>
 
-        <!-- Contributors -->
-        <div v-if="activeTab === 'contributors'">
-          <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
-            {{ t('leveesDeFonds.detail.contributors.title') }}
-          </h2>
-
-          <div v-if="contributorsByCategory.length === 0" class="py-12 text-center text-gray-500 dark:text-gray-400">
-            {{ t('leveesDeFonds.detail.contributors.empty') }}
+          <!-- Media Gallery -->
+          <div v-if="hasMedia" class="mb-8">
+            <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
+              {{ t('leveesDeFonds.detail.media.title') }}
+            </h2>
+            <FundraisingMediaGallery :media="fundraiser.media" :locale="locale" />
           </div>
 
-          <div v-else class="space-y-8">
-            <div v-for="group in contributorsByCategory" :key="group.category">
-              <h3 class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-300">
-                {{ group.label }}
-              </h3>
-              <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <div
-                  v-for="contributor in group.items"
-                  :key="contributor.id"
-                  class="flex items-center gap-4 rounded-xl bg-gray-50 p-4 dark:bg-gray-800"
-                >
-                  <!-- Logo or initials -->
-                  <div
-                    v-if="contributor.logo_url"
-                    class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg"
-                  >
-                    <img
-                      :src="contributor.logo_url"
-                      :alt="contributor.name"
-                      class="h-full w-full object-contain"
-                    >
-                  </div>
-                  <div
-                    v-else
-                    class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-brand-blue-100 text-lg font-bold text-brand-blue-600 dark:bg-brand-blue-900 dark:text-brand-blue-300"
-                  >
-                    {{ contributor.name.charAt(0) }}
-                  </div>
+          <!-- Interest Form (only for active campaigns) -->
+          <div v-if="fundraiser.status === 'active'" class="mt-4">
+            <FundraisingInterestForm
+              :slug="fundraiser.slug"
+              :is-active="fundraiser.status === 'active'"
+            />
+          </div>
+        </div>
 
-                  <div class="min-w-0 flex-1">
-                    <p class="truncate font-medium text-gray-900 dark:text-white">
-                      {{ contributor.name }}
-                    </p>
-                    <p
-                      v-if="contributor.amount !== null"
-                      class="text-sm font-semibold text-green-600 dark:text-green-400"
+        <!-- Right: Sidebar -->
+        <aside class="w-full flex-shrink-0 lg:w-80 xl:w-96">
+          <div class="space-y-8 lg:sticky lg:top-8">
+            <!-- Contributors -->
+            <div class="rounded-2xl bg-gray-50 p-6 dark:bg-gray-800">
+              <h2 class="mb-4 text-lg font-bold text-gray-900 dark:text-white">
+                {{ t('leveesDeFonds.detail.contributors.title') }}
+              </h2>
+
+              <div v-if="contributorsByCategory.length === 0" class="py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                {{ t('leveesDeFonds.detail.contributors.empty') }}
+              </div>
+
+              <div v-else class="space-y-6">
+                <div v-for="group in contributorsByCategory" :key="group.category">
+                  <h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                    {{ group.label }}
+                  </h3>
+                  <div class="space-y-3">
+                    <div
+                      v-for="contributor in group.items"
+                      :key="contributor.id"
+                      class="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm dark:bg-gray-700"
                     >
-                      {{ formatCurrency(contributor.amount, currencyLocale) }}
-                    </p>
-                    <p v-else class="text-sm italic text-gray-400 dark:text-gray-500">
-                      {{ t('leveesDeFonds.detail.contributors.amountHidden') }}
-                    </p>
+                      <!-- Logo or initials -->
+                      <div
+                        v-if="contributor.logo_url"
+                        class="h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg"
+                      >
+                        <img
+                          :src="contributor.logo_url"
+                          :alt="contributor.name"
+                          class="h-full w-full object-contain"
+                        >
+                      </div>
+                      <div
+                        v-else
+                        class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-brand-blue-100 font-bold text-brand-blue-600 dark:bg-brand-blue-900 dark:text-brand-blue-300"
+                      >
+                        {{ contributor.name.charAt(0) }}
+                      </div>
+
+                      <div class="min-w-0 flex-1">
+                        <p class="truncate text-sm font-medium text-gray-900 dark:text-white">
+                          {{ contributor.name }}
+                        </p>
+                        <p
+                          v-if="contributor.amount !== null"
+                          class="text-xs font-semibold text-green-600 dark:text-green-400"
+                        >
+                          {{ formatCurrency(contributor.amount, currencyLocale) }}
+                        </p>
+                        <p v-else class="text-xs italic text-gray-400 dark:text-gray-500">
+                          {{ t('leveesDeFonds.detail.contributors.amountHidden') }}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Media -->
-        <div v-if="activeTab === 'media' && hasMedia">
-          <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
-            {{ t('leveesDeFonds.detail.media.title') }}
-          </h2>
-          <FundraisingMediaGallery :media="fundraiser.media" :locale="locale" />
-        </div>
+            <!-- News -->
+            <div v-if="hasNews" class="rounded-2xl bg-gray-50 p-6 dark:bg-gray-800">
+              <h2 class="mb-4 text-lg font-bold text-gray-900 dark:text-white">
+                {{ t('leveesDeFonds.detail.news.title') }}
+              </h2>
 
-        <!-- News -->
-        <div v-if="activeTab === 'news'">
-          <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
-            {{ t('leveesDeFonds.detail.news.title') }}
-          </h2>
-
-          <div v-if="!fundraiser.news || fundraiser.news.length === 0" class="py-12 text-center text-gray-500 dark:text-gray-400">
-            {{ t('leveesDeFonds.detail.news.empty') }}
-          </div>
-
-          <div v-else class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <NuxtLink
-              v-for="news in fundraiser.news"
-              :key="news.id"
-              :to="localePath(`/actualites/${news.slug}`)"
-              class="group overflow-hidden rounded-xl bg-white shadow-sm transition-shadow hover:shadow-md dark:bg-gray-800"
-            >
-              <div class="aspect-video overflow-hidden bg-gray-100 dark:bg-gray-700">
-                <img
-                  v-if="news.cover_image_url"
-                  :src="news.cover_image_url"
-                  :alt="news.title"
-                  class="h-full w-full object-cover transition-transform group-hover:scale-105"
+              <div class="space-y-4">
+                <NuxtLink
+                  v-for="news in fundraiser.news"
+                  :key="news.id"
+                  :to="localePath(`/actualites/${news.slug}`)"
+                  class="group block overflow-hidden rounded-xl bg-white shadow-sm transition-shadow hover:shadow-md dark:bg-gray-700"
                 >
-                <div v-else class="flex h-full items-center justify-center text-gray-400">
-                  <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                  </svg>
-                </div>
+                  <div class="aspect-video overflow-hidden bg-gray-100 dark:bg-gray-600">
+                    <img
+                      v-if="news.cover_image_url"
+                      :src="news.cover_image_url"
+                      :alt="news.title"
+                      class="h-full w-full object-cover transition-transform group-hover:scale-105"
+                    >
+                    <div v-else class="flex h-full items-center justify-center text-gray-400">
+                      <svg class="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="p-3">
+                    <p
+                      v-if="news.published_at"
+                      class="mb-1 text-xs text-gray-500 dark:text-gray-400"
+                    >
+                      {{ new Date(news.published_at).toLocaleDateString(locale) }}
+                    </p>
+                    <h3 class="text-sm font-medium text-gray-900 group-hover:text-brand-blue-600 dark:text-white dark:group-hover:text-brand-blue-400">
+                      {{ news.title }}
+                    </h3>
+                  </div>
+                </NuxtLink>
               </div>
-              <div class="p-4">
-                <p
-                  v-if="news.published_at"
-                  class="mb-1 text-xs text-gray-500 dark:text-gray-400"
-                >
-                  {{ t('leveesDeFonds.detail.news.publishedAt') }}
-                  {{ new Date(news.published_at).toLocaleDateString(locale) }}
-                </p>
-                <h3 class="font-medium text-gray-900 group-hover:text-brand-blue-600 dark:text-white dark:group-hover:text-brand-blue-400">
-                  {{ news.title }}
-                </h3>
-              </div>
-            </NuxtLink>
+            </div>
           </div>
-        </div>
-      </div>
-
-      <!-- Interest Form (only for active campaigns) -->
-      <div v-if="fundraiser.status === 'active'" class="mt-12">
-        <FundraisingInterestForm
-          :slug="fundraiser.slug"
-          :is-active="fundraiser.status === 'active'"
-        />
+        </aside>
       </div>
     </div>
   </div>
