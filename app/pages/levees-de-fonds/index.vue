@@ -22,7 +22,7 @@ const mockGlobalStats: GlobalStats = {
   total_raised_all_campaigns: 2_450_000,
   total_contributors: 87,
   active_campaigns_count: 3,
-  completed_campaigns_count: 2,
+  completed_campaigns_count: 0,
 }
 
 const mockCampaigns: FundraiserDisplay[] = [
@@ -64,32 +64,6 @@ const mockCampaigns: FundraiserDisplay[] = [
     contributorCount: 15,
     status: 'active',
     createdAt: '2026-01-10',
-  },
-  {
-    id: '4',
-    title: 'Rénovation de la bibliothèque universitaire',
-    slug: 'renovation-bibliotheque-universitaire',
-    descriptionHtml: '<p>Rénovation complète et numérisation du fonds documentaire de la bibliothèque, création d\'espaces de travail modernes et accessibles.</p>',
-    coverImageUrl: '/images/bg/bg_mission_section.jpeg',
-    goalAmount: 300_000,
-    totalRaised: 300_000,
-    progressPercentage: 100,
-    contributorCount: 42,
-    status: 'completed',
-    createdAt: '2024-03-20',
-  },
-  {
-    id: '5',
-    title: 'Programme de mobilité étudiante internationale',
-    slug: 'programme-mobilite-etudiante',
-    descriptionHtml: '<p>Programme d\'échanges avec des universités partenaires en Europe et en Afrique, permettant à 30 étudiants par an de vivre une expérience internationale.</p>',
-    coverImageUrl: '/images/bg/backgroud_senghor3.jpg',
-    goalAmount: 200_000,
-    totalRaised: 200_000,
-    progressPercentage: 100,
-    contributorCount: 18,
-    status: 'completed',
-    createdAt: '2024-09-01',
   },
 ]
 
