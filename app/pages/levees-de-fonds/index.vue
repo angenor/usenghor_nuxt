@@ -13,7 +13,6 @@ const {
   getAllContributors,
   getEditorialSections,
   transformToDisplay,
-  formatCurrency,
 } = usePublicFundraisingApi()
 
 // SEO
@@ -47,12 +46,6 @@ const anchorSections = computed(() => {
   return sections
 })
 
-// Currency locale
-const currencyLocale = computed(() => {
-  if (locale.value === 'ar') return 'ar-EG'
-  if (locale.value === 'en') return 'en-US'
-  return 'fr-FR'
-})
 
 // Load all data
 async function loadData() {
@@ -170,22 +163,7 @@ watch(locale, async () => {
             {{ t('leveesDeFonds.sections.globalStatsSubtitle') }}
           </p>
 
-          <div class="grid grid-cols-2 gap-6 md:grid-cols-4 md:gap-8">
-            <!-- Total levé -->
-            <div class="group relative rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/10 md:p-8">
-              <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-white transition-colors group-hover:bg-white/20">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <p class="text-2xl font-bold text-white md:text-3xl lg:text-4xl">
-                {{ formatCurrency(globalStats.total_raised_all_campaigns, currencyLocale) }}
-              </p>
-              <p class="mt-2 text-sm font-medium text-brand-blue-300">
-                {{ t('leveesDeFonds.sections.totalRaised') }}
-              </p>
-            </div>
-
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">
             <!-- Contributeurs -->
             <div class="group relative rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/10 md:p-8">
               <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-white transition-colors group-hover:bg-white/20">
