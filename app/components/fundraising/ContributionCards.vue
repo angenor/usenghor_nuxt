@@ -30,40 +30,76 @@ const cards = computed(() => [
 </script>
 
 <template>
-  <section class="relative overflow-hidden bg-gray-50 py-16 transition-colors duration-300 dark:bg-gray-900 lg:py-24">
-    <!-- Animated Background -->
-    <div class="absolute inset-0 overflow-hidden">
-      <div class="absolute inset-0 bg-gradient-to-br from-brand-blue-50/50 via-transparent to-brand-red-50/50 dark:from-brand-blue-900/10 dark:via-transparent dark:to-brand-red-900/10" />
-      <div class="absolute -left-40 -top-40 h-80 w-80 animate-blob rounded-full bg-brand-blue-200/30 blur-3xl dark:bg-brand-blue-500/10" />
-      <div class="absolute -right-20 top-1/2 h-96 w-96 animate-blob rounded-full bg-brand-red-200/30 blur-3xl animation-delay-2000 dark:bg-brand-red-500/10" />
-      <div class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.03)_1px,transparent_1px)] bg-[size:60px_60px] dark:bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear_gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" />
-    </div>
+  <div>
+    <!-- Hero Intro : texte + image côte à côte -->
+    <section class="relative overflow-hidden bg-white dark:bg-gray-900">
+      <div ref="heroRef" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid items-center gap-12 py-16 md:py-24 lg:grid-cols-2 lg:gap-16">
+          <!-- Texte -->
+          <div>
+            <!-- Badge -->
+            <span class="mb-6 inline-flex items-center rounded-full bg-brand-blue-100 px-4 py-1.5 text-sm font-medium text-brand-blue-700 dark:bg-brand-blue-900/30 dark:text-brand-blue-400">
+              <font-awesome-icon icon="fa-solid fa-star" class="mr-2 h-3.5 w-3.5" />
+              {{ t('leveesDeFonds.contribution.heroBadge') }}
+            </span>
 
-    <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <!-- Hero Intro -->
-      <div ref="heroRef" class="mx-auto mb-16 max-w-3xl text-center lg:mb-20">
-        <span class="mb-4 inline-flex items-center rounded-full bg-brand-blue-100 px-4 py-1.5 text-sm font-medium text-brand-blue-700 dark:bg-brand-blue-900/30 dark:text-brand-blue-400">
-          <font-awesome-icon icon="fa-solid fa-star" class="mr-2 h-3.5 w-3.5" />
-          {{ t('leveesDeFonds.contribution.heroBadge') }}
-        </span>
-        <h2 class="mb-4 text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
-          <span class="relative inline-block">
-            {{ t('leveesDeFonds.contribution.heroTitleStart') }} {{ t('leveesDeFonds.contribution.heroTitleEmphasis') }}<br>{{ t('leveesDeFonds.contribution.heroTitleEnd') }}
-            <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-brand-blue-500 to-brand-blue-300" />
-          </span>
-        </h2>
-        <p class="mx-auto max-w-2xl text-lg leading-relaxed text-gray-600 dark:text-gray-400" v-html="t('leveesDeFonds.contribution.heroText')" />
+            <!-- Titre -->
+            <h2 class="mb-6 text-3xl font-bold leading-tight text-gray-900 dark:text-white sm:text-4xl md:text-5xl">
+              {{ t('leveesDeFonds.contribution.heroTitleStart') }}
+              <span class="text-brand-red-500">{{ t('leveesDeFonds.contribution.heroTitleEmphasis') }}</span>
+              <br>
+              {{ t('leveesDeFonds.contribution.heroTitleEnd') }}
+            </h2>
+
+            <!-- Ligne décorative -->
+            <div class="mb-8 flex items-center gap-3">
+              <div class="h-1 w-16 rounded-full bg-brand-red-500" />
+              <div class="h-1 w-8 rounded-full bg-brand-blue-300" />
+            </div>
+
+            <!-- Texte -->
+            <p
+              class="max-w-xl text-lg leading-relaxed text-gray-600 dark:text-gray-400 [&_strong]:font-semibold [&_strong]:text-gray-900 dark:[&_strong]:text-white"
+              v-html="t('leveesDeFonds.contribution.heroText')"
+            />
+          </div>
+
+          <!-- Image -->
+          <div class="relative">
+            <!-- Décoration derrière l'image -->
+            <div class="absolute -right-4 -top-4 h-full w-full rounded-2xl bg-gradient-to-br from-brand-blue-500/20 to-brand-red-500/20 dark:from-brand-blue-500/10 dark:to-brand-red-500/10" />
+            <div class="absolute -bottom-4 -left-4 h-full w-full rounded-2xl border-2 border-brand-blue-200 dark:border-brand-blue-800" />
+
+            <img
+              src="/images/bg/backgroud_senghor2.jpg"
+              alt="Remise de diplômes - Université Senghor"
+              class="relative z-10 h-auto w-full rounded-2xl object-cover shadow-2xl"
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section : Votre contribution sert à -->
+    <section class="relative overflow-hidden bg-gray-50 py-16 transition-colors duration-300 dark:bg-gray-900 lg:py-24">
+      <!-- Animated Background -->
+      <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-brand-blue-50/50 via-transparent to-brand-red-50/50 dark:from-brand-blue-900/10 dark:via-transparent dark:to-brand-red-900/10" />
+        <div class="absolute -left-40 -top-40 h-80 w-80 animate-blob rounded-full bg-brand-blue-200/30 blur-3xl dark:bg-brand-blue-500/10" />
+        <div class="absolute -right-20 top-1/2 h-96 w-96 animate-blob rounded-full bg-brand-red-200/30 blur-3xl animation-delay-2000 dark:bg-brand-red-500/10" />
+        <div class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.03)_1px,transparent_1px)] bg-[size:60px_60px] dark:bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)]" />
       </div>
 
-      <!-- Section Header : Votre contribution sert à -->
-      <div ref="headerRef" class="mb-12 text-center lg:mb-16">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
-          <span class="relative inline-block">
-            {{ t('leveesDeFonds.contribution.titleStart') }} {{ t('leveesDeFonds.contribution.titleEmphasis') }}
-            <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-brand-blue-500 to-brand-blue-300" />
-          </span>
-        </h2>
-      </div>
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <!-- Section Header : Votre contribution sert à -->
+        <div ref="headerRef" class="mb-12 text-center lg:mb-16">
+          <h2 class="text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
+            <span class="relative inline-block">
+              {{ t('leveesDeFonds.contribution.titleStart') }} {{ t('leveesDeFonds.contribution.titleEmphasis') }}
+              <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-brand-blue-500 to-brand-blue-300" />
+            </span>
+          </h2>
+        </div>
 
       <!-- Cards Grid -->
       <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
@@ -127,8 +163,9 @@ const cards = computed(() => [
           </div>
         </div>
       </div>
-    </div>
-  </section>
+      </div>
+    </section>
+  </div>
 </template>
 
 <style scoped>
