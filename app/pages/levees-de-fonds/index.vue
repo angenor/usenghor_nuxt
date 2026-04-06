@@ -30,6 +30,37 @@ const editorialSections = ref<EditorialSectionPublic[]>([])
 const allCampaigns = ref<FundraiserDisplay[]>([])
 const allContributors = ref<AllContributorsItem[]>([])
 
+// Mock news data
+const mockNews = [
+  {
+    id: '1',
+    slug: 'inauguration-nouveau-campus',
+    title: 'Inauguration du nouveau campus numérique',
+    summary: 'Grâce aux contributions de nos donateurs, le campus numérique de l\'Université Senghor a été inauguré, offrant des équipements de pointe aux étudiants.',
+    cover_image: '/images/placeholder-news-1.jpg',
+    published_at: '2026-03-15',
+    tags: [{ name: 'Campus', slug: 'campus' }],
+  },
+  {
+    id: '2',
+    slug: 'bourse-excellence-2026',
+    title: 'Lancement du programme de bourses d\'excellence 2026',
+    summary: 'Un nouveau programme de bourses financé par les levées de fonds permettra à 50 étudiants africains de poursuivre leurs études à Alexandrie.',
+    cover_image: '/images/placeholder-news-2.jpg',
+    published_at: '2026-02-28',
+    tags: [{ name: 'Bourses', slug: 'bourses' }],
+  },
+  {
+    id: '3',
+    slug: 'partenariat-international',
+    title: 'Nouveau partenariat avec l\'Université de Genève',
+    summary: 'Ce partenariat stratégique renforcera les échanges académiques et la coopération en matière de recherche entre les deux institutions.',
+    cover_image: '/images/placeholder-news-3.jpg',
+    published_at: '2026-01-20',
+    tags: [{ name: 'Partenariats', slug: 'partenariats' }],
+  },
+]
+
 // Anchor sections for nav
 const anchorSections = computed(() => {
   const sections = []
@@ -40,6 +71,7 @@ const anchorSections = computed(() => {
     sections.push({ id: 'editorial', label: t('leveesDeFonds.anchors.editorial') })
   }
   sections.push({ id: 'stats', label: t('leveesDeFonds.anchors.stats') })
+  sections.push({ id: 'news', label: t('leveesDeFonds.anchors.news') })
   if (allContributors.value.length > 0) {
     sections.push({ id: 'contributors', label: t('leveesDeFonds.anchors.contributors') })
   }
@@ -193,6 +225,68 @@ watch(locale, async () => {
                 {{ t('leveesDeFonds.sections.completedCampaigns', globalStats.completed_campaigns_count) }}
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Actualités -->
+      <section
+        id="news"
+        class="bg-gray-50 py-16 dark:bg-gray-950 md:py-24"
+      >
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <h2 class="mb-3 text-center text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
+            {{ t('leveesDeFonds.sections.relatedNews') }}
+          </h2>
+          <p class="mx-auto mb-14 max-w-lg text-center text-gray-500 dark:text-gray-400">
+            {{ t('leveesDeFonds.sections.relatedNewsSubtitle') }}
+          </p>
+
+          <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+            <NuxtLink
+              v-for="item in mockNews"
+              :key="item.id"
+              :to="`/actualites/${item.slug}`"
+              class="group"
+            >
+              <!-- Image -->
+              <div class="aspect-[16/10] overflow-hidden rounded-xl bg-gray-200 dark:bg-gray-800">
+                <img
+                  v-if="item.cover_image"
+                  :src="item.cover_image"
+                  :alt="item.title"
+                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                >
+                <div v-else class="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-blue-100 to-brand-blue-200 dark:from-brand-blue-900 dark:to-brand-blue-800">
+                  <svg class="h-10 w-10 text-brand-blue-400/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z" />
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Content -->
+              <div class="mt-4">
+                <div class="flex items-center gap-2">
+                  <span
+                    v-for="tag in item.tags"
+                    :key="tag.slug"
+                    class="text-xs font-medium text-brand-blue-600 dark:text-brand-blue-400"
+                  >
+                    {{ tag.name }}
+                  </span>
+                  <span class="text-xs text-gray-400 dark:text-gray-500">
+                    {{ new Date(item.published_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : locale === 'en' ? 'en-US' : 'fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) }}
+                  </span>
+                </div>
+                <h3 class="mt-2 text-lg font-semibold text-gray-900 transition-colors group-hover:text-brand-blue-600 dark:text-white dark:group-hover:text-brand-blue-400">
+                  {{ item.title }}
+                </h3>
+                <p class="mt-2 line-clamp-2 text-sm text-gray-500 dark:text-gray-400">
+                  {{ item.summary }}
+                </p>
+              </div>
+            </NuxtLink>
           </div>
         </div>
       </section>

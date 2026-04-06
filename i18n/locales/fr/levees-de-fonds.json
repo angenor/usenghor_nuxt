@@ -45,7 +45,8 @@
       "allContributors": "Nos contributeurs",
       "allContributorsSubtitle": "Les partenaires qui soutiennent nos projets",
       "campaignsCount": "campagne | campagnes",
-      "relatedNews": "Actualités liées",
+      "relatedNews": "Actualités",
+      "relatedNewsSubtitle": "Suivez les dernières avancées de nos projets financés",
       "noRelatedNews": "Aucune actualité liée aux levées de fonds pour le moment."
     },
     "campaigns": {

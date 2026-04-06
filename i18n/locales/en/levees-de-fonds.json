@@ -45,7 +45,8 @@
       "allContributors": "Our contributors",
       "allContributorsSubtitle": "The partners who support our projects",
       "campaignsCount": "campaign | campaigns",
-      "relatedNews": "Related news",
+      "relatedNews": "News",
+      "relatedNewsSubtitle": "Follow the latest progress of our funded projects",
       "noRelatedNews": "No news related to fundraising at the moment."
     },
     "campaigns": {

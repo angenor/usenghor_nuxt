@@ -45,7 +45,8 @@
       "allContributors": "مساهمونا",
       "allContributorsSubtitle": "الشركاء الذين يدعمون مشاريعنا",
       "campaignsCount": "حملة | حملات",
-      "relatedNews": "الأخبار ذات الصلة",
+      "relatedNews": "الأخبار",
+      "relatedNewsSubtitle": "تابعوا آخر مستجدات مشاريعنا الممولة",
       "noRelatedNews": "لا توجد أخبار مرتبطة بجمع التبرعات حالياً."
     },
     "campaigns": {
