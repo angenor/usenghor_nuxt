@@ -37,6 +37,7 @@ export interface FundraiserPublic {
   id: string
   title: string
   slug: string
+  description_html: string | null
   cover_image_url: string | null
   goal_amount: number
   total_raised: number
@@ -131,6 +132,7 @@ export interface FundraiserDisplay {
   id: string
   title: string
   slug: string
+  descriptionHtml: string | null
   coverImageUrl: string | null
   goalAmount: number
   totalRaised: number

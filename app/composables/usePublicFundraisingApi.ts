@@ -24,6 +24,7 @@ export function usePublicFundraisingApi() {
       id: fundraiser.id,
       title: fundraiser.title,
       slug: fundraiser.slug,
+      descriptionHtml: fundraiser.description_html,
       coverImageUrl: fundraiser.cover_image_url,
       goalAmount: fundraiser.goal_amount,
       totalRaised: fundraiser.total_raised,
