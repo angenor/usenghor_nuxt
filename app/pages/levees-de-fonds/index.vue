@@ -163,48 +163,33 @@ watch(locale, async () => {
             {{ t('leveesDeFonds.sections.globalStatsSubtitle') }}
           </p>
 
-          <div class="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">
+          <div class="flex flex-col items-center justify-center gap-16 md:flex-row md:gap-0 md:divide-x md:divide-white/20">
             <!-- Contributeurs -->
-            <div class="group relative flex flex-col items-center rounded-2xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/10 md:p-8">
-              <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-white transition-colors group-hover:bg-white/20">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <p class="text-2xl font-bold text-white md:text-3xl lg:text-4xl">
+            <div class="flex flex-col items-center px-8 md:px-16">
+              <p class="text-5xl font-extralight tracking-tight text-white md:text-6xl lg:text-7xl">
                 {{ globalStats.total_contributors }}
               </p>
-              <p class="mt-2 text-sm font-medium text-brand-blue-300">
+              <p class="mt-3 text-sm uppercase tracking-widest text-brand-blue-300">
                 {{ t('leveesDeFonds.sections.totalContributors') }}
               </p>
             </div>
 
             <!-- Campagnes actives -->
-            <div class="group relative flex flex-col items-center rounded-2xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/10 md:p-8">
-              <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-white transition-colors group-hover:bg-white/20">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <p class="text-2xl font-bold text-white md:text-3xl lg:text-4xl">
+            <div class="flex flex-col items-center px-8 md:px-16">
+              <p class="text-5xl font-extralight tracking-tight text-white md:text-6xl lg:text-7xl">
                 {{ globalStats.active_campaigns_count }}
               </p>
-              <p class="mt-2 text-sm font-medium text-brand-blue-300">
+              <p class="mt-3 text-sm uppercase tracking-widest text-brand-blue-300">
                 {{ t('leveesDeFonds.sections.activeCampaigns', globalStats.active_campaigns_count) }}
               </p>
             </div>
 
             <!-- Campagnes terminées -->
-            <div class="group relative flex flex-col items-center rounded-2xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/10 md:p-8">
-              <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-white transition-colors group-hover:bg-white/20">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <p class="text-2xl font-bold text-white md:text-3xl lg:text-4xl">
+            <div class="flex flex-col items-center px-8 md:px-16">
+              <p class="text-5xl font-extralight tracking-tight text-white md:text-6xl lg:text-7xl">
                 {{ globalStats.completed_campaigns_count }}
               </p>
-              <p class="mt-2 text-sm font-medium text-brand-blue-300">
+              <p class="mt-3 text-sm uppercase tracking-widest text-brand-blue-300">
                 {{ t('leveesDeFonds.sections.completedCampaigns', globalStats.completed_campaigns_count) }}
               </p>
             </div>
