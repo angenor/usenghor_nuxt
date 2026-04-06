@@ -7,13 +7,6 @@ import type {
 } from '~/types/fundraising'
 
 const { t, locale } = useI18n()
-const {
-  listPublishedFundraisers,
-  getGlobalStats,
-  getAllContributors,
-  getEditorialSections,
-  transformToDisplay,
-} = usePublicFundraisingApi()
 
 // SEO
 useSeoMeta({
@@ -23,12 +16,194 @@ useSeoMeta({
   ogDescription: () => t('leveesDeFonds.seo.description'),
 })
 
-// State
-const loading = ref(true)
-const globalStats = ref<GlobalStats | null>(null)
-const editorialSections = ref<EditorialSectionPublic[]>([])
-const allCampaigns = ref<FundraiserDisplay[]>([])
-const allContributors = ref<AllContributorsItem[]>([])
+// ── Mock Data (démonstration client) ───────────────────────────────
+
+const mockGlobalStats: GlobalStats = {
+  total_raised_all_campaigns: 2_450_000,
+  total_contributors: 87,
+  active_campaigns_count: 3,
+  completed_campaigns_count: 2,
+}
+
+const mockCampaigns: FundraiserDisplay[] = [
+  {
+    id: '1',
+    title: 'Modernisation du campus numérique',
+    slug: 'modernisation-campus-numerique',
+    descriptionHtml: '<p>Un projet ambitieux pour doter le campus d\'équipements numériques de dernière génération : salles informatiques, laboratoires de recherche et espaces collaboratifs connectés.</p>',
+    coverImageUrl: '/images/bg/bg_mission_section.jpeg',
+    goalAmount: 500_000,
+    totalRaised: 342_500,
+    progressPercentage: 68.5,
+    contributorCount: 24,
+    status: 'active',
+    createdAt: '2025-09-01',
+  },
+  {
+    id: '2',
+    title: 'Bourses d\'excellence pour l\'Afrique francophone',
+    slug: 'bourses-excellence-afrique-francophone',
+    descriptionHtml: '<p>Financer 50 bourses complètes pour des étudiants méritants issus de pays africains francophones, couvrant frais de scolarité, logement et accompagnement académique.</p>',
+    coverImageUrl: '/images/bg/backgroud_senghor3.jpg',
+    goalAmount: 750_000,
+    totalRaised: 512_000,
+    progressPercentage: 68.3,
+    contributorCount: 31,
+    status: 'active',
+    createdAt: '2025-06-15',
+  },
+  {
+    id: '3',
+    title: 'Centre de recherche en développement durable',
+    slug: 'centre-recherche-developpement-durable',
+    descriptionHtml: '<p>Création d\'un centre interdisciplinaire de recherche sur le développement durable en Afrique, réunissant chercheurs, experts et acteurs de terrain.</p>',
+    coverImageUrl: '/images/bg/backgroud_senghor2.jpg',
+    goalAmount: 1_200_000,
+    totalRaised: 285_000,
+    progressPercentage: 23.8,
+    contributorCount: 15,
+    status: 'active',
+    createdAt: '2026-01-10',
+  },
+  {
+    id: '4',
+    title: 'Rénovation de la bibliothèque universitaire',
+    slug: 'renovation-bibliotheque-universitaire',
+    descriptionHtml: '<p>Rénovation complète et numérisation du fonds documentaire de la bibliothèque, création d\'espaces de travail modernes et accessibles.</p>',
+    coverImageUrl: '/images/bg/bg_mission_section.jpeg',
+    goalAmount: 300_000,
+    totalRaised: 300_000,
+    progressPercentage: 100,
+    contributorCount: 42,
+    status: 'completed',
+    createdAt: '2024-03-20',
+  },
+  {
+    id: '5',
+    title: 'Programme de mobilité étudiante internationale',
+    slug: 'programme-mobilite-etudiante',
+    descriptionHtml: '<p>Programme d\'échanges avec des universités partenaires en Europe et en Afrique, permettant à 30 étudiants par an de vivre une expérience internationale.</p>',
+    coverImageUrl: '/images/bg/backgroud_senghor3.jpg',
+    goalAmount: 200_000,
+    totalRaised: 200_000,
+    progressPercentage: 100,
+    contributorCount: 18,
+    status: 'completed',
+    createdAt: '2024-09-01',
+  },
+]
+
+const mockEditorialSections: EditorialSectionPublic[] = [
+  {
+    slug: 'contribution-benefits',
+    title: 'Les avantages de votre contribution',
+    items: [
+      {
+        icon: 'AcademicCapIcon',
+        title: 'Impact éducatif direct',
+        description: 'Chaque contribution finance directement des bourses, des équipements pédagogiques et des programmes de recherche au bénéfice des étudiants africains.',
+      },
+      {
+        icon: 'GlobeAltIcon',
+        title: 'Rayonnement international',
+        description: 'Votre soutien renforce le réseau mondial de l\'Université Senghor et contribue au développement de la coopération universitaire francophone.',
+      },
+      {
+        icon: 'HeartIcon',
+        title: 'Transparence totale',
+        description: 'Un suivi détaillé de l\'utilisation des fonds est publié chaque trimestre, garantissant une transparence complète envers nos donateurs.',
+      },
+      {
+        icon: 'StarIcon',
+        title: 'Reconnaissance institutionnelle',
+        description: 'Les contributeurs sont reconnus publiquement et invités aux événements exclusifs de l\'Université Senghor.',
+      },
+    ],
+  },
+]
+
+const mockContributors: AllContributorsItem[] = [
+  {
+    name: 'Organisation Internationale de la Francophonie',
+    category: 'state_organization',
+    total_amount: 500_000,
+    show_amount_publicly: true,
+    logo_url: null,
+    campaigns_count: 3,
+  },
+  {
+    name: 'Agence Universitaire de la Francophonie',
+    category: 'state_organization',
+    total_amount: 350_000,
+    show_amount_publicly: true,
+    logo_url: null,
+    campaigns_count: 2,
+  },
+  {
+    name: 'République Française — Ministère de l\'Europe et des Affaires étrangères',
+    category: 'state_organization',
+    total_amount: 400_000,
+    show_amount_publicly: true,
+    logo_url: null,
+    campaigns_count: 4,
+  },
+  {
+    name: 'République Arabe d\'Égypte',
+    category: 'state_organization',
+    total_amount: 250_000,
+    show_amount_publicly: true,
+    logo_url: null,
+    campaigns_count: 2,
+  },
+  {
+    name: 'Fondation Ahmed Baba',
+    category: 'foundation_philanthropist',
+    total_amount: 120_000,
+    show_amount_publicly: true,
+    logo_url: null,
+    campaigns_count: 2,
+  },
+  {
+    name: 'Fondation pour le Développement de l\'Afrique',
+    category: 'foundation_philanthropist',
+    total_amount: 85_000,
+    show_amount_publicly: true,
+    logo_url: null,
+    campaigns_count: 1,
+  },
+  {
+    name: 'Fondation Léopold Sédar Senghor',
+    category: 'foundation_philanthropist',
+    total_amount: 150_000,
+    show_amount_publicly: true,
+    logo_url: null,
+    campaigns_count: 3,
+  },
+  {
+    name: 'Orange Afrique & Moyen-Orient',
+    category: 'company',
+    total_amount: 75_000,
+    show_amount_publicly: true,
+    logo_url: null,
+    campaigns_count: 1,
+  },
+  {
+    name: 'Total Energies Foundation',
+    category: 'company',
+    total_amount: 100_000,
+    show_amount_publicly: true,
+    logo_url: null,
+    campaigns_count: 2,
+  },
+  {
+    name: 'Société Générale Afrique',
+    category: 'company',
+    total_amount: 60_000,
+    show_amount_publicly: true,
+    logo_url: null,
+    campaigns_count: 1,
+  },
+]
 
 // Mock news data
 const mockNews = [
@@ -61,6 +236,14 @@ const mockNews = [
   },
 ]
 
+// ── State (initialisé avec les données mock) ───────────────────────
+
+const loading = ref(false)
+const globalStats = ref<GlobalStats>(mockGlobalStats)
+const editorialSections = ref<EditorialSectionPublic[]>(mockEditorialSections)
+const allCampaigns = ref<FundraiserDisplay[]>(mockCampaigns)
+const allContributors = ref<AllContributorsItem[]>(mockContributors)
+
 // Anchor sections for nav
 const anchorSections = computed(() => {
   const sections = []
@@ -73,53 +256,6 @@ const anchorSections = computed(() => {
     sections.push({ id: 'contributors', label: t('leveesDeFonds.anchors.contributors') })
   }
   return sections
-})
-
-
-// Load all data
-async function loadData() {
-  loading.value = true
-  try {
-    const [statsData, editorialData, activeData, completedData, contributorsData] = await Promise.all([
-      getGlobalStats(),
-      getEditorialSections(),
-      listPublishedFundraisers({ status: 'active', limit: 20 }),
-      listPublishedFundraisers({ status: 'completed', limit: 20 }),
-      getAllContributors({ limit: 50 }),
-    ])
-
-    globalStats.value = statsData
-    editorialSections.value = (editorialData.sections || []).filter(
-      s => s.slug !== 'contribution-reasons' && s.slug !== 'engagement-examples',
-    )
-
-    allCampaigns.value = [
-      ...activeData.items.map(transformToDisplay),
-      ...completedData.items.map(transformToDisplay),
-    ]
-    allContributors.value = contributorsData.items || []
-  }
-  catch (e) {
-    console.error('Erreur chargement levées de fonds:', e)
-  }
-  finally {
-    loading.value = false
-  }
-}
-
-onMounted(loadData)
-
-// Recharger les sections éditoriales quand la locale change
-watch(locale, async () => {
-  try {
-    const editorialData = await getEditorialSections()
-    editorialSections.value = (editorialData.sections || []).filter(
-      s => s.slug !== 'contribution-reasons' && s.slug !== 'engagement-examples',
-    )
-  }
-  catch (e) {
-    console.error('Erreur rechargement sections:', e)
-  }
 })
 </script>
 
