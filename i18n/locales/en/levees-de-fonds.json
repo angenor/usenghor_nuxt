@@ -12,8 +12,7 @@
     "anchors": {
       "editorial": "Why contribute",
       "stats": "Key figures",
-      "activeCampaign": "Current campaign",
-      "pastCampaigns": "Past campaigns",
+      "campaigns": "Our campaigns",
       "contributors": "Contributors",
       "news": "News"
     },
@@ -48,6 +47,14 @@
       "campaignsCount": "campaign | campaigns",
       "relatedNews": "Related news",
       "noRelatedNews": "No news related to fundraising at the moment."
+    },
+    "campaigns": {
+      "title": "Our campaigns",
+      "subtitle": "Discover our ongoing fundraising campaigns and those that have already been completed",
+      "filterAll": "All",
+      "filterActive": "Ongoing",
+      "filterCompleted": "Completed",
+      "empty": "No campaigns in this category at the moment."
     },
     "list": {
       "title": "Our campaigns",

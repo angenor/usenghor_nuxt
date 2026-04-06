@@ -12,8 +12,7 @@
     "anchors": {
       "editorial": "Pourquoi contribuer",
       "stats": "Chiffres clés",
-      "activeCampaign": "Campagne en cours",
-      "pastCampaigns": "Campagnes passées",
+      "campaigns": "Nos campagnes",
       "contributors": "Contributeurs",
       "news": "Actualités"
     },
@@ -48,6 +47,14 @@
       "campaignsCount": "campagne | campagnes",
       "relatedNews": "Actualités liées",
       "noRelatedNews": "Aucune actualité liée aux levées de fonds pour le moment."
+    },
+    "campaigns": {
+      "title": "Nos campagnes",
+      "subtitle": "Découvrez nos campagnes de levée de fonds en cours et celles qui ont déjà abouti",
+      "filterAll": "Toutes",
+      "filterActive": "En cours",
+      "filterCompleted": "Clôturées",
+      "empty": "Aucune campagne dans cette catégorie pour le moment."
     },
     "list": {
       "title": "Nos campagnes",

@@ -76,6 +76,30 @@ export const mockFundraisers: FundraiserPublic[] = [
     created_at: '2026-01-15T10:00:00Z',
   },
   {
+    id: 'f4',
+    title: 'Bibliothèque numérique francophone',
+    slug: 'bibliotheque-numerique-francophone',
+    cover_image_url: null,
+    goal_amount: 180000,
+    total_raised: 42000,
+    progress_percentage: 23,
+    contributor_count: 6,
+    status: 'active',
+    created_at: '2026-03-01T10:00:00Z',
+  },
+  {
+    id: 'f5',
+    title: 'Laboratoire de recherche en développement durable',
+    slug: 'labo-recherche-dd',
+    cover_image_url: null,
+    goal_amount: 350000,
+    total_raised: 120000,
+    progress_percentage: 34,
+    contributor_count: 9,
+    status: 'active',
+    created_at: '2026-02-10T10:00:00Z',
+  },
+  {
     id: 'f2',
     title: 'Rénovation du Campus d\'Alexandrie',
     slug: 'renovation-campus-alexandrie',
@@ -98,6 +122,30 @@ export const mockFundraisers: FundraiserPublic[] = [
     contributor_count: 15,
     status: 'completed',
     created_at: '2024-09-01T10:00:00Z',
+  },
+  {
+    id: 'f6',
+    title: 'Équipement informatique des salles de cours',
+    slug: 'equipement-informatique-salles',
+    cover_image_url: null,
+    goal_amount: 120000,
+    total_raised: 120000,
+    progress_percentage: 100,
+    contributor_count: 10,
+    status: 'completed',
+    created_at: '2025-01-15T10:00:00Z',
+  },
+  {
+    id: 'f7',
+    title: 'Fonds d\'aide aux étudiants en situation de crise',
+    slug: 'fonds-aide-etudiants-crise',
+    cover_image_url: null,
+    goal_amount: 80000,
+    total_raised: 95000,
+    progress_percentage: 119,
+    contributor_count: 22,
+    status: 'completed',
+    created_at: '2024-03-01T10:00:00Z',
   },
 ]
 
@@ -167,10 +215,10 @@ export const mockEditorialSections: EditorialSectionPublic[] = [
 // ── Stats globales ──────────────────────────────────────────────────
 
 export const mockGlobalStats: GlobalStats = {
-  total_raised_all_campaigns: 785000,
-  total_contributors: 35,
-  active_campaigns_count: 1,
-  completed_campaigns_count: 2,
+  total_raised_all_campaigns: 1162000,
+  total_contributors: 82,
+  active_campaigns_count: 3,
+  completed_campaigns_count: 4,
 }
 
 export const mockAdminStats: FundraiserStatistics = {

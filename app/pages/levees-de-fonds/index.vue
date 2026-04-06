@@ -7,7 +7,6 @@ import type {
 } from '~/types/fundraising'
 
 const { t, locale } = useI18n()
-const localePath = useLocalePath()
 const {
   listPublishedFundraisers,
   getGlobalStats,
@@ -29,23 +28,19 @@ useSeoMeta({
 const loading = ref(true)
 const globalStats = ref<GlobalStats | null>(null)
 const editorialSections = ref<EditorialSectionPublic[]>([])
-const activeCampaign = ref<FundraiserDisplay | null>(null)
-const pastCampaigns = ref<FundraiserDisplay[]>([])
+const allCampaigns = ref<FundraiserDisplay[]>([])
 const allContributors = ref<AllContributorsItem[]>([])
 
 // Anchor sections for nav
 const anchorSections = computed(() => {
   const sections = []
+  if (allCampaigns.value.length > 0) {
+    sections.push({ id: 'campaigns', label: t('leveesDeFonds.anchors.campaigns') })
+  }
   if (editorialSections.value.length > 0) {
     sections.push({ id: 'editorial', label: t('leveesDeFonds.anchors.editorial') })
   }
   sections.push({ id: 'stats', label: t('leveesDeFonds.anchors.stats') })
-  if (activeCampaign.value) {
-    sections.push({ id: 'active-campaign', label: t('leveesDeFonds.anchors.activeCampaign') })
-  }
-  if (pastCampaigns.value.length > 0) {
-    sections.push({ id: 'past-campaigns', label: t('leveesDeFonds.anchors.pastCampaigns') })
-  }
   if (allContributors.value.length > 0) {
     sections.push({ id: 'contributors', label: t('leveesDeFonds.anchors.contributors') })
   }
@@ -66,18 +61,20 @@ async function loadData() {
     const [statsData, editorialData, activeData, completedData, contributorsData] = await Promise.all([
       getGlobalStats(),
       getEditorialSections(),
-      listPublishedFundraisers({ status: 'active', limit: 1 }),
-      listPublishedFundraisers({ status: 'completed', limit: 6 }),
+      listPublishedFundraisers({ status: 'active', limit: 20 }),
+      listPublishedFundraisers({ status: 'completed', limit: 20 }),
       getAllContributors({ limit: 50 }),
     ])
 
     globalStats.value = statsData
-    editorialSections.value = (editorialData.sections || []).filter(s => s.slug !== 'contribution-reasons')
+    editorialSections.value = (editorialData.sections || []).filter(
+      s => s.slug !== 'contribution-reasons' && s.slug !== 'engagement-examples',
+    )
 
-    if (activeData.items.length > 0) {
-      activeCampaign.value = transformToDisplay(activeData.items[0])
-    }
-    pastCampaigns.value = completedData.items.map(transformToDisplay)
+    allCampaigns.value = [
+      ...activeData.items.map(transformToDisplay),
+      ...completedData.items.map(transformToDisplay),
+    ]
     allContributors.value = contributorsData.items || []
   }
   catch (e) {
@@ -94,7 +91,9 @@ onMounted(loadData)
 watch(locale, async () => {
   try {
     const editorialData = await getEditorialSections()
-    editorialSections.value = (editorialData.sections || []).filter(s => s.slug !== 'contribution-reasons')
+    editorialSections.value = (editorialData.sections || []).filter(
+      s => s.slug !== 'contribution-reasons' && s.slug !== 'engagement-examples',
+    )
   }
   catch (e) {
     console.error('Erreur rechargement sections:', e)
@@ -122,6 +121,14 @@ watch(locale, async () => {
     </div>
 
     <template v-else>
+      <!-- Nos campagnes (filtrable en cours / clôturé) -->
+      <FundraisingCampaignsSection
+        v-if="allCampaigns.length > 0"
+        id="campaigns"
+        :campaigns="allCampaigns"
+        class="bg-white dark:bg-gray-800"
+      />
+
       <!-- Editorial Sections -->
       <section
         v-if="editorialSections.length > 0"
@@ -223,48 +230,6 @@ watch(locale, async () => {
                 {{ t('leveesDeFonds.sections.completedCampaigns', globalStats.completed_campaigns_count) }}
               </p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Active Campaign -->
-      <section
-        v-if="activeCampaign"
-        id="active-campaign"
-        class="bg-gray-50 py-16 dark:bg-gray-900 md:py-24"
-      >
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 class="mb-8 text-center text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
-            <span class="relative inline-block">
-              {{ t('leveesDeFonds.sections.activeCampaign') }}
-              <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-brand-blue-500 to-brand-blue-300" />
-            </span>
-          </h2>
-          <div class="mx-auto max-w-2xl">
-            <CardsCardFundraiser :fundraiser="activeCampaign" />
-          </div>
-        </div>
-      </section>
-
-      <!-- Past Campaigns -->
-      <section
-        v-if="pastCampaigns.length > 0"
-        id="past-campaigns"
-        class="bg-white py-16 dark:bg-gray-800 md:py-24"
-      >
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 class="mb-8 text-center text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
-            <span class="relative inline-block">
-              {{ t('leveesDeFonds.sections.pastCampaigns') }}
-              <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-brand-blue-500 to-brand-blue-300" />
-            </span>
-          </h2>
-          <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            <CardsCardFundraiser
-              v-for="campaign in pastCampaigns"
-              :key="campaign.id"
-              :fundraiser="campaign"
-            />
           </div>
         </div>
       </section>

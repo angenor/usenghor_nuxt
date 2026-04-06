@@ -12,8 +12,7 @@
     "anchors": {
       "editorial": "لماذا المساهمة",
       "stats": "الأرقام الرئيسية",
-      "activeCampaign": "الحملة الجارية",
-      "pastCampaigns": "الحملات السابقة",
+      "campaigns": "حملاتنا",
       "contributors": "المساهمون",
       "news": "الأخبار"
     },
@@ -48,6 +47,14 @@
       "campaignsCount": "حملة | حملات",
       "relatedNews": "الأخبار ذات الصلة",
       "noRelatedNews": "لا توجد أخبار مرتبطة بجمع التبرعات حالياً."
+    },
+    "campaigns": {
+      "title": "حملاتنا",
+      "subtitle": "اكتشف حملات جمع التبرعات الجارية وتلك التي اكتملت بالفعل",
+      "filterAll": "الكل",
+      "filterActive": "جارية",
+      "filterCompleted": "مكتملة",
+      "empty": "لا توجد حملات في هذه الفئة حالياً."
     },
     "list": {
       "title": "حملاتنا",
