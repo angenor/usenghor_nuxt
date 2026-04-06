@@ -84,23 +84,9 @@ const hasNews = computed(() => {
   <div v-if="fundraiser">
     <!-- Hero Section -->
     <section class="relative h-[50vh] min-h-[400px] max-h-[500px] overflow-hidden">
-      <!-- Background Image -->
-      <template v-if="fundraiser.cover_image_url">
-        <div class="absolute inset-0">
-          <img
-            :src="fundraiser.cover_image_url"
-            :alt="fundraiser.title"
-            class="h-full w-full object-cover"
-          >
-          <div class="absolute inset-0 bg-gray-900/60" />
-        </div>
-      </template>
-
-      <!-- Mode pattern (sans image) -->
-      <template v-else>
-        <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
-        <div class="absolute inset-0 opacity-10 heropattern-topography-brand-blue-500" />
-      </template>
+      <!-- Background pattern -->
+      <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
+      <div class="absolute inset-0 opacity-10 heropattern-topography-brand-blue-500" />
 
       <!-- Content -->
       <div class="relative z-10 flex h-full flex-col justify-center">
@@ -199,6 +185,15 @@ const hasNews = computed(() => {
       <div class="flex flex-col gap-8 lg:flex-row lg:gap-12">
         <!-- Left: Présentation -->
         <div class="min-w-0 flex-1">
+          <!-- Cover image -->
+          <div v-if="fundraiser.cover_image_url" class="mb-8 overflow-hidden rounded-2xl">
+            <img
+              :src="fundraiser.cover_image_url"
+              :alt="fundraiser.title"
+              class="h-auto w-full object-cover"
+            >
+          </div>
+
           <!-- Description -->
           <div v-if="descriptionHtml" class="mb-8">
             <h2 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
