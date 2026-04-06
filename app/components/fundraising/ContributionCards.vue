@@ -127,7 +127,7 @@ const cards = computed(() => [
             />
 
             <!-- Number -->
-            <span class="absolute right-6 top-4 text-6xl font-bold text-gray-100 transition-colors duration-500 group-hover:text-gray-200 dark:text-gray-700/50 dark:group-hover:text-gray-600/50">
+            <span class="absolute right-6 top-4 text-6xl font-bold text-gray-200 transition-colors duration-500 group-hover:text-gray-300 dark:text-white/20 dark:group-hover:text-white/30">
               {{ card.number }}
             </span>
 
