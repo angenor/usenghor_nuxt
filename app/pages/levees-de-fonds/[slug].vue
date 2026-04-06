@@ -95,75 +95,71 @@ const tabs = computed(() => {
 
 <template>
   <div v-if="fundraiser">
-    <!-- Hero -->
-    <div class="relative min-h-[300px] overflow-hidden bg-gray-900 md:min-h-[400px]">
-      <!-- Background image or gradient -->
-      <div
-        v-if="fundraiser.cover_image_url"
-        class="absolute inset-0 bg-cover bg-center"
-        :style="{ backgroundImage: `url(${fundraiser.cover_image_url})` }"
-      />
-      <div v-else class="absolute inset-0 bg-gradient-to-br from-brand-blue-900 to-brand-blue-700" />
+    <!-- Hero Section -->
+    <section class="relative h-[50vh] min-h-[400px] max-h-[500px] overflow-hidden">
+      <!-- Background Image -->
+      <template v-if="fundraiser.cover_image_url">
+        <div class="absolute inset-0">
+          <img
+            :src="fundraiser.cover_image_url"
+            :alt="fundraiser.title"
+            class="h-full w-full object-cover"
+          >
+          <div class="absolute inset-0 bg-gray-900/60" />
+        </div>
+      </template>
 
-      <!-- Overlay -->
-      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
+      <!-- Mode pattern (sans image) -->
+      <template v-else>
+        <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
+        <div class="absolute inset-0 opacity-10 heropattern-topography-brand-blue-500" />
+      </template>
 
       <!-- Content -->
-      <div class="relative z-10 flex min-h-[300px] flex-col justify-end pb-12 md:min-h-[400px]">
+      <div class="relative z-10 flex h-full flex-col justify-center">
         <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <!-- Breadcrumb -->
           <nav class="mb-6">
-            <ol class="flex items-center gap-2 text-sm text-white/70">
+            <ol class="flex items-center space-x-2 text-sm">
               <li>
-                <NuxtLink :to="localePath('/')" class="hover:text-white">
+                <NuxtLink :to="localePath('/')" class="text-white/70 transition-colors duration-200 hover:text-white">
                   {{ t('common.home', 'Accueil') }}
                 </NuxtLink>
               </li>
-              <li class="text-white/50">
-                /
-              </li>
-              <li>
-                <NuxtLink :to="localePath('/levees-de-fonds')" class="hover:text-white">
+              <li class="flex items-center">
+                <font-awesome-icon icon="fa-solid fa-chevron-right" class="mx-2 h-3 w-3 text-white/40" />
+                <NuxtLink :to="localePath('/levees-de-fonds')" class="text-white/70 transition-colors duration-200 hover:text-white">
                   {{ t('leveesDeFonds.detail.breadcrumb') }}
                 </NuxtLink>
               </li>
-              <li class="text-white/50">
-                /
-              </li>
-              <li class="text-brand-red-400">
-                {{ fundraiser.title }}
+              <li class="flex items-center">
+                <font-awesome-icon icon="fa-solid fa-chevron-right" class="mx-2 h-3 w-3 text-white/40" />
+                <span class="max-w-xs truncate font-medium text-brand-red-400">{{ fundraiser.title }}</span>
               </li>
             </ol>
           </nav>
 
           <!-- Status badge -->
-          <span
-            v-if="fundraiser.status === 'completed'"
-            class="mb-4 inline-block rounded-full bg-blue-500/20 px-4 py-1.5 text-sm font-medium text-blue-300"
-          >
-            {{ t('leveesDeFonds.detail.closedBadge') }}
-          </span>
+          <div v-if="fundraiser.status === 'completed'" class="mb-4">
+            <span class="inline-block rounded-full bg-blue-500/20 px-4 py-1.5 text-sm font-medium text-blue-300">
+              {{ t('leveesDeFonds.detail.closedBadge') }}
+            </span>
+          </div>
 
-          <h1 class="text-3xl font-bold text-white md:text-5xl">
+          <!-- Title -->
+          <h1 class="text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
             {{ fundraiser.title }}
           </h1>
         </div>
       </div>
 
-      <!-- SVG Separator -->
+      <!-- Ligne de séparation oblique -->
       <div class="absolute bottom-0 left-0 right-0">
-        <svg
-          viewBox="0 0 1200 120"
-          preserveAspectRatio="none"
-          class="h-8 w-full md:h-12"
-        >
-          <polygon
-            points="0,40 1200,0 1200,120 0,120"
-            class="fill-white dark:fill-gray-900"
-          />
+        <svg class="h-12 w-full text-white md:h-16 dark:text-gray-900" viewBox="0 0 1200 120" preserveAspectRatio="none">
+          <polygon points="0,40 1200,0 1200,120 0,120" fill="currentColor" />
         </svg>
       </div>
-    </div>
+    </section>
 
     <!-- Main content -->
     <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-12 lg:px-8">
