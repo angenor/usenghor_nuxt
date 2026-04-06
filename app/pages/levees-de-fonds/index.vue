@@ -46,7 +46,7 @@ const mockNews = [
     slug: 'bourse-excellence-2026',
     title: 'Lancement du programme de bourses d\'excellence 2026',
     summary: 'Un nouveau programme de bourses financé par les levées de fonds permettra à 50 étudiants africains de poursuivre leurs études à Alexandrie.',
-    cover_image: '/images/bg/people-bg-1.jpg',
+    cover_image: '/images/bg/backgroud_senghor3.jpg',
     published_at: '2026-02-28',
     tags: [{ name: 'Bourses', slug: 'bourses' }],
   },
