@@ -201,16 +201,13 @@ watch(locale, async () => {
       <section
         v-if="allContributors.length > 0"
         id="contributors"
-        class="bg-gray-50 py-16 dark:bg-gray-900 md:py-24"
+        class="bg-white py-16 dark:bg-gray-900 md:py-24"
       >
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 class="mb-2 text-center text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
-            <span class="relative inline-block">
-              {{ t('leveesDeFonds.sections.allContributors') }}
-              <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-brand-blue-500 to-brand-blue-300" />
-            </span>
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <h2 class="mb-3 text-center text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
+            {{ t('leveesDeFonds.sections.allContributors') }}
           </h2>
-          <p class="mb-12 text-center text-gray-600 dark:text-gray-400">
+          <p class="mx-auto mb-14 max-w-lg text-center text-gray-500 dark:text-gray-400">
             {{ t('leveesDeFonds.sections.allContributorsSubtitle') }}
           </p>
           <FundraisingContributorsList

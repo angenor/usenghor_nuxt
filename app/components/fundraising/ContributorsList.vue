@@ -14,7 +14,7 @@ const props = withDefaults(defineProps<{
 const { t, locale } = useI18n()
 const { formatCurrency } = usePublicFundraisingApi()
 
-const INITIAL_VISIBLE = 8
+const INITIAL_VISIBLE = 12
 const showAll = ref(false)
 
 // Group contributors by category
@@ -68,14 +68,7 @@ const currencyLocale = computed(() => {
   return 'fr-FR'
 })
 
-// Track how many items shown per group when truncated
-function visibleItems(items: ContributorItem[]): ContributorItem[] {
-  if (!shouldTruncate.value) return items
-  // Simple truncation: just show all groups but limit total
-  return items
-}
-
-// Count shown
+// Track how many items shown when truncated
 let shownCount = 0
 function shouldShowItem(): boolean {
   if (!shouldTruncate.value) return true
@@ -93,52 +86,54 @@ const resetCounter = computed(() => {
 <template>
   <div>
     <!-- Hidden computed trigger to reset counter -->
-    <span v-if="resetCounter" class="hidden"></span>
+    <span v-if="resetCounter" class="hidden" />
 
     <template v-for="[category, items] in groupedContributors" :key="category">
       <!-- Category label -->
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 mt-8 first:mt-0 rtl:text-right">
+      <p class="mb-5 mt-10 text-xs font-semibold uppercase tracking-widest text-gray-400 first:mt-0 dark:text-gray-500 rtl:text-right">
         {{ t(`leveesDeFonds.detail.contributors.categories.${category}`) }}
-      </h3>
+      </p>
 
-      <!-- Contributors grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Contributors list -->
+      <div class="divide-y divide-gray-100 dark:divide-gray-800">
         <template v-for="contributor in items" :key="'name' in contributor ? contributor.name : ''">
           <div
             v-if="shouldShowItem()"
-            class="flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200"
+            class="flex items-center gap-4 py-4"
           >
             <!-- Logo or initials -->
-            <div class="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden bg-brand-blue-100 dark:bg-brand-blue-900/40 flex items-center justify-center">
+            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
               <img
                 v-if="contributor.logo_url"
                 :src="contributor.logo_url"
                 :alt="getContributorName(contributor)"
-                class="w-full h-full object-cover"
+                class="h-full w-full object-cover"
                 loading="lazy"
               >
               <span
                 v-else
-                class="text-sm font-bold text-brand-blue-600 dark:text-brand-blue-400"
+                class="text-xs font-semibold text-gray-500 dark:text-gray-400"
               >
                 {{ getInitials(getContributorName(contributor)) }}
               </span>
             </div>
 
-            <!-- Info -->
-            <div class="min-w-0 flex-1">
-              <p class="font-semibold text-gray-900 dark:text-white text-sm truncate rtl:text-right">
-                {{ getContributorName(contributor) }}
-              </p>
+            <!-- Name -->
+            <p class="min-w-0 flex-1 truncate text-sm font-medium text-gray-900 dark:text-white rtl:text-right">
+              {{ getContributorName(contributor) }}
+            </p>
+
+            <!-- Amount / campaign count (right side) -->
+            <div class="flex flex-col items-end gap-0.5">
               <p
                 v-if="getAmount(contributor) !== null"
-                class="text-xs text-emerald-600 dark:text-emerald-400 font-medium"
+                class="text-sm font-semibold text-gray-900 dark:text-white"
               >
                 {{ formatCurrency(getAmount(contributor)!, currencyLocale) }}
               </p>
               <p
                 v-if="showCampaignCount && 'campaigns_count' in contributor"
-                class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"
+                class="text-xs text-gray-400 dark:text-gray-500"
               >
                 {{ (contributor as AllContributorsItem).campaigns_count }}
                 {{ t('leveesDeFonds.sections.campaignsCount', (contributor as AllContributorsItem).campaigns_count) }}
@@ -152,18 +147,18 @@ const resetCounter = computed(() => {
     <!-- Empty state -->
     <p
       v-if="contributors.length === 0"
-      class="text-center text-gray-500 dark:text-gray-400 py-8"
+      class="py-8 text-center text-gray-500 dark:text-gray-400"
     >
       {{ t('leveesDeFonds.detail.contributors.empty') }}
     </p>
 
     <!-- Voir plus button -->
-    <div v-if="totalCount > INITIAL_VISIBLE" class="flex justify-center mt-8">
+    <div v-if="totalCount > INITIAL_VISIBLE" class="mt-10 flex justify-center">
       <button
-        class="px-6 py-2.5 text-sm font-medium rounded-full border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+        class="text-sm font-medium text-brand-blue-600 transition-colors hover:text-brand-blue-700 dark:text-brand-blue-400 dark:hover:text-brand-blue-300"
         @click="showAll = !showAll"
       >
-        {{ showAll ? t('leveesDeFonds.detail.contributors.title') : `Voir plus (${totalCount})` }}
+        {{ showAll ? t('leveesDeFonds.detail.contributors.showLess') : t('leveesDeFonds.detail.contributors.showMore', { count: totalCount }) }}
       </button>
     </div>
   </div>

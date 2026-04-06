@@ -96,7 +96,9 @@
         },
         "empty": "No contributors yet.",
         "categoryEmpty": "No contributors in this category.",
-        "amountHidden": "Amount not disclosed"
+        "amountHidden": "Amount not disclosed",
+        "showMore": "View all contributors ({count})",
+        "showLess": "Show less"
       },
       "media": {
         "title": "Media gallery",

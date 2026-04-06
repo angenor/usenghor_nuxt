@@ -96,7 +96,9 @@
         },
         "empty": "Aucun contributeur pour le moment.",
         "categoryEmpty": "Aucun contributeur dans cette catégorie.",
-        "amountHidden": "Montant non communiqué"
+        "amountHidden": "Montant non communiqué",
+        "showMore": "Voir tous les contributeurs ({count})",
+        "showLess": "Voir moins"
       },
       "media": {
         "title": "Médiathèque",
