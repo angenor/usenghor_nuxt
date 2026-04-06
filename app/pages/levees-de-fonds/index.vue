@@ -64,13 +64,10 @@ const mockNews = [
 // Anchor sections for nav
 const anchorSections = computed(() => {
   const sections = []
+  sections.push({ id: 'contribution', label: t('leveesDeFonds.anchors.contribution') })
   if (allCampaigns.value.length > 0) {
     sections.push({ id: 'campaigns', label: t('leveesDeFonds.anchors.campaigns') })
   }
-  if (editorialSections.value.length > 0) {
-    sections.push({ id: 'editorial', label: t('leveesDeFonds.anchors.editorial') })
-  }
-  sections.push({ id: 'stats', label: t('leveesDeFonds.anchors.stats') })
   sections.push({ id: 'news', label: t('leveesDeFonds.anchors.news') })
   if (allContributors.value.length > 0) {
     sections.push({ id: 'contributors', label: t('leveesDeFonds.anchors.contributors') })
@@ -138,7 +135,7 @@ watch(locale, async () => {
     />
 
     <!-- Contribution Cards Section -->
-    <FundraisingContributionCards />
+    <FundraisingContributionCards id="contribution" />
 
     <!-- Loading state -->
     <div v-if="loading" class="flex justify-center py-20">
