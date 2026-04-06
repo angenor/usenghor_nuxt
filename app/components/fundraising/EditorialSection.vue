@@ -50,10 +50,13 @@ function resolveIcon(icon: string): string {
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <!-- Section title -->
       <h2
-        class="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl rtl:text-right"
+        class="mb-12 text-center text-3xl font-bold text-gray-900 dark:text-white md:text-4xl rtl:text-right"
         :class="{ 'mb-20 lg:mb-24': isListarStyle }"
       >
-        {{ title }}
+        <span class="relative inline-block">
+          {{ title }}
+          <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-brand-blue-500 to-brand-blue-300" />
+        </span>
       </h2>
 
       <!-- Listar style cards (engagement-examples) -->

@@ -154,7 +154,10 @@ watch(locale, async () => {
 
         <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 class="mb-4 text-center text-3xl font-bold text-white md:text-4xl">
-            {{ t('leveesDeFonds.sections.globalStats') }}
+            <span class="relative inline-block">
+              {{ t('leveesDeFonds.sections.globalStats') }}
+              <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-white/80 to-white/40" />
+            </span>
           </h2>
           <p class="mx-auto mb-16 max-w-2xl text-center text-lg text-brand-blue-200">
             {{ t('leveesDeFonds.sections.globalStatsSubtitle') }}
@@ -232,7 +235,10 @@ watch(locale, async () => {
       >
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 class="mb-8 text-center text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
-            {{ t('leveesDeFonds.sections.activeCampaign') }}
+            <span class="relative inline-block">
+              {{ t('leveesDeFonds.sections.activeCampaign') }}
+              <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-brand-blue-500 to-brand-blue-300" />
+            </span>
           </h2>
           <div class="mx-auto max-w-2xl">
             <CardsCardFundraiser :fundraiser="activeCampaign" />
@@ -248,7 +254,10 @@ watch(locale, async () => {
       >
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 class="mb-8 text-center text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
-            {{ t('leveesDeFonds.sections.pastCampaigns') }}
+            <span class="relative inline-block">
+              {{ t('leveesDeFonds.sections.pastCampaigns') }}
+              <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-brand-blue-500 to-brand-blue-300" />
+            </span>
           </h2>
           <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             <CardsCardFundraiser
@@ -268,7 +277,10 @@ watch(locale, async () => {
       >
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 class="mb-2 text-center text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
-            {{ t('leveesDeFonds.sections.allContributors') }}
+            <span class="relative inline-block">
+              {{ t('leveesDeFonds.sections.allContributors') }}
+              <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-brand-blue-500 to-brand-blue-300" />
+            </span>
           </h2>
           <p class="mb-12 text-center text-gray-600 dark:text-gray-400">
             {{ t('leveesDeFonds.sections.allContributorsSubtitle') }}

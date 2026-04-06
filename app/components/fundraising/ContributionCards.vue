@@ -46,7 +46,7 @@ const cards = computed(() => [
           <font-awesome-icon icon="fa-solid fa-star" class="mr-2 h-3.5 w-3.5" />
           {{ t('leveesDeFonds.contribution.heroBadge') }}
         </span>
-        <h2 class="mb-4 text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl lg:text-5xl">
+        <h2 class="mb-4 text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
           <span class="relative inline-block">
             {{ t('leveesDeFonds.contribution.heroTitleStart') }} {{ t('leveesDeFonds.contribution.heroTitleEmphasis') }}<br>{{ t('leveesDeFonds.contribution.heroTitleEnd') }}
             <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-brand-blue-500 to-brand-blue-300" />
@@ -57,7 +57,7 @@ const cards = computed(() => [
 
       <!-- Section Header : Votre contribution sert à -->
       <div ref="headerRef" class="mb-12 text-center lg:mb-16">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
           <span class="relative inline-block">
             {{ t('leveesDeFonds.contribution.titleStart') }} {{ t('leveesDeFonds.contribution.titleEmphasis') }}
             <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-brand-blue-500 to-brand-blue-300" />
