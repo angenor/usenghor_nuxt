@@ -87,11 +87,6 @@ const mockEditorialSections: EditorialSectionPublic[] = [
         title: 'Transparence totale',
         description: 'Un suivi détaillé de l\'utilisation des fonds est publié chaque trimestre, garantissant une transparence complète envers nos donateurs.',
       },
-      {
-        icon: 'StarIcon',
-        title: 'Reconnaissance institutionnelle',
-        description: 'Les contributeurs sont reconnus publiquement et invités aux événements exclusifs de l\'Université Senghor.',
-      },
     ],
   },
 ]
