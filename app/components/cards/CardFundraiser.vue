@@ -75,17 +75,17 @@ const campaignLink = computed(() =>
     :to="campaignLink"
     class="group flex flex-col overflow-hidden rounded-lg bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:bg-gray-800"
   >
-    <!-- Cover image -->
+    <!-- Cover image avec fort dégradé -->
     <div class="relative aspect-[16/10] overflow-hidden">
       <img
         :src="coverImage"
         :alt="fundraiser.title"
-        class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        class="h-full w-full object-cover brightness-75 saturate-[0.7] transition-transform duration-500 group-hover:scale-105"
         loading="lazy"
       >
 
-      <!-- Overlay gradient bas -->
-      <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/40 to-transparent" />
+      <!-- Fort dégradé du bas vers le haut -->
+      <div class="absolute inset-0 bg-gradient-to-t from-white via-white/80 via-40% to-transparent dark:from-gray-800 dark:via-gray-800/80" />
 
       <!-- Status badge -->
       <span
