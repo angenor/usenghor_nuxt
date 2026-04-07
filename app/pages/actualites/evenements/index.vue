@@ -40,7 +40,7 @@ onMounted(async () => {
   try {
     const [upcoming, past] = await Promise.all([
       getApiUpcomingEvents(50),
-      getApiPastEvents(20)
+      getApiPastEvents(500)
     ])
     upcomingEvents.value = upcoming
     pastEvents.value = past
@@ -75,7 +75,7 @@ const featuredEvents = computed(() => filteredUpcoming.value.slice(0, 4))
 const otherUpcomingEvents = computed(() => filteredUpcoming.value.slice(4))
 
 // Show past events toggle
-const showPastEvents = ref(false)
+const showPastEvents = ref(true)
 
 // Filter options (adaptés aux types backend)
 const typeFilters = [
@@ -330,7 +330,7 @@ const typeColors: Record<string, string> = {
             >
               <div v-show="showPastEvents" class="space-y-4 overflow-hidden">
                 <NuxtLink
-                  v-for="event in filteredPast.slice(0, 6)"
+                  v-for="event in filteredPast"
                   :key="event.id"
                   :to="localePath(`/actualites/evenements/${event.slug}`)"
                   class="group flex items-center gap-4 py-3 border-b border-gray-200 dark:border-gray-700 opacity-70 hover:opacity-100 transition-opacity"
