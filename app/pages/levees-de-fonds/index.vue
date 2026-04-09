@@ -8,12 +8,13 @@ import type {
 
 const { t, locale } = useI18n()
 
-// SEO
+// SEO — page en développement, non indexée
 useSeoMeta({
   title: () => t('leveesDeFonds.seo.title'),
   description: () => t('leveesDeFonds.seo.description'),
   ogTitle: () => t('leveesDeFonds.seo.title'),
   ogDescription: () => t('leveesDeFonds.seo.description'),
+  robots: 'noindex, nofollow',
 })
 
 // ── Mock Data (démonstration client) ───────────────────────────────

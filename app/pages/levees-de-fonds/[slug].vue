@@ -20,13 +20,14 @@ if (!fundraiser.value) {
   throw createError({ statusCode: 404, statusMessage: 'Campagne non trouvée' })
 }
 
-// SEO
+// SEO — page en développement, non indexée
 useSeoMeta({
   title: () => fundraiser.value?.title || t('leveesDeFonds.seo.title'),
   description: () => t('leveesDeFonds.seo.description'),
   ogTitle: () => fundraiser.value?.title || '',
   ogDescription: () => t('leveesDeFonds.seo.description'),
   ogImage: () => fundraiser.value?.cover_image_url || undefined,
+  robots: 'noindex, nofollow',
 })
 
 // Currency locale

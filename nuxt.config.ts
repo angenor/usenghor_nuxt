@@ -67,7 +67,7 @@ export default defineNuxtConfig({
   ],
   sitemap: {
     sources: ['/api/__sitemap__/urls'],
-    exclude: ['/admin/**'],
+    exclude: ['/admin/**', '/levees-de-fonds/**'],
     autoI18n: true
   },
   css: [
