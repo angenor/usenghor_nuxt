@@ -602,7 +602,7 @@ onUnmounted(() => {
               leave-to-class="opacity-0 -translate-y-2"
             >
               <div
-                v-if="isLanguageDropdownOpen"
+                v-show="isLanguageDropdownOpen"
                 class="absolute top-full ltr:right-0 rtl:left-0 mt-2 w-40 bg-white dark:bg-gray-900 rounded-xl shadow-xl shadow-black/10 dark:shadow-black/30 border border-gray-100 dark:border-gray-800 overflow-hidden py-1"
               >
                 <NuxtLink

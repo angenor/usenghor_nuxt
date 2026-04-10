@@ -1,16 +1,12 @@
 <script setup lang="ts">
 const { locale } = useI18n()
-const route = useRoute()
 const router = useRouter()
 const { $lenis } = useNuxtApp()
 const { public: { siteUrl } } = useRuntimeConfig()
 
-// SEO i18n : génère automatiquement lang, dir, hreflang alternate et og:locale
-// Nécessite `i18n.baseUrl` défini dans nuxt.config.ts.
+// SEO i18n : génère automatiquement lang, dir, hreflang alternate,
+// canonical et og:locale. Nécessite `i18n.baseUrl` défini dans nuxt.config.ts.
 const i18nHead = useLocaleHead({ seo: true })
-
-// URL canonique : siteUrl + chemin courant (sans query string)
-const canonicalUrl = computed(() => `${siteUrl}${route.path}`)
 
 // Meta OG globales (SSR) — fallback pour toutes les pages
 const htmlLang = computed(() => i18nHead.value.htmlAttrs?.lang)
@@ -25,10 +21,7 @@ useHead({
     lang: htmlLang,
     dir: htmlDir
   },
-  link: [
-    { rel: 'canonical', href: canonicalUrl },
-    ...(i18nHead.value.link || [])
-  ],
+  link: () => i18nHead.value.link || [],
   meta: [
     { property: 'og:site_name', content: 'Université Senghor' },
     { property: 'og:type', content: 'website' },
