@@ -1,6 +1,7 @@
 <script setup lang="ts">
-const { t, locale, setLocale } = useI18n()
+const { t, locale } = useI18n()
 const localePath = useLocalePath()
+const switchLocalePath = useSwitchLocalePath()
 const { isDark, toggle: originalToggleDarkMode } = useDarkMode()
 
 // Contenus éditoriaux pour les éléments globaux
@@ -145,7 +146,14 @@ const toggleMobileMenu = () => {
   }
 }
 
-const languages = [
+type LocaleCode = 'fr' | 'en' | 'ar'
+interface Language {
+  code: LocaleCode
+  name: string
+  flag: string
+}
+
+const languages: Language[] = [
   { code: 'fr', name: 'Français', flag: 'https://flagcdn.com/w40/fr.png' },
   { code: 'en', name: 'English', flag: 'https://flagcdn.com/w40/gb.png' },
   { code: 'ar', name: 'العربية', flag: 'https://flagcdn.com/w40/eg.png' }
@@ -153,12 +161,9 @@ const languages = [
 
 const isLanguageDropdownOpen = ref(false)
 
-const changeLanguage = (langCode: string) => {
-  setLocale(langCode)
-  if (import.meta.client) {
-    document.documentElement.dir = langCode === 'ar' ? 'rtl' : 'ltr'
-  }
+const closeLanguageMenus = () => {
   isLanguageDropdownOpen.value = false
+  isMobileMenuOpen.value = false
 }
 
 const toggleLanguageDropdown = () => {
@@ -600,16 +605,19 @@ onUnmounted(() => {
                 v-if="isLanguageDropdownOpen"
                 class="absolute top-full ltr:right-0 rtl:left-0 mt-2 w-40 bg-white dark:bg-gray-900 rounded-xl shadow-xl shadow-black/10 dark:shadow-black/30 border border-gray-100 dark:border-gray-800 overflow-hidden py-1"
               >
-                <button
+                <NuxtLink
                   v-for="lang in languages"
                   :key="lang.code"
-                  @click="changeLanguage(lang.code)"
-                  class="flex items-center gap-3 w-full px-4 py-2.5 text-sm transition-colors duration-200"
+                  :to="switchLocalePath(lang.code) || '/'"
+                  :hreflang="lang.code"
+                  :rel="locale === lang.code ? undefined : 'alternate'"
+                  class="flex items-center gap-3 w-full px-4 py-2.5 text-sm transition-colors duration-200 no-underline"
                   :class="[
                     locale === lang.code
                       ? 'bg-brand-blue-50 dark:bg-brand-blue-900/20 text-brand-blue-700 dark:text-brand-blue-400 font-medium'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                   ]"
+                  @click="closeLanguageMenus"
                 >
                   <img
                     :src="lang.flag"
@@ -622,7 +630,7 @@ onUnmounted(() => {
                     icon="fa-solid fa-check"
                     class="w-3 h-3 ltr:ml-auto rtl:mr-auto text-brand-blue-500"
                   />
-                </button>
+                </NuxtLink>
               </div>
             </Transition>
           </div>
@@ -770,16 +778,19 @@ onUnmounted(() => {
               {{ t('nav.language') }}
             </p>
             <div class="grid grid-cols-3 gap-2">
-              <button
+              <NuxtLink
                 v-for="lang in languages"
                 :key="lang.code"
-                @click="changeLanguage(lang.code)"
-                class="flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-all duration-200"
+                :to="switchLocalePath(lang.code) || '/'"
+                :hreflang="lang.code"
+                :rel="locale === lang.code ? undefined : 'alternate'"
+                class="flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-all duration-200 no-underline"
                 :class="[
                   locale === lang.code
                     ? 'bg-brand-blue-100 dark:bg-brand-blue-900/30 text-brand-blue-700 dark:text-brand-blue-400 ring-2 ring-brand-blue-500/50'
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                 ]"
+                @click="closeLanguageMenus"
               >
                 <img
                   :src="lang.flag"
@@ -787,7 +798,7 @@ onUnmounted(() => {
                   class="w-8 h-6 object-cover rounded-sm shadow-sm"
                 />
                 <span class="text-xs font-medium">{{ lang.code.toUpperCase() }}</span>
-              </button>
+              </NuxtLink>
             </div>
           </div>
 

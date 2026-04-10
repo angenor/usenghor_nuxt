@@ -1,12 +1,34 @@
 <script setup lang="ts">
 const { locale } = useI18n()
+const route = useRoute()
 const router = useRouter()
 const { $lenis } = useNuxtApp()
 const { public: { siteUrl } } = useRuntimeConfig()
 
+// SEO i18n : génère automatiquement lang, dir, hreflang alternate et og:locale
+// Nécessite `i18n.baseUrl` défini dans nuxt.config.ts.
+const i18nHead = useLocaleHead({ seo: true })
+
+// URL canonique : siteUrl + chemin courant (sans query string)
+const canonicalUrl = computed(() => `${siteUrl}${route.path}`)
+
 // Meta OG globales (SSR) — fallback pour toutes les pages
+const htmlLang = computed(() => i18nHead.value.htmlAttrs?.lang)
+const htmlDir = computed<'auto' | 'ltr' | 'rtl' | undefined>(() => {
+  const dir = i18nHead.value.htmlAttrs?.dir
+  return dir === 'ltr' || dir === 'rtl' || dir === 'auto' ? dir : undefined
+})
+
 useHead({
   titleTemplate: '%s | Université Senghor',
+  htmlAttrs: {
+    lang: htmlLang,
+    dir: htmlDir
+  },
+  link: [
+    { rel: 'canonical', href: canonicalUrl },
+    ...(i18nHead.value.link || [])
+  ],
   meta: [
     { property: 'og:site_name', content: 'Université Senghor' },
     { property: 'og:type', content: 'website' },
@@ -15,9 +37,7 @@ useHead({
     { property: 'og:image:height', content: '630' },
     { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'twitter:image', content: `${siteUrl}/images/og/og-default.png` },
-    { property: 'og:locale', content: 'fr_FR' },
-    { property: 'og:locale:alternate', content: 'en_US' },
-    { property: 'og:locale:alternate', content: 'ar_SA' }
+    ...(i18nHead.value.meta || [])
   ]
 })
 

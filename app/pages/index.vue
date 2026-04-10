@@ -1,18 +1,20 @@
 <script setup lang="ts">
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const { public: { siteUrl } } = useRuntimeConfig()
 const route = useRoute()
 
-const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
+// Sur la page d'accueil, on force `titleTemplate` à `%s` pour éviter le doublon
+// "Université Senghor - ... | Université Senghor" provoqué par le template global.
+useHead({
+  titleTemplate: '%s'
+})
 
 useSeoMeta({
   title: () => t('hero.title'),
   ogTitle: () => t('hero.title'),
   description: () => t('og.defaultDescription'),
   ogDescription: () => t('og.defaultDescription'),
-  ogUrl: () => siteUrl + route.fullPath,
-  ogLocale: () => localeMap[locale.value] || 'fr_FR',
-  ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
+  ogUrl: () => siteUrl + route.path
 })
 
 // Chargement SSR du contenu éditorial pour tous les composants homepage

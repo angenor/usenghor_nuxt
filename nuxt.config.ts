@@ -77,10 +77,11 @@ export default defineNuxtConfig({
     '@fontsource-variable/inter/index.css'
   ],
   i18n: {
+    baseUrl: siteUrl,
     locales: [
-      { code: 'fr', name: 'Français', file: 'fr/index.ts', dir: 'ltr' },
-      { code: 'en', name: 'English', file: 'en/index.ts', dir: 'ltr' },
-      { code: 'ar', name: 'العربية', file: 'ar/index.ts', dir: 'rtl' }
+      { code: 'fr', name: 'Français', file: 'fr/index.ts', dir: 'ltr', language: 'fr-FR' },
+      { code: 'en', name: 'English', file: 'en/index.ts', dir: 'ltr', language: 'en-US' },
+      { code: 'ar', name: 'العربية', file: 'ar/index.ts', dir: 'rtl', language: 'ar-EG' }
     ],
     defaultLocale: 'fr',
     langDir: 'locales',
