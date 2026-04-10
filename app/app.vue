@@ -1,5 +1,4 @@
 <script setup lang="ts">
-const { locale } = useI18n()
 const router = useRouter()
 const { $lenis } = useNuxtApp()
 const { public: { siteUrl } } = useRuntimeConfig()
@@ -14,6 +13,44 @@ const htmlDir = computed<'auto' | 'ltr' | 'rtl' | undefined>(() => {
   const dir = i18nHead.value.htmlAttrs?.dir
   return dir === 'ltr' || dir === 'rtl' || dir === 'auto' ? dir : undefined
 })
+
+// Données structurées Schema.org : EducationalOrganization (CollegeOrUniversity) + WebSite
+// Permet à Google d'afficher le knowledge panel et la sitelinks searchbox.
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollegeOrUniversity',
+  '@id': `${siteUrl}/#organization`,
+  name: 'Université Senghor',
+  alternateName: ['Université internationale Senghor', 'Senghor University'],
+  url: siteUrl,
+  logo: `${siteUrl}/images/logos/logo-web-noir-petit.png`,
+  image: `${siteUrl}/images/og/og-default.png`,
+  foundingDate: '1990',
+  description: "Université internationale de la Francophonie, opérateur direct de l'OIF, formant les cadres africains au développement durable depuis Alexandrie.",
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: '1 Place Ahmed Orabi, El Mancheya',
+    addressLocality: 'Alexandrie',
+    addressCountry: 'EG'
+  },
+  sameAs: [
+    'https://facebook.com/usenghor',
+    'https://twitter.com/usenghor',
+    'https://linkedin.com/school/usenghor',
+    'https://youtube.com/usenghor',
+    'https://instagram.com/usenghor'
+  ]
+}
+
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': `${siteUrl}/#website`,
+  name: 'Université Senghor',
+  url: siteUrl,
+  inLanguage: ['fr', 'en', 'ar'],
+  publisher: { '@id': `${siteUrl}/#organization` }
+}
 
 useHead({
   titleTemplate: '%s | Université Senghor',
@@ -31,16 +68,20 @@ useHead({
     { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'twitter:image', content: `${siteUrl}/images/og/og-default.png` },
     ...(i18nHead.value.meta || [])
+  ],
+  script: [
+    {
+      type: 'application/ld+json',
+      key: 'jsonld-organization',
+      innerHTML: JSON.stringify(organizationJsonLd)
+    },
+    {
+      type: 'application/ld+json',
+      key: 'jsonld-website',
+      innerHTML: JSON.stringify(websiteJsonLd)
+    }
   ]
 })
-
-// Set document direction based on locale
-watch(locale, (newLocale) => {
-  if (import.meta.client) {
-    document.documentElement.dir = newLocale === 'ar' ? 'rtl' : 'ltr'
-    document.documentElement.lang = newLocale
-  }
-}, { immediate: true })
 
 // Gestion du scroll lors de la navigation (Lenis intercepte le scroll natif)
 if (import.meta.client) {

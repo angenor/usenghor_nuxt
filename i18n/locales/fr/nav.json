@@ -123,6 +123,19 @@
     },
     "language": "Langue",
     "search": "Rechercher",
-    "backToMainSite": "Retour au site principal"
+    "backToMainSite": "Retour au site principal",
+    "aria": {
+      "primary": "Navigation principale",
+      "openMenu": "Ouvrir le menu {name}",
+      "closeMenu": "Fermer le menu {name}",
+      "openLanguageMenu": "Changer de langue",
+      "openSearch": "Ouvrir la recherche",
+      "closeSearch": "Fermer la recherche",
+      "enableDarkMode": "Activer le mode sombre",
+      "disableDarkMode": "Désactiver le mode sombre",
+      "openMobileMenu": "Ouvrir le menu mobile",
+      "closeMobileMenu": "Fermer le menu mobile",
+      "currentLanguage": "Langue actuelle : {name}"
+    }
   }
 }

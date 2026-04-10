@@ -1,8 +1,12 @@
 <script setup lang="ts">
+const { t } = useI18n()
 const localePath = useLocalePath()
 
 // Contenus éditoriaux avec fallback sur i18n
 const { getContent, getRawContent } = useEditorialContent('homepage')
+
+// Alt descriptif pour une slide donnée (basé sur son titre éditorial)
+const slideAlt = (titleKey: string) => getContent(titleKey) || t('hero.title')
 
 // API Media pour résoudre les URLs des images
 const { getMediaUrl } = useMediaApi()
@@ -182,14 +186,17 @@ onUnmounted(() => {
             class="absolute inset-0"
           >
             <!-- Seul le slide courant et le suivant chargent leur image -->
-            <img
+            <NuxtImg
               v-if="index === currentSlide || index === nextSlideIndex"
               :src="item.image"
-              :alt="`Slide ${index + 1}`"
+              :alt="slideAlt(item.editorialTitleKey)"
               class="w-full h-full object-cover scale-105 animate-slow-zoom"
               :fetchpriority="index === 0 ? 'high' : 'auto'"
               :loading="index === 0 ? 'eager' : 'lazy'"
-            >
+              format="webp"
+              sizes="100vw md:100vw lg:100vw"
+              densities="x1 x2"
+            />
           </div>
         </TransitionGroup>
       </template>
@@ -199,17 +206,20 @@ onUnmounted(() => {
       <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30"></div>
     </div>
 
+    <!-- H1 SEO stable, masqué visuellement (le titre marketing dynamique est en h2 ci-dessous) -->
+    <h1 class="sr-only">{{ t('hero.title') }}</h1>
+
     <!-- Content (affiché immédiatement avec fallback i18n) -->
     <div class="relative z-10 h-full flex items-center">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div class="max-w-3xl">
-          <!-- Title -->
-          <h1
+          <!-- Titre marketing dynamique (carrousel) -->
+          <h2
             :key="currentSlide + '-title'"
             class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight mb-6 animate__animated animate__fadeInUp"
           >
             {{ currentTitle }}
-          </h1>
+          </h2>
 
           <!-- Subtitle -->
           <p

@@ -5,7 +5,7 @@ const switchLocalePath = useSwitchLocalePath()
 const { isDark, toggle: originalToggleDarkMode } = useDarkMode()
 
 // Contenus éditoriaux pour les éléments globaux
-const { getContent, getRawContent, loadContent } = useEditorialContent('global')
+const { getRawContent, loadContent } = useEditorialContent('global')
 const editorialStore = useEditorialContentStore()
 
 const isScrolled = ref(false)
@@ -154,9 +154,9 @@ interface Language {
 }
 
 const languages: Language[] = [
-  { code: 'fr', name: 'Français', flag: 'https://flagcdn.com/w40/fr.png' },
-  { code: 'en', name: 'English', flag: 'https://flagcdn.com/w40/gb.png' },
-  { code: 'ar', name: 'العربية', flag: 'https://flagcdn.com/w40/eg.png' }
+  { code: 'fr', name: 'Français', flag: '/images/flags/fr.svg' },
+  { code: 'en', name: 'English', flag: '/images/flags/gb.svg' },
+  { code: 'ar', name: 'العربية', flag: '/images/flags/eg.svg' }
 ]
 
 const isLanguageDropdownOpen = ref(false)
@@ -174,8 +174,8 @@ const closeLanguageDropdown = () => {
   isLanguageDropdownOpen.value = false
 }
 
-const currentLanguage = computed(() => {
-  return languages.find(l => l.code === locale.value) || languages[0]
+const currentLanguage = computed<Language>(() => {
+  return languages.find(l => l.code === locale.value) ?? languages[0]!
 })
 
 const openDropdown = (key: string) => {
@@ -323,6 +323,7 @@ onUnmounted(() => {
 
 <template>
   <nav
+    :aria-label="t('nav.aria.primary')"
     class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out"
     :class="[
       isScrolled
@@ -334,10 +335,15 @@ onUnmounted(() => {
       <div class="flex items-center justify-between h-20">
         <!-- Logo -->
         <div class="flex-shrink-0">
-          <NuxtLink :to="localePath('/')" class="flex items-center group">
-            <img
+          <NuxtLink :to="localePath('/')" class="flex items-center group" :aria-label="t('nav.home')">
+            <NuxtImg
               src="/images/logos/logo-web-noir-petit.png"
-              alt="Université Senghor"
+              alt="Université Senghor — Retour à l'accueil"
+              width="150"
+              height="48"
+              format="webp"
+              loading="eager"
+              fetchpriority="high"
               class="h-12 w-auto transition-all duration-300 group-hover:scale-105"
               :class="{ 'brightness-0 invert': !isScrolled || isDark }"
             />
@@ -356,6 +362,9 @@ onUnmounted(() => {
           >
             <NuxtLink
               :to="localePath(item.route)"
+              :aria-haspopup="item.hasDropdown ? 'menu' : undefined"
+              :aria-expanded="item.hasDropdown ? (activeDropdown === item.key ? 'true' : 'false') : undefined"
+              :aria-controls="item.hasDropdown ? `nav-dropdown-${item.key}` : undefined"
               class="group relative flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 no-underline"
               :class="[
                 isScrolled
@@ -379,6 +388,9 @@ onUnmounted(() => {
 
             <!-- Mega Menu Dropdown — CSS hover (pré-hydratation) + JS state (post-hydratation) -->
             <div
+              :id="`nav-dropdown-${item.key}`"
+              role="menu"
+              :aria-label="t(`nav.${item.key}`)"
               class="absolute top-full left-1/2 -translate-x-1/2 pt-4 transition-all duration-300 ease-out"
               :class="activeDropdown === item.key
                 ? 'opacity-100 visible translate-y-0 pointer-events-auto'
@@ -463,6 +475,11 @@ onUnmounted(() => {
             @mouseleave="isMoreMenuOpen = false"
           >
             <button
+              type="button"
+              aria-haspopup="menu"
+              :aria-expanded="isMoreMenuOpen ? 'true' : 'false'"
+              aria-controls="nav-dropdown-more"
+              @click="isMoreMenuOpen = !isMoreMenuOpen"
               class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-all duration-300"
               :class="[
                 isScrolled
@@ -485,6 +502,9 @@ onUnmounted(() => {
 
             <!-- More Menu Dropdown — CSS hover (pré-hydratation) + JS state (post-hydratation) -->
             <div
+              id="nav-dropdown-more"
+              role="menu"
+              :aria-label="t('nav.more')"
               class="absolute top-full right-0 pt-4 transition-all duration-300 ease-out"
               :class="isMoreMenuOpen
                 ? 'opacity-100 visible translate-y-0 pointer-events-auto'
@@ -535,6 +555,9 @@ onUnmounted(() => {
         <div class="hidden lg:flex items-center gap-2">
           <!-- Search Button -->
           <button
+            type="button"
+            :aria-label="isSearchOpen ? t('nav.aria.closeSearch') : t('nav.aria.openSearch')"
+            :aria-expanded="isSearchOpen ? 'true' : 'false'"
             @click="toggleSearch"
             class="flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300"
             :class="[
@@ -548,6 +571,9 @@ onUnmounted(() => {
 
           <!-- Dark Mode Toggle -->
           <button
+            type="button"
+            :aria-label="isDark ? t('nav.aria.disableDarkMode') : t('nav.aria.enableDarkMode')"
+            :aria-pressed="isDark ? 'true' : 'false'"
             @click="toggleDarkMode"
             class="flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300"
             :class="[
@@ -567,6 +593,11 @@ onUnmounted(() => {
             @mouseleave="closeLanguageDropdown"
           >
             <button
+              type="button"
+              :aria-label="t('nav.aria.openLanguageMenu')"
+              aria-haspopup="menu"
+              :aria-expanded="isLanguageDropdownOpen ? 'true' : 'false'"
+              aria-controls="nav-language-menu"
               @click="toggleLanguageDropdown"
               class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl transition-all duration-300"
               :class="[
@@ -581,7 +612,8 @@ onUnmounted(() => {
             >
               <img
                 :src="currentLanguage.flag"
-                :alt="currentLanguage.name"
+                :alt="''"
+                aria-hidden="true"
                 class="w-5 h-4 object-cover rounded-sm"
               />
               <span>{{ locale.toUpperCase() }}</span>
@@ -602,15 +634,21 @@ onUnmounted(() => {
               leave-to-class="opacity-0 -translate-y-2"
             >
               <div
+                id="nav-language-menu"
                 v-show="isLanguageDropdownOpen"
+                role="menu"
+                :aria-label="t('nav.language')"
                 class="absolute top-full ltr:right-0 rtl:left-0 mt-2 w-40 bg-white dark:bg-gray-900 rounded-xl shadow-xl shadow-black/10 dark:shadow-black/30 border border-gray-100 dark:border-gray-800 overflow-hidden py-1"
               >
                 <NuxtLink
                   v-for="lang in languages"
                   :key="lang.code"
+                  role="menuitem"
                   :to="switchLocalePath(lang.code) || '/'"
                   :hreflang="lang.code"
+                  :lang="lang.code"
                   :rel="locale === lang.code ? undefined : 'alternate'"
+                  :aria-current="locale === lang.code ? 'true' : undefined"
                   class="flex items-center gap-3 w-full px-4 py-2.5 text-sm transition-colors duration-200 no-underline"
                   :class="[
                     locale === lang.code
@@ -621,7 +659,8 @@ onUnmounted(() => {
                 >
                   <img
                     :src="lang.flag"
-                    :alt="lang.name"
+                    :alt="''"
+                    aria-hidden="true"
                     class="w-5 h-4 object-cover rounded-sm"
                   />
                   <span>{{ lang.name }}</span>
@@ -652,6 +691,10 @@ onUnmounted(() => {
 
         <!-- Mobile Menu Button -->
         <button
+          type="button"
+          :aria-label="isMobileMenuOpen ? t('nav.aria.closeMobileMenu') : t('nav.aria.openMobileMenu')"
+          :aria-expanded="isMobileMenuOpen ? 'true' : 'false'"
+          aria-controls="nav-mobile-menu"
           @click="toggleMobileMenu"
           class="lg:hidden p-2.5 rounded-xl transition-all duration-300"
           :class="[
@@ -660,8 +703,8 @@ onUnmounted(() => {
               : 'text-white hover:bg-white/10'
           ]"
         >
-          <font-awesome-icon v-if="!isMobileMenuOpen" icon="fa-solid fa-bars" class="w-6 h-6" />
-          <font-awesome-icon v-else icon="fa-solid fa-xmark" class="w-6 h-6" />
+          <font-awesome-icon v-if="!isMobileMenuOpen" icon="fa-solid fa-bars" class="w-6 h-6" aria-hidden="true" />
+          <font-awesome-icon v-else icon="fa-solid fa-xmark" class="w-6 h-6" aria-hidden="true" />
         </button>
       </div>
     </div>
@@ -676,6 +719,7 @@ onUnmounted(() => {
       leave-to-class="opacity-0 -translate-y-4"
     >
       <div
+        id="nav-mobile-menu"
         v-if="isMobileMenuOpen"
         class="lg:hidden absolute top-full left-0 right-0 bg-white dark:bg-gray-900 shadow-2xl border-t border-gray-100 dark:border-gray-800 max-h-[85vh] overflow-y-auto"
       >
@@ -694,6 +738,9 @@ onUnmounted(() => {
             <!-- Menu Item with Dropdown and children -->
             <div v-else class="rounded-xl overflow-hidden">
               <button
+                type="button"
+                :aria-expanded="isMobileSubmenuExpanded(item.key) ? 'true' : 'false'"
+                :aria-controls="`nav-mobile-submenu-${item.key}`"
                 @click="toggleMobileSubmenu(item.key)"
                 class="flex items-center justify-between w-full px-4 py-3.5 text-gray-700 dark:text-gray-200 font-medium transition-all duration-200"
                 :class="isMobileSubmenuExpanded(item.key) ? 'bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white' : 'hover:bg-gray-50 dark:hover:bg-gray-800'"
@@ -703,6 +750,7 @@ onUnmounted(() => {
                   icon="fa-solid fa-chevron-down"
                   class="w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform duration-300"
                   :class="{ 'rotate-180': isMobileSubmenuExpanded(item.key) }"
+                  aria-hidden="true"
                 />
               </button>
 

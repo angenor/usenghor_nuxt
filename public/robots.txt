@@ -1,2 +1,5 @@
 User-Agent: *
 Disallow: /levees-de-fonds/
+Disallow: /admin/
+
+Sitemap: https://usenghor-francophonie.org/sitemap.xml

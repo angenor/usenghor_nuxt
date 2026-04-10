@@ -103,6 +103,19 @@
     },
     "language": "اللغة",
     "search": "بحث",
-    "backToMainSite": "العودة إلى الموقع الرئيسي"
+    "backToMainSite": "العودة إلى الموقع الرئيسي",
+    "aria": {
+      "primary": "التنقل الرئيسي",
+      "openMenu": "فتح قائمة {name}",
+      "closeMenu": "إغلاق قائمة {name}",
+      "openLanguageMenu": "تغيير اللغة",
+      "openSearch": "فتح البحث",
+      "closeSearch": "إغلاق البحث",
+      "enableDarkMode": "تفعيل الوضع الداكن",
+      "disableDarkMode": "إيقاف الوضع الداكن",
+      "openMobileMenu": "فتح قائمة الجوال",
+      "closeMobileMenu": "إغلاق قائمة الجوال",
+      "currentLanguage": "اللغة الحالية: {name}"
+    }
   }
 }

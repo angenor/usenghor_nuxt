@@ -103,6 +103,19 @@
     },
     "language": "Language",
     "search": "Search",
-    "backToMainSite": "Back to main site"
+    "backToMainSite": "Back to main site",
+    "aria": {
+      "primary": "Main navigation",
+      "openMenu": "Open {name} menu",
+      "closeMenu": "Close {name} menu",
+      "openLanguageMenu": "Change language",
+      "openSearch": "Open search",
+      "closeSearch": "Close search",
+      "enableDarkMode": "Enable dark mode",
+      "disableDarkMode": "Disable dark mode",
+      "openMobileMenu": "Open mobile menu",
+      "closeMobileMenu": "Close mobile menu",
+      "currentLanguage": "Current language: {name}"
+    }
   }
 }
