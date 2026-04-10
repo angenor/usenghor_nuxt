@@ -293,7 +293,9 @@ const toggleSemester = (num: number) => {
       <PageHero
         :title="getLocalizedTitle"
         :subtitle="t(`formations.typeDescriptions.${typeSlug}`)"
-        image="/images/bg/backgroud_senghor2.jpg"
+        :image="program.cover_image_external_id
+          ? `/api/public/media/${program.cover_image_external_id}/download`
+          : '/images/bg/backgroud_senghor2.jpg'"
         :breadcrumb="breadcrumb"
       />
 

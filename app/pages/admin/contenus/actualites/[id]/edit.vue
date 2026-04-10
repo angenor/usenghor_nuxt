@@ -272,7 +272,9 @@ const hasChanges = computed(() => {
     form.video_url !== (originalNews.value.video_url || '') ||
     form.cover_image !== (originalNews.value.cover_image || '') ||
     form.status !== originalNews.value.status ||
-    form.highlight_status !== originalNews.value.highlight_status
+    form.highlight_status !== originalNews.value.highlight_status ||
+    form.published_at !== (originalNews.value.published_at ? originalNews.value.published_at.slice(0, 16) : '') ||
+    form.visible_from !== (originalNews.value.visible_from ? originalNews.value.visible_from.slice(0, 16) : '')
 })
 
 // === METHODS ===
@@ -376,10 +378,12 @@ async function submitForm() {
   error.value = null
 
   try {
-    // Définir automatiquement published_at lors du premier passage en published
-    // Conserver la date existante si déjà publiée, sinon définir maintenant
+    // Si l'admin a saisi une date, on l'utilise telle quelle.
+    // Sinon, on définit automatiquement la date au moment du premier passage
+    // en statut "published" (transition draft/scheduled -> published).
     let publishedAt: string | null = form.published_at || null
-    if (form.status === 'published' && !publishedAt) {
+    const wasNotPublished = originalNews.value?.status !== 'published'
+    if (form.status === 'published' && !publishedAt && wasNotPublished) {
       publishedAt = new Date().toISOString()
     }
 
@@ -927,17 +931,55 @@ async function createTag() {
             </select>
           </div>
 
+          <!-- Date de publication -->
+          <div>
+            <label for="published_at" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Date de publication
+            </label>
+            <div class="flex items-center gap-2">
+              <input
+                id="published_at"
+                v-model="form.published_at"
+                type="datetime-local"
+                class="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+              <button
+                v-if="form.published_at"
+                type="button"
+                class="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+                title="Effacer la date de publication"
+                @click="form.published_at = ''"
+              >
+                <font-awesome-icon icon="fa-solid fa-xmark" class="w-4 h-4" />
+              </button>
+            </div>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Laisser vide pour qu'elle soit définie automatiquement à la première publication.
+            </p>
+          </div>
+
           <!-- Visible à partir de -->
           <div>
             <label for="visible_from" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Visible à partir de
             </label>
-            <input
-              id="visible_from"
-              v-model="form.visible_from"
-              type="datetime-local"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            />
+            <div class="flex items-center gap-2">
+              <input
+                id="visible_from"
+                v-model="form.visible_from"
+                type="datetime-local"
+                class="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+              <button
+                v-if="form.visible_from"
+                type="button"
+                class="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+                title="Effacer la date de visibilité"
+                @click="form.visible_from = ''"
+              >
+                <font-awesome-icon icon="fa-solid fa-xmark" class="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
