@@ -41,6 +41,20 @@ async function handleImageUpload(payload: { blob: Blob, callback: (url: string, 
   }
 }
 
+async function handleFileUpload(payload: { file: File, callback: (url: string, name: string) => void }) {
+  try {
+    const result = await uploadMedia(payload.file, { folder: 'editor' })
+    const url = getMediaUrl(result)
+    if (url) {
+      payload.callback(url, payload.file.name)
+    }
+  }
+  catch (error) {
+    console.error('Erreur upload fichier éditeur:', error)
+    alert('Impossible d\'uploader le fichier')
+  }
+}
+
 const editorRef = ref<{ getMarkdown: () => string, getHTML: () => string } | null>(null)
 const initialSnapshot = ref('')
 const currentMarkdown = ref('')
@@ -141,6 +155,7 @@ onUnmounted(() => {
           @update:model-value="onEditorUpdate"
           @update:html="onHtmlUpdate"
           @image-upload="handleImageUpload"
+          @file-upload="handleFileUpload"
         />
       </div>
     </div>

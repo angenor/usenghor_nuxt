@@ -196,6 +196,20 @@ function getFileExtension(item: MediaItem): string {
   const match = name.match(/\.(\w+)(\?|$)/)
   return match ? match[1].toUpperCase() : ''
 }
+
+// Un document PDF peut être affiché directement dans un iframe
+function isInlineViewableDocument(item: MediaItem): boolean {
+  if (detectType(item) !== 'document') return false
+  if (item.mime_type === 'application/pdf') return true
+  return getFileExtension(item) === 'PDF'
+}
+
+// Construit une URL forçant le téléchargement via ?download=1
+function getDownloadUrl(item: MediaItem): string {
+  const url = item.url
+  const separator = url.includes('?') ? '&' : '?'
+  return `${url}${separator}download=1`
+}
 </script>
 
 <template>
@@ -404,15 +418,49 @@ function getFileExtension(item: MediaItem): string {
                 <audio
                   :key="currentItem.id"
                   controls
+                  autoplay
                   class="w-full"
                   preload="metadata"
                 >
                   <source :src="currentItem.url" :type="currentItem.mime_type || 'audio/mpeg'" />
                   Votre navigateur ne supporte pas la lecture audio.
                 </audio>
+                <a
+                  :href="getDownloadUrl(currentItem)"
+                  :download="getLocalizedTitle(currentItem)"
+                  class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <font-awesome-icon icon="fa-solid fa-download" class="w-4 h-4" />
+                  Télécharger
+                </a>
               </div>
 
-              <!-- Document single view -->
+              <!-- Document PDF: affichage inline via iframe -->
+              <div
+                v-else-if="isInlineViewableDocument(currentItem)"
+                class="w-full h-full flex flex-col gap-3"
+              >
+                <div class="w-full h-[70vh] bg-white rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                  <iframe
+                    :key="currentItem.id"
+                    :src="currentItem.url"
+                    :title="getLocalizedTitle(currentItem)"
+                    class="w-full h-full"
+                  ></iframe>
+                </div>
+                <div class="flex justify-center">
+                  <a
+                    :href="getDownloadUrl(currentItem)"
+                    :download="getLocalizedTitle(currentItem)"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-download" class="w-4 h-4" />
+                    Télécharger
+                  </a>
+                </div>
+              </div>
+
+              <!-- Autres documents: fallback avec téléchargement -->
               <div v-else class="flex flex-col items-center gap-6 py-12">
                 <div class="w-32 h-32 rounded-2xl bg-red-50 dark:bg-red-900/30 flex flex-col items-center justify-center gap-2">
                   <font-awesome-icon icon="fa-solid fa-file-lines" class="w-16 h-16 text-red-400 dark:text-red-500" />
@@ -422,9 +470,8 @@ function getFileExtension(item: MediaItem): string {
                 </div>
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white text-center max-w-md">{{ getLocalizedTitle(currentItem) }}</h3>
                 <a
-                  :href="currentItem.url"
-                  target="_blank"
-                  rel="noopener"
+                  :href="getDownloadUrl(currentItem)"
+                  :download="getLocalizedTitle(currentItem)"
                   class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-blue-600 text-white font-medium hover:bg-brand-blue-700 transition-colors"
                 >
                   <font-awesome-icon icon="fa-solid fa-download" class="w-4 h-4" />

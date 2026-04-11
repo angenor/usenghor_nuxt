@@ -107,6 +107,21 @@ function getFileExtension(item: MediaRead): string {
   return match ? match[1].toUpperCase() : ''
 }
 
+// Un document est affichable inline si c'est un PDF (la plupart des navigateurs
+// prennent en charge l'affichage natif des PDF via <iframe>/<embed>).
+function isInlineViewableDocument(item: MediaRead): boolean {
+  if (item.type !== 'document') return false
+  if (item.mime_type === 'application/pdf') return true
+  return getFileExtension(item) === 'PDF'
+}
+
+// Construit une URL de téléchargement forcé en ajoutant ?download=1
+function getDownloadUrl(item: MediaRead): string {
+  const url = item.url
+  const separator = url.includes('?') ? '&' : '?'
+  return `${url}${separator}download=1`
+}
+
 // Visionneuse
 function openViewer(index: number) {
   viewerIndex.value = index
@@ -166,7 +181,7 @@ watch(activeFilter, () => {
 // Téléchargement
 function downloadMedia(item: MediaRead) {
   const link = document.createElement('a')
-  link.href = item.url
+  link.href = getDownloadUrl(item)
   link.download = item.name
   link.target = '_blank'
   link.rel = 'noopener'
@@ -461,14 +476,36 @@ function downloadMedia(item: MediaRead) {
               <audio
                 :key="currentViewerItem.id"
                 controls
-                class="w-80"
+                autoplay
+                class="w-80 max-w-full"
                 preload="metadata"
               >
                 <source :src="currentViewerItem.url" :type="currentViewerItem.mime_type || 'audio/mpeg'" />
               </audio>
+              <button
+                type="button"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-colors"
+                @click="downloadMedia(currentViewerItem)"
+              >
+                <font-awesome-icon icon="fa-solid fa-download" class="w-4 h-4" />
+                {{ t('mediatheque.album.download') }}
+              </button>
             </div>
 
-            <!-- Document -->
+            <!-- Document PDF: affichage inline via iframe -->
+            <div
+              v-else-if="isInlineViewableDocument(currentViewerItem)"
+              class="w-full max-w-5xl h-[80vh] bg-white rounded-lg overflow-hidden"
+            >
+              <iframe
+                :key="currentViewerItem.id"
+                :src="currentViewerItem.url"
+                :title="currentViewerItem.name"
+                class="w-full h-full"
+              ></iframe>
+            </div>
+
+            <!-- Autres documents: fallback avec bouton de téléchargement -->
             <div v-else class="flex flex-col items-center gap-6">
               <div class="w-32 h-32 rounded-2xl bg-white/10 flex flex-col items-center justify-center gap-2">
                 <font-awesome-icon icon="fa-solid fa-file-lines" class="w-16 h-16 text-red-400" />

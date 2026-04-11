@@ -34,11 +34,46 @@ const emit = defineEmits<{
   (e: 'update:html', value: string): void
   (e: 'ready'): void
   (e: 'image-upload', payload: { blob: Blob, callback: (url: string, alt?: string) => void }): void
+  (e: 'file-upload', payload: { file: File, callback: (url: string, name: string) => void }): void
 }>()
 
 const editorRef = ref<HTMLDivElement>()
+const fileInputRef = ref<HTMLInputElement>()
 const editorInstance = shallowRef<Editor | null>(null)
 const isUpdating = ref(false)
+
+// Extensions acceptées pour l'upload de fichiers (hors images gérées séparément)
+const ACCEPTED_FILE_TYPES = [
+  // Documents
+  '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt', '.csv',
+  // Audio
+  'audio/*',
+].join(',')
+
+function onFileSelected(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
+  const callback = (url: string, name: string) => {
+    if (!editorInstance.value) return
+    // Insertion d'un lien (mode WYSIWYG ou Markdown).
+    // RichTextRenderer detectera l'extension pour styliser ou jouer l'audio.
+    editorInstance.value.exec('addLink', {
+      linkUrl: url,
+      linkText: name || file.name,
+    })
+  }
+
+  emit('file-upload', { file, callback })
+
+  // Reset pour permettre de re-uploader le même fichier
+  input.value = ''
+}
+
+function triggerFileUpload() {
+  fileInputRef.value?.click()
+}
 
 // Modal mode state
 const isModalOpen = ref(false)
@@ -79,6 +114,15 @@ onMounted(async () => {
   await nextTick()
   if (!editorRef.value) return
 
+  // Bouton custom pour upload de fichier (PDF, Word, Excel, audio…)
+  const fileButton = document.createElement('button')
+  fileButton.type = 'button'
+  fileButton.className = 'toastui-editor-toolbar-icons toastui-editor-file-upload-btn'
+  fileButton.setAttribute('aria-label', 'Joindre un fichier')
+  fileButton.style.backgroundImage = 'none'
+  fileButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>'
+  fileButton.addEventListener('click', triggerFileUpload)
+
   const editor = new Editor({
     el: editorRef.value,
     initialValue: props.modelValue || '',
@@ -98,6 +142,11 @@ onMounted(async () => {
       ['hr', 'quote'],
       ['ul', 'ol', 'task'],
       ['table', 'image', 'link'],
+      [{
+        name: 'file',
+        tooltip: 'Joindre un fichier (PDF, Word, Excel, audio…)',
+        el: fileButton,
+      }],
       ['code', 'codeblock'],
       ['scrollSync'],
     ],
@@ -234,7 +283,16 @@ defineExpose({
   </div>
 
   <!-- Mode inline : éditeur direct (comportement original) -->
-  <div v-else ref="editorRef" class="toastui-editor-wrapper" />
+  <div v-else>
+    <div ref="editorRef" class="toastui-editor-wrapper" />
+    <input
+      ref="fileInputRef"
+      type="file"
+      class="hidden"
+      :accept="ACCEPTED_FILE_TYPES"
+      @change="onFileSelected"
+    >
+  </div>
 </template>
 
 <style>
