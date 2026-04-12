@@ -2,7 +2,7 @@
   "mediatheque": {
     "title": "Médiathèque",
     "subtitle": "Explorez nos collections de photos, vidéos, documents et fichiers audio",
-    "searchPlaceholder": "Rechercher un album...",
+    "searchPlaceholder": "Rechercher un album ou un fichier...",
     "filters": {
       "all": "Tous",
       "image": "Images",
@@ -16,11 +16,27 @@
       "previous": "Précédent",
       "next": "Suivant"
     },
+    "tabs": {
+      "all": "Tout",
+      "albums": "Albums",
+      "files": "Fichiers"
+    },
+    "sections": {
+      "albums": "Albums",
+      "files": "Fichiers"
+    },
     "empty": {
       "title": "Aucun album disponible",
       "description": "La médiathèque ne contient pas encore d'albums publiés.",
       "noResults": "Aucun résultat pour votre recherche",
-      "noResultsDescription": "Essayez de modifier vos critères de recherche ou de filtrage."
+      "noResultsDescription": "Essayez de modifier vos critères de recherche ou de filtrage.",
+      "filesTitle": "Aucun fichier disponible",
+      "filesDescription": "Aucun fichier n'a encore été publié dans la médiathèque."
+    },
+    "files": {
+      "download": "Télécharger",
+      "open": "Ouvrir",
+      "count": "fichier | fichiers"
     },
     "album": {
       "files": "fichier | fichiers",
@@ -28,6 +44,30 @@
       "backToMediatheque": "Retour à la médiathèque",
       "notFound": "Album non trouvé",
       "notFoundDescription": "L'album que vous recherchez n'existe pas ou n'est plus disponible."
+    }
+  },
+  "admin": {
+    "upload": {
+      "title": "Ajouter des fichiers",
+      "dropzone": "Glissez-déposez vos fichiers ici",
+      "browse": "Parcourir",
+      "acceptedTypes": "Images, vidéos, audio ou PDF — 50 Mo max par fichier",
+      "status": {
+        "queued": "En attente",
+        "uploading": "Téléversement...",
+        "done": "Terminé",
+        "error": "Échec",
+        "rejected": "Rejeté",
+        "cancelled": "Annulé"
+      },
+      "close": "Fermer",
+      "retry": "Réessayer",
+      "remove": "Retirer",
+      "closeConfirm": "Des téléversements sont en cours. Voulez-vous vraiment fermer et les annuler ?",
+      "summary": "{done}/{total} fichier(s) téléversé(s)",
+      "errorTooLarge": "Le fichier dépasse la taille maximale autorisée",
+      "errorBadType": "Type de fichier non autorisé",
+      "errorNetwork": "Erreur réseau — vérifiez votre connexion et réessayez"
     }
   }
 }

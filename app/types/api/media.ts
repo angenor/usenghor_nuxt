@@ -156,3 +156,31 @@ export interface PublicAlbumListResponse {
   limit: number
   pages: number
 }
+
+// ----------------------------------------------------------------------------
+// Public Direct Media (fichiers hors album)
+// ----------------------------------------------------------------------------
+
+export interface PublicDirectMediaItem {
+  id: string
+  name: string
+  description: string | null
+  type: MediaType
+  url: string
+  mime_type: string | null
+  size_bytes: number | null
+  width: number | null
+  height: number | null
+  duration_seconds: number | null
+  alt_text: string | null
+  credits: string | null
+  created_at: string
+}
+
+export interface PublicDirectMediaListResponse {
+  items: PublicDirectMediaItem[]
+  total: number
+  page: number
+  limit: number
+  pages: number
+}

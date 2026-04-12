@@ -2,7 +2,7 @@
   "mediatheque": {
     "title": "Media Library",
     "subtitle": "Explore our collections of photos, videos, documents and audio files",
-    "searchPlaceholder": "Search for an album...",
+    "searchPlaceholder": "Search for an album or a file...",
     "filters": {
       "all": "All",
       "image": "Images",
@@ -16,11 +16,27 @@
       "previous": "Previous",
       "next": "Next"
     },
+    "tabs": {
+      "all": "All",
+      "albums": "Albums",
+      "files": "Files"
+    },
+    "sections": {
+      "albums": "Albums",
+      "files": "Files"
+    },
     "empty": {
       "title": "No albums available",
       "description": "The media library does not contain any published albums yet.",
       "noResults": "No results for your search",
-      "noResultsDescription": "Try modifying your search or filter criteria."
+      "noResultsDescription": "Try modifying your search or filter criteria.",
+      "filesTitle": "No files available",
+      "filesDescription": "No files have been published in the media library yet."
+    },
+    "files": {
+      "download": "Download",
+      "open": "Open",
+      "count": "file | files"
     },
     "album": {
       "files": "file | files",
@@ -28,6 +44,30 @@
       "backToMediatheque": "Back to media library",
       "notFound": "Album not found",
       "notFoundDescription": "The album you are looking for does not exist or is no longer available."
+    }
+  },
+  "admin": {
+    "upload": {
+      "title": "Add files",
+      "dropzone": "Drag and drop your files here",
+      "browse": "Browse",
+      "acceptedTypes": "Images, videos, audio or PDF — 50 MB max per file",
+      "status": {
+        "queued": "Queued",
+        "uploading": "Uploading...",
+        "done": "Done",
+        "error": "Failed",
+        "rejected": "Rejected",
+        "cancelled": "Cancelled"
+      },
+      "close": "Close",
+      "retry": "Retry",
+      "remove": "Remove",
+      "closeConfirm": "Uploads are still in progress. Do you really want to close and cancel them?",
+      "summary": "{done}/{total} file(s) uploaded",
+      "errorTooLarge": "File exceeds the maximum allowed size",
+      "errorBadType": "File type not allowed",
+      "errorNetwork": "Network error — check your connection and try again"
     }
   }
 }

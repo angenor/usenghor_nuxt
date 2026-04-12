@@ -323,6 +323,13 @@ onMounted(() => {
   loadAlbums()
 })
 
+// Feature 016-mediatheque-direct-upload : rechargement debounced quand un fichier
+// est téléversé via la modale. Évite N requêtes consécutives lors d'un burst.
+const onMediaUploaded = useDebounceFn(() => {
+  loadMedia()
+  loadStats()
+}, 200)
+
 // === METHODS ===
 // Sélection
 const toggleSelectAll = () => {
@@ -1805,69 +1812,11 @@ const handleLinkToEntity = async (entity: EntityOption) => {
       </div>
     </Teleport>
 
-    <!-- Modal Upload -->
-    <Teleport to="body">
-      <div
-        v-if="showUploadModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-        @click.self="showUploadModal = false"
-      >
-        <div class="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
-          <div class="mb-6 flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-              Ajouter des fichiers
-            </h3>
-            <button
-              class="rounded p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700"
-              @click="showUploadModal = false"
-            >
-              <font-awesome-icon icon="fa-solid fa-xmark" class="h-5 w-5" />
-            </button>
-          </div>
-
-          <div class="mb-6 rounded-lg border-2 border-dashed border-gray-300 p-8 text-center transition-colors hover:border-blue-400 dark:border-gray-600">
-            <font-awesome-icon icon="fa-solid fa-cloud-arrow-up" class="mb-4 h-12 w-12 text-gray-400" />
-            <p class="mb-2 text-gray-600 dark:text-gray-300">
-              Glissez-déposez vos fichiers ici
-            </p>
-            <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
-              ou
-            </p>
-            <label class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
-              Parcourir
-              <input type="file" multiple class="hidden" />
-            </label>
-            <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">
-              Images (JPG, PNG, GIF, WebP, SVG) - Vidéos (MP4, WebM, MOV) - Documents (PDF, DOC, XLS, PPT) - Audio (MP3, WAV, OGG)
-            </p>
-          </div>
-
-          <div class="mb-6">
-            <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Ou ajouter une URL externe</p>
-            <div class="flex gap-2">
-              <input
-                type="url"
-                placeholder="https://..."
-                class="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              />
-              <button class="rounded-lg bg-gray-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700">
-                Ajouter
-              </button>
-            </div>
-          </div>
-
-          <div class="flex justify-end gap-3">
-            <button
-              type="button"
-              class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-              @click="showUploadModal = false"
-            >
-              Fermer
-            </button>
-          </div>
-        </div>
-      </div>
-    </Teleport>
+    <!-- Modal Upload (feature 016-mediatheque-direct-upload) -->
+    <MediathequeMediaDirectUploadModal
+      v-model="showUploadModal"
+      @uploaded="onMediaUploaded"
+    />
 
     <!-- Modal Ajouter à un album -->
     <Teleport to="body">

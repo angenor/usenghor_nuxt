@@ -46,6 +46,7 @@ export function useMediaApi() {
       credits?: string
       description?: string
       base_filename?: string
+      signal?: AbortSignal
     } = {},
   ): Promise<MediaUploadResponse> {
     const formData = new FormData()
@@ -60,6 +61,7 @@ export function useMediaApi() {
     return apiFetch<MediaUploadResponse>('/api/admin/media/upload', {
       method: 'POST',
       body: formData,
+      signal: options.signal,
     })
   }
 
