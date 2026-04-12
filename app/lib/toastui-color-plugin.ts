@@ -58,8 +58,23 @@ function parseStyleString(style: string): Record<string, string> {
   return result
 }
 
-function buildStyleString(styles: Record<string, string>): string {
-  return Object.entries(styles)
+function buildStyleString(styles: Record<string, string>, highlightRadius?: string): string {
+  const result = { ...styles }
+  if (result['background-color']) {
+    result['padding'] = '2px 4px'
+    const radius = highlightRadius || '3px'
+    if (radius !== '0') {
+      result['border-radius'] = radius
+    }
+    else {
+      delete result['border-radius']
+    }
+  }
+  else {
+    delete result['padding']
+    delete result['border-radius']
+  }
+  return Object.entries(result)
     .map(([k, v]) => `${k}: ${v}`)
     .join('; ')
 }
@@ -67,7 +82,8 @@ function buildStyleString(styles: Record<string, string>): string {
 // --- Commandes WYSIWYG ---
 // Plugin commands via addCommand HOC: (payload, state, dispatch, view) => void
 
-function createWysiwygCommand(styleProperty: 'color' | 'background-color') {
+function createWysiwygCommand(styleProperty: 'color' | 'background-color', getHighlightRadius?: () => string) {
+  const radius = getHighlightRadius
   return (payload: { selectedColor?: string }, state: PMState, dispatch: PMDispatch): boolean => {
     const { selection, schema, doc } = state
     if (selection.empty) return false
@@ -79,10 +95,13 @@ function createWysiwygCommand(styleProperty: 'color' | 'background-color') {
 
     const tr = state.tr
     const otherProp = styleProperty === 'color' ? 'background-color' : 'color'
+    const r = radius?.()
 
     if (!selectedColor) {
-      // Suppression sélective
-      let handled = false
+      // Suppression sélective : retirer uniquement la propriété ciblée
+      let hasOtherProp = false
+      let otherPropValue = ''
+
       doc.nodesBetween(from, to, (node: PMNode) => {
         if (!node.marks) return
         for (const mark of node.marks) {
@@ -91,19 +110,24 @@ function createWysiwygCommand(styleProperty: 'color' | 'background-color') {
             if (style) {
               const styles = parseStyleString(style)
               if (styles[otherProp]) {
-                const kept: Record<string, string> = {}
-                kept[otherProp] = styles[otherProp]
-                tr.removeMark(from, to, mark)
-                tr.addMark(from, to, spanMarkType.create({ htmlAttrs: { style: buildStyleString(kept) } }))
-                handled = true
+                hasOtherProp = true
+                otherPropValue = styles[otherProp]
               }
             }
           }
         }
       })
-      if (!handled) {
-        tr.removeMark(from, to, spanMarkType.create({}))
+
+      // Retirer tous les span marks (par type, pas par instance)
+      tr.removeMark(from, to, spanMarkType as unknown as PMMark)
+
+      // Si l'autre propriété existe, la réappliquer
+      if (hasOtherProp) {
+        const kept: Record<string, string> = {}
+        kept[otherProp] = otherPropValue
+        tr.addMark(from, to, spanMarkType.create({ htmlAttrs: { style: buildStyleString(kept, r) } }))
       }
+
       dispatch(tr)
       return true
     }
@@ -123,13 +147,13 @@ function createWysiwygCommand(styleProperty: 'color' | 'background-color') {
       }
     })
 
-    tr.removeMark(from, to, spanMarkType.create({}))
+    tr.removeMark(from, to, spanMarkType as unknown as PMMark)
 
     const newStyles: Record<string, string> = {}
     newStyles[styleProperty] = selectedColor
     if (existingOtherStyle) newStyles[otherProp] = existingOtherStyle
 
-    tr.addMark(from, to, spanMarkType.create({ htmlAttrs: { style: buildStyleString(newStyles) } }))
+    tr.addMark(from, to, spanMarkType.create({ htmlAttrs: { style: buildStyleString(newStyles, r) } }))
     dispatch(tr)
     return true
   }
@@ -291,7 +315,7 @@ function createSplitButtonWithPopup(
 
 export default function colorPlugin(context: PluginContext): Record<string, unknown> {
   const { eventEmitter } = context
-  const { getLastColor, setLastColor, createColorPickerPopup } = useColorPicker()
+  const { getLastColor, setLastColor, getHighlightRadius, createColorPickerPopup } = useColorPicker()
 
   const textColorButton = createSplitButtonWithPopup(
     'text-color', 'textColor',
@@ -313,8 +337,8 @@ export default function colorPlugin(context: PluginContext): Record<string, unkn
       highlight: createMarkdownCommand('background-color'),
     },
     wysiwygCommands: {
-      textColor: createWysiwygCommand('color'),
-      highlight: createWysiwygCommand('background-color'),
+      textColor: createWysiwygCommand('color', getHighlightRadius),
+      highlight: createWysiwygCommand('background-color', getHighlightRadius),
     },
     toolbarItems: [
       {

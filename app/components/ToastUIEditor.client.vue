@@ -633,6 +633,52 @@ defineExpose({
   cursor: not-allowed;
 }
 
+/* Sélecteur de border-radius */
+.color-picker-popup .radius-section {
+  margin-top: 4px;
+}
+
+.color-picker-popup .radius-grid {
+  display: flex;
+  gap: 4px;
+}
+
+.color-picker-popup .radius-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.color-picker-popup .radius-btn:hover {
+  background: #f5f5f5;
+  border-color: #aaa;
+}
+
+.color-picker-popup .radius-btn.active {
+  border-color: #049ddf;
+  background: #e8f4fd;
+}
+
+.color-picker-popup .radius-preview {
+  display: block;
+  width: 28px;
+  height: 14px;
+  background: #ffd966;
+}
+
+.color-picker-popup .radius-label {
+  font-size: 9px;
+  color: #666;
+  line-height: 1;
+}
+
 /* Bouton supprimer la couleur */
 .color-picker-popup .color-remove {
   display: block;
@@ -719,6 +765,24 @@ defineExpose({
 
 .dark .color-picker-popup .color-apply-custom:hover:not(:disabled) {
   background: #4b5563;
+}
+
+.dark .color-picker-popup .radius-btn {
+  border-color: #4b5563;
+}
+
+.dark .color-picker-popup .radius-btn:hover {
+  background: #374151;
+  border-color: #6b7280;
+}
+
+.dark .color-picker-popup .radius-btn.active {
+  border-color: #049ddf;
+  background: #0c3547;
+}
+
+.dark .color-picker-popup .radius-label {
+  color: #9ca3af;
 }
 
 .dark .color-picker-popup .color-remove {

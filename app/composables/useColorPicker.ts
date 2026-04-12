@@ -9,6 +9,18 @@ export interface ColorPreset {
 
 export type ColorPickerMode = 'text-color' | 'highlight'
 
+export interface RadiusLevel {
+  label: string
+  value: string
+}
+
+const RADIUS_LEVELS: RadiusLevel[] = [
+  { label: 'Aucun', value: '0' },
+  { label: 'Léger', value: '3px' },
+  { label: 'Moyen', value: '8px' },
+  { label: 'Arrondi', value: '14px' },
+]
+
 // Catalogue par défaut (FR-003)
 const DEFAULT_VIVID_COLORS: ColorPreset[] = [
   { hex: '#fdbc00', category: 'vivid', label: 'Jaune vif' },
@@ -39,6 +51,7 @@ const HEX_COLOR_REGEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/
 // État persistant par mode (retient la dernière couleur utilisée par bouton)
 const lastTextColor = ref<string | null>(null)
 const lastHighlightColor = ref<string | null>(null)
+const highlightRadius = ref<string>('3px')
 
 export function useColorPicker(options?: {
   vividColors?: ColorPreset[]
@@ -129,11 +142,58 @@ export function useColorPicker(options?: {
     const customSection = createCustomColorSection(eventEmitter, commandName, mode)
     container.appendChild(customSection)
 
+    // Sélecteur de border-radius (seulement en mode surlignage)
+    if (mode === 'highlight') {
+      const radiusSection = document.createElement('div')
+      radiusSection.className = 'color-section radius-section'
+      const radiusLabel = document.createElement('label')
+      radiusLabel.textContent = 'Arrondi'
+      radiusSection.appendChild(radiusLabel)
+
+      const radiusGrid = document.createElement('div')
+      radiusGrid.className = 'radius-grid'
+
+      for (const level of RADIUS_LEVELS) {
+        const btn = document.createElement('button')
+        btn.type = 'button'
+        btn.className = 'radius-btn'
+        if (highlightRadius.value === level.value) {
+          btn.classList.add('active')
+        }
+        btn.title = level.label
+
+        // Aperçu visuel du radius
+        const preview = document.createElement('span')
+        preview.className = 'radius-preview'
+        preview.style.borderRadius = level.value
+        btn.appendChild(preview)
+
+        const labelSpan = document.createElement('span')
+        labelSpan.className = 'radius-label'
+        labelSpan.textContent = level.label
+        btn.appendChild(labelSpan)
+
+        btn.addEventListener('mousedown', (e) => { e.preventDefault() })
+        btn.addEventListener('click', () => {
+          highlightRadius.value = level.value
+          // Mettre à jour l'état actif
+          radiusGrid.querySelectorAll('.radius-btn').forEach(b => b.classList.remove('active'))
+          btn.classList.add('active')
+        })
+
+        radiusGrid.appendChild(btn)
+      }
+
+      radiusSection.appendChild(radiusGrid)
+      container.appendChild(radiusSection)
+    }
+
     // Bouton supprimer la couleur
     const removeBtn = document.createElement('button')
     removeBtn.className = 'color-remove'
     removeBtn.type = 'button'
     removeBtn.textContent = 'Supprimer la couleur'
+    removeBtn.addEventListener('mousedown', (e) => { e.preventDefault() })
     removeBtn.addEventListener('click', () => {
       setLastColor(mode, null)
       eventEmitter.emit('command', commandName, { selectedColor: '' })
@@ -245,6 +305,7 @@ export function useColorPicker(options?: {
     normalizeHexColor,
     getLastColor,
     setLastColor,
+    getHighlightRadius: () => highlightRadius.value,
     createColorPickerPopup,
   }
 }
