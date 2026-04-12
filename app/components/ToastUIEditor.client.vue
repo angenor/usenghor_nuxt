@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Editor from '@toast-ui/editor'
 import tableMergedCell from '@toast-ui/editor-plugin-table-merged-cell'
+import colorPlugin from '~/lib/toastui-color-plugin'
 import '@toast-ui/editor/dist/toastui-editor.css'
 import '@toast-ui/editor/dist/i18n/fr-fr'
 import '@toast-ui/editor-plugin-table-merged-cell/dist/toastui-editor-plugin-table-merged-cell.css'
@@ -131,7 +132,7 @@ onMounted(async () => {
     height: props.height,
     language: props.language,
     placeholder: props.placeholder,
-    plugins: [tableMergedCell],
+    plugins: [tableMergedCell, colorPlugin],
     hooks: {
       addImageBlobHook: (blob: Blob | File, callback: (url: string, alt?: string) => void) => {
         emit('image-upload', { blob, callback })
@@ -424,5 +425,319 @@ defineExpose({
 .toastui-editor-wrapper[dir="rtl"] .CodeMirror-lines {
   direction: rtl;
   text-align: right;
+}
+
+/* ===== Color Picker Plugin Styles ===== */
+
+/* Bouton split (couleur de texte / surlignage) */
+.color-split-btn {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  border-radius: 3px;
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.color-split-btn .color-apply-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 2px 4px 0;
+  color: #333;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.color-split-btn .color-apply-btn:hover {
+  background-color: #e8eaed;
+}
+
+.color-split-btn .color-indicator {
+  display: block;
+  width: 16px;
+  height: 3px;
+  margin-top: 1px;
+  border-radius: 1px;
+}
+
+.color-split-btn .color-dropdown-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  font-size: 10px;
+  color: #555;
+}
+
+.color-split-btn .color-dropdown-btn:hover {
+  background-color: #e8eaed;
+}
+
+/* Icônes dans les boutons split */
+.color-icon-text {
+  font-family: serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.color-icon-highlight {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.color-icon-highlight svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Popup color picker — positionné en fixed sur le body */
+.color-popup-container {
+  position: fixed;
+  z-index: 10000;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 220px;
+}
+
+.color-picker-popup {
+  padding: 8px;
+}
+
+.color-picker-popup .color-section {
+  margin-bottom: 6px;
+}
+
+.color-picker-popup .color-section label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.color-picker-popup .color-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.color-picker-popup .color-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: border-color 0.15s, transform 0.15s;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.color-picker-popup .color-swatch:hover {
+  border-color: #333;
+  transform: scale(1.15);
+}
+
+.color-picker-popup .color-swatch:focus {
+  outline: 2px solid #049ddf;
+  outline-offset: 1px;
+}
+
+.color-picker-popup hr {
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 8px 0;
+}
+
+/* Section couleur personnalisée */
+.color-picker-popup .color-custom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.color-picker-popup .color-custom input[type="color"] {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 2px;
+  cursor: pointer;
+  background: transparent;
+}
+
+.color-picker-popup .color-custom input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.color-picker-popup .color-custom input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 2px;
+}
+
+.color-picker-popup .color-hex-input {
+  width: 80px;
+  height: 28px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0 6px;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.color-picker-popup .color-hex-input.error {
+  border-color: #e53e3e;
+}
+
+.color-picker-popup .color-error {
+  font-size: 10px;
+  color: #e53e3e;
+}
+
+.color-picker-popup .color-apply-custom {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #f5f5f5;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.color-picker-popup .color-apply-custom:hover:not(:disabled) {
+  background: #e8eaed;
+}
+
+.color-picker-popup .color-apply-custom:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Bouton supprimer la couleur */
+.color-picker-popup .color-remove {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+}
+
+.color-picker-popup .color-remove:hover {
+  background: #f5f5f5;
+  color: #e53e3e;
+  border-color: #e53e3e;
+}
+
+/* ===== Dark mode — Color Picker ===== */
+
+.dark .color-popup-container {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+.dark .color-split-btn .color-apply-btn {
+  color: #d1d5db;
+}
+
+.dark .color-split-btn .color-apply-btn:hover {
+  background-color: #374151;
+}
+
+.dark .color-split-btn .color-dropdown-btn {
+  color: #9ca3af;
+}
+
+.dark .color-split-btn .color-dropdown-btn:hover {
+  background-color: #374151;
+}
+
+.dark .color-picker-popup .color-section label {
+  color: #9ca3af;
+}
+
+.dark .color-picker-popup .color-swatch {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.dark .color-picker-popup .color-swatch:hover {
+  border-color: #e5e7eb;
+}
+
+.dark .color-picker-popup hr {
+  border-top-color: #374151;
+}
+
+.dark .color-picker-popup .color-custom input[type="color"] {
+  border-color: #4b5563;
+}
+
+.dark .color-picker-popup .color-hex-input {
+  background-color: #111827;
+  color: #e5e7eb;
+  border-color: #4b5563;
+}
+
+.dark .color-picker-popup .color-hex-input.error {
+  border-color: #f87171;
+}
+
+.dark .color-picker-popup .color-error {
+  color: #f87171;
+}
+
+.dark .color-picker-popup .color-apply-custom {
+  background: #374151;
+  border-color: #4b5563;
+  color: #e5e7eb;
+}
+
+.dark .color-picker-popup .color-apply-custom:hover:not(:disabled) {
+  background: #4b5563;
+}
+
+.dark .color-picker-popup .color-remove {
+  border-color: #4b5563;
+  color: #9ca3af;
+}
+
+.dark .color-picker-popup .color-remove:hover {
+  background: #374151;
+  color: #f87171;
+  border-color: #f87171;
+}
+
+/* ===== RTL — Color Picker ===== */
+.toastui-editor-wrapper[dir="rtl"] .color-picker-popup .color-grid {
+  direction: rtl;
+}
+
+.toastui-editor-wrapper[dir="rtl"] .color-picker-popup .color-custom {
+  direction: rtl;
 }
 </style>
