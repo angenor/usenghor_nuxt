@@ -186,17 +186,18 @@ onUnmounted(() => {
             class="absolute inset-0"
           >
             <!-- Seul le slide courant et le suivant chargent leur image -->
-            <NuxtImg
+            <!-- <img> natif (et non <NuxtImg>) car l'URL pointe vers l'endpoint backend
+                 /api/public/media/{id}/download : IPX essaierait de la résoudre comme un
+                 asset statique dans public/ et échouerait. -->
+            <img
               v-if="index === currentSlide || index === nextSlideIndex"
               :src="item.image"
               :alt="slideAlt(item.editorialTitleKey)"
               class="w-full h-full object-cover scale-105 animate-slow-zoom"
               :fetchpriority="index === 0 ? 'high' : 'auto'"
               :loading="index === 0 ? 'eager' : 'lazy'"
-              format="webp"
-              sizes="100vw md:100vw lg:100vw"
-              densities="x1 x2"
-            />
+              decoding="async"
+            >
           </div>
         </TransitionGroup>
       </template>
