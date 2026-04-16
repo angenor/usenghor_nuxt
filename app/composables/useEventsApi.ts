@@ -196,6 +196,14 @@ export function useEventsApi() {
   }
 
   /**
+   * Associe un unique album à un événement (wrapper autour de addAlbumsToEvent).
+   * Utile pour la page Médiathèque qui associe les albums un par un.
+   */
+  async function addEventAlbum(eventId: string, albumId: string): Promise<ContentAlbumEntry[]> {
+    return addAlbumsToEvent(eventId, [albumId])
+  }
+
+  /**
    * Dissocie un album d'un événement.
    */
   async function removeAlbumFromEvent(eventId: string, albumId: string): Promise<MessageResponse> {
@@ -287,6 +295,7 @@ export function useEventsApi() {
     // Media Library (albums)
     getEventAlbums,
     addAlbumsToEvent,
+    addEventAlbum,
     removeAlbumFromEvent,
     reorderEventAlbums,
 
