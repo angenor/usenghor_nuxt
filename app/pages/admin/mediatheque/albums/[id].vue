@@ -72,6 +72,24 @@ const showEditInfoModal = ref(false)
 const showUploadModal = ref(false)
 const selectedMediaToRemove = ref<MediaRead | null>(null)
 
+// Prévisualisation
+const previewIndex = ref<number | null>(null)
+const previewMedia = computed<MediaRead | null>(() =>
+  previewIndex.value !== null ? albumMedia.value[previewIndex.value] ?? null : null
+)
+
+const openPreview = (index: number) => {
+  previewIndex.value = index
+}
+
+const closePreview = () => {
+  previewIndex.value = null
+}
+
+const navigatePreview = (index: number) => {
+  previewIndex.value = index
+}
+
 // Upload
 const uploadFiles = ref<File[]>([])
 const isUploading = ref(false)
@@ -588,13 +606,18 @@ const handleUploadAndAdd = async () => {
               {{ index + 1 }}
             </div>
 
-            <!-- Miniature -->
-            <div class="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700">
+            <!-- Miniature (cliquable → prévisualisation) -->
+            <button
+              type="button"
+              class="group relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+              :title="`Prévisualiser « ${media.name} »`"
+              @click="openPreview(index)"
+            >
               <img
                 v-if="media.type === 'image'"
                 :src="getMediaUrl(media) || ''"
                 :alt="media.alt_text || media.name"
-                class="h-full w-full object-cover"
+                class="h-full w-full object-cover transition-transform group-hover:scale-105"
               />
               <div
                 v-else
@@ -602,7 +625,15 @@ const handleUploadAndAdd = async () => {
               >
                 <font-awesome-icon
                   :icon="`fa-solid ${mediaTypeIcons[media.type]}`"
-                  class="h-6 w-6 text-gray-400"
+                  class="h-6 w-6 text-gray-400 transition-colors group-hover:text-gray-600 dark:group-hover:text-gray-300"
+                />
+              </div>
+
+              <!-- Overlay play/preview au survol -->
+              <div class="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/40">
+                <font-awesome-icon
+                  :icon="media.type === 'video' || media.type === 'audio' ? 'fa-solid fa-play' : media.type === 'document' ? 'fa-solid fa-file-lines' : 'fa-solid fa-expand'"
+                  class="h-5 w-5 text-white opacity-0 transition-opacity group-hover:opacity-100"
                 />
               </div>
 
@@ -613,11 +644,18 @@ const handleUploadAndAdd = async () => {
               >
                 Couverture
               </span>
-            </div>
+            </button>
 
-            <!-- Infos -->
+            <!-- Infos (nom cliquable → prévisualisation) -->
             <div class="min-w-0 flex-1">
-              <h3 class="truncate font-medium text-gray-900 dark:text-white">{{ media.name }}</h3>
+              <button
+                type="button"
+                class="block max-w-full truncate text-left font-medium text-gray-900 transition-colors hover:text-blue-600 focus:outline-none focus:text-blue-600 dark:text-white dark:hover:text-blue-400"
+                :title="`Prévisualiser « ${media.name} »`"
+                @click="openPreview(index)"
+              >
+                {{ media.name }}
+              </button>
               <div class="flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                 <span :class="['rounded-full px-2 py-0.5 text-xs font-medium', mediaTypeColors[media.type]]">
                   {{ mediaTypeLabels[media.type] }}
@@ -665,6 +703,15 @@ const handleUploadAndAdd = async () => {
                   <font-awesome-icon icon="fa-solid fa-angles-down" class="h-3 w-3" />
                 </button>
               </div>
+
+              <!-- Prévisualiser -->
+              <button
+                class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
+                title="Prévisualiser"
+                @click="openPreview(index)"
+              >
+                <font-awesome-icon icon="fa-solid fa-eye" class="h-4 w-4" />
+              </button>
 
               <!-- Définir comme couverture -->
               <button
@@ -1129,5 +1176,14 @@ const handleUploadAndAdd = async () => {
         </div>
       </div>
     </Teleport>
+
+    <!-- Modal prévisualisation du média -->
+    <MediaFilePreviewModal
+      :media="previewMedia"
+      :items="albumMedia"
+      :current-index="previewIndex ?? 0"
+      @close="closePreview"
+      @navigate="navigatePreview"
+    />
   </div>
 </template>
