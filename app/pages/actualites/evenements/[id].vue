@@ -268,8 +268,41 @@ const registrationCampaignLink = computed(() => {
       </div>
     </section>
 
-    <!-- Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Onglets (Détails / Médiathèque) sticky, au-dessus du contenu -->
+    <div v-if="hasMediaLibrary" class="sticky top-20 z-40 border-b border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="-mb-px flex overflow-x-auto scrollbar-hide">
+          <button
+            class="flex flex-shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-4 py-4 text-sm font-medium transition-colors"
+            :class="activeTab === 'details'
+              ? 'border-brand-blue-500 text-brand-blue-600 dark:text-brand-blue-400'
+              : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+            @click="activeTab = 'details'"
+          >
+            <font-awesome-icon icon="fa-solid fa-file-lines" class="h-4 w-4" />
+            {{ t('actualites.detail.event.tabs.details') }}
+          </button>
+          <button
+            class="flex flex-shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-4 py-4 text-sm font-medium transition-colors"
+            :class="activeTab === 'mediatheque'
+              ? 'border-brand-blue-500 text-brand-blue-600 dark:text-brand-blue-400'
+              : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+            @click="activeTab = 'mediatheque'"
+          >
+            <font-awesome-icon :icon="['fas', 'photo-film']" class="h-4 w-4" />
+            {{ t('actualites.detail.event.tabs.mediatheque') }}
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Tab: Médiathèque (pleine largeur) -->
+    <div v-if="activeTab === 'mediatheque' && hasMediaLibrary" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <MediaLibraryTab :albums="eventAlbums" />
+    </div>
+
+    <!-- Content (Détails) -->
+    <div v-show="activeTab === 'details'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div class="flex flex-col lg:flex-row gap-12">
         <!-- Visioconférence mobile (visible uniquement sur mobile, avant le contenu) -->
         <div class="lg:hidden space-y-4">
@@ -378,39 +411,6 @@ const registrationCampaignLink = computed(() => {
             </div>
           </div>
 
-          <!-- Onglets (Détails / Médiathèque) -->
-          <div v-if="hasMediaLibrary" class="mb-8 border-b border-gray-200 dark:border-gray-700">
-            <nav class="-mb-px flex gap-6">
-              <button
-                class="whitespace-nowrap border-b-2 pb-3 text-sm font-medium transition-colors"
-                :class="activeTab === 'details'
-                  ? 'border-brand-blue-500 text-brand-blue-600 dark:text-brand-blue-400'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
-                @click="activeTab = 'details'"
-              >
-                {{ t('actualites.detail.event.tabs.details') }}
-              </button>
-              <button
-                class="whitespace-nowrap border-b-2 pb-3 text-sm font-medium transition-colors"
-                :class="activeTab === 'mediatheque'
-                  ? 'border-brand-blue-500 text-brand-blue-600 dark:text-brand-blue-400'
-                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
-                @click="activeTab = 'mediatheque'"
-              >
-                <font-awesome-icon :icon="['fas', 'images']" class="mr-1.5 h-4 w-4" />
-                {{ t('actualites.detail.event.tabs.mediatheque') }}
-              </button>
-            </nav>
-          </div>
-
-          <!-- Tab: Médiathèque -->
-          <div v-if="activeTab === 'mediatheque' && hasMediaLibrary" class="mb-8">
-            <MediaLibraryTab :albums="eventAlbums" />
-          </div>
-
-          <!-- Tab: Détails (contenu existant) -->
-          <div v-show="activeTab === 'details'">
-
           <!-- Description -->
           <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Description</h2>
@@ -512,8 +512,6 @@ const registrationCampaignLink = computed(() => {
               </article>
             </div>
           </section>
-
-          </div><!-- fin v-show="activeTab === 'details'" -->
         </article>
 
         <!-- Sidebar (inscription/visio masqués sur mobile car affichés au-dessus) -->
@@ -601,3 +599,14 @@ const registrationCampaignLink = computed(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+</style>
