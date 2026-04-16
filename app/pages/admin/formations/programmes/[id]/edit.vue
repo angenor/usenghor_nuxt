@@ -1134,7 +1134,7 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
 
           <div>
             <label for="teaching_methods" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Méthodologies pédagogiques
+              Approche pédagogique
             </label>
             <textarea
               id="teaching_methods"
