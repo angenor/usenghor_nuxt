@@ -51,6 +51,7 @@ export interface MediaUpdatePayload {
   description?: string | null
   alt_text?: string | null
   credits?: string | null
+  thumbnail_url?: string | null
 }
 
 // ============================================================================
@@ -89,6 +90,7 @@ export interface AlbumRead {
   id: string
   title: string
   description: string | null
+  slug: string
   status: AlbumStatus
   created_at: string
   updated_at: string
@@ -132,6 +134,7 @@ export interface PublicAlbumWithMedia {
 export interface PublicCoverMedia {
   id: string
   url: string
+  thumbnail_url: string | null
   type: MediaType
   name: string
 }

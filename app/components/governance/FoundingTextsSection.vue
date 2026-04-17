@@ -19,12 +19,15 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const emit = defineEmits<{ preview: [doc: FoundingDocument] }>()
 
 const { t } = useI18n()
 const { elementRef } = useScrollAnimation({ animation: 'fadeInUp', threshold: 0.2 })
 
 const sectionTitle = computed(() => props.title || t('governance.foundingTexts.title'))
 const sectionDescription = computed(() => props.description || t('governance.foundingTexts.description'))
+
+const hasDocuments = computed(() => Array.isArray(props.documents) && props.documents.length > 0)
 
 const formatFileSize = (bytes?: number) => {
   if (!bytes) return ''
@@ -67,7 +70,16 @@ const formatFileSize = (bytes?: number) => {
 
         <!-- Colonne droite : Flip cards documents -->
         <div class="px-4 sm:px-6 lg:px-8 py-8 border-l-2 border-y rounded-l-3xl">
-          <div class="flex flex-wrap justify-center lg:justify-start gap-6">
+          <!-- État vide discret : on garde le bandeau (badge/titre/description) du parent
+               et on remplace simplement la grille par un message court (FR-015, Q2). -->
+          <div
+            v-if="!hasDocuments"
+            class="text-center text-gray-500 dark:text-gray-400 italic py-8"
+          >
+            {{ t('governance.foundingTexts.emptyState') }}
+          </div>
+
+          <div v-else class="flex flex-wrap justify-center lg:justify-start gap-6">
             <div
               v-for="doc in props.documents"
               :key="doc.id"
@@ -126,15 +138,26 @@ const formatFileSize = (bytes?: number) => {
                         rel="noopener noreferrer"
                         class="w-10 h-10 flex items-center justify-center bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full text-white transition-all"
                         :title="t('governance.foundingTexts.view')"
+                        :aria-label="t('governance.foundingTexts.view')"
                         @click.stop
                       >
                         <font-awesome-icon icon="fa-solid fa-eye" class="w-4 h-4" />
                       </a>
+                      <button
+                        type="button"
+                        class="w-10 h-10 flex items-center justify-center bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full text-white transition-all"
+                        :title="t('governance.foundingTexts.preview')"
+                        :aria-label="t('governance.foundingTexts.preview')"
+                        @click.stop="emit('preview', doc)"
+                      >
+                        <font-awesome-icon icon="fa-solid fa-magnifying-glass" class="w-4 h-4" />
+                      </button>
                       <a
                         :href="doc.file_url"
                         download
                         class="w-10 h-10 flex items-center justify-center bg-brand-blue-500 hover:bg-brand-blue-600 rounded-full text-white transition-all shadow-lg"
                         :title="t('governance.foundingTexts.download')"
+                        :aria-label="t('governance.foundingTexts.download')"
                         @click.stop
                       >
                         <font-awesome-icon icon="fa-solid fa-download" class="w-4 h-4" />

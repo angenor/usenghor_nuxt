@@ -12,7 +12,9 @@
       "point2": "Statuts de l'Université approuvés par l'OIF",
       "point3": "Convention de siège avec la République arabe d'Égypte",
       "view": "Voir le document",
-      "download": "Télécharger"
+      "download": "Télécharger",
+      "preview": "Prévisualiser",
+      "emptyState": "Les documents seront bientôt disponibles."
     },
     "donorCountries": {
       "title": "Pays Bailleurs",

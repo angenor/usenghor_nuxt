@@ -55,9 +55,39 @@ function cancel() {
 </script>
 
 <template>
+  <!-- Champ déprécié : affichage en lecture seule + note + lien vers l'admin de remplacement.
+       Utilisé pour signaler qu'un contenu est désormais géré ailleurs (médiathèque, etc.). -->
+  <div
+    v-if="field.editable === false"
+    class="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/20 p-4 space-y-2"
+  >
+    <div class="flex items-start gap-2">
+      <font-awesome-icon
+        icon="fa-solid fa-circle-info"
+        class="mt-0.5 w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0"
+      />
+      <div class="flex-1">
+        <p class="font-medium text-sm text-amber-900 dark:text-amber-200">
+          {{ field.label }}
+        </p>
+        <p class="mt-1 text-xs text-amber-800 dark:text-amber-300">
+          {{ field.description }}
+        </p>
+        <NuxtLink
+          v-if="field.redirectLink"
+          :to="field.redirectLink"
+          class="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 underline"
+        >
+          <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
+          Ouvrir la médiathèque
+        </NuxtLink>
+      </div>
+    </div>
+  </div>
+
   <!-- Pour les champs image, utiliser le composant dédié -->
   <AdminEditorialImageField
-    v-if="field.type === 'image'"
+    v-else-if="field.type === 'image'"
     :field="field"
     :value="value"
     :is-editing="isEditing"

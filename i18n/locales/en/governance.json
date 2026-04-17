@@ -12,7 +12,9 @@
       "point2": "University Statutes approved by the OIF",
       "point3": "Headquarters Agreement with the Arab Republic of Egypt",
       "view": "View document",
-      "download": "Download"
+      "download": "Download",
+      "preview": "Preview",
+      "emptyState": "Documents will be available soon."
     },
     "donorCountries": {
       "title": "Donor Countries",

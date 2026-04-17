@@ -1,5 +1,18 @@
 <script setup lang="ts">
 import type { PaysBailleur } from '@bank/mock-data/pays-bailleurs'
+import type { MediaRead } from '~/types/api/media'
+
+interface FoundingDocument {
+  id: string
+  title_fr: string
+  description_fr?: string
+  file_url: string
+  file_size?: number
+  year?: number
+  cover_image?: string
+  document_category?: string
+  sort_order?: number
+}
 
 const { t, locale } = useI18n()
 const { public: { siteUrl } } = useRuntimeConfig()
@@ -13,12 +26,64 @@ const {
   africanFounders: mockAfricanFounders,
 } = usePaysBailleursData()
 const { selectedPays, openDrawer, closeDrawer } = useCountryDrawer()
+const { getAlbumBySlug } = usePublicAlbumsApi()
 
 // Contenus éditoriaux avec fallback i18n
 const { getContent, getRawContent, loadContent } = useEditorialContent('governance')
 
 // Chargement SSR du contenu éditorial
 await useAsyncData('editorial-governance', () => loadContent())
+
+// Chargement SSR de l'album « gouvernance » (textes fondateurs)
+const { data: foundingAlbum } = await useAsyncData(
+  'public-album-gouvernance',
+  async () => {
+    try {
+      return await getAlbumBySlug('gouvernance')
+    }
+    catch {
+      return null
+    }
+  },
+)
+
+// Map id → MediaRead pour retrouver le média complet à l'ouverture du modal
+const foundingMediaById = computed(() => {
+  const map = new Map<string, MediaRead>()
+  for (const m of foundingAlbum.value?.media_items ?? []) {
+    map.set(m.id, m)
+  }
+  return map
+})
+
+function mapMediaToFoundingDocument(m: MediaRead, index: number): FoundingDocument {
+  const yearRaw = m.credits ? Number.parseInt(m.credits, 10) : NaN
+  return {
+    id: m.id,
+    title_fr: m.name,
+    description_fr: m.description ?? undefined,
+    file_url: m.url,
+    file_size: m.size_bytes ?? undefined,
+    year: Number.isFinite(yearRaw) ? yearRaw : undefined,
+    cover_image: m.thumbnail_url ?? undefined,
+    sort_order: index,
+  }
+}
+
+const foundingDocuments = computed<FoundingDocument[]>(() =>
+  (foundingAlbum.value?.media_items ?? []).map((m, i) => mapMediaToFoundingDocument(m, i)),
+)
+
+// Modal de prévisualisation
+const selectedMedia = ref<MediaRead | null>(null)
+
+function onPreview(doc: FoundingDocument) {
+  selectedMedia.value = foundingMediaById.value.get(doc.id) ?? null
+}
+
+function closePreview() {
+  selectedMedia.value = null
+}
 
 // SEO
 const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
@@ -38,23 +103,6 @@ const breadcrumb = computed(() => [
   { label: t('nav.about'), to: '/a-propos' },
   { label: getContent('governance.badge') },
 ])
-
-// Documents fondateurs : éditorial uniquement, pas de fallback mock
-const foundingTexts = computed(() => {
-  const rawDocs = getRawContent('governance.foundingTexts.documents')
-  if (rawDocs) {
-    try {
-      const parsed = JSON.parse(rawDocs)
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed
-      }
-    }
-    catch {
-      // JSON invalide
-    }
-  }
-  return []
-})
 
 // Pays fondateurs : éditorial avec fallback sur mock data
 const paysBailleurs = computed<PaysBailleur[]>(() => {
@@ -115,9 +163,17 @@ const observers = computed(() =>
 
     <!-- Section 1: Textes Fondateurs -->
     <GovernanceFoundingTextsSection
-      :documents="foundingTexts"
+      :documents="foundingDocuments"
       :title="foundingTextsTitle"
       :description="foundingTextsDescription"
+      @preview="onPreview"
+    />
+
+    <!-- Modal de prévisualisation des documents fondateurs -->
+    <MediaFilePreviewModal
+      v-if="selectedMedia"
+      :media="selectedMedia"
+      @close="closePreview"
     />
 
     <!-- Section 2: Pays Bailleurs -->

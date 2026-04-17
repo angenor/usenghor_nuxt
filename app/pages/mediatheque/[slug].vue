@@ -328,7 +328,14 @@ function downloadMedia(item: MediaRead) {
 
             <!-- Vidéo -->
             <template v-else-if="item.type === 'video'">
-              <div class="w-full h-full bg-purple-50 dark:bg-purple-900/30 flex flex-col items-center justify-center gap-2">
+              <img
+                v-if="item.thumbnail_url"
+                :src="item.thumbnail_url"
+                :alt="item.alt_text || item.name"
+                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                loading="lazy"
+              />
+              <div v-else class="w-full h-full bg-purple-50 dark:bg-purple-900/30 flex flex-col items-center justify-center gap-2">
                 <div class="w-14 h-14 rounded-full bg-purple-100 dark:bg-purple-800/50 flex items-center justify-center">
                   <font-awesome-icon icon="fa-solid fa-play" class="w-6 h-6 text-purple-600 dark:text-purple-400 ml-0.5" />
                 </div>
@@ -348,7 +355,14 @@ function downloadMedia(item: MediaRead) {
 
             <!-- Document -->
             <template v-else>
-              <div class="w-full h-full bg-red-50 dark:bg-red-900/30 flex flex-col items-center justify-center gap-2">
+              <img
+                v-if="item.thumbnail_url"
+                :src="item.thumbnail_url"
+                :alt="item.alt_text || item.name"
+                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                loading="lazy"
+              />
+              <div v-else class="w-full h-full bg-red-50 dark:bg-red-900/30 flex flex-col items-center justify-center gap-2">
                 <div class="w-14 h-14 rounded-full bg-red-100 dark:bg-red-800/50 flex items-center justify-center">
                   <font-awesome-icon icon="fa-solid fa-file-lines" class="w-6 h-6 text-red-600 dark:text-red-400" />
                 </div>

@@ -163,12 +163,14 @@ function goToPage(page: number) {
 }
 
 // Préparer les items pour MediaAlbumCard
+// Priorité à `thumbnail_url` (vignette explicite) puis fallback sur `url`
+// pour gérer les albums dont la couverture est un document (PDF, etc.).
 function getCardItems(album: PublicAlbumListItem) {
   if (!album.cover_media) return []
   return [{
     id: album.cover_media.id,
     title_fr: album.cover_media.name,
-    url: album.cover_media.url,
+    url: album.cover_media.thumbnail_url ?? album.cover_media.url,
     type: album.cover_media.type as MediaType,
   }]
 }

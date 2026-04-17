@@ -29,6 +29,8 @@ export interface PageSectionField {
   editable: boolean
   /** Valeur par défaut affichée quand aucun contenu éditorial n'existe en BDD */
   defaultValue?: string
+  /** Lien vers une autre interface admin lorsqu'un champ est déprécié (editable=false) */
+  redirectLink?: string
 }
 
 export interface FrontOfficePage {
@@ -1174,7 +1176,7 @@ export const governancePageSections: PageSection[] = [
       { key: 'governance.foundingTexts.badge', label: 'Badge', description: 'Texte du badge de la section', type: 'text', editorialKey: 'governance.foundingTexts.badge', editable: true },
       { key: 'governance.foundingTexts.title', label: 'Titre', description: 'Titre de la section textes fondateurs', type: 'text', editorialKey: 'governance.foundingTexts.title', editable: true },
       { key: 'governance.foundingTexts.description', label: 'Description', description: 'Texte de présentation des textes fondateurs', type: 'html', editorialKey: 'governance.foundingTexts.description', editable: true },
-      { key: 'governance.foundingTexts.documents', label: 'Documents fondateurs', description: 'Liste dynamique des documents (PDF, chartes, conventions). Ajoutez, modifiez ou supprimez les documents.', type: 'documents', editorialKey: 'governance.foundingTexts.documents', editable: true },
+      { key: 'governance.foundingTexts.documents', label: 'Documents fondateurs', description: 'Documents fondateurs désormais gérés dans la médiathèque — Album Gouvernance.', type: 'documents', editorialKey: 'governance.foundingTexts.documents', editable: false, redirectLink: '/admin/mediatheque/albums' },
     ],
   },
   {

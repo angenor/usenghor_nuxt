@@ -156,7 +156,8 @@ const editForm = reactive({
   name: '',
   description: '',
   alt_text: '',
-  credits: ''
+  credits: '',
+  thumbnail_url: ''
 })
 
 const albumForm = ref({
@@ -414,6 +415,7 @@ const openDetailModal = async (media: MediaRead) => {
   editForm.description = media.description || ''
   editForm.alt_text = media.alt_text || ''
   editForm.credits = media.credits || ''
+  editForm.thumbnail_url = media.thumbnail_url || ''
   await loadMediaUsage(media.id)
   showDetailModal.value = true
 }
@@ -499,7 +501,8 @@ const handleSaveMedia = async () => {
       name: editForm.name,
       description: editForm.description || null,
       alt_text: editForm.alt_text || null,
-      credits: editForm.credits || null
+      credits: editForm.credits || null,
+      thumbnail_url: editForm.thumbnail_url || null
     })
     closeDetailModal()
     await loadMedia()
@@ -1691,6 +1694,21 @@ const handleLinkToEntity = async (entity: EntityOption) => {
                   placeholder="Photographe, source..."
                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 />
+              </div>
+
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Image de couverture (optionnel)
+                </label>
+                <input
+                  v-model="editForm.thumbnail_url"
+                  type="url"
+                  placeholder="https://… ou /uploads/..."
+                  class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                />
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  URL d'une vignette à afficher pour les documents et vidéos. Laisser vide pour utiliser l'icône par défaut.
+                </p>
               </div>
 
               <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-700/50">
