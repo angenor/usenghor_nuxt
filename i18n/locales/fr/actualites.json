@@ -162,9 +162,11 @@
         "backToEvents": "Retour aux événements",
         "tabs": {
           "details": "Détails",
+          "actualites": "Actualités",
           "mediatheque": "Médiathèque"
         },
         "noMedia": "Aucun album disponible pour cet événement.",
+        "noNews": "Aucune actualité associée à cet événement pour le moment.",
         "registration": {
           "title": "Inscription",
           "register": "S'inscrire",

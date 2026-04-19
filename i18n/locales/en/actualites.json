@@ -162,9 +162,11 @@
         "backToEvents": "Back to events",
         "tabs": {
           "details": "Details",
+          "actualites": "News",
           "mediatheque": "Media Library"
         },
         "noMedia": "No albums available for this event.",
+        "noNews": "No news associated with this event yet.",
         "registration": {
           "title": "Registration",
           "register": "Register",

@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import type { EventPublic } from '~/composables/usePublicEventsApi'
 import type { PublicAlbumWithMedia } from '~/types/api/media'
+import type { NewsDisplay } from '~/types/news'
 
 const route = useRoute()
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { getEventBySlug, getUpcomingEvents, getEventAlbums } = usePublicEventsApi()
+const { getAllPublishedNews } = usePublicNewsApi()
 const { getCampaignsByEntity } = usePublicSurveyApi()
 const { getCampusById, getFlagEmoji } = useMockData()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
@@ -25,7 +27,8 @@ const slug = computed(() => route.params.id as string)
 const relatedEventsData = ref<EventPublic[]>([])
 const associatedCampaigns = ref<any[]>([])
 const eventAlbums = ref<PublicAlbumWithMedia[]>([])
-const activeTab = ref<'details' | 'mediatheque'>('details')
+const eventNews = ref<NewsDisplay[]>([])
+const activeTab = ref<'details' | 'actualites' | 'mediatheque'>('details')
 
 // Charger l'événement depuis l'API (SSR + client)
 const { data: event, status } = await useAsyncData(
@@ -59,10 +62,16 @@ onMounted(async () => {
     try {
       eventAlbums.value = await getEventAlbums(event.value.slug)
     } catch { /* pas d'albums */ }
+
+    try {
+      eventNews.value = await getAllPublishedNews({ event_id: event.value.id, limit: 50 })
+    } catch { /* pas d'actualités */ }
   }
 })
 
 const hasMediaLibrary = computed(() => eventAlbums.value.length > 0)
+const hasRelatedNews = computed(() => eventNews.value.length > 0)
+const hasTabs = computed(() => hasMediaLibrary.value || hasRelatedNews.value)
 
 // Get campus info - note: backend ne stocke pas campus_id pour événements
 const campus = computed(() => null)
@@ -268,8 +277,8 @@ const registrationCampaignLink = computed(() => {
       </div>
     </section>
 
-    <!-- Onglets (Détails / Médiathèque) sticky, au-dessus du contenu -->
-    <div v-if="hasMediaLibrary" class="sticky top-20 z-40 border-b border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
+    <!-- Onglets (Détails / Actualités / Médiathèque) sticky, au-dessus du contenu -->
+    <div v-if="hasTabs" class="sticky top-20 z-40 border-b border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <nav class="-mb-px flex overflow-x-auto scrollbar-hide">
           <button
@@ -283,6 +292,18 @@ const registrationCampaignLink = computed(() => {
             {{ t('actualites.detail.event.tabs.details') }}
           </button>
           <button
+            v-if="hasRelatedNews"
+            class="flex flex-shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-4 py-4 text-sm font-medium transition-colors"
+            :class="activeTab === 'actualites'
+              ? 'border-brand-blue-500 text-brand-blue-600 dark:text-brand-blue-400'
+              : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+            @click="activeTab = 'actualites'"
+          >
+            <font-awesome-icon icon="fa-solid fa-newspaper" class="h-4 w-4" />
+            {{ t('actualites.detail.event.tabs.actualites') }}
+          </button>
+          <button
+            v-if="hasMediaLibrary"
             class="flex flex-shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-4 py-4 text-sm font-medium transition-colors"
             :class="activeTab === 'mediatheque'
               ? 'border-brand-blue-500 text-brand-blue-600 dark:text-brand-blue-400'
@@ -293,6 +314,44 @@ const registrationCampaignLink = computed(() => {
             {{ t('actualites.detail.event.tabs.mediatheque') }}
           </button>
         </nav>
+      </div>
+    </div>
+
+    <!-- Tab: Actualités associées -->
+    <div v-if="activeTab === 'actualites' && hasRelatedNews" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <article
+          v-for="item in eventNews"
+          :key="item.id"
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow"
+        >
+          <NuxtLink :to="localePath(`/actualites/${item.slug}`)" class="block">
+            <div class="h-48 overflow-hidden">
+              <img
+                v-if="item.cover_image_external_id"
+                :src="getImageVariantUrl(getMediaUrl(item.cover_image_external_id) || '', 'medium') || ''"
+                :alt="item.cover_image_alt || item.title"
+                class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                loading="lazy"
+              >
+              <div v-else class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                <font-awesome-icon icon="fa-solid fa-newspaper" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
+              </div>
+            </div>
+            <div class="p-5">
+              <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-2">
+                <font-awesome-icon icon="fa-solid fa-calendar" class="w-4 h-4" />
+                {{ formatDate(item.published_at || item.created_at) }}
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                {{ item.title }}
+              </h3>
+              <p v-if="item.summary" class="text-gray-600 dark:text-gray-400 text-sm line-clamp-3">
+                {{ item.summary }}
+              </p>
+            </div>
+          </NuxtLink>
+        </article>
       </div>
     </div>
 
