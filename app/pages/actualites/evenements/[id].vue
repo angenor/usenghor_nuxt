@@ -301,6 +301,14 @@ const registrationCampaignLink = computed(() => {
           >
             <font-awesome-icon icon="fa-solid fa-newspaper" class="h-4 w-4" />
             {{ t('actualites.detail.event.tabs.actualites') }}
+            <span
+              class="inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-semibold"
+              :class="activeTab === 'actualites'
+                ? 'bg-brand-blue-100 text-brand-blue-700 dark:bg-brand-blue-900/40 dark:text-brand-blue-300'
+                : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'"
+            >
+              {{ eventNews.length }}
+            </span>
           </button>
           <button
             v-if="hasMediaLibrary"
