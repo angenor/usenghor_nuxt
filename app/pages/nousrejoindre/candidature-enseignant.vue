@@ -233,7 +233,7 @@ const handleSubmit = async () => {
                 <input
                   v-model="formData.civilite"
                   type="radio"
-                  value="mr"
+                  value="Mr"
                   class="w-4 h-4 text-brand-blue-600 border-gray-300 focus:ring-brand-blue-500"
                 />
                 <span class="ms-2 text-gray-700 dark:text-gray-300">{{ t('careers.application.form.mr') }}</span>
@@ -242,10 +242,28 @@ const handleSubmit = async () => {
                 <input
                   v-model="formData.civilite"
                   type="radio"
-                  value="mme"
+                  value="Mrs"
                   class="w-4 h-4 text-brand-blue-600 border-gray-300 focus:ring-brand-blue-500"
                 />
                 <span class="ms-2 text-gray-700 dark:text-gray-300">{{ t('careers.application.form.mme') }}</span>
+              </label>
+              <label class="inline-flex items-center">
+                <input
+                  v-model="formData.civilite"
+                  type="radio"
+                  value="Dr"
+                  class="w-4 h-4 text-brand-blue-600 border-gray-300 focus:ring-brand-blue-500"
+                />
+                <span class="ms-2 text-gray-700 dark:text-gray-300">Dr</span>
+              </label>
+              <label class="inline-flex items-center">
+                <input
+                  v-model="formData.civilite"
+                  type="radio"
+                  value="Pr"
+                  class="w-4 h-4 text-brand-blue-600 border-gray-300 focus:ring-brand-blue-500"
+                />
+                <span class="ms-2 text-gray-700 dark:text-gray-300">Pr</span>
               </label>
             </div>
           </div>
