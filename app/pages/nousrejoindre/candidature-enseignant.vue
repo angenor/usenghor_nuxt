@@ -46,43 +46,35 @@ const isSubmitted = ref(false)
 const referenceNumber = ref('')
 const error = ref<string | null>(null)
 
-// Liste des pays francophones
-const countries = [
-  { code: 'DZ', name_fr: 'Algérie', name_en: 'Algeria', name_ar: 'الجزائر' },
-  { code: 'BJ', name_fr: 'Bénin', name_en: 'Benin', name_ar: 'بنين' },
-  { code: 'BF', name_fr: 'Burkina Faso', name_en: 'Burkina Faso', name_ar: 'بوركينا فاسو' },
-  { code: 'BI', name_fr: 'Burundi', name_en: 'Burundi', name_ar: 'بوروندي' },
-  { code: 'CM', name_fr: 'Cameroun', name_en: 'Cameroon', name_ar: 'الكاميرون' },
-  { code: 'CF', name_fr: 'Centrafrique', name_en: 'Central African Republic', name_ar: 'جمهورية أفريقيا الوسطى' },
-  { code: 'TD', name_fr: 'Tchad', name_en: 'Chad', name_ar: 'تشاد' },
-  { code: 'KM', name_fr: 'Comores', name_en: 'Comoros', name_ar: 'جزر القمر' },
-  { code: 'CG', name_fr: 'Congo', name_en: 'Congo', name_ar: 'الكونغو' },
-  { code: 'CD', name_fr: 'RD Congo', name_en: 'DR Congo', name_ar: 'الكونغو الديمقراطية' },
-  { code: 'CI', name_fr: 'Côte d\'Ivoire', name_en: 'Ivory Coast', name_ar: 'ساحل العاج' },
-  { code: 'DJ', name_fr: 'Djibouti', name_en: 'Djibouti', name_ar: 'جيبوتي' },
-  { code: 'EG', name_fr: 'Égypte', name_en: 'Egypt', name_ar: 'مصر' },
-  { code: 'GA', name_fr: 'Gabon', name_en: 'Gabon', name_ar: 'الغابون' },
-  { code: 'GN', name_fr: 'Guinée', name_en: 'Guinea', name_ar: 'غينيا' },
-  { code: 'GW', name_fr: 'Guinée-Bissau', name_en: 'Guinea-Bissau', name_ar: 'غينيا بيساو' },
-  { code: 'GQ', name_fr: 'Guinée équatoriale', name_en: 'Equatorial Guinea', name_ar: 'غينيا الاستوائية' },
-  { code: 'MG', name_fr: 'Madagascar', name_en: 'Madagascar', name_ar: 'مدغشقر' },
-  { code: 'ML', name_fr: 'Mali', name_en: 'Mali', name_ar: 'مالي' },
-  { code: 'MA', name_fr: 'Maroc', name_en: 'Morocco', name_ar: 'المغرب' },
-  { code: 'MR', name_fr: 'Mauritanie', name_en: 'Mauritania', name_ar: 'موريتانيا' },
-  { code: 'MU', name_fr: 'Maurice', name_en: 'Mauritius', name_ar: 'موريشيوس' },
-  { code: 'NE', name_fr: 'Niger', name_en: 'Niger', name_ar: 'النيجر' },
-  { code: 'RW', name_fr: 'Rwanda', name_en: 'Rwanda', name_ar: 'رواندا' },
-  { code: 'SN', name_fr: 'Sénégal', name_en: 'Senegal', name_ar: 'السنغال' },
-  { code: 'SC', name_fr: 'Seychelles', name_en: 'Seychelles', name_ar: 'سيشل' },
-  { code: 'TG', name_fr: 'Togo', name_en: 'Togo', name_ar: 'توغو' },
-  { code: 'TN', name_fr: 'Tunisie', name_en: 'Tunisia', name_ar: 'تونس' },
-  { code: 'VN', name_fr: 'Vietnam', name_en: 'Vietnam', name_ar: 'فيتنام' },
-  { code: 'OTHER', name_fr: 'Autre', name_en: 'Other', name_ar: 'آخر' },
-]
+// Liste des pays chargée depuis l'API (UUID requis par le backend)
+interface CountryOption {
+  id: string
+  iso_code: string
+  name_fr: string
+  name_en?: string | null
+  name_ar?: string | null
+}
 
-const getCountryName = (country: typeof countries[0]) => {
-  if (locale.value === 'en') return country.name_en
-  if (locale.value === 'ar') return country.name_ar
+const countries = ref<CountryOption[]>([])
+const apiBase = useApiBase()
+
+const fetchCountries = async () => {
+  try {
+    const result = await $fetch<CountryOption[]>(`${apiBase}/api/public/countries/all`)
+    countries.value = result
+  }
+  catch {
+    countries.value = []
+  }
+}
+
+onMounted(() => {
+  fetchCountries()
+})
+
+const getCountryName = (country: CountryOption) => {
+  if (locale.value === 'en' && country.name_en) return country.name_en
+  if (locale.value === 'ar' && country.name_ar) return country.name_ar
   return country.name_fr
 }
 
@@ -338,8 +330,8 @@ const handleSubmit = async () => {
               </option>
               <option
                 v-for="country in countries"
-                :key="country.code"
-                :value="country.code"
+                :key="country.id"
+                :value="country.id"
               >
                 {{ getCountryName(country) }}
               </option>
