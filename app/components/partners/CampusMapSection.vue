@@ -48,6 +48,21 @@ const filteredLocations = computed<MapLocation[]>(() => {
   return morocco ? [...others, morocco] : others
 })
 
+// Path du Sahara occidental utilisé comme overlay sans bordure pour
+// masquer la frontière entre le Maroc et le Sahara occidental sans
+// affecter les bordures avec l'Algérie et la Mauritanie.
+const westernSaharaPath = computed<string | null>(() => {
+  const eh = (map.locations as MapLocation[]).find((l: MapLocation) => l.id.toLowerCase() === 'eh')
+  return eh ? eh.path : null
+})
+
+// Voisins du Sahara occidental (hors Maroc) dont la frontière avec eh
+// doit être redessinée par-dessus l'overlay pour rester visible.
+const ehNeighbors = computed<MapLocation[]>(() => {
+  const ids = new Set(['dz', 'mr'])
+  return (map.locations as MapLocation[]).filter((l: MapLocation) => ids.has(l.id.toLowerCase()))
+})
+
 // === CHARGEMENT DES DONNÉES ===
 onMounted(async () => {
   try {
@@ -415,6 +430,30 @@ const getCampusLocationText = (campus: CampusItem): string => {
                   @mouseenter="hovered = location.id === 'eh' ? { id: 'ma', name: 'Morocco' } : location"
                   @mouseleave="hovered = null"
                   @click="handleCountryClick(location.id === 'eh' ? { id: 'ma' } : location)"
+                />
+                <!-- Overlay du Sahara occidental rempli ET contouré avec la couleur
+                     du Maroc, pour recouvrir intégralement le trait blanc partagé
+                     Maroc/Sahara (les 0.5 px de stroke du Maroc sont entièrement
+                     masqués par ce contour de 1 px de la même couleur). -->
+                <path
+                  v-if="westernSaharaPath"
+                  :d="westernSaharaPath"
+                  :fill="getColor('ma')"
+                  :stroke="getColor('ma')"
+                  stroke-width="1"
+                  stroke-linejoin="round"
+                  pointer-events="none"
+                />
+                <!-- Re-rendu des bordures Algérie/Mauritanie APRÈS l'overlay
+                     pour restaurer leur frontière visible avec le Sahara occidental. -->
+                <path
+                  v-for="neighbor in ehNeighbors"
+                  :key="`eh-neighbor-${neighbor.id}`"
+                  :d="neighbor.path"
+                  fill="none"
+                  stroke="#fff"
+                  stroke-width="0.5"
+                  pointer-events="none"
                 />
               </svg>
 
