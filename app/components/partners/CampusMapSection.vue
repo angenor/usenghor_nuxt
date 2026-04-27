@@ -38,8 +38,14 @@ const excludedCountriesSet = ref<Set<string>>(new Set(DEFAULT_EXCLUDED_COUNTRIES
 const viewBoxString = computed(() => viewBoxToString(mapViewBox.value))
 
 // Filtered map locations (sans les pays exclus)
-const filteredLocations = computed(() => {
-  return map.locations.filter(location => !excludedCountriesSet.value.has(location.id.toLowerCase()))
+// Le Maroc (ma) est rendu en dernier pour passer par-dessus le Sahara occidental (eh),
+// supprimant la frontière visible entre les deux territoires (intégrité territoriale du Maroc).
+type MapLocation = { id: string; name: string; path: string }
+const filteredLocations = computed<MapLocation[]>(() => {
+  const visible = (map.locations as MapLocation[]).filter((location: MapLocation) => !excludedCountriesSet.value.has(location.id.toLowerCase()))
+  const others = visible.filter((location: MapLocation) => location.id.toLowerCase() !== 'ma')
+  const morocco = visible.find((location: MapLocation) => location.id.toLowerCase() === 'ma')
+  return morocco ? [...others, morocco] : others
 })
 
 // === CHARGEMENT DES DONNÉES ===
@@ -224,11 +230,15 @@ const adjustBrightness = (hex: string, percent: number): string => {
   ).toString(16).slice(1)}`
 }
 
+// Le Sahara occidental (eh) est traité comme le Maroc (ma) — territoire intégré.
+const resolveCountryId = (id: string): string => (id === 'eh' ? 'ma' : id)
+
 // Get color for a country
 const getColor = (id: string): string => {
-  const isHovered = hovered.value?.id === id
-  const isSelected = selectedCampus.value?.country_iso_code?.toLowerCase() === id
-  const countryData = coloredCountries.value[id]
+  const resolvedId = resolveCountryId(id)
+  const isHovered = resolveCountryId(hovered.value?.id ?? '') === resolvedId
+  const isSelected = selectedCampus.value?.country_iso_code?.toLowerCase() === resolvedId
+  const countryData = coloredCountries.value[resolvedId]
 
   if (countryData) {
     if (isSelected) {
@@ -249,7 +259,8 @@ const getColor = (id: string): string => {
 
 // Get campus for a country
 const getCampusForCountry = (countryId: string) => {
-  return allCampuses.value.find(c => c.country_iso_code?.toLowerCase() === countryId)
+  const resolvedId = resolveCountryId(countryId)
+  return allCampuses.value.find(c => c.country_iso_code?.toLowerCase() === resolvedId)
 }
 
 // Computed property for hovered campus
@@ -397,13 +408,13 @@ const getCampusLocationText = (campus: CampusItem): string => {
                   :key="location.id"
                   :d="location.path"
                   :fill="getColor(location.id)"
-                  stroke="#fff"
+                  :stroke="location.id === 'eh' ? 'transparent' : '#fff'"
                   stroke-width="0.5"
                   class="map-path"
-                  :class="{ 'cursor-pointer': coloredCountries[location.id] }"
-                  @mouseenter="hovered = location"
+                  :class="{ 'cursor-pointer': coloredCountries[location.id] || location.id === 'eh' }"
+                  @mouseenter="hovered = location.id === 'eh' ? { id: 'ma', name: 'Morocco' } : location"
                   @mouseleave="hovered = null"
-                  @click="handleCountryClick(location)"
+                  @click="handleCountryClick(location.id === 'eh' ? { id: 'ma' } : location)"
                 />
               </svg>
 

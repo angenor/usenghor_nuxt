@@ -309,12 +309,15 @@ function downloadMedia(item: MediaRead) {
       <!-- Grille de médias -->
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          <button
+          <div
             v-for="(item, index) in filteredMedia"
             :key="item.id"
-            type="button"
-            class="group relative aspect-square rounded-xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-brand-blue-500"
+            role="button"
+            tabindex="0"
+            class="group relative aspect-square rounded-xl overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-blue-500"
             @click="openViewer(index)"
+            @keydown.enter.prevent="openViewer(index)"
+            @keydown.space.prevent="openViewer(index)"
           >
             <!-- Image thumbnail -->
             <template v-if="item.type === 'image'">
@@ -412,7 +415,7 @@ function downloadMedia(item: MediaRead) {
             >
               <font-awesome-icon icon="fa-solid fa-download" class="w-3.5 h-3.5 text-gray-700 dark:text-gray-300" />
             </button>
-          </button>
+          </div>
         </div>
       </div>
     </template>
