@@ -430,6 +430,18 @@ export function useAdminSidebar() {
     },
 
     // ========================================================================
+    // FAQ - Foire aux questions
+    // ========================================================================
+    {
+      id: 'faq',
+      label: 'FAQ',
+      icon: 'fa-solid fa-circle-question',
+      route: '/admin/faq',
+      permissions: ['faq.view'],
+      description: 'Questions fréquentes trilingues'
+    },
+
+    // ========================================================================
     // SHORT LINKS - Liens courts
     // ========================================================================
     {

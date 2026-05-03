@@ -25,6 +25,7 @@ import leveesDeFonds from './levees-de-fonds.json'
 import survey from './survey.json'
 import shortLinks from './short-links.json'
 import mediatheque from './mediatheque.json'
+import faq from './faq.json'
 
 export default {
   ...common,
@@ -53,5 +54,6 @@ export default {
   ...leveesDeFonds,
   ...survey,
   ...shortLinks,
-  ...mediatheque
+  ...mediatheque,
+  ...faq
 }
