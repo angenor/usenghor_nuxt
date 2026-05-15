@@ -1,355 +1,134 @@
-# Solution 1 : Prometheus + Grafana (Stack complète)
+# Solution 1 — Monitoring technique avec Prometheus + Grafana
 
-## Resume
+## Objectif
 
-Stack de monitoring classique basee sur Prometheus (collecte de metriques) et Grafana (visualisation/alertes), deployee en conteneurs Docker aux cotes de l'application existante.
+Mettre en place une observabilité technique complète du site Usenghor (FastAPI + Nuxt + PostgreSQL + Nginx, déployés en Docker) afin de :
 
-**Cout ressources estime : ~400-500 Mo RAM, 2 conteneurs supplementaires**
-
----
-
-## Architecture
-
-```
-                    ┌─────────────┐
-   Requetes ──────►│    Nginx     │── access logs ──► Promtail (optionnel)
-                    └──────┬──────┘                      │
-                           │                             ▼
-                    ┌──────┴──────┐               ┌──────────┐
-                    │   Nuxt SSR  │               │   Loki   │ (optionnel)
-                    └──────┬──────┘               └────┬─────┘
-                           │                          │
-                    ┌──────┴──────┐               ┌───▼──────┐
-                    │   FastAPI   │──── metrics ──►│Prometheus│
-                    │ (middleware)│               └────┬─────┘
-                    └─────────────┘                    │
-                                                 ┌────▼─────┐
-                                                 │ Grafana  │
-                                                 │Dashboard │
-                                                 └──────────┘
-```
+1. Mesurer la consommation CPU/RAM/réseau du VPS et de chaque conteneur Docker.
+2. Mesurer les requêtes par seconde, la latence (p50/p95/p99) et le taux d'erreur **par endpoint FastAPI**.
+3. Mesurer les requêtes Nginx (codes HTTP, débit, latence).
+4. Identifier les goulots d'étranglement applicatifs afin de préparer un futur **découpage en microservices** (quel module consomme le plus de CPU/RAM/temps cumulé, quels endpoints sont candidats à extraction).
 
 ---
 
-## Composants
+## Prompt à coller dans GitHub Spec Kit (`/speckit.specify`)
 
-### 1. Middleware FastAPI (`TrafficMiddleware`)
+> Copier-coller le bloc ci-dessous tel quel dans la commande `/speckit.specify` pour générer la spec, puis enchaîner avec `/speckit.clarify` → `/speckit.plan` → `/speckit.tasks` → `/speckit.implement`.
 
-Middleware Starlette qui instrumente chaque requete entrante et expose les metriques au format Prometheus.
-
-**Metriques collectees :**
-
-| Metrique | Type Prometheus | Labels | Description |
-|----------|----------------|--------|-------------|
-| `http_requests_total` | Counter | method, endpoint, status | Nombre total de requetes |
-| `http_request_duration_seconds` | Histogram | method, endpoint | Latence par requete (buckets: 0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10) |
-| `http_requests_in_progress` | Gauge | method | Requetes en cours de traitement |
-| `http_request_size_bytes` | Summary | method, endpoint | Taille des requetes entrantes |
-| `http_response_size_bytes` | Summary | method, endpoint | Taille des reponses |
-
-**Dependance Python :** `prometheus-client` (~50 Ko)
-
-**Endpoint expose :** `GET /metrics` (format texte Prometheus)
-
-**Code estimatif du middleware :**
-
-```python
-# app/middleware/traffic.py
-
-import time
-from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
-from starlette.responses import Response
-
-REQUEST_COUNT = Counter(
-    "http_requests_total",
-    "Total HTTP requests",
-    ["method", "endpoint", "status"]
-)
-
-REQUEST_LATENCY = Histogram(
-    "http_request_duration_seconds",
-    "HTTP request latency",
-    ["method", "endpoint"],
-    buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]
-)
-
-REQUESTS_IN_PROGRESS = Gauge(
-    "http_requests_in_progress",
-    "HTTP requests currently in progress",
-    ["method"]
-)
-
-
-class TrafficMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        if request.url.path == "/metrics":
-            return Response(
-                generate_latest(),
-                media_type=CONTENT_TYPE_LATEST
-            )
-
-        method = request.method
-        # Normaliser les endpoints (remplacer les UUIDs par {id})
-        endpoint = self._normalize_path(request.url.path)
-
-        REQUESTS_IN_PROGRESS.labels(method=method).inc()
-        start_time = time.perf_counter()
-
-        try:
-            response = await call_next(request)
-            status = str(response.status_code)
-        except Exception:
-            status = "500"
-            raise
-        finally:
-            duration = time.perf_counter() - start_time
-            REQUEST_COUNT.labels(method=method, endpoint=endpoint, status=status).inc()
-            REQUEST_LATENCY.labels(method=method, endpoint=endpoint).observe(duration)
-            REQUESTS_IN_PROGRESS.labels(method=method).dec()
-
-        return response
-
-    @staticmethod
-    def _normalize_path(path: str) -> str:
-        """Remplace les UUIDs et IDs numeriques par des placeholders."""
-        import re
-        path = re.sub(
-            r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
-            "{id}",
-            path
-        )
-        path = re.sub(r"/\d+", "/{id}", path)
-        return path
 ```
+Mettre en place une stack de monitoring technique pour le projet Usenghor (monorepo Nuxt 4 + FastAPI + PostgreSQL 16 + Nginx, déployé via Docker Compose sur un VPS). L'objectif est de collecter, stocker et visualiser des métriques techniques afin d'identifier les goulots d'étranglement et de préparer un futur découpage en microservices.
 
-**Integration dans `main.py` :**
+## Périmètre fonctionnel
 
-```python
-from app.middleware.traffic import TrafficMiddleware
+1. **Collecte de métriques système (VPS)** : CPU, RAM, disque, réseau, charge moyenne, via `node-exporter`.
+2. **Collecte de métriques par conteneur Docker** : CPU, RAM, I/O, réseau par conteneur (`usenghor_nginx`, `usenghor_frontend`, `usenghor_backend`, `usenghor_db`), via `cAdvisor`.
+3. **Collecte de métriques applicatives FastAPI** :
+   - Requêtes par seconde par endpoint et par méthode HTTP.
+   - Latence (histogramme : p50, p95, p99) par endpoint.
+   - Taux d'erreurs (codes 4xx / 5xx) par endpoint.
+   - Nombre de requêtes en cours.
+   - Utiliser `prometheus-fastapi-instrumentator` (intégration en quelques lignes dans `usenghor_backend/app/main.py`).
+   - Exposer l'endpoint `/metrics` sur le backend (protégé : accessible uniquement depuis le réseau Docker interne, pas publié vers l'extérieur).
+4. **Collecte de métriques Nginx** : requêtes/s, codes HTTP, connexions actives, via `nginx-prometheus-exporter` (nécessite l'activation du module `stub_status` dans la configuration Nginx).
+5. **Collecte de métriques PostgreSQL** : connexions actives, transactions/s, taille de la base, requêtes lentes, via `postgres-exporter`.
+6. **Stockage** : `Prometheus` (rétention 30 jours, volume Docker dédié).
+7. **Visualisation** : `Grafana` avec dashboards préfaits importés automatiquement au démarrage (provisioning) :
+   - Dashboard Node Exporter Full (ID 1860)
+   - Dashboard cAdvisor / Docker monitoring (ID 193 ou 14282)
+   - Dashboard FastAPI (ID 14282 pour `prometheus-fastapi-instrumentator`)
+   - Dashboard Nginx (ID 12708)
+   - Dashboard PostgreSQL (ID 9628)
+8. **Sécurité** :
+   - Grafana protégé par authentification (admin + mot de passe via variables d'environnement, jamais en clair).
+   - Prometheus et exporters non exposés publiquement (réseau Docker interne uniquement).
+   - Accès Grafana via `https://monitoring.usenghor.<domaine>` derrière le Nginx existant + Let's Encrypt.
+9. **Alertes (optionnel, phase 2)** : Alertmanager pour notifications email lorsque CPU > 90% pendant 5 min, RAM > 90%, disque > 85%, ou taux d'erreur 5xx > 5%.
 
-app.add_middleware(TrafficMiddleware)
+## Contraintes techniques
+
+- Utiliser Docker Compose, fichier dédié `docker-compose.monitoring.yml` (ou intégration dans le `docker-compose.yml` existant via profil `monitoring`).
+- Tous les conteneurs doivent rejoindre le réseau Docker existant du projet pour scraper les services.
+- Volumes Docker persistants pour les données Prometheus et Grafana.
+- Provisioning Grafana en YAML : datasource Prometheus + dashboards JSON importés automatiquement.
+- Ressources cibles maximales : Prometheus ~300 MB RAM, Grafana ~150 MB RAM, exporters ~50 MB chacun (~700 MB RAM au total).
+- Compatible avec le script `deploy.sh` existant (ajouter une commande `./deploy.sh monitoring up|down|logs`).
+- Documentation à jour dans `usenghor_nuxt/bank/documentations/monitoring-trafic/` :
+  - Architecture (schéma des conteneurs et flux de scraping).
+  - Procédure d'installation locale et VPS.
+  - Procédure d'accès aux dashboards.
+  - Procédure de sauvegarde/restauration des données Prometheus et Grafana.
+
+## Livrables attendus
+
+1. `usenghor_backend/docker-compose.monitoring.yml` (ou modification du compose existant).
+2. `usenghor_backend/monitoring/prometheus/prometheus.yml` (configuration de scraping).
+3. `usenghor_backend/monitoring/grafana/provisioning/datasources/prometheus.yml`.
+4. `usenghor_backend/monitoring/grafana/provisioning/dashboards/*.json` (dashboards importés).
+5. Modification de `usenghor_backend/app/main.py` pour ajouter `prometheus-fastapi-instrumentator`.
+6. Mise à jour `usenghor_backend/requirements.txt` (ajout `prometheus-fastapi-instrumentator`).
+7. Modification de la configuration Nginx pour activer `stub_status` (interne uniquement).
+8. Modification du `deploy.sh` (commande `monitoring`).
+9. Documentation complète en français dans `usenghor_nuxt/bank/documentations/monitoring-trafic/`.
+10. Variables d'environnement documentées dans `.env.example` :
+    - `GRAFANA_ADMIN_USER`
+    - `GRAFANA_ADMIN_PASSWORD`
+    - `POSTGRES_EXPORTER_DSN`
+    - `MONITORING_DOMAIN` (ex. `monitoring.usenghor.org`)
+
+## Critères d'acceptation
+
+- [ ] Après `docker compose --profile monitoring up -d`, tous les conteneurs (`prometheus`, `grafana`, `node-exporter`, `cadvisor`, `nginx-exporter`, `postgres-exporter`) démarrent sans erreur.
+- [ ] Prometheus affiche tous les targets en état `UP` sur `http://localhost:9090/targets`.
+- [ ] Grafana est accessible sur `http://localhost:3001` (local) avec authentification.
+- [ ] Les 5 dashboards préfaits s'affichent automatiquement et présentent des données réelles.
+- [ ] Le dashboard FastAPI affiche au moins 3 endpoints réels avec des métriques de latence et de taux de requêtes.
+- [ ] L'endpoint `/metrics` du backend FastAPI n'est PAS accessible depuis Internet public.
+- [ ] La documentation permet à un nouveau développeur de relancer la stack en moins de 15 minutes.
+- [ ] La rétention Prometheus de 30 jours est validée par configuration explicite (`--storage.tsdb.retention.time=30d`).
+
+## Hors périmètre (à exclure de cette spec)
+
+- Monitoring du trafic visiteurs (Umami / Plausible) — fera l'objet d'une autre spec.
+- Logs centralisés (Loki, ELK) — fera l'objet d'une autre spec.
+- Tracing distribué (Jaeger, Tempo) — pertinent après le découpage en microservices.
+- Alertmanager (phase 2, à spécifier séparément après stabilisation).
 ```
 
 ---
 
-### 2. Prometheus (conteneur Docker)
+## Workflow Spec Kit recommandé
 
-**Image :** `prom/prometheus:latest` (~200 Mo RAM)
+```bash
+# 1. Générer la spécification
+/speckit.specify <coller le prompt ci-dessus>
 
-**Configuration (`prometheus/prometheus.yml`) :**
+# 2. Lever les ambiguïtés (5 questions max)
+/speckit.clarify
 
-```yaml
-global:
-  scrape_interval: 15s
-  evaluation_interval: 15s
+# 3. Générer le plan technique
+/speckit.plan
 
-scrape_configs:
-  - job_name: "fastapi"
-    static_configs:
-      - targets: ["backend:8000"]
-    metrics_path: "/metrics"
-    scrape_interval: 15s
+# 4. Découper en tâches ordonnées
+/speckit.tasks
 
-  # Optionnel : metriques systeme via node_exporter
-  # - job_name: "node"
-  #   static_configs:
-  #     - targets: ["node-exporter:9100"]
+# 5. (Optionnel) Vérifier la cohérence
+/speckit.analyze
 
-rule_files:
-  - "alerts.yml"
-
-alerting:
-  alertmanagers:
-    - static_configs:
-        - targets: [] # Configurer si Alertmanager est deploye
-```
-
-**Regles d'alerte (`prometheus/alerts.yml`) :**
-
-```yaml
-groups:
-  - name: usenghor_alerts
-    rules:
-      - alert: HighLatency
-        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "Latence elevee sur {{ $labels.endpoint }}"
-          description: "P95 > 2s pendant 5 min sur {{ $labels.endpoint }}"
-
-      - alert: HighErrorRate
-        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: "Taux d'erreurs 5xx > 5% sur {{ $labels.endpoint }}"
-
-      - alert: TrafficSpike
-        expr: rate(http_requests_total[5m]) > 2 * rate(http_requests_total[5m] offset 1d)
-        for: 10m
-        labels:
-          severity: warning
-        annotations:
-          summary: "Pic de trafic detecte (x2 vs hier)"
+# 6. Exécuter l'implémentation
+/speckit.implement
 ```
 
 ---
 
-### 3. Grafana (conteneur Docker)
+## Notes pratiques
 
-**Image :** `grafana/grafana:latest` (~200 Mo RAM)
-
-**Dashboards preconfigures :**
-
-#### Dashboard 1 : Vue d'ensemble du trafic
-
-- **Requetes/seconde** : courbe temporelle, groupee par endpoint (top 10)
-- **Latence P50/P95/P99** : courbes par endpoint
-- **Taux d'erreurs** : pourcentage 4xx et 5xx dans le temps
-- **Requetes en cours** : jauge temps reel
-
-#### Dashboard 2 : Analyse de scaling
-
-- **Top 10 endpoints par volume** (table triee)
-- **Top 10 endpoints par latence** (table triee)
-- **Heatmap trafic** par heure/jour de la semaine
-- **Ratio requetes/latence** : identifier les endpoints a forte charge ET lents (candidats prioritaires au scaling)
-
-#### Dashboard 3 : Sante du systeme (optionnel, necessite node_exporter)
-
-- CPU, RAM, disque du VPS
-- Connexions PostgreSQL actives
-- I/O disque
-
----
-
-### 4. Ajouts Docker Compose
-
-```yaml
-# A ajouter dans docker-compose.prod.yml
-
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: usenghor_prometheus
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml
-      - prometheus_data:/prometheus
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--storage.tsdb.retention.time=90d"
-      - "--storage.tsdb.retention.size=1GB"
-    networks:
-      - usenghor_network
-    restart: unless-stopped
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: usenghor_grafana
-    environment:
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
-      - GF_SERVER_ROOT_URL=https://usenghor.org/grafana/
-    volumes:
-      - grafana_data:/var/lib/grafana
-    depends_on:
-      - prometheus
-    networks:
-      - usenghor_network
-    restart: unless-stopped
-
-volumes:
-  prometheus_data:
-  grafana_data:
-```
-
-**Nginx (ajout pour Grafana) :**
-
-```nginx
-location /grafana/ {
-    # Acces restreint par IP ou auth basique
-    # allow 1.2.3.4;
-    # deny all;
-    proxy_pass http://grafana:3000/;
-    proxy_set_header Host $host;
-}
-```
-
----
-
-## Phase optionnelle : Logs structures (Promtail + Loki)
-
-### Nginx access log en JSON
-
-```nginx
-log_format json_combined escape=json
-    '{'
-        '"time":"$time_iso8601",'
-        '"remote_addr":"$remote_addr",'
-        '"method":"$request_method",'
-        '"uri":"$request_uri",'
-        '"status":$status,'
-        '"body_bytes_sent":$body_bytes_sent,'
-        '"request_time":$request_time,'
-        '"upstream_response_time":"$upstream_response_time",'
-        '"user_agent":"$http_user_agent",'
-        '"referer":"$http_referer"'
-    '}';
-
-access_log /var/log/nginx/access.log json_combined;
-```
-
-### Promtail + Loki (conteneurs supplementaires)
-
-- **Promtail** : lit les logs Nginx, les pousse vers Loki
-- **Loki** : stockage et indexation des logs
-- **Grafana** : exploration des logs (deja present)
-
-**Cout supplementaire : ~150-200 Mo RAM**
-
----
-
-## Bilan des ressources
-
-| Composant | RAM | CPU | Disque/mois |
-|-----------|-----|-----|-------------|
-| Middleware Python | < 5 Mo | ~0.1 ms/req | 0 |
-| Prometheus | ~150-200 Mo | Faible | ~100 Mo |
-| Grafana | ~150-200 Mo | Faible | ~50 Mo |
-| *Promtail + Loki (optionnel)* | *~150-200 Mo* | *Faible* | *~200 Mo* |
-| **Total (sans Loki)** | **~300-400 Mo** | **Negligeable** | **~150 Mo** |
-| **Total (avec Loki)** | **~500-600 Mo** | **Negligeable** | **~350 Mo** |
-
----
-
-## Avantages
-
-- Stack standard de l'industrie, documentation abondante
-- Dashboards puissants et personnalisables (Grafana)
-- Systeme d'alertes mature (regles PromQL)
-- Historique long terme avec retention configurable
-- Communaute active, nombreux dashboards preconfigures
-- Extensible (ajout de node_exporter, cAdvisor, etc.)
-
-## Inconvenients
-
-- **Consommation RAM significative** (~400 Mo minimum)
-- 2 conteneurs supplementaires a maintenir
-- Configuration initiale plus complexe
-- Necessite d'exposer Grafana (securisation supplementaire)
-- Peut etre surdimensionne pour un VPS avec peu de trafic
-
----
-
-## Quand choisir cette solution ?
-
-- Le VPS a **2 Go+ de RAM disponible** au-dela des services actuels
-- Besoin de dashboards **tres personnalises** et interactifs
-- Equipe familiere avec Prometheus/Grafana
-- Prevision de scaling vers **plusieurs serveurs** (Prometheus supporte nativement le multi-target)
-- Besoin d'un historique de metriques **longue duree** (> 90 jours)
+- Les IDs Grafana mentionnés (1860, 193, 14282, 12708, 9628) sont publics et téléchargeables depuis [grafana.com/grafana/dashboards](https://grafana.com/grafana/dashboards/).
+- L'instrumentation FastAPI se résume à :
+  ```python
+  from prometheus_fastapi_instrumentator import Instrumentator
+  Instrumentator().instrument(app).expose(app, endpoint="/metrics", include_in_schema=False)
+  ```
+- Pour le découpage en microservices à venir, surveiller particulièrement dans Grafana :
+  - **Top 10 des endpoints par temps CPU cumulé** (latence × requêtes/s) → candidats à extraction.
+  - **Corrélation pics RAM ↔ endpoint** → identifier les modules gourmands.
+  - **Latence p95 par préfixe d'URL** (`/api/admin/*`, `/api/public/*`, `/api/auth/*`) → mesurer l'impact relatif de chaque domaine fonctionnel.
