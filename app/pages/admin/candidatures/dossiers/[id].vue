@@ -159,8 +159,19 @@ const saveDocumentValidation = async () => {
 }
 
 const downloadDocument = (doc: ApplicationDocumentRead) => {
-  // TODO: implement document download when media service is ready
-  console.log('Téléchargement:', doc.media_external_id)
+  if (!doc.media_external_id) {
+    error.value = 'Aucun fichier associé à ce document'
+    return
+  }
+  const url = `/api/public/media/${doc.media_external_id}/download?download=1`
+  const link = document.createElement('a')
+  link.href = url
+  link.target = '_blank'
+  link.rel = 'noopener'
+  link.download = doc.document_name || ''
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 }
 
 const exportPDF = () => {
