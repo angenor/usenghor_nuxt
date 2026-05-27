@@ -101,6 +101,31 @@ export function useApplicationsApi() {
     return apiFetch<ApplicationWithDetails>(`/api/admin/applications/${id}`)
   }
 
+  /**
+   * Exporte les candidatures en archive ZIP (un dossier par candidat, contenant
+   * les documents soumis et un fichier Excel récapitulatif).
+   * Si `ids` est fourni, seules ces candidatures sont exportées ; sinon toutes
+   * celles correspondant aux filtres.
+   */
+  async function exportApplications(params: {
+    search?: string
+    call_id?: string | 'all'
+    status?: ApplicationStatus | 'all'
+    program_id?: string
+    ids?: string[]
+  } = {}): Promise<Blob> {
+    return apiFetch<Blob>('/api/admin/applications/export', {
+      responseType: 'blob',
+      query: {
+        search: params.search || undefined,
+        call_id: params.call_id !== 'all' ? params.call_id : undefined,
+        status: params.status !== 'all' ? params.status : undefined,
+        program_id: params.program_id || undefined,
+        ids: params.ids && params.ids.length > 0 ? params.ids.join(',') : undefined,
+      },
+    })
+  }
+
   async function deleteApplication(id: string): Promise<MessageResponse> {
     return apiFetch<MessageResponse>(`/api/admin/applications/${id}`, {
       method: 'DELETE',
@@ -163,6 +188,7 @@ export function useApplicationsApi() {
     // CRUD principal
     listApplications,
     getApplicationById,
+    exportApplications,
     deleteApplication,
     updateApplicationStatus,
 

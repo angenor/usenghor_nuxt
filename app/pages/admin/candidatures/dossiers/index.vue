@@ -10,6 +10,7 @@ const router = useRouter()
 const {
   listApplications,
   getStatistics,
+  exportApplications,
   deleteApplication: apiDeleteApplication,
   updateApplicationStatus,
   applicationStatusLabels,
@@ -250,89 +251,27 @@ const bulkChangeStatus = async (status: ApplicationStatus) => {
 
 const exporting = ref(false)
 
-// Récupère toutes les candidatures correspondant aux filtres courants (toutes pages)
-const fetchAllForExport = async (): Promise<ApplicationRead[]> => {
-  const pageSize = 100
-  const results: ApplicationRead[] = []
-  let page = 1
-  let total = Infinity
-
-  while (results.length < total) {
-    const response = await listApplications({
-      page,
-      limit: pageSize,
-      sort_by: sortBy.value,
-      sort_order: sortOrder.value,
-      search: searchQuery.value || undefined,
-      status: filterStatus.value,
-      call_id: filterCallId.value,
-    })
-    total = response.total
-    results.push(...response.items)
-    if (response.items.length === 0) break
-    page++
-  }
-
-  return results
-}
-
-// Échappement CSV : guillemets autour de chaque champ, guillemets internes doublés
-const escapeCsv = (value: string | number | null | undefined): string => {
-  const str = value === null || value === undefined ? '' : String(value)
-  return `"${str.replace(/"/g, '""')}"`
-}
-
-const buildCsv = (rows: ApplicationRead[]): string => {
-  const headers = [
-    'Référence',
-    'Civilité',
-    'Nom',
-    'Prénom',
-    'Email',
-    'Téléphone',
-    'Date de soumission',
-    'Statut',
-    'Score',
-  ]
-
-  const lines = rows.map(app => [
-    app.reference_number,
-    app.salutation ? salutationLabels[app.salutation] : '',
-    app.last_name,
-    app.first_name,
-    app.email,
-    app.phone ?? '',
-    formatDateTime(app.submitted_at),
-    applicationStatusLabels[app.status],
-    app.review_score != null ? Number(app.review_score).toFixed(1) : '',
-  ].map(escapeCsv).join(';'))
-
-  // Séparateur ';' + BOM UTF-8 pour une ouverture correcte dans Excel (locale FR)
-  return '﻿' + [headers.map(escapeCsv).join(';'), ...lines].join('\r\n')
-}
-
+// Export ZIP : un dossier par candidat (documents soumis + Excel récapitulatif).
+// Si une sélection est active, seules ces candidatures sont exportées ;
+// sinon toutes celles correspondant aux filtres courants.
 const exportSelection = async () => {
   if (exporting.value) return
   exporting.value = true
   error.value = null
 
   try {
-    const rows = selectedIds.value.length > 0
-      ? applications.value.filter(a => selectedIds.value.includes(a.id))
-      : await fetchAllForExport()
+    const blob = await exportApplications({
+      search: searchQuery.value || undefined,
+      status: filterStatus.value,
+      call_id: filterCallId.value,
+      ids: selectedIds.value.length > 0 ? selectedIds.value : undefined,
+    })
 
-    if (rows.length === 0) {
-      error.value = 'Aucune candidature à exporter'
-      return
-    }
-
-    const csv = buildCsv(rows)
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     const stamp = new Date().toISOString().slice(0, 10)
     link.href = url
-    link.download = `candidatures_${stamp}.csv`
+    link.download = `candidatures_${stamp}.zip`
     link.click()
     URL.revokeObjectURL(url)
   } catch {
