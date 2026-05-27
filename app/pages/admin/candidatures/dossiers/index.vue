@@ -248,8 +248,98 @@ const bulkChangeStatus = async (status: ApplicationStatus) => {
   }
 }
 
-const exportSelection = () => {
-  console.log('Export des candidatures:', selectedIds.value.length > 0 ? selectedIds.value : 'toutes')
+const exporting = ref(false)
+
+// Récupère toutes les candidatures correspondant aux filtres courants (toutes pages)
+const fetchAllForExport = async (): Promise<ApplicationRead[]> => {
+  const pageSize = 100
+  const results: ApplicationRead[] = []
+  let page = 1
+  let total = Infinity
+
+  while (results.length < total) {
+    const response = await listApplications({
+      page,
+      limit: pageSize,
+      sort_by: sortBy.value,
+      sort_order: sortOrder.value,
+      search: searchQuery.value || undefined,
+      status: filterStatus.value,
+      call_id: filterCallId.value,
+    })
+    total = response.total
+    results.push(...response.items)
+    if (response.items.length === 0) break
+    page++
+  }
+
+  return results
+}
+
+// Échappement CSV : guillemets autour de chaque champ, guillemets internes doublés
+const escapeCsv = (value: string | number | null | undefined): string => {
+  const str = value === null || value === undefined ? '' : String(value)
+  return `"${str.replace(/"/g, '""')}"`
+}
+
+const buildCsv = (rows: ApplicationRead[]): string => {
+  const headers = [
+    'Référence',
+    'Civilité',
+    'Nom',
+    'Prénom',
+    'Email',
+    'Téléphone',
+    'Date de soumission',
+    'Statut',
+    'Score',
+  ]
+
+  const lines = rows.map(app => [
+    app.reference_number,
+    app.salutation ? salutationLabels[app.salutation] : '',
+    app.last_name,
+    app.first_name,
+    app.email,
+    app.phone ?? '',
+    formatDateTime(app.submitted_at),
+    applicationStatusLabels[app.status],
+    app.review_score != null ? Number(app.review_score).toFixed(1) : '',
+  ].map(escapeCsv).join(';'))
+
+  // Séparateur ';' + BOM UTF-8 pour une ouverture correcte dans Excel (locale FR)
+  return '﻿' + [headers.map(escapeCsv).join(';'), ...lines].join('\r\n')
+}
+
+const exportSelection = async () => {
+  if (exporting.value) return
+  exporting.value = true
+  error.value = null
+
+  try {
+    const rows = selectedIds.value.length > 0
+      ? applications.value.filter(a => selectedIds.value.includes(a.id))
+      : await fetchAllForExport()
+
+    if (rows.length === 0) {
+      error.value = 'Aucune candidature à exporter'
+      return
+    }
+
+    const csv = buildCsv(rows)
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    const stamp = new Date().toISOString().slice(0, 10)
+    link.href = url
+    link.download = `candidatures_${stamp}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+  } catch {
+    error.value = 'Erreur lors de l\'export'
+  } finally {
+    exporting.value = false
+  }
 }
 
 // Formatage
@@ -286,11 +376,15 @@ const getStatusColor = (status: ApplicationStatus) => {
       </div>
       <div class="flex gap-2">
         <button
-          class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          :disabled="exporting"
+          class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
           @click="exportSelection"
         >
-          <font-awesome-icon icon="fa-solid fa-download" class="mr-2 h-4 w-4" />
-          Exporter
+          <font-awesome-icon
+            :icon="exporting ? 'fa-solid fa-spinner' : 'fa-solid fa-download'"
+            :class="['mr-2 h-4 w-4', { 'animate-spin': exporting }]"
+          />
+          {{ exporting ? 'Export…' : (selectedIds.length > 0 ? `Exporter (${selectedIds.length})` : 'Exporter') }}
         </button>
       </div>
     </div>
