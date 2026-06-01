@@ -11,6 +11,9 @@ const {
 } = usePublicProjectsApi()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
+const route = useRoute()
+const router = useRouter()
+
 // Helper pour obtenir l'URL de l'image de couverture selon la variante souhaitée
 function getCoverImageUrl(project: ProjectPublicDisplay, variant: 'low' | 'medium' | 'original' = 'low'): string | null {
   if ((project as any).cover_image_external_id) {
@@ -51,9 +54,6 @@ const totalProjects = ref(0)
 
 // Filters
 const validStatuses = ['all', 'planned', 'ongoing', 'completed', 'suspended'] as const
-
-const route = useRoute()
-const router = useRouter()
 
 const getInitialCategory = () => {
   const cat = route.query.category as string
