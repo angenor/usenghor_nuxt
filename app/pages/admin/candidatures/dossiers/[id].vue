@@ -177,6 +177,14 @@ const downloadDocument = (doc: ApplicationDocumentRead) => {
 
 const exporting = ref(false)
 
+// Translittère et nettoie une chaîne pour un nom de fichier sûr : supprime les
+// accents (problèmes d'encodage SSH/Docker) et ne garde que [A-Za-z0-9_-].
+const slugify = (value: string, fallback = 'candidat'): string => {
+  const ascii = value.normalize('NFKD').replace(/\p{Diacritic}/gu, '')
+  const cleaned = ascii.replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
+  return cleaned || fallback
+}
+
 // Exporte le dossier complet du candidat (ZIP : un dossier à son nom contenant
 // l'Excel récapitulatif et l'ensemble des documents soumis).
 const exportDossier = async () => {
@@ -190,7 +198,10 @@ const exportDossier = async () => {
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `dossier_${application.value.reference_number}.zip`
+    const slug = slugify(
+      `${application.value.last_name}_${application.value.first_name}_${application.value.reference_number}`,
+    )
+    link.download = `dossier_${slug}.zip`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
