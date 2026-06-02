@@ -12,6 +12,7 @@ const {
   getApplicationById,
   updateApplicationStatus,
   validateDocument: apiValidateDocument,
+  exportApplications,
   applicationStatusLabels,
   salutationLabels,
   maritalStatusLabels,
@@ -174,8 +175,31 @@ const downloadDocument = (doc: ApplicationDocumentRead) => {
   document.body.removeChild(link)
 }
 
-const exportPDF = () => {
-  console.log('Export PDF de la candidature:', application.value?.id)
+const exporting = ref(false)
+
+// Exporte le dossier complet du candidat (ZIP : un dossier à son nom contenant
+// l'Excel récapitulatif et l'ensemble des documents soumis).
+const exportDossier = async () => {
+  if (exporting.value || !application.value) return
+  exporting.value = true
+  error.value = null
+
+  try {
+    const blob = await exportApplications({ ids: [application.value.id] })
+
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `dossier_${application.value.reference_number}.zip`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  } catch {
+    error.value = 'Erreur lors de l\'export du dossier'
+  } finally {
+    exporting.value = false
+  }
 }
 
 const goBack = () => {
@@ -222,11 +246,15 @@ const goBack = () => {
           Changer le statut
         </button>
         <button
-          class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          @click="exportPDF"
+          :disabled="exporting"
+          class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          @click="exportDossier"
         >
-          <font-awesome-icon icon="fa-solid fa-file-pdf" class="mr-2 h-4 w-4" />
-          Exporter PDF
+          <font-awesome-icon
+            :icon="exporting ? 'fa-solid fa-spinner' : 'fa-solid fa-download'"
+            :class="['mr-2 h-4 w-4', { 'animate-spin': exporting }]"
+          />
+          {{ exporting ? 'Export…' : 'Exporter' }}
         </button>
       </div>
     </div>
