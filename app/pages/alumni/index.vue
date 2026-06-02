@@ -6,6 +6,8 @@ import { TESTIMONIAL_KEY_PREFIX } from '~/composables/editorial-values-config'
 const { t, locale } = useI18n()
 const { public: { siteUrl } } = useRuntimeConfig()
 const localePath = useLocalePath()
+const route = useRoute()
+const router = useRouter()
 const {
   getAllAlumni,
   getAlumniStats,
@@ -90,9 +92,6 @@ const departments = [
 ]
 
 // Filters
-const route = useRoute()
-const router = useRouter()
-
 const getInitialDepartment = () => {
   const dept = route.query.department as string
   if (dept && departments.some(d => d.id === dept)) return dept
