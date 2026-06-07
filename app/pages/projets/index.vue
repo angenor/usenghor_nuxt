@@ -263,34 +263,46 @@ const stats = computed(() => [
             {{ getContent('projects.list.title', 'projets.list.title') }}
           </h2>
 
-          <!-- Projects Grid -->
-          <div v-if="visibleProjects.length > 0" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <NuxtLink
-              v-for="project in visibleProjects"
+          <!-- Projects List : une occurrence par ligne, image + texte côte à côte -->
+          <div v-if="visibleProjects.length > 0" class="space-y-14 lg:space-y-20">
+            <article
+              v-for="(project, index) in visibleProjects"
               :key="project.id"
-              :to="localePath(`/projets/${project.slug}`)"
-              class="group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700"
+              class="group grid items-center gap-8 lg:grid-cols-2 lg:gap-14"
             >
-              <div class="aspect-video overflow-hidden">
-                <img
-                  v-if="getCoverImageUrl(project)"
-                  :src="getCoverImageUrl(project)!"
-                  :alt="getLocalizedTitle(project)"
-                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                >
-                <div v-else class="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                  <font-awesome-icon icon="fa-solid fa-diagram-project" class="w-12 h-12 text-gray-400 dark:text-gray-500" />
-                </div>
-              </div>
+              <!-- Image -->
+              <NuxtLink
+                :to="localePath(`/projets/${project.slug}`)"
+                class="relative block"
+                :class="index % 2 === 1 ? 'lg:order-2' : ''"
+              >
+                <!-- Décorations derrière l'image -->
+                <div class="absolute -right-3 -top-3 h-full w-full rounded-2xl bg-gradient-to-br from-brand-blue-500/20 to-brand-red-500/20 dark:from-brand-blue-500/10 dark:to-brand-red-500/10" />
+                <div class="absolute -bottom-3 -left-3 h-full w-full rounded-2xl border-2 border-brand-blue-200 dark:border-brand-blue-800" />
 
-              <div class="p-5">
-                <div class="flex items-center gap-2 mb-3">
-                  <span v-if="getFirstCategoryName(project)" class="inline-block px-2 py-0.5 text-xs font-medium text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30 rounded">
+                <div class="relative z-10 aspect-video overflow-hidden rounded-2xl shadow-xl">
+                  <img
+                    v-if="getCoverImageUrl(project, 'medium')"
+                    :src="getCoverImageUrl(project, 'medium')!"
+                    :alt="getLocalizedTitle(project)"
+                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  >
+                  <div v-else class="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-700">
+                    <font-awesome-icon icon="fa-solid fa-diagram-project" class="h-14 w-14 text-gray-400 dark:text-gray-500" />
+                  </div>
+                </div>
+              </NuxtLink>
+
+              <!-- Contenu -->
+              <div :class="index % 2 === 1 ? 'lg:order-1' : ''">
+                <!-- Badges -->
+                <div class="mb-4 flex flex-wrap items-center gap-2">
+                  <span v-if="getFirstCategoryName(project)" class="inline-block rounded px-2.5 py-1 text-xs font-medium text-brand-blue-700 dark:text-brand-blue-400 bg-brand-blue-100 dark:bg-brand-blue-900/30">
                     {{ getFirstCategoryName(project) }}
                   </span>
                   <span
-                    class="inline-block px-2 py-0.5 text-xs font-medium rounded"
+                    class="inline-block rounded px-2.5 py-1 text-xs font-medium"
                     :class="{
                       'text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30': project.status === 'ongoing',
                       'text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30': project.status === 'completed',
@@ -302,15 +314,37 @@ const stats = computed(() => [
                   </span>
                 </div>
 
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors line-clamp-2">
-                  {{ getLocalizedTitle(project) }}
+                <!-- Titre -->
+                <h3 class="mb-4 text-2xl font-bold leading-tight text-gray-900 dark:text-white md:text-3xl">
+                  <NuxtLink
+                    :to="localePath(`/projets/${project.slug}`)"
+                    class="transition-colors hover:text-brand-blue-600 dark:hover:text-brand-blue-400"
+                  >
+                    {{ getLocalizedTitle(project) }}
+                  </NuxtLink>
                 </h3>
 
-                <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                <!-- Ligne décorative -->
+                <div class="mb-5 flex items-center gap-3">
+                  <div class="h-1 w-16 rounded-full bg-brand-red-500" />
+                  <div class="h-1 w-8 rounded-full bg-brand-blue-300" />
+                </div>
+
+                <!-- Description -->
+                <p v-if="getLocalizedDescription(project)" class="mb-6 line-clamp-3 text-base leading-relaxed text-gray-600 dark:text-gray-400">
                   {{ getLocalizedDescription(project) }}
                 </p>
+
+                <!-- Bouton En savoir plus -->
+                <NuxtLink
+                  :to="localePath(`/projets/${project.slug}`)"
+                  class="inline-flex items-center gap-2 rounded-lg bg-brand-blue-600 px-6 py-3 font-medium text-white shadow-sm transition-colors hover:bg-brand-blue-700"
+                >
+                  {{ t('common.learnMore') }}
+                  <font-awesome-icon icon="fa-solid fa-arrow-right" class="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </NuxtLink>
               </div>
-            </NuxtLink>
+            </article>
           </div>
 
           <!-- Empty state -->
