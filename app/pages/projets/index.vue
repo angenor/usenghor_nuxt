@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ProjectCategoryRead, ProjectStatus } from '~/types/api'
 import type { ProjectPublicDisplay } from '~/composables/usePublicProjectsApi'
+import type { NewsDisplay } from '~/types/news'
 
 const { t, locale } = useI18n()
 const { public: { siteUrl } } = useRuntimeConfig()
@@ -9,6 +10,7 @@ const {
   listProjects,
   getCategories,
 } = usePublicProjectsApi()
+const { getAllPublishedNews } = usePublicNewsApi()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
 const route = useRoute()
@@ -51,6 +53,39 @@ const error = ref<string | null>(null)
 const projects = ref<ProjectPublicDisplay[]>([])
 const categories = ref<ProjectCategoryRead[]>([])
 const totalProjects = ref(0)
+
+// Actualités associées à l'ensemble des projets
+const projectNews = ref<NewsDisplay[]>([])
+
+async function loadProjectNews() {
+  try {
+    const allNews = await getAllPublishedNews({ limit: 100 })
+    // On ne garde que les actualités rattachées à un projet (association faite en backoffice)
+    projectNews.value = allNews.filter(n => !!n.project_id)
+  }
+  catch (err) {
+    console.error('Erreur lors du chargement des actualités des projets:', err)
+  }
+}
+
+// Navigation par ancres (tab bar)
+const anchorSections = computed(() => {
+  const sections = [
+    { id: 'presentation', label: t('projets.anchors.presentation') },
+    { id: 'projets', label: t('projets.anchors.projects') },
+  ]
+  if (projectNews.value.length > 0) {
+    sections.push({ id: 'actualites', label: t('projets.anchors.news') })
+  }
+  return sections
+})
+
+// Format de date localisé pour les actualités
+const newsDateLocale = computed(() => (locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR'))
+function formatNewsDate(isoDate: string | null | undefined): string {
+  if (!isoDate) return ''
+  return new Date(isoDate).toLocaleDateString(newsDateLocale.value, { day: 'numeric', month: 'long', year: 'numeric' })
+}
 
 // Filters
 const validStatuses = ['all', 'planned', 'ongoing', 'completed', 'suspended'] as const
@@ -129,6 +164,8 @@ await useAsyncData('editorial-projects', () => loadContent())
 onMounted(async () => {
   // Charger les chiffres-clés (non-bloquant)
   loadKeyFigures()
+  // Charger les actualités liées aux projets (non-bloquant)
+  loadProjectNews()
   // Charger les données
   await loadData()
 })
@@ -202,8 +239,15 @@ const stats = computed(() => [
       </div>
     </section>
 
+    <!-- Tab Bar / Navigation par ancres -->
+    <FundraisingAnchorNav
+      v-if="!isLoading && !error && anchorSections.length > 0"
+      :key="anchorSections.map(s => s.id).join('-')"
+      :sections="anchorSections"
+    />
+
     <!-- Introduction Section -->
-    <section class="py-16 bg-white dark:bg-gray-950 bg-grid-pattern">
+    <section id="presentation" class="py-16 bg-white dark:bg-gray-950 bg-grid-pattern">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-3xl mx-auto mb-12">
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -257,7 +301,7 @@ const stats = computed(() => [
     <!-- Content -->
     <template v-else>
       <!-- All Projects -->
-      <section class="py-16 bg-white dark:bg-gray-950 bg-grid-pattern">
+      <section id="projets" class="py-16 bg-white dark:bg-gray-950 bg-grid-pattern">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">
             {{ getContent('projects.list.title', 'projets.list.title') }}
@@ -372,6 +416,67 @@ const stats = computed(() => [
         </div>
       </section>
     </template>
+
+    <!-- Actualités liées à l'ensemble des projets -->
+    <section
+      v-if="projectNews.length > 0"
+      id="actualites"
+      class="bg-gray-50 py-16 dark:bg-gray-950 md:py-24"
+    >
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <h2 class="mb-3 text-center text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
+          {{ t('projets.news.title') }}
+        </h2>
+        <p class="mx-auto mb-14 max-w-lg text-center text-gray-500 dark:text-gray-400">
+          {{ t('projets.news.subtitle') }}
+        </p>
+
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+          <NuxtLink
+            v-for="item in projectNews"
+            :key="item.id"
+            :to="localePath(`/actualites/${item.slug}`)"
+            class="group"
+          >
+            <!-- Image -->
+            <div class="aspect-[16/10] overflow-hidden rounded-xl bg-gray-200 dark:bg-gray-800">
+              <img
+                v-if="item.cover_image"
+                :src="item.cover_image"
+                :alt="item.title"
+                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                loading="lazy"
+              >
+              <div v-else class="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-blue-100 to-brand-blue-200 dark:from-brand-blue-900 dark:to-brand-blue-800">
+                <font-awesome-icon icon="fa-solid fa-newspaper" class="h-10 w-10 text-brand-blue-400/50" />
+              </div>
+            </div>
+
+            <!-- Contenu -->
+            <div class="mt-4">
+              <div class="flex flex-wrap items-center gap-2">
+                <span
+                  v-for="tag in item.tags"
+                  :key="tag.slug"
+                  class="text-xs font-medium text-brand-blue-600 dark:text-brand-blue-400"
+                >
+                  {{ tag.name }}
+                </span>
+                <span v-if="item.published_at" class="text-xs text-gray-400 dark:text-gray-500">
+                  {{ formatNewsDate(item.published_at) }}
+                </span>
+              </div>
+              <h3 class="mt-2 text-lg font-semibold text-gray-900 transition-colors group-hover:text-brand-blue-600 dark:text-white dark:group-hover:text-brand-blue-400">
+                {{ item.title }}
+              </h3>
+              <p v-if="item.summary" class="mt-2 line-clamp-2 text-sm text-gray-500 dark:text-gray-400">
+                {{ item.summary }}
+              </p>
+            </div>
+          </NuxtLink>
+        </div>
+      </div>
+    </section>
 
     <!-- CTA Section -->
     <section class="py-16 bg-gradient-to-r from-brand-blue-500 to-brand-blue-600">

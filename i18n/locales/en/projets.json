@@ -113,6 +113,15 @@
       "showMore": "Show more projects",
       "showLess": "Show less"
     },
+    "anchors": {
+      "presentation": "Overview",
+      "projects": "Our projects",
+      "news": "News"
+    },
+    "news": {
+      "title": "Project news",
+      "subtitle": "Follow the latest news related to all our projects."
+    },
     "filters": {
       "all": "All",
       "category": "Category",
