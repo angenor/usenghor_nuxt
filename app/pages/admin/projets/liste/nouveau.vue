@@ -54,8 +54,6 @@ const form = reactive({
   category_ids: [] as string[],
   status: 'planned' as ProjectStatus,
   publication_status: 'draft' as PublicationStatus,
-  is_fundraising_featured: false,
-  fundraising_display_order: 0,
 })
 
 // Auto-génération du slug
@@ -178,8 +176,6 @@ const saveForm = async () => {
       category_ids: form.category_ids.length > 0 ? form.category_ids : null,
       status: form.status,
       publication_status: form.publication_status,
-      is_fundraising_featured: form.is_fundraising_featured,
-      fundraising_display_order: form.fundraising_display_order,
     })
 
     router.push('/admin/projets/liste')
@@ -557,13 +553,17 @@ const tabs = [
                 Associations disponibles après création
               </h3>
               <p class="mt-1 text-sm text-amber-700 dark:text-amber-300">
-                Vous pourrez associer des <strong>partenaires</strong>, des <strong>pays concernés</strong> et des <strong>albums de la médiathèque</strong>
+                Vous pourrez associer des <strong>partenaires</strong>, des <strong>levées de fonds</strong>, des <strong>pays concernés</strong> et des <strong>albums de la médiathèque</strong>
                 à ce projet après l'avoir créé. Enregistrez d'abord le projet, puis revenez sur cette page pour gérer les associations.
               </p>
               <div class="mt-4 flex flex-wrap gap-4">
                 <div class="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
                   <font-awesome-icon :icon="['fas', 'handshake']" class="h-4 w-4" />
                   <span>Partenaires</span>
+                </div>
+                <div class="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
+                  <font-awesome-icon :icon="['fas', 'hand-holding-dollar']" class="h-4 w-4" />
+                  <span>Levées de fonds</span>
                 </div>
                 <div class="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
                   <font-awesome-icon :icon="['fas', 'globe-africa']" class="h-4 w-4" />
@@ -613,38 +613,10 @@ const tabs = [
           </div>
         </div>
 
-        <!-- Levée de fonds -->
-        <label class="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-700/50 dark:hover:bg-gray-700">
-          <input
-            v-model="form.is_fundraising_featured"
-            type="checkbox"
-            class="h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 dark:border-gray-600 dark:bg-gray-700"
-          >
-          <div>
-            <span class="flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-white">
-              <font-awesome-icon :icon="['fas', 'hand-holding-dollar']" class="h-3.5 w-3.5 text-amber-500" />
-              Levée de fonds
-            </span>
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              Afficher dans la section levée de fonds (page Stratégie)
-            </p>
-          </div>
-        </label>
-
-        <!-- Ordre d'affichage (visible seulement si featured) -->
-        <div v-if="form.is_fundraising_featured">
-          <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Ordre d'affichage (levée de fonds)
-          </label>
-          <input
-            v-model.number="form.fundraising_display_order"
-            type="number"
-            min="0"
-            class="w-20 rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
-          >
-          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Les projets sont affichés par ordre croissant (0 = premier)
-          </p>
+        <!-- Note : l'association aux levées de fonds se gère après création, dans l'onglet Associations -->
+        <div class="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-700/50 dark:text-gray-400">
+          <font-awesome-icon :icon="['fas', 'hand-holding-dollar']" class="mt-0.5 h-4 w-4 text-amber-500" />
+          <span>L'association à une ou plusieurs <strong>levées de fonds</strong> se fera après création du projet, dans l'onglet <strong>Associations</strong>.</span>
         </div>
       </div>
     </div>

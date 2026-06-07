@@ -217,13 +217,13 @@ const allContributors = ref<AllContributorsItem[]>(mockContributors)
 // Anchor sections for nav
 const anchorSections = computed(() => {
   const sections = []
-  sections.push({ id: 'contribution', label: t('leveesDeFonds.anchors.contribution') })
+  sections.push({ id: 'contribution', label: t('leveesDeFonds.anchors.contribution'), icon: 'fa-solid fa-hand-holding-heart' })
   if (allCampaigns.value.length > 0) {
-    sections.push({ id: 'campaigns', label: t('leveesDeFonds.anchors.campaigns') })
+    sections.push({ id: 'campaigns', label: t('leveesDeFonds.anchors.campaigns'), icon: 'fa-solid fa-bullhorn' })
   }
-  sections.push({ id: 'news', label: t('leveesDeFonds.anchors.news') })
+  sections.push({ id: 'news', label: t('leveesDeFonds.anchors.news'), icon: 'fa-solid fa-newspaper' })
   if (allContributors.value.length > 0) {
-    sections.push({ id: 'contributors', label: t('leveesDeFonds.anchors.contributors') })
+    sections.push({ id: 'contributors', label: t('leveesDeFonds.anchors.contributors'), icon: 'fa-solid fa-users' })
   }
   return sections
 })

@@ -47,8 +47,6 @@ const form = reactive({
   category_ids: [] as string[],
   status: 'planned' as ProjectStatus,
   publication_status: 'draft' as PublicationStatus,
-  is_fundraising_featured: false,
-  fundraising_display_order: 0,
 })
 
 const isLoading = ref(true)
@@ -99,8 +97,6 @@ onMounted(async () => {
     form.category_ids = project.categories?.map(c => c.id) || []
     form.status = project.status
     form.publication_status = project.publication_status
-    form.is_fundraising_featured = project.is_fundraising_featured || false
-    form.fundraising_display_order = project.fundraising_display_order || 0
   }
   catch (err: any) {
     console.error('Erreur chargement projet:', err)
@@ -214,8 +210,6 @@ const saveForm = async () => {
       category_ids: form.category_ids.length > 0 ? form.category_ids : null,
       status: form.status,
       publication_status: form.publication_status,
-      is_fundraising_featured: form.is_fundraising_featured,
-      fundraising_display_order: form.fundraising_display_order,
     })
 
     router.push(`/admin/projets/liste/${projectId.value}`)
@@ -624,11 +618,14 @@ const tabs = [
       <!-- Onglet Associations -->
       <div v-show="activeTab === 'associations'" class="space-y-6">
         <p class="text-sm text-gray-500 dark:text-gray-400">
-          Gérez les partenaires, pays et albums associés à ce projet.
+          Gérez les partenaires, levées de fonds, pays et albums associés à ce projet.
         </p>
 
         <!-- Partenaires -->
         <AdminProjetsProjectPartnersSection :project-id="projectId" />
+
+        <!-- Levées de fonds (un projet peut en avoir plusieurs, historique conservé) -->
+        <AdminProjetsProjectFundraisersSection :project-id="projectId" />
 
         <!-- Pays concernés -->
         <AdminProjetsProjectCountriesSection :project-id="projectId" />
@@ -671,38 +668,10 @@ const tabs = [
           </div>
         </div>
 
-        <!-- Levée de fonds -->
-        <label class="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-700/50 dark:hover:bg-gray-700">
-          <input
-            v-model="form.is_fundraising_featured"
-            type="checkbox"
-            class="h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 dark:border-gray-600 dark:bg-gray-700"
-          >
-          <div>
-            <span class="flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-white">
-              <font-awesome-icon :icon="['fas', 'hand-holding-dollar']" class="h-3.5 w-3.5 text-amber-500" />
-              Levée de fonds
-            </span>
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              Afficher dans la section levée de fonds (page Stratégie)
-            </p>
-          </div>
-        </label>
-
-        <!-- Ordre d'affichage (visible seulement si featured) -->
-        <div v-if="form.is_fundraising_featured">
-          <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Ordre d'affichage (levée de fonds)
-          </label>
-          <input
-            v-model.number="form.fundraising_display_order"
-            type="number"
-            min="0"
-            class="w-20 rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
-          >
-          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Les projets sont affichés par ordre croissant (0 = premier)
-          </p>
+        <!-- Note : l'association aux levées de fonds se gère dans l'onglet Associations -->
+        <div class="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-700/50 dark:text-gray-400">
+          <font-awesome-icon :icon="['fas', 'hand-holding-dollar']" class="mt-0.5 h-4 w-4 text-amber-500" />
+          <span>Pour associer une ou plusieurs <strong>levées de fonds</strong> à ce projet, rendez-vous dans l'onglet <strong>Associations</strong>.</span>
         </div>
       </div>
     </div>

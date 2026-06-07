@@ -29,6 +29,7 @@ import type {
   ProjectUpdatePayload,
   PublicationStatus,
 } from '~/types/api'
+import type { FundraiserRead } from '~/types/fundraising'
 
 // ============================================================================
 // Types Display (enrichis pour le frontend)
@@ -374,6 +375,53 @@ export function useProjectsApi() {
   }
 
   // =========================================================================
+  // Project Fundraisers (association projet <-> levée de fonds)
+  // =========================================================================
+
+  /**
+   * Liste les levées de fonds associées à un projet (historique).
+   */
+  async function listProjectFundraisers(projectId: string): Promise<FundraiserRead[]> {
+    return apiFetch<FundraiserRead[]>(`/api/admin/projects/${projectId}/fundraisers`)
+  }
+
+  /**
+   * Associe une levée de fonds existante à un projet.
+   */
+  async function attachProjectFundraiser(
+    projectId: string,
+    data: { fundraiser_external_id: string, start_date?: string | null, end_date?: string | null },
+  ): Promise<FundraiserRead> {
+    return apiFetch<FundraiserRead>(`/api/admin/projects/${projectId}/fundraisers`, {
+      method: 'POST',
+      body: data,
+    })
+  }
+
+  /**
+   * Met à jour la période d'une levée associée à un projet.
+   */
+  async function updateProjectFundraiser(
+    projectId: string,
+    fundraiserExternalId: string,
+    data: { start_date?: string | null, end_date?: string | null },
+  ): Promise<FundraiserRead> {
+    return apiFetch<FundraiserRead>(`/api/admin/projects/${projectId}/fundraisers/${fundraiserExternalId}`, {
+      method: 'PUT',
+      body: data,
+    })
+  }
+
+  /**
+   * Dissocie une levée de fonds d'un projet (la levée est conservée).
+   */
+  async function detachProjectFundraiser(projectId: string, fundraiserExternalId: string): Promise<MessageResponse> {
+    return apiFetch<MessageResponse>(`/api/admin/projects/${projectId}/fundraisers/${fundraiserExternalId}`, {
+      method: 'DELETE',
+    })
+  }
+
+  // =========================================================================
   // Project Calls
   // =========================================================================
 
@@ -595,6 +643,12 @@ export function useProjectsApi() {
     addProjectPartner,
     updateProjectPartner,
     removeProjectPartner,
+
+    // Fundraisers (association projet <-> levée de fonds)
+    listProjectFundraisers,
+    attachProjectFundraiser,
+    updateProjectFundraiser,
+    detachProjectFundraiser,
 
     // Project Calls
     listAllCalls,

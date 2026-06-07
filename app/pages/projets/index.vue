@@ -85,14 +85,14 @@ async function loadProjectPartners() {
 // Navigation par ancres (tab bar)
 const anchorSections = computed(() => {
   const sections = [
-    { id: 'presentation', label: t('projets.anchors.presentation') },
-    { id: 'projets', label: t('projets.anchors.projects') },
+    { id: 'presentation', label: t('projets.anchors.presentation'), icon: 'fa-solid fa-circle-info' },
+    { id: 'projets', label: t('projets.anchors.projects'), icon: 'fa-solid fa-diagram-project' },
   ]
   if (projectNews.value.length > 0) {
-    sections.push({ id: 'actualites', label: t('projets.anchors.news') })
+    sections.push({ id: 'actualites', label: t('projets.anchors.news'), icon: 'fa-solid fa-newspaper' })
   }
   if (projectPartners.value.length > 0) {
-    sections.push({ id: 'partenaires', label: t('projets.anchors.partners') })
+    sections.push({ id: 'partenaires', label: t('projets.anchors.partners'), icon: 'fa-solid fa-handshake' })
   }
   return sections
 })

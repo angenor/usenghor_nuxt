@@ -10,7 +10,6 @@ import type {
   ProjectCallRead,
   ProjectCallStatus,
   ProjectCategoryRead,
-  ProjectFundraisingPublic,
   ProjectReadWithRelations,
   ProjectStatus,
 } from '~/types/api'
@@ -25,11 +24,6 @@ export interface ProjectPublicDisplay extends ProjectReadWithRelations {
 
 export interface ProjectCallPublicDisplay extends ProjectCallRead {
   cover_image: string | null
-}
-
-export interface ProjectFundraisingDisplay extends ProjectFundraisingPublic {
-  cover_image: string | null
-  formatted_budget: string
 }
 
 // ============================================================================
@@ -179,30 +173,6 @@ export function usePublicProjectsApi() {
   }
 
   // =========================================================================
-  // Levée de fonds
-  // =========================================================================
-
-  /**
-   * Liste les projets mis en avant pour la section levée de fonds.
-   */
-  async function listFundraisingFeaturedProjects(limit = 4): Promise<ProjectFundraisingDisplay[]> {
-    const projects = await $fetch<ProjectFundraisingPublic[]>(
-      '/api/public/projects/fundraising-featured',
-      { query: { limit } },
-    )
-    return projects.map(project => ({
-      ...project,
-      cover_image: project.cover_image_external_id
-        ? `/api/public/media/${project.cover_image_external_id}/download`
-        : null,
-      formatted_budget: formatBudget(
-        project.budget != null ? Number(project.budget) : null,
-        project.currency,
-      ),
-    }))
-  }
-
-  // =========================================================================
   // Appels de projets
   // =========================================================================
 
@@ -306,9 +276,6 @@ export function usePublicProjectsApi() {
     listProjects,
     getProjectBySlug,
     getProjectById,
-
-    // Levée de fonds
-    listFundraisingFeaturedProjects,
 
     // Appels
     getOngoingCalls,

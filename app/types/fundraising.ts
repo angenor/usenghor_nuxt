@@ -29,6 +29,10 @@ export interface FundraiserRead {
   cover_image_external_id: string | null
   goal_amount: number
   status: FundraiserStatus
+  // Association projet (facultatif) + période de la levée
+  project_external_id: string | null
+  start_date: string | null
+  end_date: string | null
   created_at: string
   updated_at: string
 }
