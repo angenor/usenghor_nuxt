@@ -116,11 +116,16 @@
     "anchors": {
       "presentation": "Présentation",
       "projects": "Nos projets",
-      "news": "Actualités"
+      "news": "Actualités",
+      "partners": "Partenaires"
     },
     "news": {
       "title": "Actualités des projets",
       "subtitle": "Suivez les dernières actualités liées à l'ensemble de nos projets."
+    },
+    "partners": {
+      "title": "Nos partenaires",
+      "subtitle": "L'ensemble des partenaires qui soutiennent nos projets."
     },
     "filters": {
       "all": "Tous",

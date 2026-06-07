@@ -156,6 +156,18 @@ export function usePublicPartnersApi() {
   }
 
   /**
+   * Récupère les partenaires de l'ensemble des projets publiés (sans doublon)
+   */
+  async function getProjectsPartners(): Promise<PartnerPublic[]> {
+    // S'assurer que le cache des pays est chargé
+    await loadCountriesCache()
+
+    const partners = await $fetch<PartnerPublicRaw[]>(`${baseUrl}/api/public/projects/partners`)
+
+    return partners.map(enrichPartner)
+  }
+
+  /**
    * Récupère les partenaires d'un type donné
    */
   async function getPartnersByType(partnerType: PartnerType): Promise<PartnerPublic[]> {
@@ -206,6 +218,7 @@ export function usePublicPartnersApi() {
     // API calls
     listPartners,
     getAllPartners,
+    getProjectsPartners,
     getPartnersByType,
 
     // Helpers

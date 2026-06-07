@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ProjectCategoryRead, ProjectStatus } from '~/types/api'
 import type { ProjectPublicDisplay } from '~/composables/usePublicProjectsApi'
+import type { PartnerPublic } from '~/composables/usePublicPartnersApi'
 import type { NewsDisplay } from '~/types/news'
 
 const { t, locale } = useI18n()
@@ -11,6 +12,7 @@ const {
   getCategories,
 } = usePublicProjectsApi()
 const { getAllPublishedNews } = usePublicNewsApi()
+const { getProjectsPartners } = usePublicPartnersApi()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
 const route = useRoute()
@@ -68,6 +70,18 @@ async function loadProjectNews() {
   }
 }
 
+// Partenaires associés à l'ensemble des projets
+const projectPartners = ref<PartnerPublic[]>([])
+
+async function loadProjectPartners() {
+  try {
+    projectPartners.value = await getProjectsPartners()
+  }
+  catch (err) {
+    console.error('Erreur lors du chargement des partenaires des projets:', err)
+  }
+}
+
 // Navigation par ancres (tab bar)
 const anchorSections = computed(() => {
   const sections = [
@@ -76,6 +90,9 @@ const anchorSections = computed(() => {
   ]
   if (projectNews.value.length > 0) {
     sections.push({ id: 'actualites', label: t('projets.anchors.news') })
+  }
+  if (projectPartners.value.length > 0) {
+    sections.push({ id: 'partenaires', label: t('projets.anchors.partners') })
   }
   return sections
 })
@@ -166,6 +183,8 @@ onMounted(async () => {
   loadKeyFigures()
   // Charger les actualités liées aux projets (non-bloquant)
   loadProjectNews()
+  // Charger les partenaires liés aux projets (non-bloquant)
+  loadProjectPartners()
   // Charger les données
   await loadData()
 })
@@ -193,8 +212,28 @@ const getLocalizedTitle = (project: ProjectPublicDisplay) => {
   return project.title
 }
 
+// Convertit un contenu HTML (rich text) en texte brut pour un extrait (SSR-safe)
+function htmlToPlainText(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, ' ') // retire les balises
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#39;|&apos;/g, '\'')
+    .replace(/&quot;/g, '"')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 const getLocalizedDescription = (project: ProjectPublicDisplay) => {
-  return project.summary || ''
+  // Le backend public renvoie summary_html / description_html (double colonne rich text).
+  // On affiche un extrait : résumé si présent, sinon un morceau de la description détaillée.
+  const raw = (project as any).summary_html
+    || project.description_html
+    || (project as any).summary
+    || ''
+  return raw ? htmlToPlainText(raw) : ''
 }
 
 // Stats - valeurs depuis l'admin avec fallback
@@ -474,6 +513,62 @@ const stats = computed(() => [
               </p>
             </div>
           </NuxtLink>
+        </div>
+      </div>
+    </section>
+
+    <!-- Partenaires de l'ensemble des projets -->
+    <section
+      v-if="projectPartners.length > 0"
+      id="partenaires"
+      class="bg-white py-16 dark:bg-gray-900 md:py-24"
+    >
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <h2 class="mb-3 text-center text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
+          {{ t('projets.partners.title') }}
+        </h2>
+        <p class="mx-auto mb-14 max-w-lg text-center text-gray-500 dark:text-gray-400">
+          {{ t('projets.partners.subtitle') }}
+        </p>
+
+        <div class="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+          <component
+            :is="partner.website ? 'a' : 'div'"
+            v-for="partner in projectPartners"
+            :key="partner.id"
+            :href="partner.website || undefined"
+            :target="partner.website ? '_blank' : undefined"
+            :rel="partner.website ? 'noopener noreferrer' : undefined"
+            class="group flex flex-col items-center rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800"
+          >
+            <!-- Logo -->
+            <div class="flex h-24 w-full items-center justify-center">
+              <img
+                v-if="partner.logo_url"
+                :src="partner.logo_url"
+                :alt="partner.name"
+                class="max-h-20 max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                loading="lazy"
+              >
+              <div v-else class="flex h-20 w-20 items-center justify-center rounded-full bg-brand-blue-100 dark:bg-brand-blue-900/30">
+                <font-awesome-icon icon="fa-solid fa-handshake" class="h-9 w-9 text-brand-blue-400" />
+              </div>
+            </div>
+
+            <!-- Nom -->
+            <h3 class="mt-4 text-center text-sm font-semibold text-gray-900 transition-colors group-hover:text-brand-blue-600 dark:text-white dark:group-hover:text-brand-blue-400">
+              {{ partner.name }}
+            </h3>
+
+            <!-- Lien site web -->
+            <span
+              v-if="partner.website"
+              class="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-brand-blue-600 dark:text-brand-blue-400"
+            >
+              <font-awesome-icon icon="fa-solid fa-external-link-alt" class="h-3 w-3" />
+              {{ t('partners.card.visitWebsite') }}
+            </span>
+          </component>
         </div>
       </div>
     </section>
