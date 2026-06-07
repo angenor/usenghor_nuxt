@@ -16,6 +16,7 @@ const eventId = computed(() => route.params.id as string)
 const {
   getEventById,
   updateEvent,
+  translateEvent,
   slugifyEvent,
   toDatetimeLocal,
   eventTypeLabels,
@@ -25,6 +26,8 @@ const {
   removeAlbumFromEvent,
   reorderEventAlbums,
 } = useEventsApi()
+
+const { t } = useI18n()
 
 const {
   getAllProjects,
@@ -64,6 +67,11 @@ const form = ref({
   type: 'conference' as EventType,
   type_other: '',
   description: '',
+  // Traductions des champs courts (FR → EN/AR)
+  title_en: '',
+  title_ar: '',
+  description_en: '',
+  description_ar: '',
   cover_image_external_id: '' as string | null,
   start_date: '',
   end_date: '',
@@ -96,6 +104,41 @@ const notFound = ref(false)
 const error = ref<string | null>(null)
 const formInitialized = ref(false)
 
+// === TRADUCTION AUTO FR → EN/AR ===
+const translating = ref(false)
+const translateMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
+async function handleTranslate() {
+  translateMessage.value = null
+  if (!form.value.title && !form.value.description && !contentMd.value) {
+    translateMessage.value = { type: 'error', text: t('adminTranslate.translateNeedsFr') }
+    return
+  }
+  translating.value = true
+  try {
+    const res = await translateEvent({
+      title: form.value.title || null,
+      description: form.value.description || null,
+      content_html: contentHtml.value || null,
+      content_md: contentMd.value || null,
+    })
+    if (res.title_en != null) form.value.title_en = res.title_en
+    if (res.title_ar != null) form.value.title_ar = res.title_ar
+    if (res.description_en != null) form.value.description_en = res.description_en
+    if (res.description_ar != null) form.value.description_ar = res.description_ar
+    if (res.content_en_html != null) contentHtmlEn.value = res.content_en_html
+    if (res.content_en_md != null) contentMdEn.value = res.content_en_md
+    if (res.content_ar_html != null) contentHtmlAr.value = res.content_ar_html
+    if (res.content_ar_md != null) contentMdAr.value = res.content_ar_md
+    translateMessage.value = { type: 'success', text: t('adminTranslate.translateSuccess') }
+  }
+  catch {
+    translateMessage.value = { type: 'error', text: t('adminTranslate.translateError') }
+  }
+  finally {
+    translating.value = false
+  }
+}
+
 // Albums associés (médiathèque)
 const eventAlbums = ref<ContentAlbumEntry[]>([])
 const isLoadingAlbums = ref(true)
@@ -119,6 +162,10 @@ onMounted(async () => {
       type: event.type,
       type_other: event.type_other || '',
       description: event.description || '',
+      title_en: event.title_en || '',
+      title_ar: event.title_ar || '',
+      description_en: event.description_en || '',
+      description_ar: event.description_ar || '',
       cover_image_external_id: event.cover_image_external_id || '',
       start_date: toDatetimeLocal(event.start_date),
       end_date: toDatetimeLocal(event.end_date),
@@ -326,6 +373,10 @@ const saveForm = async () => {
       title: form.value.title,
       slug: form.value.slug,
       description: form.value.description || null,
+      title_en: form.value.title_en || null,
+      title_ar: form.value.title_ar || null,
+      description_en: form.value.description_en || null,
+      description_ar: form.value.description_ar || null,
       content_html: contentHtml.value || null,
       content_md: contentMd.value || null,
       content_en_html: contentHtmlEn.value || null,
@@ -506,6 +557,27 @@ const tabs = [
       <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
         <!-- Onglet: Informations générales -->
         <div v-show="activeTab === 'general'" class="space-y-6">
+          <!-- Traduction automatique FR → EN/AR -->
+          <div class="flex flex-wrap items-center gap-3 rounded-lg border border-dashed border-brand-blue-300 bg-brand-blue-50/50 p-3 dark:border-brand-blue-700 dark:bg-brand-blue-900/20">
+            <button
+              type="button"
+              :disabled="translating"
+              class="inline-flex items-center gap-2 rounded-lg bg-brand-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-blue-700 disabled:opacity-50"
+              @click="handleTranslate"
+            >
+              <font-awesome-icon v-if="translating" icon="fa-solid fa-spinner" class="animate-spin" />
+              {{ translating ? t('adminTranslate.translating') : t('adminTranslate.translate') }}
+            </button>
+            <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('adminTranslate.translateHint') }}</p>
+            <p
+              v-if="translateMessage"
+              class="w-full text-xs"
+              :class="translateMessage.type === 'success' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'"
+            >
+              {{ translateMessage.text }}
+            </p>
+          </div>
+
           <div class="grid gap-6 sm:grid-cols-2">
             <div class="sm:col-span-2">
               <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -518,6 +590,10 @@ const tabs = [
                 placeholder="Ex: Conférence sur le développement durable"
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
+              <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <input v-model="form.title_en" type="text" placeholder="Title (EN)" class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-700/60 dark:text-white" />
+                <input v-model="form.title_ar" type="text" dir="rtl" placeholder="العنوان (AR)" class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-700/60 dark:text-white" />
+              </div>
             </div>
 
             <div class="sm:col-span-2">
@@ -575,6 +651,10 @@ const tabs = [
                 placeholder="Brève description de l'événement..."
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
+              <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <textarea v-model="form.description_en" rows="2" placeholder="Description (EN)" class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-700/60 dark:text-white"></textarea>
+                <textarea v-model="form.description_ar" rows="2" dir="rtl" placeholder="الوصف (AR)" class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-700/60 dark:text-white"></textarea>
+              </div>
             </div>
 
             <!-- Image de couverture -->

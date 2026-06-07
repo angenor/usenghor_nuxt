@@ -9,6 +9,8 @@ import type {
   EventCreatePayload,
   EventRead,
   EventStatistics,
+  EventTranslateRequest,
+  EventTranslateResponse,
   EventType,
   EventUpdatePayload,
   EventWithRegistrations,
@@ -159,6 +161,18 @@ export function useEventsApi() {
     })
   }
 
+  /**
+   * Traduit les champs FR → EN/AR sans persistance (bouton « Traduire »).
+   */
+  async function translateEvent(
+    payload: EventTranslateRequest,
+  ): Promise<EventTranslateResponse> {
+    return apiFetch<EventTranslateResponse>('/api/admin/events/translate', {
+      method: 'POST',
+      body: payload,
+    })
+  }
+
   // =========================================================================
   // Statistics
   // =========================================================================
@@ -288,6 +302,7 @@ export function useEventsApi() {
     publishEvent,
     cancelEvent,
     duplicateEvent,
+    translateEvent,
 
     // Statistics
     getEventsStats,

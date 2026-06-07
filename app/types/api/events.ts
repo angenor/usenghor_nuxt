@@ -69,6 +69,11 @@ export interface EventRead {
   title: string
   slug: string
   description: string | null
+  // Traductions automatiques FR → EN/AR des champs courts (convention additive)
+  title_en: string | null
+  title_ar: string | null
+  description_en: string | null
+  description_ar: string | null
   content_html: string | null
   content_md: string | null
   content_en_html: string | null
@@ -115,6 +120,10 @@ export interface EventCreatePayload {
   title: string
   slug: string
   description?: string | null
+  title_en?: string | null
+  title_ar?: string | null
+  description_en?: string | null
+  description_ar?: string | null
   content_html?: string | null
   content_md?: string | null
   content_en_html?: string | null
@@ -150,6 +159,10 @@ export interface EventUpdatePayload {
   title?: string
   slug?: string
   description?: string | null
+  title_en?: string | null
+  title_ar?: string | null
+  description_en?: string | null
+  description_ar?: string | null
   content_html?: string | null
   content_md?: string | null
   content_en_html?: string | null
@@ -199,4 +212,28 @@ export interface EventStatistics {
   past: number
   by_type: Record<EventType, number>
   timeline: EventTimelineDataPoint[]
+}
+
+// ============================================================================
+// Traduction auto FR → EN/AR
+// ============================================================================
+
+/** Champs source FR d'un événement à traduire (sans persistance). */
+export interface EventTranslateRequest {
+  title?: string | null
+  description?: string | null
+  content_html?: string | null
+  content_md?: string | null
+}
+
+/** Traductions EN/AR renvoyées par l'endpoint admin de traduction. */
+export interface EventTranslateResponse {
+  title_en?: string | null
+  title_ar?: string | null
+  description_en?: string | null
+  description_ar?: string | null
+  content_en_html?: string | null
+  content_en_md?: string | null
+  content_ar_html?: string | null
+  content_ar_md?: string | null
 }
