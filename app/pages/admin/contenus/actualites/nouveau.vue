@@ -14,10 +14,13 @@ const {
   createNews: apiCreateNews,
   getAllTags,
   createTag: apiCreateTag,
+  translateNews,
   newsStatusLabels,
   highlightStatusLabels,
   slugify,
 } = useAdminNewsApi()
+
+const { t } = useI18n()
 
 const { uploadMedia, uploadMediaVariants, getMediaUrl } = useMediaApi()
 
@@ -72,6 +75,11 @@ const form = reactive({
   title: '',
   slug: '',
   summary: '',
+  // Traductions des champs courts (FR → EN/AR)
+  title_en: '',
+  title_ar: '',
+  summary_en: '',
+  summary_ar: '',
   video_url: '',
   cover_image: '',
   cover_image_alt: '',
@@ -92,6 +100,41 @@ const form = reactive({
 
 // Tags from API
 const allTags = ref<TagRead[]>([])
+
+// === TRADUCTION AUTO FR → EN/AR ===
+const translating = ref(false)
+const translateMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
+async function handleTranslate() {
+  translateMessage.value = null
+  if (!form.title && !form.summary && !contentMd.value) {
+    translateMessage.value = { type: 'error', text: t('adminTranslate.translateNeedsFr') }
+    return
+  }
+  translating.value = true
+  try {
+    const res = await translateNews({
+      title: form.title || null,
+      summary: form.summary || null,
+      content_html: contentHtml.value || null,
+      content_md: contentMd.value || null,
+    })
+    if (res.title_en != null) form.title_en = res.title_en
+    if (res.title_ar != null) form.title_ar = res.title_ar
+    if (res.summary_en != null) form.summary_en = res.summary_en
+    if (res.summary_ar != null) form.summary_ar = res.summary_ar
+    if (res.content_en_html != null) contentHtmlEn.value = res.content_en_html
+    if (res.content_en_md != null) contentMdEn.value = res.content_en_md
+    if (res.content_ar_html != null) contentHtmlAr.value = res.content_ar_html
+    if (res.content_ar_md != null) contentMdAr.value = res.content_ar_md
+    translateMessage.value = { type: 'success', text: t('adminTranslate.translateSuccess') }
+  }
+  catch {
+    translateMessage.value = { type: 'error', text: t('adminTranslate.translateError') }
+  }
+  finally {
+    translating.value = false
+  }
+}
 
 // Load data on mount + set default author
 onMounted(async () => {
@@ -270,6 +313,10 @@ async function submitForm() {
       title: form.title,
       slug: form.slug,
       summary: form.summary || null,
+      title_en: form.title_en || null,
+      title_ar: form.title_ar || null,
+      summary_en: form.summary_en || null,
+      summary_ar: form.summary_ar || null,
       content_html: contentHtml.value || null,
       content_md: contentMd.value || null,
       content_en_html: contentHtmlEn.value || null,
@@ -359,6 +406,27 @@ async function createTag() {
         </h2>
 
         <div class="space-y-4">
+          <!-- Traduction automatique FR → EN/AR -->
+          <div class="flex flex-wrap items-center gap-3 rounded-lg border border-dashed border-brand-blue-300 bg-brand-blue-50/50 p-3 dark:border-brand-blue-700 dark:bg-brand-blue-900/20">
+            <button
+              type="button"
+              :disabled="translating"
+              class="inline-flex items-center gap-2 rounded-lg bg-brand-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-blue-700 disabled:opacity-50"
+              @click="handleTranslate"
+            >
+              <font-awesome-icon v-if="translating" icon="fa-solid fa-spinner" class="animate-spin" />
+              {{ translating ? t('adminTranslate.translating') : t('adminTranslate.translate') }}
+            </button>
+            <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('adminTranslate.translateHint') }}</p>
+            <p
+              v-if="translateMessage"
+              class="w-full text-xs"
+              :class="translateMessage.type === 'success' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'"
+            >
+              {{ translateMessage.text }}
+            </p>
+          </div>
+
           <!-- Titre -->
           <div>
             <label for="title" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -372,6 +440,10 @@ async function createTag() {
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               placeholder="Titre de l'actualité"
             />
+            <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <input v-model="form.title_en" type="text" placeholder="Title (EN)" class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-700/60 dark:text-white" />
+              <input v-model="form.title_ar" type="text" dir="rtl" placeholder="العنوان (AR)" class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-700/60 dark:text-white" />
+            </div>
           </div>
 
           <!-- Slug -->
@@ -419,6 +491,10 @@ async function createTag() {
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ form.summary.length }}/300 caractères
             </p>
+            <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <textarea v-model="form.summary_en" rows="2" placeholder="Summary (EN)" class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-700/60 dark:text-white"></textarea>
+              <textarea v-model="form.summary_ar" rows="2" dir="rtl" placeholder="الملخص (AR)" class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-700/60 dark:text-white"></textarea>
+            </div>
           </div>
 
           <!-- URL Vidéo -->

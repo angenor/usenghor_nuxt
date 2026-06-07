@@ -17,6 +17,8 @@ import type {
   NewsStats,
   NewsStatus,
   NewsTag,
+  NewsTranslateRequest,
+  NewsTranslateResponse,
   NewsUpdatePayload,
   NewsWithTags,
   TagCreatePayload,
@@ -72,13 +74,22 @@ export function useAdminNewsApi() {
       slug: news.slug,
       title: news.title,
       summary: news.summary,
+      // Traductions des champs courts (FR → EN/AR)
+      title_en: news.title_en ?? null,
+      title_ar: news.title_ar ?? null,
+      summary_en: news.summary_en ?? null,
+      summary_ar: news.summary_ar ?? null,
       // Contenu legacy (non utilisé avec TOAST UI)
       content: null,
       content_en: null,
       content_ar: null,
-      // Contenu TOAST UI Editor (HTML + Markdown)
+      // Contenu TOAST UI Editor (HTML + Markdown, FR/EN/AR)
       content_html: news.content_html || null,
       content_md: news.content_md || null,
+      content_en_html: news.content_en_html ?? null,
+      content_en_md: news.content_en_md ?? null,
+      content_ar_html: news.content_ar_html ?? null,
+      content_ar_md: news.content_ar_md ?? null,
       // Médias
       video_url: news.video_url,
       cover_image: news.cover_image_external_id
@@ -361,6 +372,18 @@ export function useAdminNewsApi() {
     })
   }
 
+  /**
+   * Traduit les champs FR → EN/AR sans persistance (bouton « Traduire »).
+   */
+  async function translateNews(
+    payload: NewsTranslateRequest,
+  ): Promise<NewsTranslateResponse> {
+    return apiFetch<NewsTranslateResponse>('/api/admin/news/translate', {
+      method: 'POST',
+      body: payload,
+    })
+  }
+
   // =========================================================================
   // CRUD Tags
   // =========================================================================
@@ -541,6 +564,7 @@ export function useAdminNewsApi() {
     publishNews,
     unpublishNews,
     duplicateNews,
+    translateNews,
 
     // CRUD Tags
     listTags,

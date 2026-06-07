@@ -61,6 +61,11 @@ export interface NewsRead {
   title: string
   slug: string
   summary: string | null
+  // Traductions automatiques FR → EN/AR des champs courts (convention additive)
+  title_en: string | null
+  title_ar: string | null
+  summary_en: string | null
+  summary_ar: string | null
   content_html: string | null
   content_md: string | null
   content_en_html: string | null
@@ -117,6 +122,11 @@ export interface NewsDisplay {
   slug: string
   title: string
   summary: string | null
+  // Traductions automatiques FR → EN/AR des champs courts
+  title_en: string | null
+  title_ar: string | null
+  summary_en: string | null
+  summary_ar: string | null
   // Contenu HTML + Markdown (TOAST UI Editor)
   content_html: string | null
   content_md: string | null
@@ -195,6 +205,10 @@ export interface NewsCreatePayload {
   title: string
   slug: string
   summary?: string | null
+  title_en?: string | null
+  title_ar?: string | null
+  summary_en?: string | null
+  summary_ar?: string | null
   content_html?: string | null
   content_md?: string | null
   content_en_html?: string | null
@@ -222,6 +236,10 @@ export interface NewsUpdatePayload {
   title?: string
   slug?: string
   summary?: string | null
+  title_en?: string | null
+  title_ar?: string | null
+  summary_en?: string | null
+  summary_ar?: string | null
   content_html?: string | null
   content_md?: string | null
   content_en_html?: string | null
@@ -251,6 +269,26 @@ export interface NewsPublishPayload {
 
 export interface NewsDuplicatePayload {
   new_slug: string
+}
+
+/** Champs source FR d'une actualité à traduire (sans persistance). */
+export interface NewsTranslateRequest {
+  title?: string | null
+  summary?: string | null
+  content_html?: string | null
+  content_md?: string | null
+}
+
+/** Traductions EN/AR renvoyées par l'endpoint admin de traduction. */
+export interface NewsTranslateResponse {
+  title_en?: string | null
+  title_ar?: string | null
+  summary_en?: string | null
+  summary_ar?: string | null
+  content_en_html?: string | null
+  content_en_md?: string | null
+  content_ar_html?: string | null
+  content_ar_md?: string | null
 }
 
 // ============================================================================
