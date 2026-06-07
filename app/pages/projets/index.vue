@@ -289,8 +289,11 @@ const stats = computed(() => [
     <section id="presentation" class="py-16 bg-white dark:bg-gray-950 bg-grid-pattern">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-3xl mx-auto mb-12">
-          <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            {{ getContent('projects.intro.title', 'projets.intro.title') }}
+          <h2 class="mb-4 text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
+            <span class="relative inline-block">
+              {{ getContent('projects.intro.title', 'projets.intro.title') }}
+              <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-brand-blue-500 to-brand-blue-300" />
+            </span>
           </h2>
           <p class="text-lg text-gray-600 dark:text-gray-400">
             {{ getContent('projects.intro.description', 'projets.intro.description') }}
@@ -342,8 +345,11 @@ const stats = computed(() => [
       <!-- All Projects -->
       <section id="projets" class="py-16 bg-white dark:bg-gray-950 bg-grid-pattern">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-            {{ getContent('projects.list.title', 'projets.list.title') }}
+          <h2 class="mb-14 text-center text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
+            <span class="relative inline-block">
+              {{ getContent('projects.list.title', 'projets.list.title') }}
+              <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-brand-blue-500 to-brand-blue-300" />
+            </span>
           </h2>
 
           <!-- Projects List : une occurrence par ligne, image + texte côte à côte -->
@@ -464,7 +470,10 @@ const stats = computed(() => [
     >
       <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <h2 class="mb-3 text-center text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
-          {{ t('projets.news.title') }}
+          <span class="relative inline-block">
+            {{ t('projets.news.title') }}
+            <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-brand-blue-500 to-brand-blue-300" />
+          </span>
         </h2>
         <p class="mx-auto mb-14 max-w-lg text-center text-gray-500 dark:text-gray-400">
           {{ t('projets.news.subtitle') }}
@@ -525,7 +534,10 @@ const stats = computed(() => [
     >
       <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <h2 class="mb-3 text-center text-3xl font-bold text-gray-900 dark:text-white md:text-4xl">
-          {{ t('projets.partners.title') }}
+          <span class="relative inline-block">
+            {{ t('projets.partners.title') }}
+            <span class="absolute -bottom-2 left-0 h-1 w-1/3 rounded-full bg-gradient-to-r from-brand-blue-500 to-brand-blue-300" />
+          </span>
         </h2>
         <p class="mx-auto mb-14 max-w-lg text-center text-gray-500 dark:text-gray-400">
           {{ t('projets.partners.subtitle') }}
