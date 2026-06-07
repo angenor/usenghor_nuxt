@@ -4,6 +4,7 @@ import type { PublicAlbumWithMedia } from '~/types/api/media'
 
 const route = useRoute()
 const { t, locale } = useI18n()
+const { localized } = useLocalizedField()
 const localePath = useLocalePath()
 const { getNewsBySlug: getPublicNewsBySlug, getAllPublishedNews, getNewsAlbums } = usePublicNewsApi()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
@@ -65,18 +66,10 @@ const hasAssociations = computed(() => {
   return !!news.value.sector_name
 })
 
-// Localization helpers
-const getLocalizedTitle = computed(() => {
-  if (!news.value) return ''
-  // Pour le moment, on utilise uniquement le titre principal
-  // TODO: Implémenter le support multilingue complet
-  return news.value.title
-})
+// Localization helpers (repli FR via useLocalizedField)
+const getLocalizedTitle = computed(() => localized(news.value, 'title'))
 
-const getLocalizedExcerpt = computed(() => {
-  if (!news.value) return ''
-  return news.value.summary || ''
-})
+const getLocalizedExcerpt = computed(() => localized(news.value, 'summary'))
 
 // SEO
 const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
@@ -139,9 +132,7 @@ const youtubeEmbedUrl = computed(() => {
 const relatedNews = computed(() => relatedNewsItems.value)
 
 // Get localized title for related news
-const getLocalizedTitleFor = (item: NewsDisplay) => {
-  return item.title
-}
+const getLocalizedTitleFor = (item: NewsDisplay) => localized(item, 'title')
 </script>
 
 <template>
@@ -284,7 +275,7 @@ const getLocalizedTitleFor = (item: NewsDisplay) => {
             </p>
 
             <!-- Contenu riche -->
-            <RichTextRenderer v-if="news.content_html" :html="news.content_html" />
+            <RichTextRenderer v-if="localized(news, 'content_html')" :html="localized(news, 'content_html')" />
 
             <!-- Fallback si pas de contenu -->
             <p v-else class="text-gray-500 dark:text-gray-400 italic">

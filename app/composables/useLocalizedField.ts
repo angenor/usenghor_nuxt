@@ -29,7 +29,10 @@ export function useLocalizedField() {
     return `${base}_${lang}`
   }
 
-  function localized(obj: Record<string, unknown> | null | undefined, base: string): string {
+  // `Record<string, any>` (et non unknown) : les objets de lecture publique sont
+  // typés par des interfaces (EventPublic, NewsPublic…) qui doivent rester
+  // assignables sans friction.
+  function localized(obj: Record<string, any> | null | undefined, base: string): string {
     if (!obj) return ''
     const lang = locale.value
     if (lang === 'en' || lang === 'ar') {

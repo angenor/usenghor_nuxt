@@ -23,6 +23,15 @@ export interface EventPublic {
   content: string | null
   content_html: string | null
   content_md: string | null
+  // Traductions FR → EN/AR (convention additive ; repli FR via useLocalizedField)
+  title_en?: string | null
+  title_ar?: string | null
+  description_en?: string | null
+  description_ar?: string | null
+  content_en_html?: string | null
+  content_en_md?: string | null
+  content_ar_html?: string | null
+  content_ar_md?: string | null
   type: EventType
   type_other: string | null
   start_date: string

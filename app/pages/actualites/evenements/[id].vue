@@ -5,6 +5,7 @@ import type { NewsDisplay } from '~/types/news'
 
 const route = useRoute()
 const { t, locale } = useI18n()
+const { localized } = useLocalizedField()
 const localePath = useLocalePath()
 const { getEventBySlug, getUpcomingEvents, getEventAlbums } = usePublicEventsApi()
 const { getAllPublishedNews } = usePublicNewsApi()
@@ -79,10 +80,7 @@ const campusFlag = computed(() => '')
 const campusName = computed(() => '')
 
 // Localization helpers
-const getLocalizedTitle = computed(() => {
-  if (!event.value) return ''
-  return event.value.title
-})
+const getLocalizedTitle = computed(() => localized(event.value, 'title'))
 
 const getLocalizedLocation = computed(() => {
   if (!event.value) return ''
@@ -96,8 +94,8 @@ const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA
 useSeoMeta({
   title: () => `${getLocalizedTitle.value} | ${t('actualites.events.title')}`,
   ogTitle: () => `${getLocalizedTitle.value} | ${t('actualites.events.title')}`,
-  description: () => event.value?.description || '',
-  ogDescription: () => event.value?.description || '',
+  description: () => localized(event.value, 'description'),
+  ogDescription: () => localized(event.value, 'description'),
   ogType: 'article',
   ogUrl: () => `${siteUrl}${route.fullPath}`,
   ogImage: () => (event.value as any)?.cover_image_external_id
@@ -106,7 +104,7 @@ useSeoMeta({
   ogLocale: () => localeMap[locale.value] || 'fr_FR',
   ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
   twitterTitle: () => `${getLocalizedTitle.value} | ${t('actualites.events.title')}`,
-  twitterDescription: () => event.value?.description || '',
+  twitterDescription: () => localized(event.value, 'description'),
   twitterImage: () => (event.value as any)?.cover_image_external_id
     ? `${siteUrl}/api/public/media/${(event.value as any).cover_image_external_id}/download?variant=medium`
     : undefined,
@@ -169,9 +167,7 @@ const normalizedRegistrationLink = computed(() => {
 const relatedEvents = computed(() => relatedEventsData.value)
 
 // Get localized title for related events
-const getLocalizedTitleFor = (item: EventPublic) => {
-  return item.title
-}
+const getLocalizedTitleFor = (item: EventPublic) => localized(item, 'title')
 
 const formatShortDate = (dateStr: string | null | undefined) => {
   if (!dateStr) return ''
@@ -346,7 +342,7 @@ const registrationCampaignLink = computed(() => {
               <img
                 v-if="item.cover_image_external_id"
                 :src="getImageVariantUrl(getMediaUrl(item.cover_image_external_id) || '', 'medium') || ''"
-                :alt="item.cover_image_alt || item.title"
+                :alt="item.cover_image_alt || localized(item, 'title')"
                 class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                 loading="lazy"
               >
@@ -360,10 +356,10 @@ const registrationCampaignLink = computed(() => {
                 {{ formatDate(item.published_at || item.created_at) }}
               </div>
               <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
-                {{ item.title }}
+                {{ localized(item, 'title') }}
               </h3>
-              <p v-if="item.summary" class="text-gray-600 dark:text-gray-400 text-sm line-clamp-3">
-                {{ item.summary }}
+              <p v-if="localized(item, 'summary')" class="text-gray-600 dark:text-gray-400 text-sm line-clamp-3">
+                {{ localized(item, 'summary') }}
               </p>
             </div>
           </NuxtLink>
@@ -537,13 +533,13 @@ const registrationCampaignLink = computed(() => {
           <!-- Description -->
           <div class="prose prose-lg dark:prose-invert max-w-none mb-8">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Description</h2>
-            <p v-if="event.description" class="text-gray-700 dark:text-gray-300 leading-relaxed">
-              {{ event.description }}
+            <p v-if="localized(event, 'description')" class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              {{ localized(event, 'description') }}
             </p>
 
             <!-- Contenu riche -->
-            <div v-if="event.content_html" class="mt-8">
-              <RichTextRenderer :html="event.content_html" />
+            <div v-if="localized(event, 'content_html')" class="mt-8">
+              <RichTextRenderer :html="localized(event, 'content_html')" />
             </div>
           </div>
 

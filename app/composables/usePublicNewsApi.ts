@@ -35,13 +35,22 @@ export function usePublicNewsApi() {
       slug: news.slug,
       title: sanitizeText(news.title) || news.title,
       summary: news.summary ? sanitizeText(news.summary) : news.summary,
+      // Traductions des champs courts (FR → EN/AR ; repli FR via localized())
+      title_en: news.title_en ?? null,
+      title_ar: news.title_ar ?? null,
+      summary_en: news.summary_en ?? null,
+      summary_ar: news.summary_ar ?? null,
       // Contenu legacy (non utilisé avec TOAST UI)
       content: null,
       content_en: null,
       content_ar: null,
-      // Contenu HTML (TOAST UI Editor)
+      // Contenu HTML (TOAST UI Editor, FR/EN/AR)
       content_html: news.content_html,
       content_md: news.content_md,
+      content_en_html: news.content_en_html ?? null,
+      content_en_md: news.content_en_md ?? null,
+      content_ar_html: news.content_ar_html ?? null,
+      content_ar_md: news.content_ar_md ?? null,
       // Médias
       video_url: news.video_url,
       cover_image: news.cover_image_external_id

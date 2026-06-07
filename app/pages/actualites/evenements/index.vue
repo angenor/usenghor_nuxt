@@ -2,6 +2,7 @@
 import type { EventPublic, EventType } from '~/composables/usePublicEventsApi'
 
 const { t, locale } = useI18n()
+const { localized } = useLocalizedField()
 const localePath = useLocalePath()
 const { public: { siteUrl } } = useRuntimeConfig()
 const route = useRoute()
@@ -89,10 +90,7 @@ const typeFilters = [
 ]
 
 // Localization helpers
-const getLocalizedTitle = (item: EventPublic) => {
-  // Pour le moment, on utilise uniquement le titre principal
-  return item.title
-}
+const getLocalizedTitle = (item: EventPublic) => localized(item, 'title')
 
 const getLocalizedLocation = (item: EventPublic) => {
   // Utiliser venue ou city
@@ -213,7 +211,7 @@ const typeColors: Record<string, string> = {
 
               <!-- Hidden on default, visible on hover -->
               <p class="text-sm text-gray-200 line-clamp-2 mb-2 opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-20 transition-all duration-300">
-                {{ event.description }}
+                {{ localized(event, 'description') }}
               </p>
 
               <div class="flex flex-col gap-1 text-sm text-gray-200 opacity-0 max-h-0 group-hover:opacity-100 group-hover:max-h-20 transition-all duration-300">
@@ -281,7 +279,7 @@ const typeColors: Record<string, string> = {
                   </h3>
 
                   <p class="mt-2 text-gray-600 dark:text-gray-400 line-clamp-2">
-                    {{ event.description }}
+                    {{ localized(event, 'description') }}
                   </p>
 
                   <div class="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-500 dark:text-gray-400">

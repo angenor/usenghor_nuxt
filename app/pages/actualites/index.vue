@@ -3,6 +3,7 @@ import type { NewsDisplay } from '~/types/news'
 import type { ApplicationCallPublic, CallType } from '~/types/api'
 
 const { t, locale } = useI18n()
+const { localized } = useLocalizedField()
 const localePath = useLocalePath()
 const { public: { siteUrl } } = useRuntimeConfig()
 const route = useRoute()
@@ -127,16 +128,9 @@ const showLessNews = () => {
 }
 
 // Localization helpers
-const getLocalizedTitle = (item: NewsDisplay) => {
-  // Pour le moment, on utilise uniquement le titre principal
-  // TODO: Implémenter le support multilingue complet
-  return item.title
-}
+const getLocalizedTitle = (item: NewsDisplay) => localized(item, 'title')
 
-const getLocalizedExcerpt = (item: NewsDisplay) => {
-  // Pour le moment, on utilise le summary
-  return item.summary || ''
-}
+const getLocalizedExcerpt = (item: NewsDisplay) => localized(item, 'summary')
 
 // Helper pour obtenir le label du type d'appel
 const getCallTypeLabel = (type: CallType) => {
@@ -173,9 +167,7 @@ const typeColors: Record<string, string> = {
 }
 
 // Helper pour les événements
-const getEventTitle = (event: any) => {
-  return event.title
-}
+const getEventTitle = (event: any) => localized(event, 'title')
 
 // Vérifier si une actualité a des associations
 const hasAssociations = (item: NewsDisplay) => {
