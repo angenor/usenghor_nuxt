@@ -12,10 +12,13 @@ const {
   deleteTag,
   mergeTags,
   getTagUsage,
+  translateTag,
   slugify,
   availableIcons,
   getTagColor,
 } = useTagsApi()
+
+const { t } = useI18n()
 
 // === STATE ===
 const searchQuery = ref('')
@@ -38,12 +41,23 @@ const mergingTag = ref<(TagRead & { news_count?: number }) | null>(null)
 const selectedMergeTarget = ref('')
 
 // Form state
-const newTag = ref<TagCreate>({
+const emptyTag = (): TagCreate => ({
   name: '',
   slug: '',
   icon: '',
-  description: ''
+  description: '',
+  name_en: '',
+  name_ar: '',
+  description_en: '',
+  description_ar: '',
 })
+const newTag = ref<TagCreate>(emptyTag())
+
+// Traduction automatique FR → EN/AR (état par modale)
+const translatingNew = ref(false)
+const translateNewMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
+const translatingEdit = ref(false)
+const translateEditMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
 
 // Loading states for actions
 const isCreating = ref(false)
@@ -151,17 +165,19 @@ const updateSlug = () => {
 
 // Modals
 const openAddModal = () => {
-  newTag.value = { name: '', slug: '', icon: '', description: '' }
+  newTag.value = emptyTag()
+  translateNewMessage.value = null
   showAddModal.value = true
 }
 
 const closeAddModal = () => {
   showAddModal.value = false
-  newTag.value = { name: '', slug: '', icon: '', description: '' }
+  newTag.value = emptyTag()
 }
 
 const openEditModal = (tag: TagRead) => {
   editingTag.value = { ...tag }
+  translateEditMessage.value = null
   showEditModal.value = true
 }
 
@@ -202,6 +218,10 @@ async function addTag() {
       slug: newTag.value.slug || slugify(newTag.value.name),
       icon: newTag.value.icon || null,
       description: newTag.value.description || null,
+      name_en: newTag.value.name_en || null,
+      name_ar: newTag.value.name_ar || null,
+      description_en: newTag.value.description_en || null,
+      description_ar: newTag.value.description_ar || null,
     }
 
     await createTag(data)
@@ -224,6 +244,10 @@ async function handleUpdateTag() {
       name: editingTag.value.name,
       icon: editingTag.value.icon,
       description: editingTag.value.description,
+      name_en: editingTag.value.name_en || null,
+      name_ar: editingTag.value.name_ar || null,
+      description_en: editingTag.value.description_en || null,
+      description_ar: editingTag.value.description_ar || null,
     }
 
     await updateTag(editingTag.value.id, data)
@@ -269,6 +293,56 @@ async function handleMergeTags() {
     error.value = 'Erreur lors de la fusion'
   } finally {
     isMerging.value = false
+  }
+}
+
+// === TRADUCTION AUTO FR → EN/AR ===
+async function handleTranslateNew() {
+  translateNewMessage.value = null
+  if (!newTag.value.name && !newTag.value.description) {
+    translateNewMessage.value = { type: 'error', text: t('adminTranslate.translateNeedsFr') }
+    return
+  }
+  translatingNew.value = true
+  try {
+    const res = await translateTag({
+      name: newTag.value.name || null,
+      description: newTag.value.description || null,
+    })
+    if (res.name_en != null) newTag.value.name_en = res.name_en
+    if (res.name_ar != null) newTag.value.name_ar = res.name_ar
+    if (res.description_en != null) newTag.value.description_en = res.description_en
+    if (res.description_ar != null) newTag.value.description_ar = res.description_ar
+    translateNewMessage.value = { type: 'success', text: t('adminTranslate.translateSuccess') }
+  } catch {
+    translateNewMessage.value = { type: 'error', text: t('adminTranslate.translateError') }
+  } finally {
+    translatingNew.value = false
+  }
+}
+
+async function handleTranslateEdit() {
+  if (!editingTag.value) return
+  translateEditMessage.value = null
+  if (!editingTag.value.name && !editingTag.value.description) {
+    translateEditMessage.value = { type: 'error', text: t('adminTranslate.translateNeedsFr') }
+    return
+  }
+  translatingEdit.value = true
+  try {
+    const res = await translateTag({
+      name: editingTag.value.name || null,
+      description: editingTag.value.description || null,
+    })
+    if (res.name_en != null) editingTag.value.name_en = res.name_en
+    if (res.name_ar != null) editingTag.value.name_ar = res.name_ar
+    if (res.description_en != null) editingTag.value.description_en = res.description_en
+    if (res.description_ar != null) editingTag.value.description_ar = res.description_ar
+    translateEditMessage.value = { type: 'success', text: t('adminTranslate.translateSuccess') }
+  } catch {
+    translateEditMessage.value = { type: 'error', text: t('adminTranslate.translateError') }
+  } finally {
+    translatingEdit.value = false
   }
 }
 
@@ -584,6 +658,47 @@ const viewNewsByTag = (tagId: string) => {
               />
             </div>
 
+            <!-- Traductions automatiques FR → EN/AR -->
+            <div class="mb-6 space-y-3 rounded-lg border border-dashed border-blue-300 bg-blue-50/50 p-3 dark:border-blue-700 dark:bg-blue-900/20">
+              <div class="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  :disabled="translatingNew"
+                  class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  @click="handleTranslateNew"
+                >
+                  <font-awesome-icon v-if="translatingNew" icon="fa-solid fa-spinner" class="animate-spin" />
+                  {{ translatingNew ? t('adminTranslate.translating') : t('adminTranslate.translate') }}
+                </button>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('adminTranslate.translateHint') }}</p>
+              </div>
+              <p
+                v-if="translateNewMessage"
+                class="text-xs"
+                :class="translateNewMessage.type === 'success' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'"
+              >
+                {{ translateNewMessage.text }}
+              </p>
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Nom (EN)</label>
+                  <input v-model="newTag.name_en" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">الاسم (AR)</label>
+                  <input v-model="newTag.name_ar" type="text" dir="rtl" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Description (EN)</label>
+                  <textarea v-model="newTag.description_en" rows="2" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">الوصف (AR)</label>
+                  <textarea v-model="newTag.description_ar" rows="2" dir="rtl" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                </div>
+              </div>
+            </div>
+
             <div class="flex justify-end gap-3">
               <button
                 type="button"
@@ -682,6 +797,47 @@ const viewNewsByTag = (tagId: string) => {
                 rows="3"
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
+            </div>
+
+            <!-- Traductions automatiques FR → EN/AR -->
+            <div class="mb-6 space-y-3 rounded-lg border border-dashed border-blue-300 bg-blue-50/50 p-3 dark:border-blue-700 dark:bg-blue-900/20">
+              <div class="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  :disabled="translatingEdit"
+                  class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  @click="handleTranslateEdit"
+                >
+                  <font-awesome-icon v-if="translatingEdit" icon="fa-solid fa-spinner" class="animate-spin" />
+                  {{ translatingEdit ? t('adminTranslate.translating') : t('adminTranslate.translate') }}
+                </button>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('adminTranslate.translateHint') }}</p>
+              </div>
+              <p
+                v-if="translateEditMessage"
+                class="text-xs"
+                :class="translateEditMessage.type === 'success' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'"
+              >
+                {{ translateEditMessage.text }}
+              </p>
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Nom (EN)</label>
+                  <input v-model="editingTag.name_en" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">الاسم (AR)</label>
+                  <input v-model="editingTag.name_ar" type="text" dir="rtl" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Description (EN)</label>
+                  <textarea v-model="editingTag.description_en" rows="2" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">الوصف (AR)</label>
+                  <textarea v-model="editingTag.description_ar" rows="2" dir="rtl" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                </div>
+              </div>
             </div>
 
             <div class="flex justify-end gap-3">

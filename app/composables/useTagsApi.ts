@@ -10,6 +10,8 @@ import type {
   TagCreate,
   TagMerge,
   TagRead,
+  TagTranslateRequest,
+  TagTranslateResponse,
   TagUpdate,
   TagUsage,
 } from '~/types/api'
@@ -88,6 +90,18 @@ export function useTagsApi() {
   }
 
   /**
+   * Traduit les champs FR → EN/AR sans persistance (bouton « Traduire »).
+   */
+  async function translateTag(
+    payload: TagTranslateRequest,
+  ): Promise<TagTranslateResponse> {
+    return apiFetch<TagTranslateResponse>('/api/admin/tags/translate', {
+      method: 'POST',
+      body: payload,
+    })
+  }
+
+  /**
    * Génère un slug depuis un nom
    */
   function slugify(text: string): string {
@@ -147,6 +161,7 @@ export function useTagsApi() {
     deleteTag,
     mergeTags,
     getTagUsage,
+    translateTag,
     slugify,
     availableIcons,
     tagColors,

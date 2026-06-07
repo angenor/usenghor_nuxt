@@ -22,6 +22,11 @@ export interface TagRead {
   slug: string
   icon: string | null
   description: string | null
+  // Traductions automatiques FR → EN/AR (convention additive)
+  name_en?: string | null
+  name_ar?: string | null
+  description_en?: string | null
+  description_ar?: string | null
   created_at: string
 }
 
@@ -30,6 +35,10 @@ export interface TagCreatePayload {
   slug: string
   icon?: string | null
   description?: string | null
+  name_en?: string | null
+  name_ar?: string | null
+  description_en?: string | null
+  description_ar?: string | null
 }
 
 export interface TagUpdatePayload {
@@ -37,6 +46,10 @@ export interface TagUpdatePayload {
   slug?: string
   icon?: string | null
   description?: string | null
+  name_en?: string | null
+  name_ar?: string | null
+  description_en?: string | null
+  description_ar?: string | null
 }
 
 // ============================================================================
