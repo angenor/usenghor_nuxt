@@ -56,7 +56,13 @@
       "entryCount": "Questions",
       "displayOrder": "Order",
       "saveSuccess": "Changes saved.",
-      "saveError": "Save error."
+      "saveError": "Save error.",
+      "translate": "Translate FR → EN/AR",
+      "translating": "Translating…",
+      "translateHint": "Generates the English and Arabic versions from French. You can edit them before saving.",
+      "translateSuccess": "Translations generated. Review then save.",
+      "translateError": "Translation failed. Please try again later.",
+      "translateNeedsFr": "Please fill in the French content first."
     }
   }
 }

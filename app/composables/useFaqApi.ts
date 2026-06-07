@@ -13,6 +13,8 @@ import type {
   FaqEntryAdminFull,
   FaqEntryCreatePayload,
   FaqEntryUpdatePayload,
+  FaqTranslateRequest,
+  FaqTranslateResponse,
 } from '~/types/api/faq'
 
 interface CategoriesListResponse {
@@ -134,6 +136,15 @@ export function useFaqApi() {
     )
   }
 
+  async function translateEntry(
+    payload: FaqTranslateRequest,
+  ): Promise<FaqTranslateResponse> {
+    return await apiFetch<FaqTranslateResponse>(
+      '/api/admin/faq/entries/translate',
+      { method: 'POST', body: payload },
+    )
+  }
+
   // ── Helpers ───────────────────────────────────────────────────
 
   function slugify(text: string): string {
@@ -159,6 +170,7 @@ export function useFaqApi() {
     deleteEntry,
     setPublished,
     reorderEntries,
+    translateEntry,
     slugify,
   }
 }

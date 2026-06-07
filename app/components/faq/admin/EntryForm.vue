@@ -23,7 +23,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { slugify } = useFaqApi()
+const { slugify, translateEntry } = useFaqApi()
 
 const isEditMode = computed(() => !!props.entry)
 
@@ -71,6 +71,39 @@ function onAnswerUpdate(lang: 'fr' | 'en' | 'ar', md: string, html: string) {
 }
 
 const errorMessage = ref<string | null>(null)
+
+// ── Traduction automatique FR → EN/AR ──────────────────────────────
+const translating = ref(false)
+const translateMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
+
+async function handleTranslate() {
+  translateMessage.value = null
+  if (!form.question_fr && !form.answer_fr_md) {
+    translateMessage.value = { type: 'error', text: t('faq.admin.translateNeedsFr') }
+    return
+  }
+  translating.value = true
+  try {
+    const res = await translateEntry({
+      question_fr: form.question_fr || null,
+      answer_fr_md: form.answer_fr_md || null,
+      answer_fr_html: form.answer_fr_html || null,
+    })
+    if (res.question_en !== null) form.question_en = res.question_en
+    if (res.question_ar !== null) form.question_ar = res.question_ar
+    if (res.answer_en_md !== null) form.answer_en_md = res.answer_en_md
+    if (res.answer_en_html !== null) form.answer_en_html = res.answer_en_html
+    if (res.answer_ar_md !== null) form.answer_ar_md = res.answer_ar_md
+    if (res.answer_ar_html !== null) form.answer_ar_html = res.answer_ar_html
+    translateMessage.value = { type: 'success', text: t('faq.admin.translateSuccess') }
+  }
+  catch {
+    translateMessage.value = { type: 'error', text: t('faq.admin.translateError') }
+  }
+  finally {
+    translating.value = false
+  }
+}
 
 function handleSubmit() {
   errorMessage.value = null
@@ -199,6 +232,30 @@ function handleSubmit() {
           class="rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-800"
         >
       </label>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3 rounded-lg border border-dashed border-brand-blue-300 bg-brand-blue-50/50 p-3 dark:border-brand-blue-700 dark:bg-brand-blue-900/20">
+      <button
+        type="button"
+        :disabled="translating"
+        class="inline-flex items-center gap-2 rounded-lg bg-brand-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-blue-700 disabled:opacity-50"
+        @click="handleTranslate"
+      >
+        <span v-if="translating" class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+        {{ translating ? t('faq.admin.translating') : t('faq.admin.translate') }}
+      </button>
+      <p class="text-xs text-gray-600 dark:text-gray-400">
+        {{ t('faq.admin.translateHint') }}
+      </p>
+      <p
+        v-if="translateMessage"
+        class="w-full text-xs"
+        :class="translateMessage.type === 'success'
+          ? 'text-green-700 dark:text-green-400'
+          : 'text-red-700 dark:text-red-400'"
+      >
+        {{ translateMessage.text }}
+      </p>
     </div>
 
     <div class="space-y-4">

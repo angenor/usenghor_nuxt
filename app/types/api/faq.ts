@@ -144,6 +144,21 @@ export interface PublishRequest {
   is_published: boolean
 }
 
+export interface FaqTranslateRequest {
+  question_fr?: string | null
+  answer_fr_md?: string | null
+  answer_fr_html?: string | null
+}
+
+export interface FaqTranslateResponse {
+  question_en: string | null
+  question_ar: string | null
+  answer_en_md: string | null
+  answer_en_html: string | null
+  answer_ar_md: string | null
+  answer_ar_html: string | null
+}
+
 export interface FaqEntriesAdminPage {
   items: FaqEntryAdminListItem[]
   total: number

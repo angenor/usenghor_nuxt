@@ -56,7 +56,13 @@
       "entryCount": "Questions",
       "displayOrder": "Ordre",
       "saveSuccess": "Modifications enregistrées.",
-      "saveError": "Erreur lors de l'enregistrement."
+      "saveError": "Erreur lors de l'enregistrement.",
+      "translate": "Traduire FR → EN/AR",
+      "translating": "Traduction en cours…",
+      "translateHint": "Génère les versions anglaise et arabe à partir du français. Vous pouvez les corriger avant d'enregistrer.",
+      "translateSuccess": "Traductions générées. Vérifiez puis enregistrez.",
+      "translateError": "La traduction a échoué. Réessayez plus tard.",
+      "translateNeedsFr": "Renseignez d'abord le contenu en français."
     }
   }
 }
