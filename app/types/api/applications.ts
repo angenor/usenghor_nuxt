@@ -91,6 +91,9 @@ export interface ApplicationRead {
   degree_date: string | null
   degree_location: string | null
 
+  // Motivation
+  motivation_text: string | null
+
   // Review
   status: ApplicationStatus
   submitted_at: string

@@ -26,7 +26,7 @@ const error = ref<string | null>(null)
 const application = ref<ApplicationWithDetails | null>(null)
 
 // Onglet actif
-const activeTab = ref<'personal' | 'professional' | 'academic' | 'documents' | 'evaluation'>('personal')
+const activeTab = ref<'personal' | 'professional' | 'academic' | 'motivation' | 'documents' | 'evaluation'>('personal')
 
 // Modals
 const showStatusModal = ref(false)
@@ -61,6 +61,7 @@ const tabs = [
   { id: 'personal', label: 'Informations personnelles', icon: 'fa-solid fa-user' },
   { id: 'professional', label: 'Situation professionnelle', icon: 'fa-solid fa-briefcase' },
   { id: 'academic', label: 'Parcours académique', icon: 'fa-solid fa-graduation-cap' },
+  { id: 'motivation', label: 'Lettre de motivation', icon: 'fa-solid fa-pen-fancy' },
   { id: 'documents', label: 'Documents', icon: 'fa-solid fa-file-lines' },
   { id: 'evaluation', label: 'Évaluation', icon: 'fa-solid fa-clipboard-check' },
 ]
@@ -173,6 +174,16 @@ const downloadDocument = (doc: ApplicationDocumentRead) => {
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
+}
+
+// Ouvre le document dans un nouvel onglet pour prévisualisation (inline, sans
+// ?download=1 : le navigateur affiche les PDF/images au lieu de les télécharger).
+const previewDocument = (doc: ApplicationDocumentRead) => {
+  if (!doc.media_external_id) {
+    error.value = 'Aucun fichier associé à ce document'
+    return
+  }
+  window.open(`/api/public/media/${doc.media_external_id}/download`, '_blank', 'noopener')
 }
 
 const exporting = ref(false)
@@ -484,6 +495,20 @@ const goBack = () => {
           </div>
         </div>
 
+        <!-- Lettre de motivation -->
+        <div v-if="activeTab === 'motivation'" class="space-y-6">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white">Lettre de motivation</h3>
+          <div
+            v-if="application.motivation_text"
+            class="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-700/50"
+          >
+            <p class="whitespace-pre-wrap text-gray-700 dark:text-gray-300">{{ application.motivation_text }}</p>
+          </div>
+          <p v-else class="italic text-gray-500 dark:text-gray-400">
+            Aucune lettre de motivation fournie
+          </p>
+        </div>
+
         <!-- Documents -->
         <div v-if="activeTab === 'documents'" class="space-y-6">
           <div class="mb-4 flex items-center justify-between">
@@ -535,6 +560,13 @@ const goBack = () => {
                   En attente
                 </span>
                 <div class="flex items-center gap-2">
+                  <button
+                    class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-white hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400"
+                    title="Prévisualiser"
+                    @click="previewDocument(doc)"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-eye" class="h-5 w-5" />
+                  </button>
                   <button
                     class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-white hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400"
                     title="Télécharger"
