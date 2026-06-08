@@ -26,6 +26,8 @@ const {
   updateCourse,
   deleteCourse,
   reorderCourses,
+  translateSemester,
+  translateCourse,
   getSemesterDisplayName,
   getTotalHoursForCourse,
   calculateSemesterTotals,
@@ -62,6 +64,8 @@ const targetSemesterIdForCourse = ref<string | null>(null)
 const newSemester = ref({
   number: 1,
   title: '',
+  title_en: '',
+  title_ar: '',
   credits: 30
 })
 
@@ -69,12 +73,49 @@ const newCourse = ref({
   code: '',
   title: '',
   description: '',
+  title_en: '',
+  title_ar: '',
+  description_en: '',
+  description_ar: '',
   credits: null as number | null,
   lecture_hours: 20,
   tutorial_hours: 10,
   practical_hours: 0,
   coefficient: 1
 })
+
+// === TRADUCTION AUTO FR → EN/AR (modales) ===
+const isTranslatingModal = ref(false)
+
+async function translateSemesterFields(target: { title?: string | null, title_en?: string | null, title_ar?: string | null }) {
+  isTranslatingModal.value = true
+  try {
+    const r = await translateSemester({ title: target.title || null })
+    if (r.title_en != null) target.title_en = r.title_en
+    if (r.title_ar != null) target.title_ar = r.title_ar
+  } catch (e) {
+    console.error('Erreur traduction:', e)
+    alert('La traduction a échoué. Réessayez plus tard.')
+  } finally {
+    isTranslatingModal.value = false
+  }
+}
+
+async function translateCourseFields(target: { title?: string | null, description?: string | null, title_en?: string | null, title_ar?: string | null, description_en?: string | null, description_ar?: string | null }) {
+  isTranslatingModal.value = true
+  try {
+    const r = await translateCourse({ title: target.title || null, description: target.description || null })
+    if (r.title_en != null) target.title_en = r.title_en
+    if (r.title_ar != null) target.title_ar = r.title_ar
+    if (r.description_en != null) target.description_en = r.description_en
+    if (r.description_ar != null) target.description_ar = r.description_ar
+  } catch (e) {
+    console.error('Erreur traduction:', e)
+    alert('La traduction a échoué. Réessayez plus tard.')
+  } finally {
+    isTranslatingModal.value = false
+  }
+}
 
 // === DATA LOADING ===
 async function loadPrograms() {
@@ -166,6 +207,8 @@ const openAddSemesterModal = () => {
   newSemester.value = {
     number: maxNumber + 1,
     title: '',
+    title_en: '',
+    title_ar: '',
     credits: 30
   }
   showAddSemesterModal.value = true
@@ -202,6 +245,10 @@ const openAddCourseModal = (semesterId: string) => {
     code: '',
     title: '',
     description: '',
+    title_en: '',
+    title_ar: '',
+    description_en: '',
+    description_ar: '',
     credits: null,
     lecture_hours: 20,
     tutorial_hours: 10,
@@ -245,6 +292,8 @@ const addSemesterAction = async () => {
       program_id: selectedProgramId.value,
       number: newSemester.value.number,
       title: newSemester.value.title || null,
+      title_en: newSemester.value.title_en || null,
+      title_ar: newSemester.value.title_ar || null,
       credits: newSemester.value.credits,
       display_order: semesters.value.length + 1,
     })
@@ -265,6 +314,8 @@ const updateSemesterAction = async () => {
     await updateSemester(editingSemester.value.id, {
       number: editingSemester.value.number,
       title: editingSemester.value.title || null,
+      title_en: editingSemester.value.title_en || null,
+      title_ar: editingSemester.value.title_ar || null,
       credits: editingSemester.value.credits,
     })
     closeEditSemesterModal()
@@ -300,6 +351,10 @@ const addCourseAction = async () => {
       title: newCourse.value.title,
       code: newCourse.value.code || null,
       description: newCourse.value.description || null,
+      title_en: newCourse.value.title_en || null,
+      title_ar: newCourse.value.title_ar || null,
+      description_en: newCourse.value.description_en || null,
+      description_ar: newCourse.value.description_ar || null,
       credits: newCourse.value.credits,
       lecture_hours: newCourse.value.lecture_hours,
       tutorial_hours: newCourse.value.tutorial_hours,
@@ -324,6 +379,10 @@ const updateCourseAction = async () => {
       title: editingCourse.value.title,
       code: editingCourse.value.code || null,
       description: editingCourse.value.description || null,
+      title_en: editingCourse.value.title_en || null,
+      title_ar: editingCourse.value.title_ar || null,
+      description_en: editingCourse.value.description_en || null,
+      description_ar: editingCourse.value.description_ar || null,
       credits: editingCourse.value.credits,
       lecture_hours: editingCourse.value.lecture_hours,
       tutorial_hours: editingCourse.value.tutorial_hours,
@@ -807,6 +866,18 @@ onMounted(loadPrograms)
               />
             </div>
 
+            <div class="mt-4 rounded-lg border border-blue-100 bg-blue-50/40 p-3 dark:border-blue-900/40 dark:bg-blue-900/10">
+              <div class="mb-2 flex items-center justify-between">
+                <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">Traductions (EN / AR)</span>
+                <button type="button" :disabled="isTranslatingModal || !newSemester.title" class="inline-flex items-center gap-1 rounded-md border border-blue-300 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-50 disabled:opacity-50 dark:border-blue-700 dark:text-blue-300" @click="translateSemesterFields(newSemester)">
+                  <font-awesome-icon :icon="isTranslatingModal ? 'fa-solid fa-spinner' : 'fa-solid fa-language'" :class="isTranslatingModal ? 'animate-spin' : ''" class="h-3 w-3" />
+                  Traduire
+                </button>
+              </div>
+              <input v-model="newSemester.title_en" type="text" placeholder="Title (EN)" class="mb-2 w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+              <input v-model="newSemester.title_ar" dir="rtl" type="text" placeholder="العنوان (AR)" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+            </div>
+
             <div class="mt-6 flex justify-end gap-3">
               <button
                 type="button"
@@ -886,6 +957,18 @@ onMounted(loadPrograms)
                 placeholder="Ex: Tronc commun, Module fondamental, UE1..."
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
+            </div>
+
+            <div class="mt-4 rounded-lg border border-blue-100 bg-blue-50/40 p-3 dark:border-blue-900/40 dark:bg-blue-900/10">
+              <div class="mb-2 flex items-center justify-between">
+                <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">Traductions (EN / AR)</span>
+                <button type="button" :disabled="isTranslatingModal || !editingSemester.title" class="inline-flex items-center gap-1 rounded-md border border-blue-300 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-50 disabled:opacity-50 dark:border-blue-700 dark:text-blue-300" @click="translateSemesterFields(editingSemester)">
+                  <font-awesome-icon :icon="isTranslatingModal ? 'fa-solid fa-spinner' : 'fa-solid fa-language'" :class="isTranslatingModal ? 'animate-spin' : ''" class="h-3 w-3" />
+                  Traduire
+                </button>
+              </div>
+              <input v-model="editingSemester.title_en" type="text" placeholder="Title (EN)" class="mb-2 w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+              <input v-model="editingSemester.title_ar" dir="rtl" type="text" placeholder="العنوان (AR)" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
             </div>
 
             <div class="mt-6 flex justify-end gap-3">
@@ -1032,6 +1115,22 @@ onMounted(loadPrograms)
               />
             </div>
 
+            <div class="mt-4 rounded-lg border border-blue-100 bg-blue-50/40 p-3 dark:border-blue-900/40 dark:bg-blue-900/10">
+              <div class="mb-2 flex items-center justify-between">
+                <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">Traductions (EN / AR)</span>
+                <button type="button" :disabled="isTranslatingModal || !newCourse.title" class="inline-flex items-center gap-1 rounded-md border border-blue-300 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-50 disabled:opacity-50 dark:border-blue-700 dark:text-blue-300" @click="translateCourseFields(newCourse)">
+                  <font-awesome-icon :icon="isTranslatingModal ? 'fa-solid fa-spinner' : 'fa-solid fa-language'" :class="isTranslatingModal ? 'animate-spin' : ''" class="h-3 w-3" />
+                  Traduire
+                </button>
+              </div>
+              <div class="grid gap-2 sm:grid-cols-2">
+                <input v-model="newCourse.title_en" type="text" placeholder="Title (EN)" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                <input v-model="newCourse.title_ar" dir="rtl" type="text" placeholder="العنوان (AR)" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                <textarea v-model="newCourse.description_en" rows="2" placeholder="Description (EN)" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                <textarea v-model="newCourse.description_ar" dir="rtl" rows="2" placeholder="الوصف (AR)" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              </div>
+            </div>
+
             <div class="mt-4 grid gap-4 sm:grid-cols-4">
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -1170,6 +1269,22 @@ onMounted(loadPrograms)
                 rows="2"
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
+            </div>
+
+            <div class="mt-4 rounded-lg border border-blue-100 bg-blue-50/40 p-3 dark:border-blue-900/40 dark:bg-blue-900/10">
+              <div class="mb-2 flex items-center justify-between">
+                <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">Traductions (EN / AR)</span>
+                <button type="button" :disabled="isTranslatingModal || !editingCourse.title" class="inline-flex items-center gap-1 rounded-md border border-blue-300 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-50 disabled:opacity-50 dark:border-blue-700 dark:text-blue-300" @click="translateCourseFields(editingCourse)">
+                  <font-awesome-icon :icon="isTranslatingModal ? 'fa-solid fa-spinner' : 'fa-solid fa-language'" :class="isTranslatingModal ? 'animate-spin' : ''" class="h-3 w-3" />
+                  Traduire
+                </button>
+              </div>
+              <div class="grid gap-2 sm:grid-cols-2">
+                <input v-model="editingCourse.title_en" type="text" placeholder="Title (EN)" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                <input v-model="editingCourse.title_ar" dir="rtl" type="text" placeholder="العنوان (AR)" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                <textarea v-model="editingCourse.description_en" rows="2" placeholder="Description (EN)" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                <textarea v-model="editingCourse.description_ar" dir="rtl" rows="2" placeholder="الوصف (AR)" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              </div>
             </div>
 
             <div class="mt-4 grid gap-4 sm:grid-cols-4">

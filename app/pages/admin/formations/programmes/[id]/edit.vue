@@ -11,6 +11,7 @@ const router = useRouter()
 const {
   getProgramById,
   updateProgram,
+  translateProgram,
   programTypeLabels,
   publicationStatusLabels,
   listProgramPartners,
@@ -176,6 +177,23 @@ const form = ref<{
   required_degree: string
   status: PublicationStatus
   is_featured: boolean
+  // Traductions EN/AR (convention state <champ>_<html|md>_<langue>).
+  title_en: string
+  title_ar: string
+  subtitle_en: string
+  subtitle_ar: string
+  required_degree_en: string
+  required_degree_ar: string
+  teaching_methods_en: string
+  teaching_methods_ar: string
+  description_md_en: string
+  description_html_en: string
+  description_md_ar: string
+  description_html_ar: string
+  objectives_en: string[]
+  objectives_ar: string[]
+  target_audience_en: string[]
+  target_audience_ar: string[]
 }>({
   code: '',
   title: '',
@@ -200,6 +218,83 @@ const form = ref<{
   required_degree: '',
   status: 'draft',
   is_featured: false,
+  title_en: '',
+  title_ar: '',
+  subtitle_en: '',
+  subtitle_ar: '',
+  required_degree_en: '',
+  required_degree_ar: '',
+  teaching_methods_en: '',
+  teaching_methods_ar: '',
+  description_md_en: '',
+  description_html_en: '',
+  description_md_ar: '',
+  description_html_ar: '',
+  objectives_en: [],
+  objectives_ar: [],
+  target_audience_en: [],
+  target_audience_ar: [],
+})
+
+// === TRADUCTION AUTO FR → EN/AR ===
+const isTranslating = ref(false)
+
+async function handleTranslate() {
+  isTranslating.value = true
+  try {
+    const r = await translateProgram({
+      title: form.value.title || null,
+      subtitle: form.value.subtitle || null,
+      description_html: form.value.description_html || null,
+      description_md: form.value.description_md || null,
+      teaching_methods_html: form.value.teaching_methods || null,
+      teaching_methods_md: form.value.teaching_methods || null,
+      required_degree: form.value.required_degree || null,
+      objectives: form.value.objectives.length > 0 ? form.value.objectives : null,
+      target_audience: form.value.target_audience.length > 0 ? form.value.target_audience : null,
+    })
+    if (r.title_en != null) form.value.title_en = r.title_en
+    if (r.title_ar != null) form.value.title_ar = r.title_ar
+    if (r.subtitle_en != null) form.value.subtitle_en = r.subtitle_en
+    if (r.subtitle_ar != null) form.value.subtitle_ar = r.subtitle_ar
+    if (r.required_degree_en != null) form.value.required_degree_en = r.required_degree_en
+    if (r.required_degree_ar != null) form.value.required_degree_ar = r.required_degree_ar
+    if (r.teaching_methods_en_md != null) form.value.teaching_methods_en = r.teaching_methods_en_md
+    if (r.teaching_methods_ar_md != null) form.value.teaching_methods_ar = r.teaching_methods_ar_md
+    if (r.description_en_html != null) form.value.description_html_en = r.description_en_html
+    if (r.description_en_md != null) form.value.description_md_en = r.description_en_md
+    if (r.description_ar_html != null) form.value.description_html_ar = r.description_ar_html
+    if (r.description_ar_md != null) form.value.description_md_ar = r.description_ar_md
+    if (r.objectives_en) form.value.objectives_en = r.objectives_en
+    if (r.objectives_ar) form.value.objectives_ar = r.objectives_ar
+    if (r.target_audience_en) form.value.target_audience_en = r.target_audience_en
+    if (r.target_audience_ar) form.value.target_audience_ar = r.target_audience_ar
+  }
+  catch (e) {
+    console.error('Erreur traduction:', e)
+    alert('La traduction a échoué. Réessayez plus tard.')
+  }
+  finally {
+    isTranslating.value = false
+  }
+}
+
+// Proxies texte ↔ liste pour l'édition des listes JSONB traduites (un item par ligne).
+const objectivesEnText = computed({
+  get: () => form.value.objectives_en.join('\n'),
+  set: (v: string) => { form.value.objectives_en = v.split('\n').map(s => s.trim()).filter(Boolean) },
+})
+const objectivesArText = computed({
+  get: () => form.value.objectives_ar.join('\n'),
+  set: (v: string) => { form.value.objectives_ar = v.split('\n').map(s => s.trim()).filter(Boolean) },
+})
+const targetAudienceEnText = computed({
+  get: () => form.value.target_audience_en.join('\n'),
+  set: (v: string) => { form.value.target_audience_en = v.split('\n').map(s => s.trim()).filter(Boolean) },
+})
+const targetAudienceArText = computed({
+  get: () => form.value.target_audience_ar.join('\n'),
+  set: (v: string) => { form.value.target_audience_ar = v.split('\n').map(s => s.trim()).filter(Boolean) },
 })
 
 // État de l'upload d'image
@@ -277,6 +372,22 @@ async function loadProgram() {
       required_degree: program.value.required_degree || '',
       status: program.value.status,
       is_featured: program.value.is_featured || false,
+      title_en: program.value.title_en || '',
+      title_ar: program.value.title_ar || '',
+      subtitle_en: program.value.subtitle_en || '',
+      subtitle_ar: program.value.subtitle_ar || '',
+      required_degree_en: program.value.required_degree_en || '',
+      required_degree_ar: program.value.required_degree_ar || '',
+      teaching_methods_en: program.value.teaching_methods_en_md || program.value.teaching_methods_en_html || '',
+      teaching_methods_ar: program.value.teaching_methods_ar_md || program.value.teaching_methods_ar_html || '',
+      description_md_en: program.value.description_en_md || '',
+      description_html_en: program.value.description_en_html || '',
+      description_md_ar: program.value.description_ar_md || '',
+      description_html_ar: program.value.description_ar_html || '',
+      objectives_en: program.value.objectives_en || [],
+      objectives_ar: program.value.objectives_ar || [],
+      target_audience_en: program.value.target_audience_en || [],
+      target_audience_ar: program.value.target_audience_ar || [],
     }
     evaluationMethods.value = parseEvaluationMethods(program.value.evaluation_methods)
     await nextTick()
@@ -758,6 +869,25 @@ const submitForm = async () => {
       required_degree: form.value.required_degree || null,
       status: form.value.status,
       is_featured: form.value.is_featured,
+      // Traductions EN/AR (champs propres ; format/evaluation_methods auto-traduits backend).
+      title_en: form.value.title_en || null,
+      title_ar: form.value.title_ar || null,
+      subtitle_en: form.value.subtitle_en || null,
+      subtitle_ar: form.value.subtitle_ar || null,
+      required_degree_en: form.value.required_degree_en || null,
+      required_degree_ar: form.value.required_degree_ar || null,
+      teaching_methods_en_html: form.value.teaching_methods_en || null,
+      teaching_methods_en_md: form.value.teaching_methods_en || null,
+      teaching_methods_ar_html: form.value.teaching_methods_ar || null,
+      teaching_methods_ar_md: form.value.teaching_methods_ar || null,
+      description_en_html: form.value.description_html_en || null,
+      description_en_md: form.value.description_md_en || null,
+      description_ar_html: form.value.description_html_ar || null,
+      description_ar_md: form.value.description_md_ar || null,
+      objectives_en: form.value.objectives_en.length > 0 ? form.value.objectives_en : null,
+      objectives_ar: form.value.objectives_ar.length > 0 ? form.value.objectives_ar : null,
+      target_audience_en: form.value.target_audience_en.length > 0 ? form.value.target_audience_en : null,
+      target_audience_ar: form.value.target_audience_ar.length > 0 ? form.value.target_audience_ar : null,
     })
 
     hasChanges.value = false
@@ -848,6 +978,16 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
           @click="handleCancel"
         >
           Annuler
+        </button>
+        <button
+          type="button"
+          :disabled="isTranslating || !form.title"
+          class="inline-flex items-center gap-2 rounded-lg border border-blue-300 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-50 disabled:opacity-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/30"
+          title="Génère les versions anglaise et arabe à partir du français. Corrigez-les avant d'enregistrer."
+          @click="handleTranslate"
+        >
+          <font-awesome-icon :icon="isTranslating ? 'fa-solid fa-spinner' : 'fa-solid fa-language'" :class="isTranslating ? 'animate-spin' : ''" class="h-4 w-4" />
+          {{ isTranslating ? 'Traduction…' : 'Traduire FR → EN/AR' }}
         </button>
         <button
           type="submit"
@@ -1126,6 +1266,10 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
             <AdminRichTextEditor
               v-model="form.description_md"
               v-model:html-value="form.description_html"
+              v-model:model-value-en="form.description_md_en"
+              v-model:html-value-en="form.description_html_en"
+              v-model:model-value-ar="form.description_md_ar"
+              v-model:html-value-ar="form.description_html_ar"
               :show-card="false"
               placeholder="Décrivez le programme en détail..."
               height="200px"
@@ -1237,6 +1381,39 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
                   {{ opt.label }}
                 </option>
               </select>
+            </div>
+          </div>
+
+          <!-- Traductions EN/AR (champs propres) -->
+          <div class="rounded-lg border border-blue-100 bg-blue-50/40 p-4 dark:border-blue-900/40 dark:bg-blue-900/10">
+            <p class="mb-1 flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
+              <font-awesome-icon icon="fa-solid fa-language" class="h-4 w-4 text-blue-500" />
+              Traductions (EN / AR)
+            </p>
+            <p class="mb-4 text-xs text-gray-500 dark:text-gray-400">
+              Générées par « Traduire FR → EN/AR » ; corrigez-les avant d'enregistrer. Listes : un élément par ligne.
+            </p>
+            <div class="grid gap-6 md:grid-cols-2">
+              <!-- Anglais -->
+              <div class="space-y-3">
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">🇬🇧 English</p>
+                <input v-model="form.title_en" type="text" placeholder="Title (EN)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                <input v-model="form.subtitle_en" type="text" placeholder="Subtitle (EN)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                <input v-model="form.required_degree_en" type="text" placeholder="Required degree (EN)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                <textarea v-model="form.teaching_methods_en" rows="3" placeholder="Teaching approach (EN)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                <textarea v-model="objectivesEnText" rows="3" placeholder="Objectives (EN — one per line)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                <textarea v-model="targetAudienceEnText" rows="3" placeholder="Target audience (EN — one per line)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              </div>
+              <!-- Arabe -->
+              <div class="space-y-3" dir="rtl">
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">🇸🇦 العربية</p>
+                <input v-model="form.title_ar" type="text" placeholder="العنوان (AR)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                <input v-model="form.subtitle_ar" type="text" placeholder="العنوان الفرعي (AR)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                <input v-model="form.required_degree_ar" type="text" placeholder="الشهادة المطلوبة (AR)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                <textarea v-model="form.teaching_methods_ar" rows="3" placeholder="المقاربة البيداغوجية (AR)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                <textarea v-model="objectivesArText" rows="3" placeholder="الأهداف (AR — سطر لكل عنصر)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                <textarea v-model="targetAudienceArText" rows="3" placeholder="الجمهور المستهدف (AR — سطر لكل عنصر)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              </div>
             </div>
           </div>
 

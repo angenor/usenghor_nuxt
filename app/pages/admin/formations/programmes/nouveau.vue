@@ -9,6 +9,7 @@ const router = useRouter()
 
 const {
   createProgram,
+  translateProgram,
   programTypeLabels,
   addPartnerToProgram,
 } = useProgramsApi()
@@ -145,6 +146,79 @@ const form = ref({
   objectives: [] as string[],
   target_audience: [] as string[],
   format: '',
+  // Traductions auto FR → EN/AR (remplies via « Traduire », éditables avant save).
+  // Convention state : <champ>_<html|md>_<langue> ↔ backend <champ>_<langue>_<html|md>.
+  title_en: '',
+  title_ar: '',
+  subtitle_en: '',
+  subtitle_ar: '',
+  required_degree_en: '',
+  required_degree_ar: '',
+  description_md_en: '',
+  description_html_en: '',
+  description_md_ar: '',
+  description_html_ar: '',
+  objectives_en: [] as string[],
+  objectives_ar: [] as string[],
+  target_audience_en: [] as string[],
+  target_audience_ar: [] as string[],
+})
+
+// === TRADUCTION AUTO FR → EN/AR ===
+const isTranslating = ref(false)
+
+async function handleTranslate() {
+  isTranslating.value = true
+  try {
+    const r = await translateProgram({
+      title: form.value.title || null,
+      subtitle: form.value.subtitle || null,
+      description_html: form.value.description_html || null,
+      description_md: form.value.description_md || null,
+      required_degree: form.value.required_degree || null,
+      objectives: form.value.objectives.length > 0 ? form.value.objectives : null,
+      target_audience: form.value.target_audience.length > 0 ? form.value.target_audience : null,
+    })
+    if (r.title_en != null) form.value.title_en = r.title_en
+    if (r.title_ar != null) form.value.title_ar = r.title_ar
+    if (r.subtitle_en != null) form.value.subtitle_en = r.subtitle_en
+    if (r.subtitle_ar != null) form.value.subtitle_ar = r.subtitle_ar
+    if (r.required_degree_en != null) form.value.required_degree_en = r.required_degree_en
+    if (r.required_degree_ar != null) form.value.required_degree_ar = r.required_degree_ar
+    if (r.description_en_html != null) form.value.description_html_en = r.description_en_html
+    if (r.description_en_md != null) form.value.description_md_en = r.description_en_md
+    if (r.description_ar_html != null) form.value.description_html_ar = r.description_ar_html
+    if (r.description_ar_md != null) form.value.description_md_ar = r.description_ar_md
+    if (r.objectives_en) form.value.objectives_en = r.objectives_en
+    if (r.objectives_ar) form.value.objectives_ar = r.objectives_ar
+    if (r.target_audience_en) form.value.target_audience_en = r.target_audience_en
+    if (r.target_audience_ar) form.value.target_audience_ar = r.target_audience_ar
+  }
+  catch (e) {
+    console.error('Erreur traduction:', e)
+    alert('La traduction a échoué. Réessayez plus tard.')
+  }
+  finally {
+    isTranslating.value = false
+  }
+}
+
+// Proxies texte ↔ liste pour l'édition des listes JSONB traduites (un item par ligne).
+const objectivesEnText = computed({
+  get: () => form.value.objectives_en.join('\n'),
+  set: (v: string) => { form.value.objectives_en = v.split('\n').map(s => s.trim()).filter(Boolean) },
+})
+const objectivesArText = computed({
+  get: () => form.value.objectives_ar.join('\n'),
+  set: (v: string) => { form.value.objectives_ar = v.split('\n').map(s => s.trim()).filter(Boolean) },
+})
+const targetAudienceEnText = computed({
+  get: () => form.value.target_audience_en.join('\n'),
+  set: (v: string) => { form.value.target_audience_en = v.split('\n').map(s => s.trim()).filter(Boolean) },
+})
+const targetAudienceArText = computed({
+  get: () => form.value.target_audience_ar.join('\n'),
+  set: (v: string) => { form.value.target_audience_ar = v.split('\n').map(s => s.trim()).filter(Boolean) },
 })
 
 // Options du format
@@ -307,6 +381,21 @@ async function submitForm() {
       target_audience: form.value.target_audience.length > 0 ? form.value.target_audience : null,
       format_md: form.value.format || null,
       format_html: form.value.format || null,
+      // Traductions EN/AR (champs propres ; format/evaluation_methods auto-traduits backend).
+      title_en: form.value.title_en || null,
+      title_ar: form.value.title_ar || null,
+      subtitle_en: form.value.subtitle_en || null,
+      subtitle_ar: form.value.subtitle_ar || null,
+      required_degree_en: form.value.required_degree_en || null,
+      required_degree_ar: form.value.required_degree_ar || null,
+      description_en_html: form.value.description_html_en || null,
+      description_en_md: form.value.description_md_en || null,
+      description_ar_html: form.value.description_html_ar || null,
+      description_ar_md: form.value.description_md_ar || null,
+      objectives_en: form.value.objectives_en.length > 0 ? form.value.objectives_en : null,
+      objectives_ar: form.value.objectives_ar.length > 0 ? form.value.objectives_ar : null,
+      target_audience_en: form.value.target_audience_en.length > 0 ? form.value.target_audience_en : null,
+      target_audience_ar: form.value.target_audience_ar.length > 0 ? form.value.target_audience_ar : null,
       evaluation_methods_html: evaluationMethods.value.length > 0 ? `<ul>${evaluationMethods.value.map(m => `<li>${m}</li>`).join('')}</ul>` : null,
       evaluation_methods_md: evaluationMethods.value.length > 0 ? evaluationMethods.value.map(m => `- ${m}`).join('\n') : null,
     }
@@ -365,6 +454,16 @@ async function submitForm() {
           @click="router.push('/admin/formations/programmes')"
         >
           Annuler
+        </button>
+        <button
+          type="button"
+          :disabled="isTranslating || !form.title"
+          class="inline-flex items-center gap-2 rounded-lg border border-blue-300 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-50 disabled:opacity-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/30"
+          title="Génère les versions anglaise et arabe à partir du français. Corrigez-les avant d'enregistrer."
+          @click="handleTranslate"
+        >
+          <font-awesome-icon :icon="isTranslating ? 'fa-solid fa-spinner' : 'fa-solid fa-language'" :class="isTranslating ? 'animate-spin' : ''" class="h-4 w-4" />
+          {{ isTranslating ? 'Traduction…' : 'Traduire FR → EN/AR' }}
         </button>
         <button
           type="button"
@@ -731,17 +830,85 @@ async function submitForm() {
         </div>
       </div>
 
-      <!-- Section: Description -->
+      <!-- Section: Description (éditeur multilingue FR/EN/AR) -->
       <AdminRichTextEditor
         v-model="form.description_md"
         v-model:html-value="form.description_html"
+        v-model:model-value-en="form.description_md_en"
+        v-model:html-value-en="form.description_html_en"
+        v-model:model-value-ar="form.description_md_ar"
+        v-model:html-value-ar="form.description_html_ar"
         title="Description"
-        description="Description détaillée du programme de formation"
+        description="Description détaillée du programme. Utilisez « Traduire » puis corrigez les onglets EN/AR."
         icon="fa-solid fa-file-lines"
         icon-color="text-indigo-500"
         placeholder="Décrivez le programme en détail..."
         height="300px"
       />
+
+      <!-- Section: Traductions EN/AR (champs texte + listes) -->
+      <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+        <h2 class="mb-1 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+          <font-awesome-icon icon="fa-solid fa-language" class="h-5 w-5 text-blue-500" />
+          Traductions (EN / AR)
+        </h2>
+        <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+          Générées par « Traduire FR → EN/AR ». Vous pouvez les corriger avant d'enregistrer.
+          Pour les listes : un élément par ligne.
+        </p>
+
+        <div class="grid gap-6 md:grid-cols-2">
+          <!-- Anglais -->
+          <div class="space-y-4">
+            <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">🇬🇧 English</p>
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Titre (EN)</label>
+              <input v-model="form.title_en" type="text" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Sous-titre (EN)</label>
+              <input v-model="form.subtitle_en" type="text" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Diplôme requis (EN)</label>
+              <input v-model="form.required_degree_en" type="text" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Objectifs (EN — un par ligne)</label>
+              <textarea v-model="objectivesEnText" rows="3" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Public cible (EN — un par ligne)</label>
+              <textarea v-model="targetAudienceEnText" rows="3" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+            </div>
+          </div>
+
+          <!-- Arabe -->
+          <div class="space-y-4" dir="rtl">
+            <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">🇸🇦 العربية</p>
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">العنوان (AR)</label>
+              <input v-model="form.title_ar" type="text" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">العنوان الفرعي (AR)</label>
+              <input v-model="form.subtitle_ar" type="text" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">الشهادة المطلوبة (AR)</label>
+              <input v-model="form.required_degree_ar" type="text" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">الأهداف (AR — سطر لكل عنصر)</label>
+              <textarea v-model="objectivesArText" rows="3" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+            </div>
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">الجمهور المستهدف (AR — سطر لكل عنصر)</label>
+              <textarea v-model="targetAudienceArText" rows="3" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Section: Image de couverture -->
       <div class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">

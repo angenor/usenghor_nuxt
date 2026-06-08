@@ -19,6 +19,7 @@ const router = useRouter()
 const {
   getCallById,
   updateCall: apiUpdateCall,
+  translateCall,
   addCriterion: apiAddCriterion,
   deleteCriterion: apiDeleteCriterion,
   addCoverage: apiAddCoverage,
@@ -206,7 +207,41 @@ const form = ref({
   publication_status: 'draft' as PublicationStatus,
   cover_image: '',
   cover_image_external_id: null as string | null,
+  // Traductions EN/AR (title + description ; sous-tables auto-traduites backend).
+  title_en: '',
+  title_ar: '',
+  description_md_en: '',
+  description_html_en: '',
+  description_md_ar: '',
+  description_html_ar: '',
 })
+
+// === TRADUCTION AUTO FR → EN/AR ===
+const isTranslating = ref(false)
+
+async function handleTranslate() {
+  isTranslating.value = true
+  try {
+    const r = await translateCall({
+      title: form.value.title || null,
+      description_html: form.value.description_html || null,
+      description_md: form.value.description_md || null,
+    })
+    if (r.title_en != null) form.value.title_en = r.title_en
+    if (r.title_ar != null) form.value.title_ar = r.title_ar
+    if (r.description_en_html != null) form.value.description_html_en = r.description_en_html
+    if (r.description_en_md != null) form.value.description_md_en = r.description_en_md
+    if (r.description_ar_html != null) form.value.description_html_ar = r.description_ar_html
+    if (r.description_ar_md != null) form.value.description_md_ar = r.description_ar_md
+  }
+  catch (e) {
+    console.error('Erreur traduction:', e)
+    alert('La traduction a échoué. Réessayez plus tard.')
+  }
+  finally {
+    isTranslating.value = false
+  }
+}
 
 // État de l'upload d'image
 const pendingCoverFile = ref<File | null>(null)
@@ -253,6 +288,12 @@ async function fetchCall() {
       cover_image: call.cover_image_external_id
         ? (getMediaUrl(call.cover_image_external_id) || '')
         : '',
+      title_en: call.title_en || '',
+      title_ar: call.title_ar || '',
+      description_md_en: call.description_en_md || '',
+      description_html_en: call.description_en_html || '',
+      description_md_ar: call.description_ar_md || '',
+      description_html_ar: call.description_ar_html || '',
     }
 
     // Peupler les sous-entités
@@ -578,6 +619,13 @@ const saveForm = async () => {
       use_internal_form: form.value.use_internal_form,
       external_form_url: form.value.external_form_url || null,
       publication_status: form.value.publication_status,
+      // Traductions EN/AR (title + description ; sous-tables auto-traduites backend).
+      title_en: form.value.title_en || null,
+      title_ar: form.value.title_ar || null,
+      description_en_html: form.value.description_html_en || null,
+      description_en_md: form.value.description_md_en || null,
+      description_ar_html: form.value.description_html_ar || null,
+      description_ar_md: form.value.description_md_ar || null,
     })
 
     // 2) Sync sub-entities: delete all existing, then re-create
@@ -704,6 +752,16 @@ const tabs = [
 
       <div class="flex gap-2">
         <button
+          type="button"
+          class="inline-flex items-center gap-2 rounded-lg border border-blue-300 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-50 disabled:opacity-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/30"
+          :disabled="isTranslating || !form.title"
+          title="Génère les versions anglaise et arabe à partir du français. Corrigez-les avant d'enregistrer."
+          @click="handleTranslate"
+        >
+          <font-awesome-icon :icon="isTranslating ? 'fa-solid fa-spinner' : 'fa-solid fa-language'" :class="isTranslating ? 'animate-spin' : ''" class="h-4 w-4" />
+          {{ isTranslating ? 'Traduction…' : 'Traduire FR → EN/AR' }}
+        </button>
+        <button
           class="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
           :disabled="isSaving"
           @click="saveDraft"
@@ -757,6 +815,10 @@ const tabs = [
               placeholder="Ex: Appel à candidatures Master 2025-2026"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
+            <div class="mt-2 grid gap-2 sm:grid-cols-2">
+              <input v-model="form.title_en" type="text" placeholder="Title (EN)" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+              <input v-model="form.title_ar" dir="rtl" type="text" placeholder="العنوان (AR)" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+            </div>
           </div>
 
           <div class="sm:col-span-2">
@@ -959,6 +1021,10 @@ const tabs = [
             <AdminRichTextEditor
               v-model="form.description_md"
               v-model:html-value="form.description_html"
+              v-model:model-value-en="form.description_md_en"
+              v-model:html-value-en="form.description_html_en"
+              v-model:model-value-ar="form.description_md_ar"
+              v-model:html-value-ar="form.description_html_ar"
               :show-card="false"
               placeholder="Description détaillée de l'appel..."
               height="200px"
