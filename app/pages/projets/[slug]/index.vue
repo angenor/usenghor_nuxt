@@ -15,6 +15,7 @@ const {
 const { listCallsByProject, callTypeLabels, callStatusLabels, callStatusColors } = usePublicCallsApi()
 const { getProjectFundraisers } = usePublicFundraisingApi()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
+const { localized } = useLocalizedField()
 
 // Helper pour obtenir l'URL de l'image de couverture selon la variante souhaitée
 function getCoverImageUrl(project: ProjectPublicDisplay, variant: 'low' | 'medium' | 'original' = 'medium'): string | null {
@@ -90,8 +91,7 @@ watch(() => route.hash, () => {
 // Localization helpers
 const getLocalizedTitle = computed(() => {
   if (!project.value) return ''
-  // Le backend utilise un seul titre (pas de multilangue pour l'instant)
-  return project.value.title
+  return localized(project.value, 'title')
 })
 
 const getLocalizedDescription = computed(() => {
@@ -341,8 +341,8 @@ const breadcrumb = computed(() => [
               </div>
 
               <!-- Content -->
-              <div v-if="project.description_html" class="prose prose-lg dark:prose-invert max-w-none mb-8">
-                <RichTextRenderer :html="project.description_html" />
+              <div v-if="localized(project, 'description_html')" class="prose prose-lg dark:prose-invert max-w-none mb-8">
+                <RichTextRenderer :html="localized(project, 'description_html')" />
               </div>
 
               <!-- Levées de fonds associées -->

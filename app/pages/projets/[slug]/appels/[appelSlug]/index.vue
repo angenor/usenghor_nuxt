@@ -13,6 +13,7 @@ const { t, locale } = useI18n()
 const { public: { siteUrl } } = useRuntimeConfig()
 const localePath = useLocalePath()
 const { getProjectBySlug, getOngoingCalls, getUpcomingCalls } = usePublicProjectsApi()
+const { localized } = useLocalizedField()
 
 // Get params
 const projectSlug = computed(() => route.params.slug as string)
@@ -64,9 +65,9 @@ async function loadData() {
 onMounted(loadData)
 
 // Localization helpers
-const getProjectTitle = computed(() => project.value?.title || '')
+const getProjectTitle = computed(() => localized(project.value, 'title'))
 
-const getCallTitle = computed(() => call.value?.title || '')
+const getCallTitle = computed(() => localized(call.value, 'title'))
 
 // SEO
 const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
@@ -188,7 +189,7 @@ const breadcrumb = computed(() => [
             </div>
 
             <!-- Description -->
-            <CallsDescriptionSection v-if="call.description_html" :description="call.description_html" />
+            <CallsDescriptionSection v-if="localized(call, 'description_html')" :description="localized(call, 'description_html')" />
 
             <!-- Details cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -224,15 +225,13 @@ const breadcrumb = computed(() => [
             </div>
 
             <!-- Conditions -->
-            <div v-if="call.conditions" class="mb-8">
+            <div v-if="localized(call, 'conditions_html')" class="mb-8">
               <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <font-awesome-icon icon="fa-solid fa-list-check" class="w-5 h-5 text-brand-blue-600" />
                 {{ t('projets.appels.conditions') || 'Conditions' }}
               </h2>
               <div class="prose prose-lg dark:prose-invert max-w-none">
-                <p class="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">
-                  {{ call.conditions }}
-                </p>
+                <RichTextRenderer :html="localized(call, 'conditions_html')" />
               </div>
             </div>
 

@@ -209,8 +209,7 @@ const getFirstCategoryName = (project: ProjectPublicDisplay) => {
 
 // Localization helpers
 const getLocalizedTitle = (project: ProjectPublicDisplay) => {
-  // Le backend renvoie un seul titre, pas de multilangue pour l'instant
-  return project.title
+  return localized(project, 'title')
 }
 
 // Convertit un contenu HTML (rich text) en texte brut pour un extrait (SSR-safe)
@@ -230,8 +229,9 @@ function htmlToPlainText(html: string): string {
 const getLocalizedDescription = (project: ProjectPublicDisplay) => {
   // Le backend public renvoie summary_html / description_html (double colonne rich text).
   // On affiche un extrait : résumé si présent, sinon un morceau de la description détaillée.
+  // summary reste en FR (non traduit, cf. décision) ; description suit la locale via localized().
   const raw = (project as any).summary_html
-    || project.description_html
+    || localized(project, 'description_html')
     || (project as any).summary
     || ''
   return raw ? htmlToPlainText(raw) : ''

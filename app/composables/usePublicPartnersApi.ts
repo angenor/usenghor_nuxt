@@ -20,6 +20,9 @@ export interface PartnerPublicRaw {
   id: string
   name: string
   description: string | null
+  // Traductions auto FR → EN/AR (convention additive). name reste en FR.
+  description_en: string | null
+  description_ar: string | null
   logo_external_id: string | null
   country_external_id: string | null
   website: string | null
@@ -33,6 +36,9 @@ export interface PartnerPublic {
   id: string
   name: string
   description: string | null
+  // Traductions auto FR → EN/AR transmises pour lecture via localized()
+  description_en: string | null
+  description_ar: string | null
   logo_url: string | null
   website: string | null
   type: PartnerType
@@ -100,6 +106,8 @@ export function usePublicPartnersApi() {
       id: partner.id,
       name: partner.name,
       description: partner.description,
+      description_en: partner.description_en ?? null,
+      description_ar: partner.description_ar ?? null,
       logo_url: partner.logo_external_id ? getMediaUrl(partner.logo_external_id, 'low') : null,
       website: partner.website,
       type: partner.type,
