@@ -12,10 +12,93 @@ export type CallType = 'application' | 'scholarship' | 'project' | 'recruitment'
 export type CallStatus = 'ongoing' | 'closed' | 'upcoming'
 
 // ============================================================================
+// Champs de traduction auto FR → EN/AR (convention additive)
+// ⚠ target_audience est RICH ici (paires _html/_md), contrairement au JSONB de
+// programs.target_audience.
+// ============================================================================
+
+export interface CallI18nFields {
+  title_en?: string | null
+  title_ar?: string | null
+  description_en_html?: string | null
+  description_en_md?: string | null
+  description_ar_html?: string | null
+  description_ar_md?: string | null
+  target_audience_en_html?: string | null
+  target_audience_en_md?: string | null
+  target_audience_ar_html?: string | null
+  target_audience_ar_md?: string | null
+}
+
+export interface CriterionI18nFields {
+  criterion_en?: string | null
+  criterion_ar?: string | null
+}
+
+export interface CoverageI18nFields {
+  item_en?: string | null
+  item_ar?: string | null
+  description_en?: string | null
+  description_ar?: string | null
+}
+
+export interface RequiredDocumentI18nFields {
+  document_name_en?: string | null
+  document_name_ar?: string | null
+  description_en?: string | null
+  description_ar?: string | null
+}
+
+export interface ScheduleI18nFields {
+  step_en?: string | null
+  step_ar?: string | null
+  description_en?: string | null
+  description_ar?: string | null
+}
+
+// Requêtes/réponses du bouton « Traduire » (sans persistance).
+export interface ApplicationCallTranslateRequest {
+  title?: string | null
+  description_html?: string | null
+  description_md?: string | null
+  target_audience_html?: string | null
+  target_audience_md?: string | null
+}
+
+export type ApplicationCallTranslateResponse = CallI18nFields
+
+export interface CallEligibilityCriteriaTranslateRequest {
+  criterion?: string | null
+}
+
+export type CallEligibilityCriteriaTranslateResponse = CriterionI18nFields
+
+export interface CallCoverageTranslateRequest {
+  item?: string | null
+  description?: string | null
+}
+
+export type CallCoverageTranslateResponse = CoverageI18nFields
+
+export interface CallRequiredDocumentTranslateRequest {
+  document_name?: string | null
+  description?: string | null
+}
+
+export type CallRequiredDocumentTranslateResponse = RequiredDocumentI18nFields
+
+export interface CallScheduleTranslateRequest {
+  step?: string | null
+  description?: string | null
+}
+
+export type CallScheduleTranslateResponse = ScheduleI18nFields
+
+// ============================================================================
 // Sous-entités Read
 // ============================================================================
 
-export interface CallEligibilityCriteriaRead {
+export interface CallEligibilityCriteriaRead extends CriterionI18nFields {
   id: string
   call_id: string
   criterion: string
@@ -23,7 +106,7 @@ export interface CallEligibilityCriteriaRead {
   display_order: number
 }
 
-export interface CallCoverageRead {
+export interface CallCoverageRead extends CoverageI18nFields {
   id: string
   call_id: string
   item: string
@@ -31,7 +114,7 @@ export interface CallCoverageRead {
   display_order: number
 }
 
-export interface CallRequiredDocumentRead {
+export interface CallRequiredDocumentRead extends RequiredDocumentI18nFields {
   id: string
   call_id: string
   document_name: string
@@ -42,7 +125,7 @@ export interface CallRequiredDocumentRead {
   display_order: number
 }
 
-export interface CallScheduleRead {
+export interface CallScheduleRead extends ScheduleI18nFields {
   id: string
   call_id: string
   step: string
@@ -56,7 +139,7 @@ export interface CallScheduleRead {
 // Application Call Read
 // ============================================================================
 
-export interface ApplicationCallRead {
+export interface ApplicationCallRead extends CallI18nFields {
   id: string
   title: string
   slug: string
@@ -97,7 +180,7 @@ export interface ApplicationCallWithDetails extends ApplicationCallRead {
 // Application Call Public (pour le front-office)
 // ============================================================================
 
-export interface ApplicationCallPublic {
+export interface ApplicationCallPublic extends CallI18nFields {
   id: string
   title: string
   slug: string
@@ -134,7 +217,7 @@ export interface ApplicationCallPublicWithDetails extends ApplicationCallPublic 
 // Application Call Create / Update
 // ============================================================================
 
-export interface ApplicationCallCreatePayload {
+export interface ApplicationCallCreatePayload extends CallI18nFields {
   title: string
   slug: string
   description_html?: string | null
@@ -160,7 +243,7 @@ export interface ApplicationCallCreatePayload {
   publication_status?: PublicationStatus
 }
 
-export interface ApplicationCallUpdatePayload {
+export interface ApplicationCallUpdatePayload extends CallI18nFields {
   title?: string
   slug?: string
   description_html?: string | null
@@ -190,19 +273,19 @@ export interface ApplicationCallUpdatePayload {
 // Sous-entités Create
 // ============================================================================
 
-export interface CallEligibilityCriteriaCreate {
+export interface CallEligibilityCriteriaCreate extends CriterionI18nFields {
   criterion: string
   is_mandatory?: boolean
   display_order?: number
 }
 
-export interface CallCoverageCreate {
+export interface CallCoverageCreate extends CoverageI18nFields {
   item: string
   description?: string | null
   display_order?: number
 }
 
-export interface CallRequiredDocumentCreate {
+export interface CallRequiredDocumentCreate extends RequiredDocumentI18nFields {
   document_name: string
   description?: string | null
   is_mandatory?: boolean
@@ -211,7 +294,7 @@ export interface CallRequiredDocumentCreate {
   display_order?: number
 }
 
-export interface CallScheduleCreate {
+export interface CallScheduleCreate extends ScheduleI18nFields {
   step: string
   start_date?: string | null
   end_date?: string | null

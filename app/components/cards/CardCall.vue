@@ -12,6 +12,7 @@ interface Props {
 const props = defineProps<Props>()
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
+const { localized } = useLocalizedField()
 
 // Helper to check if it's an API call
 const isApiCall = computed(() => 'slug' in props.call)
@@ -19,7 +20,7 @@ const isApiCall = computed(() => 'slug' in props.call)
 // Get localized title
 const getLocalizedTitle = computed(() => {
   if (isApiCall.value) {
-    return (props.call as ApplicationCallPublic).title
+    return localized(props.call as ApplicationCallPublic, 'title')
   }
   const mockCall = props.call as CampusCall
   if (locale.value === 'en' && mockCall.title_en) {
@@ -41,7 +42,7 @@ const extractPlainText = (content: string | null | undefined): string => {
 const getLocalizedDescription = computed(() => {
   let rawDescription = ''
   if (isApiCall.value) {
-    rawDescription = (props.call as ApplicationCallPublic).description_html || ''
+    rawDescription = localized(props.call as ApplicationCallPublic, 'description_html') || ''
   } else {
     const mockCall = props.call as CampusCall
     if (locale.value === 'en' && mockCall.description_en) {

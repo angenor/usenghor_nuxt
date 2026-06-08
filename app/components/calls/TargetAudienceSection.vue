@@ -14,8 +14,8 @@ const { t } = useI18n()
       <font-awesome-icon icon="fa-solid fa-users" class="text-brand-blue-500" />
       {{ t('actualites.detail.call.targetAudience') || 'Public cible' }}
     </h3>
-    <p class="text-gray-700 dark:text-gray-300 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-      {{ targetAudience }}
-    </p>
+    <div class="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+      <RichTextRenderer :html="targetAudience" />
+    </div>
   </div>
 </template>

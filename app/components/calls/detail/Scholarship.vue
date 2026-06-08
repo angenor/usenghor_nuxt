@@ -7,6 +7,7 @@ interface Props {
 
 const props = defineProps<Props>()
 const { t, locale } = useI18n()
+const { localized } = useLocalizedField()
 
 // Format date
 const formatDate = (dateStr: string | null) => {
@@ -70,7 +71,7 @@ const daysUntilDeadline = computed(() => {
     />
 
     <!-- Description -->
-    <CallsDescriptionSection :description="call.description_html" />
+    <CallsDescriptionSection :description="localized(call, 'description_html')" />
 
     <!-- Coverage/Benefits (MAIN SECTION for scholarships) -->
     <CallsCoverageSection
@@ -82,7 +83,7 @@ const daysUntilDeadline = computed(() => {
     />
 
     <!-- Target Audience -->
-    <CallsTargetAudienceSection :target-audience="call.target_audience" />
+    <CallsTargetAudienceSection :target-audience="localized(call, 'target_audience_html')" />
 
     <!-- Eligibility Criteria -->
     <CallsEligibilitySection :criteria="call.eligibility_criteria" />

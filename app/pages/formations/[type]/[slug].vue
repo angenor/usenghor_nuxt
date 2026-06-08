@@ -27,6 +27,17 @@ const {
   callStatusColors,
 } = usePublicCallsApi()
 
+const { localized } = useLocalizedField()
+
+// Liste localisée (objectives/target_audience JSONB) avec repli FR.
+function localizedList(obj: Record<string, unknown> | null | undefined, base: string): string[] {
+  if (!obj) return []
+  const lang = locale.value
+  const variant = obj[`${base}_${lang}`]
+  if ((lang === 'en' || lang === 'ar') && Array.isArray(variant)) return variant as string[]
+  return Array.isArray(obj[base]) ? (obj[base] as string[]) : []
+}
+
 // Valid URL types
 const validTypes = ['masters', 'doctorat', 'diplomes-universitaires', 'certifiantes', 'cloms']
 
@@ -143,18 +154,17 @@ if (programData.value) {
   loading.value = false
 }
 
-// Localization helpers
-const getLocalizedTitle = computed(() => {
-  if (!program.value) return ''
-  // Le backend ne supporte pas encore la localisation, on retourne le titre principal
-  return program.value.title
-})
+// Localization helpers (traduction auto FR → EN/AR, repli FR systématique)
+const getLocalizedTitle = computed(() => localized(program.value, 'title'))
 
 // Texte brut pour SEO et aperçus
 const getLocalizedDescription = computed(() => {
-  if (!program.value) return ''
-  return extractPlainText(program.value.description_html)
+  return extractPlainText(localized(program.value, 'description_html'))
 })
+
+// Objectifs / public cible localisés (listes JSONB, repli FR).
+const localizedObjectives = computed(() => localizedList(program.value, 'objectives'))
+const localizedTargetAudience = computed(() => localizedList(program.value, 'target_audience'))
 
 // Modalités d'évaluation (parsées depuis JSON)
 const parsedEvaluationMethods = computed<string[]>(() => {
@@ -223,7 +233,7 @@ const getProgramUrl = (p: ProgramPublic) => {
 
 // Get localized title for related program
 const getLocalizedTitleFor = (p: ProgramPublic) => {
-  return p.title
+  return localized(p, 'title')
 }
 
 // Tab navigation via hash
@@ -392,7 +402,7 @@ const toggleSemester = (num: number) => {
                   {{ t('formations.detail.requiredDegree') }}
                 </div>
                 <div class="font-bold text-gray-900 dark:text-white text-sm">
-                  {{ program.required_degree }}
+                  {{ localized(program, 'required_degree') }}
                 </div>
               </div>
 
@@ -457,18 +467,18 @@ const toggleSemester = (num: number) => {
 
             <!-- Description -->
             <div v-if="program.description_html" class="mb-8">
-              <RichTextRenderer :html="program.description_html" />
+              <RichTextRenderer :html="localized(program, 'description_html')" />
             </div>
 
             <!-- Objectifs -->
-            <div v-if="program.objectives?.length" class="mb-8">
+            <div v-if="localizedObjectives.length" class="mb-8">
               <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 {{ t('formations.detail.objectives') }}
               </h2>
               <div class="rounded-xl bg-yellow-50 dark:bg-yellow-900/20 p-5">
                 <ul class="space-y-3">
                   <li
-                    v-for="item in program.objectives"
+                    v-for="item in localizedObjectives"
                     :key="item"
                     class="flex items-start gap-3 text-gray-700 dark:text-gray-300"
                   >
@@ -483,14 +493,14 @@ const toggleSemester = (num: number) => {
             </div>
 
             <!-- Public cible -->
-            <div v-if="program.target_audience?.length" class="mb-8">
+            <div v-if="localizedTargetAudience.length" class="mb-8">
               <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 {{ t('formations.detail.targetAudience') }}
               </h2>
               <div class="rounded-xl bg-blue-50 dark:bg-blue-900/20 p-5">
                 <ul class="space-y-3">
                   <li
-                    v-for="item in program.target_audience"
+                    v-for="item in localizedTargetAudience"
                     :key="item"
                     class="flex items-start gap-3 text-gray-700 dark:text-gray-300"
                   >
@@ -555,7 +565,7 @@ const toggleSemester = (num: number) => {
                       >
                         S{{ semester.number }}
                       </span>
-                      {{ semester.title || `Semestre ${semester.number}` }}
+                      {{ localized(semester, 'title') || `Semestre ${semester.number}` }}
                       <span v-if="semester.credits" class="text-sm font-normal text-gray-500 dark:text-gray-400">
                         ({{ semester.credits }} {{ t('formations.card.credits') }})
                       </span>
@@ -582,7 +592,7 @@ const toggleSemester = (num: number) => {
                           class="w-4 h-4 text-brand-red-500 mt-1 flex-shrink-0"
                         />
                         <span>
-                          {{ course.title }}
+                          {{ localized(course, 'title') }}
                           <span v-if="course.credits" class="text-sm text-gray-500 dark:text-gray-400 ml-1">
                             ({{ course.credits }} {{ t('formations.card.credits') }})
                           </span>
@@ -627,7 +637,7 @@ const toggleSemester = (num: number) => {
                 {{ t('formations.detail.teachingMethods') }}
               </h2>
               <div class="rounded-xl bg-emerald-50 dark:bg-emerald-900/20 p-5">
-                <RichTextRenderer :html="program.teaching_methods_html" />
+                <RichTextRenderer :html="localized(program, 'teaching_methods_html')" />
               </div>
             </div>
 
@@ -701,7 +711,7 @@ const toggleSemester = (num: number) => {
                         />
                       </div>
                       <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors line-clamp-2">
-                        {{ call.title }}
+                        {{ localized(call, 'title') }}
                       </p>
                       <p v-if="call.deadline" class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
                         <font-awesome-icon icon="fa-solid fa-clock" class="w-3 h-3" />

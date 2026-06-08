@@ -1,6 +1,7 @@
 import type {
   PaginatedResponse,
   ProgramCareerOpportunityRead,
+  ProgramI18nFields,
   ProgramSemesterWithCourses,
   ProgramSkillRead,
   ProgramType,
@@ -10,7 +11,7 @@ import type {
 // Types pour l'API publique des programmes
 // ============================================================================
 
-export interface ProgramPublic {
+export interface ProgramPublic extends ProgramI18nFields {
   id: string
   code: string
   title: string

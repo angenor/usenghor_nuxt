@@ -11,10 +11,88 @@ import type { PublicationStatus } from './common'
 export type ProgramType = 'master' | 'doctorate' | 'university_diploma' | 'certificate' | 'clom'
 
 // ============================================================================
+// Champs de traduction auto FR → EN/AR (convention additive)
+// rich = paire _html/_md (langue insérée avant le suffixe) ; listes = JSONB.
+// ============================================================================
+
+export interface ProgramI18nFields {
+  title_en?: string | null
+  title_ar?: string | null
+  subtitle_en?: string | null
+  subtitle_ar?: string | null
+  description_en_html?: string | null
+  description_en_md?: string | null
+  description_ar_html?: string | null
+  description_ar_md?: string | null
+  teaching_methods_en_html?: string | null
+  teaching_methods_en_md?: string | null
+  teaching_methods_ar_html?: string | null
+  teaching_methods_ar_md?: string | null
+  format_en_html?: string | null
+  format_en_md?: string | null
+  format_ar_html?: string | null
+  format_ar_md?: string | null
+  evaluation_methods_en_html?: string | null
+  evaluation_methods_en_md?: string | null
+  evaluation_methods_ar_html?: string | null
+  evaluation_methods_ar_md?: string | null
+  required_degree_en?: string | null
+  required_degree_ar?: string | null
+  objectives_en?: string[] | null
+  objectives_ar?: string[] | null
+  target_audience_en?: string[] | null
+  target_audience_ar?: string[] | null
+}
+
+export interface SemesterI18nFields {
+  title_en?: string | null
+  title_ar?: string | null
+}
+
+export interface CourseI18nFields {
+  title_en?: string | null
+  title_ar?: string | null
+  description_en?: string | null
+  description_ar?: string | null
+}
+
+// Requêtes/réponses du bouton « Traduire » (sans persistance).
+export interface ProgramTranslateRequest {
+  title?: string | null
+  subtitle?: string | null
+  description_html?: string | null
+  description_md?: string | null
+  teaching_methods_html?: string | null
+  teaching_methods_md?: string | null
+  format_html?: string | null
+  format_md?: string | null
+  evaluation_methods_html?: string | null
+  evaluation_methods_md?: string | null
+  required_degree?: string | null
+  objectives?: string[] | null
+  target_audience?: string[] | null
+}
+
+export type ProgramTranslateResponse = ProgramI18nFields
+
+export interface ProgramSemesterTranslateRequest {
+  title?: string | null
+}
+
+export type ProgramSemesterTranslateResponse = SemesterI18nFields
+
+export interface ProgramCourseTranslateRequest {
+  title?: string | null
+  description?: string | null
+}
+
+export type ProgramCourseTranslateResponse = CourseI18nFields
+
+// ============================================================================
 // Program Sub-entities Read
 // ============================================================================
 
-export interface ProgramCourseRead {
+export interface ProgramCourseRead extends CourseI18nFields {
   id: string
   semester_id: string
   code: string | null
@@ -28,7 +106,7 @@ export interface ProgramCourseRead {
   display_order: number
 }
 
-export interface ProgramSemesterRead {
+export interface ProgramSemesterRead extends SemesterI18nFields {
   id: string
   program_id: string
   number: number
@@ -89,7 +167,7 @@ export interface ProgramFieldUpdatePayload {
 // Program Read
 // ============================================================================
 
-export interface ProgramRead {
+export interface ProgramRead extends ProgramI18nFields {
   id: string
   code: string
   title: string
@@ -133,7 +211,7 @@ export interface ProgramWithDetails extends ProgramRead {
 // Program Create/Update
 // ============================================================================
 
-export interface ProgramCreatePayload {
+export interface ProgramCreatePayload extends ProgramI18nFields {
   code: string
   title: string
   subtitle?: string | null
@@ -163,7 +241,7 @@ export interface ProgramCreatePayload {
   display_order?: number
 }
 
-export interface ProgramUpdatePayload {
+export interface ProgramUpdatePayload extends ProgramI18nFields {
   code?: string
   title?: string
   subtitle?: string | null
@@ -235,7 +313,7 @@ export interface ProgramCareerOpportunityUpdatePayload {
 // Program Semester Create/Update
 // ============================================================================
 
-export interface ProgramSemesterCreatePayload {
+export interface ProgramSemesterCreatePayload extends SemesterI18nFields {
   program_id: string
   number: number
   title?: string | null
@@ -243,7 +321,7 @@ export interface ProgramSemesterCreatePayload {
   display_order?: number
 }
 
-export interface ProgramSemesterUpdatePayload {
+export interface ProgramSemesterUpdatePayload extends SemesterI18nFields {
   number?: number
   title?: string | null
   credits?: number
@@ -254,7 +332,7 @@ export interface ProgramSemesterUpdatePayload {
 // Program Course Create/Update
 // ============================================================================
 
-export interface ProgramCourseCreatePayload {
+export interface ProgramCourseCreatePayload extends CourseI18nFields {
   title: string
   code?: string | null
   description?: string | null
@@ -266,7 +344,7 @@ export interface ProgramCourseCreatePayload {
   display_order?: number
 }
 
-export interface ProgramCourseUpdatePayload {
+export interface ProgramCourseUpdatePayload extends CourseI18nFields {
   title?: string
   code?: string | null
   description?: string | null

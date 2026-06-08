@@ -9,6 +9,7 @@ interface Props {
 defineProps<Props>()
 
 const { t } = useI18n()
+const { localized } = useLocalizedField()
 </script>
 
 <template>
@@ -31,7 +32,7 @@ const { t } = useI18n()
             <span class="text-xs font-bold text-brand-blue-600">{{ index + 1 }}</span>
           </div>
           <div class="flex-1 pb-4">
-            <p class="font-medium text-gray-900 dark:text-white">{{ step.step }}</p>
+            <p class="font-medium text-gray-900 dark:text-white">{{ localized(step, 'step') }}</p>
             <div class="flex flex-wrap gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
               <span v-if="step.start_date">
                 <font-awesome-icon icon="fa-solid fa-calendar" class="w-3 h-3 mr-1" />
@@ -42,7 +43,7 @@ const { t } = useI18n()
               </span>
             </div>
             <p v-if="step.description" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {{ step.description }}
+              {{ localized(step, 'description') }}
             </p>
           </div>
         </div>

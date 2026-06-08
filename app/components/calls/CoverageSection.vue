@@ -14,6 +14,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const { t } = useI18n()
+const { localized } = useLocalizedField()
 
 const sectionTitle = computed(() => props.title || t('actualites.detail.call.coverage') || 'Prises en charge')
 </script>
@@ -45,8 +46,8 @@ const sectionTitle = computed(() => props.title || t('actualites.detail.call.cov
           <font-awesome-icon icon="fa-solid fa-check" class="w-3 h-3" />
         </div>
         <div>
-          <p class="font-medium text-gray-900 dark:text-white">{{ item.item }}</p>
-          <p v-if="item.description" class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ item.description }}</p>
+          <p class="font-medium text-gray-900 dark:text-white">{{ localized(item, 'item') }}</p>
+          <p v-if="item.description" class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ localized(item, 'description') }}</p>
         </div>
       </div>
     </div>

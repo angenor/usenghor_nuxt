@@ -8,6 +8,7 @@ interface Props {
 defineProps<Props>()
 
 const { t } = useI18n()
+const { localized } = useLocalizedField()
 </script>
 
 <template>
@@ -29,10 +30,10 @@ const { t } = useI18n()
             </div>
             <div>
               <p class="font-medium text-gray-900 dark:text-white">
-                {{ doc.document_name }}
+                {{ localized(doc, 'document_name') }}
                 <span v-if="doc.is_mandatory" class="text-red-600 ml-1">*</span>
               </p>
-              <p v-if="doc.description" class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ doc.description }}</p>
+              <p v-if="doc.description" class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ localized(doc, 'description') }}</p>
               <div class="flex flex-wrap gap-2 mt-2">
                 <span v-if="doc.accepted_formats" class="text-xs px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">
                   {{ doc.accepted_formats.toUpperCase() }}

@@ -3,16 +3,26 @@ import type {
   ApplicationCallPublic,
   ApplicationCallPublicWithDetails,
   ApplicationCallRead,
+  ApplicationCallTranslateRequest,
+  ApplicationCallTranslateResponse,
   ApplicationCallUpdatePayload,
   ApplicationCallWithDetails,
   CallCoverageCreate,
   CallCoverageRead,
+  CallCoverageTranslateRequest,
+  CallCoverageTranslateResponse,
   CallEligibilityCriteriaCreate,
   CallEligibilityCriteriaRead,
+  CallEligibilityCriteriaTranslateRequest,
+  CallEligibilityCriteriaTranslateResponse,
   CallRequiredDocumentCreate,
   CallRequiredDocumentRead,
+  CallRequiredDocumentTranslateRequest,
+  CallRequiredDocumentTranslateResponse,
   CallScheduleCreate,
   CallScheduleRead,
+  CallScheduleTranslateRequest,
+  CallScheduleTranslateResponse,
   CallStatus,
   CallType,
   IdResponse,
@@ -244,6 +254,45 @@ export function useApplicationCallsApi() {
     })
   }
 
+  // =========================================================================
+  // Traduction auto FR → EN/AR (sans persistance — bouton « Traduire »)
+  // =========================================================================
+
+  async function translateCall(data: ApplicationCallTranslateRequest): Promise<ApplicationCallTranslateResponse> {
+    return apiFetch<ApplicationCallTranslateResponse>('/api/admin/application-calls/translate', {
+      method: 'POST',
+      body: data,
+    })
+  }
+
+  async function translateCriterion(data: CallEligibilityCriteriaTranslateRequest): Promise<CallEligibilityCriteriaTranslateResponse> {
+    return apiFetch<CallEligibilityCriteriaTranslateResponse>('/api/admin/application-calls/criteria/translate', {
+      method: 'POST',
+      body: data,
+    })
+  }
+
+  async function translateCoverage(data: CallCoverageTranslateRequest): Promise<CallCoverageTranslateResponse> {
+    return apiFetch<CallCoverageTranslateResponse>('/api/admin/application-calls/coverage/translate', {
+      method: 'POST',
+      body: data,
+    })
+  }
+
+  async function translateRequiredDocument(data: CallRequiredDocumentTranslateRequest): Promise<CallRequiredDocumentTranslateResponse> {
+    return apiFetch<CallRequiredDocumentTranslateResponse>('/api/admin/application-calls/required-documents/translate', {
+      method: 'POST',
+      body: data,
+    })
+  }
+
+  async function translateSchedule(data: CallScheduleTranslateRequest): Promise<CallScheduleTranslateResponse> {
+    return apiFetch<CallScheduleTranslateResponse>('/api/admin/application-calls/schedule/translate', {
+      method: 'POST',
+      body: data,
+    })
+  }
+
   return {
     // CRUD principal (admin)
     listCalls,
@@ -272,6 +321,13 @@ export function useApplicationCallsApi() {
     getCallAlbums,
     addCallAlbum,
     removeCallAlbum,
+
+    // Traduction
+    translateCall,
+    translateCriterion,
+    translateCoverage,
+    translateRequiredDocument,
+    translateSchedule,
 
     // Labels / couleurs UI
     callTypeLabels,

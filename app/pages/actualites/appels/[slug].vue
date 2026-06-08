@@ -14,6 +14,7 @@ const localePath = useLocalePath()
 const { siteUrl } = useRuntimeConfig().public
 
 const { getCallBySlug, listOngoingCalls } = usePublicCallsApi()
+const { localized } = useLocalizedField()
 
 // Active tab from hash (default to 'presentation')
 const activeTab = ref('presentation')
@@ -74,18 +75,18 @@ watch(() => route.hash, () => {
 const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
 
 useSeoMeta({
-  title: () => call.value ? `${call.value.title} | ${t('actualites.calls.title')}` : t('actualites.calls.title'),
-  ogTitle: () => call.value ? `${call.value.title} | ${t('actualites.calls.title')}` : t('actualites.calls.title'),
-  description: () => extractPlainText(call.value?.description_html) || t('actualites.calls.subtitle'),
-  ogDescription: () => extractPlainText(call.value?.description_html) || t('actualites.calls.subtitle'),
+  title: () => call.value ? `${localized(call.value, 'title')} | ${t('actualites.calls.title')}` : t('actualites.calls.title'),
+  ogTitle: () => call.value ? `${localized(call.value, 'title')} | ${t('actualites.calls.title')}` : t('actualites.calls.title'),
+  description: () => extractPlainText(localized(call.value, 'description_html')) || t('actualites.calls.subtitle'),
+  ogDescription: () => extractPlainText(localized(call.value, 'description_html')) || t('actualites.calls.subtitle'),
   ogUrl: () => `${siteUrl}${route.fullPath}`,
   ogImage: () => call.value?.cover_image_external_id
     ? `${siteUrl}/api/public/media/${call.value.cover_image_external_id}/download?variant=medium`
     : undefined,
   ogLocale: () => localeMap[locale.value] || 'fr_FR',
   ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
-  twitterTitle: () => call.value ? `${call.value.title} | ${t('actualites.calls.title')}` : t('actualites.calls.title'),
-  twitterDescription: () => extractPlainText(call.value?.description_html) || t('actualites.calls.subtitle'),
+  twitterTitle: () => call.value ? `${localized(call.value, 'title')} | ${t('actualites.calls.title')}` : t('actualites.calls.title'),
+  twitterDescription: () => extractPlainText(localized(call.value, 'description_html')) || t('actualites.calls.subtitle'),
   twitterImage: () => call.value?.cover_image_external_id
     ? `${siteUrl}/api/public/media/${call.value.cover_image_external_id}/download?variant=medium`
     : undefined,
@@ -141,7 +142,7 @@ useSeoMeta({
             <div class="overflow-hidden rounded-xl mb-8 shadow-lg">
               <img
                 :src="getCallImage(call)"
-                :alt="call.title"
+                :alt="localized(call, 'title')"
                 class="w-full h-auto object-cover"
               >
             </div>

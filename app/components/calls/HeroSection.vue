@@ -12,6 +12,7 @@ defineProps<Props>()
 
 const { t } = useI18n()
 const localePath = useLocalePath()
+const { localized } = useLocalizedField()
 </script>
 
 <template>
@@ -20,7 +21,7 @@ const localePath = useLocalePath()
     <div class="absolute inset-0">
       <img
         :src="heroImage"
-        :alt="call.title"
+        :alt="localized(call, 'title')"
         class="w-full h-full object-cover"
       >
       <!-- Gradient Overlays -->
@@ -47,7 +48,7 @@ const localePath = useLocalePath()
             </li>
             <li class="flex items-center">
               <font-awesome-icon icon="fa-solid fa-chevron-right" class="w-3 h-3 mx-2 text-white/40" />
-              <span class="text-brand-red-400 font-medium truncate max-w-xs">{{ call.title }}</span>
+              <span class="text-brand-red-400 font-medium truncate max-w-xs">{{ localized(call, 'title') }}</span>
             </li>
           </ol>
         </nav>
@@ -82,7 +83,7 @@ const localePath = useLocalePath()
 
         <!-- Title -->
         <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-4">
-          {{ call.title }}
+          {{ localized(call, 'title') }}
         </h1>
       </div>
     </div>

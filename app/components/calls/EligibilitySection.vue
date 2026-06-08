@@ -8,6 +8,7 @@ interface Props {
 defineProps<Props>()
 
 const { t } = useI18n()
+const { localized } = useLocalizedField()
 </script>
 
 <template>
@@ -32,7 +33,7 @@ const { t } = useI18n()
           />
         </div>
         <div>
-          <p class="text-gray-700 dark:text-gray-300">{{ criterion.criterion }}</p>
+          <p class="text-gray-700 dark:text-gray-300">{{ localized(criterion, 'criterion') }}</p>
           <span v-if="criterion.is_mandatory" class="text-xs text-red-600 dark:text-red-400 font-medium">
             Obligatoire
           </span>

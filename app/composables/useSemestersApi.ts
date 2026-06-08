@@ -4,9 +4,13 @@ import type {
   ProgramSemesterWithCourses,
   ProgramSemesterCreatePayload,
   ProgramSemesterUpdatePayload,
+  ProgramSemesterTranslateRequest,
+  ProgramSemesterTranslateResponse,
   ProgramCourseRead,
   ProgramCourseCreatePayload,
   ProgramCourseUpdatePayload,
+  ProgramCourseTranslateRequest,
+  ProgramCourseTranslateResponse,
   IdResponse,
   MessageResponse,
 } from '~/types/api'
@@ -92,6 +96,24 @@ export function useSemestersApi() {
   }
 
   // =========================================================================
+  // Traduction auto FR → EN/AR (sans persistance — bouton « Traduire »)
+  // =========================================================================
+
+  async function translateSemester(data: ProgramSemesterTranslateRequest): Promise<ProgramSemesterTranslateResponse> {
+    return apiFetch<ProgramSemesterTranslateResponse>('/api/admin/program-semesters/translate', {
+      method: 'POST',
+      body: data,
+    })
+  }
+
+  async function translateCourse(data: ProgramCourseTranslateRequest): Promise<ProgramCourseTranslateResponse> {
+    return apiFetch<ProgramCourseTranslateResponse>('/api/admin/program-semesters/courses/translate', {
+      method: 'POST',
+      body: data,
+    })
+  }
+
+  // =========================================================================
   // Helpers
   // =========================================================================
 
@@ -136,6 +158,10 @@ export function useSemestersApi() {
     updateCourse,
     deleteCourse,
     reorderCourses,
+
+    // Traduction
+    translateSemester,
+    translateCourse,
 
     // Helpers
     getSemesterDisplayName,

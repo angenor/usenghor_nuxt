@@ -6,6 +6,8 @@ import type {
   ProgramCreatePayload,
   ProgramRead,
   ProgramSkillRead,
+  ProgramTranslateRequest,
+  ProgramTranslateResponse,
   ProgramType,
   ProgramUpdatePayload,
   ProgramWithDetails,
@@ -103,6 +105,17 @@ export function useProgramsApi() {
     })
   }
 
+  /**
+   * Traduit les champs FR d'un programme en EN/AR (sans persistance).
+   * Sert au bouton « Traduire FR → EN/AR » du formulaire admin.
+   */
+  async function translateProgram(data: ProgramTranslateRequest): Promise<ProgramTranslateResponse> {
+    return apiFetch<ProgramTranslateResponse>('/api/admin/programs/translate', {
+      method: 'POST',
+      body: data,
+    })
+  }
+
   // =========================================================================
   // Skills
   // =========================================================================
@@ -190,6 +203,7 @@ export function useProgramsApi() {
     deleteProgram,
     toggleProgramStatus,
     duplicateProgram,
+    translateProgram,
 
     // Relations
     getSkillsByProgram,
