@@ -127,6 +127,16 @@
       "title": "Nos partenaires",
       "subtitle": "L'ensemble des partenaires qui soutiennent nos projets."
     },
+    "fundraisers": {
+      "title": "Soutenir ce projet",
+      "subtitle": "Les levées de fonds liées à ce projet.",
+      "viewCampaign": "Voir la campagne",
+      "statusActive": "En cours",
+      "statusCompleted": "Terminée",
+      "periodFull": "Du {start} au {end}",
+      "periodFrom": "Depuis le {start}",
+      "periodTo": "Jusqu'au {end}"
+    },
     "filters": {
       "all": "Tous",
       "category": "Catégorie",

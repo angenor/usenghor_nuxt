@@ -127,6 +127,16 @@
       "title": "Our partners",
       "subtitle": "All the partners supporting our projects."
     },
+    "fundraisers": {
+      "title": "Support this project",
+      "subtitle": "Fundraising campaigns linked to this project.",
+      "viewCampaign": "View campaign",
+      "statusActive": "Ongoing",
+      "statusCompleted": "Completed",
+      "periodFull": "From {start} to {end}",
+      "periodFrom": "Since {start}",
+      "periodTo": "Until {end}"
+    },
     "filters": {
       "all": "All",
       "category": "Category",

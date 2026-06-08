@@ -48,6 +48,8 @@ export interface FundraiserPublic {
   progress_percentage: number
   contributor_count: number
   status: FundraiserStatus
+  start_date: string | null
+  end_date: string | null
   created_at: string
 }
 

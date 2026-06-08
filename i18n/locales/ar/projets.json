@@ -127,6 +127,16 @@
       "title": "شركاؤنا",
       "subtitle": "جميع الشركاء الذين يدعمون مشاريعنا."
     },
+    "fundraisers": {
+      "title": "ادعم هذا المشروع",
+      "subtitle": "حملات جمع التبرعات المرتبطة بهذا المشروع.",
+      "viewCampaign": "عرض الحملة",
+      "statusActive": "جارية",
+      "statusCompleted": "منتهية",
+      "periodFull": "من {start} إلى {end}",
+      "periodFrom": "منذ {start}",
+      "periodTo": "حتى {end}"
+    },
     "filters": {
       "all": "الكل",
       "category": "الفئة",

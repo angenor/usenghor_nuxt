@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ApplicationCallPublic } from '~/types/api'
 import type { ProjectPublicDisplay } from '~/composables/usePublicProjectsApi'
+import type { FundraiserPublic } from '~/types/fundraising'
 
 const route = useRoute()
 const { t, locale } = useI18n()
@@ -12,6 +13,7 @@ const {
   formatBudget,
 } = usePublicProjectsApi()
 const { listCallsByProject, callTypeLabels, callStatusLabels, callStatusColors } = usePublicCallsApi()
+const { getProjectFundraisers } = usePublicFundraisingApi()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 
 // Helper pour obtenir l'URL de l'image de couverture selon la variante souhaitée
@@ -68,6 +70,11 @@ onMounted(async () => {
       projectCalls.value = await listCallsByProject(project.value.id)
     } catch {
       console.error('Erreur lors du chargement des appels du projet')
+    }
+    try {
+      projectFundraisers.value = await getProjectFundraisers(project.value.id)
+    } catch {
+      console.error('Erreur lors du chargement des levées de fonds du projet')
     }
   }
 })
@@ -130,6 +137,23 @@ const projectCalls = ref<ApplicationCallPublic[]>([])
 const openCalls = computed(() =>
   projectCalls.value.filter(c => c.status === 'ongoing' || c.status === 'upcoming'),
 )
+
+// Levées de fonds associées à ce projet (historique : active + terminée)
+const projectFundraisers = ref<FundraiserPublic[]>([])
+
+function fmtFundraiserDate(d: string): string {
+  return new Date(d).toLocaleDateString(
+    locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
+    { day: 'numeric', month: 'short', year: 'numeric' },
+  )
+}
+
+function fundraiserPeriod(f: FundraiserPublic): string {
+  if (f.start_date && f.end_date) return t('projets.fundraisers.periodFull', { start: fmtFundraiserDate(f.start_date), end: fmtFundraiserDate(f.end_date) })
+  if (f.start_date) return t('projets.fundraisers.periodFrom', { start: fmtFundraiserDate(f.start_date) })
+  if (f.end_date) return t('projets.fundraisers.periodTo', { end: fmtFundraiserDate(f.end_date) })
+  return ''
+}
 
 // Format deadline
 const formatDeadline = (dateStr: string | null) => {
@@ -319,6 +343,75 @@ const breadcrumb = computed(() => [
               <!-- Content -->
               <div v-if="project.description_html" class="prose prose-lg dark:prose-invert max-w-none mb-8">
                 <RichTextRenderer :html="project.description_html" />
+              </div>
+
+              <!-- Levées de fonds associées -->
+              <div v-if="projectFundraisers.length > 0" class="mt-10">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+                  <font-awesome-icon icon="fa-solid fa-hand-holding-dollar" class="text-amber-500" />
+                  {{ t('projets.fundraisers.title') }}
+                </h2>
+                <div class="space-y-6">
+                  <div
+                    v-for="f in projectFundraisers"
+                    :key="f.id"
+                    class="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                  >
+                    <div class="flex flex-col sm:flex-row">
+                      <!-- Image -->
+                      <div v-if="f.cover_image_url" class="sm:w-2/5">
+                        <img
+                          :src="f.cover_image_url"
+                          :alt="f.title"
+                          class="h-44 w-full object-cover sm:h-full"
+                          loading="lazy"
+                        >
+                      </div>
+
+                      <!-- Contenu -->
+                      <div class="flex-1 p-5">
+                        <div class="mb-2 flex flex-wrap items-center gap-2">
+                          <span
+                            class="rounded-full px-2.5 py-0.5 text-xs font-medium"
+                            :class="f.status === 'active'
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                              : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'"
+                          >
+                            {{ f.status === 'active' ? t('projets.fundraisers.statusActive') : t('projets.fundraisers.statusCompleted') }}
+                          </span>
+                          <span v-if="fundraiserPeriod(f)" class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ fundraiserPeriod(f) }}
+                          </span>
+                        </div>
+
+                        <h3 class="mb-4 text-lg font-bold text-gray-900 dark:text-white">
+                          <NuxtLink
+                            :to="localePath(`/levees-de-fonds/${f.slug}`)"
+                            class="transition-colors hover:text-brand-blue-600 dark:hover:text-brand-blue-400"
+                          >
+                            {{ f.title }}
+                          </NuxtLink>
+                        </h3>
+
+                        <FundraisingProgressBar
+                          :goal-amount="f.goal_amount"
+                          :total-raised="f.total_raised"
+                          :progress-percentage="f.progress_percentage"
+                        />
+
+                        <div class="mt-5">
+                          <NuxtLink
+                            :to="localePath(`/levees-de-fonds/${f.slug}`)"
+                            class="inline-flex items-center gap-2 rounded-lg bg-brand-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-blue-700"
+                          >
+                            {{ t('projets.fundraisers.viewCampaign') }}
+                            <font-awesome-icon icon="fa-solid fa-arrow-right" class="h-3.5 w-3.5" />
+                          </NuxtLink>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 

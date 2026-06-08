@@ -70,6 +70,16 @@ export function usePublicFundraisingApi() {
     )
   }
 
+  /**
+   * Récupère les levées de fonds publiées (active + completed) associées à un projet.
+   * Conserve l'historique (levées terminées incluses).
+   */
+  async function getProjectFundraisers(projectId: string): Promise<FundraiserPublic[]> {
+    return await $fetch<FundraiserPublic[]>(
+      `${apiBase}/api/public/projects/${projectId}/fundraisers`,
+    )
+  }
+
   async function getGlobalStats(): Promise<GlobalStats> {
     return await $fetch<GlobalStats>(
       `${apiBase}/api/public/fundraisers/global-stats`,
@@ -111,6 +121,7 @@ export function usePublicFundraisingApi() {
     resolveMediaUrl,
     listPublishedFundraisers,
     getFundraiserBySlug,
+    getProjectFundraisers,
     getGlobalStats,
     getAllContributors,
     getEditorialSections,
