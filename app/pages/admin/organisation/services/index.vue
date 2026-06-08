@@ -1408,7 +1408,6 @@ const handleDragEnd = () => {
                 v-model:model-value-ar="newService.description_md_ar"
                 v-model:html-value-ar="newService.description_html_ar"
                 placeholder="Description du service..."
-                mode="inline"
                 :show-card="false"
                 height="200px"
               />
@@ -1427,7 +1426,6 @@ const handleDragEnd = () => {
                 v-model:model-value-ar="newService.mission_md_ar"
                 v-model:html-value-ar="newService.mission_html_ar"
                 placeholder="Mission et objectifs du service..."
-                mode="inline"
                 :show-card="false"
                 height="250px"
               />

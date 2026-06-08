@@ -951,7 +951,6 @@ const goToServices = (sectorId: string) => {
                 v-model:model-value-ar="newSector.description_md_ar"
                 v-model:html-value-ar="newSector.description_html_ar"
                 placeholder="Description courte du secteur..."
-                mode="inline"
                 :show-card="false"
                 height="200px"
               />
@@ -970,7 +969,6 @@ const goToServices = (sectorId: string) => {
                 v-model:model-value-ar="newSector.mission_md_ar"
                 v-model:html-value-ar="newSector.mission_html_ar"
                 placeholder="Mission et objectifs du secteur..."
-                mode="inline"
                 :show-card="false"
                 height="250px"
               />

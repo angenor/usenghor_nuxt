@@ -480,7 +480,6 @@ const tabs = [
               v-model:model-value-ar="form.description_md_ar"
               v-model:html-value-ar="form.description_html_ar"
               placeholder="Description du campus..."
-              mode="inline"
               :show-card="false"
               height="250px"
             />
