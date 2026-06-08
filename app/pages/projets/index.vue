@@ -5,6 +5,7 @@ import type { PartnerPublic } from '~/composables/usePublicPartnersApi'
 import type { NewsDisplay } from '~/types/news'
 
 const { t, locale } = useI18n()
+const { localized } = useLocalizedField()
 const { public: { siteUrl } } = useRuntimeConfig()
 const localePath = useLocalePath()
 const {
@@ -491,7 +492,7 @@ const stats = computed(() => [
               <img
                 v-if="item.cover_image"
                 :src="item.cover_image"
-                :alt="item.title"
+                :alt="localized(item, 'title')"
                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
               >
@@ -515,10 +516,10 @@ const stats = computed(() => [
                 </span>
               </div>
               <h3 class="mt-2 text-lg font-semibold text-gray-900 transition-colors group-hover:text-brand-blue-600 dark:text-white dark:group-hover:text-brand-blue-400">
-                {{ item.title }}
+                {{ localized(item, 'title') }}
               </h3>
-              <p v-if="item.summary" class="mt-2 line-clamp-2 text-sm text-gray-500 dark:text-gray-400">
-                {{ item.summary }}
+              <p v-if="localized(item, 'summary')" class="mt-2 line-clamp-2 text-sm text-gray-500 dark:text-gray-400">
+                {{ localized(item, 'summary') }}
               </p>
             </div>
           </NuxtLink>

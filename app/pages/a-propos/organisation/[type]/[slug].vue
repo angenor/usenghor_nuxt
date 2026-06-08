@@ -13,6 +13,7 @@ import type { ProgramPublic } from '~/composables/usePublicProgramsApi'
 
 const route = useRoute()
 const { t, locale } = useI18n()
+const { localized } = useLocalizedField()
 const localePath = useLocalePath()
 const { public: { siteUrl } } = useRuntimeConfig()
 const {
@@ -982,7 +983,7 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                   <img
                     v-if="getNewsCoverImageUrl(news, 'low')"
                     :src="getNewsCoverImageUrl(news, 'low')!"
-                    :alt="news.title"
+                    :alt="localized(news, 'title')"
                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"
                   />
@@ -1006,10 +1007,10 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                 <!-- Content -->
                 <div class="p-5">
                   <h3 class="font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
-                    {{ news.title }}
+                    {{ localized(news, 'title') }}
                   </h3>
-                  <p v-if="news.summary" class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
-                    {{ news.summary }}
+                  <p v-if="localized(news, 'summary')" class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+                    {{ localized(news, 'summary') }}
                   </p>
 
                   <!-- Tags -->

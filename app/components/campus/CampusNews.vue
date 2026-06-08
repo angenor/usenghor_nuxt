@@ -7,6 +7,7 @@ interface Props {
 
 const props = defineProps<Props>()
 const { t, locale } = useI18n()
+const { localized } = useLocalizedField()
 const localePath = useLocalePath()
 const { listPublishedNews } = usePublicNewsApi()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
@@ -80,7 +81,7 @@ const formatDate = (dateStr: string | null | undefined) => {
               <img
                 v-if="getCoverImage(featuredNews, 'medium')"
                 :src="getCoverImage(featuredNews, 'medium')!"
-                :alt="featuredNews.title"
+                :alt="localized(featuredNews, 'title')"
                 class="w-full h-64 md:h-80 object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
               >
@@ -102,13 +103,13 @@ const formatDate = (dateStr: string | null | undefined) => {
                   :to="getNewsUrl(featuredNews)"
                   class="hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200"
                 >
-                  {{ featuredNews.title }}
+                  {{ localized(featuredNews, 'title') }}
                 </NuxtLink>
               </h3>
 
               <!-- Excerpt -->
-              <p v-if="featuredNews.summary" class="mt-3 text-gray-600 dark:text-gray-400 text-base lg:text-lg leading-relaxed">
-                {{ featuredNews.summary }}
+              <p v-if="localized(featuredNews, 'summary')" class="mt-3 text-gray-600 dark:text-gray-400 text-base lg:text-lg leading-relaxed">
+                {{ localized(featuredNews, 'summary') }}
               </p>
 
               <!-- Date -->
@@ -134,7 +135,7 @@ const formatDate = (dateStr: string | null | undefined) => {
                   <img
                     v-if="getCoverImage(item)"
                     :src="getCoverImage(item)!"
-                    :alt="item.title"
+                    :alt="localized(item, 'title')"
                     class="w-full h-40 md:h-32 object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
                   >
@@ -152,13 +153,13 @@ const formatDate = (dateStr: string | null | undefined) => {
                     :to="getNewsUrl(item)"
                     class="hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200"
                   >
-                    {{ item.title }}
+                    {{ localized(item, 'title') }}
                   </NuxtLink>
                 </h4>
 
                 <!-- Excerpt -->
-                <p v-if="item.summary" class="mt-2 text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2">
-                  {{ item.summary }}
+                <p v-if="localized(item, 'summary')" class="mt-2 text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2">
+                  {{ localized(item, 'summary') }}
                 </p>
 
                 <!-- Date -->
@@ -183,7 +184,7 @@ const formatDate = (dateStr: string | null | undefined) => {
             <img
               v-if="getCoverImage(item)"
               :src="getCoverImage(item)!"
-              :alt="item.title"
+              :alt="localized(item, 'title')"
               class="w-full h-48 md:h-56 object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
             >
@@ -198,13 +199,13 @@ const formatDate = (dateStr: string | null | undefined) => {
               :to="getNewsUrl(item)"
               class="hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200"
             >
-              {{ item.title }}
+              {{ localized(item, 'title') }}
             </NuxtLink>
           </h4>
 
           <!-- Excerpt -->
-          <p v-if="item.summary" class="mt-3 text-gray-600 dark:text-gray-400 text-base leading-relaxed line-clamp-3">
-            {{ item.summary }}
+          <p v-if="localized(item, 'summary')" class="mt-3 text-gray-600 dark:text-gray-400 text-base leading-relaxed line-clamp-3">
+            {{ localized(item, 'summary') }}
           </p>
 
           <!-- Date -->

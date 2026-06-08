@@ -7,6 +7,7 @@ interface Props {
 
 const props = defineProps<Props>()
 const { t, locale } = useI18n()
+const { localized } = useLocalizedField()
 const localePath = useLocalePath()
 const { listPublishedEvents } = usePublicEventsApi()
 
@@ -119,7 +120,7 @@ const getTypeLabel = (type: string) => {
               <img
                 v-if="getCoverImage(event)"
                 :src="getCoverImage(event)!"
-                :alt="event.title"
+                :alt="localized(event, 'title')"
                 class="absolute z-0 object-cover w-full h-72 md:h-96 transform transition-transform duration-500 group-hover:scale-110"
                 loading="lazy"
               >
@@ -142,14 +143,14 @@ const getTypeLabel = (type: string) => {
                     </span>
                     <!-- Title -->
                     <h4 class="font-bold text-white leading-tight transition duration-300 text-lg md:text-xl pb-4 group-hover:underline">
-                      {{ event.title }}
+                      {{ localized(event, 'title') }}
                     </h4>
                   </div>
                 </div>
                 <div class="h-1/2">
                   <!-- Description (hidden, shown on hover) -->
-                  <p v-if="event.description" class="text-white text-sm pb-3 opacity-0 transition duration-300 group-hover:opacity-100 line-clamp-3">
-                    {{ event.description }}
+                  <p v-if="localized(event, 'description')" class="text-white text-sm pb-3 opacity-0 transition duration-300 group-hover:opacity-100 line-clamp-3">
+                    {{ localized(event, 'description') }}
                   </p>
                   <!-- Date & Location -->
                   <div class="text-gray-200 text-sm opacity-0 transition duration-300 group-hover:opacity-100 flex items-center gap-2 mb-3">
@@ -191,7 +192,7 @@ const getTypeLabel = (type: string) => {
                     <img
                       v-if="getCoverImage(event)"
                       :src="getCoverImage(event)!"
-                      :alt="event.title"
+                      :alt="localized(event, 'title')"
                       class="w-full h-40 md:h-32 object-cover transition-transform duration-500 hover:scale-105"
                       loading="lazy"
                     >
@@ -215,12 +216,12 @@ const getTypeLabel = (type: string) => {
                   <!-- Title -->
                   <h4 class="text-gray-900 dark:text-white font-bold text-xl md:text-2xl pb-2 leading-tight">
                     <NuxtLink :to="getEventUrl(event)" class="hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:underline transition-colors duration-200">
-                      {{ event.title }}
+                      {{ localized(event, 'title') }}
                     </NuxtLink>
                   </h4>
                   <!-- Description -->
-                  <p v-if="event.description" class="text-gray-600 dark:text-gray-400 pb-2 line-clamp-2">
-                    {{ event.description }}
+                  <p v-if="localized(event, 'description')" class="text-gray-600 dark:text-gray-400 pb-2 line-clamp-2">
+                    {{ localized(event, 'description') }}
                   </p>
                   <!-- Meta info -->
                   <div class="text-gray-500 dark:text-gray-400 py-1 text-sm flex flex-wrap gap-4">
@@ -262,7 +263,7 @@ const getTypeLabel = (type: string) => {
                 <img
                   v-if="getCoverImage(highlightedEvent)"
                   :src="getCoverImage(highlightedEvent)!"
-                  :alt="highlightedEvent.title"
+                  :alt="localized(highlightedEvent, 'title')"
                   class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                 >
@@ -281,12 +282,12 @@ const getTypeLabel = (type: string) => {
 
               <!-- Title -->
               <h4 class="text-gray-900 dark:text-white font-bold text-xl md:text-2xl pb-3 leading-tight mt-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors duration-200">
-                {{ highlightedEvent.title }}
+                {{ localized(highlightedEvent, 'title') }}
               </h4>
 
               <!-- Description -->
-              <p v-if="highlightedEvent.description" class="text-gray-600 dark:text-gray-400 pb-3 line-clamp-3">
-                {{ highlightedEvent.description }}
+              <p v-if="localized(highlightedEvent, 'description')" class="text-gray-600 dark:text-gray-400 pb-3 line-clamp-3">
+                {{ localized(highlightedEvent, 'description') }}
               </p>
 
               <!-- Meta info -->

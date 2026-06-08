@@ -11,6 +11,7 @@ interface Props {
 
 const props = defineProps<Props>()
 const { t, locale } = useI18n()
+const { localized } = useLocalizedField()
 const { getCampusPrograms } = usePublicCampusApi()
 const { listPublishedEvents } = usePublicEventsApi()
 const { listPublishedNews } = usePublicNewsApi()
@@ -256,7 +257,7 @@ const eventTypeColors: Record<string, string> = {
                 {{ t(`actualites.events.types.${event.type}`) }}
               </span>
               <h4 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
-                {{ event.title }}
+                {{ localized(event, 'title') }}
               </h4>
             </div>
           </div>
@@ -291,7 +292,7 @@ const eventTypeColors: Record<string, string> = {
             <img
               v-if="getCoverImageUrl(news)"
               :src="getCoverImageUrl(news)!"
-              :alt="news.title"
+              :alt="localized(news, 'title')"
               class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
               loading="lazy"
             >
@@ -306,7 +307,7 @@ const eventTypeColors: Record<string, string> = {
           <!-- Contenu -->
           <div class="flex-1 min-w-0">
             <h4 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
-              {{ news.title }}
+              {{ localized(news, 'title') }}
             </h4>
             <div class="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
               <span>{{ formatDate(news.published_at) }}</span>
