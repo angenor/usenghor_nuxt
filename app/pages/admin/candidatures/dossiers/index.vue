@@ -251,7 +251,8 @@ const bulkChangeStatus = async (status: ApplicationStatus) => {
 
 const exporting = ref(false)
 
-// Export ZIP : un dossier par candidat (documents soumis + Excel récapitulatif).
+// Export CSV : un unique fichier, une ligne par candidat avec toutes ses
+// informations et les liens vers ses fichiers téléversés (CV, diplômes...).
 // Si une sélection est active, seules ces candidatures sont exportées ;
 // sinon toutes celles correspondant aux filtres courants.
 const exportSelection = async () => {
@@ -265,13 +266,14 @@ const exportSelection = async () => {
       status: filterStatus.value,
       call_id: filterCallId.value,
       ids: selectedIds.value.length > 0 ? selectedIds.value : undefined,
+      format: 'csv',
     })
 
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     const stamp = new Date().toISOString().slice(0, 10)
     link.href = url
-    link.download = `candidatures_${stamp}.zip`
+    link.download = `candidatures_${stamp}.csv`
     link.click()
     URL.revokeObjectURL(url)
   } catch {

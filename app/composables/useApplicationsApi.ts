@@ -102,8 +102,11 @@ export function useApplicationsApi() {
   }
 
   /**
-   * Exporte les candidatures en archive ZIP (un dossier par candidat, contenant
-   * les documents soumis et un fichier Excel récapitulatif).
+   * Exporte les candidatures.
+   * - `format: 'zip'` (défaut) : archive ZIP, un dossier par candidat (documents
+   *   soumis + fichier Excel récapitulatif).
+   * - `format: 'csv'` : un unique fichier CSV, une ligne par candidat avec toutes
+   *   ses infos et les liens vers ses fichiers téléversés.
    * Si `ids` est fourni, seules ces candidatures sont exportées ; sinon toutes
    * celles correspondant aux filtres.
    */
@@ -113,6 +116,7 @@ export function useApplicationsApi() {
     status?: ApplicationStatus | 'all'
     program_id?: string
     ids?: string[]
+    format?: 'zip' | 'csv'
   } = {}): Promise<Blob> {
     return apiFetch<Blob>('/api/admin/applications/export', {
       responseType: 'blob',
@@ -122,6 +126,7 @@ export function useApplicationsApi() {
         status: params.status !== 'all' ? params.status : undefined,
         program_id: params.program_id || undefined,
         ids: params.ids && params.ids.length > 0 ? params.ids.join(',') : undefined,
+        format: params.format || undefined,
       },
     })
   }
