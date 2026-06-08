@@ -12,10 +12,14 @@ import type {
   ProjectCallCreate,
   ProjectCallRead,
   ProjectCallStatus,
+  ProjectCallTranslateRequest,
+  ProjectCallTranslateResponse,
   ProjectCallType,
   ProjectCallUpdate,
   ProjectCategoryCreate,
   ProjectCategoryRead,
+  ProjectCategoryTranslateRequest,
+  ProjectCategoryTranslateResponse,
   ProjectCategoryUpdate,
   ProjectCreatePayload,
   ProjectMediaRead,
@@ -26,6 +30,8 @@ import type {
   ProjectReadWithRelations,
   ProjectStatistics,
   ProjectStatus,
+  ProjectTranslateRequest,
+  ProjectTranslateResponse,
   ProjectUpdatePayload,
   PublicationStatus,
 } from '~/types/api'
@@ -546,6 +552,46 @@ export function useProjectsApi() {
   }
 
   // =========================================================================
+  // Traduction auto FR → EN/AR (sans persistance — bouton « Traduire »)
+  // =========================================================================
+
+  /**
+   * Traduit les champs FR d'une catégorie (name, description) → EN/AR.
+   */
+  async function translateCategory(
+    payload: ProjectCategoryTranslateRequest,
+  ): Promise<ProjectCategoryTranslateResponse> {
+    return apiFetch<ProjectCategoryTranslateResponse>('/api/admin/projects/categories/translate', {
+      method: 'POST',
+      body: payload,
+    })
+  }
+
+  /**
+   * Traduit les champs FR d'un projet (title, description) → EN/AR.
+   */
+  async function translateProject(
+    payload: ProjectTranslateRequest,
+  ): Promise<ProjectTranslateResponse> {
+    return apiFetch<ProjectTranslateResponse>('/api/admin/projects/translate', {
+      method: 'POST',
+      body: payload,
+    })
+  }
+
+  /**
+   * Traduit les champs FR d'un appel de projet (title, description, conditions) → EN/AR.
+   */
+  async function translateCall(
+    payload: ProjectCallTranslateRequest,
+  ): Promise<ProjectCallTranslateResponse> {
+    return apiFetch<ProjectCallTranslateResponse>('/api/admin/projects/calls/translate', {
+      method: 'POST',
+      body: payload,
+    })
+  }
+
+  // =========================================================================
   // Helpers
   // =========================================================================
 
@@ -657,6 +703,11 @@ export function useProjectsApi() {
     createProjectCall,
     updateCall,
     deleteCall,
+
+    // Traduction auto FR → EN/AR
+    translateCategory,
+    translateProject,
+    translateCall,
 
     // Countries
     listProjectCountries,

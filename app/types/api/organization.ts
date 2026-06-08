@@ -93,6 +93,9 @@ export interface PartnerRead {
   id: string
   name: string
   description: string | null
+  // Traductions auto FR → EN/AR (convention additive). name reste en FR.
+  description_en: string | null
+  description_ar: string | null
   logo_external_id: string | null
   country_external_id: string | null
   website: string | null
@@ -108,6 +111,8 @@ export interface PartnerRead {
 export interface PartnerCreate {
   name: string
   description?: string | null
+  description_en?: string | null
+  description_ar?: string | null
   logo_external_id?: string | null
   country_external_id?: string | null
   website?: string | null
@@ -121,6 +126,8 @@ export interface PartnerCreate {
 export interface PartnerUpdate {
   name?: string
   description?: string | null
+  description_en?: string | null
+  description_ar?: string | null
   logo_external_id?: string | null
   country_external_id?: string | null
   website?: string | null
@@ -133,6 +140,17 @@ export interface PartnerUpdate {
 
 export interface PartnerReorder {
   partner_ids: string[]
+}
+
+/** Champ source FR d'un partenaire à traduire (sans persistance). */
+export interface PartnerTranslateRequest {
+  description?: string | null
+}
+
+/** Traductions EN/AR générées pour pré-remplir le formulaire admin. */
+export interface PartnerTranslateResponse {
+  description_en: string | null
+  description_ar: string | null
 }
 
 // ============================================================================

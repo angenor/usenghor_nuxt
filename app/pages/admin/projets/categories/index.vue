@@ -10,8 +10,11 @@ const {
   createCategory,
   updateCategory: updateCategoryApi,
   deleteCategory: deleteCategoryApi,
+  translateCategory,
   slugify,
 } = useProjectsApi()
+
+const { t } = useI18n()
 
 // Liste des icônes disponibles
 const categoryIcons = [
@@ -53,8 +56,18 @@ const newCategory = ref({
   name: '',
   slug: '',
   icon: '',
-  description: ''
+  description: '',
+  name_en: '',
+  name_ar: '',
+  description_en: '',
+  description_ar: ''
 })
+
+// Traduction automatique FR → EN/AR (état par modale)
+const translatingNew = ref(false)
+const translateNewMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
+const translatingEdit = ref(false)
+const translateEditMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
 
 // === CHARGEMENT DES DONNÉES ===
 const loadCategories = async () => {
@@ -136,19 +149,71 @@ const updateSlug = () => {
   }
 }
 
+// === TRADUCTION AUTO FR → EN/AR ===
+async function handleTranslateNew() {
+  translateNewMessage.value = null
+  if (!newCategory.value.name && !newCategory.value.description) {
+    translateNewMessage.value = { type: 'error', text: t('adminTranslate.translateNeedsFr') }
+    return
+  }
+  translatingNew.value = true
+  try {
+    const res = await translateCategory({
+      name: newCategory.value.name || null,
+      description: newCategory.value.description || null,
+    })
+    if (res.name_en != null) newCategory.value.name_en = res.name_en
+    if (res.name_ar != null) newCategory.value.name_ar = res.name_ar
+    if (res.description_en != null) newCategory.value.description_en = res.description_en
+    if (res.description_ar != null) newCategory.value.description_ar = res.description_ar
+    translateNewMessage.value = { type: 'success', text: t('adminTranslate.translateSuccess') }
+  } catch {
+    translateNewMessage.value = { type: 'error', text: t('adminTranslate.translateError') }
+  } finally {
+    translatingNew.value = false
+  }
+}
+
+async function handleTranslateEdit() {
+  if (!editingCategory.value) return
+  translateEditMessage.value = null
+  if (!editingCategory.value.name && !editingCategory.value.description) {
+    translateEditMessage.value = { type: 'error', text: t('adminTranslate.translateNeedsFr') }
+    return
+  }
+  translatingEdit.value = true
+  try {
+    const res = await translateCategory({
+      name: editingCategory.value.name || null,
+      description: editingCategory.value.description || null,
+    })
+    if (res.name_en != null) editingCategory.value.name_en = res.name_en
+    if (res.name_ar != null) editingCategory.value.name_ar = res.name_ar
+    if (res.description_en != null) editingCategory.value.description_en = res.description_en
+    if (res.description_ar != null) editingCategory.value.description_ar = res.description_ar
+    translateEditMessage.value = { type: 'success', text: t('adminTranslate.translateSuccess') }
+  } catch {
+    translateEditMessage.value = { type: 'error', text: t('adminTranslate.translateError') }
+  } finally {
+    translatingEdit.value = false
+  }
+}
+
 // Modals
 const openAddModal = () => {
-  newCategory.value = { name: '', slug: '', icon: '', description: '' }
+  newCategory.value = { name: '', slug: '', icon: '', description: '', name_en: '', name_ar: '', description_en: '', description_ar: '' }
+  translateNewMessage.value = null
   showAddModal.value = true
 }
 
 const closeAddModal = () => {
   showAddModal.value = false
-  newCategory.value = { name: '', slug: '', icon: '', description: '' }
+  newCategory.value = { name: '', slug: '', icon: '', description: '', name_en: '', name_ar: '', description_en: '', description_ar: '' }
 }
 
 const openEditModal = (category: ProjectCategoryRead) => {
   editingCategory.value = { ...category }
+  translateEditMessage.value = null
   showEditModal.value = true
 }
 
@@ -183,6 +248,10 @@ const addCategory = async () => {
       slug: newCategory.value.slug,
       icon: newCategory.value.icon || null,
       description: newCategory.value.description || null,
+      name_en: newCategory.value.name_en || null,
+      name_ar: newCategory.value.name_ar || null,
+      description_en: newCategory.value.description_en || null,
+      description_ar: newCategory.value.description_ar || null,
     })
 
     closeAddModal()
@@ -209,6 +278,10 @@ const updateCategory = async () => {
       slug: editingCategory.value.slug,
       icon: editingCategory.value.icon || null,
       description: editingCategory.value.description || null,
+      name_en: editingCategory.value.name_en || null,
+      name_ar: editingCategory.value.name_ar || null,
+      description_en: editingCategory.value.description_en || null,
+      description_ar: editingCategory.value.description_ar || null,
     })
 
     closeEditModal()
@@ -547,6 +620,47 @@ const formatDate = (isoDate: string) => {
               />
             </div>
 
+            <!-- Traductions automatiques FR → EN/AR -->
+            <div class="mb-6 space-y-3 rounded-lg border border-dashed border-blue-300 bg-blue-50/50 p-3 dark:border-blue-700 dark:bg-blue-900/20">
+              <div class="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  :disabled="translatingNew"
+                  class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  @click="handleTranslateNew"
+                >
+                  <font-awesome-icon v-if="translatingNew" icon="fa-solid fa-spinner" class="animate-spin" />
+                  {{ translatingNew ? t('adminTranslate.translating') : t('adminTranslate.translate') }}
+                </button>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('adminTranslate.translateHint') }}</p>
+              </div>
+              <p
+                v-if="translateNewMessage"
+                class="text-xs"
+                :class="translateNewMessage.type === 'success' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'"
+              >
+                {{ translateNewMessage.text }}
+              </p>
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Nom (EN)</label>
+                  <input v-model="newCategory.name_en" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">الاسم (AR)</label>
+                  <input v-model="newCategory.name_ar" type="text" dir="rtl" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Description (EN)</label>
+                  <textarea v-model="newCategory.description_en" rows="2" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">الوصف (AR)</label>
+                  <textarea v-model="newCategory.description_ar" rows="2" dir="rtl" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                </div>
+              </div>
+            </div>
+
             <div class="flex justify-end gap-3">
               <button
                 type="button"
@@ -644,6 +758,47 @@ const formatDate = (isoDate: string) => {
                 rows="3"
                 class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
               />
+            </div>
+
+            <!-- Traductions automatiques FR → EN/AR -->
+            <div class="mb-6 space-y-3 rounded-lg border border-dashed border-blue-300 bg-blue-50/50 p-3 dark:border-blue-700 dark:bg-blue-900/20">
+              <div class="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  :disabled="translatingEdit"
+                  class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  @click="handleTranslateEdit"
+                >
+                  <font-awesome-icon v-if="translatingEdit" icon="fa-solid fa-spinner" class="animate-spin" />
+                  {{ translatingEdit ? t('adminTranslate.translating') : t('adminTranslate.translate') }}
+                </button>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('adminTranslate.translateHint') }}</p>
+              </div>
+              <p
+                v-if="translateEditMessage"
+                class="text-xs"
+                :class="translateEditMessage.type === 'success' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'"
+              >
+                {{ translateEditMessage.text }}
+              </p>
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Nom (EN)</label>
+                  <input v-model="editingCategory.name_en" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">الاسم (AR)</label>
+                  <input v-model="editingCategory.name_ar" type="text" dir="rtl" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Description (EN)</label>
+                  <textarea v-model="editingCategory.description_en" rows="2" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">الوصف (AR)</label>
+                  <textarea v-model="editingCategory.description_ar" rows="2" dir="rtl" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                </div>
+              </div>
             </div>
 
             <div class="flex justify-end gap-3">

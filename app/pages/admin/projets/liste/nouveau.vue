@@ -6,9 +6,11 @@ definePageMeta({
 })
 
 const router = useRouter()
+const { t } = useI18n()
 
 const {
   createProject,
+  translateProject,
   getAllCategories,
   slugify,
   projectStatusLabels,
@@ -39,10 +41,16 @@ const activeTab = ref<'general' | 'classification' | 'dates' | 'associations' | 
 // État du formulaire (aligné sur le schéma backend)
 const form = reactive({
   title: '',
+  titleEn: '',
+  titleAr: '',
   slug: '',
   summary: '',
   descriptionMd: '',
   descriptionHtml: '',
+  descriptionMdEn: '',
+  descriptionHtmlEn: '',
+  descriptionMdAr: '',
+  descriptionHtmlAr: '',
   cover_image_external_id: null as string | null,
   sector_external_id: null as string | null,
   manager_external_id: null as string | null,
@@ -64,6 +72,38 @@ watch(() => form.title, (title) => {
     form.slug = slugify(title)
   }
 })
+
+// === TRADUCTION AUTO FR → EN/AR (title + description) ===
+const translating = ref(false)
+const translateMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
+async function handleTranslate() {
+  translateMessage.value = null
+  if (!form.title && !form.descriptionMd) {
+    translateMessage.value = { type: 'error', text: t('adminTranslate.translateNeedsFr') }
+    return
+  }
+  translating.value = true
+  try {
+    const res = await translateProject({
+      title: form.title || null,
+      description_html: form.descriptionHtml || null,
+      description_md: form.descriptionMd || null,
+    })
+    if (res.title_en != null) form.titleEn = res.title_en
+    if (res.title_ar != null) form.titleAr = res.title_ar
+    if (res.description_en_html != null) form.descriptionHtmlEn = res.description_en_html
+    if (res.description_en_md != null) form.descriptionMdEn = res.description_en_md
+    if (res.description_ar_html != null) form.descriptionHtmlAr = res.description_ar_html
+    if (res.description_ar_md != null) form.descriptionMdAr = res.description_ar_md
+    translateMessage.value = { type: 'success', text: t('adminTranslate.translateSuccess') }
+  }
+  catch {
+    translateMessage.value = { type: 'error', text: t('adminTranslate.translateError') }
+  }
+  finally {
+    translating.value = false
+  }
+}
 
 // === GESTION DES BÉNÉFICIAIRES ===
 const newBeneficiary = ref('')
@@ -161,10 +201,16 @@ const saveForm = async () => {
   try {
     await createProject({
       title: form.title,
+      title_en: form.titleEn || null,
+      title_ar: form.titleAr || null,
       slug: form.slug,
       summary: form.summary || null,
       description_html: form.descriptionHtml || null,
       description_md: form.descriptionMd || null,
+      description_en_html: form.descriptionHtmlEn || null,
+      description_en_md: form.descriptionMdEn || null,
+      description_ar_html: form.descriptionHtmlAr || null,
+      description_ar_md: form.descriptionMdAr || null,
       cover_image_external_id: form.cover_image_external_id,
       sector_external_id: form.sector_external_id,
       manager_external_id: form.manager_external_id,
@@ -385,11 +431,49 @@ const tabs = [
             />
           </div>
 
+          <!-- Traduction automatique FR → EN/AR (title + description) -->
+          <div class="sm:col-span-2 space-y-3 rounded-lg border border-dashed border-blue-300 bg-blue-50/50 p-3 dark:border-blue-700 dark:bg-blue-900/20">
+            <div class="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                :disabled="translating"
+                class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                @click="handleTranslate"
+              >
+                <font-awesome-icon v-if="translating" :icon="['fas', 'spinner']" class="animate-spin" />
+                {{ translating ? t('adminTranslate.translating') : t('adminTranslate.translate') }}
+              </button>
+              <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('adminTranslate.translateHint') }}</p>
+            </div>
+            <p
+              v-if="translateMessage"
+              class="text-xs"
+              :class="translateMessage.type === 'success' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'"
+            >
+              {{ translateMessage.text }}
+            </p>
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Titre (EN)</label>
+                <input v-model="form.titleEn" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              </div>
+              <div>
+                <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">العنوان (AR)</label>
+                <input v-model="form.titleAr" type="text" dir="rtl" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">La description traduite (EN/AR) est éditable via les onglets de l'éditeur de description ci-dessous.</p>
+          </div>
+
           <!-- Description (Rich Text Editor) -->
           <div class="sm:col-span-2">
             <AdminRichTextEditor
               v-model="form.descriptionMd"
               v-model:html-value="form.descriptionHtml"
+              v-model:model-value-en="form.descriptionMdEn"
+              v-model:html-value-en="form.descriptionHtmlEn"
+              v-model:model-value-ar="form.descriptionMdAr"
+              v-model:html-value-ar="form.descriptionHtmlAr"
               label="Description détaillée"
               placeholder="Description complète du projet : contexte, objectifs, méthodologie..."
               :show-card="false"

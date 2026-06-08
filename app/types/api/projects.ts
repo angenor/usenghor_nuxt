@@ -23,6 +23,11 @@ export interface ProjectCategoryRead {
   description: string | null
   icon: string | null
   created_at: string
+  // Traductions auto FR → EN/AR (convention additive)
+  name_en: string | null
+  name_ar: string | null
+  description_en: string | null
+  description_ar: string | null
 }
 
 export interface ProjectCategoryCreate {
@@ -30,6 +35,10 @@ export interface ProjectCategoryCreate {
   slug: string
   description?: string | null
   icon?: string | null
+  name_en?: string | null
+  name_ar?: string | null
+  description_en?: string | null
+  description_ar?: string | null
 }
 
 export interface ProjectCategoryUpdate {
@@ -37,6 +46,24 @@ export interface ProjectCategoryUpdate {
   slug?: string
   description?: string | null
   icon?: string | null
+  name_en?: string | null
+  name_ar?: string | null
+  description_en?: string | null
+  description_ar?: string | null
+}
+
+/** Champs source FR d'une catégorie à traduire (sans persistance). */
+export interface ProjectCategoryTranslateRequest {
+  name?: string | null
+  description?: string | null
+}
+
+/** Traductions EN/AR générées pour pré-remplir le formulaire admin. */
+export interface ProjectCategoryTranslateResponse {
+  name_en: string | null
+  name_ar: string | null
+  description_en: string | null
+  description_ar: string | null
 }
 
 // ============================================================================
@@ -50,6 +77,13 @@ export interface ProjectRead {
   summary: string | null
   description_html: string | null
   description_md: string | null
+  // Traductions auto FR → EN/AR (convention additive). summary non traduit (cf. décision).
+  title_en: string | null
+  title_ar: string | null
+  description_en_html: string | null
+  description_en_md: string | null
+  description_ar_html: string | null
+  description_ar_md: string | null
   cover_image_external_id: string | null
   sector_external_id: string | null
   manager_external_id: string | null
@@ -69,6 +103,23 @@ export interface ProjectReadWithRelations extends ProjectRead {
   categories: ProjectCategoryRead[]
 }
 
+/** Champs source FR d'un projet à traduire (title + description ; summary exclu). */
+export interface ProjectTranslateRequest {
+  title?: string | null
+  description_html?: string | null
+  description_md?: string | null
+}
+
+/** Traductions EN/AR générées pour pré-remplir le formulaire admin. */
+export interface ProjectTranslateResponse {
+  title_en: string | null
+  title_ar: string | null
+  description_en_html: string | null
+  description_en_md: string | null
+  description_ar_html: string | null
+  description_ar_md: string | null
+}
+
 // ============================================================================
 // Project Create / Update
 // ============================================================================
@@ -79,6 +130,12 @@ export interface ProjectCreatePayload {
   summary?: string | null
   description_html?: string | null
   description_md?: string | null
+  title_en?: string | null
+  title_ar?: string | null
+  description_en_html?: string | null
+  description_en_md?: string | null
+  description_ar_html?: string | null
+  description_ar_md?: string | null
   cover_image_external_id?: string | null
   sector_external_id?: string | null
   manager_external_id?: string | null
@@ -100,6 +157,12 @@ export interface ProjectUpdatePayload {
   summary?: string | null
   description_html?: string | null
   description_md?: string | null
+  title_en?: string | null
+  title_ar?: string | null
+  description_en_html?: string | null
+  description_en_md?: string | null
+  description_ar_html?: string | null
+  description_ar_md?: string | null
   cover_image_external_id?: string | null
   sector_external_id?: string | null
   manager_external_id?: string | null
@@ -175,6 +238,17 @@ export interface ProjectCallRead {
   status: ProjectCallStatus
   created_at: string
   updated_at: string
+  // Traductions auto FR → EN/AR (convention additive)
+  title_en: string | null
+  title_ar: string | null
+  description_en_html: string | null
+  description_en_md: string | null
+  description_ar_html: string | null
+  description_ar_md: string | null
+  conditions_en_html: string | null
+  conditions_en_md: string | null
+  conditions_ar_html: string | null
+  conditions_ar_md: string | null
 }
 
 export interface ProjectCallCreate {
@@ -187,6 +261,16 @@ export interface ProjectCallCreate {
   type?: ProjectCallType | null
   deadline?: string | null
   status?: ProjectCallStatus
+  title_en?: string | null
+  title_ar?: string | null
+  description_en_html?: string | null
+  description_en_md?: string | null
+  description_ar_html?: string | null
+  description_ar_md?: string | null
+  conditions_en_html?: string | null
+  conditions_en_md?: string | null
+  conditions_ar_html?: string | null
+  conditions_ar_md?: string | null
 }
 
 export interface ProjectCallUpdate {
@@ -199,6 +283,39 @@ export interface ProjectCallUpdate {
   type?: ProjectCallType | null
   deadline?: string | null
   status?: ProjectCallStatus
+  title_en?: string | null
+  title_ar?: string | null
+  description_en_html?: string | null
+  description_en_md?: string | null
+  description_ar_html?: string | null
+  description_ar_md?: string | null
+  conditions_en_html?: string | null
+  conditions_en_md?: string | null
+  conditions_ar_html?: string | null
+  conditions_ar_md?: string | null
+}
+
+/** Champs source FR d'un appel de projet à traduire (title + description + conditions). */
+export interface ProjectCallTranslateRequest {
+  title?: string | null
+  description_html?: string | null
+  description_md?: string | null
+  conditions_html?: string | null
+  conditions_md?: string | null
+}
+
+/** Traductions EN/AR générées pour pré-remplir le formulaire admin. */
+export interface ProjectCallTranslateResponse {
+  title_en: string | null
+  title_ar: string | null
+  description_en_html: string | null
+  description_en_md: string | null
+  description_ar_html: string | null
+  description_ar_md: string | null
+  conditions_en_html: string | null
+  conditions_en_md: string | null
+  conditions_ar_html: string | null
+  conditions_ar_md: string | null
 }
 
 // ============================================================================

@@ -12,6 +12,8 @@ import type {
   PartnerCreate,
   PartnerRead,
   PartnerReorder,
+  PartnerTranslateRequest,
+  PartnerTranslateResponse,
   PartnerType,
   PartnerUpdate,
 } from '~/types/api'
@@ -203,6 +205,18 @@ export function usePartnersApi() {
     })
   }
 
+  /**
+   * Traduit la description FR d'un partenaire → EN/AR (sans persistance).
+   */
+  async function translatePartner(
+    payload: PartnerTranslateRequest,
+  ): Promise<PartnerTranslateResponse> {
+    return apiFetch<PartnerTranslateResponse>('/api/admin/partners/translate', {
+      method: 'POST',
+      body: payload,
+    })
+  }
+
   // =========================================================================
   // Statistics
   // =========================================================================
@@ -300,6 +314,9 @@ export function usePartnersApi() {
     deletePartner,
     togglePartnerActive,
     reorderPartners,
+
+    // Traduction auto FR → EN/AR
+    translatePartner,
 
     // Statistics
     getPartnersStats,

@@ -16,10 +16,13 @@ const {
   updatePartner,
   deletePartner: apiDeletePartner,
   togglePartnerActive: apiTogglePartnerActive,
+  translatePartner,
   partnerTypeLabels,
   partnerTypeColors,
   partnerTypes,
 } = usePartnersApi()
+
+const { t } = useI18n()
 
 const { apiFetch } = useApi()
 const { getMediaUrl, uploadMedia, uploadMediaVariants } = useMediaApi()
@@ -68,6 +71,8 @@ const error = ref<string | null>(null)
 const newPartner = ref({
   name: '',
   description: '',
+  description_en: '',
+  description_ar: '',
   type: 'campus_partner' as PartnerType,
   logo_external_id: '',
   country_external_id: '',
@@ -83,6 +88,10 @@ const newPartner = ref({
   existing_campus_ids: [] as string[],
   existing_project_ids: [] as string[],
 })
+
+// Traduction automatique FR → EN/AR (description uniquement, modale partagée)
+const translatingPartner = ref(false)
+const translatePartnerMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
 
 // Campus et projets pour les associations conditionnelles
 interface CampusOption {
@@ -312,6 +321,8 @@ const openAddModal = () => {
   newPartner.value = {
     name: '',
     description: '',
+    description_en: '',
+    description_ar: '',
     type: 'campus_partner',
     logo_external_id: '',
     country_external_id: '',
@@ -326,6 +337,7 @@ const openAddModal = () => {
     existing_project_ids: [],
   }
   logoPreviewUrl.value = null
+  translatePartnerMessage.value = null
   showAddModal.value = true
 }
 
@@ -340,6 +352,8 @@ const openEditModal = async (partner: PartnerDisplay) => {
   newPartner.value = {
     name: partner.name,
     description: partner.description || '',
+    description_en: partner.description_en || '',
+    description_ar: partner.description_ar || '',
     type: partner.type,
     logo_external_id: partner.logo_external_id || '',
     country_external_id: partner.country_external_id || '',
@@ -354,6 +368,7 @@ const openEditModal = async (partner: PartnerDisplay) => {
     existing_project_ids: existingProjectIds,
   }
   logoPreviewUrl.value = null
+  translatePartnerMessage.value = null
   showEditModal.value = true
 }
 
@@ -390,6 +405,8 @@ const handleAddPartner = async () => {
     const payload = {
       name: newPartner.value.name,
       description: newPartner.value.description || null,
+      description_en: newPartner.value.description_en || null,
+      description_ar: newPartner.value.description_ar || null,
       type: newPartner.value.type,
       logo_external_id: newPartner.value.logo_external_id || null,
       country_external_id: newPartner.value.country_external_id || null,
@@ -450,6 +467,8 @@ const handleEditPartner = async () => {
     const payload = {
       name: newPartner.value.name,
       description: newPartner.value.description || null,
+      description_en: newPartner.value.description_en || null,
+      description_ar: newPartner.value.description_ar || null,
       type: newPartner.value.type,
       logo_external_id: newPartner.value.logo_external_id || null,
       country_external_id: newPartner.value.country_external_id || null,
@@ -531,6 +550,28 @@ const handleEditPartner = async () => {
   }
   finally {
     isSaving.value = false
+  }
+}
+
+// === TRADUCTION AUTO FR → EN/AR (description uniquement) ===
+async function handleTranslatePartner() {
+  translatePartnerMessage.value = null
+  if (!newPartner.value.description) {
+    translatePartnerMessage.value = { type: 'error', text: t('adminTranslate.translateNeedsFr') }
+    return
+  }
+  translatingPartner.value = true
+  try {
+    const res = await translatePartner({
+      description: newPartner.value.description || null,
+    })
+    if (res.description_en != null) newPartner.value.description_en = res.description_en
+    if (res.description_ar != null) newPartner.value.description_ar = res.description_ar
+    translatePartnerMessage.value = { type: 'success', text: t('adminTranslate.translateSuccess') }
+  } catch {
+    translatePartnerMessage.value = { type: 'error', text: t('adminTranslate.translateError') }
+  } finally {
+    translatingPartner.value = false
   }
 }
 
@@ -1666,6 +1707,39 @@ const requestTypeToPartnerType: Record<string, string> = {
                   class="w-full rounded-lg border border-gray-300 bg-white py-2 px-3 text-sm text-gray-900 placeholder-gray-500 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
                   placeholder="Description du partenaire"
                 />
+              </div>
+
+              <!-- Traductions automatiques FR → EN/AR (description uniquement) -->
+              <div class="space-y-3 rounded-lg border border-dashed border-blue-300 bg-blue-50/50 p-3 dark:border-blue-700 dark:bg-blue-900/20">
+                <div class="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    :disabled="translatingPartner"
+                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                    @click="handleTranslatePartner"
+                  >
+                    <font-awesome-icon v-if="translatingPartner" icon="fa-solid fa-spinner" class="animate-spin" />
+                    {{ translatingPartner ? t('adminTranslate.translating') : t('adminTranslate.translate') }}
+                  </button>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('adminTranslate.translateHint') }}</p>
+                </div>
+                <p
+                  v-if="translatePartnerMessage"
+                  class="text-xs"
+                  :class="translatePartnerMessage.type === 'success' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'"
+                >
+                  {{ translatePartnerMessage.text }}
+                </p>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div>
+                    <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Description (EN)</label>
+                    <textarea v-model="newPartner.description_en" rows="2" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">الوصف (AR)</label>
+                    <textarea v-model="newPartner.description_ar" rows="2" dir="rtl" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                  </div>
+                </div>
               </div>
 
               <div class="grid grid-cols-3 gap-4">

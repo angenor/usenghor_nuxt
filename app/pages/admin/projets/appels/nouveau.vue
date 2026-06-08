@@ -6,10 +6,12 @@ definePageMeta({
 })
 
 const router = useRouter()
+const { t } = useI18n()
 
 const {
   listProjects,
   createProjectCall,
+  translateCall,
   projectCallTypeLabels,
   projectCallStatusLabels,
 } = useProjectsApi()
@@ -23,19 +25,68 @@ const isLoadingProjects = ref(true)
 // Contenu éditeur (séparé du formulaire pour éviter les problèmes de réactivité)
 const descriptionMd = ref('')
 const descriptionHtml = ref('')
+const descriptionMdEn = ref('')
+const descriptionHtmlEn = ref('')
+const descriptionMdAr = ref('')
+const descriptionHtmlAr = ref('')
 const conditionsMd = ref('')
 const conditionsHtml = ref('')
+const conditionsMdEn = ref('')
+const conditionsHtmlEn = ref('')
+const conditionsMdAr = ref('')
+const conditionsHtmlAr = ref('')
 
 // État du formulaire
 const form = reactive({
   project_id: '',
   title: '',
+  titleEn: '',
+  titleAr: '',
   short_description: '',
   cover_image_external_id: null as string | null,
   type: 'project' as ProjectCallType,
   status: 'upcoming' as ProjectCallStatus,
   deadline: '',
 })
+
+// === TRADUCTION AUTO FR → EN/AR ===
+const translating = ref(false)
+const translateMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
+
+async function handleTranslate() {
+  translateMessage.value = null
+  if (!form.title && !descriptionMd.value && !conditionsMd.value) {
+    translateMessage.value = { type: 'error', text: t('adminTranslate.translateNeedsFr') }
+    return
+  }
+  translating.value = true
+  try {
+    const res = await translateCall({
+      title: form.title || null,
+      description_html: descriptionHtml.value || null,
+      description_md: descriptionMd.value || null,
+      conditions_html: conditionsHtml.value || null,
+      conditions_md: conditionsMd.value || null,
+    })
+    if (res.title_en != null) form.titleEn = res.title_en
+    if (res.title_ar != null) form.titleAr = res.title_ar
+    if (res.description_en_html != null) descriptionHtmlEn.value = res.description_en_html
+    if (res.description_en_md != null) descriptionMdEn.value = res.description_en_md
+    if (res.description_ar_html != null) descriptionHtmlAr.value = res.description_ar_html
+    if (res.description_ar_md != null) descriptionMdAr.value = res.description_ar_md
+    if (res.conditions_en_html != null) conditionsHtmlEn.value = res.conditions_en_html
+    if (res.conditions_en_md != null) conditionsMdEn.value = res.conditions_en_md
+    if (res.conditions_ar_html != null) conditionsHtmlAr.value = res.conditions_ar_html
+    if (res.conditions_ar_md != null) conditionsMdAr.value = res.conditions_ar_md
+    translateMessage.value = { type: 'success', text: t('adminTranslate.translateSuccess') }
+  }
+  catch {
+    translateMessage.value = { type: 'error', text: t('adminTranslate.translateError') }
+  }
+  finally {
+    translating.value = false
+  }
+}
 
 // === GESTION DE L'IMAGE DE COUVERTURE ===
 const showCoverEditor = ref(false)
@@ -131,6 +182,16 @@ const saveForm = async () => {
       type: form.type,
       status: form.status,
       deadline: form.deadline ? new Date(form.deadline).toISOString() : null,
+      title_en: form.titleEn || null,
+      title_ar: form.titleAr || null,
+      description_en_html: descriptionHtmlEn.value || null,
+      description_en_md: descriptionMdEn.value || null,
+      description_ar_html: descriptionHtmlAr.value || null,
+      description_ar_md: descriptionMdAr.value || null,
+      conditions_en_html: conditionsHtmlEn.value || null,
+      conditions_en_md: conditionsMdEn.value || null,
+      conditions_ar_html: conditionsHtmlAr.value || null,
+      conditions_ar_md: conditionsMdAr.value || null,
     })
 
     router.push('/admin/projets/appels')
@@ -245,6 +306,40 @@ const goBack = () => {
           />
         </div>
 
+        <!-- Traduction auto FR → EN/AR -->
+        <div class="space-y-3 rounded-lg border border-dashed border-blue-300 bg-blue-50/50 p-3 dark:border-blue-700 dark:bg-blue-900/20 sm:col-span-2">
+          <div class="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              :disabled="translating"
+              class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              @click="handleTranslate"
+            >
+              <font-awesome-icon v-if="translating" :icon="['fas', 'spinner']" class="animate-spin" />
+              {{ translating ? t('adminTranslate.translating') : t('adminTranslate.translate') }}
+            </button>
+            <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('adminTranslate.translateHint') }}</p>
+          </div>
+          <p
+            v-if="translateMessage"
+            class="text-xs"
+            :class="translateMessage.type === 'success' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'"
+          >
+            {{ translateMessage.text }}
+          </p>
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Titre (EN)</label>
+              <input v-model="form.titleEn" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+            </div>
+            <div>
+              <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">العنوان (AR)</label>
+              <input v-model="form.titleAr" type="text" dir="rtl" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+            </div>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Les descriptions et conditions traduites sont éditables via les onglets EN/AR de leurs éditeurs respectifs.</p>
+        </div>
+
         <!-- Type -->
         <div>
           <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -351,6 +446,10 @@ const goBack = () => {
     <AdminRichTextEditor
       v-model="descriptionMd"
       v-model:html-value="descriptionHtml"
+      v-model:model-value-en="descriptionMdEn"
+      v-model:html-value-en="descriptionHtmlEn"
+      v-model:model-value-ar="descriptionMdAr"
+      v-model:html-value-ar="descriptionHtmlAr"
       title="Description détaillée"
       description="Décrivez l'appel en détail : contexte, objectifs, profils recherchés..."
       icon="fa-solid fa-file-lines"
@@ -363,6 +462,10 @@ const goBack = () => {
     <AdminRichTextEditor
       v-model="conditionsMd"
       v-model:html-value="conditionsHtml"
+      v-model:model-value-en="conditionsMdEn"
+      v-model:html-value-en="conditionsHtmlEn"
+      v-model:model-value-ar="conditionsMdAr"
+      v-model:html-value-ar="conditionsHtmlAr"
       title="Conditions de participation"
       description="Précisez les critères d'éligibilité et les conditions de participation"
       icon="fa-solid fa-clipboard-check"
