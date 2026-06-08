@@ -23,6 +23,11 @@ export interface CampusPublic {
   description: string | null
   description_html: string | null
   description_md: string | null
+  // Traductions auto FR → EN/AR (repli FR via useLocalizedField). city/address = FR.
+  name_en?: string | null
+  name_ar?: string | null
+  description_en_html?: string | null
+  description_ar_html?: string | null
   cover_image_url: string | null
   city: string | null
   email: string | null

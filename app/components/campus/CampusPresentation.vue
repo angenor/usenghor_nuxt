@@ -7,6 +7,7 @@ interface Props {
 
 const props = defineProps<Props>()
 const { t } = useI18n()
+const { localized } = useLocalizedField()
 const { getCampusLocation, getCampusFlagEmoji } = usePublicCampusApi()
 
 const location = computed(() => getCampusLocation(props.campus))
@@ -17,7 +18,7 @@ const flagEmoji = computed(() => getCampusFlagEmoji(props.campus))
   <section class="py-12">
     <div class="mb-8">
       <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-        {{ campus.name }}
+        {{ localized(campus, 'name') }}
       </h2>
       <p v-if="location" class="text-gray-600 dark:text-gray-400 flex items-center gap-2">
         <span v-if="flagEmoji" class="text-xl">{{ flagEmoji }}</span>
@@ -46,9 +47,9 @@ const flagEmoji = computed(() => getCampusFlagEmoji(props.campus))
     </div>
 
     <!-- Description (pleine largeur) -->
-    <div v-if="campus.description_html" class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-sm">
+    <div v-if="localized(campus, 'description_html')" class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-sm">
       <div class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-        <RichTextRenderer :html="campus.description_html" />
+        <RichTextRenderer :html="localized(campus, 'description_html')" />
       </div>
     </div>
     <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">

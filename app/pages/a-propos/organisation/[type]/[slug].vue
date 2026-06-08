@@ -208,10 +208,10 @@ if (!isValidType) {
   })
 }
 
-// Get entity name
+// Get entity name (traduit selon la locale, repli FR)
 const entityName = computed(() => {
   if (!entity.value) return ''
-  return entity.value.name
+  return localized(entity.value, 'name')
 })
 
 // Extraire le texte brut d'un contenu HTML (pour les previews)
@@ -220,10 +220,10 @@ const extractPlainText = (html: string | null | undefined): string => {
   return html.replace(/<[^>]*>/g, '').trim().substring(0, 200)
 }
 
-// Get entity description (string pour le hero subtitle)
+// Get entity description (string pour le hero subtitle, traduit selon la locale)
 const entityDescriptionText = computed(() => {
   if (!entity.value) return ''
-  return extractPlainText(entity.value.description_html)
+  return extractPlainText(localized(entity.value, 'description_html'))
 })
 
 // Objectives (only for services)
@@ -525,9 +525,9 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
             </div>
 
             <!-- Description Card -->
-            <div v-if="entity?.description_html" class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-sm mb-8">
+            <div v-if="localized(entity, 'description_html')" class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-sm mb-8">
               <div class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-                <RichTextRenderer :html="entity.description_html" />
+                <RichTextRenderer :html="localized(entity, 'description_html')" />
               </div>
             </div>
 
@@ -561,12 +561,12 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
             </div>
 
             <!-- Mission Card -->
-            <div v-if="entity?.mission_html" class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-sm mb-8">
+            <div v-if="localized(entity, 'mission_html')" class="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-sm mb-8">
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 {{ t('organizationDetail.missions.mission') || 'Mission' }}
               </h3>
               <div class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-                <RichTextRenderer :html="entity.mission_html" />
+                <RichTextRenderer :html="localized(entity, 'mission_html')" />
               </div>
             </div>
 
@@ -589,7 +589,7 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                     <font-awesome-icon icon="fa-solid fa-circle-check" class="w-5 h-5" :class="colorClasses.text" />
                   </div>
                   <div class="flex-1 min-w-0 pt-1">
-                    <h4 class="font-semibold text-gray-900 dark:text-white mb-1">{{ objective.title }}</h4>
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-1">{{ localized(objective, 'title') }}</h4>
                     <p v-if="objective.description" class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{{ objective.description }}</p>
                   </div>
                 </div>
@@ -719,7 +719,7 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                   </div>
                   <div class="flex-1 min-w-0">
                     <h4 class="font-semibold text-gray-900 dark:text-white mb-1 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
-                      {{ svc.name }}
+                      {{ localized(svc, 'name') }}
                     </h4>
                     <p v-if="svc.description" class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
                       {{ svc.description }}
@@ -771,7 +771,7 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                     <font-awesome-icon icon="fa-solid fa-calendar" class="w-4 h-4 mr-2" />
                     {{ formatDate(achievement.achievement_date) }}
                   </p>
-                  <h3 class="font-bold text-gray-900 dark:text-white mb-2">{{ achievement.title }}</h3>
+                  <h3 class="font-bold text-gray-900 dark:text-white mb-2">{{ localized(achievement, 'title') }}</h3>
                   <p v-if="achievement.description" class="text-sm text-gray-600 dark:text-gray-400">{{ achievement.description }}</p>
                 </div>
               </div>
@@ -827,7 +827,7 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                   </div>
                 </div>
                 <div class="p-6">
-                  <h3 class="font-bold text-gray-900 dark:text-white mb-2">{{ project.title }}</h3>
+                  <h3 class="font-bold text-gray-900 dark:text-white mb-2">{{ localized(project, 'title') }}</h3>
                   <p v-if="project.description" class="text-sm text-gray-600 dark:text-gray-400 mb-4">{{ project.description }}</p>
 
                   <!-- Dates -->

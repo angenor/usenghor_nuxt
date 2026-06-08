@@ -9,10 +9,13 @@
 
 import type {
   SectorRead,
+  SectorServiceI18nFields,
   IdResponse,
   MessageResponse,
   PaginatedResponse,
   ServiceRead,
+  ServiceTranslateRequest,
+  ServiceTranslateResponse,
 } from '~/types/api'
 
 // Import mock data pour fallback en développement
@@ -75,12 +78,14 @@ export interface ServiceWithDetails extends ServiceRead {
   team: ServiceTeamMemberRead[]
 }
 
-export interface ServiceCreate {
+export interface ServiceCreate extends SectorServiceI18nFields {
   name: string
   sigle?: string | null
   color?: string | null
-  description?: string | null
-  mission?: string | null
+  description_html?: string | null
+  description_md?: string | null
+  mission_html?: string | null
+  mission_md?: string | null
   email?: string | null
   phone?: string | null
   head_external_id?: string | null
@@ -90,12 +95,14 @@ export interface ServiceCreate {
   active?: boolean
 }
 
-export interface ServiceUpdate {
+export interface ServiceUpdate extends SectorServiceI18nFields {
   name?: string
   sigle?: string | null
   color?: string | null
-  description?: string | null
-  mission?: string | null
+  description_html?: string | null
+  description_md?: string | null
+  mission_html?: string | null
+  mission_md?: string | null
   email?: string | null
   phone?: string | null
   head_external_id?: string | null
@@ -583,6 +590,19 @@ export function useServicesApi() {
     })
   }
 
+  /**
+   * Traduit les champs FR d'un service (name + description + mission) → EN/AR,
+   * sans persistance (bouton « Traduire » du formulaire admin).
+   */
+  async function translateService(
+    payload: ServiceTranslateRequest,
+  ): Promise<ServiceTranslateResponse> {
+    return apiFetch<ServiceTranslateResponse>('/api/admin/services/translate', {
+      method: 'POST',
+      body: payload,
+    })
+  }
+
   // =========================================================================
   // Objectives
   // =========================================================================
@@ -1061,6 +1081,7 @@ export function useServicesApi() {
     duplicateService,
     toggleServiceActive,
     reorderServices,
+    translateService,
 
     // Objectives
     getServiceObjectives,

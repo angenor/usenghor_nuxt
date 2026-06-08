@@ -16,7 +16,18 @@ import type {
 // Types Backend (alignés sur les schemas Pydantic)
 // ============================================================================
 
-export interface CampusRead {
+// Champs de traduction auto FR → EN/AR (convention additive) : name + la paire
+// rich description_html/_md. La colonne legacy `description` reste en FR.
+export interface CampusI18nFields {
+  name_en?: string | null
+  name_ar?: string | null
+  description_en_html?: string | null
+  description_en_md?: string | null
+  description_ar_html?: string | null
+  description_ar_md?: string | null
+}
+
+export interface CampusRead extends CampusI18nFields {
   id: string
   code: string
   name: string
@@ -62,7 +73,7 @@ export interface CampusPartnerRead {
   end_date: string | null
 }
 
-export interface CampusCreate {
+export interface CampusCreate extends CampusI18nFields {
   code: string
   name: string
   description?: string | null
@@ -83,7 +94,7 @@ export interface CampusCreate {
   active?: boolean
 }
 
-export interface CampusUpdate {
+export interface CampusUpdate extends CampusI18nFields {
   code?: string
   name?: string
   description?: string | null
@@ -103,6 +114,16 @@ export interface CampusUpdate {
   is_headquarters?: boolean
   active?: boolean
 }
+
+/** Champs source FR d'un campus à traduire (sans persistance). */
+export interface CampusTranslateRequest {
+  name?: string | null
+  description_html?: string | null
+  description_md?: string | null
+}
+
+/** Traductions EN/AR générées pour pré-remplir le formulaire admin. */
+export type CampusTranslateResponse = CampusI18nFields
 
 export interface CampusTeamCreate {
   campus_id: string
@@ -240,6 +261,19 @@ export function useCampusApi() {
   async function toggleCampusActive(id: string): Promise<CampusRead> {
     return apiFetch<CampusRead>(`/api/admin/campuses/${id}/toggle-active`, {
       method: 'POST',
+    })
+  }
+
+  /**
+   * Traduit les champs FR d'un campus (name + description) → EN/AR, sans
+   * persistance (bouton « Traduire » du formulaire admin).
+   */
+  async function translateCampus(
+    payload: CampusTranslateRequest,
+  ): Promise<CampusTranslateResponse> {
+    return apiFetch<CampusTranslateResponse>('/api/admin/campuses/translate', {
+      method: 'POST',
+      body: payload,
     })
   }
 
@@ -439,6 +473,7 @@ export function useCampusApi() {
     updateCampus,
     deleteCampus,
     toggleCampusActive,
+    translateCampus,
 
     // Team
     getCampusTeam,

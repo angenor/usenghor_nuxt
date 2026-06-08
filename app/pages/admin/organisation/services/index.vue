@@ -23,10 +23,51 @@ const {
   duplicateService: apiDuplicateService,
   toggleServiceActive: apiToggleServiceActive,
   reorderServices,
-  generateServiceId
+  generateServiceId,
+  translateService,
 } = useServicesApi()
 
 const { apiFetch } = useApi()
+const { t } = useI18n()
+
+// === TRADUCTION AUTO FR → EN/AR ===
+const translating = ref(false)
+const translateMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
+
+async function handleTranslate() {
+  translateMessage.value = null
+  if (!newService.value.name && !newService.value.description_md && !newService.value.mission_md) {
+    translateMessage.value = { type: 'error', text: t('adminTranslate.translateNeedsFr') }
+    return
+  }
+  translating.value = true
+  try {
+    const res = await translateService({
+      name: newService.value.name || null,
+      description_html: newService.value.description_html || null,
+      description_md: newService.value.description_md || null,
+      mission_html: newService.value.mission_html || null,
+      mission_md: newService.value.mission_md || null,
+    })
+    if (res.name_en != null) newService.value.name_en = res.name_en
+    if (res.name_ar != null) newService.value.name_ar = res.name_ar
+    if (res.description_en_html != null) newService.value.description_html_en = res.description_en_html
+    if (res.description_en_md != null) newService.value.description_md_en = res.description_en_md
+    if (res.description_ar_html != null) newService.value.description_html_ar = res.description_ar_html
+    if (res.description_ar_md != null) newService.value.description_md_ar = res.description_ar_md
+    if (res.mission_en_html != null) newService.value.mission_html_en = res.mission_en_html
+    if (res.mission_en_md != null) newService.value.mission_md_en = res.mission_en_md
+    if (res.mission_ar_html != null) newService.value.mission_html_ar = res.mission_ar_html
+    if (res.mission_ar_md != null) newService.value.mission_md_ar = res.mission_ar_md
+    translateMessage.value = { type: 'success', text: t('adminTranslate.translateSuccess') }
+  }
+  catch {
+    translateMessage.value = { type: 'error', text: t('adminTranslate.translateError') }
+  }
+  finally {
+    translating.value = false
+  }
+}
 
 // === STATE ===
 const isLoading = ref(true)
@@ -87,6 +128,17 @@ const newService = ref<{
   description_html: string
   mission_md: string
   mission_html: string
+  // Traductions auto FR → EN/AR (clé state : <champ>_<langue>)
+  name_en: string
+  name_ar: string
+  description_md_en: string
+  description_html_en: string
+  description_md_ar: string
+  description_html_ar: string
+  mission_md_en: string
+  mission_html_en: string
+  mission_md_ar: string
+  mission_html_ar: string
   head_external_id: string
   album_external_id: string
   email: string
@@ -101,6 +153,16 @@ const newService = ref<{
   description_html: '',
   mission_md: '',
   mission_html: '',
+  name_en: '',
+  name_ar: '',
+  description_md_en: '',
+  description_html_en: '',
+  description_md_ar: '',
+  description_html_ar: '',
+  mission_md_en: '',
+  mission_html_en: '',
+  mission_md_ar: '',
+  mission_html_ar: '',
   head_external_id: '',
   album_external_id: '',
   email: '',
@@ -350,12 +412,23 @@ const openAddModal = () => {
     description_html: '',
     mission_md: '',
     mission_html: '',
+    name_en: '',
+    name_ar: '',
+    description_md_en: '',
+    description_html_en: '',
+    description_md_ar: '',
+    description_html_ar: '',
+    mission_md_en: '',
+    mission_html_en: '',
+    mission_md_ar: '',
+    mission_html_ar: '',
     head_external_id: '',
     album_external_id: '',
     email: '',
     phone: '',
     active: true
   }
+  translateMessage.value = null
   showAddModal.value = true
 }
 
@@ -370,12 +443,23 @@ const openEditModal = (service: ServiceDisplay) => {
     description_html: (service as any).description_html || '',
     mission_md: (service as any).mission_md || '',
     mission_html: (service as any).mission_html || '',
+    name_en: (service as any).name_en || '',
+    name_ar: (service as any).name_ar || '',
+    description_md_en: (service as any).description_en_md || '',
+    description_html_en: (service as any).description_en_html || '',
+    description_md_ar: (service as any).description_ar_md || '',
+    description_html_ar: (service as any).description_ar_html || '',
+    mission_md_en: (service as any).mission_en_md || '',
+    mission_html_en: (service as any).mission_en_html || '',
+    mission_md_ar: (service as any).mission_ar_md || '',
+    mission_html_ar: (service as any).mission_ar_html || '',
     head_external_id: service.head_external_id || '',
     album_external_id: service.album_external_id || '',
     email: service.email || '',
     phone: service.phone || '',
     active: service.active
   }
+  translateMessage.value = null
   showEditModal.value = true
 }
 
@@ -407,6 +491,17 @@ const saveService = async () => {
       description_md: newService.value.description_md || null,
       mission_html: newService.value.mission_html || null,
       mission_md: newService.value.mission_md || null,
+      // Traductions EN/AR (state <champ>_<langue> → backend <champ>_<langue>_<html|md>)
+      name_en: newService.value.name_en || null,
+      name_ar: newService.value.name_ar || null,
+      description_en_html: newService.value.description_html_en || null,
+      description_en_md: newService.value.description_md_en || null,
+      description_ar_html: newService.value.description_html_ar || null,
+      description_ar_md: newService.value.description_md_ar || null,
+      mission_en_html: newService.value.mission_html_en || null,
+      mission_en_md: newService.value.mission_md_en || null,
+      mission_ar_html: newService.value.mission_html_ar || null,
+      mission_ar_md: newService.value.mission_md_ar || null,
       head_external_id: newService.value.head_external_id || null,
       album_external_id: newService.value.album_external_id || null,
       email: newService.value.email || null,
@@ -1218,6 +1313,42 @@ const handleDragEnd = () => {
               />
             </div>
 
+            <!-- Traduction auto FR → EN/AR -->
+            <div class="space-y-3 rounded-lg border border-dashed border-blue-300 bg-blue-50/50 p-3 dark:border-blue-700 dark:bg-blue-900/20">
+              <div class="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  :disabled="translating"
+                  class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  @click="handleTranslate"
+                >
+                  <font-awesome-icon v-if="translating" :icon="['fas', 'spinner']" class="animate-spin" />
+                  {{ translating ? t('adminTranslate.translating') : t('adminTranslate.translate') }}
+                </button>
+                <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('adminTranslate.translateHint') }}</p>
+              </div>
+              <p
+                v-if="translateMessage"
+                class="text-xs"
+                :class="translateMessage.type === 'success' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'"
+              >
+                {{ translateMessage.text }}
+              </p>
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Nom (EN)</label>
+                  <input v-model="newService.name_en" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">الاسم (AR)</label>
+                  <input v-model="newService.name_ar" type="text" dir="rtl" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                </div>
+              </div>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                Les traductions EN/AR de la description et de la mission apparaissent dans les onglets de leurs éditeurs respectifs.
+              </p>
+            </div>
+
             <div class="grid grid-cols-2 gap-4">
               <!-- Sigle -->
               <div>
@@ -1269,12 +1400,17 @@ const handleDragEnd = () => {
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Description
               </label>
-              <ToastUIEditor
+              <AdminRichTextEditor
                 v-model="newService.description_md"
+                v-model:html-value="newService.description_html"
+                v-model:model-value-en="newService.description_md_en"
+                v-model:html-value-en="newService.description_html_en"
+                v-model:model-value-ar="newService.description_md_ar"
+                v-model:html-value-ar="newService.description_html_ar"
                 placeholder="Description du service..."
-                :min-height="150"
                 mode="inline"
-                @update:html="newService.description_html = $event"
+                :show-card="false"
+                height="200px"
               />
             </div>
 
@@ -1283,12 +1419,17 @@ const handleDragEnd = () => {
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Mission
               </label>
-              <ToastUIEditor
+              <AdminRichTextEditor
                 v-model="newService.mission_md"
+                v-model:html-value="newService.mission_html"
+                v-model:model-value-en="newService.mission_md_en"
+                v-model:html-value-en="newService.mission_html_en"
+                v-model:model-value-ar="newService.mission_md_ar"
+                v-model:html-value-ar="newService.mission_html_ar"
                 placeholder="Mission et objectifs du service..."
-                :min-height="200"
                 mode="inline"
-                @update:html="newService.mission_html = $event"
+                :show-card="false"
+                height="250px"
               />
             </div>
 

@@ -9,10 +9,11 @@ definePageMeta({
 const router = useRouter()
 
 // APIs
-const { createCampus } = useCampusApi()
+const { createCampus, translateCampus } = useCampusApi()
 const { getAllCountriesPublic, getFlagEmoji } = useCountriesApi()
 const { apiFetch } = useApi()
 const { uploadMediaVariants } = useMediaApi()
+const { t } = useI18n()
 
 // Données de référence
 const countries = ref<CountryRead[]>([])
@@ -74,6 +75,13 @@ const form = reactive({
   name: '',
   description_md: '',
   description_html: '',
+  // Traductions auto FR → EN/AR (clé state : <champ>_<langue>)
+  name_en: '',
+  name_ar: '',
+  description_md_en: '',
+  description_html_en: '',
+  description_md_ar: '',
+  description_html_ar: '',
   cover_image: '', // URL d'aperçu local
   cover_image_external_id: null as string | null,
   country_external_id: '',
@@ -88,6 +96,39 @@ const form = reactive({
   is_headquarters: false,
   active: true,
 })
+
+// === TRADUCTION AUTO FR → EN/AR ===
+const translating = ref(false)
+const translateMessage = ref<{ type: 'success' | 'error', text: string } | null>(null)
+
+async function handleTranslate() {
+  translateMessage.value = null
+  if (!form.name && !form.description_md) {
+    translateMessage.value = { type: 'error', text: t('adminTranslate.translateNeedsFr') }
+    return
+  }
+  translating.value = true
+  try {
+    const res = await translateCampus({
+      name: form.name || null,
+      description_html: form.description_html || null,
+      description_md: form.description_md || null,
+    })
+    if (res.name_en != null) form.name_en = res.name_en
+    if (res.name_ar != null) form.name_ar = res.name_ar
+    if (res.description_en_html != null) form.description_html_en = res.description_en_html
+    if (res.description_en_md != null) form.description_md_en = res.description_en_md
+    if (res.description_ar_html != null) form.description_html_ar = res.description_ar_html
+    if (res.description_ar_md != null) form.description_md_ar = res.description_ar_md
+    translateMessage.value = { type: 'success', text: t('adminTranslate.translateSuccess') }
+  }
+  catch {
+    translateMessage.value = { type: 'error', text: t('adminTranslate.translateError') }
+  }
+  finally {
+    translating.value = false
+  }
+}
 
 // État pour l'éditeur d'image de couverture
 const showCoverEditor = ref(false)
@@ -220,6 +261,13 @@ const submitForm = async () => {
       name: form.name.trim(),
       description_html: form.description_html || undefined,
       description_md: form.description_md || undefined,
+      // Traductions EN/AR (state <champ>_<langue> → backend <champ>_<langue>_<html|md>)
+      name_en: form.name_en || undefined,
+      name_ar: form.name_ar || undefined,
+      description_en_html: form.description_html_en || undefined,
+      description_en_md: form.description_md_en || undefined,
+      description_ar_html: form.description_html_ar || undefined,
+      description_ar_md: form.description_md_ar || undefined,
       cover_image_external_id: form.cover_image_external_id || undefined,
       country_external_id: form.country_external_id || undefined,
       head_external_id: form.head_external_id || undefined,
@@ -383,15 +431,58 @@ const tabs = [
             </div>
           </div>
 
+          <!-- Traduction auto FR → EN/AR -->
+          <div class="space-y-3 rounded-lg border border-dashed border-blue-300 bg-blue-50/50 p-3 dark:border-blue-700 dark:bg-blue-900/20">
+            <div class="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                :disabled="translating"
+                class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                @click="handleTranslate"
+              >
+                <font-awesome-icon v-if="translating" :icon="['fas', 'spinner']" class="animate-spin" />
+                {{ translating ? t('adminTranslate.translating') : t('adminTranslate.translate') }}
+              </button>
+              <p class="text-xs text-gray-600 dark:text-gray-400">{{ t('adminTranslate.translateHint') }}</p>
+            </div>
+            <p
+              v-if="translateMessage"
+              class="text-xs"
+              :class="translateMessage.type === 'success' ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'"
+            >
+              {{ translateMessage.text }}
+            </p>
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Nom (EN)</label>
+                <input v-model="form.name_en" type="text" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              </div>
+              <div>
+                <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">الاسم (AR)</label>
+                <input v-model="form.name_ar" type="text" dir="rtl" class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+              </div>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              Les traductions EN/AR de la description apparaissent dans les onglets de l'éditeur ci-dessous.
+            </p>
+          </div>
+
           <!-- Description -->
           <div>
             <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Description
             </label>
-            <ToastUIEditor
+            <AdminRichTextEditor
               v-model="form.description_md"
+              v-model:html-value="form.description_html"
+              v-model:model-value-en="form.description_md_en"
+              v-model:html-value-en="form.description_html_en"
+              v-model:model-value-ar="form.description_md_ar"
+              v-model:html-value-ar="form.description_html_ar"
               placeholder="Description du campus..."
-              @update:html="form.description_html = $event"
+              mode="inline"
+              :show-card="false"
+              height="250px"
             />
           </div>
 

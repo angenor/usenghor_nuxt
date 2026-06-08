@@ -10,6 +10,8 @@ import type {
   SectorCreate,
   SectorRead,
   SectorReorder,
+  SectorTranslateRequest,
+  SectorTranslateResponse,
   SectorUpdate,
   SectorWithServices,
   IdResponse,
@@ -299,6 +301,19 @@ export function useSectorsApi() {
     })
   }
 
+  /**
+   * Traduit les champs FR d'un secteur (name + description + mission) → EN/AR,
+   * sans persistance (bouton « Traduire » du formulaire admin).
+   */
+  async function translateSector(
+    payload: SectorTranslateRequest,
+  ): Promise<SectorTranslateResponse> {
+    return apiFetch<SectorTranslateResponse>('/api/admin/sectors/translate', {
+      method: 'POST',
+      body: payload,
+    })
+  }
+
   // =========================================================================
   // Services
   // =========================================================================
@@ -436,6 +451,7 @@ export function useSectorsApi() {
     duplicateSector,
     toggleSectorActive,
     reorderSectors,
+    translateSector,
 
     // Services
     getSectorServices,

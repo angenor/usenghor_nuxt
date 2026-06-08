@@ -2,7 +2,16 @@
 // Types pour l'API publique de l'organisation
 // ============================================================================
 
-export interface ServiceObjectivePublic {
+// Champs de traduction auto FR → EN/AR (repli FR via useLocalizedField) communs
+// aux sous-tables service : title (court) + description (rich, variante _html).
+interface SubtableI18nFields {
+  title_en?: string | null
+  title_ar?: string | null
+  description_en_html?: string | null
+  description_ar_html?: string | null
+}
+
+export interface ServiceObjectivePublic extends SubtableI18nFields {
   id: string
   service_id: string
   title: string
@@ -12,7 +21,7 @@ export interface ServiceObjectivePublic {
   display_order: number
 }
 
-export interface ServiceAchievementPublic {
+export interface ServiceAchievementPublic extends SubtableI18nFields {
   id: string
   service_id: string
   title: string
@@ -25,7 +34,7 @@ export interface ServiceAchievementPublic {
   created_at: string
 }
 
-export interface ServiceProjectPublic {
+export interface ServiceProjectPublic extends SubtableI18nFields {
   id: string
   service_id: string
   title: string
@@ -61,7 +70,18 @@ export interface ServiceTeamMemberPublic {
   }
 }
 
-export interface SectorPublic {
+// Champs de traduction auto FR → EN/AR (repli FR via useLocalizedField) communs
+// aux secteurs et services : name + description/mission (variantes _html).
+interface SectorServicePublicI18nFields {
+  name_en?: string | null
+  name_ar?: string | null
+  description_en_html?: string | null
+  description_ar_html?: string | null
+  mission_en_html?: string | null
+  mission_ar_html?: string | null
+}
+
+export interface SectorPublic extends SectorServicePublicI18nFields {
   id: string
   code: string
   name: string
@@ -76,7 +96,7 @@ export interface SectorPublic {
   display_order: number
 }
 
-export interface ServicePublic {
+export interface ServicePublic extends SectorServicePublicI18nFields {
   id: string
   name: string
   sigle: string | null

@@ -6,7 +6,22 @@
 // Sectors
 // ============================================================================
 
-export interface SectorRead {
+// Champs de traduction auto FR → EN/AR (convention additive) partagés par
+// secteurs et services (name + description rich + mission rich).
+export interface SectorServiceI18nFields {
+  name_en?: string | null
+  name_ar?: string | null
+  description_en_html?: string | null
+  description_en_md?: string | null
+  description_ar_html?: string | null
+  description_ar_md?: string | null
+  mission_en_html?: string | null
+  mission_en_md?: string | null
+  mission_ar_html?: string | null
+  mission_ar_md?: string | null
+}
+
+export interface SectorRead extends SectorServiceI18nFields {
   id: string
   code: string
   name: string
@@ -23,7 +38,7 @@ export interface SectorRead {
   updated_at: string
 }
 
-export interface SectorCreate {
+export interface SectorCreate extends SectorServiceI18nFields {
   code: string
   name: string
   description_html?: string | null
@@ -37,7 +52,7 @@ export interface SectorCreate {
   active?: boolean
 }
 
-export interface SectorUpdate {
+export interface SectorUpdate extends SectorServiceI18nFields {
   code?: string
   name?: string
   description_html?: string | null
@@ -55,11 +70,27 @@ export interface SectorReorder {
   sector_ids: string[]
 }
 
+/** Champs source FR d'un secteur/service à traduire (sans persistance). */
+export interface SectorTranslateRequest {
+  name?: string | null
+  description_html?: string | null
+  description_md?: string | null
+  mission_html?: string | null
+  mission_md?: string | null
+}
+
+/** Traductions EN/AR générées pour pré-remplir le formulaire admin. */
+export type SectorTranslateResponse = SectorServiceI18nFields
+
+// Les services partagent exactement le même périmètre traduit que les secteurs.
+export type ServiceTranslateRequest = SectorTranslateRequest
+export type ServiceTranslateResponse = SectorServiceI18nFields
+
 // ============================================================================
 // Services
 // ============================================================================
 
-export interface ServiceRead {
+export interface ServiceRead extends SectorServiceI18nFields {
   id: string
   name: string
   sigle: string | null

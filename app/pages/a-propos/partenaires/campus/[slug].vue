@@ -4,6 +4,7 @@ const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { siteUrl } = useRuntimeConfig().public
 const { getCampusBySlug, getCoverImageUrl, getCampusFlagEmoji } = usePublicCampusApi()
+const { localized } = useLocalizedField()
 
 // Valid tabs (in display order)
 const validTabs = ['presentation', 'formations', 'calls', 'events', 'news', 'partners', 'team', 'media']
@@ -26,9 +27,12 @@ if (error.value || (!pending.value && !campus.value)) {
   })
 }
 
-// Extraire le texte brut du HTML pour le SEO
+// Nom traduit selon la locale active (repli FR)
+const campusName = computed(() => (campus.value ? localized(campus.value, 'name') : ''))
+
+// Extraire le texte brut du HTML (traduit) pour le SEO
 const descriptionPlainText = computed(() => {
-  const html = campus.value?.description_html
+  const html = campus.value ? localized(campus.value, 'description_html') : ''
   if (!html) return ''
   return html.replace(/<[^>]*>/g, '').trim()
 })
@@ -36,9 +40,9 @@ const descriptionPlainText = computed(() => {
 // SEO
 const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
 useSeoMeta({
-  title: () => `${campus.value?.name || ''} | ${t('partners.seo.title')}`,
+  title: () => `${campusName.value} | ${t('partners.seo.title')}`,
   description: () => descriptionPlainText.value.substring(0, 160) || t('partners.seo.description'),
-  ogTitle: () => `${campus.value?.name || ''} | ${t('partners.seo.title')}`,
+  ogTitle: () => `${campusName.value} | ${t('partners.seo.title')}`,
   ogDescription: () => descriptionPlainText.value.substring(0, 160) || t('partners.seo.description'),
   ogUrl: () => `${siteUrl}${route.fullPath}`,
   ogImage: () => campus.value
@@ -46,7 +50,7 @@ useSeoMeta({
     : undefined,
   ogLocale: () => localeMap[locale.value] || 'fr_FR',
   ogLocaleAlternate: () => Object.values(localeMap).filter(l => l !== (localeMap[locale.value] || 'fr_FR')),
-  twitterTitle: () => `${campus.value?.name || ''} | ${t('partners.seo.title')}`,
+  twitterTitle: () => `${campusName.value} | ${t('partners.seo.title')}`,
   twitterDescription: () => descriptionPlainText.value.substring(0, 160) || t('partners.seo.description'),
   twitterImage: () => campus.value
     ? (getCoverImageUrl(campus.value) ? `${siteUrl}${getCoverImageUrl(campus.value)}?variant=medium` : undefined)
@@ -58,7 +62,7 @@ const breadcrumb = computed(() => [
   { label: t('nav.home'), to: localePath('/') },
   { label: t('nav.about'), to: localePath('/a-propos') },
   { label: t('partners.hero.title'), to: localePath('/a-propos/partenaires') },
-  { label: campus.value?.name || '' }
+  { label: campusName.value }
 ])
 
 // Active tab based on URL hash (default: presentation)
@@ -81,7 +85,7 @@ watch(() => route.hash, syncTabFromHash)
   <div v-if="campus" class="bg-grid-pattern">
     <!-- Campus NavBar -->
     <CampusNavBar
-      :campus-name="campus.name"
+      :campus-name="campusName"
       :country-flag="getCampusFlagEmoji(campus)"
     />
 

@@ -7,6 +7,7 @@ interface Props {
 
 const props = defineProps<Props>()
 const { t } = useI18n()
+const { localized } = useLocalizedField()
 const { getCoverImageUrl, getCampusFlagEmoji, getCampusLocation } = usePublicCampusApi()
 
 // Cover image URL (with fallback)
@@ -54,7 +55,7 @@ defineExpose({ titleRef })
 
           <!-- Title -->
           <h1 ref="titleRef" class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4">
-            {{ campus.name }}
+            {{ localized(campus, 'name') }}
           </h1>
 
           <!-- Location -->
