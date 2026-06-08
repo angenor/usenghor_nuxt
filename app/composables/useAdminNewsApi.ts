@@ -225,8 +225,16 @@ export function useAdminNewsApi() {
     title: string
     slug: string
     summary?: string | null
+    title_en?: string | null
+    title_ar?: string | null
+    summary_en?: string | null
+    summary_ar?: string | null
     content_html?: string | null
     content_md?: string | null
+    content_en_html?: string | null
+    content_en_md?: string | null
+    content_ar_html?: string | null
+    content_ar_md?: string | null
     video_url?: string | null
     highlight_status?: NewsHighlightStatus
     cover_image_external_id?: string | null
@@ -247,8 +255,17 @@ export function useAdminNewsApi() {
       title: data.title,
       slug: data.slug,
       summary: data.summary,
+      // Traductions FR → EN/AR (sinon le backend ne reçoit jamais les champs i18n)
+      title_en: data.title_en ?? null,
+      title_ar: data.title_ar ?? null,
+      summary_en: data.summary_en ?? null,
+      summary_ar: data.summary_ar ?? null,
       content_html: data.content_html || null,
       content_md: data.content_md || null,
+      content_en_html: data.content_en_html ?? null,
+      content_en_md: data.content_en_md ?? null,
+      content_ar_html: data.content_ar_html ?? null,
+      content_ar_md: data.content_ar_md ?? null,
       video_url: data.video_url,
       highlight_status: data.highlight_status || 'standard',
       cover_image_external_id: data.cover_image_external_id,
@@ -279,8 +296,16 @@ export function useAdminNewsApi() {
     title?: string
     slug?: string
     summary?: string | null
+    title_en?: string | null
+    title_ar?: string | null
+    summary_en?: string | null
+    summary_ar?: string | null
     content_html?: string | null
     content_md?: string | null
+    content_en_html?: string | null
+    content_en_md?: string | null
+    content_ar_html?: string | null
+    content_ar_md?: string | null
     video_url?: string | null
     highlight_status?: NewsHighlightStatus
     cover_image_external_id?: string | null
@@ -322,6 +347,16 @@ export function useAdminNewsApi() {
     // Contenu HTML/Markdown (TOAST UI Editor)
     if (data.content_html !== undefined) payload.content_html = data.content_html
     if (data.content_md !== undefined) payload.content_md = data.content_md
+
+    // Traductions FR → EN/AR (titre/résumé courts + contenu riche)
+    if (data.title_en !== undefined) payload.title_en = data.title_en
+    if (data.title_ar !== undefined) payload.title_ar = data.title_ar
+    if (data.summary_en !== undefined) payload.summary_en = data.summary_en
+    if (data.summary_ar !== undefined) payload.summary_ar = data.summary_ar
+    if (data.content_en_html !== undefined) payload.content_en_html = data.content_en_html
+    if (data.content_en_md !== undefined) payload.content_en_md = data.content_en_md
+    if (data.content_ar_html !== undefined) payload.content_ar_html = data.content_ar_html
+    if (data.content_ar_md !== undefined) payload.content_ar_md = data.content_ar_md
 
     const news = await apiFetch<NewsWithTags>(`/api/admin/news/${id}`, {
       method: 'PUT',
