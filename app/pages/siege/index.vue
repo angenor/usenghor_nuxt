@@ -13,7 +13,7 @@ const { getMediaUrl } = useMediaApi()
 const footerStore = useFooterDataStore()
 
 // Contenus éditoriaux avec fallback sur i18n
-const { getContent, loadContent } = useEditorialContent('site')
+const { getContent, getRawContent, loadContent } = useEditorialContent('site')
 
 // Chiffres-clés depuis l'admin
 const { getFigure, loadKeyFigures } = useKeyFigures()
@@ -117,52 +117,40 @@ const prevImage = (facility: SiteFacility) => {
   setActiveImageIndex(facility.id, prevIndex)
 }
 
-// Mapping facility ID → clé éditoriale pour les images
-const facilityEditorialKeyMap: Record<string, string> = {
-  'facility-housing': 'site.facility.housing.images',
-  'facility-library': 'site.facility.library.images',
-  'facility-conference': 'site.facility.conference.images',
-  'facility-academic': 'site.facility.academic.images',
-  'facility-sports': 'site.facility.sports.images',
-  'facility-hotel': 'site.facility.hotel.images',
+// Mapping facility ID → préfixe de clé éditoriale (voir /admin/editorial/valeurs → Page Site / Campus)
+const facilityEditorialPrefixMap: Record<string, string> = {
+  'facility-housing': 'site.facility.housing',
+  'facility-library': 'site.facility.library',
+  'facility-conference': 'site.facility.conference',
+  'facility-academic': 'site.facility.academic',
+  'facility-sports': 'site.facility.sports',
+  'facility-hotel': 'site.facility.hotel',
 }
 
-// Mapping facility ID → clé éditoriale pour les features (checklist)
-const facilityFeaturesKeyMap: Record<string, string> = {
-  'facility-housing': 'site.facility.housing.features',
-  'facility-library': 'site.facility.library.features',
-  'facility-conference': 'site.facility.conference.features',
-  'facility-academic': 'site.facility.academic.features',
-  'facility-sports': 'site.facility.sports.features',
-  'facility-hotel': 'site.facility.hotel.features',
-}
-
-// Mapping facility ID → clé éditoriale pour la capacité
-const facilityCapacityKeyMap: Record<string, string> = {
-  'facility-housing': 'site.facility.housing.capacity',
-  'facility-library': 'site.facility.library.capacity',
-  'facility-conference': 'site.facility.conference.capacity',
-  'facility-academic': 'site.facility.academic.capacity',
-  'facility-hotel': 'site.facility.hotel.capacity',
+/**
+ * Valeur éditoriale brute d'un champ d'installation (null si non éditée).
+ * On passe par getRawContent pour éviter le fallback i18n de getContent,
+ * qui renverrait la clé elle-même quand aucun contenu n'existe.
+ */
+const getFacilityRaw = (facility: SiteFacility, field: string): string | null => {
+  const prefix = facilityEditorialPrefixMap[facility.id]
+  if (!prefix) return null
+  const raw = getRawContent(`${prefix}.${field}`)
+  return raw && raw.trim() ? raw : null
 }
 
 // Récupère les images d'une installation (éditorial avec fallback mock)
 const getFacilityImages = (facility: SiteFacility): string[] => {
-  const editorialKey = facilityEditorialKeyMap[facility.id]
-  if (editorialKey) {
-    const raw = getContent(editorialKey)
-    // getContent retourne la clé i18n en fallback si pas de contenu éditorial
-    // On vérifie que c'est bien du JSON (commence par '[')
-    if (raw && raw.startsWith('[')) {
-      try {
-        const mediaIds: string[] = JSON.parse(raw)
-        if (mediaIds.length > 0) {
-          return mediaIds.map(id => getMediaUrl(id, 'medium'))
-        }
+  const raw = getFacilityRaw(facility, 'images')
+  if (raw && raw.startsWith('[')) {
+    try {
+      const mediaIds: string[] = JSON.parse(raw)
+      if (mediaIds.length > 0) {
+        return mediaIds.map(id => getMediaUrl(id, 'medium'))
       }
-      catch {
-        // Fallback sur mock
-      }
+    }
+    catch {
+      // Fallback sur mock
     }
   }
   return facility.images
@@ -170,26 +158,27 @@ const getFacilityImages = (facility: SiteFacility): string[] => {
 
 // Localization helpers
 const getLocalizedFacilityName = (facility: SiteFacility) => {
+  const raw = getFacilityRaw(facility, 'name')
+  if (raw) return raw
   if (locale.value === 'en') return facility.name_en
   if (locale.value === 'ar') return facility.name_ar
   return facility.name_fr
 }
 
 const getLocalizedFacilityDescription = (facility: SiteFacility) => {
+  const raw = getFacilityRaw(facility, 'description')
+  if (raw) return raw
   if (locale.value === 'en') return facility.description_en
   if (locale.value === 'ar') return facility.description_ar
   return facility.description_fr
 }
 
 const getLocalizedFacilityFeatures = (facility: SiteFacility): string[] => {
-  // Vérifier si des features éditoriaux existent
-  const editorialKey = facilityFeaturesKeyMap[facility.id]
-  if (editorialKey) {
-    const raw = getContent(editorialKey)
-    // getContent retourne la clé i18n en fallback — on vérifie que c'est bien du texte multiligne
-    if (raw && raw.includes('\n')) {
-      return raw.split('\n').filter(item => item.trim())
-    }
+  // Vérifier si des caractéristiques éditoriales existent (une par ligne)
+  const raw = getFacilityRaw(facility, 'features')
+  if (raw) {
+    const items = raw.split('\n').map(item => item.trim()).filter(Boolean)
+    if (items.length) return items
   }
   // Fallback sur les données mock
   if (locale.value === 'en') return facility.features_en
@@ -199,15 +188,7 @@ const getLocalizedFacilityFeatures = (facility: SiteFacility): string[] => {
 
 // Récupère la capacité d'une installation (éditorial avec fallback mock)
 const getFacilityCapacity = (facility: SiteFacility): string | undefined => {
-  const editorialKey = facilityCapacityKeyMap[facility.id]
-  if (editorialKey) {
-    const raw = getContent(editorialKey)
-    // getContent retourne la clé i18n en fallback — on vérifie que c'est un vrai contenu
-    if (raw && raw !== editorialKey && !raw.startsWith('site.facility.')) {
-      return raw
-    }
-  }
-  return facility.capacity
+  return getFacilityRaw(facility, 'capacity') ?? facility.capacity
 }
 
 // Stats - labels depuis éditorial, valeurs depuis chiffres-clés avec fallback i18n
