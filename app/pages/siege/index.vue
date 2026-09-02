@@ -191,12 +191,14 @@ const getFacilityCapacity = (facility: SiteFacility): string | undefined => {
   return getFacilityRaw(facility, 'capacity') ?? facility.capacity
 }
 
-// Stats - labels depuis éditorial, valeurs depuis chiffres-clés avec fallback i18n
+// Stats - libellés depuis l'éditorial (/admin/editorial/valeurs), valeurs depuis
+// les chiffres-clés (/admin/editorial/chiffres-cles) avec repli sur i18n.
+// Les clés *Value ne sont pas éditoriales : elles n'existent qu'en i18n.
 const stats = computed(() => [
-  { label: getContent('site.presentation.stats.surface'), value: getFigure('stats_site_surface', getContent('site.presentation.stats.surfaceValue')) },
-  { label: getContent('site.presentation.stats.rooms'), value: getFigure('stats_site_rooms', getContent('site.presentation.stats.roomsValue')) },
-  { label: getContent('site.presentation.stats.capacity'), value: getFigure('stats_site_capacity', getContent('site.presentation.stats.capacityValue')) },
-  { label: getContent('site.presentation.stats.founded'), value: getFigure('stats_site_founded', getContent('site.presentation.stats.foundedValue')) }
+  { label: getContent('site.presentation.stats.surface'), value: getFigure('stats_site_surface', t('site.presentation.stats.surfaceValue')) },
+  { label: getContent('site.presentation.stats.rooms'), value: getFigure('stats_site_rooms', t('site.presentation.stats.roomsValue')) },
+  { label: getContent('site.presentation.stats.capacity'), value: getFigure('stats_site_capacity', t('site.presentation.stats.capacityValue')) },
+  { label: getContent('site.presentation.stats.founded'), value: getFigure('stats_site_founded', t('site.presentation.stats.foundedValue')) }
 ])
 
 // Color configuration per facility (rotating colors)
