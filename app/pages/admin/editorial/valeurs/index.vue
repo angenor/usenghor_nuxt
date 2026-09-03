@@ -6,7 +6,7 @@ import type {
   Testimonial,
   TestimonialData,
 } from '~/types/api'
-import type { PageSectionField } from '~/composables/editorial-pages-config'
+import type { PageSection, PageSectionField } from '~/composables/editorial-pages-config'
 
 definePageMeta({
   layout: 'admin',
@@ -42,16 +42,62 @@ const timelineYearKeys: Record<string, string> = {
   'historypage-timeline-2030': 'history.timeline.2030.year',
 }
 
-// Pages avec noms de sections timeline dynamiques (reflètent l'année éditée)
+/**
+ * Valeur éditoriale du premier champ de la section dont la clé se termine par
+ * l'un des suffixes donnés (par ordre de priorité). Null si aucun n'est renseigné.
+ */
+const getSectionFieldValue = (section: PageSection, suffixes: string[]): string | null => {
+  for (const suffix of suffixes) {
+    const field = section.fields.find(f => f.editorialKey?.endsWith(`.${suffix}`))
+    const value = field?.editorialKey ? allContents.value.get(field.editorialKey)?.value : null
+    if (value?.trim()) return value.trim()
+  }
+  return null
+}
+
+// Longueur max du sous-titre de section (il est affiché sur une seule ligne)
+const SECTION_SUMMARY_MAX_LENGTH = 160
+
+/**
+ * Réduit un contenu éditorial à un résumé d'une ligne : balises HTML et
+ * marqueurs Markdown retirés, retours à la ligne aplatis, longueur bornée.
+ */
+const toSectionSummary = (value: string): string => {
+  const flat = value
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/[#*_`>]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+  return flat.length > SECTION_SUMMARY_MAX_LENGTH
+    ? `${flat.slice(0, SECTION_SUMMARY_MAX_LENGTH).trimEnd()}…`
+    : flat
+}
+
+/**
+ * Sections dont le titre et le sous-titre reflètent le contenu réellement saisi :
+ * une section renommée dans le back-office porte son nom d'affichage plutôt que
+ * son libellé générique. À défaut de contenu, les libellés de configuration
+ * restent utilisés.
+ */
 const dynamicFrontOfficePages = computed(() =>
   frontOfficePages.map(page => ({
     ...page,
     sections: page.sections.map((section) => {
+      // Les sections timeline sont identifiées par leur année, pas par leur titre
       const yearKey = timelineYearKeys[section.id]
-      if (!yearKey) return section
-      const yearContent = allContents.value.get(yearKey)
-      const year = yearContent?.value || section.name.replace('Timeline - ', '')
-      return { ...section, name: `Timeline - ${year}` }
+      if (yearKey) {
+        const year = allContents.value.get(yearKey)?.value || section.name.replace('Timeline - ', '')
+        return { ...section, name: `Timeline - ${year}` }
+      }
+
+      const name = getSectionFieldValue(section, ['name', 'title'])
+      const summary = getSectionFieldValue(section, ['description', 'subtitle'])
+
+      return {
+        ...section,
+        name: name ? toSectionSummary(name) : section.name,
+        description: summary ? toSectionSummary(summary) : section.description,
+      }
     }),
   })),
 )

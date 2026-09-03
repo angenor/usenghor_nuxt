@@ -124,20 +124,20 @@ function handleFieldHistory(field: PageSectionField) {
               class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
               @click="toggleSection(pageSection.id)"
             >
-              <div class="flex items-center gap-3">
+              <div class="flex min-w-0 items-center gap-3">
                 <div
-                  class="flex h-10 w-10 items-center justify-center rounded-lg"
+                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
                   :class="pageSection.color"
                 >
                   <font-awesome-icon :icon="['fas', pageSection.icon]" class="h-5 w-5" />
                 </div>
-                <div>
-                  <h4 class="font-medium text-gray-900 dark:text-white">{{ pageSection.name }}</h4>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ pageSection.description }}</p>
+                <div class="min-w-0 text-left">
+                  <h4 class="font-medium text-gray-900 dark:text-white line-clamp-1" :title="pageSection.name">{{ pageSection.name }}</h4>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-1" :title="pageSection.description">{{ pageSection.description }}</p>
                 </div>
               </div>
-              <div class="flex items-center gap-3">
-                <span class="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">
+              <div class="flex shrink-0 items-center gap-3 pl-3">
+                <span class="whitespace-nowrap text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">
                   {{ countEditableFields(pageSection) }} champ(s)
                 </span>
                 <font-awesome-icon
