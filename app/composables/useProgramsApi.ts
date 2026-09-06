@@ -14,6 +14,14 @@ import type {
   PublicationStatus,
 } from '~/types/api'
 
+/** Association programme ↔ partenaire (backoffice). */
+export interface ProgramPartnerRead {
+  program_id: string
+  partner_external_id: string
+  partnership_type: string | null
+  display_order: number
+}
+
 // Labels UI
 export const programTypeLabels: Record<ProgramType, string> = {
   master: 'Master',
@@ -157,8 +165,8 @@ export function useProgramsApi() {
   // Partners
   // =========================================================================
 
-  async function listProgramPartners(programId: string): Promise<unknown[]> {
-    return apiFetch<unknown[]>(`/api/admin/programs/${programId}/partners`)
+  async function listProgramPartners(programId: string): Promise<ProgramPartnerRead[]> {
+    return apiFetch<ProgramPartnerRead[]>(`/api/admin/programs/${programId}/partners`)
   }
 
   async function addPartnerToProgram(programId: string, data: {
@@ -174,6 +182,14 @@ export function useProgramsApi() {
   async function removePartnerFromProgram(programId: string, partnerExternalId: string): Promise<unknown> {
     return apiFetch<unknown>(`/api/admin/programs/${programId}/partners/${partnerExternalId}`, {
       method: 'DELETE',
+    })
+  }
+
+  /** Réordonne les partenaires d'un programme (liste ordonnée d'IDs de partenaires). */
+  async function reorderProgramPartners(programId: string, partnerIds: string[]): Promise<ProgramPartnerRead[]> {
+    return apiFetch<ProgramPartnerRead[]>(`/api/admin/programs/${programId}/partners/reorder`, {
+      method: 'PUT',
+      body: { partner_ids: partnerIds },
     })
   }
 
@@ -213,6 +229,7 @@ export function useProgramsApi() {
     listProgramPartners,
     addPartnerToProgram,
     removePartnerFromProgram,
+    reorderProgramPartners,
 
     // Media Library
     getProgramAlbums,

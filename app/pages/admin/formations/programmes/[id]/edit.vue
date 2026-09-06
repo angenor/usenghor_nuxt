@@ -17,6 +17,7 @@ const {
   listProgramPartners,
   addPartnerToProgram,
   removePartnerFromProgram,
+  reorderProgramPartners,
 } = useProgramsApi()
 
 const {
@@ -333,11 +334,12 @@ interface PartnerItem {
   active: boolean
   type: string
 }
-const programPartners = ref<Array<{ partner_external_id: string, partnership_type: string | null }>>([])
+const programPartners = ref<Array<{ partner_external_id: string, partnership_type: string | null, display_order: number }>>([])
 const allPartnersList = ref<PartnerItem[]>([])
 const loadingPartners = ref(false)
 const selectedPartnerId = ref('')
 const partnerSearchQuery = ref('')
+const draggedPartnerIndex = ref<number | null>(null)
 const draggedCareerOpportunityIndex = ref<number | null>(null)
 
 // Chargement du programme
@@ -693,7 +695,7 @@ async function loadPartners() {
       listProgramPartners(program.value.id),
       getAllPartners(),
     ])
-    programPartners.value = partnersResponse as Array<{ partner_external_id: string, partnership_type: string | null, program_id: string }>
+    programPartners.value = [...partnersResponse].sort((a, b) => a.display_order - b.display_order)
     allPartnersList.value = allPartnersResponse as unknown as PartnerItem[]
   } catch (e) {
     console.error('Erreur lors du chargement des partenaires:', e)
@@ -752,6 +754,41 @@ async function handleRemovePartner(partnerExternalId: string) {
   } catch (e) {
     console.error('Erreur suppression partenaire:', e)
   }
+}
+
+// Réordonnancement des partenaires par glisser-déposer
+const onPartnerDragStart = (index: number) => {
+  draggedPartnerIndex.value = index
+}
+
+const onPartnerDragOver = (e: DragEvent) => {
+  e.preventDefault()
+}
+
+const onPartnerDrop = async (e: DragEvent, targetIndex: number) => {
+  e.preventDefault()
+  if (draggedPartnerIndex.value === null || draggedPartnerIndex.value === targetIndex) return
+  if (!program.value) return
+
+  const newPartners = [...programPartners.value]
+  const [dragged] = newPartners.splice(draggedPartnerIndex.value, 1)
+  if (!dragged) return
+  newPartners.splice(targetIndex, 0, dragged)
+  programPartners.value = newPartners
+
+  try {
+    await reorderProgramPartners(program.value.id, newPartners.map(p => p.partner_external_id))
+    await loadPartners()
+  } catch (e) {
+    console.error('Erreur lors de la réorganisation des partenaires:', e)
+    await loadPartners()
+  } finally {
+    draggedPartnerIndex.value = null
+  }
+}
+
+const onPartnerDragEnd = () => {
+  draggedPartnerIndex.value = null
 }
 
 // === GESTION DE L'IMAGE DE COUVERTURE ===
@@ -1863,11 +1900,32 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
 
         <!-- Liste des partenaires -->
         <div v-else class="space-y-2">
+          <p class="mb-3 text-xs text-gray-500 dark:text-gray-400">
+            <font-awesome-icon icon="fa-solid fa-grip-vertical" class="mr-1 h-3 w-3" />
+            Glissez-déposez pour définir l'ordre d'affichage sur la page publique
+          </p>
+
           <div
-            v-for="partner in associatedPartnersDetails"
+            v-for="(partner, index) in associatedPartnersDetails"
             :key="partner.partner_external_id"
-            class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-700/50"
+            class="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 transition-all dark:border-gray-700 dark:bg-gray-700/50"
+            :class="{ 'opacity-50': draggedPartnerIndex === index }"
+            draggable="true"
+            @dragstart="onPartnerDragStart(index)"
+            @dragover="onPartnerDragOver"
+            @drop="(e) => onPartnerDrop(e, index)"
+            @dragend="onPartnerDragEnd"
           >
+            <!-- Poignée -->
+            <div class="cursor-grab text-gray-400 active:cursor-grabbing">
+              <font-awesome-icon icon="fa-solid fa-grip-vertical" class="h-4 w-4" />
+            </div>
+
+            <!-- Numéro -->
+            <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+              {{ index + 1 }}
+            </div>
+
             <!-- Logo -->
             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-white dark:bg-gray-600">
               <img

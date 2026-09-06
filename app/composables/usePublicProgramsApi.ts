@@ -71,6 +71,7 @@ export interface ProgramPartnerPublic {
   website: string | null
   partner_type: string
   partnership_type: string | null
+  display_order: number
 }
 
 export interface ProgramPublicWithDetails extends ProgramPublic {
