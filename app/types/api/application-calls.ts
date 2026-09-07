@@ -301,3 +301,21 @@ export interface CallScheduleCreate extends ScheduleI18nFields {
   description?: string | null
   display_order?: number
 }
+
+// ============================================================================
+// Synchronisation atomique des sous-entités (PUT /{id}/details)
+// ============================================================================
+// `id` présent → mise à jour en place ; absent → création ; élément existant
+// non listé → suppression. Une liste omise reste intacte.
+
+export type CallEligibilityCriteriaSyncItem = CallEligibilityCriteriaCreate & { id?: string }
+export type CallCoverageSyncItem = CallCoverageCreate & { id?: string }
+export type CallRequiredDocumentSyncItem = CallRequiredDocumentCreate & { id?: string }
+export type CallScheduleSyncItem = CallScheduleCreate & { id?: string }
+
+export interface ApplicationCallDetailsSync {
+  eligibility_criteria?: CallEligibilityCriteriaSyncItem[]
+  coverage?: CallCoverageSyncItem[]
+  required_documents?: CallRequiredDocumentSyncItem[]
+  schedule?: CallScheduleSyncItem[]
+}

@@ -10,10 +10,7 @@ const router = useRouter()
 const {
   createCall: apiCreateCall,
   translateCall,
-  addCriterion: apiAddCriterion,
-  addCoverage: apiAddCoverage,
-  addRequiredDocument: apiAddRequiredDocument,
-  addScheduleItem: apiAddScheduleItem,
+  syncCallDetails: apiSyncCallDetails,
 } = useApplicationCallsApi()
 
 const {
@@ -375,6 +372,9 @@ const extractErrorMessage = (err: unknown): string => {
 }
 
 const saveForm = async () => {
+  // Garde anti double-soumission (double clic, Entrée répété…)
+  if (isSaving.value) return
+
   if (!form.value.title.trim() || !form.value.slug.trim()) {
     error.value = 'Le titre et le slug sont obligatoires'
     activeTab.value = 'general'
@@ -437,54 +437,47 @@ const saveForm = async () => {
       }
     }
 
-    // 2) Créer les sous-entités en parallèle
-    const promises: Promise<unknown>[] = []
+    // 2) Créer les sous-entités en UNE requête atomique (une seule transaction
+    //    côté serveur). Évite les N requêtes parallèles qui déclenchaient le
+    //    rate limiting nginx (503) et laissaient l'appel à moitié rempli.
+    const hasDetails = criteria.value.length > 0 || coverageItems.value.length > 0
+      || documents.value.length > 0 || scheduleItems.value.length > 0
 
-    for (const c of criteria.value) {
-      promises.push(apiAddCriterion(callId, {
-        criterion: c.criterion,
-        is_mandatory: c.is_mandatory,
-        display_order: c.display_order,
-      }))
-    }
-
-    for (const c of coverageItems.value) {
-      promises.push(apiAddCoverage(callId, {
-        item: c.item,
-        description: c.description,
-        display_order: c.display_order,
-      }))
-    }
-
-    for (const d of documents.value) {
-      promises.push(apiAddRequiredDocument(callId, {
-        document_name: d.document_name,
-        description: d.description,
-        is_mandatory: d.is_mandatory,
-        accepted_formats: d.accepted_formats,
-        max_size_mb: d.max_size_mb,
-        display_order: d.display_order,
-      }))
-    }
-
-    for (const s of scheduleItems.value) {
-      promises.push(apiAddScheduleItem(callId, {
-        step: s.step,
-        start_date: s.start_date,
-        end_date: s.end_date,
-        description: s.description,
-        display_order: s.display_order,
-      }))
-    }
-
-    const results = await Promise.allSettled(promises)
-    const failures = results.filter(r => r.status === 'rejected')
-
-    if (failures.length > 0) {
-      // L'appel est créé, rediriger mais avertir
-      error.value = `L'appel a été créé mais ${failures.length} élément(s) associé(s) n'ont pas pu être ajoutés. Vous pouvez les ajouter depuis la page de détail.`
-      setTimeout(() => router.push(`/admin/candidatures/appels/${callId}`), 3000)
-      return
+    if (hasDetails) {
+      try {
+        await apiSyncCallDetails(callId, {
+          eligibility_criteria: criteria.value.map(c => ({
+            criterion: c.criterion,
+            is_mandatory: c.is_mandatory,
+            display_order: c.display_order,
+          })),
+          coverage: coverageItems.value.map(c => ({
+            item: c.item,
+            description: c.description,
+            display_order: c.display_order,
+          })),
+          required_documents: documents.value.map(d => ({
+            document_name: d.document_name,
+            description: d.description,
+            is_mandatory: d.is_mandatory,
+            accepted_formats: d.accepted_formats,
+            max_size_mb: d.max_size_mb,
+            display_order: d.display_order,
+          })),
+          schedule: scheduleItems.value.map(s => ({
+            step: s.step,
+            start_date: s.start_date,
+            end_date: s.end_date,
+            description: s.description,
+            display_order: s.display_order,
+          })),
+        })
+      } catch (detailsErr: unknown) {
+        // L'appel est créé, rediriger mais avertir
+        error.value = `L'appel a été créé mais ses listes (critères, prises en charge, documents, calendrier) n'ont pas pu être enregistrées : ${extractErrorMessage(detailsErr)}. Vous pouvez les compléter depuis la page de modification.`
+        setTimeout(() => router.push(`/admin/candidatures/appels/${callId}/edit`), 3000)
+        return
+      }
     }
 
     // 3) Rediriger vers le détail

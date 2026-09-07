@@ -20,14 +20,7 @@ const {
   getCallById,
   updateCall: apiUpdateCall,
   translateCall,
-  addCriterion: apiAddCriterion,
-  deleteCriterion: apiDeleteCriterion,
-  addCoverage: apiAddCoverage,
-  deleteCoverage: apiDeleteCoverage,
-  addRequiredDocument: apiAddRequiredDocument,
-  deleteRequiredDocument: apiDeleteRequiredDocument,
-  addScheduleItem: apiAddScheduleItem,
-  deleteScheduleItem: apiDeleteScheduleItem,
+  syncCallDetails: apiSyncCallDetails,
 } = useApplicationCallsApi()
 
 const { listCampuses } = useCampusApi()
@@ -586,6 +579,9 @@ const extractErrorMessage = (err: unknown): string => {
 }
 
 const saveForm = async () => {
+  // Garde anti double-soumission (double clic, Entrée répété…)
+  if (isSaving.value) return
+
   if (!form.value.title.trim() || !form.value.slug.trim()) {
     error.value = 'Le titre et le slug sont obligatoires'
     activeTab.value = 'general'
@@ -628,67 +624,46 @@ const saveForm = async () => {
       description_ar_md: form.value.description_md_ar || null,
     })
 
-    // 2) Sync sub-entities: delete all existing, then re-create
-    // Sérialisé pour éviter de saturer le serveur (503 en production)
-    if (existingCall.value) {
-      for (const c of existingCall.value.eligibility_criteria || []) {
-        try { await apiDeleteCriterion(callId, c.id) } catch { /* déjà supprimé */ }
-      }
-      for (const c of existingCall.value.coverage || []) {
-        try { await apiDeleteCoverage(callId, c.id) } catch { /* déjà supprimé */ }
-      }
-      for (const d of existingCall.value.required_documents || []) {
-        try { await apiDeleteRequiredDocument(callId, d.id) } catch { /* déjà supprimé */ }
-      }
-      for (const s of existingCall.value.schedule || []) {
-        try { await apiDeleteScheduleItem(callId, s.id) } catch { /* déjà supprimé */ }
-      }
-      // Vider les anciens IDs pour éviter les 404 en cas de ré-essai
-      existingCall.value.eligibility_criteria = []
-      existingCall.value.coverage = []
-      existingCall.value.required_documents = []
-      existingCall.value.schedule = []
-    }
-
-    // 3) Re-create all sub-entities (sérialisé)
-    for (const c of criteria.value) {
-      await apiAddCriterion(callId, {
+    // 2) Synchroniser les sous-entités en UNE requête atomique et idempotente.
+    //    Les éléments existants (`_existingId`) sont mis à jour en place, les
+    //    nouveaux créés, les absents supprimés — côté serveur, dans une seule
+    //    transaction. Rejouer la requête (timeout, nouvel essai) ne crée
+    //    jamais de doublon, contrairement à l'ancien cycle
+    //    « tout supprimer / tout recréer » en N requêtes.
+    const synced = await apiSyncCallDetails(callId, {
+      eligibility_criteria: criteria.value.map(c => ({
+        id: c._existingId,
         criterion: c.criterion,
         is_mandatory: c.is_mandatory,
         display_order: c.display_order,
-      })
-    }
-
-    for (const c of coverageItems.value) {
-      await apiAddCoverage(callId, {
+      })),
+      coverage: coverageItems.value.map(c => ({
+        id: c._existingId,
         item: c.item,
         description: c.description,
         display_order: c.display_order,
-      })
-    }
-
-    for (const d of documents.value) {
-      await apiAddRequiredDocument(callId, {
+      })),
+      required_documents: documents.value.map(d => ({
+        id: d._existingId,
         document_name: d.document_name,
         description: d.description,
         is_mandatory: d.is_mandatory,
         accepted_formats: d.accepted_formats,
         max_size_mb: d.max_size_mb,
         display_order: d.display_order,
-      })
-    }
-
-    for (const s of scheduleItems.value) {
-      await apiAddScheduleItem(callId, {
+      })),
+      schedule: scheduleItems.value.map(s => ({
+        id: s._existingId,
         step: s.step,
         start_date: s.start_date,
         end_date: s.end_date,
         description: s.description,
         display_order: s.display_order,
-      })
-    }
+      })),
+    })
+    existingCall.value = synced
 
-    // 4) Rediriger vers le détail
+    // 3) Rediriger vers le détail
     router.push(`/admin/candidatures/appels/${callId}`)
   } catch (err: unknown) {
     error.value = `Erreur lors de la sauvegarde : ${extractErrorMessage(err)}`

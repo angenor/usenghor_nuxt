@@ -6,6 +6,7 @@ import type {
   ApplicationCallTranslateRequest,
   ApplicationCallTranslateResponse,
   ApplicationCallUpdatePayload,
+  ApplicationCallDetailsSync,
   ApplicationCallWithDetails,
   CallCoverageCreate,
   CallCoverageRead,
@@ -166,6 +167,17 @@ export function useApplicationCallsApi() {
   }
 
   // =========================================================================
+  // Synchronisation atomique des sous-entités (une seule requête, idempotente)
+  // =========================================================================
+
+  async function syncCallDetails(callId: string, data: ApplicationCallDetailsSync): Promise<ApplicationCallWithDetails> {
+    return apiFetch<ApplicationCallWithDetails>(`/api/admin/application-calls/${callId}/details`, {
+      method: 'PUT',
+      body: data,
+    })
+  }
+
+  // =========================================================================
   // Eligibility Criteria
   // =========================================================================
 
@@ -299,6 +311,7 @@ export function useApplicationCallsApi() {
     getCallById,
     createCall,
     updateCall,
+    syncCallDetails,
     deleteCall,
     togglePublication,
     updateCallStatus,
