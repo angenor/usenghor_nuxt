@@ -135,7 +135,7 @@ const form = ref({
   slug: '',
   description_md: '',
   description_html: '',
-  type: 'application' as CallType,
+  type: 'training' as CallType,
   status: 'upcoming' as const,
   campus_external_id: '' as string,
   program_external_id: '' as string,
@@ -631,7 +631,6 @@ const tabs = [
               required
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             >
-              <option value="application">Candidature</option>
               <option value="scholarship">Bourse</option>
               <option value="project">Projet</option>
               <option value="recruitment">Recrutement</option>

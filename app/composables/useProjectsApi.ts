@@ -102,6 +102,14 @@ export const projectCallTypeLabels: Record<ProjectCallType, string> = {
   training: 'Formation',
 }
 
+// Types sélectionnables dans les formulaires : 'application' (Candidature) est
+// déprécié depuis la migration 044 (fusionné dans 'training') et donc masqué.
+export const projectCallTypeOptions: { value: ProjectCallType, label: string }[] = (
+  Object.entries(projectCallTypeLabels) as [ProjectCallType, string][]
+)
+  .filter(([value]) => value !== 'application')
+  .map(([value, label]) => ({ value, label }))
+
 export const projectCallStatusLabels: Record<ProjectCallStatus, string> = {
   ongoing: 'En cours',
   closed: 'Clôturé',
@@ -736,6 +744,7 @@ export function useProjectsApi() {
     publicationStatusLabels,
     publicationStatusColors,
     projectCallTypeLabels,
+    projectCallTypeOptions,
     projectCallStatusLabels,
     projectCallStatusColors,
   }

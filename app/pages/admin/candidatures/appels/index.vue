@@ -407,7 +407,6 @@ const isDeadlineSoon = (deadline?: string | null) => {
             class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           >
             <option value="all">Tous les types</option>
-            <option value="application">Candidature</option>
             <option value="scholarship">Bourse</option>
             <option value="project">Projet</option>
             <option value="recruitment">Recrutement</option>

@@ -46,7 +46,8 @@ const statusToI18nKey: Record<CallStatus, string> = {
 }
 
 // Filters - initialized from query parameters
-const validTypes = ['all', 'application', 'project', 'recruitment', 'training'] as const
+// NB : le type 'application' (Candidature) est déprécié et masqué (fusionné dans 'training')
+const validTypes = ['all', 'project', 'recruitment', 'training'] as const
 const validStatuses = ['all', 'ongoing', 'closed'] as const
 
 const getInitialType = (): 'all' | CallType => {
@@ -152,7 +153,6 @@ onMounted(fetchCalls)
 // Filter options
 const typeFilters = [
   { value: 'all', label: 'actualites.calls.filters.all' },
-  { value: 'application', label: 'actualites.calls.filters.candidature' },
   { value: 'project', label: 'actualites.calls.filters.projet' },
   { value: 'recruitment', label: 'actualites.calls.filters.recrutement' },
   { value: 'training', label: 'actualites.calls.filters.formation' },

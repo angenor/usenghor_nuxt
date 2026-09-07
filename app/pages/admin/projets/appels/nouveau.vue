@@ -12,7 +12,7 @@ const {
   listProjects,
   createProjectCall,
   translateCall,
-  projectCallTypeLabels,
+  projectCallTypeOptions,
   projectCallStatusLabels,
 } = useProjectsApi()
 
@@ -349,8 +349,8 @@ const goBack = () => {
             v-model="form.type"
             class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           >
-            <option v-for="(label, key) in projectCallTypeLabels" :key="key" :value="key">
-              {{ label }}
+            <option v-for="option in projectCallTypeOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
             </option>
           </select>
         </div>
