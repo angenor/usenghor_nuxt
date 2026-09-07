@@ -29,10 +29,10 @@ const ROUTE_PERMISSIONS: Record<string, string[]> = {
   '/admin/contenus/inscriptions': ['events.view'],
   '/admin/contenus/etiquettes': ['news.edit'],
   // Projets
-  '/admin/projets': ['projects.view'],
-  '/admin/projets/liste': ['projects.view'],
-  '/admin/projets/categories': ['projects.view'],
-  '/admin/projets/appels': ['projects.view'],
+  '/admin/projets': ['project.view'],
+  '/admin/projets/liste': ['project.view'],
+  '/admin/projets/categories': ['project.view'],
+  '/admin/projets/appels': ['project.view'],
   // Organisation
   '/admin/organisation': ['organization.view'],
   '/admin/organisation/secteurs': ['organization.view'],

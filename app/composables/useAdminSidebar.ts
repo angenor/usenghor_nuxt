@@ -204,14 +204,14 @@ export function useAdminSidebar() {
       id: 'projects',
       label: 'Projets',
       icon: 'fa-solid fa-rocket',
-      permissions: ['projects.view'],
+      permissions: ['project.view'],
       children: [
         {
           id: 'projects-list',
           label: 'Liste des projets',
           icon: 'fa-solid fa-list',
           route: '/admin/projets/liste',
-          permissions: ['projects.view'],
+          permissions: ['project.view'],
           description: 'Projets de recherche et développement'
         },
         {
@@ -219,7 +219,7 @@ export function useAdminSidebar() {
           label: 'Catégories',
           icon: 'fa-solid fa-folder-tree',
           route: '/admin/projets/categories',
-          permissions: ['projects.view'],
+          permissions: ['project.view'],
           description: 'Classification des projets'
         },
         {
@@ -227,7 +227,7 @@ export function useAdminSidebar() {
           label: 'Appels à projets',
           icon: 'fa-solid fa-bullhorn',
           route: '/admin/projets/appels',
-          permissions: ['projects.view'],
+          permissions: ['project.view'],
           description: 'Financement et appels d\'offres'
         }
       ]
