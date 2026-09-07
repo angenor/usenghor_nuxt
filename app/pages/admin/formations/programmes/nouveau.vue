@@ -131,6 +131,8 @@ const form = ref({
   type: 'master' as ProgramType,
   description_md: '',
   description_html: '',
+  teaching_methods_md: '',
+  teaching_methods_html: '',
   duration_months: 24,
   credits: 120,
   degree_awarded: 'Master professionnel',
@@ -158,6 +160,10 @@ const form = ref({
   description_html_en: '',
   description_md_ar: '',
   description_html_ar: '',
+  teaching_methods_md_en: '',
+  teaching_methods_html_en: '',
+  teaching_methods_md_ar: '',
+  teaching_methods_html_ar: '',
   objectives_en: [] as string[],
   objectives_ar: [] as string[],
   target_audience_en: [] as string[],
@@ -175,6 +181,8 @@ async function handleTranslate() {
       subtitle: form.value.subtitle || null,
       description_html: form.value.description_html || null,
       description_md: form.value.description_md || null,
+      teaching_methods_html: form.value.teaching_methods_html || null,
+      teaching_methods_md: form.value.teaching_methods_md || null,
       required_degree: form.value.required_degree || null,
       objectives: form.value.objectives.length > 0 ? form.value.objectives : null,
       target_audience: form.value.target_audience.length > 0 ? form.value.target_audience : null,
@@ -189,6 +197,10 @@ async function handleTranslate() {
     if (r.description_en_md != null) form.value.description_md_en = r.description_en_md
     if (r.description_ar_html != null) form.value.description_html_ar = r.description_ar_html
     if (r.description_ar_md != null) form.value.description_md_ar = r.description_ar_md
+    if (r.teaching_methods_en_html != null) form.value.teaching_methods_html_en = r.teaching_methods_en_html
+    if (r.teaching_methods_en_md != null) form.value.teaching_methods_md_en = r.teaching_methods_en_md
+    if (r.teaching_methods_ar_html != null) form.value.teaching_methods_html_ar = r.teaching_methods_ar_html
+    if (r.teaching_methods_ar_md != null) form.value.teaching_methods_md_ar = r.teaching_methods_ar_md
     if (r.objectives_en) form.value.objectives_en = r.objectives_en
     if (r.objectives_ar) form.value.objectives_ar = r.objectives_ar
     if (r.target_audience_en) form.value.target_audience_en = r.target_audience_en
@@ -366,6 +378,8 @@ async function submitForm() {
       type: form.value.type,
       description_html: form.value.description_html || null,
       description_md: form.value.description_md || null,
+      teaching_methods_html: form.value.teaching_methods_html || null,
+      teaching_methods_md: form.value.teaching_methods_md || null,
       duration_months: form.value.duration_months || null,
       credits: form.value.credits || null,
       degree_awarded: form.value.degree_awarded || null,
@@ -392,6 +406,10 @@ async function submitForm() {
       description_en_md: form.value.description_md_en || null,
       description_ar_html: form.value.description_html_ar || null,
       description_ar_md: form.value.description_md_ar || null,
+      teaching_methods_en_html: form.value.teaching_methods_html_en || null,
+      teaching_methods_en_md: form.value.teaching_methods_md_en || null,
+      teaching_methods_ar_html: form.value.teaching_methods_html_ar || null,
+      teaching_methods_ar_md: form.value.teaching_methods_md_ar || null,
       objectives_en: form.value.objectives_en.length > 0 ? form.value.objectives_en : null,
       objectives_ar: form.value.objectives_ar.length > 0 ? form.value.objectives_ar : null,
       target_audience_en: form.value.target_audience_en.length > 0 ? form.value.target_audience_en : null,
@@ -843,6 +861,22 @@ async function submitForm() {
         icon="fa-solid fa-file-lines"
         icon-color="text-indigo-500"
         placeholder="Décrivez le programme en détail..."
+        height="300px"
+      />
+
+      <!-- Section: Approche pédagogique (éditeur multilingue FR/EN/AR) -->
+      <AdminRichTextEditor
+        v-model="form.teaching_methods_md"
+        v-model:html-value="form.teaching_methods_html"
+        v-model:model-value-en="form.teaching_methods_md_en"
+        v-model:html-value-en="form.teaching_methods_html_en"
+        v-model:model-value-ar="form.teaching_methods_md_ar"
+        v-model:html-value-ar="form.teaching_methods_html_ar"
+        title="Approche pédagogique"
+        description="Méthodes pédagogiques du programme. Utilisez « Traduire » puis corrigez les onglets EN/AR."
+        icon="fa-solid fa-chalkboard-teacher"
+        icon-color="text-emerald-500"
+        placeholder="Décrivez les méthodes pédagogiques utilisées..."
         height="300px"
       />
 

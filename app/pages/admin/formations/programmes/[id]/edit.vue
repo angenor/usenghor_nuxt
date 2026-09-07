@@ -161,7 +161,8 @@ const form = ref<{
   slug: string
   description_md: string
   description_html: string
-  teaching_methods: string
+  teaching_methods_md: string
+  teaching_methods_html: string
   objectives: string[]
   target_audience: string[]
   format: string
@@ -185,8 +186,10 @@ const form = ref<{
   subtitle_ar: string
   required_degree_en: string
   required_degree_ar: string
-  teaching_methods_en: string
-  teaching_methods_ar: string
+  teaching_methods_md_en: string
+  teaching_methods_html_en: string
+  teaching_methods_md_ar: string
+  teaching_methods_html_ar: string
   description_md_en: string
   description_html_en: string
   description_md_ar: string
@@ -202,7 +205,8 @@ const form = ref<{
   slug: '',
   description_md: '',
   description_html: '',
-  teaching_methods: '',
+  teaching_methods_md: '',
+  teaching_methods_html: '',
   objectives: [],
   target_audience: [],
   format: '',
@@ -225,8 +229,10 @@ const form = ref<{
   subtitle_ar: '',
   required_degree_en: '',
   required_degree_ar: '',
-  teaching_methods_en: '',
-  teaching_methods_ar: '',
+  teaching_methods_md_en: '',
+  teaching_methods_html_en: '',
+  teaching_methods_md_ar: '',
+  teaching_methods_html_ar: '',
   description_md_en: '',
   description_html_en: '',
   description_md_ar: '',
@@ -248,8 +254,8 @@ async function handleTranslate() {
       subtitle: form.value.subtitle || null,
       description_html: form.value.description_html || null,
       description_md: form.value.description_md || null,
-      teaching_methods_html: form.value.teaching_methods || null,
-      teaching_methods_md: form.value.teaching_methods || null,
+      teaching_methods_html: form.value.teaching_methods_html || null,
+      teaching_methods_md: form.value.teaching_methods_md || null,
       required_degree: form.value.required_degree || null,
       objectives: form.value.objectives.length > 0 ? form.value.objectives : null,
       target_audience: form.value.target_audience.length > 0 ? form.value.target_audience : null,
@@ -260,8 +266,10 @@ async function handleTranslate() {
     if (r.subtitle_ar != null) form.value.subtitle_ar = r.subtitle_ar
     if (r.required_degree_en != null) form.value.required_degree_en = r.required_degree_en
     if (r.required_degree_ar != null) form.value.required_degree_ar = r.required_degree_ar
-    if (r.teaching_methods_en_md != null) form.value.teaching_methods_en = r.teaching_methods_en_md
-    if (r.teaching_methods_ar_md != null) form.value.teaching_methods_ar = r.teaching_methods_ar_md
+    if (r.teaching_methods_en_html != null) form.value.teaching_methods_html_en = r.teaching_methods_en_html
+    if (r.teaching_methods_en_md != null) form.value.teaching_methods_md_en = r.teaching_methods_en_md
+    if (r.teaching_methods_ar_html != null) form.value.teaching_methods_html_ar = r.teaching_methods_ar_html
+    if (r.teaching_methods_ar_md != null) form.value.teaching_methods_md_ar = r.teaching_methods_ar_md
     if (r.description_en_html != null) form.value.description_html_en = r.description_en_html
     if (r.description_en_md != null) form.value.description_md_en = r.description_en_md
     if (r.description_ar_html != null) form.value.description_html_ar = r.description_ar_html
@@ -355,7 +363,8 @@ async function loadProgram() {
       slug: program.value.slug,
       description_md: program.value.description_md || '',
       description_html: program.value.description_html || '',
-      teaching_methods: program.value.teaching_methods_md || program.value.teaching_methods_html || '',
+      teaching_methods_md: program.value.teaching_methods_md || '',
+      teaching_methods_html: program.value.teaching_methods_html || '',
       objectives: program.value.objectives || [],
       target_audience: program.value.target_audience || [],
       format: program.value.format_md || '',
@@ -380,8 +389,10 @@ async function loadProgram() {
       subtitle_ar: program.value.subtitle_ar || '',
       required_degree_en: program.value.required_degree_en || '',
       required_degree_ar: program.value.required_degree_ar || '',
-      teaching_methods_en: program.value.teaching_methods_en_md || program.value.teaching_methods_en_html || '',
-      teaching_methods_ar: program.value.teaching_methods_ar_md || program.value.teaching_methods_ar_html || '',
+      teaching_methods_md_en: program.value.teaching_methods_en_md || '',
+      teaching_methods_html_en: program.value.teaching_methods_en_html || '',
+      teaching_methods_md_ar: program.value.teaching_methods_ar_md || '',
+      teaching_methods_html_ar: program.value.teaching_methods_ar_html || '',
       description_md_en: program.value.description_en_md || '',
       description_html_en: program.value.description_en_html || '',
       description_md_ar: program.value.description_ar_md || '',
@@ -886,8 +897,8 @@ const submitForm = async () => {
       slug: form.value.slug,
       description_html: form.value.description_html || null,
       description_md: form.value.description_md || null,
-      teaching_methods_html: form.value.teaching_methods || null,
-      teaching_methods_md: form.value.teaching_methods || null,
+      teaching_methods_html: form.value.teaching_methods_html || null,
+      teaching_methods_md: form.value.teaching_methods_md || null,
       objectives: form.value.objectives.length > 0 ? form.value.objectives : null,
       target_audience: form.value.target_audience.length > 0 ? form.value.target_audience : null,
       format_md: form.value.format || null,
@@ -913,10 +924,10 @@ const submitForm = async () => {
       subtitle_ar: form.value.subtitle_ar || null,
       required_degree_en: form.value.required_degree_en || null,
       required_degree_ar: form.value.required_degree_ar || null,
-      teaching_methods_en_html: form.value.teaching_methods_en || null,
-      teaching_methods_en_md: form.value.teaching_methods_en || null,
-      teaching_methods_ar_html: form.value.teaching_methods_ar || null,
-      teaching_methods_ar_md: form.value.teaching_methods_ar || null,
+      teaching_methods_en_html: form.value.teaching_methods_html_en || null,
+      teaching_methods_en_md: form.value.teaching_methods_md_en || null,
+      teaching_methods_ar_html: form.value.teaching_methods_html_ar || null,
+      teaching_methods_ar_md: form.value.teaching_methods_md_ar || null,
       description_en_html: form.value.description_html_en || null,
       description_en_md: form.value.description_md_en || null,
       description_ar_html: form.value.description_html_ar || null,
@@ -1314,15 +1325,19 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
           </div>
 
           <div>
-            <label for="teaching_methods" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Approche pédagogique
             </label>
-            <textarea
-              id="teaching_methods"
-              v-model="form.teaching_methods"
-              rows="4"
+            <AdminRichTextEditor
+              v-model="form.teaching_methods_md"
+              v-model:html-value="form.teaching_methods_html"
+              v-model:model-value-en="form.teaching_methods_md_en"
+              v-model:html-value-en="form.teaching_methods_html_en"
+              v-model:model-value-ar="form.teaching_methods_md_ar"
+              v-model:html-value-ar="form.teaching_methods_html_ar"
+              :show-card="false"
               placeholder="Décrivez les méthodes pédagogiques utilisées..."
-              class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              height="200px"
             />
           </div>
 
@@ -1437,7 +1452,6 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
                 <input v-model="form.title_en" type="text" placeholder="Title (EN)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                 <input v-model="form.subtitle_en" type="text" placeholder="Subtitle (EN)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                 <input v-model="form.required_degree_en" type="text" placeholder="Required degree (EN)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                <textarea v-model="form.teaching_methods_en" rows="3" placeholder="Teaching approach (EN)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                 <textarea v-model="objectivesEnText" rows="3" placeholder="Objectives (EN — one per line)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                 <textarea v-model="targetAudienceEnText" rows="3" placeholder="Target audience (EN — one per line)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               </div>
@@ -1447,7 +1461,6 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
                 <input v-model="form.title_ar" type="text" placeholder="العنوان (AR)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                 <input v-model="form.subtitle_ar" type="text" placeholder="العنوان الفرعي (AR)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                 <input v-model="form.required_degree_ar" type="text" placeholder="الشهادة المطلوبة (AR)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                <textarea v-model="form.teaching_methods_ar" rows="3" placeholder="المقاربة البيداغوجية (AR)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                 <textarea v-model="objectivesArText" rows="3" placeholder="الأهداف (AR — سطر لكل عنصر)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                 <textarea v-model="targetAudienceArText" rows="3" placeholder="الجمهور المستهدف (AR — سطر لكل عنصر)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
               </div>

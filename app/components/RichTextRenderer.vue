@@ -31,10 +31,28 @@ const DOCUMENT_EXTENSIONS: Record<string, { label: string, color: string }> = {
 
 const processedHtml = computed(() => {
   if (!props.html) return ''
-  let html = transformFileLinks(props.html)
+  let html = normalizePlainText(props.html)
+  html = transformFileLinks(html)
   html = processLinks(html)
   return html
 })
+
+/** Balises de bloc trahissant un contenu déjà structuré en HTML. */
+const BLOCK_TAG_RE = /<(?:p|div|ul|ol|li|h[1-6]|table|blockquote|pre|figure|section|article)\b/i
+
+/**
+ * Certains champs `*_html` contiennent encore du texte brut saisi avant le
+ * passage à l'éditeur riche : les sauts de ligne y sont significatifs mais
+ * disparaissent une fois injectés en HTML. On les restitue en paragraphes
+ * (lignes vides) et en retours à la ligne (`<br>`). Un contenu déjà structuré
+ * est renvoyé tel quel.
+ */
+function normalizePlainText(html: string): string {
+  if (BLOCK_TAG_RE.test(html)) return html
+  const blocks = html.split(/\n{2,}/).map(block => block.trim()).filter(Boolean)
+  if (blocks.length === 0) return ''
+  return blocks.map(block => `<p>${block.replace(/\n/g, '<br>')}</p>`).join('')
+}
 
 /**
  * Extrait l'extension d'une URL (en ignorant la query string et le hash).

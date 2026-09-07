@@ -309,16 +309,12 @@ function getStatusColor(published: boolean) {
         </div>
 
         <!-- Méthodologies pédagogiques -->
-        <div v-if="program.teaching_methods" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
+        <div v-if="program.teaching_methods_html" class="rounded-lg bg-white p-6 shadow dark:bg-gray-800">
           <h2 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
             <font-awesome-icon icon="fa-solid fa-chalkboard-teacher" class="w-5 h-5 text-indigo-500" />
             Méthodologies pédagogiques
           </h2>
-          <div class="prose prose-gray max-w-none dark:prose-invert">
-            <p class="text-gray-600 dark:text-gray-300">
-              {{ program.teaching_methods }}
-            </p>
-          </div>
+          <RichTextRenderer :html="program.teaching_methods_html" />
         </div>
       </div>
 
