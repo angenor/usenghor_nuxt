@@ -27,3 +27,30 @@ html.dark .bg-grid-pattern::before {
     linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
 }
+
+/* Contenu riche (prose) — compactage des listes
+   TOAST UI Editor enveloppe chaque puce dans <li><p>…</p></li>. Le plugin
+   @tailwindcss/typography cumule alors les marges du <li> et celles du <p>
+   (dont 1.25em sur le premier et le dernier paragraphe de la liste), d'où des
+   puces trop espacées et un écart inégal entre le premier item et les suivants. */
+.prose li > p {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* Un item réellement composé de plusieurs paragraphes garde sa respiration */
+.prose li > p + p {
+  margin-top: 0.75em;
+}
+
+.prose li {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+/* Listes imbriquées : pas de marge superflue autour du sous-niveau */
+.prose li > ul,
+.prose li > ol {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
