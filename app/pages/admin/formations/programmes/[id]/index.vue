@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ProgramWithDetails } from '~/types/api'
+import { programTypeToUrlSlug } from '~/composables/usePublicProgramsApi'
 
 definePageMeta({
   layout: 'admin'
@@ -406,7 +407,7 @@ function getStatusColor(published: boolean) {
 
           <div class="space-y-2">
             <NuxtLink
-              :to="`/formations/${program.slug}`"
+              :to="`/formations/${programTypeToUrlSlug[program.type]}/${program.slug}`"
               target="_blank"
               class="flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
             >

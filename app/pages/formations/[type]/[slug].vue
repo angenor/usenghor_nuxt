@@ -54,28 +54,26 @@ const programPartners = ref<ProgramPartnerPublic[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 
+// URL canonique d'un programme : /formations/<type>/<slug>
+const canonicalPath = (data: ProgramPublic) =>
+  localePath(`/formations/${programTypeToUrlSlug[data.type]}/${data.slug}`)
+
+// Si le type présent dans l'URL ne correspond pas au type réel du programme
+// (ex. /formations/masters/<slug-d-un-clom>, ou type inconnu), on redirige en
+// 301 vers l'URL canonique plutôt que de renvoyer une 404.
+const isCanonicalUrl = (data: ProgramPublic) => programTypeToUrlSlug[data.type] === typeSlug.value
+
 // Fetch program data
 const fetchProgram = async () => {
-  if (!isValidType.value) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Type de formation invalide',
-    })
-  }
-
   loading.value = true
   error.value = null
 
   try {
     const data = await getProgramBySlug(slug.value)
 
-    // Verify type matches URL
-    const expectedTypeSlug = programTypeToUrlSlug[data.type]
-    if (expectedTypeSlug !== typeSlug.value) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: 'Formation non trouvée',
-      })
+    if (!isCanonicalUrl(data)) {
+      await navigateTo(canonicalPath(data), { redirectCode: 301, replace: true })
+      return
     }
 
     program.value = data
@@ -134,13 +132,7 @@ const { data: programData } = await useAsyncData(
   `program-${slug.value}`,
   async () => {
     try {
-      const data = await getProgramBySlug(slug.value)
-      // Verify type matches
-      const expectedTypeSlug = programTypeToUrlSlug[data.type]
-      if (expectedTypeSlug !== typeSlug.value) {
-        return null
-      }
-      return data
+      return await getProgramBySlug(slug.value)
     }
     catch {
       return null
@@ -148,10 +140,16 @@ const { data: programData } = await useAsyncData(
   },
 )
 
-// Initialize program from SSR data if available
+// Initialize program from SSR data if available (ou redirection 301 côté serveur
+// si l'URL n'est pas la canonique)
 if (programData.value) {
-  program.value = programData.value
-  loading.value = false
+  if (!isCanonicalUrl(programData.value)) {
+    await navigateTo(canonicalPath(programData.value), { redirectCode: 301, replace: true })
+  }
+  else {
+    program.value = programData.value
+    loading.value = false
+  }
 }
 
 // Localization helpers (traduction auto FR → EN/AR, repli FR systématique)

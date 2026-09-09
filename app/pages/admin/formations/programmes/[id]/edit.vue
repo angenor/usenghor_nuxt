@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ProgramType, ProgramWithDetails, ProgramFieldRead, PublicationStatus, ProgramSkillRead, ProgramCareerOpportunityRead, ImageVariants } from '~/types/api'
+import { programTypeToUrlSlug } from '~/composables/usePublicProgramsApi'
 
 definePageMeta({
   layout: 'admin'
@@ -1128,7 +1129,7 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
               </button>
             </div>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              URL: /formations/{{ form.slug || '...' }}
+              URL: /formations/{{ programTypeToUrlSlug[form.type as ProgramType] || '...' }}/{{ form.slug || '...' }}
             </p>
           </div>
 

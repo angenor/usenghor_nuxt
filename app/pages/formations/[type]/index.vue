@@ -13,6 +13,7 @@ const { t, locale } = useI18n()
 const { public: { siteUrl } } = useRuntimeConfig()
 const localePath = useLocalePath()
 const {
+  getProgramBySlug,
   listProgramsByType,
   listPublicFields,
   urlSlugToProgramType,
@@ -144,12 +145,23 @@ const resetFilters = () => {
 // Other types data for sidebar
 const otherTypesData = ref<Record<string, ProgramPublic[]>>({})
 
-// 404 if invalid type
+// Type inconnu : si le segment est en réalité le slug d'un programme
+// (ancien format /formations/<slug>), redirection 301 vers l'URL canonique
+// /formations/<type>/<slug>. Sinon, 404.
 if (!isValidType.value) {
-  throw createError({
-    statusCode: 404,
-    statusMessage: 'Formation type not found',
-  })
+  const legacyProgram = await getProgramBySlug(typeSlug.value).catch(() => null)
+  if (legacyProgram) {
+    await navigateTo(
+      localePath(`/formations/${programTypeToUrlSlug[legacyProgram.type]}/${legacyProgram.slug}`),
+      { redirectCode: 301, replace: true },
+    )
+  }
+  else {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Formation type not found',
+    })
+  }
 }
 
 // Fetch programs

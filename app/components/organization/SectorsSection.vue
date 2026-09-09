@@ -2,6 +2,14 @@
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const { sectors, getFormationsBySector } = useMockData()
+
+// Segment d'URL du type de formation (données mockées) : /formations/<type>/<slug>
+const formationTypeToUrlSlug: Record<string, string> = {
+  master: 'masters',
+  doctorat: 'doctorat',
+  du: 'diplomes-universitaires',
+  certifiante: 'certifiantes',
+}
 const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.05 })
 
 // Map sector icons to Font Awesome icons
@@ -231,7 +239,7 @@ const getFormationName = (formation: any) => {
                 <NuxtLink
                   v-for="formation in getFormationsBySector(sec.id)"
                   :key="formation.id"
-                  :to="localePath(`/formations/${formation.slug}`)"
+                  :to="localePath(`/formations/${formationTypeToUrlSlug[formation.formation_type] || 'masters'}/${formation.slug}`)"
                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:scale-105 hover:-translate-y-0.5"
                   :class="[getColors(sec.color).badgeBg, getColors(sec.color).badgeText]"
                 >

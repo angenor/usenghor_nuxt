@@ -271,7 +271,8 @@ const programTypeToUrlSlug: Record<string, string> = {
   master: 'masters',
   doctorate: 'doctorat',
   university_diploma: 'diplomes-universitaires',
-  certificate: 'certifiantes'
+  certificate: 'certifiantes',
+  clom: 'cloms'
 }
 
 // Icônes par type d'événement
