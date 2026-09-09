@@ -26,7 +26,9 @@ ENV NUXT_PUBLIC_API_BASE_URL=$NUXT_PUBLIC_API_BASE_URL
 ENV NUXT_PUBLIC_SITE_URL=$NUXT_PUBLIC_SITE_URL
 
 # Increase Node.js memory limit for build
-ENV NODE_OPTIONS="--max-old-space-size=3072"
+# Heap Node pour `nuxt build` : 3 Go ne suffisent plus (OOM constaté en prod le
+# 2026-09-09) ; le serveur dispose de ~10 Go libres.
+ENV NODE_OPTIONS="--max-old-space-size=6144"
 
 # Build the application
 RUN pnpm build
