@@ -1131,6 +1131,16 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               URL: /formations/{{ programTypeToUrlSlug[form.type as ProgramType] || '...' }}/{{ form.slug || '...' }}
             </p>
+            <!-- Changement de slug : l'ancienne adresse ne redirige pas -->
+            <p
+              v-if="program && form.slug !== program.slug"
+              class="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300"
+            >
+              <font-awesome-icon icon="fa-solid fa-exclamation-triangle" class="mr-1 w-3 h-3" />
+              Modifier le slug casse les liens déjà partagés : l'ancienne adresse
+              <code class="font-mono">/formations/{{ programTypeToUrlSlug[program.type] }}/{{ program.slug }}</code>
+              renverra une page introuvable.
+            </p>
           </div>
 
           <!-- Type -->
@@ -1148,6 +1158,18 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
                 {{ pt.label }}
               </option>
             </select>
+            <!-- Changement de type : l'adresse publique change, l'ancienne redirige -->
+            <p
+              v-if="program && form.type !== program.type"
+              class="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300"
+            >
+              <font-awesome-icon icon="fa-solid fa-exclamation-triangle" class="mr-1 w-3 h-3" />
+              Le type fait partie de l'adresse publique : elle deviendra
+              <code class="font-mono">/formations/{{ programTypeToUrlSlug[form.type as ProgramType] }}/{{ form.slug }}</code>.
+              L'ancienne adresse
+              <code class="font-mono">/formations/{{ programTypeToUrlSlug[program.type] }}/{{ program.slug }}</code>
+              redirigera automatiquement vers la nouvelle.
+            </p>
           </div>
 
           <!-- Champ disciplinaire (certificats uniquement) -->
@@ -2020,7 +2042,7 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
         <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
           <div class="mb-4 flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/30">
-              <font-awesome-icon icon="fa-solid fa-triangle-exclamation" class="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+              <font-awesome-icon icon="fa-solid fa-exclamation-triangle" class="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
             </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
               Modifications non enregistrées
@@ -2197,7 +2219,7 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
         <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
           <div class="mb-4 flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-              <font-awesome-icon icon="fa-solid fa-triangle-exclamation" class="h-5 w-5 text-red-600 dark:text-red-400" />
+              <font-awesome-icon icon="fa-solid fa-exclamation-triangle" class="h-5 w-5 text-red-600 dark:text-red-400" />
             </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
               Supprimer la compétence
@@ -2392,7 +2414,7 @@ const publicationStatuses: { value: PublicationStatus; label: string }[] = [
         <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
           <div class="mb-4 flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-              <font-awesome-icon icon="fa-solid fa-triangle-exclamation" class="h-5 w-5 text-red-600 dark:text-red-400" />
+              <font-awesome-icon icon="fa-solid fa-exclamation-triangle" class="h-5 w-5 text-red-600 dark:text-red-400" />
             </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
               Supprimer le débouché
