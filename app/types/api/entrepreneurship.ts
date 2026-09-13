@@ -1,9 +1,12 @@
 /**
  * Types API du Pôle Entrepreneuriat et Innovation (PEI)
  * Alignés sur specs/021-pei-entrepreneurship-core/contracts/{admin-api,public-api}.md
+ * et specs/022-pei-laureates-partners/contracts/ (portraits, partenaires du pôle).
  * Convention trilingue additive : champ (FR), champ_en, champ_ar ;
  * contenu riche : champ_html / champ_md + champ_en_* / champ_ar_*.
  */
+
+import type { PartnerType } from './organization'
 
 // ============================================================================
 // Énumérations
@@ -22,6 +25,11 @@ export type PeiCohortType = 'fse' | 'see'
 export type PeiResourceType = 'document' | 'link' | 'video'
 
 export type PeiColor = 'blue' | 'blue_dark' | 'red' | 'amber' | 'teal'
+
+export type PeiLaureateType = 'fse_laureate' | 'student_entrepreneur'
+
+/** Familles de partenaires du pôle, ordre fixe : académiques, appui, internationales. */
+export type PeiPartnerFamily = 'academic' | 'support' | 'international'
 
 // ============================================================================
 // Transversal
@@ -51,17 +59,27 @@ export interface PublishStatus {
   updated_at: string
 }
 
+export interface FeaturedStatus {
+  id: string
+  is_featured: boolean
+  updated_at: string
+}
+
 export interface PeiDashboardStats {
   programs: { active: number, total: number }
   cohorts: { active: number, total: number }
   resources: { published: number, total: number }
   dde_service: { id: string | null, name: string | null }
+  laureates: { published: number, total: number }
+  /** total = rattachements ; active = rattachements dont le partenaire est actif */
+  partners: { active: number, total: number }
 }
 
 export interface PeiTranslateMissingResponse {
   programs: number
   cohorts: number
   resources: number
+  laureates: number
   /** Faux si le budget de temps serveur est épuisé : relancer l'action. */
   complete: boolean
 }
@@ -326,4 +344,167 @@ export interface PeiResourceTranslateResponse {
   description_ar?: string | null
   category_en?: string | null
   category_ar?: string | null
+}
+
+// ============================================================================
+// Portraits : lauréats FSE et étudiants-entrepreneurs (pei_laureates)
+// ============================================================================
+
+export interface PeiLaureateCohortRef {
+  id: string
+  code: string
+  label: string
+  type: PeiCohortType
+  year: number
+  active: boolean
+}
+
+export interface PeiLaureateAdmin extends AuditColumns {
+  id: string
+  cohort_id: string
+  type: PeiLaureateType
+  full_name: string
+  project_name: string
+  department_label: string | null
+  department_label_en: string | null
+  department_label_ar: string | null
+  quote: string | null
+  quote_en: string | null
+  quote_ar: string | null
+  photo_external_id: string | null
+  photo_url: string | null
+  website_url: string | null
+  linkedin_url: string | null
+  instagram_url: string | null
+  facebook_url: string | null
+  video_url: string | null
+  /** Chaîne décimale (« 5000.00 ») */
+  grant_amount: string | null
+  is_featured: boolean
+  is_published: boolean
+  published_at: string | null
+  /** Relatif à la cohorte */
+  display_order: number
+  cohort: PeiLaureateCohortRef
+}
+
+export interface PeiLaureateCreatePayload {
+  cohort_id: string
+  type: PeiLaureateType
+  full_name: string
+  project_name: string
+  department_label?: string | null
+  department_label_en?: string | null
+  department_label_ar?: string | null
+  quote?: string | null
+  quote_en?: string | null
+  quote_ar?: string | null
+  photo_external_id?: string | null
+  website_url?: string | null
+  linkedin_url?: string | null
+  instagram_url?: string | null
+  facebook_url?: string | null
+  video_url?: string | null
+  grant_amount?: number | string | null
+  is_featured?: boolean
+  is_published?: boolean
+}
+
+export type PeiLaureateUpdatePayload = Partial<PeiLaureateCreatePayload>
+
+export interface PeiLaureateListParams {
+  q?: string
+  cohort_id?: string
+  type?: PeiLaureateType
+  is_published?: boolean
+  page?: number
+  page_size?: number
+}
+
+export interface PeiLaureateTranslateRequest {
+  department_label?: string | null
+  quote?: string | null
+}
+
+export interface PeiLaureateTranslateResponse {
+  department_label_en?: string | null
+  department_label_ar?: string | null
+  quote_en?: string | null
+  quote_ar?: string | null
+}
+
+export interface PeiLaureatePublic {
+  id: string
+  type: PeiLaureateType
+  full_name: string
+  project_name: string
+  department_label: string | null
+  department_label_en: string | null
+  department_label_ar: string | null
+  quote: string | null
+  quote_en: string | null
+  quote_ar: string | null
+  photo_url: string | null
+  website_url: string | null
+  linkedin_url: string | null
+  instagram_url: string | null
+  facebook_url: string | null
+  video_url: string | null
+  is_featured: boolean
+  cohort_label: string
+  cohort_label_en: string | null
+  cohort_label_ar: string | null
+  display_order: number
+}
+
+export interface PeiLaureatesPublic {
+  groups: { cohort: PeiCohortPublic, laureates: PeiLaureatePublic[] }[]
+  stats: { laureates: number, cohorts: number, max_grant_amount: string | null }
+}
+
+// ============================================================================
+// Partenaires du pôle (pei_partners)
+// ============================================================================
+
+export interface PeiPartnerLinkAdmin {
+  partner_id: string
+  family: PeiPartnerFamily
+  /** Relatif à la famille */
+  display_order: number
+  created_at: string
+  updated_at: string
+  partner: {
+    id: string
+    name: string
+    type: PartnerType
+    active: boolean
+    website: string | null
+    logo_url: string | null
+    description: string | null
+  }
+}
+
+export interface PeiPartnerAvailable {
+  id: string
+  name: string
+  type: PartnerType
+  active: boolean
+  logo_url: string | null
+}
+
+export interface PeiPartnerPublic {
+  id: string
+  name: string
+  description: string | null
+  description_en: string | null
+  description_ar: string | null
+  website: string | null
+  logo_url: string | null
+  type: PartnerType
+  display_order: number
+}
+
+export interface PeiPartnerFamilyPublic {
+  family: PeiPartnerFamily
+  partners: PeiPartnerPublic[]
 }

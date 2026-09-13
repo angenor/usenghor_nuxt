@@ -53,17 +53,18 @@ async function handleTranslateMissing() {
   try {
     // Le serveur borne chaque appel dans le temps : on relance tant que le
     // parcours n'est pas complet, en cumulant les compteurs.
-    const total = { programs: 0, cohorts: 0, resources: 0 }
+    const total = { programs: 0, cohorts: 0, resources: 0, laureates: 0 }
     let complete = false
     for (let round = 1; round <= MAX_TRANSLATE_ROUNDS && !complete; round++) {
       const result = await translateMissing()
       total.programs += result.programs
       total.cohorts += result.cohorts
       total.resources += result.resources
+      total.laureates += result.laureates ?? 0
       complete = result.complete
       // Passe incomplète sans aucun élément complété : traducteur indisponible
       // (quota, réseau) — inutile d'insister.
-      if (!complete && result.programs + result.cohorts + result.resources === 0) {
+      if (!complete && result.programs + result.cohorts + result.resources + (result.laureates ?? 0) === 0) {
         break
       }
       if (!complete) {
@@ -74,6 +75,7 @@ async function handleTranslateMissing() {
       plural(total.programs, 'dispositif', 'dispositifs'),
       plural(total.cohorts, 'cohorte', 'cohortes'),
       plural(total.resources, 'ressource', 'ressources'),
+      plural(total.laureates, 'lauréat', 'lauréats'),
     ]
     translateMessage.value = complete
       ? `Traductions complétées : ${parts.join(', ')}.`
@@ -120,6 +122,13 @@ const shortcuts = computed<Shortcut[]>(() => [
       ? `/admin/organisation/services?service_id=${ddeServiceId.value}`
       : '/admin/organisation/services',
     convention: 'Lier les albums depuis la fenêtre de modification du service DDE',
+  },
+  {
+    id: 'partners',
+    label: 'Partenaires (fiches)',
+    icon: 'fa-solid fa-handshake',
+    to: '/admin/partenaires',
+    convention: 'Créer ou modifier un partenaire ici, puis le rattacher dans « Partenaires du pôle »',
   },
   {
     id: 'faq',
@@ -244,7 +253,7 @@ const shortcuts = computed<Shortcut[]>(() => [
           <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Traductions</h2>
         </div>
         <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">
-          Complète automatiquement les champs anglais et arabe vides des dispositifs, cohortes et ressources à partir du français. Les traductions existantes ne sont pas modifiées.
+          Complète automatiquement les champs anglais et arabe vides des dispositifs, cohortes, ressources et portraits à partir du français. Les traductions existantes ne sont pas modifiées.
         </p>
 
         <button

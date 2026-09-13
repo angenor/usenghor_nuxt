@@ -6,12 +6,14 @@ const props = defineProps<{
   loading: boolean
 }>()
 
-type CardColor = 'blue' | 'green' | 'purple'
+type CardColor = 'blue' | 'green' | 'purple' | 'amber' | 'red'
 
 const colorClasses: Record<CardColor, { icon: string, text: string }> = {
   blue: { icon: 'bg-blue-100 dark:bg-blue-900/40', text: 'text-blue-600 dark:text-blue-400' },
   green: { icon: 'bg-green-100 dark:bg-green-900/40', text: 'text-green-600 dark:text-green-400' },
   purple: { icon: 'bg-purple-100 dark:bg-purple-900/40', text: 'text-purple-600 dark:text-purple-400' },
+  amber: { icon: 'bg-amber-100 dark:bg-amber-900/40', text: 'text-amber-600 dark:text-amber-400' },
+  red: { icon: 'bg-red-100 dark:bg-red-900/40', text: 'text-red-600 dark:text-red-400' },
 }
 
 const cards = computed(() => [
@@ -45,11 +47,31 @@ const cards = computed(() => [
     total: props.stats?.resources.total ?? 0,
     badge: 'Publiées',
   },
+  {
+    id: 'laureates',
+    label: 'Lauréats et étudiants-entrepreneurs',
+    icon: 'fa-solid fa-award',
+    color: 'amber' as CardColor,
+    to: '/admin/entrepreneuriat/laureats',
+    count: props.stats?.laureates.published ?? 0,
+    total: props.stats?.laureates.total ?? 0,
+    badge: 'Publiés',
+  },
+  {
+    id: 'partners',
+    label: 'Partenaires du pôle',
+    icon: 'fa-solid fa-handshake',
+    color: 'red' as CardColor,
+    to: '/admin/entrepreneuriat/partenaires',
+    count: props.stats?.partners.active ?? 0,
+    total: props.stats?.partners.total ?? 0,
+    badge: 'Actifs',
+  },
 ])
 </script>
 
 <template>
-  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
     <NuxtLink
       v-for="card in cards"
       :key="card.id"

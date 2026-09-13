@@ -473,6 +473,20 @@ export function useAdminSidebar() {
           permissions: ['entrepreneurship.view']
         },
         {
+          id: 'entrepreneurship-laureates',
+          label: 'Lauréats et étudiants-entrepreneurs',
+          icon: 'fa-solid fa-award',
+          route: '/admin/entrepreneuriat/laureats',
+          permissions: ['entrepreneurship.view']
+        },
+        {
+          id: 'entrepreneurship-partners',
+          label: 'Partenaires du pôle',
+          icon: 'fa-solid fa-handshake',
+          route: '/admin/entrepreneuriat/partenaires',
+          permissions: ['entrepreneurship.view']
+        },
+        {
           id: 'entrepreneurship-resources',
           label: 'Boîte à outils',
           icon: 'fa-solid fa-toolbox',

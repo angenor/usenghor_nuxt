@@ -1,11 +1,13 @@
 /**
  * Composable pour l'API admin du Pôle Entrepreneuriat et Innovation (PEI).
  * Authentification JWT requise (préfixe /api/admin/entrepreneurship).
- * Contrat : specs/021-pei-entrepreneurship-core/contracts/admin-api.md
+ * Contrats : specs/021-pei-entrepreneurship-core/contracts/admin-api.md,
+ * specs/022-pei-laureates-partners/contracts/admin-api.md
  */
 
 import type {
   ActiveStatus,
+  FeaturedStatus,
   PeiCohortAdmin,
   PeiCohortCreatePayload,
   PeiCohortTranslateRequest,
@@ -14,7 +16,17 @@ import type {
   PeiCohortUpdatePayload,
   PeiColor,
   PeiDashboardStats,
+  PeiLaureateAdmin,
+  PeiLaureateCreatePayload,
+  PeiLaureateListParams,
+  PeiLaureateTranslateRequest,
+  PeiLaureateTranslateResponse,
+  PeiLaureateType,
+  PeiLaureateUpdatePayload,
   PeiPage,
+  PeiPartnerAvailable,
+  PeiPartnerFamily,
+  PeiPartnerLinkAdmin,
   PeiProgramAdmin,
   PeiProgramCreatePayload,
   PeiProgramPhase,
@@ -102,6 +114,35 @@ export const colorOptions: PeiColorOption[] = [
     swatchClass: 'bg-teal-600',
     badgeClass: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300',
   },
+]
+
+export const laureateTypeLabels: Record<PeiLaureateType, string> = {
+  fse_laureate: 'Lauréat FSE',
+  student_entrepreneur: 'Étudiant-entrepreneur',
+}
+
+export const laureateTypeOptions: { value: PeiLaureateType, label: string }[] = [
+  { value: 'fse_laureate', label: laureateTypeLabels.fse_laureate },
+  { value: 'student_entrepreneur', label: laureateTypeLabels.student_entrepreneur },
+]
+
+/** Type de cohorte compatible avec chaque type de portrait. */
+export const cohortTypeForLaureateType: Record<PeiLaureateType, PeiCohortType> = {
+  fse_laureate: 'fse',
+  student_entrepreneur: 'see',
+}
+
+export const partnerFamilyLabels: Record<PeiPartnerFamily, string> = {
+  academic: 'Académiques et institutionnels',
+  support: 'Organisations d\'appui',
+  international: 'Organisations internationales',
+}
+
+/** Ordre fixe d'affichage des familles. */
+export const partnerFamilyOptions: { value: PeiPartnerFamily, label: string }[] = [
+  { value: 'academic', label: partnerFamilyLabels.academic },
+  { value: 'support', label: partnerFamilyLabels.support },
+  { value: 'international', label: partnerFamilyLabels.international },
 ]
 
 // ============================================================================
@@ -265,6 +306,97 @@ export function useEntrepreneurshipApi() {
     return await apiFetch<PeiResourceTranslateResponse>(`${BASE}/resources/translate`, { method: 'POST', body: payload })
   }
 
+  // ── Portraits (lauréats / étudiants-entrepreneurs) ────────────
+
+  async function listLaureates(params: PeiLaureateListParams = {}): Promise<PeiPage<PeiLaureateAdmin>> {
+    return await apiFetch<PeiPage<PeiLaureateAdmin>>(`${BASE}/laureates`, {
+      query: params as Record<string, unknown>,
+    })
+  }
+
+  async function getLaureate(id: string): Promise<PeiLaureateAdmin> {
+    return await apiFetch<PeiLaureateAdmin>(`${BASE}/laureates/${id}`)
+  }
+
+  async function createLaureate(payload: PeiLaureateCreatePayload): Promise<PeiLaureateAdmin> {
+    return await apiFetch<PeiLaureateAdmin>(`${BASE}/laureates`, { method: 'POST', body: payload })
+  }
+
+  async function updateLaureate(id: string, payload: PeiLaureateUpdatePayload): Promise<PeiLaureateAdmin> {
+    return await apiFetch<PeiLaureateAdmin>(`${BASE}/laureates/${id}`, { method: 'PATCH', body: payload })
+  }
+
+  async function deleteLaureate(id: string): Promise<void> {
+    await apiFetch(`${BASE}/laureates/${id}`, { method: 'DELETE' })
+  }
+
+  /** Réordonne tous les portraits d'une cohorte. */
+  async function reorderLaureates(cohortId: string, ids: string[]): Promise<ReorderResponse> {
+    return await apiFetch<ReorderResponse>(`${BASE}/laureates/reorder`, {
+      method: 'PATCH',
+      body: { cohort_id: cohortId, ids },
+    })
+  }
+
+  async function setLaureatePublished(id: string, isPublished: boolean): Promise<PublishStatus> {
+    return await apiFetch<PublishStatus>(`${BASE}/laureates/${id}/publish`, {
+      method: 'PATCH',
+      body: { is_published: isPublished },
+    })
+  }
+
+  async function setLaureateFeatured(id: string, isFeatured: boolean): Promise<FeaturedStatus> {
+    return await apiFetch<FeaturedStatus>(`${BASE}/laureates/${id}/featured`, {
+      method: 'PATCH',
+      body: { is_featured: isFeatured },
+    })
+  }
+
+  async function translateLaureate(payload: PeiLaureateTranslateRequest): Promise<PeiLaureateTranslateResponse> {
+    return await apiFetch<PeiLaureateTranslateResponse>(`${BASE}/laureates/translate`, { method: 'POST', body: payload })
+  }
+
+  // ── Partenaires du pôle ───────────────────────────────────────
+
+  async function listPeiPartners(family?: PeiPartnerFamily): Promise<PeiPartnerLinkAdmin[]> {
+    return await apiFetch<PeiPartnerLinkAdmin[]>(`${BASE}/partners`, {
+      query: family ? { family } : undefined,
+    })
+  }
+
+  /** Partenaires existants non encore rattachés au pôle. */
+  async function searchAvailablePartners(q = '', limit = 20): Promise<PeiPartnerAvailable[]> {
+    return await apiFetch<PeiPartnerAvailable[]>(`${BASE}/partners/available`, {
+      query: { q: q || undefined, limit },
+    })
+  }
+
+  async function linkPeiPartner(partnerId: string, family: PeiPartnerFamily): Promise<PeiPartnerLinkAdmin> {
+    return await apiFetch<PeiPartnerLinkAdmin>(`${BASE}/partners`, {
+      method: 'POST',
+      body: { partner_id: partnerId, family },
+    })
+  }
+
+  async function updatePeiPartnerFamily(partnerId: string, family: PeiPartnerFamily): Promise<PeiPartnerLinkAdmin> {
+    return await apiFetch<PeiPartnerLinkAdmin>(`${BASE}/partners/${partnerId}`, {
+      method: 'PATCH',
+      body: { family },
+    })
+  }
+
+  async function unlinkPeiPartner(partnerId: string): Promise<void> {
+    await apiFetch(`${BASE}/partners/${partnerId}`, { method: 'DELETE' })
+  }
+
+  /** Réordonne tous les partenaires d'une famille. */
+  async function reorderPeiPartners(family: PeiPartnerFamily, ids: string[]): Promise<ReorderResponse> {
+    return await apiFetch<ReorderResponse>(`${BASE}/partners/reorder`, {
+      method: 'PATCH',
+      body: { family, ids },
+    })
+  }
+
   return {
     getDashboard,
     translateMissing,
@@ -293,5 +425,20 @@ export function useEntrepreneurshipApi() {
     reorderResources,
     setResourcePublished,
     translateResource,
+    listLaureates,
+    getLaureate,
+    createLaureate,
+    updateLaureate,
+    deleteLaureate,
+    reorderLaureates,
+    setLaureatePublished,
+    setLaureateFeatured,
+    translateLaureate,
+    listPeiPartners,
+    searchAvailablePartners,
+    linkPeiPartner,
+    updatePeiPartnerFamily,
+    unlinkPeiPartner,
+    reorderPeiPartners,
   }
 }
