@@ -863,6 +863,187 @@ export const alumniPageSections: PageSection[] = [
 ]
 
 // ============================================================================
+// PAGE ENTREPRENEURIAT (PEI)
+// ============================================================================
+
+export const entrepreneurshipPageSections: PageSection[] = [
+  {
+    id: 'entrepreneurship-hero',
+    name: 'Hero et slider',
+    description: 'Bannière principale du mini-site : textes, boutons et images du slider',
+    icon: 'lightbulb',
+    color: 'bg-gradient-to-r from-brand-blue-800 to-brand-blue-900 text-white',
+    editorialKeys: [
+      'entrepreneurship.hero.badge',
+      'entrepreneurship.hero.title',
+      'entrepreneurship.hero.slogan',
+      'entrepreneurship.hero.subtitle',
+      'entrepreneurship.hero.cta1.text',
+      'entrepreneurship.hero.cta2.text',
+      'entrepreneurship.hero.slide1.image',
+      'entrepreneurship.hero.slide2.image',
+      'entrepreneurship.hero.slide3.image',
+    ],
+    fields: [
+      { key: 'entrepreneurship.hero.badge', label: 'Badge', description: 'Petit libellé au-dessus du titre du hero', type: 'text', editorialKey: 'entrepreneurship.hero.badge', editable: true, defaultValue: 'Pôle Entrepreneuriat et Innovation' },
+      { key: 'entrepreneurship.hero.title', label: 'Titre', description: 'Titre principal du mini-site', type: 'text', editorialKey: 'entrepreneurship.hero.title', editable: true, defaultValue: 'Entreprendre à Senghor' },
+      { key: 'entrepreneurship.hero.slogan', label: 'Slogan', description: 'Slogan affiché sous le titre', type: 'text', editorialKey: 'entrepreneurship.hero.slogan', editable: true, defaultValue: 'INNOVER. AGIR. TRANSFORMER.' },
+      { key: 'entrepreneurship.hero.subtitle', label: 'Sous-titre', description: 'Phrase d\'introduction du hero', type: 'textarea', editorialKey: 'entrepreneurship.hero.subtitle', editable: true, defaultValue: 'Le Pôle Entrepreneuriat et Innovation (PEI) accompagne les étudiants et alumni de l\'Université Senghor, de l\'idée à l\'entreprise.' },
+      { key: 'entrepreneurship.hero.cta1.text', label: 'Bouton principal', description: 'Texte du bouton principal (vers le statut étudiant-entrepreneur)', type: 'text', editorialKey: 'entrepreneurship.hero.cta1.text', editable: true, defaultValue: 'Devenir étudiant-entrepreneur' },
+      { key: 'entrepreneurship.hero.cta2.text', label: 'Bouton secondaire', description: 'Texte du bouton secondaire (vers le parcours)', type: 'text', editorialKey: 'entrepreneurship.hero.cta2.text', editable: true, defaultValue: 'Découvrir le parcours' },
+      { key: 'entrepreneurship.hero.slide1.image', label: 'Image du slider 1', description: 'Première image de fond du hero', type: 'image', editorialKey: 'entrepreneurship.hero.slide1.image', editable: true, defaultValue: '' },
+      { key: 'entrepreneurship.hero.slide2.image', label: 'Image du slider 2', description: 'Deuxième image de fond du hero', type: 'image', editorialKey: 'entrepreneurship.hero.slide2.image', editable: true, defaultValue: '' },
+      { key: 'entrepreneurship.hero.slide3.image', label: 'Image du slider 3', description: 'Troisième image de fond du hero', type: 'image', editorialKey: 'entrepreneurship.hero.slide3.image', editable: true, defaultValue: '' },
+    ],
+  },
+  {
+    id: 'entrepreneurship-presentation',
+    name: 'Présentation',
+    description: 'Présentation du Pôle Entrepreneuriat et Innovation',
+    icon: 'align-left',
+    color: 'bg-brand-blue-100 text-brand-blue-800 dark:bg-brand-blue-900/30 dark:text-brand-blue-300',
+    editorialKeys: [
+      'entrepreneurship.presentation.badge',
+      'entrepreneurship.presentation.title',
+      'entrepreneurship.presentation.content',
+      'entrepreneurship.presentation.link',
+    ],
+    fields: [
+      { key: 'entrepreneurship.presentation.badge', label: 'Badge', description: 'Libellé de la section présentation', type: 'text', editorialKey: 'entrepreneurship.presentation.badge', editable: true, defaultValue: 'Présentation du pôle' },
+      { key: 'entrepreneurship.presentation.title', label: 'Titre', description: 'Titre de la section présentation', type: 'text', editorialKey: 'entrepreneurship.presentation.title', editable: true, defaultValue: 'Une université entrepreneuriale de référence' },
+      { key: 'entrepreneurship.presentation.content', label: 'Contenu', description: 'Présentation du pôle (HTML)', type: 'html', editorialKey: 'entrepreneurship.presentation.content', editable: true, defaultValue: '<p>Créé en 2022 au sein de la Direction du Développement et de l\'Entrepreneuriat (DDE), le PEI favorise l\'émergence, l\'accompagnement et la réussite des initiatives portées par nos étudiants et alumni, en insufflant une véritable culture d\'intrapreneuriat.</p><p>Catalyseur de talents à l\'échelle du continent, le pôle a structuré un parcours contextualisé, de la sensibilisation à l\'incubation, appuyé sur deux piliers : le programme de pré-incubation « Mature Ton Idée » et l\'incubateur « Senghor\'Innov ».</p><p>Pour 2025-2027, ses grands chantiers sont l\'opérationnalisation du Statut de l\'Étudiant-Entrepreneur, la réforme des parcours de formation et l\'organisation d\'un hackathon international.</p>' },
+      { key: 'entrepreneurship.presentation.link', label: 'Lien', description: 'Texte du lien vers la page de présentation détaillée', type: 'text', editorialKey: 'entrepreneurship.presentation.link', editable: true, defaultValue: 'Historique, vision et missions du pôle' },
+    ],
+  },
+  {
+    id: 'entrepreneurship-stats',
+    name: 'Chiffres clés',
+    description: 'Quatre chiffres clés propres à la page (valeur et libellé)',
+    icon: 'chart-bar',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    editorialKeys: [
+      'entrepreneurship.stats.title',
+      'entrepreneurship.stats.1.value',
+      'entrepreneurship.stats.1.label',
+      'entrepreneurship.stats.2.value',
+      'entrepreneurship.stats.2.label',
+      'entrepreneurship.stats.3.value',
+      'entrepreneurship.stats.3.label',
+      'entrepreneurship.stats.4.value',
+      'entrepreneurship.stats.4.label',
+    ],
+    fields: [
+      { key: 'entrepreneurship.stats.title', label: 'Titre', description: 'Titre du bloc des chiffres clés', type: 'text', editorialKey: 'entrepreneurship.stats.title', editable: true, defaultValue: 'Chiffres clés' },
+      { key: 'entrepreneurship.stats.1.value', label: 'Chiffre 1 — valeur', description: 'Valeur du premier chiffre clé', type: 'text', editorialKey: 'entrepreneurship.stats.1.value', editable: true, defaultValue: '3' },
+      { key: 'entrepreneurship.stats.1.label', label: 'Chiffre 1 — libellé', description: 'Libellé du premier chiffre clé', type: 'text', editorialKey: 'entrepreneurship.stats.1.label', editable: true, defaultValue: 'ans d\'existence' },
+      { key: 'entrepreneurship.stats.2.value', label: 'Chiffre 2 — valeur', description: 'Valeur du deuxième chiffre clé', type: 'text', editorialKey: 'entrepreneurship.stats.2.value', editable: true, defaultValue: '3' },
+      { key: 'entrepreneurship.stats.2.label', label: 'Chiffre 2 — libellé', description: 'Libellé du deuxième chiffre clé', type: 'text', editorialKey: 'entrepreneurship.stats.2.label', editable: true, defaultValue: 'événements internationaux' },
+      { key: 'entrepreneurship.stats.3.value', label: 'Chiffre 3 — valeur', description: 'Valeur du troisième chiffre clé', type: 'text', editorialKey: 'entrepreneurship.stats.3.value', editable: true, defaultValue: '12' },
+      { key: 'entrepreneurship.stats.3.label', label: 'Chiffre 3 — libellé', description: 'Libellé du troisième chiffre clé', type: 'text', editorialKey: 'entrepreneurship.stats.3.label', editable: true, defaultValue: 'lauréats du FSE' },
+      { key: 'entrepreneurship.stats.4.value', label: 'Chiffre 4 — valeur', description: 'Valeur du quatrième chiffre clé', type: 'text', editorialKey: 'entrepreneurship.stats.4.value', editable: true, defaultValue: '500+' },
+      { key: 'entrepreneurship.stats.4.label', label: 'Chiffre 4 — libellé', description: 'Libellé du quatrième chiffre clé', type: 'text', editorialKey: 'entrepreneurship.stats.4.label', editable: true, defaultValue: 'étudiants et alumni formés' },
+    ],
+  },
+  {
+    id: 'entrepreneurship-activities',
+    name: 'Nos activités',
+    description: 'Introduction du parcours et animation de l\'écosystème (les dispositifs sont gérés dans Entrepreneuriat → Dispositifs)',
+    icon: 'route',
+    color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+    editorialKeys: [
+      'entrepreneurship.activities.badge',
+      'entrepreneurship.activities.title',
+      'entrepreneurship.activities.subtitle',
+      'entrepreneurship.activities.ecosystem.title',
+      'entrepreneurship.activities.ecosystem.items',
+      'entrepreneurship.activities.link',
+    ],
+    fields: [
+      { key: 'entrepreneurship.activities.badge', label: 'Badge', description: 'Libellé de la section activités', type: 'text', editorialKey: 'entrepreneurship.activities.badge', editable: true, defaultValue: 'Nos activités' },
+      { key: 'entrepreneurship.activities.title', label: 'Titre', description: 'Titre de la section activités', type: 'text', editorialKey: 'entrepreneurship.activities.title', editable: true, defaultValue: 'Un parcours, de l\'idée à l\'entreprise' },
+      { key: 'entrepreneurship.activities.subtitle', label: 'Sous-titre', description: 'Introduction du parcours (les dispositifs sont gérés dans Entrepreneuriat → Dispositifs)', type: 'textarea', editorialKey: 'entrepreneurship.activities.subtitle', editable: true, defaultValue: 'Le PEI a structuré son intervention autour d\'un parcours de croissance complet, conçu pour transformer une simple intuition en une entreprise viable et structurée.' },
+      { key: 'entrepreneurship.activities.ecosystem.title', label: 'Titre de l\'écosystème', description: 'Titre du bloc d\'animation de l\'écosystème', type: 'text', editorialKey: 'entrepreneurship.activities.ecosystem.title', editable: true, defaultValue: 'Et toute l\'année, l\'animation de l\'écosystème' },
+      { key: 'entrepreneurship.activities.ecosystem.items', label: 'Actions de l\'écosystème', description: 'Une action par ligne', type: 'list', editorialKey: 'entrepreneurship.activities.ecosystem.items', editable: true, defaultValue: 'Semaine Senghorienne de l\'Entrepreneuriat (2SE)\nHackathons internationaux\nBootcamps\nAfterworks\nSéminaires et webinaires' },
+      { key: 'entrepreneurship.activities.link', label: 'Lien', description: 'Texte du lien vers toutes les activités', type: 'text', editorialKey: 'entrepreneurship.activities.link', editable: true, defaultValue: 'Voir toutes nos activités' },
+    ],
+  },
+  {
+    id: 'entrepreneurship-quote',
+    name: 'Citation et impact',
+    description: 'Citation du directeur et bloc d\'impact',
+    icon: 'quote-left',
+    color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+    editorialKeys: [
+      'entrepreneurship.quote.text',
+      'entrepreneurship.quote.author',
+      'entrepreneurship.quote.role',
+      'entrepreneurship.quote.image',
+      'entrepreneurship.impact.text',
+      'entrepreneurship.impact.image',
+    ],
+    fields: [
+      { key: 'entrepreneurship.quote.text', label: 'Citation', description: 'Texte de la citation', type: 'textarea', editorialKey: 'entrepreneurship.quote.text', editable: true, defaultValue: 'L\'accompagnement du Pôle Entrepreneuriat ne s\'arrête pas au chèque ou à une reconnaissance académique. C\'est tout un écosystème : le mentorat, l\'accès au réseau de l\'Université et à des espaces de travail et de créativité privilégiés, qui nous ouvre les portes à des investisseurs internationaux.' },
+      { key: 'entrepreneurship.quote.author', label: 'Auteur', description: 'Nom de l\'auteur de la citation', type: 'text', editorialKey: 'entrepreneurship.quote.author', editable: true, defaultValue: 'Gaël Gbonsou' },
+      { key: 'entrepreneurship.quote.role', label: 'Fonction', description: 'Fonction de l\'auteur de la citation', type: 'text', editorialKey: 'entrepreneurship.quote.role', editable: true, defaultValue: 'Directeur du Développement et de l\'Entrepreneuriat' },
+      { key: 'entrepreneurship.quote.image', label: 'Photo de l\'auteur', description: 'Portrait associé à la citation', type: 'image', editorialKey: 'entrepreneurship.quote.image', editable: true, defaultValue: '' },
+      { key: 'entrepreneurship.impact.text', label: 'Texte d\'impact', description: 'Paragraphe présentant l\'impact du pôle', type: 'textarea', editorialKey: 'entrepreneurship.impact.text', editable: true, defaultValue: 'L\'impact est déjà tangible : 100 étudiants ont bénéficié d\'un accompagnement personnalisé, menant à la distinction de 12 lauréats. Nos actions de sensibilisation ont touché plus de 500 étudiants et alumni, créant une dynamique de réseau durable.' },
+      { key: 'entrepreneurship.impact.image', label: 'Image d\'impact', description: 'Illustration du bloc impact', type: 'image', editorialKey: 'entrepreneurship.impact.image', editable: true, defaultValue: '' },
+    ],
+  },
+  {
+    id: 'entrepreneurship-cta',
+    name: 'Appel à l\'action et contact',
+    description: 'Appel à l\'action final et e-mail de contact du pôle',
+    icon: 'bullhorn',
+    color: 'bg-brand-red-100 text-brand-red-800 dark:bg-brand-red-900/30 dark:text-brand-red-300',
+    editorialKeys: [
+      'entrepreneurship.cta.title',
+      'entrepreneurship.cta.description',
+      'entrepreneurship.cta.button',
+      'entrepreneurship.contact.email',
+    ],
+    fields: [
+      { key: 'entrepreneurship.cta.title', label: 'Titre', description: 'Titre de l\'appel à l\'action', type: 'text', editorialKey: 'entrepreneurship.cta.title', editable: true, defaultValue: 'Prêt à passer à l\'action ?' },
+      { key: 'entrepreneurship.cta.description', label: 'Description', description: 'Texte de l\'appel à l\'action', type: 'textarea', editorialKey: 'entrepreneurship.cta.description', editable: true, defaultValue: 'Ne laissez pas votre projet dormir dans un tiroir. Entreprendre et étudier à Senghor, c\'est possible grâce au statut d\'étudiant-entrepreneur.' },
+      { key: 'entrepreneurship.cta.button', label: 'Bouton', description: 'Texte du bouton de l\'appel à l\'action', type: 'text', editorialKey: 'entrepreneurship.cta.button', editable: true, defaultValue: 'Postuler au statut' },
+      { key: 'entrepreneurship.contact.email', label: 'E-mail de contact', description: 'Adresse e-mail de contact du pôle', type: 'text', editorialKey: 'entrepreneurship.contact.email', editable: true, defaultValue: 'entrepreneuriat@usenghor.org' },
+    ],
+  },
+  {
+    id: 'entrepreneurship-see',
+    name: 'Statut Étudiant-Entrepreneur',
+    description: 'Appel à candidatures SEE en cours et encart « devenir mentor »',
+    icon: 'user-graduate',
+    color: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300',
+    editorialKeys: [
+      'entrepreneurship.see.call_slug',
+      'entrepreneurship.see.mentor.title',
+      'entrepreneurship.see.mentor.description',
+      'entrepreneurship.see.mentor.button',
+    ],
+    fields: [
+      { key: 'entrepreneurship.see.call_slug', label: 'Slug de l\'appel SEE', description: 'Slug de l\'appel à candidatures du Statut Étudiant-Entrepreneur en cours (Candidatures → Appels)', type: 'text', editorialKey: 'entrepreneurship.see.call_slug', editable: true, defaultValue: '' },
+      { key: 'entrepreneurship.see.mentor.title', label: 'Mentorat — titre', description: 'Titre de l\'encart « devenir mentor »', type: 'text', editorialKey: 'entrepreneurship.see.mentor.title', editable: true, defaultValue: 'Vous êtes alumni entrepreneur ?' },
+      { key: 'entrepreneurship.see.mentor.description', label: 'Mentorat — description', description: 'Texte de l\'encart « devenir mentor »', type: 'textarea', editorialKey: 'entrepreneurship.see.mentor.description', editable: true, defaultValue: 'Rejoignez le réseau des mentors et accompagnez les nouvelles cohortes SEE 1 et SEE 2.' },
+      { key: 'entrepreneurship.see.mentor.button', label: 'Mentorat — bouton', description: 'Texte du bouton de l\'encart « devenir mentor »', type: 'text', editorialKey: 'entrepreneurship.see.mentor.button', editable: true, defaultValue: 'Devenir mentor' },
+    ],
+  },
+  {
+    id: 'entrepreneurship-settings',
+    name: 'Réglages',
+    description: 'Paramètres techniques du mini-site (service DDE)',
+    icon: 'gear',
+    color: 'bg-gray-100 text-gray-800 dark:bg-gray-700/50 dark:text-gray-300',
+    editorialKeys: [
+      'entrepreneurship.dde_service_id',
+    ],
+    fields: [
+      { key: 'entrepreneurship.dde_service_id', label: 'Service DDE', description: 'Identifiant du service DDE dans l\'organigramme (Organisation → Services) ; utilisé par le tableau de bord du pôle et le futur mini-site', type: 'text', editorialKey: 'entrepreneurship.dde_service_id', editable: true },
+    ],
+  },
+]
+
+// ============================================================================
 // DÉFINITION DE LA PAGE SITE (CAMPUS)
 // ============================================================================
 
@@ -1368,6 +1549,14 @@ export const frontOfficePages: FrontOfficePage[] = [
     description: 'Réseau des anciens diplômés et histoires de réussite',
     icon: 'user-graduate',
     sections: alumniPageSections,
+  },
+  {
+    id: 'entrepreneurship',
+    name: 'Page Entrepreneuriat (PEI)',
+    slug: '/entrepreneuriat',
+    description: 'Textes, chiffres clés et réglages du mini-site « Entreprendre à Senghor »',
+    icon: 'lightbulb',
+    sections: entrepreneurshipPageSections,
   },
   {
     id: 'site',

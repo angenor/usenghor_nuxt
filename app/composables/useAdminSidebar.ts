@@ -442,6 +442,47 @@ export function useAdminSidebar() {
     },
 
     // ========================================================================
+    // ENTREPRENEURSHIP - Pôle Entrepreneuriat et Innovation (PEI)
+    // ========================================================================
+    {
+      id: 'entrepreneurship',
+      label: 'Entrepreneuriat (PEI)',
+      icon: 'fa-solid fa-lightbulb',
+      permissions: ['entrepreneurship.view'],
+      description: 'Pôle Entrepreneuriat et Innovation',
+      children: [
+        {
+          id: 'entrepreneurship-dashboard',
+          label: 'Tableau de bord',
+          icon: 'fa-solid fa-gauge',
+          route: '/admin/entrepreneuriat',
+          permissions: ['entrepreneurship.view']
+        },
+        {
+          id: 'entrepreneurship-programs',
+          label: 'Dispositifs du parcours',
+          icon: 'fa-solid fa-route',
+          route: '/admin/entrepreneuriat/dispositifs',
+          permissions: ['entrepreneurship.view']
+        },
+        {
+          id: 'entrepreneurship-cohorts',
+          label: 'Cohortes',
+          icon: 'fa-solid fa-people-group',
+          route: '/admin/entrepreneuriat/cohortes',
+          permissions: ['entrepreneurship.view']
+        },
+        {
+          id: 'entrepreneurship-resources',
+          label: 'Boîte à outils',
+          icon: 'fa-solid fa-toolbox',
+          route: '/admin/entrepreneuriat/ressources',
+          permissions: ['entrepreneurship.view']
+        }
+      ]
+    },
+
+    // ========================================================================
     // SHORT LINKS - Liens courts
     // ========================================================================
     {
@@ -565,6 +606,11 @@ export function useAdminSidebar() {
     // Cas spécial pour le tableau de bord : correspondance exacte uniquement
     if (itemRoute === '/admin') {
       return route.path === '/admin' || route.path === '/admin/'
+    }
+
+    // Tableau de bord du PEI : exact, sinon il resterait actif sur toutes les sous-pages
+    if (itemRoute === '/admin/entrepreneuriat') {
+      return route.path === itemRoute || route.path === `${itemRoute}/`
     }
 
     // Pour les autres routes : correspondance exacte ou préfixe

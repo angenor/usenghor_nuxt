@@ -52,6 +52,8 @@ const ROUTE_PERMISSIONS: Record<string, string[]> = {
   '/admin/newsletter/campagnes': ['newsletter.view'],
   '/admin/newsletter/abonnes': ['newsletter.view'],
   '/admin/newsletter/statistiques': ['newsletter.view'],
+  // Entrepreneuriat (PEI)
+  '/admin/entrepreneuriat': ['entrepreneurship.view'],
   // Éditorial
   '/admin/editorial': ['editorial.view'],
   '/admin/editorial/chiffres-cles': ['editorial.edit'],
