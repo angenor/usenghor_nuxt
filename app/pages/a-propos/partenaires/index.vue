@@ -34,11 +34,9 @@ const breadcrumb = computed(() => [
   <div class="bg-grid-pattern">
     <!-- Hero Section -->
     <PageHero
-      :badge="getContent('partners.hero.badge')"
       :title="getContent('partners.hero.title')"
       :subtitle="getContent('partners.hero.subtitle')"
       :breadcrumb="breadcrumb"
-      badge-icon="fa-solid fa-globe"
     />
 
     <!-- Tabs Navigation -->

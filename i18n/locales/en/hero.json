@@ -29,6 +29,11 @@
       "years": "Years of excellence",
       "graduates": "Graduates trained",
       "francophone": "French-speaking"
+    },
+    "slider": {
+      "slides": "Banner images",
+      "slide": "Show image {n} of {total}",
+      "current": "Image {n} of {total}"
     }
   }
 }

@@ -1,0 +1,51 @@
+{
+  "pei": {
+    "nav": {
+      "presentation": "Présentation",
+      "activities": "Nos activités",
+      "alumni": "Nos alumni",
+      "partners": "Nos partenaires",
+      "resources": "Nos ressources",
+      "news": "Actualités",
+      "cta": "Devenir étudiant-entrepreneur",
+      "label": "Rubriques du pôle"
+    },
+    "breadcrumb": {
+      "dde": "DDE",
+      "pole": "Pôle Entrepreneuriat et Innovation"
+    },
+    "phases": {
+      "awareness": "Sensibilisation",
+      "status": "Cadre",
+      "pre_incubation": "Pré-incubation",
+      "incubation": "Incubation",
+      "funding": "Amorçage",
+      "ecosystem": "Animation de l'écosystème"
+    },
+    "families": {
+      "academic": "Académiques et institutionnels",
+      "support": "Organisations d'appui",
+      "international": "Organisations internationales"
+    },
+    "home": {
+      "ourNews": "La vie du pôle",
+      "allNews": "Toutes les actualités du PEI",
+      "ourPartners": "Un écosystème d'appui",
+      "partnersBadge": "Nos partenaires",
+      "newsBadge": "Actualités",
+      "discoverActivities": "Découvrir le parcours"
+    },
+    "activities": {
+      "anchorsLabel": "Aller à une phase",
+      "upcomingEvents": "Prochains événements",
+      "online": "En ligne",
+      "eventLink": "Voir l'événement"
+    },
+    "seo": {
+      "homeTitle": "Entreprendre à Senghor",
+      "homeDescription": "Le Pôle Entrepreneuriat et Innovation de l'Université Senghor accompagne étudiants et alumni, de la sensibilisation à l'incubation.",
+      "activitiesTitle": "Nos activités",
+      "activitiesDescription": "Sensibilisation, statut d'étudiant-entrepreneur, pré-incubation, incubation, amorçage et animation de l'écosystème : le parcours du Pôle Entrepreneuriat et Innovation."
+    }
+  }
+}

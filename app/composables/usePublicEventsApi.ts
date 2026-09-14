@@ -98,7 +98,9 @@ export function usePublicEventsApi() {
     from_date?: string
     to_date?: string
     campus_id?: string
+    service_id?: string
     upcoming?: boolean
+    order?: 'asc' | 'desc'
   } = {}): Promise<PaginatedResponse<EventPublic>> {
     const query: Record<string, string> = {
       page: String(params.page || 1),
@@ -108,6 +110,8 @@ export function usePublicEventsApi() {
     if (params.from_date) query.from_date = params.from_date
     if (params.to_date) query.to_date = params.to_date
     if (params.campus_id) query.campus_id = params.campus_id
+    if (params.service_id) query.service_id = params.service_id
+    if (params.order) query.order = params.order
     if (params.upcoming !== undefined) query.upcoming = String(params.upcoming)
 
     const response = await $fetch<PaginatedResponse<EventPublic>>(`${baseURL}/api/public/events`, {

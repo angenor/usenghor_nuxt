@@ -54,3 +54,13 @@ html.dark .bg-grid-pattern::before {
   margin-top: 0.25em;
   margin-bottom: 0.25em;
 }
+
+/* Masque la barre de défilement tout en conservant le défilement
+   (sous-navigations horizontales, ex. EntrepreneurshipSubNav) */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

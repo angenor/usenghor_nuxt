@@ -452,16 +452,7 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
           :title="entityName"
           :subtitle="entityDescriptionText"
           :breadcrumb="breadcrumb"
-        >
-          <template #badge>
-            <span
-              class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/20 backdrop-blur-sm text-white"
-            >
-              <font-awesome-icon :icon="entityType === 'secteur' ? 'fa-solid fa-layer-group' : 'fa-solid fa-building'" class="w-4 h-4" />
-              {{ t(`organizationDetail.breadcrumb.${entityType === 'secteur' ? 'sector' : 'service'}`) }}
-            </span>
-          </template>
-        </PageHero>
+        />
         <!-- Sentinel : quand il quitte le viewport, le titre sticky apparaît -->
         <div ref="heroTitleRef" aria-hidden="true" />
       </div>

@@ -29,6 +29,11 @@
       "years": "سنة من التميز",
       "graduates": "خريج متكون",
       "francophone": "فرنكوفونية"
+    },
+    "slider": {
+      "slides": "صور الواجهة",
+      "slide": "عرض الصورة {n} من {total}",
+      "current": "الصورة {n} من {total}"
     }
   }
 }

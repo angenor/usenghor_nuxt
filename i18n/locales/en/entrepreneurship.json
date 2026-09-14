@@ -1,0 +1,51 @@
+{
+  "pei": {
+    "nav": {
+      "presentation": "Overview",
+      "activities": "Our activities",
+      "alumni": "Our alumni",
+      "partners": "Our partners",
+      "resources": "Our resources",
+      "news": "News",
+      "cta": "Become a student-entrepreneur",
+      "label": "Hub sections"
+    },
+    "breadcrumb": {
+      "dde": "DDE",
+      "pole": "Entrepreneurship and Innovation Hub"
+    },
+    "phases": {
+      "awareness": "Awareness",
+      "status": "Framework",
+      "pre_incubation": "Pre-incubation",
+      "incubation": "Incubation",
+      "funding": "Seed funding",
+      "ecosystem": "Ecosystem animation"
+    },
+    "families": {
+      "academic": "Academic and institutional",
+      "support": "Support organisations",
+      "international": "International organisations"
+    },
+    "home": {
+      "ourNews": "Life at the hub",
+      "allNews": "All the hub's news",
+      "ourPartners": "A supportive ecosystem",
+      "partnersBadge": "Our partners",
+      "newsBadge": "News",
+      "discoverActivities": "Discover the pathway"
+    },
+    "activities": {
+      "anchorsLabel": "Go to a phase",
+      "upcomingEvents": "Upcoming events",
+      "online": "Online",
+      "eventLink": "View the event"
+    },
+    "seo": {
+      "homeTitle": "Entrepreneurship at Senghor",
+      "homeDescription": "Senghor University's Entrepreneurship and Innovation Hub supports students and alumni, from awareness to incubation.",
+      "activitiesTitle": "Our activities",
+      "activitiesDescription": "Awareness, student-entrepreneur status, pre-incubation, incubation, seed funding and ecosystem animation: the Entrepreneurship and Innovation Hub's pathway."
+    }
+  }
+}

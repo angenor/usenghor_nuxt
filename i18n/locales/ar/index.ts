@@ -27,6 +27,7 @@ import shortLinks from './short-links.json'
 import mediatheque from './mediatheque.json'
 import faq from './faq.json'
 import adminTranslate from './admin-translate.json'
+import entrepreneurship from './entrepreneurship.json'
 
 export default {
   ...common,
@@ -57,5 +58,6 @@ export default {
   ...shortLinks,
   ...mediatheque,
   ...faq,
-  ...adminTranslate
+  ...adminTranslate,
+  ...entrepreneurship
 }

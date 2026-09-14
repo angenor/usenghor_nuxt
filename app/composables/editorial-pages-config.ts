@@ -957,6 +957,10 @@ export const entrepreneurshipPageSections: PageSection[] = [
       'entrepreneurship.activities.ecosystem.title',
       'entrepreneurship.activities.ecosystem.items',
       'entrepreneurship.activities.link',
+      'entrepreneurship.activities.hero.badge',
+      'entrepreneurship.activities.hero.title',
+      'entrepreneurship.activities.hero.subtitle',
+      'entrepreneurship.activities.hero.image',
     ],
     fields: [
       { key: 'entrepreneurship.activities.badge', label: 'Badge', description: 'Libellé de la section activités', type: 'text', editorialKey: 'entrepreneurship.activities.badge', editable: true, defaultValue: 'Nos activités' },
@@ -965,6 +969,10 @@ export const entrepreneurshipPageSections: PageSection[] = [
       { key: 'entrepreneurship.activities.ecosystem.title', label: 'Titre de l\'écosystème', description: 'Titre du bloc d\'animation de l\'écosystème', type: 'text', editorialKey: 'entrepreneurship.activities.ecosystem.title', editable: true, defaultValue: 'Et toute l\'année, l\'animation de l\'écosystème' },
       { key: 'entrepreneurship.activities.ecosystem.items', label: 'Actions de l\'écosystème', description: 'Une action par ligne', type: 'list', editorialKey: 'entrepreneurship.activities.ecosystem.items', editable: true, defaultValue: 'Semaine Senghorienne de l\'Entrepreneuriat (2SE)\nHackathons internationaux\nBootcamps\nAfterworks\nSéminaires et webinaires' },
       { key: 'entrepreneurship.activities.link', label: 'Lien', description: 'Texte du lien vers toutes les activités', type: 'text', editorialKey: 'entrepreneurship.activities.link', editable: true, defaultValue: 'Voir toutes nos activités' },
+      { key: 'entrepreneurship.activities.hero.badge', label: 'Badge du hero', description: 'Badge du hero de la page « Nos activités »', type: 'text', editorialKey: 'entrepreneurship.activities.hero.badge', editable: true, defaultValue: 'Nos activités' },
+      { key: 'entrepreneurship.activities.hero.title', label: 'Titre du hero', description: 'Titre du hero de la page « Nos activités »', type: 'text', editorialKey: 'entrepreneurship.activities.hero.title', editable: true, defaultValue: 'Un parcours, de l\'idée à l\'entreprise' },
+      { key: 'entrepreneurship.activities.hero.subtitle', label: 'Sous-titre du hero', description: 'Sous-titre du hero de la page « Nos activités »', type: 'textarea', editorialKey: 'entrepreneurship.activities.hero.subtitle', editable: true, defaultValue: 'Le PEI a structuré son intervention autour d\'un parcours de croissance complet, conçu pour transformer une simple intuition en une entreprise viable et structurée.' },
+      { key: 'entrepreneurship.activities.hero.image', label: 'Image du hero', description: 'Image de fond du hero (médiathèque) ; vide = hero à motif', type: 'image', editorialKey: 'entrepreneurship.activities.hero.image', editable: true, defaultValue: '' },
     ],
   },
   {

@@ -29,6 +29,11 @@
       "years": "Années d'excellence",
       "graduates": "Diplômés formés",
       "francophone": "Francophone"
+    },
+    "slider": {
+      "slides": "Visuels du bandeau",
+      "slide": "Afficher le visuel {n} sur {total}",
+      "current": "Visuel {n} sur {total}"
     }
   }
 }

@@ -9,6 +9,7 @@ export default {
     './app/layouts/**/*.vue',
     './app/pages/**/*.vue',
     './app/plugins/**/*.{js,ts}',
+    './app/utils/**/*.ts',
     './app/app.vue',
     './app/error.vue'
   ],
