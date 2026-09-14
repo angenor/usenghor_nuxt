@@ -19,9 +19,9 @@ const localePath = useLocalePath()
 <template>
   <div role="status" class="py-24 px-4 text-center">
     <font-awesome-icon :icon="icon" class="w-12 h-12 text-gray-300 dark:text-gray-600" aria-hidden="true" />
-    <p class="mt-6 text-xl font-semibold text-gray-900 dark:text-white">
+    <h2 class="mt-6 text-xl font-semibold text-gray-900 dark:text-white">
       {{ title }}
-    </p>
+    </h2>
     <p v-if="description" class="mt-3 text-gray-600 dark:text-gray-300 max-w-xl mx-auto">
       {{ description }}
     </p>
