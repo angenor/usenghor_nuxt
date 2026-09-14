@@ -1,6 +1,6 @@
 /**
- * Données structurées (JSON-LD) du mini-site PEI : Organization, WebPage, BreadcrumbList.
- * Spec : specs/023-pei-public-home-activities (research R11, FR-026).
+ * Données structurées (JSON-LD) du mini-site PEI : Organization, WebPage / CollectionPage, BreadcrumbList.
+ * Specs : specs/023-pei-public-home-activities (research R11, FR-026), specs/024-pei-public-alumni-resources-news (R13).
  * Les @id `${siteUrl}/#organization` et `${siteUrl}/#website` sont déclarés dans app.vue.
  */
 
@@ -28,10 +28,10 @@ export function usePeiJsonLd() {
     }
   }
 
-  function buildWebPage(params: { path: string, name: string, description?: string | null }) {
+  function buildWebPage(params: { path: string, name: string, description?: string | null, type?: 'WebPage' | 'CollectionPage' }) {
     return {
       '@context': 'https://schema.org',
-      '@type': 'WebPage',
+      '@type': params.type ?? 'WebPage',
       '@id': `${siteUrl}${params.path}#webpage`,
       'url': `${siteUrl}${params.path}`,
       'name': params.name,

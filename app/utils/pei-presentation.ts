@@ -1,9 +1,17 @@
 /**
  * Règles de présentation publiques du Pôle Entrepreneuriat et Innovation (PEI).
- * Spec : specs/023-pei-public-home-activities (research R13).
+ * Specs : specs/023-pei-public-home-activities (research R13),
+ * specs/024-pei-public-alumni-resources-news (data-model § 2 et § 5).
  */
 
-import type { PeiColor, PeiPartnerFamily, PeiProgramPhase } from '~/types/api/entrepreneurship'
+import type {
+  PeiColor,
+  PeiLaureatePublic,
+  PeiLaureateType,
+  PeiPartnerFamily,
+  PeiProgramPhase,
+  PeiResourcePublic,
+} from '~/types/api/entrepreneurship'
 
 /** Ordre du parcours (blocs de « Nos activités »). */
 export const PEI_PHASE_ORDER: PeiProgramPhase[] = [
@@ -109,4 +117,66 @@ export function scrollToPageAnchor(hash: string, options: { smooth?: boolean, le
   }
   history.replaceState(history.state, '', hash)
   return true
+}
+
+// ============================================================================
+// Pages alumni et ressources (feature 024)
+// ============================================================================
+
+/** Paramètre d'adresse portant le sous-onglet de « Nos alumni ». */
+export const PEI_LAUREATE_TAB_QUERY = 'type'
+
+/** Sous-onglet lu dans l'adresse ; valeur absente ou inconnue → lauréats FSE. */
+export function laureateTypeFromQuery(value: unknown): PeiLaureateType {
+  return value === 'student_entrepreneur' ? 'student_entrepreneur' : 'fse_laureate'
+}
+
+/** Portraits mis en avant d'abord, puis ordre du backoffice (copie, tri stable). */
+export function sortLaureatesFeaturedFirst(list: PeiLaureatePublic[]): PeiLaureatePublic[] {
+  return [...list].sort((a, b) => Number(b.is_featured) - Number(a.is_featured) || a.display_order - b.display_order)
+}
+
+export interface PeiResourceGroup {
+  key: string
+  label: string
+  items: PeiResourcePublic[]
+}
+
+/**
+ * Regroupe les ressources par catégorie : clé = catégorie française normalisée,
+ * ordre de première apparition, intitulé localisé de la première ressource,
+ * ressources sans catégorie regroupées en dernier.
+ */
+export function groupResourcesByCategory(
+  resources: PeiResourcePublic[],
+  label: (resource: PeiResourcePublic) => string,
+  otherLabel: string,
+): PeiResourceGroup[] {
+  const groups = new Map<string, PeiResourceGroup>()
+  const others: PeiResourcePublic[] = []
+  for (const resource of resources) {
+    const key = (resource.category ?? '').trim().toLocaleLowerCase('fr').replace(/\s+/g, ' ')
+    if (!key) {
+      others.push(resource)
+      continue
+    }
+    const group = groups.get(key)
+    if (group) group.items.push(resource)
+    else groups.set(key, { key, label: label(resource) || resource.category!.trim(), items: [resource] })
+  }
+  const list = [...groups.values()]
+  if (others.length) list.push({ key: '', label: otherLabel, items: others })
+  return list
+}
+
+/** Identifiant d'une vidéo YouTube (même règle que la médiathèque de projets). */
+export function youTubeId(url: string | null | undefined): string | null {
+  if (!url) return null
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/)
+  return match?.[1] ?? null
+}
+
+/** Vrai si la valeur est une adresse http(s) exploitable. */
+export function isHttpUrl(value: string | null | undefined): value is string {
+  return !!value && /^https?:\/\//i.test(value.trim())
 }

@@ -41,11 +41,75 @@
       "online": "Online",
       "eventLink": "View the event"
     },
+    "common": {
+      "viewMore": "See more",
+      "backHome": "Back to the hub's home page",
+      "openInNewTab": "(opens in a new tab)"
+    },
+    "alumni": {
+      "tabsLabel": "Portrait type",
+      "tabs": {
+        "fse": "FSE laureates",
+        "see": "Student entrepreneurs"
+      },
+      "featured": "Featured portrait",
+      "cohortYear": "Class of {year}",
+      "mentorSubject": "Becoming a mentor at the Entrepreneurship and Innovation Hub",
+      "links": {
+        "website": "{name}'s website",
+        "linkedin": "{name}'s LinkedIn",
+        "instagram": "{name}'s Instagram",
+        "facebook": "{name}'s Facebook",
+        "video": "{name}'s video"
+      },
+      "empty": {
+        "title": "No portraits published yet",
+        "description": "Portraits in this category will be published soon."
+      }
+    },
+    "partners": {
+      "visit": "Visit website",
+      "count": "{n} partner | {n} partners",
+      "empty": {
+        "title": "No partners listed yet",
+        "description": "The hub's partners will be presented here soon."
+      }
+    },
+    "resources": {
+      "mediaTitle": "Media library",
+      "toolboxTitle": "Toolbox",
+      "otherCategory": "Other resources",
+      "download": "Download",
+      "open": "Open",
+      "watch": "Watch the video",
+      "empty": {
+        "title": "No resources available yet",
+        "description": "The hub's guides, forms and albums will be published soon."
+      }
+    },
+    "news": {
+      "newsTitle": "News",
+      "eventsTitle": "Events",
+      "upcoming": "Upcoming events",
+      "past": "Past events",
+      "empty": {
+        "title": "No news yet",
+        "description": "The hub's news and events will be published here."
+      }
+    },
     "seo": {
       "homeTitle": "Entrepreneurship at Senghor",
       "homeDescription": "Senghor University's Entrepreneurship and Innovation Hub supports students and alumni, from awareness to incubation.",
       "activitiesTitle": "Our activities",
-      "activitiesDescription": "Awareness, student-entrepreneur status, pre-incubation, incubation, seed funding and ecosystem animation: the Entrepreneurship and Innovation Hub's pathway."
+      "activitiesDescription": "Awareness, student-entrepreneur status, pre-incubation, incubation, seed funding and ecosystem animation: the Entrepreneurship and Innovation Hub's pathway.",
+      "alumniTitle": "Our alumni",
+      "alumniDescription": "Portraits and testimonials of Senghor University's Entrepreneurship Support Fund laureates and student entrepreneurs.",
+      "partnersTitle": "Our partners",
+      "partnersDescription": "Academic institutions, support organisations and international organisations partnering with the Entrepreneurship and Innovation Hub.",
+      "resourcesTitle": "Our resources",
+      "resourcesDescription": "The Entrepreneurship and Innovation Hub's media library and toolbox: albums, guides, forms and useful links.",
+      "newsTitle": "Hub news",
+      "newsDescription": "News and events from Senghor University's Entrepreneurship and Innovation Hub."
     }
   }
 }

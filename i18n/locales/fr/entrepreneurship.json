@@ -41,11 +41,75 @@
       "online": "En ligne",
       "eventLink": "Voir l'événement"
     },
+    "common": {
+      "viewMore": "Voir plus",
+      "backHome": "Retour à l'accueil du pôle",
+      "openInNewTab": "(nouvel onglet)"
+    },
+    "alumni": {
+      "tabsLabel": "Type de portraits",
+      "tabs": {
+        "fse": "Lauréats FSE",
+        "see": "Étudiants entrepreneurs"
+      },
+      "featured": "Portrait mis en avant",
+      "cohortYear": "Promotion {year}",
+      "mentorSubject": "Devenir mentor du Pôle Entrepreneuriat et Innovation",
+      "links": {
+        "website": "Site web de {name}",
+        "linkedin": "LinkedIn de {name}",
+        "instagram": "Instagram de {name}",
+        "facebook": "Facebook de {name}",
+        "video": "Vidéo de {name}"
+      },
+      "empty": {
+        "title": "Aucun portrait publié pour le moment",
+        "description": "Les portraits de cette catégorie seront publiés prochainement."
+      }
+    },
+    "partners": {
+      "visit": "Visiter le site",
+      "count": "{n} partenaire | {n} partenaires",
+      "empty": {
+        "title": "Aucun partenaire référencé pour le moment",
+        "description": "Les partenaires du pôle seront présentés ici prochainement."
+      }
+    },
+    "resources": {
+      "mediaTitle": "Médiathèque",
+      "toolboxTitle": "Boîte à outils",
+      "otherCategory": "Autres ressources",
+      "download": "Télécharger",
+      "open": "Ouvrir",
+      "watch": "Voir la vidéo",
+      "empty": {
+        "title": "Aucune ressource disponible pour le moment",
+        "description": "Guides, formulaires et albums du pôle seront mis en ligne prochainement."
+      }
+    },
+    "news": {
+      "newsTitle": "Actualités",
+      "eventsTitle": "Événements",
+      "upcoming": "Événements à venir",
+      "past": "Événements passés",
+      "empty": {
+        "title": "Aucune actualité pour le moment",
+        "description": "Les actualités et événements du pôle seront publiés ici."
+      }
+    },
     "seo": {
       "homeTitle": "Entreprendre à Senghor",
       "homeDescription": "Le Pôle Entrepreneuriat et Innovation de l'Université Senghor accompagne étudiants et alumni, de la sensibilisation à l'incubation.",
       "activitiesTitle": "Nos activités",
-      "activitiesDescription": "Sensibilisation, statut d'étudiant-entrepreneur, pré-incubation, incubation, amorçage et animation de l'écosystème : le parcours du Pôle Entrepreneuriat et Innovation."
+      "activitiesDescription": "Sensibilisation, statut d'étudiant-entrepreneur, pré-incubation, incubation, amorçage et animation de l'écosystème : le parcours du Pôle Entrepreneuriat et Innovation.",
+      "alumniTitle": "Nos alumni",
+      "alumniDescription": "Portraits et témoignages des lauréats du Fonds de Soutien à l'Entrepreneuriat et des étudiants-entrepreneurs de l'Université Senghor.",
+      "partnersTitle": "Nos partenaires",
+      "partnersDescription": "Institutions académiques, organisations d'appui et organisations internationales partenaires du Pôle Entrepreneuriat et Innovation.",
+      "resourcesTitle": "Nos ressources",
+      "resourcesDescription": "Médiathèque et boîte à outils du Pôle Entrepreneuriat et Innovation : albums, guides, formulaires et liens utiles.",
+      "newsTitle": "Actualités du pôle",
+      "newsDescription": "Actualités et événements du Pôle Entrepreneuriat et Innovation de l'Université Senghor."
     }
   }
 }

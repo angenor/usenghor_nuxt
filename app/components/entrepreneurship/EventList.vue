@@ -4,6 +4,7 @@ import type { EventPublic } from '~/composables/usePublicEventsApi'
 
 defineProps<{
   events: EventPublic[]
+  title?: string
 }>()
 
 const { t, locale } = useI18n()
@@ -32,7 +33,7 @@ function placeLabel(event: EventPublic): string {
 <template>
   <div v-if="events.length">
     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
-      {{ t('pei.activities.upcomingEvents') }}
+      {{ title ?? t('pei.activities.upcomingEvents') }}
     </h3>
     <ul class="divide-y divide-gray-200 dark:divide-gray-700 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
       <li v-for="event in events" :key="event.id" class="flex flex-wrap items-center gap-x-6 gap-y-2 p-4">
