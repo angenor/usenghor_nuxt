@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * « Nos partenaires » du mini-site PEI : familles de partenaires en version détaillée.
+ * « Nos partenaires » du mini-site PEI : partenaires filtrables par famille (style de /a-propos/partenaires).
  * Spec : specs/024-pei-public-alumni-resources-news (US2).
  */
 const { t } = useI18n()
@@ -22,8 +22,8 @@ page.applySeo()
 
     <EntrepreneurshipSubNav />
 
-    <div class="bg-white dark:bg-gray-900">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <section class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-950 bg-grid-pattern">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <EntrepreneurshipPartnerFamilies v-if="hasPartners" variant="detailed" :families="families" />
 
         <EntrepreneurshipEmptyState
@@ -35,6 +35,6 @@ page.applySeo()
           :link-label="t('pei.common.backHome')"
         />
       </div>
-    </div>
+    </section>
   </div>
 </template>

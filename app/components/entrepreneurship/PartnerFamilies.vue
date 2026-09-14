@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
- * Partenaires du pôle regroupés par famille (ordre fixe, familles vides masquées).
- * Variante `logos` (accueil, par défaut) ou `detailed` (page « Nos partenaires » : logo, nom, description, site web).
+ * Partenaires du pôle en grille unique logo + nom (style de /a-propos/partenaires), dans l'ordre des familles.
+ * Variante `logos` (accueil, par défaut) : grille seule ; `detailed` (page « Nos partenaires ») : filtres par famille.
  */
 import type { PeiPartnerFamily, PeiPartnerFamilyPublic } from '~/types/api/entrepreneurship'
 
@@ -15,100 +15,89 @@ const props = withDefaults(defineProps<{
 const { t } = useI18n()
 const { localized } = useLocalizedField()
 
-const badgeClasses: Record<PeiPartnerFamily, string> = {
-  academic: 'bg-brand-blue-100 text-brand-blue-700 dark:bg-brand-blue-900/40 dark:text-brand-blue-300',
-  support: 'bg-brand-red-100 text-brand-red-700 dark:bg-brand-red-900/40 dark:text-brand-red-300',
-  international: 'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300',
-}
-
 const visible = computed(() =>
   PEI_FAMILY_ORDER
     .map(family => props.families.find(f => f.family === family))
     .filter((f): f is PeiPartnerFamilyPublic => !!f && f.partners.length > 0),
 )
+
+// Filtre par famille de la variante détaillée (« Tous » par défaut, rendu serveur complet)
+type FamilyFilter = 'all' | PeiPartnerFamily
+const FAMILY_ICONS: Record<PeiPartnerFamily, string> = {
+  academic: 'fa-solid fa-building-columns',
+  support: 'fa-solid fa-hands-holding',
+  international: 'fa-solid fa-earth-africa',
+}
+const selectedFamily = ref<FamilyFilter>('all')
+
+const filterOptions = computed(() => [
+  { value: 'all' as FamilyFilter, label: t('pei.partners.all'), icon: 'fa-solid fa-globe', count: visible.value.reduce((n, f) => n + f.partners.length, 0) },
+  ...visible.value.map(f => ({ value: f.family as FamilyFilter, label: t(`pei.families.${f.family}`), icon: FAMILY_ICONS[f.family], count: f.partners.length })),
+])
+
+const filteredPartners = computed(() =>
+  visible.value
+    .filter(f => selectedFamily.value === 'all' || f.family === selectedFamily.value)
+    .flatMap(f => f.partners),
+)
 </script>
 
 <template>
-  <div v-if="variant === 'detailed' && visible.length" class="space-y-16">
-    <section
-      v-for="family in visible"
-      :key="family.family"
-      :aria-labelledby="`pei-family-${family.family}`"
-    >
-      <span class="inline-block rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wider" :class="badgeClasses[family.family]">
-        {{ t('pei.partners.count', family.partners.length) }}
-      </span>
-      <h2 :id="`pei-family-${family.family}`" class="mt-3 text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-        {{ t(`pei.families.${family.family}`) }}
-      </h2>
-      <div class="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <article
-          v-for="partner in family.partners"
-          :key="partner.id"
-          class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 flex flex-col gap-4"
+  <div v-if="visible.length">
+    <!-- Filtres par famille (page « Nos partenaires » uniquement) -->
+    <div v-if="variant === 'detailed'" class="mb-10 flex flex-wrap justify-center gap-3" role="group" :aria-label="t('pei.partners.filterLabel')">
+      <button
+        v-for="option in filterOptions"
+        :key="option.value"
+        type="button"
+        :aria-pressed="selectedFamily === option.value"
+        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200"
+        :class="selectedFamily === option.value
+          ? 'bg-brand-blue-600 text-white shadow-lg shadow-brand-blue-500/25'
+          : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-brand-blue-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 hover:border-brand-blue-300 dark:hover:border-brand-blue-700'"
+        @click="selectedFamily = option.value"
+      >
+        <font-awesome-icon :icon="option.icon" class="w-4 h-4" aria-hidden="true" />
+        {{ option.label }}
+        <span
+          class="px-2 py-0.5 text-xs rounded-full font-semibold"
+          :class="selectedFamily === option.value ? 'bg-white/20' : 'bg-gray-100 dark:bg-gray-700'"
         >
-          <div class="h-20 rounded-xl bg-white border border-gray-100 dark:border-gray-600 flex items-center justify-center p-3">
+          {{ option.count }}
+        </span>
+      </button>
+    </div>
+
+    <ul class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
+      <li v-for="partner in filteredPartners" :key="partner.id" class="flex">
+        <component
+          :is="partner.website ? 'a' : 'div'"
+          :href="partner.website || undefined"
+          :target="partner.website ? '_blank' : undefined"
+          :rel="partner.website ? 'noopener noreferrer' : undefined"
+          :title="localized(partner, 'description') || undefined"
+          class="group relative flex w-full flex-col items-center p-4 lg:p-6 rounded-xl border bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:shadow-lg hover:border-cyan-200 dark:hover:border-cyan-800 transition-all duration-300"
+          :class="partner.website ? 'cursor-pointer' : 'cursor-default'"
+        >
+          <div class="relative w-16 h-16 lg:w-20 lg:h-20 mb-3 flex items-center justify-center rounded-lg p-2 bg-gray-50 dark:bg-gray-700">
             <img
               v-if="partner.logo_url"
               :src="partner.logo_url"
               :alt="partner.name"
-              class="max-h-16 max-w-full object-contain"
+              class="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-105"
               loading="lazy"
             >
-            <span v-else class="font-bold text-gray-700 text-center line-clamp-2 break-words" aria-hidden="true">{{ partner.name }}</span>
+            <font-awesome-icon v-else icon="fa-solid fa-handshake" class="w-7 h-7 text-gray-300 dark:text-gray-500" aria-hidden="true" />
           </div>
-          <h3 class="font-bold text-gray-900 dark:text-white break-words">
+          <h3 class="text-xs lg:text-sm font-medium text-center line-clamp-2 text-gray-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
             {{ partner.name }}
           </h3>
-          <p v-if="localized(partner, 'description')" class="text-sm text-gray-600 dark:text-gray-300 line-clamp-4">
-            {{ localized(partner, 'description') }}
-          </p>
-          <a
-            v-if="partner.website"
-            :href="partner.website"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="mt-auto inline-flex items-center gap-2 text-sm font-medium text-brand-blue-700 dark:text-brand-blue-300 hover:underline"
-          >
-            {{ t('pei.partners.visit') }}
-            <span class="sr-only">{{ partner.name }} {{ t('pei.common.openInNewTab') }}</span>
-            <font-awesome-icon icon="fa-solid fa-arrow-up-right-from-square" class="w-3.5 h-3.5 rtl:-scale-x-100" aria-hidden="true" />
-          </a>
-        </article>
-      </div>
-    </section>
-  </div>
-  <div v-else-if="visible.length" class="grid gap-6 md:grid-cols-3">
-    <div
-      v-for="family in visible"
-      :key="family.family"
-      class="flex flex-col gap-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6"
-    >
-      <h3 class="self-start rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wider" :class="badgeClasses[family.family]">
-        {{ t(`pei.families.${family.family}`) }}
-      </h3>
-      <ul class="grid grid-cols-2 gap-3">
-        <li v-for="partner in family.partners" :key="partner.id">
-          <component
-            :is="partner.website ? 'a' : 'div'"
-            :href="partner.website || undefined"
-            :target="partner.website ? '_blank' : undefined"
-            :rel="partner.website ? 'noopener noreferrer' : undefined"
-            :title="partner.name"
-            class="h-[72px] rounded-xl border border-gray-200 dark:border-gray-600 bg-white flex items-center justify-center p-3"
-            :class="partner.website ? 'transition-shadow hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-blue-500' : ''"
-          >
-            <img
-              v-if="partner.logo_url"
-              :src="partner.logo_url"
-              :alt="partner.name"
-              class="max-h-12 max-w-full object-contain"
-              loading="lazy"
-            >
-            <span v-else class="text-sm font-bold text-gray-700 text-center line-clamp-2 break-words">{{ partner.name }}</span>
-          </component>
-        </li>
-      </ul>
-    </div>
+          <span v-if="partner.website" class="sr-only">{{ t('pei.common.openInNewTab') }}</span>
+          <span v-if="partner.website" class="absolute top-2 end-2 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true">
+            <font-awesome-icon icon="fa-solid fa-arrow-up-right-from-square" class="w-3 h-3 text-cyan-500 rtl:-scale-x-100" />
+          </span>
+        </component>
+      </li>
+    </ul>
   </div>
 </template>

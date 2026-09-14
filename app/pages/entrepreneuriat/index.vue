@@ -254,6 +254,15 @@ useHead(() => ({
           </h2>
         </div>
         <EntrepreneurshipPartnerFamilies :families="partners" />
+        <div class="mt-10 text-center">
+          <NuxtLink
+            :to="localePath('/entrepreneuriat/partenaires')"
+            class="inline-flex items-center gap-2 font-semibold text-brand-blue-700 dark:text-brand-blue-300 hover:underline"
+          >
+            {{ t('pei.home.allPartners') }}
+            <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-4 h-4 rtl:rotate-180" aria-hidden="true" />
+          </NuxtLink>
+        </div>
       </div>
     </section>
 

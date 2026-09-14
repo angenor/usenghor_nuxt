@@ -31,6 +31,7 @@
       "ourNews": "Life at the hub",
       "allNews": "All the hub's news",
       "ourPartners": "A supportive ecosystem",
+      "allPartners": "All the hub's partners",
       "partnersBadge": "Our partners",
       "newsBadge": "News",
       "discoverActivities": "Discover the pathway"
@@ -68,8 +69,8 @@
       }
     },
     "partners": {
-      "visit": "Visit website",
-      "count": "{n} partner | {n} partners",
+      "all": "All",
+      "filterLabel": "Filter by partner family",
       "empty": {
         "title": "No partners listed yet",
         "description": "The hub's partners will be presented here soon."

@@ -31,6 +31,7 @@
       "ourNews": "La vie du pôle",
       "allNews": "Toutes les actualités du PEI",
       "ourPartners": "Un écosystème d'appui",
+      "allPartners": "Tous les partenaires du pôle",
       "partnersBadge": "Nos partenaires",
       "newsBadge": "Actualités",
       "discoverActivities": "Découvrir le parcours"
@@ -68,8 +69,8 @@
       }
     },
     "partners": {
-      "visit": "Visiter le site",
-      "count": "{n} partenaire | {n} partenaires",
+      "all": "Tous",
+      "filterLabel": "Filtrer par famille de partenaires",
       "empty": {
         "title": "Aucun partenaire référencé pour le moment",
         "description": "Les partenaires du pôle seront présentés ici prochainement."

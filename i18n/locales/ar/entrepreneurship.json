@@ -31,6 +31,7 @@
       "ourNews": "حياة القطب",
       "allNews": "كل أخبار القطب",
       "ourPartners": "منظومة داعمة",
+      "allPartners": "جميع شركاء القطب",
       "partnersBadge": "شركاؤنا",
       "newsBadge": "الأخبار",
       "discoverActivities": "اكتشف المسار"
@@ -68,8 +69,8 @@
       }
     },
     "partners": {
-      "visit": "زيارة الموقع",
-      "count": "عدد الشركاء: {n}",
+      "all": "الكل",
+      "filterLabel": "التصفية حسب فئة الشركاء",
       "empty": {
         "title": "لا يوجد شركاء مدرجون حالياً",
         "description": "سيتم تقديم شركاء القطب هنا قريباً."
