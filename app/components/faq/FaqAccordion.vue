@@ -3,15 +3,29 @@ import type { FaqCategoryPublic, FaqEntryPublic, FaqTreePublic } from '~/types/a
 
 interface Props {
   tree: FaqTreePublic
+  /** Barre de recherche et filtre de catégorie (défaut : affichés). */
+  searchable?: boolean
+  /** Titres de groupe : `auto` si plus d'une catégorie, `always` toujours. */
+  groupTitles?: 'auto' | 'always'
+  headingLevel?: 'h2' | 'h3'
+  /** Plusieurs réponses ouvertes simultanément (défaut : une seule). */
+  multiple?: boolean
 }
 
-const props = defineProps<Props>()
+// Variantes additives (spec 025) : rendu de /faq inchangé par défaut.
+const props = withDefaults(defineProps<Props>(), {
+  searchable: true,
+  groupTitles: 'auto',
+  headingLevel: 'h2',
+  multiple: false,
+})
 
 const { t, locale } = useI18n()
+const { $lenis } = useNuxtApp()
 
 const search = ref('')
 const selectedCategoryId = ref<string | null>(null)
-const openSlug = ref<string | null>(null)
+const openSlugs = ref(new Set<string>())
 
 type Lang = 'fr' | 'en' | 'ar'
 const lang = computed<Lang>(() => (locale.value === 'en' || locale.value === 'ar' ? locale.value : 'fr'))
@@ -44,7 +58,7 @@ const filteredCategories = computed<FaqCategoryPublic[]>(() => {
       })
       return { ...c, entries }
     })
-    .filter(c => c.entries.length > 0 || !q)
+    .filter(c => c.entries.length > 0 || (!q && !(props.multiple && !props.searchable)))
 })
 
 const totalVisibleEntries = computed(() =>
@@ -52,8 +66,13 @@ const totalVisibleEntries = computed(() =>
 )
 
 function toggle(slug: string) {
-  openSlug.value = openSlug.value === slug ? null : slug
+  const next = props.multiple ? new Set(openSlugs.value) : new Set<string>()
+  if (openSlugs.value.has(slug)) next.delete(slug)
+  else next.add(slug)
+  openSlugs.value = next
 }
+
+const showGroupTitle = computed(() => props.groupTitles === 'always' || filteredCategories.value.length > 1)
 
 function categoryLabel(c: FaqCategoryPublic): string {
   if (lang.value === 'en') return c.label_en || c.label_fr
@@ -62,17 +81,17 @@ function categoryLabel(c: FaqCategoryPublic): string {
 }
 
 // Open from URL hash on mount + when hash changes
-function syncFromHash() {
+function syncFromHash(event?: HashChangeEvent) {
   if (!import.meta.client) return
   const hash = window.location.hash.replace(/^#/, '')
   if (!hash) return
   const found = props.tree.categories.some(c => c.entries.some(e => e.slug === hash))
   if (found) {
-    openSlug.value = hash
-    nextTick(() => {
-      const el = document.getElementById(hash)
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
+    openSlugs.value = props.multiple ? new Set([...openSlugs.value, hash]) : new Set([hash])
+    // Lenis intercepte scrollIntoView : défilement via scrollToPageAnchor (gotcha connu) ;
+    // au chargement, léger délai le temps que la page et Lenis soient en place.
+    if (event) nextTick(() => scrollToPageAnchor(`#${hash}`, { lenis: $lenis }))
+    else setTimeout(() => scrollToPageAnchor(`#${hash}`, { smooth: false, lenis: $lenis }), 900)
   }
 }
 
@@ -88,7 +107,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="space-y-6">
-    <div class="flex flex-col gap-4">
+    <div v-if="searchable" class="flex flex-col gap-4">
       <FaqSearchBar v-model:search="search" :placeholder="t('faq.searchPlaceholder')" />
       <FaqCategoryFilter
         v-model:selected-category-id="selectedCategoryId"
@@ -101,15 +120,21 @@ onBeforeUnmount(() => {
     </div>
 
     <div v-for="cat in filteredCategories" :key="cat.id" class="space-y-3">
-      <h2 v-if="filteredCategories.length > 1" class="text-xl font-bold text-gray-900 dark:text-white">
+      <component
+        :is="headingLevel"
+        v-if="showGroupTitle"
+        :class="headingLevel === 'h2'
+          ? 'text-xl font-bold text-gray-900 dark:text-white'
+          : 'text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400'"
+      >
         {{ categoryLabel(cat) }}
-      </h2>
+      </component>
       <div class="space-y-2">
         <FaqAccordionItem
           v-for="entry in cat.entries"
           :key="entry.id"
           :entry="entry"
-          :open="openSlug === entry.slug"
+          :open="openSlugs.has(entry.slug)"
           :question="questionFor(entry)"
           :answer-html="answerFor(entry)"
           @toggle="toggle"

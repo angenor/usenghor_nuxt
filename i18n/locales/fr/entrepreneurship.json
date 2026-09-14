@@ -8,7 +8,8 @@
       "resources": "Nos ressources",
       "news": "Actualités",
       "cta": "Devenir étudiant-entrepreneur",
-      "label": "Rubriques du pôle"
+      "label": "Rubriques du pôle",
+      "see": "Entreprendre et étudier"
     },
     "breadcrumb": {
       "dde": "DDE",
@@ -110,7 +111,26 @@
       "resourcesTitle": "Nos ressources",
       "resourcesDescription": "Médiathèque et boîte à outils du Pôle Entrepreneuriat et Innovation : albums, guides, formulaires et liens utiles.",
       "newsTitle": "Actualités du pôle",
-      "newsDescription": "Actualités et événements du Pôle Entrepreneuriat et Innovation de l'Université Senghor."
+      "newsDescription": "Actualités et événements du Pôle Entrepreneuriat et Innovation de l'Université Senghor.",
+      "seeTitle": "Entreprendre et étudier à Senghor",
+      "seeDescription": "Le Statut Étudiant-Entrepreneur de l'Université Senghor : parcours SEE 1 et SEE 2, avantages, conditions, calendrier de l'appel et questions fréquentes."
+    },
+    "see": {
+      "heroBadgeYear": "{badge} · Appel {year}",
+      "agendaTitle": "Agenda",
+      "agendaTitleYear": "Agenda {year}",
+      "agendaLabel": "Calendrier de l'appel à candidatures",
+      "state": {
+        "open": "Appel ouvert",
+        "upcoming": "Appel à venir",
+        "closed": "Appel clos"
+      },
+      "deadline": "Date limite de soumission",
+      "opensOn": "Ouverture des candidatures le {date}",
+      "contactButton": "Écrire au pôle",
+      "contactSubject": "Statut Étudiant-Entrepreneur",
+      "wished": "souhaité",
+      "optional": "facultatif"
     }
   }
 }

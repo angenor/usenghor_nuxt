@@ -1,5 +1,8 @@
 <script setup lang="ts">
-/** Bandeau d'appel à l'action du pôle (lien interne `to` ou adresse directe `href`, ex. mailto). */
+/**
+ * Bandeau d'appel à l'action du pôle (lien interne `to` ou adresse directe `href`, ex. mailto).
+ * `external` ouvre `href` dans un nouvel onglet ; slot `note` optionnel sous les boutons (spec 025).
+ */
 defineProps<{
   title: string
   description?: string | null
@@ -7,6 +10,7 @@ defineProps<{
   to?: string
   href?: string
   email?: string | null
+  external?: boolean
 }>()
 
 const localePath = useLocalePath()
@@ -24,6 +28,8 @@ const localePath = useLocalePath()
       <a
         v-if="href"
         :href="href"
+        :target="external ? '_blank' : undefined"
+        :rel="external ? 'noopener noreferrer' : undefined"
         class="inline-flex items-center gap-3 rounded-full bg-brand-blue-500 hover:bg-brand-blue-600 px-8 py-4 font-semibold text-white transition-colors duration-200"
       >
         {{ buttonLabel }}
@@ -46,5 +52,8 @@ const localePath = useLocalePath()
         {{ email }}
       </a>
     </div>
+    <p v-if="$slots.note" class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+      <slot name="note" />
+    </p>
   </div>
 </template>

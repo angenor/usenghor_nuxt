@@ -1,7 +1,8 @@
 /**
- * Cadre commun des rubriques du mini-site PEI (alumni, partenaires, ressources, actualités) :
- * copie éditoriale, service DDE, hero, fil d'Ariane, SEO et JSON-LD.
- * Spec : specs/024-pei-public-alumni-resources-news (research R1, contracts/frontend.md).
+ * Cadre commun des rubriques du mini-site PEI (alumni, partenaires, ressources, actualités,
+ * statut étudiant-entrepreneur) : copie éditoriale, service DDE, hero, fil d'Ariane, SEO et JSON-LD.
+ * Specs : specs/024-pei-public-alumni-resources-news (research R1, contracts/frontend.md),
+ * specs/025-pei-see-status-page (research R1 : rubrique `see`, `applySeo({ type: 'WebPage' })`).
  *
  * Usage : `const page = await usePeiPage({ heroPrefix: 'alumni', navKey: 'alumni' })` en tête de page,
  * puis les useAsyncData de la page, puis `page.applySeo()` en dernier
@@ -12,7 +13,7 @@ import type { ComputedRef, Ref } from 'vue'
 import type { ServicePublicWithDetails } from '~/composables/usePublicOrganizationApi'
 import type { PeiBreadcrumbItem } from '~/composables/usePeiJsonLd'
 
-type PeiRubric = 'alumni' | 'partners' | 'resources' | 'news'
+type PeiRubric = 'alumni' | 'partners' | 'resources' | 'news' | 'see'
 
 export interface PeiPageOptions {
   /** Préfixe des clés `entrepreneurship.<heroPrefix>.hero.*` */
@@ -27,7 +28,7 @@ export interface PeiPageContext {
   ddeService: Ref<ServicePublicWithDetails | null | undefined>
   hero: ComputedRef<{ badge?: string, title: string, subtitle?: string, images: string[] }>
   breadcrumb: ComputedRef<PeiBreadcrumbItem[]>
-  applySeo: () => void
+  applySeo: (options?: { type?: 'WebPage' | 'CollectionPage' }) => void
 }
 
 export function usePeiPage(options: PeiPageOptions): Promise<PeiPageContext> {
@@ -77,7 +78,7 @@ export function usePeiPage(options: PeiPageOptions): Promise<PeiPageContext> {
     { label: t(`pei.nav.${navKey}`) },
   ])
 
-  function applySeo() {
+  function applySeo(seoOptions: { type?: 'WebPage' | 'CollectionPage' } = {}) {
     const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }
     const seoDescription = computed(() => hero.value.subtitle || t(`pei.seo.${navKey}Description`))
 
@@ -95,7 +96,7 @@ export function usePeiPage(options: PeiPageOptions): Promise<PeiPageContext> {
     useHead(() => ({
       script: [
         { key: 'jsonld-pei-organization', type: 'application/ld+json', innerHTML: JSON.stringify(buildPeiOrganization({ name: text('hero.title') || t('pei.seo.homeTitle'), email: text('contact.email') })) },
-        { key: 'jsonld-pei-webpage', type: 'application/ld+json', innerHTML: JSON.stringify(buildWebPage({ path: route.path, name: hero.value.title, description: seoDescription.value, type: 'CollectionPage' })) },
+        { key: 'jsonld-pei-webpage', type: 'application/ld+json', innerHTML: JSON.stringify(buildWebPage({ path: route.path, name: hero.value.title, description: seoDescription.value, type: seoOptions.type ?? 'CollectionPage' })) },
         { key: 'jsonld-pei-breadcrumb', type: 'application/ld+json', innerHTML: JSON.stringify(buildBreadcrumbList(breadcrumb.value)) },
       ],
     }))

@@ -1,8 +1,11 @@
 /**
  * Règles de présentation publiques du Pôle Entrepreneuriat et Innovation (PEI).
  * Specs : specs/023-pei-public-home-activities (research R13),
- * specs/024-pei-public-alumni-resources-news (data-model § 2 et § 5).
+ * specs/024-pei-public-alumni-resources-news (data-model § 2 et § 5),
+ * specs/025-pei-see-status-page (data-model § 2).
  */
+
+import type { ApplicationCallPublicWithDetails, CallScheduleRead } from '~/types/api'
 
 import type {
   PeiColor,
@@ -179,4 +182,122 @@ export function youTubeId(url: string | null | undefined): string | null {
 /** Vrai si la valeur est une adresse http(s) exploitable. */
 export function isHttpUrl(value: string | null | undefined): value is string {
   return !!value && /^https?:\/\//i.test(value.trim())
+}
+
+// ============================================================================
+// Page SEE (feature 025)
+// ============================================================================
+
+/** État de l'appel SEE affiché par la page (data-model § 2.1). */
+export type SeeCallState = 'open' | 'upcoming' | 'closed' | 'absent'
+
+/**
+ * État dérivé de l'appel désigné : absent (clé vide, 404, erreur), ouvert
+ * (en cours et date limite non dépassée), à venir (statut saisi), sinon clos.
+ */
+export function seeCallState(call: ApplicationCallPublicWithDetails | null | undefined, now: Date = new Date()): SeeCallState {
+  if (!call) return 'absent'
+  if (call.status === 'ongoing' && (!call.deadline || new Date(call.deadline) > now)) return 'open'
+  if (call.status === 'upcoming') return 'upcoming'
+  return 'closed'
+}
+
+/** Cible des boutons « Postuler » : formulaire externe, formulaire du site ou e-mail du pôle. */
+export type SeeApplyTarget =
+  | { kind: 'external', href: string }
+  | { kind: 'internal', to: string }
+  | { kind: 'contact', href: string }
+
+/** Priorité externe > interne en état ouvert ; sinon contact si e-mail ; sinon aucun bouton. */
+export function seeApplyTarget(
+  call: ApplicationCallPublicWithDetails | null | undefined,
+  state: SeeCallState,
+  email: string,
+  subject: string,
+): SeeApplyTarget | null {
+  if (call && state === 'open') {
+    if (isHttpUrl(call.external_form_url)) return { kind: 'external', href: call.external_form_url.trim() }
+    if (call.use_internal_form) return { kind: 'internal', to: `/candidatures/postuler/${call.slug}` }
+  }
+  const address = email.trim()
+  return address ? { kind: 'contact', href: `mailto:${address}?subject=${encodeURIComponent(subject)}` } : null
+}
+
+/** Année de l'appel : ouverture, sinon date limite, sinon aucune. */
+export function seeCallYear(call: ApplicationCallPublicWithDetails | null | undefined): number | null {
+  const source = call?.opening_date || call?.deadline
+  // Lecture de l'année dans la chaîne ISO : aucun décalage de fuseau au 1ᵉʳ janvier.
+  const year = Number.parseInt(source?.slice(0, 4) ?? '', 10)
+  return Number.isNaN(year) ? null : year
+}
+
+export interface AgendaStep {
+  id: string
+  label: string
+  description: string
+  start: string | null
+  end: string | null
+  isDeadline: boolean
+  /** Ligne ajoutée pour la date limite (aucune étape ne tombe ce jour-là). */
+  synthetic: boolean
+}
+
+/** Jour calendaire AAAA-MM-JJ d'une date dans le fuseau donné. */
+function calendarDay(value: string, timeZone: string): string | null {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(date)
+}
+
+/**
+ * Frise de l'agenda : étapes dans l'ordre du backoffice ; la première étape dont le
+ * jour (fin, sinon début) est celui de la date limite est distinguée ; à défaut,
+ * une ligne « date limite » est insérée à sa place chronologique.
+ */
+export function seeAgendaSteps(
+  schedule: CallScheduleRead[],
+  deadline: string | null,
+  localize: (step: CallScheduleRead, field: 'step' | 'description') => string,
+  deadlineLabel: string,
+  timeZone = 'Africa/Cairo',
+): AgendaStep[] {
+  const deadlineDay = deadline ? calendarDay(deadline, timeZone) : null
+  let marked = false
+  const steps: AgendaStep[] = [...schedule]
+    .sort((a, b) => a.display_order - b.display_order)
+    .map((step) => {
+      const reference = step.end_date ?? step.start_date
+      const isDeadline = !marked && !!deadlineDay && !!reference && calendarDay(reference, timeZone) === deadlineDay
+      if (isDeadline) marked = true
+      return {
+        id: step.id,
+        label: localize(step, 'step'),
+        description: localize(step, 'description'),
+        start: step.start_date,
+        end: step.end_date,
+        isDeadline,
+        synthetic: false,
+      }
+    })
+  if (!marked && deadline && deadlineDay) {
+    const line: AgendaStep = { id: 'deadline', label: deadlineLabel, description: '', start: deadline, end: null, isDeadline: true, synthetic: true }
+    const deadlineTime = new Date(deadline).getTime()
+    const index = steps.findIndex(step => !!step.start && new Date(step.start).getTime() > deadlineTime)
+    steps.splice(index === -1 ? steps.length : index, 0, line)
+  }
+  return steps
+}
+
+/** Valeurs non vides des emplacements éditoriaux `see.<prefix>.1..count`, dans l'ordre. */
+export function seeSlots(text: (key: string) => string, prefix: string, count: number): string[] {
+  return Array.from({ length: count }, (_, i) => text(`see.${prefix}.${i + 1}`)).filter(Boolean)
+}
+
+/**
+ * Classe Font Awesome d'un levier ; vide, sans `fa-` ou refusée par `exists`
+ * (icône absente de la bibliothèque chargée) → icône neutre.
+ */
+export function seeLeverIcon(value: string | null | undefined, exists?: (icon: string) => boolean): string {
+  const icon = (value ?? '').trim()
+  return icon.startsWith('fa-') && (!exists || exists(icon)) ? icon : 'fa-solid fa-circle-check'
 }

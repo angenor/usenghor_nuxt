@@ -8,7 +8,8 @@
       "resources": "Our resources",
       "news": "News",
       "cta": "Become a student-entrepreneur",
-      "label": "Hub sections"
+      "label": "Hub sections",
+      "see": "Study and start a business"
     },
     "breadcrumb": {
       "dde": "DDE",
@@ -110,7 +111,26 @@
       "resourcesTitle": "Our resources",
       "resourcesDescription": "The Entrepreneurship and Innovation Hub's media library and toolbox: albums, guides, forms and useful links.",
       "newsTitle": "Hub news",
-      "newsDescription": "News and events from Senghor University's Entrepreneurship and Innovation Hub."
+      "newsDescription": "News and events from Senghor University's Entrepreneurship and Innovation Hub.",
+      "seeTitle": "Study and start a business at Senghor",
+      "seeDescription": "Senghor University's Student-Entrepreneur Status: SEE 1 and SEE 2 tracks, benefits, eligibility, call timeline and frequently asked questions."
+    },
+    "see": {
+      "heroBadgeYear": "{badge} · {year} call",
+      "agendaTitle": "Timeline",
+      "agendaTitleYear": "{year} timeline",
+      "agendaLabel": "Call for applications timeline",
+      "state": {
+        "open": "Call open",
+        "upcoming": "Upcoming call",
+        "closed": "Call closed"
+      },
+      "deadline": "Submission deadline",
+      "opensOn": "Applications open on {date}",
+      "contactButton": "Email the hub",
+      "contactSubject": "Student-Entrepreneur Status",
+      "wished": "preferred",
+      "optional": "optional"
     }
   }
 }

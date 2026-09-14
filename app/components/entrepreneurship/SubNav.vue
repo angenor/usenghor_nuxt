@@ -22,6 +22,10 @@ const isActive = (to: string, exact = false) => {
   if (exact) return currentPath === localizedPath
   return currentPath === localizedPath || currentPath.startsWith(localizedPath + '/')
 }
+
+// Bouton rouge : « page courante » sur la page du statut (spec 025, research R3).
+const ctaPath = '/entrepreneuriat/statut-etudiant-entrepreneur'
+const ctaActive = computed(() => isActive(ctaPath))
 </script>
 
 <template>
@@ -55,8 +59,12 @@ const isActive = (to: string, exact = false) => {
           </NuxtLink>
 
           <NuxtLink
-            :to="localePath('/entrepreneuriat/statut-etudiant-entrepreneur')"
-            class="ms-auto shrink-0 inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-brand-red-500 hover:bg-brand-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors duration-200"
+            :to="localePath(ctaPath)"
+            :aria-current="ctaActive ? 'page' : undefined"
+            :class="[
+              'ms-auto shrink-0 inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-brand-red-500 hover:bg-brand-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors duration-200',
+              { 'ring-4 ring-brand-red-100 dark:ring-brand-red-900/40': ctaActive },
+            ]"
           >
             <font-awesome-icon icon="fa-solid fa-rocket" class="w-4 h-4" />
             <span>{{ t('pei.nav.cta') }}</span>

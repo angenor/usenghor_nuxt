@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { FaqEntryPublic, FaqTreePublic } from '~/types/api/faq'
+import type { FaqTreePublic } from '~/types/api/faq'
+import type { FaqLang } from '~/utils/faq-jsonld'
 
 const { t, locale } = useI18n()
 
@@ -7,45 +8,9 @@ const { data: tree } = await useAsyncData<FaqTreePublic>('faq-tree', () =>
   usePublicFaqApi().getTree(),
 )
 
-type Lang = 'fr' | 'en' | 'ar'
-const lang = computed<Lang>(() => (locale.value === 'en' || locale.value === 'ar' ? locale.value : 'fr'))
+const lang = computed<FaqLang>(() => (locale.value === 'en' || locale.value === 'ar' ? locale.value : 'fr'))
 
-function stripHtml(html: string, max = 5000): string {
-  const text = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
-  return text.length > max ? `${text.slice(0, max - 1)}…` : text
-}
-
-function questionFor(e: FaqEntryPublic): string {
-  if (lang.value === 'en') return e.question_en
-  if (lang.value === 'ar') return e.question_ar
-  return e.question_fr
-}
-
-function answerHtmlFor(e: FaqEntryPublic): string {
-  if (lang.value === 'en') return e.answer_en_html
-  if (lang.value === 'ar') return e.answer_ar_html
-  return e.answer_fr_html
-}
-
-const jsonLd = computed(() => {
-  const t2 = tree.value
-  if (!t2) return null
-  const mainEntity = t2.categories.flatMap(c =>
-    c.entries.map(e => ({
-      '@type': 'Question',
-      'name': questionFor(e),
-      'acceptedAnswer': {
-        '@type': 'Answer',
-        'text': stripHtml(answerHtmlFor(e)),
-      },
-    })),
-  )
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    'mainEntity': mainEntity,
-  }
-})
+const jsonLd = computed(() => (tree.value ? buildFaqPageJsonLd(tree.value.categories, lang.value) : null))
 
 useSeoMeta({
   title: () => t('faq.title'),

@@ -53,7 +53,7 @@ async function handleTranslateMissing() {
   try {
     // Le serveur borne chaque appel dans le temps : on relance tant que le
     // parcours n'est pas complet, en cumulant les compteurs.
-    const total = { programs: 0, cohorts: 0, resources: 0, laureates: 0 }
+    const total = { programs: 0, cohorts: 0, resources: 0, laureates: 0, faq_see: 0 }
     let complete = false
     for (let round = 1; round <= MAX_TRANSLATE_ROUNDS && !complete; round++) {
       const result = await translateMissing()
@@ -61,10 +61,11 @@ async function handleTranslateMissing() {
       total.cohorts += result.cohorts
       total.resources += result.resources
       total.laureates += result.laureates ?? 0
+      total.faq_see += result.faq_see ?? 0
       complete = result.complete
       // Passe incomplète sans aucun élément complété : traducteur indisponible
       // (quota, réseau) — inutile d'insister.
-      if (!complete && result.programs + result.cohorts + result.resources + (result.laureates ?? 0) === 0) {
+      if (!complete && result.programs + result.cohorts + result.resources + (result.laureates ?? 0) + (result.faq_see ?? 0) === 0) {
         break
       }
       if (!complete) {
@@ -76,6 +77,7 @@ async function handleTranslateMissing() {
       plural(total.cohorts, 'cohorte', 'cohortes'),
       plural(total.resources, 'ressource', 'ressources'),
       plural(total.laureates, 'lauréat', 'lauréats'),
+      plural(total.faq_see, 'question FAQ', 'questions FAQ'),
     ]
     translateMessage.value = complete
       ? `Traductions complétées : ${parts.join(', ')}.`

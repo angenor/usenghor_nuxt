@@ -80,6 +80,8 @@ export interface PeiTranslateMissingResponse {
   cohorts: number
   resources: number
   laureates: number
+  /** Entrées FAQ publiées des catégories `see-*` complétées (spec 025). */
+  faq_see?: number
   /** Faux si le budget de temps serveur est épuisé : relancer l'action. */
   complete: boolean
 }
