@@ -13,7 +13,6 @@ const { loadContent, getRawContent } = useEditorialContent('entrepreneurship')
 const { getMediaUrl } = useMediaApi()
 const { listPrograms } = usePublicEntrepreneurshipApi()
 const { listPublishedEvents } = usePublicEventsApi()
-const { getServiceById, getServiceUrl } = usePublicOrganizationApi()
 const { buildPeiOrganization, buildWebPage, buildBreadcrumbList } = usePeiJsonLd()
 
 await useAsyncData('editorial-entrepreneurship', () => loadContent().then(() => true))
@@ -25,12 +24,15 @@ const ddeServiceId = computed(() => {
   return isUuid(id) ? id : null
 })
 
-const [{ data: programsData }, { data: ddeService }, { data: eventsData }] = await Promise.all([
+// Fil d'Ariane partagé du mini-site (spec 026)
+const { breadcrumb, ready: breadcrumbReady } = usePeiBreadcrumb(() => t('pei.nav.activities'), ddeServiceId)
+
+const [{ data: programsData }, { data: eventsData }] = await Promise.all([
   useAsyncData('pei-activities-programs', () => listPrograms().catch(() => [])),
-  useAsyncData('pei-activities-dde', () => (ddeServiceId.value ? getServiceById(ddeServiceId.value).catch(() => null) : Promise.resolve(null))),
   useAsyncData('pei-activities-events', () => (ddeServiceId.value
     ? listPublishedEvents({ service_id: ddeServiceId.value, upcoming: true, order: 'asc', limit: 6 }).then(r => r.items).catch(() => [])
     : Promise.resolve([]))),
+  breadcrumbReady,
 ])
 
 const byOrder = (a: PeiProgramPublic, b: PeiProgramPublic) => a.display_order - b.display_order
@@ -65,16 +67,6 @@ onMounted(() => {
 const heroTitle = computed(() => text('activities.hero.title') || t('pei.seo.activitiesTitle'))
 const heroSubtitle = computed(() => text('activities.hero.subtitle'))
 const heroImage = computed(() => getMediaUrl(text('activities.hero.image') || null, 'medium'))
-
-const ddeLink = computed(() => (ddeService.value ? getServiceUrl(ddeService.value) : null))
-const breadcrumb = computed(() => [
-  { label: t('nav.home'), to: '/' },
-  { label: t('nav.about'), to: '/a-propos' },
-  { label: t('about.tabs.organization'), to: '/a-propos/organisation' },
-  { label: ddeService.value?.sigle || t('pei.breadcrumb.dde'), to: ddeLink.value ?? undefined },
-  { label: t('pei.breadcrumb.pole'), to: '/entrepreneuriat' },
-  { label: t('pei.nav.activities') },
-])
 
 // SEO — après useRoute() et les useAsyncData (gotcha TDZ unhead)
 const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }

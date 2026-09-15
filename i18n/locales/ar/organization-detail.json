@@ -111,6 +111,12 @@
       "department": "قسم",
       "service": "خدمة",
       "sector": "قطاع"
+    },
+    "poles": {
+      "title": "الأقطاب",
+      "parentOf": "قطب تابع لـ",
+      "dedicatedPage": "زيارة الصفحة المخصصة",
+      "count": "+ {n} قطب | + {n} أقطاب"
     }
   }
 }

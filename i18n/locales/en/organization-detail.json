@@ -111,6 +111,12 @@
       "department": "department",
       "service": "service",
       "sector": "sector"
+    },
+    "poles": {
+      "title": "Hubs",
+      "parentOf": "Hub of",
+      "dedicatedPage": "Visit the dedicated page",
+      "count": "+ {n} hub | + {n} hubs"
     }
   }
 }

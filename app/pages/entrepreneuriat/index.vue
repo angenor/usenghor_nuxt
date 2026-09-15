@@ -12,7 +12,6 @@ const { loadContent, getRawContent } = useEditorialContent('entrepreneurship')
 const { getMediaUrl } = useMediaApi()
 const { listPrograms, listPartners } = usePublicEntrepreneurshipApi()
 const { getAllPublishedNews } = usePublicNewsApi()
-const { getServiceById, getServiceUrl } = usePublicOrganizationApi()
 const { buildPeiOrganization, buildWebPage, buildBreadcrumbList } = usePeiJsonLd()
 
 // Contenu éditorial d'abord (identifiant du service DDE)
@@ -26,14 +25,17 @@ const ddeServiceId = computed(() => {
   return isUuid(id) ? id : null
 })
 
+// Fil d'Ariane partagé du mini-site (spec 026)
+const { breadcrumb, ready: breadcrumbReady } = usePeiBreadcrumb(null, ddeServiceId)
+
 // Sources indépendantes : une erreur masque la section concernée (FR-023)
-const [{ data: programsData }, { data: partnersData }, { data: ddeService }, { data: newsData }] = await Promise.all([
+const [{ data: programsData }, { data: partnersData }, { data: newsData }] = await Promise.all([
   useAsyncData('pei-home-programs', () => listPrograms().catch(() => [])),
   useAsyncData('pei-home-partners', () => listPartners().catch(() => [])),
-  useAsyncData('pei-home-dde', () => (ddeServiceId.value ? getServiceById(ddeServiceId.value).catch(() => null) : Promise.resolve(null))),
   useAsyncData('pei-home-news', () => (ddeServiceId.value
     ? getAllPublishedNews({ service_id: ddeServiceId.value, limit: 3 }).catch(() => [])
     : Promise.resolve([]))),
+  breadcrumbReady,
 ])
 
 const programs = computed(() => [...(programsData.value ?? [])].sort((a, b) => a.display_order - b.display_order))
@@ -55,16 +57,6 @@ const heroActions = computed(() => {
   if (text('hero.cta2.text') && programs.value.length) actions.push({ label: text('hero.cta2.text'), to: '#parcours', variant: 'ghost' })
   return actions
 })
-
-const ddeLink = computed(() => (ddeService.value ? getServiceUrl(ddeService.value) : null))
-
-const breadcrumb = computed(() => [
-  { label: t('nav.home'), to: '/' },
-  { label: t('nav.about'), to: '/a-propos' },
-  { label: t('about.tabs.organization'), to: '/a-propos/organisation' },
-  { label: ddeService.value?.sigle || t('pei.breadcrumb.dde'), to: ddeLink.value ?? undefined },
-  { label: t('pei.breadcrumb.pole') },
-])
 
 // Présentation et chiffres clés
 const stats = computed(() =>

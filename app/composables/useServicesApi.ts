@@ -91,6 +91,8 @@ export interface ServiceCreate extends SectorServiceI18nFields {
   head_external_id?: string | null
   album_external_id?: string | null
   sector_id?: string | null
+  parent_id?: string | null
+  landing_path?: string | null
   display_order?: number
   active?: boolean
 }
@@ -108,6 +110,8 @@ export interface ServiceUpdate extends SectorServiceI18nFields {
   head_external_id?: string | null
   album_external_id?: string | null
   sector_id?: string | null
+  parent_id?: string | null
+  landing_path?: string | null
   display_order?: number
   active?: boolean
 }
@@ -425,6 +429,8 @@ export function useServicesApi() {
       email: service.email || null,
       phone: service.phone || null,
       album_external_id: service.album_id || null,
+      parent_id: null,
+      landing_path: null,
       display_order: service.display_order,
       active: service.active,
       objectives_count: service.objectives_count,

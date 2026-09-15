@@ -1,8 +1,18 @@
 import { defineSitemapEventHandler } from '#imports'
 
+// Copie de slugify (app/composables/usePublicOrganizationApi.ts) — doit rester identique
+function slugifyServiceName(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036F]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
 export default defineSitemapEventHandler(async () => {
   const backendUrl = process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
-  const urls: Array<{ loc: string; lastmod?: string }> = []
+  const urls: Array<{ loc: string; lastmod?: string; _i18nTransform?: boolean }> = []
 
   // Map des types de programmes backend → slugs URL frontend
   const programTypeToUrlSlug: Record<string, string> = {
@@ -122,30 +132,35 @@ export default defineSitemapEventHandler(async () => {
   }
 
   try {
-    // Secteurs et services (organisation)
-    const sectors = await $fetch<Array<{
-      code: string
-      services?: Array<{ slug: string; updated_at?: string }>
-    }>>(`${backendUrl}/api/public/sectors/with-services`).catch(() => [])
+    // Secteurs (organisation)
+    const sectors = await $fetch<Array<{ code: string }>>(`${backendUrl}/api/public/sectors`)
 
     for (const sector of sectors) {
       if (sector.code) {
-        urls.push({ loc: `/a-propos/organisation/secteurs/${sector.code}` })
-      }
-      if (sector.services) {
-        for (const service of sector.services) {
-          if (service.slug) {
-            urls.push({
-              loc: `/a-propos/organisation/services/${service.slug}`,
-              lastmod: service.updated_at
-            })
-          }
-        }
+        urls.push({ loc: `/a-propos/organisation/secteur/${sector.code.toLowerCase()}`, _i18nTransform: true })
       }
     }
   }
   catch {
     // Silently skip if sectors API unavailable
+  }
+
+  try {
+    // Services et pôles actifs (avec ou sans secteur), adresse dérivée du nom ;
+    // _i18nTransform : variantes /en et /ar générées par autoI18n
+    const services = await $fetch<Array<{ name: string }>>(`${backendUrl}/api/public/services`)
+    const slugs = new Set<string>()
+
+    for (const service of services) {
+      const slug = service.name ? slugifyServiceName(service.name) : ''
+      if (slug && !slugs.has(slug)) {
+        slugs.add(slug)
+        urls.push({ loc: `/a-propos/organisation/service/${slug}`, _i18nTransform: true })
+      }
+    }
+  }
+  catch {
+    // Silently skip if services API unavailable
   }
 
   return urls

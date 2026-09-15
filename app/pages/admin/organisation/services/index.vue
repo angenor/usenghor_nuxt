@@ -144,11 +144,16 @@ const newService = ref<{
   email: string
   phone: string
   active: boolean
+  // Hiérarchie : service parent (pôle) et page dédiée
+  parent_id: string | null
+  landing_path: string
 }>({
   name: '',
   sigle: '',
   color: '',
   sector_id: '',
+  parent_id: null,
+  landing_path: '',
   description_md: '',
   description_html: '',
   mission_md: '',
@@ -298,6 +303,84 @@ onMounted(async () => {
   }
 })
 
+// === HIÉRARCHIE (PÔLES) ===
+// Même expression que l'API : chemin interne, sans préfixe de langue ni lien court
+const LANDING_PATH_RE = /^\/(?!\/)(?!(?:en|ar)(?:\/|$))(?!r\/)[^\s?#]*$/
+
+// Compare deux services par (display_order, name)
+const compareByOrderAndName = (a: ServiceDisplay, b: ServiceDisplay) =>
+  (a.display_order - b.display_order) || a.name.localeCompare(b.name)
+
+// Place les pôles juste après leur parent (si présent dans la liste).
+// Les services de premier niveau conservent l'ordre reçu ; un pôle dont le
+// parent est absent de la liste reste à sa place normale.
+function orderHierarchically(list: ServiceDisplay[]): ServiceDisplay[] {
+  const presentIds = new Set(list.map(s => s.id))
+  const childrenByParent = new Map<string, ServiceDisplay[]>()
+  for (const s of list) {
+    if (s.parent_id && presentIds.has(s.parent_id)) {
+      if (!childrenByParent.has(s.parent_id)) childrenByParent.set(s.parent_id, [])
+      childrenByParent.get(s.parent_id)!.push(s)
+    }
+  }
+  const ordered: ServiceDisplay[] = []
+  for (const s of list) {
+    if (s.parent_id && presentIds.has(s.parent_id)) continue
+    ordered.push(s)
+    const children = childrenByParent.get(s.id)
+    if (children) ordered.push(...[...children].sort(compareByOrderAndName))
+  }
+  return ordered
+}
+
+// Parent d'un pôle, cherché dans la liste complète
+const findParentService = (service: ServiceDisplay) =>
+  service.parent_id ? allServices.value.find(s => s.id === service.parent_id) || null : null
+
+// Nombre de pôles rattachés à un service
+const countChildren = (serviceId: string) =>
+  allServices.value.filter(s => s.parent_id === serviceId).length
+
+const editingServiceId = computed(() => editingService.value?.id || null)
+
+const editingChildrenCount = computed(() =>
+  editingServiceId.value ? countChildren(editingServiceId.value) : 0
+)
+
+// Services proposables comme parent : premier niveau, même secteur, pas lui-même
+const parentOptions = computed(() =>
+  allServices.value
+    .filter(s =>
+      !s.parent_id
+      && (s.sector_id || null) === (newService.value.sector_id || null)
+      && s.id !== editingServiceId.value
+    )
+    .sort((a, b) => a.name.localeCompare(b.name))
+)
+
+watch(() => newService.value.sector_id, () => {
+  const parentId = newService.value.parent_id
+  if (parentId && !parentOptions.value.some(s => s.id === parentId)) {
+    newService.value.parent_id = null
+  }
+})
+
+const isLandingPathInvalid = computed(() =>
+  !!newService.value.landing_path && !LANDING_PATH_RE.test(newService.value.landing_path)
+)
+
+// Erreur de sauvegarde affichée dans la modale
+const modalError = ref('')
+
+const extractErrorDetail = (err: any): string => {
+  const detail = err?.data?.detail
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail)) {
+    return detail.map((d: any) => d?.msg).filter(Boolean).join(' ; ')
+  }
+  return err?.message || 'Erreur lors de la sauvegarde'
+}
+
 // Services filtrés et triés
 const filteredServices = computed(() => {
   let result = [...allServices.value]
@@ -339,18 +422,21 @@ const filteredServices = computed(() => {
     return sortOrder.value === 'asc' ? comparison : -comparison
   })
 
-  return result
+  return orderHierarchically(result)
 })
 
 // Services groupés filtrés
 const filteredServicesGrouped = computed(() => {
   if (!searchQuery.value && filterActive.value === undefined) {
-    return servicesGrouped.value
+    return servicesGrouped.value.map(group => ({
+      ...group,
+      services: orderHierarchically(group.services),
+    }))
   }
 
   return servicesGrouped.value.map(group => ({
     ...group,
-    services: group.services.filter(s => {
+    services: orderHierarchically(group.services.filter(s => {
       let match = true
       if (filterActive.value !== undefined) {
         match = match && s.active === filterActive.value
@@ -364,7 +450,7 @@ const filteredServicesGrouped = computed(() => {
         )
       }
       return match
-    })
+    }))
   })).filter(group => group.services.length > 0)
 })
 
@@ -408,6 +494,8 @@ const openAddModal = () => {
     sigle: '',
     color: '',
     sector_id: filterSector.value || '',
+    parent_id: null,
+    landing_path: '',
     description_md: '',
     description_html: '',
     mission_md: '',
@@ -429,6 +517,7 @@ const openAddModal = () => {
     active: true
   }
   translateMessage.value = null
+  modalError.value = ''
   showAddModal.value = true
 }
 
@@ -439,6 +528,8 @@ const openEditModal = (service: ServiceDisplay) => {
     sigle: service.sigle || '',
     color: service.color || '',
     sector_id: service.sector_id || '',
+    parent_id: service.parent_id || null,
+    landing_path: service.landing_path || '',
     description_md: (service as any).description_md || '',
     description_html: (service as any).description_html || '',
     mission_md: (service as any).mission_md || '',
@@ -460,6 +551,7 @@ const openEditModal = (service: ServiceDisplay) => {
     active: service.active
   }
   translateMessage.value = null
+  modalError.value = ''
   showEditModal.value = true
 }
 
@@ -480,13 +572,17 @@ const closeModals = () => {
 
 // CRUD operations
 const saveService = async () => {
+  if (isLandingPathInvalid.value) return
   isSaving.value = true
+  modalError.value = ''
   try {
     const serviceData = {
       name: newService.value.name,
       sigle: newService.value.sigle || null,
       color: newService.value.color || null,
       sector_id: newService.value.sector_id || null,
+      parent_id: newService.value.parent_id || null,
+      landing_path: newService.value.landing_path?.trim() || null,
       description_html: newService.value.description_html || null,
       description_md: newService.value.description_md || null,
       mission_html: newService.value.mission_html || null,
@@ -521,6 +617,7 @@ const saveService = async () => {
   }
   catch (error) {
     console.error('Erreur lors de la sauvegarde:', error)
+    modalError.value = extractErrorDetail(error)
   }
   finally {
     isSaving.value = false
@@ -597,6 +694,12 @@ const canDrag = computed(() => viewMode.value === 'grouped' && !searchQuery.valu
 
 const handleDragStart = (event: DragEvent, sectorId: string, index: number) => {
   if (!canDrag.value) return
+  // Les pôles ne se déplacent pas (ils suivent leur parent)
+  const group = filteredServicesGrouped.value.find(g => g.sector.id === sectorId)
+  if (group?.services[index]?.parent_id) {
+    event.preventDefault()
+    return
+  }
   isDragging.value = true
   event.dataTransfer?.setData('text/plain', JSON.stringify({ sectorId, index }))
 }
@@ -621,15 +724,18 @@ const handleDrop = async (event: DragEvent, targetSectorId: string, targetIndex:
     if (groupIndex === -1) return
 
     const group = servicesGrouped.value[groupIndex]!
-    const items = [...group.services]
+    // Les index correspondent à l'ordre affiché (hiérarchique)
+    const items = orderHierarchically(group.services)
+    // Les pôles ne se déplacent pas
+    if (items[sourceIndex]?.parent_id) return
     const [movedItem] = items.splice(sourceIndex, 1)!
     items.splice(targetIndex, 0, movedItem!)
 
     // Mettre à jour localement
     servicesGrouped.value[groupIndex] = { sector: group.sector, services: items }
 
-    // Envoyer au backend (uniquement les IDs du secteur)
-    const serviceIds = items.map(s => s.id)
+    // Envoyer au backend (uniquement les IDs des services de premier niveau du secteur)
+    const serviceIds = items.filter(s => !s.parent_id).map(s => s.id)
     await reorderServices(serviceIds)
     await loadData()
     enrichServicesWithHeads()
@@ -908,8 +1014,15 @@ const handleDragEnd = () => {
             >
 
               <!-- Service -->
-              <td class="px-4 py-3">
+              <td class="px-4 py-3" :class="{ 'ps-8': service.parent_id }">
                 <div class="flex items-center gap-3">
+                  <span
+                    v-if="service.parent_id"
+                    class="inline-flex flex-shrink-0 rtl:-scale-x-100"
+                    aria-hidden="true"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-turn-up" class="fa-rotate-90 w-4 h-4 text-gray-400 dark:text-gray-500" />
+                  </span>
                   <span
                     v-if="service.color"
                     class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold"
@@ -923,6 +1036,12 @@ const handleDragEnd = () => {
                       {{ service.name }}
                       <span v-if="service.sigle && !service.color" class="text-xs text-gray-400 dark:text-gray-500 font-normal ml-1">({{ service.sigle }})</span>
                     </p>
+                    <span
+                      v-if="service.parent_id && findParentService(service)"
+                      class="inline-flex items-center mt-0.5 px-2 py-0.5 text-xs font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full"
+                    >
+                      Pôle de {{ findParentService(service)?.sigle || findParentService(service)?.name }}
+                    </span>
                     <p v-if="service.description" class="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
                       {{ service.description }}
                     </p>
@@ -1149,8 +1268,8 @@ const handleDragEnd = () => {
               v-for="(service, serviceIndex) in group.services"
               :key="service.id"
               class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/30"
-              :class="{ 'opacity-50': !service.active }"
-              :draggable="canDrag"
+              :class="{ 'opacity-50': !service.active, 'ps-8': service.parent_id }"
+              :draggable="canDrag && !service.parent_id"
               @dragstart="handleDragStart($event, group.sector.id, serviceIndex)"
               @dragover="handleDragOver"
               @drop="handleDrop($event, group.sector.id, serviceIndex)"
@@ -1159,11 +1278,19 @@ const handleDragEnd = () => {
               <div class="flex items-center gap-4 flex-1">
                 <!-- Grip -->
                 <button
-                  v-if="canDrag"
+                  v-if="canDrag && !service.parent_id"
                   class="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0"
                 >
                   <font-awesome-icon :icon="['fas', 'grip-vertical']" class="w-4 h-4" />
                 </button>
+                <!-- Pôle -->
+                <span
+                  v-if="service.parent_id"
+                  class="inline-flex flex-shrink-0 rtl:-scale-x-100"
+                  aria-hidden="true"
+                >
+                  <font-awesome-icon icon="fa-solid fa-turn-up" class="fa-rotate-90 w-4 h-4 text-gray-400 dark:text-gray-500" />
+                </span>
                 <span
                   v-if="service.color"
                   class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold"
@@ -1178,6 +1305,12 @@ const handleDragEnd = () => {
                     <span v-if="service.sigle && !service.color" class="text-xs text-gray-400 dark:text-gray-500 font-normal ml-1">({{ service.sigle }})</span>
                   </p>
                   <div class="flex items-center gap-4 mt-1">
+                    <span
+                      v-if="service.parent_id && findParentService(service)"
+                      class="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full"
+                    >
+                      Pôle de {{ findParentService(service)?.sigle || findParentService(service)?.name }}
+                    </span>
                     <span v-if="service.head" class="text-sm text-gray-500 dark:text-gray-400">
                       {{ service.head.name }}
                     </span>
@@ -1284,6 +1417,16 @@ const handleDragEnd = () => {
           </div>
 
           <div class="p-4 space-y-4">
+            <!-- Erreur de sauvegarde -->
+            <div
+              v-if="modalError"
+              role="alert"
+              class="rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400"
+            >
+              <font-awesome-icon :icon="['fas', 'exclamation-circle']" class="me-2" />
+              {{ modalError }}
+            </div>
+
             <!-- Secteur parent -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -1298,6 +1441,51 @@ const handleDragEnd = () => {
                   {{ dept.name }} ({{ dept.code }})
                 </option>
               </select>
+            </div>
+
+            <!-- Service parent (pôle) -->
+            <div>
+              <label for="service-parent" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Service parent
+              </label>
+              <select
+                id="service-parent"
+                v-model="newService.parent_id"
+                :disabled="editingChildrenCount > 0"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option :value="null">Aucun (service de premier niveau)</option>
+                <option v-for="option in parentOptions" :key="option.id" :value="option.id">
+                  {{ option.sigle ? `${option.sigle} — ${option.name}` : option.name }}
+                </option>
+              </select>
+              <p v-if="editingChildrenCount > 0" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Ce service a {{ editingChildrenCount }} pôle(s) : il ne peut pas être rattaché
+              </p>
+            </div>
+
+            <!-- Page dédiée -->
+            <div>
+              <label for="service-landing-path" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Page dédiée (facultatif)
+              </label>
+              <input
+                id="service-landing-path"
+                v-model.trim="newService.landing_path"
+                type="text"
+                maxlength="255"
+                class="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-red-500 focus:border-transparent font-mono text-sm"
+                :class="isLandingPathInvalid ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'"
+                placeholder="/entrepreneuriat"
+                :aria-invalid="isLandingPathInvalid"
+                aria-describedby="service-landing-path-help"
+              />
+              <p v-if="isLandingPathInvalid" class="mt-1 text-xs text-red-600 dark:text-red-400">
+                Chemin invalide : il doit commencer par « / », sans préfixe de langue (/en, /ar), sans « /r/ », ni espace, « ? » ou « # ».
+              </p>
+              <p id="service-landing-path-help" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Chemin interne sans préfixe de langue. Si renseigné, la carte du service dans l'organigramme mène à cette page.
+              </p>
             </div>
 
             <!-- Nom -->
@@ -1521,7 +1709,7 @@ const handleDragEnd = () => {
             </button>
             <button
               class="px-4 py-2 text-sm font-medium text-white bg-brand-red-600 hover:bg-brand-red-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              :disabled="!newService.name || !newService.sector_id || isSaving"
+              :disabled="!newService.name || !newService.sector_id || isLandingPathInvalid || isSaving"
               @click="saveService"
             >
               <span v-if="isSaving">Enregistrement...</span>
@@ -1550,6 +1738,19 @@ const handleDragEnd = () => {
             <p class="text-gray-500 dark:text-gray-400 mb-4">
               Êtes-vous sûr de vouloir supprimer <strong class="text-gray-900 dark:text-white">{{ deletingService.name }}</strong> ?
             </p>
+
+            <!-- Avertissement si le service a des pôles -->
+            <div
+              v-if="countChildren(deletingService.id) > 0"
+              class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4 text-start"
+            >
+              <div class="flex items-start gap-2">
+                <font-awesome-icon :icon="['fas', 'info-circle']" class="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5" />
+                <p class="text-sm text-blue-700 dark:text-blue-300">
+                  Ses {{ countChildren(deletingService.id) }} pôle(s) deviendront des services de premier niveau du secteur.
+                </p>
+              </div>
+            </div>
 
             <!-- Avertissement si utilisé -->
             <div

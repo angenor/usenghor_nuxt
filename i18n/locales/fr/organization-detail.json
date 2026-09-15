@@ -111,6 +111,12 @@
       "department": "département",
       "service": "service",
       "sector": "secteur"
+    },
+    "poles": {
+      "title": "Pôles",
+      "parentOf": "Pôle de",
+      "dedicatedPage": "Voir la page dédiée",
+      "count": "+ {n} pôle | + {n} pôles"
     }
   }
 }

@@ -1,9 +1,14 @@
 <script setup lang="ts">
+import { createReusableTemplate } from '@vueuse/core'
 import type { SectorPublicWithServices, ServicePublic } from '~/composables/usePublicOrganizationApi'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
-const { listSectorsWithServices, slugify } = usePublicOrganizationApi()
+const { listSectorsWithServices, getServiceLink } = usePublicOrganizationApi()
+const { localized } = useLocalizedField()
+
+// Carte de service partagée entre un service seul et un service avec pôles (DOM identique)
+const [DefineServiceCard, ReuseServiceCard] = createReusableTemplate<{ service: ServicePublic, sectorIndex: number }>({ inheritAttrs: false })
 const { elementRef: sectionRef } = useScrollAnimation({ animation: 'fadeIn', threshold: 0.1 })
 
 // State
@@ -132,9 +137,9 @@ const getSectorColors = (index: number) => {
   return sectorColors[index % sectorColors.length]
 }
 
-// Generate service URL
+// Destination d'une carte : page dédiée si renseignée, sinon fiche du service
 const getServiceUrl = (service: ServicePublic) => {
-  return localePath(`/a-propos/organisation/service/${slugify(service.name)}`)
+  return localePath(getServiceLink(service))
 }
 
 // Generate sector URL
@@ -148,6 +153,53 @@ const getSectorUrl = (sector: SectorPublicWithServices) => {
     ref="sectionRef"
     class="py-16 lg:py-24 bg-white dark:bg-gray-900 bg-grid-pattern transition-colors duration-300"
   >
+    <DefineServiceCard v-slot="{ service, sectorIndex }">
+      <NuxtLink
+        :to="getServiceUrl(service)"
+        data-card
+        class="group bg-white dark:bg-gray-800 rounded-xl p-5 border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+        :class="service.color ? 'border-opacity-30' : getSectorColors(sectorIndex).border"
+        :style="service.color ? { borderColor: service.color + '40' } : {}"
+      >
+        <div class="flex items-start gap-4">
+          <div
+            class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300"
+            :class="service.color ? '' : getSectorColors(sectorIndex).bg"
+            :style="service.color ? { backgroundColor: service.color + '20' } : {}"
+          >
+            <font-awesome-icon
+              v-if="!service.sigle"
+              icon="fa-solid fa-building"
+              class="w-5 h-5"
+              :class="service.color ? '' : getSectorColors(sectorIndex).text"
+              :style="service.color ? { color: service.color } : {}"
+            />
+            <span
+              v-else
+              class="text-xs font-bold"
+              :class="service.color ? '' : getSectorColors(sectorIndex).text"
+              :style="service.color ? { color: service.color } : {}"
+            >
+              {{ service.sigle }}
+            </span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h4 class="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
+              {{ service.name }}<span v-if="service.sigle">&nbsp;({{ service.sigle }})</span>
+            </h4>
+            <span
+              class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 transition-colors"
+              :class="service.color ? '' : getSectorColors(sectorIndex).hover"
+              :style="service.color ? { '--tw-hover-color': service.color } : {}"
+            >
+              <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
+              <span>{{ t('organization.departments.view_programs') }}</span>
+            </span>
+          </div>
+        </div>
+      </NuxtLink>
+    </DefineServiceCard>
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="text-center mb-12 lg:mb-16">
@@ -230,52 +282,42 @@ const getSectorUrl = (sector: SectorPublicWithServices) => {
 
           <!-- Services Grid -->
           <div v-if="sector.services.length > 0" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <NuxtLink
-              v-for="service in sector.services"
-              :key="service.id"
-              :to="getServiceUrl(service)"
-              data-card
-              class="group bg-white dark:bg-gray-800 rounded-xl p-5 border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-              :class="service.color ? 'border-opacity-30' : getSectorColors(sectorIndex).border"
-              :style="service.color ? { borderColor: service.color + '40' } : {}"
-            >
-              <div class="flex items-start gap-4">
-                <div
-                  class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300"
-                  :class="service.color ? '' : getSectorColors(sectorIndex).bg"
-                  :style="service.color ? { backgroundColor: service.color + '20' } : {}"
+            <template v-for="service in sector.services" :key="service.id">
+              <ReuseServiceCard v-if="!service.children?.length" :service="service" :sector-index="sectorIndex" />
+              <div v-else class="flex flex-col gap-2">
+                <ReuseServiceCard :service="service" :sector-index="sectorIndex" />
+                <!-- Pôles du service -->
+                <ul
+                  class="ms-4 ps-3 border-s-2 space-y-2"
+                  :class="service.color ? '' : getSectorColors(sectorIndex).border"
+                  :style="service.color ? { borderColor: service.color + '40' } : {}"
+                  :aria-label="t('organization.poles.of', { name: localized(service, 'name') })"
                 >
-                  <font-awesome-icon
-                    v-if="!service.sigle"
-                    icon="fa-solid fa-building"
-                    class="w-5 h-5"
-                    :class="service.color ? '' : getSectorColors(sectorIndex).text"
-                    :style="service.color ? { color: service.color } : {}"
-                  />
-                  <span
-                    v-else
-                    class="text-xs font-bold"
-                    :class="service.color ? '' : getSectorColors(sectorIndex).text"
-                    :style="service.color ? { color: service.color } : {}"
-                  >
-                    {{ service.sigle }}
-                  </span>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <h4 class="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
-                    {{ service.name }}<span v-if="service.sigle">&nbsp;({{ service.sigle }})</span>
-                  </h4>
-                  <span
-                    class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 transition-colors"
-                    :class="service.color ? '' : getSectorColors(sectorIndex).hover"
-                    :style="service.color ? { '--tw-hover-color': service.color } : {}"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
-                    <span>{{ t('organization.departments.view_programs') }}</span>
-                  </span>
-                </div>
+                  <li v-for="pole in service.children" :key="pole.id">
+                    <NuxtLink
+                      :to="getServiceUrl(pole)"
+                      data-card
+                      class="group flex items-center gap-3 bg-white dark:bg-gray-800 rounded-lg px-3 py-2 border transition-all duration-300 hover:shadow-md"
+                      :class="(pole.color || service.color) ? '' : getSectorColors(sectorIndex).border"
+                      :style="(pole.color || service.color) ? { borderColor: (pole.color || service.color) + '40' } : {}"
+                    >
+                      <span
+                        class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                        :class="(pole.color || service.color) ? '' : getSectorColors(sectorIndex).bg"
+                        :style="(pole.color || service.color) ? { backgroundColor: (pole.color || service.color) + '20', color: (pole.color || service.color) as string } : {}"
+                      >
+                        <span v-if="pole.sigle" class="text-[0.65rem] font-bold" :class="(pole.color || service.color) ? '' : getSectorColors(sectorIndex).text">{{ pole.sigle }}</span>
+                        <font-awesome-icon v-else icon="fa-solid fa-building" class="w-4 h-4" :class="(pole.color || service.color) ? '' : getSectorColors(sectorIndex).text" />
+                      </span>
+                      <span class="flex-1 min-w-0 text-sm font-medium text-gray-800 dark:text-gray-100 line-clamp-2">
+                        {{ localized(pole, 'name') }}
+                      </span>
+                      <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3 text-gray-400 dark:text-gray-500 rtl:-scale-x-100 transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" />
+                    </NuxtLink>
+                  </li>
+                </ul>
               </div>
-            </NuxtLink>
+            </template>
           </div>
 
           <!-- Empty services message -->

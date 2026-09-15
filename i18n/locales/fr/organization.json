@@ -61,6 +61,9 @@
       "title": "Rencontrez notre équipe",
       "text": "Découvrez les visages de ceux qui font vivre l'Université au quotidien.",
       "button": "Voir l'équipe"
+    },
+    "poles": {
+      "of": "Pôles de {name}"
     }
   }
 }

@@ -22,6 +22,7 @@ const {
   updateServiceTeamMember,
   deleteServiceTeamMember,
   getSectorsForSelect,
+  getAllServices,
 } = useServicesApi()
 
 const { apiFetch } = useApi()
@@ -61,6 +62,22 @@ const userCandidates = ref<UserCandidate[]>([])
 
 // Sectors for info editing
 const sectors = ref<Array<{ id: string; name: string; code: string }>>([])
+
+// Hiérarchie : liste des services pour résoudre le parent et les pôles
+const hierarchyServices = ref<Array<{ id: string; name: string; parent_id?: string | null }>>([])
+
+const parentService = computed(() => {
+  const parentId = service.value?.parent_id
+  return parentId ? hierarchyServices.value.find(s => s.id === parentId) || null : null
+})
+
+const childServices = computed(() =>
+  service.value
+    ? hierarchyServices.value
+        .filter(s => s.parent_id === service.value!.id)
+        .sort((a, b) => a.name.localeCompare(b.name))
+    : []
+)
 
 // === LOAD DATA ===
 async function loadService() {
@@ -124,11 +141,22 @@ async function loadSectors() {
   }
 }
 
+async function loadHierarchyServices() {
+  try {
+    const items = await getAllServices()
+    hierarchyServices.value = items.map(s => ({ id: s.id, name: s.name, parent_id: s.parent_id }))
+  }
+  catch (err) {
+    console.error('Erreur chargement de la hiérarchie des services:', err)
+  }
+}
+
 onMounted(async () => {
   await Promise.all([
     loadService(),
     loadUserCandidates(),
     loadSectors(),
+    loadHierarchyServices(),
   ])
 })
 
@@ -442,6 +470,36 @@ function formatDate(dateString: string | null): string {
           <div>
             <p class="text-sm text-gray-500 dark:text-gray-400">Secteur</p>
             <p class="font-medium text-gray-900 dark:text-white">{{ sectors.find(s => s.id === service.sector_id)?.name || '—' }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Service parent</p>
+            <p class="font-medium text-gray-900 dark:text-white">
+              <NuxtLink
+                v-if="service.parent_id"
+                :to="`/admin/organisation/services/${service.parent_id}`"
+                class="text-brand-red-600 dark:text-brand-red-400 hover:underline"
+              >
+                {{ parentService?.name || service.parent_id }}
+              </NuxtLink>
+              <template v-else>—</template>
+            </p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Page dédiée</p>
+            <p class="font-medium text-gray-900 dark:text-white font-mono">{{ service.landing_path || '—' }}</p>
+          </div>
+          <div v-if="childServices.length > 0" class="col-span-2">
+            <p class="text-sm text-gray-500 dark:text-gray-400">Pôles</p>
+            <ul class="flex flex-wrap gap-x-4 gap-y-1">
+              <li v-for="child in childServices" :key="child.id">
+                <NuxtLink
+                  :to="`/admin/organisation/services/${child.id}`"
+                  class="font-medium text-brand-red-600 dark:text-brand-red-400 hover:underline"
+                >
+                  {{ child.name }}
+                </NuxtLink>
+              </li>
+            </ul>
           </div>
           <div class="col-span-2">
             <p class="text-sm text-gray-500 dark:text-gray-400">Description</p>

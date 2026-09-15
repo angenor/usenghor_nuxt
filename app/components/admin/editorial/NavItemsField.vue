@@ -4,6 +4,8 @@ import type { PageSectionField } from '~/composables/editorial-pages-config'
 interface NavSubItem {
   id: string
   label: string
+  label_en?: string
+  label_ar?: string
   description?: string
   route: string
   icon: string
@@ -88,6 +90,8 @@ function startAddItem() {
   isAddingNew.value = true
   formData.value = {
     label: '',
+    label_en: '',
+    label_ar: '',
     description: '',
     route: '',
     icon: 'fa-solid fa-link',
@@ -98,7 +102,17 @@ function startAddItem() {
 function startEditItem(item: NavSubItem) {
   isAddingNew.value = false
   editingItemId.value = item.id
-  formData.value = { ...item }
+  formData.value = { ...item, label_en: item.label_en ?? '', label_ar: item.label_ar ?? '' }
+}
+
+// Supprime les libellés traduits vides (on n'écrit jamais de chaîne vide)
+function stripEmptyTranslatedLabels(item: NavSubItem): NavSubItem {
+  for (const key of ['label_en', 'label_ar'] as const) {
+    const value = item[key]?.trim()
+    if (value) item[key] = value
+    else delete item[key]
+  }
+  return item
 }
 
 function cancelForm() {
@@ -110,15 +124,17 @@ function cancelForm() {
 function confirmAddItem() {
   if (!formData.value.label || !formData.value.route) return
 
-  const newItem: NavSubItem = {
+  const newItem: NavSubItem = stripEmptyTranslatedLabels({
     id: self.crypto?.randomUUID?.() ?? Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join(''),
     label: formData.value.label!,
+    label_en: formData.value.label_en,
+    label_ar: formData.value.label_ar,
     description: formData.value.description || undefined,
     route: formData.value.route!,
     icon: formData.value.icon || 'fa-solid fa-link',
     badge: formData.value.badge || undefined,
     sort_order: items.value.length + 1,
-  }
+  })
 
   items.value.push(newItem)
   cancelForm()
@@ -131,7 +147,10 @@ function confirmEditItem() {
   if (index === -1) return
 
   const existing = items.value[index]!
-  items.value[index] = {
+  // Fusion : les clés inconnues de l'item existant sont préservées
+  items.value[index] = stripEmptyTranslatedLabels({
+    ...existing,
+    ...formData.value,
     id: existing.id,
     sort_order: existing.sort_order,
     label: formData.value.label!,
@@ -139,7 +158,7 @@ function confirmEditItem() {
     route: formData.value.route!,
     icon: formData.value.icon || 'fa-solid fa-link',
     badge: formData.value.badge || undefined,
-  }
+  })
 
   cancelForm()
 }
@@ -239,6 +258,12 @@ function moveDown(index: number) {
               <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
                 {{ item.label }}
               </p>
+              <p v-if="item.label_en" class="text-xs text-gray-400 dark:text-gray-500 truncate" dir="ltr">
+                EN : {{ item.label_en }}
+              </p>
+              <p v-if="item.label_ar" class="text-xs text-gray-400 dark:text-gray-500 truncate">
+                AR : <span dir="rtl">{{ item.label_ar }}</span>
+              </p>
               <p v-if="item.description" class="text-xs text-gray-400 dark:text-gray-500 truncate">
                 {{ item.description }}
               </p>
@@ -336,6 +361,39 @@ function moveDown(index: number) {
               />
             </div>
           </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Libellé anglais -->
+            <div>
+              <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                Libellé (anglais)
+              </label>
+              <input
+                v-model="formData.label_en"
+                type="text"
+                dir="ltr"
+                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                placeholder="Ex: Our mission"
+              />
+            </div>
+
+            <!-- Libellé arabe -->
+            <div>
+              <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                Libellé (arabe)
+              </label>
+              <input
+                v-model="formData.label_ar"
+                type="text"
+                dir="rtl"
+                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                placeholder="Ex: مهمتنا"
+              />
+            </div>
+          </div>
+          <p class="-mt-1 text-xs text-gray-400 dark:text-gray-500">
+            Facultatifs : sans traduction, le libellé français s'affiche dans toutes les langues.
+          </p>
 
           <!-- Description -->
           <div>
@@ -457,6 +515,8 @@ function moveDown(index: number) {
           >
             <font-awesome-icon :icon="item.icon" class="h-3.5 w-3.5 text-indigo-500 flex-shrink-0" />
             <span class="text-gray-700 dark:text-gray-300 truncate">{{ item.label }}</span>
+            <span v-if="item.label_en" class="text-xs text-gray-400 dark:text-gray-500 truncate" dir="ltr">EN : {{ item.label_en }}</span>
+            <span v-if="item.label_ar" class="text-xs text-gray-400 dark:text-gray-500 truncate">AR : <span dir="rtl">{{ item.label_ar }}</span></span>
             <span v-if="item.description" class="text-xs text-gray-400 dark:text-gray-500 truncate">— {{ item.description }}</span>
             <span class="text-xs text-gray-400 dark:text-gray-500">{{ item.route }}</span>
           </div>

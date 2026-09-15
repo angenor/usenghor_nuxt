@@ -104,6 +104,8 @@ export interface ServiceRead extends SectorServiceI18nFields {
   sector_id: string | null
   head_external_id: string | null
   album_external_id: string | null
+  parent_id?: string | null
+  landing_path?: string | null
   display_order: number
   active: boolean
   created_at: string

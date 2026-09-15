@@ -20,6 +20,7 @@ const {
   getSectorByCode,
   findServiceBySlug,
   slugify,
+  getServiceLink,
 } = usePublicOrganizationApi()
 const { listPublishedNews, formatNewsDate } = usePublicNewsApi()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
@@ -257,6 +258,11 @@ const team = computed<ServiceTeamMemberPublic[]>(() => {
   }
   return []
 })
+
+// Hiérarchie des pôles (services uniquement) : parent actif, page dédiée, pôles actifs
+const serviceParent = computed(() => (entityType === 'service' ? service.value?.parent ?? null : null))
+const serviceLandingPath = computed(() => (entityType === 'service' ? service.value?.landing_path ?? null : null))
+const servicePoles = computed(() => (entityType === 'service' ? service.value?.children ?? [] : []))
 
 // Services (only for sectors)
 const sectorServices = computed(() => {
@@ -528,6 +534,64 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
               <p class="text-gray-500 dark:text-gray-400 text-lg">{{ t('organizationDetail.presentation.empty') }}</p>
             </div>
 
+            <!-- Rattachement : service parent et page dédiée -->
+            <div v-if="serviceParent || serviceLandingPath" class="mt-8 flex flex-wrap items-center gap-3">
+              <NuxtLink
+                v-if="serviceParent"
+                :to="getServiceUrl(serviceParent)"
+                class="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 shadow-sm hover:shadow-md transition-all"
+              >
+                <font-awesome-icon icon="fa-solid fa-arrow-left" class="w-3 h-3 rtl:-scale-x-100" />
+                <span>{{ t('organizationDetail.poles.parentOf') }}</span>
+                <span class="font-semibold" :class="colorClasses.text">{{ serviceParent.sigle || localized(serviceParent, 'name') }}</span>
+              </NuxtLink>
+              <NuxtLink
+                v-if="serviceLandingPath"
+                :to="localePath(serviceLandingPath)"
+                class="group inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-white bg-brand-blue-600 hover:bg-brand-blue-700 transition-colors"
+              >
+                <span>{{ t('organizationDetail.poles.dedicatedPage') }}</span>
+                <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3 rtl:-scale-x-100 transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" />
+              </NuxtLink>
+            </div>
+
+            <!-- Pôles du service -->
+            <section v-if="servicePoles.length" aria-labelledby="poles-title" class="mt-8">
+              <h3 id="poles-title" class="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                {{ t('organizationDetail.poles.title') }}
+              </h3>
+              <div class="grid sm:grid-cols-2 gap-4">
+                <NuxtLink
+                  v-for="pole in servicePoles"
+                  :key="pole.id"
+                  :to="localePath(getServiceLink(pole))"
+                  class="group bg-white dark:bg-gray-900 rounded-xl p-5 border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                  :class="pole.color ? '' : 'border-brand-blue-200 dark:border-brand-blue-800'"
+                  :style="pole.color ? { borderColor: pole.color + '40' } : {}"
+                >
+                  <div class="flex items-start gap-4">
+                    <div
+                      class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300"
+                      :class="pole.color ? '' : colorClasses.bgLight"
+                      :style="pole.color ? { backgroundColor: pole.color + '20', color: pole.color } : {}"
+                    >
+                      <span v-if="pole.sigle" class="text-xs font-bold" :class="pole.color ? '' : colorClasses.text">{{ pole.sigle }}</span>
+                      <font-awesome-icon v-else icon="fa-solid fa-building" class="w-5 h-5" :class="pole.color ? '' : colorClasses.text" />
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <h4 class="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
+                        {{ localized(pole, 'name') }}
+                      </h4>
+                      <span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                        <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3 rtl:-scale-x-100" />
+                        <span>{{ pole.landing_path ? t('organizationDetail.poles.dedicatedPage') : t('organization.departments.view_programs') }}</span>
+                      </span>
+                    </div>
+                  </div>
+                </NuxtLink>
+              </div>
+            </section>
+
             <!-- Next Tab Button -->
             <div v-if="nextTab" class="mt-12 flex justify-end">
               <button
@@ -718,6 +782,9 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                     <span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                       <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
                       <span>{{ t('organization.departments.view_programs') }}</span>
+                    </span>
+                    <span v-if="svc.children?.length" class="block mt-1 text-xs font-medium text-brand-blue-600 dark:text-brand-blue-400">
+                      {{ t('organizationDetail.poles.count', { n: svc.children.length }, svc.children.length) }}
                     </span>
                   </div>
                 </div>

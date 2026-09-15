@@ -112,7 +112,26 @@ export interface ServicePublic extends SectorServicePublicI18nFields {
   sector_id: string | null
   head_external_id: string | null
   album_external_id: string | null
+  parent_id: string | null
+  landing_path: string | null
   display_order: number
+}
+
+/** Parent ou pôle d'un service (fiche publique) */
+export interface ServiceRelativePublic {
+  id: string
+  name: string
+  name_en?: string | null
+  name_ar?: string | null
+  sigle: string | null
+  color: string | null
+  landing_path: string | null
+  display_order: number
+}
+
+/** Service de premier niveau avec ses pôles actifs */
+export interface ServicePublicWithChildren extends ServicePublic {
+  children: ServicePublic[]
 }
 
 export interface ServicePublicWithDetails extends ServicePublic {
@@ -121,10 +140,12 @@ export interface ServicePublicWithDetails extends ServicePublic {
   projects: ServiceProjectPublic[]
   team: ServiceTeamMemberPublic[]
   album_ids: string[]
+  parent?: ServiceRelativePublic | null
+  children?: ServiceRelativePublic[]
 }
 
 export interface SectorPublicWithServices extends SectorPublic {
-  services: ServicePublic[]
+  services: ServicePublicWithChildren[]
 }
 
 // ============================================================================
@@ -231,8 +252,16 @@ export function usePublicOrganizationApi() {
   /**
    * Génère l'URL d'un service
    */
-  function getServiceUrl(service: ServicePublic): string {
+  function getServiceUrl(service: Pick<ServicePublic, 'name'>): string {
     return `/a-propos/organisation/service/${slugify(service.name)}`
+  }
+
+  /**
+   * Destination d'une carte de service : page dédiée si renseignée, sinon fiche
+   * (non localisée : l'appelant applique localePath)
+   */
+  function getServiceLink(service: Pick<ServicePublic, 'name' | 'landing_path'>): string {
+    return service.landing_path || getServiceUrl(service)
   }
 
   /**
@@ -276,6 +305,7 @@ export function usePublicOrganizationApi() {
     // Helpers
     slugify,
     getServiceUrl,
+    getServiceLink,
     getSectorUrl,
     getCoverImageUrl,
     getIconUrl,

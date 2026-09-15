@@ -32,7 +32,13 @@ interface NavChild {
   icon: string
   badge?: string
   _label?: string
+  _labels?: { fr?: string, en?: string, ar?: string }
   _description?: string
+}
+
+// Libellé d'un enfant de navigation : langue du visiteur, puis libellé éditorial (FR), puis traduction du site
+function navChildLabel(sectionKey: string, child: NavChild): string {
+  return child._labels?.[locale.value as 'fr' | 'en' | 'ar'] || child._label || t(`nav.dropdowns.${sectionKey}.${child.key}`)
 }
 
 interface PrimaryNavItem {
@@ -233,6 +239,8 @@ function updatePrimaryNavItems() {
       const editorialChildren = JSON.parse(editorialJson) as Array<{
         id: string
         label: string
+        label_en?: string
+        label_ar?: string
         description?: string
         route: string
         icon: string
@@ -252,6 +260,7 @@ function updatePrimaryNavItems() {
             icon: child.icon,
             badge: child.badge,
             _label: child.label,
+            _labels: { fr: child.label, en: child.label_en, ar: child.label_ar },
             _description: child.description,
           })),
       }
@@ -272,6 +281,8 @@ function updateSecondaryNavItems() {
       const editorialChildren = JSON.parse(editorialJson) as Array<{
         id: string
         label: string
+        label_en?: string
+        label_ar?: string
         route: string
         icon: string
         badge?: string
@@ -290,6 +301,7 @@ function updateSecondaryNavItems() {
             icon: child.icon,
             badge: child.badge,
             _label: child.label,
+            _labels: { fr: child.label, en: child.label_en, ar: child.label_ar },
           })),
       }
     }
@@ -443,7 +455,7 @@ onUnmounted(() => {
                           <div class="flex-1 min-w-0 pt-0.5">
                             <div class="flex items-center gap-2">
                               <span class="block text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
-                                {{ child._label || t(`nav.dropdowns.${item.key}.${child.key}`) }}
+                                {{ navChildLabel(item.key, child) }}
                               </span>
                               <span
                                 v-if="child.badge"
@@ -534,7 +546,7 @@ onUnmounted(() => {
                             class="group flex items-center gap-2 px-2 py-1.5 text-xs text-gray-600 dark:text-gray-400 hover:text-brand-blue-600 dark:hover:text-brand-blue-400 rounded-lg hover:bg-white dark:hover:bg-gray-700 transition-all duration-200"
                           >
                             <font-awesome-icon :icon="child.icon" class="w-3 h-3 opacity-50 group-hover:opacity-100" />
-                            <span>{{ child._label || t(`nav.dropdowns.${section.key}.${child.key}`) }}</span>
+                            <span>{{ navChildLabel(section.key, child) }}</span>
                             <span
                               v-if="child.badge"
                               class="ml-auto px-1 py-0.5 text-[8px] font-semibold uppercase rounded bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-300"
@@ -779,7 +791,7 @@ onUnmounted(() => {
                         <font-awesome-icon :icon="child.icon" class="text-gray-400 dark:text-gray-500 text-sm" />
                       </div>
                       <div class="flex-1">
-                        <span class="text-sm font-medium">{{ child._label || t(`nav.dropdowns.${item.key}.${child.key}`) }}</span>
+                        <span class="text-sm font-medium">{{ navChildLabel(item.key, child) }}</span>
                       </div>
                       <span
                         v-if="child.badge"
