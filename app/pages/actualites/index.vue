@@ -506,7 +506,7 @@ const hasAssociations = (item: NewsDisplay) => {
               <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <div v-if="call.deadline" class="text-sm">
                   <span class="text-gray-500 dark:text-gray-400">{{ t('actualites.calls.deadline') }}:</span>
-                  <span class="ml-1 font-semibold text-red-600 dark:text-red-400">{{ formatShortDate(call.deadline) }}</span>
+                  <span class="ml-1 font-semibold text-red-600 dark:text-red-400">{{ formatGmtDateTime(call.deadline, locale, { day: 'numeric', month: 'short' }) }}</span>
                 </div>
 
                 <span class="inline-flex items-center gap-1 px-3 py-1.5 bg-brand-blue-600 text-white text-sm font-medium rounded-lg">

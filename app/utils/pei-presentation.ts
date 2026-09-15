@@ -259,7 +259,7 @@ export function seeAgendaSteps(
   deadline: string | null,
   localize: (step: CallScheduleRead, field: 'step' | 'description') => string,
   deadlineLabel: string,
-  timeZone = 'Africa/Cairo',
+  timeZone = 'UTC',
 ): AgendaStep[] {
   const deadlineDay = deadline ? calendarDay(deadline, timeZone) : null
   let marked = false

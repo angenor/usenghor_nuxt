@@ -93,17 +93,6 @@ const formatDate = (dateString?: string | null) => {
   })
 }
 
-const formatDateTime = (dateString?: string | null) => {
-  if (!dateString) return '-'
-  return new Date(dateString).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
 const isDeadlinePassed = (deadline?: string | null) => {
   if (!deadline) return false
   return new Date(deadline) < new Date()
@@ -532,7 +521,7 @@ const reopenCall = async () => {
                 class="text-sm font-medium"
                 :class="isDeadlinePassed(call.deadline) ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'"
               >
-                {{ formatDateTime(call.deadline) }}
+                {{ formatGmtDateTime(call.deadline, 'fr') || '-' }}
               </p>
               <p
                 v-if="!isDeadlinePassed(call.deadline) && getDaysRemaining(call.deadline)"

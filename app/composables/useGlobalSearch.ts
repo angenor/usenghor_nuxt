@@ -400,7 +400,7 @@ export function useGlobalSearch() {
         id: call.id,
         type: 'call',
         title: call.title,
-        subtitle: `${typeLabels.call} • ${call.deadline ? `Date limite: ${new Date(call.deadline).toLocaleDateString('fr-FR')}` : 'En cours'}`,
+        subtitle: `${typeLabels.call} • ${call.deadline ? `Date limite: ${formatGmtDate(call.deadline, 'fr', { day: '2-digit', month: '2-digit', year: 'numeric' })}` : 'En cours'}`,
         description: extractPlainText(call.description_html),
         icon: callIcons[call.type] || 'fa-solid fa-bullhorn',
         route: `/actualites/appels/${call.slug}`,

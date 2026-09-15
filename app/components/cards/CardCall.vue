@@ -65,14 +65,7 @@ const deadline = computed(() => {
 })
 
 // Format deadline date
-const formattedDeadline = computed(() => {
-  if (!deadline.value) return ''
-  const date = new Date(deadline.value)
-  return date.toLocaleDateString(
-    locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
-    { day: 'numeric', month: 'long', year: 'numeric' }
-  )
-})
+const formattedDeadline = computed(() => formatGmtDateTime(deadline.value, locale.value))
 
 // Check if deadline is soon (within 30 days)
 const isDeadlineSoon = computed(() => {

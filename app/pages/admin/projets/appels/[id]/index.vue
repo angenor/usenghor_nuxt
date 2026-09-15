@@ -239,7 +239,7 @@ const projectCallTypeColors: Record<string, string> = {
             <div>
               <div class="text-sm text-gray-500 dark:text-gray-400">Date limite</div>
               <div :class="['font-semibold', isDeadlinePassed(call.deadline) ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white']">
-                {{ formatShortDate(call.deadline) }}
+                {{ formatGmtDateTime(call.deadline, 'fr') || '-' }}
               </div>
               <div v-if="call.deadline && !isDeadlinePassed(call.deadline)" class="text-xs text-green-600 dark:text-green-400">
                 {{ getDaysUntilDeadline(call.deadline) }} jour(s) restant(s)

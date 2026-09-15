@@ -9,24 +9,10 @@ const props = defineProps<Props>()
 const { t, locale } = useI18n()
 const { localized } = useLocalizedField()
 
-// Format date
-const formatDate = (dateStr: string | null) => {
-  if (!dateStr) return '-'
-  const date = new Date(dateStr)
-  return date.toLocaleDateString(
-    locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
-    { day: 'numeric', month: 'long', year: 'numeric' }
-  )
-}
+// Dates et heures affichées en GMT (heure saisie dans le backoffice)
+const formatDate = (dateStr: string | null) => formatGmtDate(dateStr, locale.value) || '-'
 
-const formatDateTime = (dateStr: string | null) => {
-  if (!dateStr) return '-'
-  const date = new Date(dateStr)
-  return date.toLocaleDateString(
-    locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
-    { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }
-  )
-}
+const formatDateTime = (dateStr: string | null) => formatGmtDateTime(dateStr, locale.value) || '-'
 
 // Type mapping
 const typeToI18nKey: Record<CallType, string> = {

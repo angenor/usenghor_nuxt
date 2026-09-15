@@ -21,8 +21,6 @@ const props = defineProps<{
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 
-const TIME_ZONE = 'Africa/Cairo'
-
 const badgeClass = computed(() => {
   if (props.state === 'open') return 'bg-brand-red-100 text-brand-red-700 dark:bg-brand-red-900/30 dark:text-brand-red-300'
   if (props.state === 'upcoming') return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
@@ -32,19 +30,11 @@ const badgeLabel = computed(() => t(`pei.see.state.${props.state === 'absent' ? 
 
 const showSteps = computed(() => props.state !== 'absent' && props.steps.length > 0)
 
+// Dates lues en GMT ; la date limite porte son heure GMT (heure saisie dans le backoffice).
 function formatDate(value: string | null, withTime = false): string {
   if (!value) return ''
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
-  // Date seule (AAAA-MM-JJ) : lue en UTC pour ne jamais changer de jour.
   const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(value)
-  return new Intl.DateTimeFormat(locale.value, {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    timeZone: dateOnly ? 'UTC' : TIME_ZONE,
-    ...(withTime && !dateOnly ? { hour: '2-digit', minute: '2-digit' } : {}),
-  }).format(date)
+  return withTime && !dateOnly ? formatGmtDateTime(value, locale.value) : formatGmtDate(value, locale.value)
 }
 
 function stepDate(step: AgendaStep): string {

@@ -713,7 +713,7 @@ const toggleSemester = (num: number) => {
                       </p>
                       <p v-if="call.deadline" class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
                         <font-awesome-icon icon="fa-solid fa-clock" class="w-3 h-3" />
-                        {{ t('formations.detail.deadline') }}: {{ new Date(call.deadline).toLocaleDateString(locale) }}
+                        {{ t('formations.detail.deadline') }}: {{ formatGmtDateTime(call.deadline, locale) }}
                       </p>
                     </div>
                   </NuxtLink>

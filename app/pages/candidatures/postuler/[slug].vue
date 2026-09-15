@@ -231,7 +231,7 @@ useSeoMeta({
             <font-awesome-icon icon="fa-solid fa-clock" class="w-4 h-4 mr-1" />
             {{ t('candidatures.deadline') || "Date limite" }} :
             <span class="font-medium text-red-600 dark:text-red-400">
-              {{ new Date(call.deadline).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) }}
+              {{ formatGmtDateTime(call.deadline, locale) }}
             </span>
           </p>
         </div>

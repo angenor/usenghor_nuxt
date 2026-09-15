@@ -165,18 +165,8 @@ const statusFilters = [
 ]
 
 // Format date avec heure
-const formatDate = (dateStr: string | null) => {
-  if (!dateStr) return ''
-  const date = new Date(dateStr)
-  const hasTime = dateStr.includes('T') && !dateStr.endsWith('T00:00:00') && !dateStr.endsWith('T00:00')
-  const localeStr = locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR'
-  const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' }
-  if (hasTime) {
-    options.hour = '2-digit'
-    options.minute = '2-digit'
-  }
-  return date.toLocaleDateString(localeStr, options)
-}
+// Date limite affichée en GMT (heure saisie dans le backoffice)
+const formatDate = (dateStr: string | null) => formatGmtDateTime(dateStr, locale.value)
 
 // Days until deadline
 const daysUntilDeadline = (deadlineStr: string | null) => {

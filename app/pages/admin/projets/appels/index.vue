@@ -554,7 +554,7 @@ const projectCallTypeColors: Record<ProjectCallType, string> = {
               <td class="px-4 py-3">
                 <div class="text-sm">
                   <div :class="{ 'text-red-600 dark:text-red-400': isDeadlinePassed(call.deadline) }">
-                    {{ formatDate(call.deadline) }}
+                    {{ formatGmtDateTime(call.deadline, 'fr', { day: '2-digit', month: 'short', year: 'numeric' }) || '-' }}
                   </div>
                   <div v-if="call.deadline && !isDeadlinePassed(call.deadline)" class="text-xs text-gray-500">
                     {{ getDaysUntilDeadline(call.deadline) }} jour(s) restant(s)

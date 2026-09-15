@@ -70,14 +70,7 @@ const detailUrl = computed(() => {
 })
 
 // Format deadline date
-const formattedDeadline = computed(() => {
-  if (!props.formation.application_deadline) return null
-  const date = new Date(props.formation.application_deadline)
-  return date.toLocaleDateString(
-    locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
-    { day: 'numeric', month: 'long', year: 'numeric' }
-  )
-})
+const formattedDeadline = computed(() => formatGmtDateTime(props.formation.application_deadline, locale.value) || null)
 
 // Image URL (null if no image available)
 const imageUrl = computed(() => {

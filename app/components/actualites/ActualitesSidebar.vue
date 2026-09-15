@@ -229,7 +229,7 @@ const typeColors: Record<string, string> = {
             </h4>
             <div v-if="call.deadline" class="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
               <span class="text-red-500 dark:text-red-400 font-medium">
-                {{ t('actualites.calls.deadline') }}: {{ formatDate(call.deadline) }}
+                {{ t('actualites.calls.deadline') }}: {{ formatGmtDateTime(call.deadline, locale) }}
               </span>
             </div>
           </NuxtLink>

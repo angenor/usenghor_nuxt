@@ -209,7 +209,7 @@ const eventTypeColors: Record<string, string> = {
           <div v-if="call.deadline" class="flex items-center gap-1 mt-1 text-xs text-gray-500 dark:text-gray-400">
             <font-awesome-icon icon="fa-solid fa-clock" class="w-3 h-3 text-red-500" />
             <span class="text-red-500 dark:text-red-400 font-medium">
-              {{ formatDate(call.deadline) }}
+              {{ formatGmtDateTime(call.deadline, locale) }}
             </span>
           </div>
         </a>

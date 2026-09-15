@@ -402,7 +402,7 @@ const saveForm = async () => {
       location_address: form.value.location_address || null,
       cover_image_external_id: form.value.cover_image_external_id,
       opening_date: form.value.opening_date || null,
-      deadline: form.value.deadline || null,
+      deadline: fromGmtInputValue(form.value.deadline),
       program_start_date: form.value.program_start_date || null,
       program_end_date: form.value.program_end_date || null,
       registration_fee: form.value.registration_fee || null,
@@ -835,7 +835,7 @@ const tabs = [
 
           <div>
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Date limite de candidature *
+              Date limite de candidature (heure GMT) *
             </label>
             <input
               v-model="form.deadline"
@@ -843,6 +843,12 @@ const tabs = [
               required
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Heure GMT, affichée telle quelle sur le site.
+              <ClientOnly>
+                <span v-if="form.deadline">Soit {{ gmtInputLocalEquivalent(form.deadline) }} dans votre fuseau horaire.</span>
+              </ClientOnly>
+            </p>
           </div>
 
           <div>

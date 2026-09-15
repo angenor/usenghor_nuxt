@@ -180,7 +180,7 @@ onMounted(async () => {
 
     // Convertir la deadline pour le format datetime-local
     if (call.deadline) {
-      form.deadline = call.deadline.slice(0, 16)
+      form.deadline = toGmtInputValue(call.deadline)
     }
 
     // Charger le contenu éditeur
@@ -233,7 +233,7 @@ const saveForm = async () => {
       conditions_md: conditionsMd.value || null,
       type: form.type,
       status: form.status,
-      deadline: form.deadline ? new Date(form.deadline).toISOString() : null,
+      deadline: fromGmtInputValue(form.deadline),
       title_en: form.titleEn || null,
       title_ar: form.titleAr || null,
       description_en_html: descriptionHtmlEn.value || null,
@@ -483,7 +483,7 @@ const formatDate = (date: string | undefined) => {
           <!-- Date limite -->
           <div class="sm:col-span-2">
             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Date limite de soumission
+              Date limite de soumission (heure GMT)
             </label>
             <input
               v-model="form.deadline"
@@ -491,6 +491,12 @@ const formatDate = (date: string | undefined) => {
               class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
             <p class="mt-1 text-xs text-gray-500">Laissez vide si pas de date limite</p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Heure GMT, affichée telle quelle sur le site.
+              <ClientOnly>
+                <span v-if="form.deadline">Soit {{ gmtInputLocalEquivalent(form.deadline) }} dans votre fuseau horaire.</span>
+              </ClientOnly>
+            </p>
           </div>
 
           <!-- Image de couverture -->

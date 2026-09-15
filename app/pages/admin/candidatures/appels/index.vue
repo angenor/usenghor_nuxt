@@ -604,7 +604,7 @@ const isDeadlineSoon = (deadline?: string | null) => {
                       'text-gray-600 dark:text-gray-300': !isDeadlinePassed(call.deadline) && !isDeadlineSoon(call.deadline)
                     }"
                   >
-                    {{ formatDate(call.deadline) }}
+                    {{ formatGmtDateTime(call.deadline, 'fr', { day: '2-digit', month: 'short', year: 'numeric' }) || '-' }}
                   </span>
                   <span
                     v-if="isDeadlinePassed(call.deadline)"

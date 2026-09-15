@@ -506,7 +506,7 @@ const breadcrumb = computed(() => [
                   </h3>
                   <div v-if="selectedFormation.application_deadline" class="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
                     <font-awesome-icon icon="fa-solid fa-calendar" class="w-4 h-4" />
-                    {{ t('formations.candidature.info.deadline') }} {{ formatDate(selectedFormation.application_deadline) }}
+                    {{ t('formations.candidature.info.deadline') }} {{ formatGmtDateTime(selectedFormation.application_deadline, locale) }}
                   </div>
                 </div>
               </div>

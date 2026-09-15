@@ -83,14 +83,7 @@ useSeoMeta({
 })
 
 // Format deadline
-const formatDeadline = (dateStr: string | null) => {
-  if (!dateStr) return '-'
-  const date = new Date(dateStr)
-  return date.toLocaleDateString(
-    locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
-    { day: 'numeric', month: 'long', year: 'numeric' },
-  )
-}
+const formatDeadline = (dateStr: string | null) => formatGmtDateTime(dateStr, locale.value) || '-'
 
 // Breadcrumb
 const breadcrumb = computed(() => [

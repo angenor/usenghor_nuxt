@@ -28,13 +28,7 @@ const getLocalizedDescription = (call: any) => {
 }
 
 // Format deadline
-const formatDeadline = (dateStr: string) => {
-  const date = new Date(dateStr)
-  return date.toLocaleDateString(
-    locale.value === 'ar' ? 'ar-EG' : locale.value === 'en' ? 'en-US' : 'fr-FR',
-    { day: 'numeric', month: 'long', year: 'numeric' }
-  )
-}
+const formatDeadline = (dateStr: string) => formatGmtDateTime(dateStr, locale.value)
 
 // Check if deadline is near (within 14 days)
 const isDeadlineNear = (dateStr: string) => {
