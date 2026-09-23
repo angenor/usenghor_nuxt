@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const { t, locale } = useI18n()
-const { listContents } = useEditorialApi()
+const { getContentsByKeys } = usePublicEditorialApi()
 const { getAllPartners } = usePublicPartnersApi()
 const { public: { siteUrl } } = useRuntimeConfig()
 const route = useRoute()
@@ -48,11 +48,11 @@ await useAsyncData('editorial-about', () => loadContent())
 // Charger les chiffres clés et le nombre de partenaires (client-side)
 onMounted(async () => {
   try {
-    const [editorialResponse, partners] = await Promise.all([
-      listContents({ value_type: 'number', limit: 50 }),
+    const [editorialContents, partners] = await Promise.all([
+      getContentsByKeys(Object.keys(keyFigures.value)),
       getAllPartners(),
     ])
-    for (const item of editorialResponse.items) {
+    for (const item of editorialContents) {
       if (item.value && Object.prototype.hasOwnProperty.call(keyFigures.value, item.key)) {
         // @ts-expect-error dynamic key assignment
         keyFigures.value[item.key] = item.value

@@ -486,13 +486,13 @@ onUnmounted(() => {
             @mouseenter="isMoreMenuOpen = true"
             @mouseleave="isMoreMenuOpen = false"
           >
-            <button
-              type="button"
+            <NuxtLink
+              :to="localePath('/a-propos')"
               aria-haspopup="menu"
               :aria-expanded="isMoreMenuOpen ? 'true' : 'false'"
               aria-controls="nav-dropdown-more"
-              @click="isMoreMenuOpen = !isMoreMenuOpen"
-              class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-all duration-300"
+              @click="isMoreMenuOpen = false"
+              class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-all duration-300 no-underline"
               :class="[
                 isScrolled
                   ? isMoreMenuOpen
@@ -510,7 +510,7 @@ onUnmounted(() => {
                 class="w-3 h-3 transition-transform duration-300 opacity-60"
                 :class="{ 'rotate-180': isMoreMenuOpen }"
               />
-            </button>
+            </NuxtLink>
 
             <!-- More Menu Dropdown — CSS hover (pré-hydratation) + JS state (post-hydratation) -->
             <div
