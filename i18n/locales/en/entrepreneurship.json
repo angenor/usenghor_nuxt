@@ -42,7 +42,9 @@
         "breadcrumbLabel": "Breadcrumb",
         "slides": "Slogan slides",
         "showSlide": "Show slide {n} of {total}: {label}",
-        "slideAnnounce": "Slide {n} of {total}: {label}"
+        "slideAnnounce": "Slide {n} of {total}: {label}",
+        "pause": "Pause the slideshow",
+        "resume": "Resume the slideshow"
       },
       "preview": {
         "label": "Preview",

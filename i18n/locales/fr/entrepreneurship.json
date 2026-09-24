@@ -42,7 +42,9 @@
         "breadcrumbLabel": "Fil d'Ariane",
         "slides": "Diapositives du slogan",
         "showSlide": "Afficher la diapositive {n} sur {total} : {label}",
-        "slideAnnounce": "Diapositive {n} sur {total} : {label}"
+        "slideAnnounce": "Diapositive {n} sur {total} : {label}",
+        "pause": "Mettre en pause le défilement",
+        "resume": "Reprendre le défilement"
       },
       "preview": {
         "label": "Aperçu",

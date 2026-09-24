@@ -11,8 +11,8 @@
  *   Images : autant d'images que de mots → l'image n suit le mot n ; au moins 2 images
  *   en nombre différent → elles avancent au même rythme (modulo) ; 0 ou 1 image → image fixe.
  *   Sans slogan exploitable (moins de 2 mots) mais avec 2 images ou plus : slider d'images seul.
- * - Défilement automatique (barre de progression CSS) en pause au survol, au focus
- *   et onglet masqué.
+ * - Défilement automatique (barre de progression CSS) continu au survol ; en pause avec le
+ *   bouton pause / lecture (WCAG 2.2.2), au focus clavier (`:focus-visible`) et onglet masqué.
  * - `prefers-reduced-motion` : aucune avance automatique et tous les mots allumés
  *   (le slogan reste lisible d'un coup d'œil) ; un clic sur une commande allume le mot choisi.
  * - Commandes : un bouton par étape (numéro + mot), annonce polie au changement manuel.
@@ -103,7 +103,9 @@ const mounted = ref(false)
 const reducedMotion = ref(false)
 /** Une commande a été actionnée (mouvement réduit : un seul mot allumé ensuite). */
 const touched = ref(false)
-const hovered = ref(false)
+/** Pause demandée par le bouton pause / lecture. */
+const userPaused = ref(false)
+/** Focus clavier dans le hero (un clic souris ne met pas en pause). */
 const focused = ref(false)
 const pageHidden = ref(false)
 const liveMessage = ref('')
@@ -111,7 +113,7 @@ const liveMessage = ref('')
 const autoplay = computed(() => mounted.value && hasSteps.value && !reducedMotion.value)
 /** Zoom lent de l'image active : après hydratation (le zoom part de l'échelle 1), jamais en mouvement réduit. */
 const kenBurns = computed(() => mounted.value && !reducedMotion.value)
-const paused = computed(() => hovered.value || focused.value || pageHidden.value)
+const paused = computed(() => userPaused.value || focused.value || pageHidden.value)
 
 /** Image affichée : appariée au mot, sinon rotation au rythme des étapes, sinon fixe. */
 const activeImage = computed(() => {
@@ -158,6 +160,15 @@ function wordClass(index: number): string {
   return last ? 'text-[#7584c2] motion-reduce:text-brand-red-300' : 'text-[#7584c2] motion-reduce:text-white'
 }
 
+function onFocusIn(event: FocusEvent) {
+  const target = event.target as HTMLElement | null
+  focused.value = !!target?.matches?.(':focus-visible')
+}
+
+function toggleUserPause() {
+  userPaused.value = !userPaused.value
+}
+
 function onFocusOut(event: FocusEvent) {
   const root = event.currentTarget as HTMLElement | null
   if (root && event.relatedTarget instanceof Node && root.contains(event.relatedTarget)) return
@@ -197,9 +208,7 @@ function actionClass(action: HeroAction): string {
 <template>
   <section
     class="pei-home-hero relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-brand-blue-900 text-white lg:min-h-[max(100svh,760px)]"
-    @mouseenter="hovered = true"
-    @mouseleave="hovered = false"
-    @focusin="focused = true"
+    @focusin="onFocusIn"
     @focusout="onFocusOut"
   >
     <!-- Images (fondu enchaîné calé sur le changement de mot + zoom lent de l'image active) -->
@@ -332,6 +341,16 @@ function actionClass(action: HeroAction): string {
             >
               {{ pad(index) }}<template v-if="stepLabel(index - 1)"> · {{ stepLabel(index - 1) }}</template>
             </span>
+          </button>
+          <button
+            v-if="autoplay"
+            type="button"
+            class="inline-flex h-11 w-11 shrink-0 items-center justify-center self-end rounded-full border border-white/40 text-white transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            :aria-label="userPaused ? t('pei.home.hero.resume') : t('pei.home.hero.pause')"
+            :aria-pressed="userPaused ? 'true' : 'false'"
+            @click="toggleUserPause"
+          >
+            <font-awesome-icon :icon="userPaused ? 'fa-solid fa-play' : 'fa-solid fa-pause'" class="h-3.5 w-3.5" aria-hidden="true" />
           </button>
         </div>
       </div>

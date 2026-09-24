@@ -42,7 +42,9 @@
         "breadcrumbLabel": "مسار التنقل",
         "slides": "شرائح الشعار",
         "showSlide": "عرض الشريحة {n} من {total}: {label}",
-        "slideAnnounce": "الشريحة {n} من {total}: {label}"
+        "slideAnnounce": "الشريحة {n} من {total}: {label}",
+        "pause": "إيقاف العرض مؤقتًا",
+        "resume": "استئناف العرض"
       },
       "preview": {
         "label": "معاينة",
