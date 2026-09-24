@@ -6,10 +6,16 @@
  * Toutes les données viennent des dispositifs (`pei_programs`), des clés éditoriales `entrepreneurship.*`
  * et des événements à venir de la DDE ; les libellés fixes sont dans l'i18n `pei.activities.*`.
  * Specs : specs/023-pei-public-home-activities (US2, US4), specs/026 (fil d'Ariane partagé).
+ *
+ * Mode aperçu (`usePeiPreview`, actif par défaut pendant la validation) : chaque emplacement photo
+ * de la maquette est rempli (visuels des étapes, bande des phases, mosaïque de l'écosystème) par
+ * la réserve partagée `usePeiPreviewImages`, le paragraphe de l'écosystème et l'agenda par des
+ * exemples (`@bank/mock-data/pei-home-preview`). Hors aperçu, rien n'est inventé.
  */
 import type { PeiProgramPhase, PeiProgramPublic } from '~/types/api/entrepreneurship'
 import type { PeiStepTone } from '~/utils/pei-presentation'
 import type { JourneyRingStep } from '~/components/entrepreneurship/JourneyRing.vue'
+import { peiActivitiesPreview, pickPreviewPhotos, usedPhotos } from '@bank/mock-data/pei-home-preview'
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -22,6 +28,8 @@ const { listPrograms } = usePublicEntrepreneurshipApi()
 const { listPublishedEvents } = usePublicEventsApi()
 const { localized } = useLocalizedField()
 const { buildPeiOrganization, buildWebPage, buildBreadcrumbList } = usePeiJsonLd()
+// Mode aperçu : bandeau, exemples et noindex (`?apercu=0` = état réel)
+const { preview, previewPath } = usePeiPreview()
 
 await useAsyncData('editorial-entrepreneurship', () => loadContent().then(() => true))
 
@@ -36,7 +44,7 @@ const keyServiceId = computed(() => {
 // (parent du pôle de page dédiée `/entrepreneuriat`, sinon clé `entrepreneurship.dde_service_id`)
 const { breadcrumb, ddeId, ready: breadcrumbReady } = usePeiBreadcrumb(() => t('pei.nav.activities'), keyServiceId)
 
-const [{ data: programsData }, { data: eventsData }] = await Promise.all([
+const [{ data: programsData }, { data: eventsData }, { data: sampleEventsData }, { image: previewImage, ids: previewIds }] = await Promise.all([
   useAsyncData('pei-activities-programs', () => listPrograms().catch(() => [])),
   useAsyncData('pei-activities-events', async () => {
     await breadcrumbReady
@@ -44,6 +52,16 @@ const [{ data: programsData }, { data: eventsData }] = await Promise.all([
       ? listPublishedEvents({ service_id: ddeId.value, upcoming: true, order: 'asc', limit: 6 }).then(r => r.items).catch(() => [])
       : []
   }),
+  // Aperçu : événements publiés de l'université (à venir, sinon les plus récents), affichés
+  // seulement si la DDE n'en a aucun à venir ; rien n'est chargé hors aperçu
+  useAsyncData('pei-activities-sample-events', async () => {
+    if (!preview.value) return []
+    const limit = peiActivitiesPreview.agendaCount
+    const upcoming = await listPublishedEvents({ upcoming: true, order: 'asc', limit }).then(r => r.items).catch(() => [])
+    return upcoming.length ? upcoming : listPublishedEvents({ order: 'desc', limit }).then(r => r.items).catch(() => [])
+  }, { watch: [preview] }),
+  // Réserve d'images d'exemple partagée du mini-site (vide hors aperçu)
+  usePeiPreviewImages(),
   breadcrumbReady,
 ])
 
@@ -112,14 +130,48 @@ function supportCardLayout(index: number): { variant: 'dark' | 'darker' | 'light
   return { variant, offset: total <= 3 ? offsets[fromEnd] ?? '' : '' }
 }
 
+const coverOf = (program: PeiProgramPublic) => (program.cover_image_url ? getImageVariantUrl(program.cover_image_url, 'medium') : null)
+
+// ---------------------------------------------------------------------------
+// Aperçu : une photo d'exemple distincte par emplacement de la maquette
+// ---------------------------------------------------------------------------
+const previewPhotos = computed(() => {
+  if (!preview.value) return null
+  const { slots } = peiActivitiesPreview
+  // Photos réelles de la page d'abord : un exemple ne les répète pas
+  const used = usedPhotos([
+    ...(programsData.value ?? []).map(coverOf),
+    ...(eventsData.value ?? []).map(e => (e.cover_image ? getImageVariantUrl(e.cover_image, 'medium') : null)),
+  ])
+  const poolSize = previewIds.value.length
+  return {
+    features: pickPreviewPhotos(slots.features, previewImage, used, poolSize),
+    supportBand: pickPreviewPhotos(slots.supportBand, previewImage, used, poolSize),
+    mosaic: pickPreviewPhotos(slots.mosaic, previewImage, used, poolSize),
+  }
+})
+
+/** Aperçu : photo d'exemple de l'étape grand format n° `index` (dispositif sans visuel). */
+const featureFallback = (index: number) => previewPhotos.value?.features[index] ?? null
+
+/** Bande sous les cartes : visuels des dispositifs ; en aperçu, un exemple pour chaque carte sans visuel. */
 const supportCovers = computed(() => supportSteps.value
-  .filter(s => s.program.cover_image_url)
-  .map(s => ({ src: getImageVariantUrl(s.program.cover_image_url!, 'medium'), alt: localized(s.program, 'title'), key: s.program.id })))
+  .map((s, index) => {
+    const real = coverOf(s.program)
+    if (real) return { src: real, alt: localized(s.program, 'title'), key: s.program.id }
+    const sample = previewPhotos.value?.supportBand[index % 3]
+    return sample ? { src: sample, alt: '', key: `preview-${s.program.id}` } : null
+  })
+  .filter((c): c is { src: string, alt: string, key: string } => !!c))
+const failedCovers = ref<string[]>([])
+const supportCoversShown = computed(() => supportCovers.value.filter(c => !failedCovers.value.includes(c.key)))
 
 // ---------------------------------------------------------------------------
 // Écosystème et agenda
 // ---------------------------------------------------------------------------
-const events = computed(() => eventsData.value ?? [])
+/** Agenda : événements à venir de la DDE ; en aperçu, exemples de l'université s'il n'y en a aucun. */
+const realEvents = computed(() => eventsData.value ?? [])
+const events = computed(() => (realEvents.value.length || !preview.value ? realEvents.value : sampleEventsData.value ?? []))
 const ecosystemItems = computed(() => text('activities.ecosystem.items').split('\n').map(s => s.trim()).filter(Boolean))
 const WALL_COLORS = [
   'text-brand-blue-900 dark:text-white',
@@ -127,15 +179,26 @@ const WALL_COLORS = [
   'text-brand-red-700 dark:text-brand-red-300',
 ]
 
-/** Mosaïque : visuels des dispositifs d'écosystème puis des prochains événements (4 au plus). */
-const mosaic = computed(() => [
-  ...ecosystemPrograms.value
-    .filter(p => p.cover_image_url)
-    .map(p => ({ key: p.id, src: getImageVariantUrl(p.cover_image_url!, 'medium'), alt: localized(p, 'title') })),
-  ...events.value
-    .filter(e => e.cover_image)
-    .map(e => ({ key: e.id, src: getImageVariantUrl(e.cover_image!, 'medium'), alt: localized(e, 'title') })),
-].slice(0, 4))
+/**
+ * Mosaïque : visuels des dispositifs d'écosystème puis des prochains événements de la DDE
+ * (4 au plus) ; en aperçu, complétée jusqu'à 4 photos d'exemple.
+ */
+const MOSAIC_MAX = peiActivitiesPreview.mosaicCount
+const mosaic = computed(() => {
+  const tiles = [
+    ...ecosystemPrograms.value
+      .filter(p => p.cover_image_url)
+      .map(p => ({ key: p.id, src: getImageVariantUrl(p.cover_image_url!, 'medium'), alt: localized(p, 'title') })),
+    ...realEvents.value
+      .filter(e => e.cover_image)
+      .map(e => ({ key: e.id, src: getImageVariantUrl(e.cover_image!, 'medium'), alt: localized(e, 'title') })),
+  ].slice(0, MOSAIC_MAX)
+  for (const [index, src] of (previewPhotos.value?.mosaic ?? []).entries()) {
+    if (tiles.length >= MOSAIC_MAX) break
+    tiles.push({ key: `preview-${index}`, src, alt: '' })
+  }
+  return tiles
+})
 const MOSAIC_LAYOUTS: Record<number, string[]> = {
   1: ['col-span-2 lg:col-span-4 lg:row-span-2'],
   2: ['col-span-2 lg:row-span-2', 'col-span-2 lg:row-span-2'],
@@ -144,6 +207,10 @@ const MOSAIC_LAYOUTS: Record<number, string[]> = {
 }
 const failedMosaic = ref<string[]>([])
 const mosaicShown = computed(() => mosaic.value.filter(m => !failedMosaic.value.includes(m.key)))
+
+/** Paragraphe de droite : dispositif(s) d'écosystème publiés ; en aperçu, texte du cahier des charges. */
+const ecosystemSampleText = computed(() => (!ecosystemPrograms.value.length && preview.value ? peiActivitiesPreview.ecosystemText : ''))
+const hasEcosystemText = computed(() => ecosystemPrograms.value.length > 0 || !!ecosystemSampleText.value)
 
 const showEcosystem = computed(() => ecosystemItems.value.length > 0 || ecosystemPrograms.value.length > 0 || mosaicShown.value.length > 0)
 const ecosystemTitle = computed(() => text('activities.ecosystem.title') || t('pei.phases.ecosystem'))
@@ -191,6 +258,7 @@ const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA
 const seoDescription = computed(() => heroSubtitle.value || t('pei.seo.activitiesDescription'))
 
 useSeoMeta({
+  robots: () => (preview.value ? 'noindex, nofollow' : undefined),
   title: () => heroTitle.value,
   description: () => seoDescription.value,
   ogTitle: () => heroTitle.value,
@@ -211,7 +279,10 @@ useHead(() => ({
 </script>
 
 <template>
-  <div>
+  <!-- Aperçu : ancres décalées sous le bandeau fixe (en-tête + bandeau + sous-navigation) -->
+  <div :class="{ '[&_[id]]:scroll-mt-[200px]': preview }">
+    <EntrepreneurshipPreviewBanner />
+
     <!-- ===================== HERO ===================== -->
     <section class="relative overflow-hidden bg-brand-blue-900 dark:bg-brand-blue-950 text-white" aria-labelledby="pei-activities-title">
       <img
@@ -223,7 +294,11 @@ useHead(() => ({
         decoding="async"
         @error="heroImageFailed = true"
       >
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 sm:pt-32 lg:pt-36 lg:pb-24 grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,36rem)] items-center">
+      <!-- Aperçu : marge haute augmentée de la hauteur du bandeau fixe (44 px) -->
+      <div
+        class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 lg:pb-24 grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,36rem)] items-center"
+        :class="preview ? 'pt-[9.75rem] sm:pt-[10.75rem] lg:pt-[11.75rem]' : 'pt-28 sm:pt-32 lg:pt-36'"
+      >
         <div class="min-w-0 flex flex-col gap-7">
           <nav v-if="breadcrumb.length" :aria-label="t('pei.breadcrumb.label')">
             <ol class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-brand-blue-200">
@@ -270,7 +345,7 @@ useHead(() => ({
               <font-awesome-icon icon="fa-solid fa-arrow-down" class="w-4 h-4" aria-hidden="true" />
             </a>
             <NuxtLink
-              :to="localePath(STATUS_PAGE)"
+              :to="previewPath(localePath(STATUS_PAGE))"
               class="inline-flex min-h-[3.25rem] items-center rounded-xl bg-brand-red-500 px-6 font-bold text-white hover:bg-brand-red-600 transition-colors"
             >
               {{ heroPrimaryLabel }}
@@ -286,7 +361,7 @@ useHead(() => ({
       </div>
     </section>
 
-    <EntrepreneurshipSubNav />
+    <EntrepreneurshipSubNav :below-preview-banner="preview" />
 
     <!-- ===================== CHIFFRES ===================== -->
     <section
@@ -334,10 +409,11 @@ useHead(() => ({
           :tone="step.tone"
           :reverse="index % 2 === 1"
           :anchor-id="step.anchor"
+          :fallback-image="featureFallback(index)"
         >
           <NuxtLink
             v-if="step.program.phase === 'status'"
-            :to="localePath(STATUS_PAGE)"
+            :to="previewPath(localePath(STATUS_PAGE))"
             class="self-start inline-flex min-h-[3rem] items-center gap-2.5 rounded-xl border-2 px-5 font-bold transition-colors border-[color:var(--pei-fill)] text-[color:var(--pei-ink)] hover:bg-[color:var(--pei-soft)] dark:border-[color:var(--pei-fill)] dark:text-[color:var(--pei-fill)] dark:hover:bg-[color:var(--pei-soft-dark)]"
           >
             {{ t('pei.activities.statusLink') }}
@@ -388,19 +464,21 @@ useHead(() => ({
           />
         </div>
 
+        <!-- Bande de photos sous les cartes (maquette : 3 × 240 px, rayon 20) -->
         <div
-          v-if="supportCovers.length"
+          v-if="supportCoversShown.length"
           class="grid gap-6"
-          :class="{ 'sm:grid-cols-2': supportCovers.length === 2, 'sm:grid-cols-3': supportCovers.length >= 3 }"
+          :class="{ 'sm:grid-cols-2': supportCoversShown.length === 2, 'sm:grid-cols-3': supportCoversShown.length >= 3 }"
         >
           <img
-            v-for="cover in supportCovers"
+            v-for="cover in supportCoversShown"
             :key="cover.key"
             :src="cover.src"
             :alt="cover.alt"
-            class="h-52 sm:h-60 w-full rounded-2xl object-cover"
+            class="h-52 sm:h-60 w-full rounded-[20px] object-cover"
             loading="lazy"
             decoding="async"
+            @error="failedCovers.push(cover.key)"
           >
         </div>
       </div>
@@ -414,7 +492,8 @@ useHead(() => ({
       class="scroll-mt-40 bg-[#faf8f4] dark:bg-gray-950"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-28 flex flex-col gap-12 lg:gap-14">
-        <div class="grid gap-8 lg:gap-20 lg:items-end" :class="{ 'lg:grid-cols-2': ecosystemPrograms.length }">
+        <!-- Sur-titre + titre à gauche, paragraphe à droite (aligné en bas) -->
+        <div class="grid gap-8 lg:gap-20 lg:items-end" :class="{ 'lg:grid-cols-2': hasEcosystemText }">
           <div class="flex flex-col gap-4">
             <p class="text-xs sm:text-[0.8125rem] font-bold uppercase tracking-[0.12em] text-brand-red-700 dark:text-brand-red-300">
               {{ t('pei.activities.ecosystemEyebrow') }}
@@ -425,32 +504,41 @@ useHead(() => ({
           </div>
           <div v-if="ecosystemPrograms.length" class="flex flex-col gap-6">
             <div v-for="program in ecosystemPrograms" :key="program.id">
-              <h3 class="text-xl font-extrabold text-brand-blue-900 dark:text-white">
+              <!-- Un seul dispositif : son texte suffit (le titre de section le présente) -->
+              <h3 v-if="ecosystemPrograms.length > 1" class="mb-2 text-xl font-extrabold text-brand-blue-900 dark:text-white">
                 {{ localized(program, 'title') }}
               </h3>
               <RichTextRenderer
                 v-if="localized(program, 'content_html')"
                 :html="localized(program, 'content_html')"
-                class="mt-2 text-gray-700 dark:text-gray-300"
+                class="text-[1.0625rem] leading-[1.75] text-gray-700 dark:text-gray-300 prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-[1.75]"
               />
-              <p v-else-if="localized(program, 'tagline')" class="mt-2 leading-relaxed text-gray-700 dark:text-gray-300">
+              <p v-else-if="localized(program, 'tagline')" class="text-[1.0625rem] leading-[1.75] text-gray-700 dark:text-gray-300">
                 {{ localized(program, 'tagline') }}
               </p>
             </div>
           </div>
+          <p v-else-if="ecosystemSampleText" class="text-[1.0625rem] leading-[1.75] text-gray-700 dark:text-gray-300">
+            {{ ecosystemSampleText }}
+          </p>
         </div>
 
+        <!-- Mur typographique géant (maquette : 84 px, interligne 1,1, séparateurs « · » orangés) -->
         <ul
           v-if="ecosystemItems.length"
-          class="text-3xl sm:text-5xl lg:text-6xl xl:text-[4.5rem] font-black leading-[1.12] tracking-tight"
+          class="text-[2rem] sm:text-5xl lg:text-6xl xl:text-[5.25rem] font-black leading-[1.1] tracking-[-0.04em]"
         >
+          <!-- Point collé à l'élément qui précède (jamais en début de ligne), espace sécable après -->
           <li v-for="(item, index) in ecosystemItems" :key="item" class="inline">
-            <span :class="WALL_COLORS[index % WALL_COLORS.length]">{{ item }}</span>
-            <!-- Espace insécable avant le point, espace sécable après : coupure possible entre deux éléments -->
-            <span v-if="index < ecosystemItems.length - 1" class="text-[#f7a64a]" aria-hidden="true">&nbsp;&nbsp;·&nbsp; </span>
+            <span :class="WALL_COLORS[index % WALL_COLORS.length]">{{ item }}</span><span
+              v-if="index < ecosystemItems.length - 1"
+              class="ms-[0.3em] me-[0.08em] text-[#f7a64a]"
+              aria-hidden="true"
+            >·</span>{{ ' ' }}
           </li>
         </ul>
 
+        <!-- Mosaïque (maquette : 4 colonnes × 2 rangées de 220 px ; grande 2×2, deux petites, large 2×1) -->
         <div
           v-if="mosaicShown.length"
           class="grid grid-cols-2 gap-4 lg:gap-5 auto-rows-[9rem] sm:auto-rows-[12rem] lg:grid-cols-4 lg:auto-rows-[13.75rem]"
@@ -461,7 +549,7 @@ useHead(() => ({
             :src="tile.src"
             :alt="tile.alt"
             class="h-full w-full object-cover"
-            :class="[MOSAIC_LAYOUTS[mosaicShown.length]?.[index], index === 0 ? 'rounded-3xl' : 'rounded-2xl']"
+            :class="[MOSAIC_LAYOUTS[mosaicShown.length]?.[index], index === 0 ? 'rounded-3xl' : 'rounded-[20px]']"
             loading="lazy"
             decoding="async"
             @error="failedMosaic.push(tile.key)"
@@ -504,7 +592,7 @@ useHead(() => ({
         </div>
         <div class="flex flex-col gap-3 w-full sm:w-auto lg:w-[21.25rem] shrink-0">
           <NuxtLink
-            :to="localePath(STATUS_PAGE)"
+            :to="previewPath(localePath(STATUS_PAGE))"
             class="flex min-h-[3.5rem] items-center justify-center rounded-xl bg-brand-red-500 px-6 font-extrabold text-white hover:bg-brand-red-600 transition-colors"
           >
             {{ text('cta.button') || t('pei.nav.cta') }}

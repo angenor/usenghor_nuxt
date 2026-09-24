@@ -1,90 +1,118 @@
 <script setup lang="ts">
-/** Carte portrait d'un lauréat FSE ou d'un étudiant-entrepreneur (page « Nos alumni »). */
+/**
+ * Carte portrait d'un lauréat FSE ou d'un étudiant-entrepreneur (page « Nos alumni ») :
+ * grande photo, nom, projet (teinte de la promotion), département, verbatim éventuel, liens.
+ * `track` : étiquette de parcours (« SEE 1 · Idéation ») et ligne « projet · département » ;
+ * `sample` : portrait d'exemple du mode aperçu (étiquette « Exemple », liens `#` inertes).
+ */
 import type { PeiLaureatePublic } from '~/types/api/entrepreneurship'
+import type { PeiStepTone } from '~/utils/pei-presentation'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   laureate: PeiLaureatePublic
-}>()
+  /** Teinte de la promotion (nom du projet) ; bleu de la marque par défaut. */
+  tone?: PeiStepTone | null
+  /** Étiquette de parcours (vue étudiants-entrepreneurs). */
+  track?: { label: string, tone: PeiStepTone } | null
+  sample?: boolean
+  headingTag?: 'h3' | 'h4'
+  /** Photo un peu moins haute (grille à quatre colonnes). */
+  compact?: boolean
+}>(), {
+  tone: null,
+  track: null,
+  sample: false,
+  headingTag: 'h3',
+  compact: false,
+})
 
 const { t } = useI18n()
 const { localized } = useLocalizedField()
 
-const LINKS = [
-  { field: 'website_url', key: 'website', icon: 'fa-solid fa-globe' },
-  { field: 'linkedin_url', key: 'linkedin', icon: 'fa-brands fa-linkedin-in' },
-  { field: 'instagram_url', key: 'instagram', icon: 'fa-brands fa-instagram' },
-  { field: 'facebook_url', key: 'facebook', icon: 'fa-brands fa-facebook-f' },
-  { field: 'video_url', key: 'video', icon: 'fa-solid fa-play' },
-] as const
-
-const links = computed(() =>
-  LINKS
-    .map(link => ({ ...link, url: props.laureate[link.field] }))
-    .filter((link): link is typeof link & { url: string } => isHttpUrl(link.url)),
-)
-
+const links = computed(() => peiLaureateLinks(props.laureate, props.sample))
 const department = computed(() => localized(props.laureate, 'department_label'))
 const quote = computed(() => localized(props.laureate, 'quote'))
+
+const photoFailed = ref(false)
+watch(() => props.laureate.photo_url, () => { photoFailed.value = false })
 </script>
 
 <template>
-  <article class="flex flex-col rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
-    <div class="relative">
+  <article class="flex min-w-0 flex-col gap-3.5" :style="tone ? peiStepStyle(tone) : undefined">
+    <div
+      class="relative overflow-hidden rounded-[1.25rem] bg-[#e8ebf3] dark:bg-gray-800"
+      :class="compact ? 'h-[17.5rem]' : 'h-[18.75rem]'"
+    >
       <img
-        v-if="laureate.photo_url"
+        v-if="laureate.photo_url && !photoFailed"
         :src="laureate.photo_url"
         :alt="laureate.full_name"
-        class="aspect-[4/3] w-full object-cover"
+        class="h-full w-full object-cover"
         loading="lazy"
+        decoding="async"
+        @error="photoFailed = true"
       >
-      <div v-else class="aspect-[4/3] bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-        <font-awesome-icon icon="fa-solid fa-user" class="w-10 h-10 text-gray-400" aria-hidden="true" />
+      <div v-else class="flex h-full items-center justify-center">
+        <font-awesome-icon icon="fa-solid fa-user" class="h-12 w-12 text-gray-400 dark:text-gray-500" aria-hidden="true" />
       </div>
       <span
-        v-if="laureate.is_featured"
-        class="absolute top-3 start-3 rounded-full bg-white/90 dark:bg-gray-900/80 p-1.5 leading-none"
-        :title="t('pei.alumni.featured')"
+        v-if="sample"
+        class="absolute start-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-brand-blue-900 shadow-sm dark:bg-gray-950/85 dark:text-white"
       >
-        <font-awesome-icon icon="fa-solid fa-star" class="w-3.5 h-3.5 text-amber-500" aria-hidden="true" />
-        <span class="sr-only">{{ t('pei.alumni.featured') }}</span>
+        {{ t('pei.alumni.sample') }}
       </span>
     </div>
 
-    <div class="p-5 flex flex-1 flex-col gap-2">
-      <div class="flex items-start justify-between gap-2">
-        <h3 class="font-bold text-gray-900 dark:text-white break-words">
-          {{ laureate.full_name }}
-        </h3>
-        <span class="rounded-full bg-brand-blue-100 dark:bg-brand-blue-900/40 text-brand-blue-700 dark:text-brand-blue-300 text-[11px] font-semibold px-2 py-0.5 shrink-0">
-          {{ localized(laureate, 'cohort_label') }}
-        </span>
-      </div>
-      <p class="text-brand-blue-600 dark:text-brand-blue-300 font-medium break-words">
-        {{ laureate.project_name }}
-      </p>
-      <p v-if="department" class="text-sm text-gray-500 dark:text-gray-400">
-        {{ department }}
-      </p>
-      <blockquote
-        v-if="quote"
-        class="mt-2 text-sm italic text-gray-600 dark:text-gray-300 border-s-2 border-brand-blue-200 dark:border-brand-blue-800 ps-3 break-words"
-      >
-        {{ quote }}
-      </blockquote>
+    <span
+      v-if="track"
+      class="self-start rounded-full bg-[color:var(--pei-soft)] px-2.5 py-1 text-xs font-bold text-[color:var(--pei-ink)] dark:bg-[color:var(--pei-soft-dark)] dark:text-[color:var(--pei-fill)]"
+      :style="peiStepStyle(track.tone)"
+    >
+      {{ track.label }}
+    </span>
 
-      <ul v-if="links.length" class="mt-auto pt-3 flex flex-wrap gap-2">
-        <li v-for="link in links" :key="link.key">
-          <a
-            :href="link.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            :aria-label="t(`pei.alumni.links.${link.key}`, { name: laureate.full_name })"
-            class="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-brand-blue-600 dark:hover:text-brand-blue-400 hover:border-brand-blue-300 transition-colors"
-          >
-            <font-awesome-icon :icon="link.icon" class="w-3.5 h-3.5" aria-hidden="true" />
-          </a>
-        </li>
-      </ul>
+    <div class="flex min-w-0 flex-col gap-1">
+      <component :is="headingTag" class="break-words text-lg font-extrabold text-brand-blue-900 dark:text-white sm:text-[1.1875rem]">
+        {{ laureate.full_name }}
+      </component>
+      <p v-if="track" class="break-words text-sm text-gray-600 dark:text-gray-400">
+        {{ laureate.project_name }}<template v-if="department">
+          · {{ department }}
+        </template>
+      </p>
+      <template v-else>
+        <p
+          class="break-words text-[0.9375rem] font-semibold"
+          :class="tone ? 'text-[color:var(--pei-ink)] dark:text-[color:var(--pei-fill)]' : 'text-brand-blue-700 dark:text-brand-blue-300'"
+        >
+          {{ laureate.project_name }}
+        </p>
+        <p v-if="department" class="break-words text-sm text-gray-600 dark:text-gray-400">
+          {{ department }}
+        </p>
+      </template>
     </div>
+
+    <blockquote
+      v-if="quote"
+      class="line-clamp-5 border-s-2 border-gray-200 ps-3 text-sm italic leading-relaxed text-gray-600 dark:border-gray-700 dark:text-gray-300"
+    >
+      {{ quote }}
+    </blockquote>
+
+    <ul v-if="links.length" class="flex flex-wrap gap-2">
+      <li v-for="link in links" :key="link.key">
+        <a
+          :href="link.url"
+          :target="sample ? undefined : '_blank'"
+          :rel="sample ? undefined : 'noopener noreferrer'"
+          :aria-label="t(`pei.alumni.links.${link.key}`, { name: laureate.full_name })"
+          class="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-brand-blue-700 transition-colors hover:border-brand-blue-300 hover:text-brand-blue-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-brand-blue-300 dark:hover:text-white"
+          @click="sample && $event.preventDefault()"
+        >
+          <font-awesome-icon :icon="link.icon" class="h-[1.125rem] w-[1.125rem]" aria-hidden="true" />
+        </a>
+      </li>
+    </ul>
   </article>
 </template>

@@ -196,14 +196,25 @@ export function usePublicOrganizationApi() {
    * Liste les secteurs actifs avec leurs services actifs
    */
   async function listSectorsWithServices(): Promise<SectorPublicWithServices[]> {
-    return publicFetch<SectorPublicWithServices[]>('/api/public/sectors/with-services')
+    const sectors = await publicFetch<SectorPublicWithServices[]>('/api/public/sectors/with-services')
+    return sectors.map(withoutUnlistedPoles)
   }
 
   /**
    * Récupère un secteur par son code avec ses services
    */
   async function getSectorByCode(code: string): Promise<SectorPublicWithServices> {
-    return publicFetch<SectorPublicWithServices>(`/api/public/sectors/${code}`)
+    return withoutUnlistedPoles(await publicFetch<SectorPublicWithServices>(`/api/public/sectors/${code}`))
+  }
+
+  /** Retire les pôles non encore ouverts (`isUnlistedPeiService`) des services d'un secteur. */
+  function withoutUnlistedPoles(sector: SectorPublicWithServices): SectorPublicWithServices {
+    return {
+      ...sector,
+      services: (sector.services ?? [])
+        .filter(service => !isUnlistedPeiService(service))
+        .map(service => ({ ...service, children: (service.children ?? []).filter(child => !isUnlistedPeiService(child)) })),
+    }
   }
 
   // ==========================================================================
@@ -222,7 +233,11 @@ export function usePublicOrganizationApi() {
    * Récupère un service par son ID avec ses détails
    */
   async function getServiceById(serviceId: string): Promise<ServicePublicWithDetails> {
-    return publicFetch<ServicePublicWithDetails>(`/api/public/services/${serviceId}`)
+    const service = await publicFetch<ServicePublicWithDetails>(`/api/public/services/${serviceId}`)
+    // Pôles non encore ouverts retirés de la section « Pôles » de la fiche
+    return service.children
+      ? { ...service, children: service.children.filter(child => !isUnlistedPeiService(child)) }
+      : service
   }
 
   /**
@@ -234,8 +249,8 @@ export function usePublicOrganizationApi() {
       // Récupérer tous les services
       const services = await listServices()
 
-      // Chercher le service dont le slug correspond
-      const matchingService = services.find(s => slugify(s.name) === slug)
+      // Chercher le service dont le slug correspond (fiche d'un pôle non encore ouvert : introuvable)
+      const matchingService = services.find(s => slugify(s.name) === slug && !isUnlistedPeiService(s))
 
       if (!matchingService) {
         return null

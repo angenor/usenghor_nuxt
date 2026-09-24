@@ -4,11 +4,18 @@
  * Specs : specs/023-pei-public-home-activities (US1, US4) ; refonte selon la maquette validée
  * (hero « slogan allumé », manifeste, bandeau de chiffres, parcours en cartes, citation + impact,
  * actualité à la une, partenaires par famille, bandeau final).
+ *
+ * Mode aperçu (`usePeiPreview`, actif par défaut pendant la validation) : chaque emplacement photo
+ * de la maquette est rempli — hero (une image par mot du slogan), bloc impact, actualités,
+ * logos — par la réserve partagée `usePeiPreviewImages` et les exemples de
+ * `@bank/mock-data/pei-home-preview` ; le portrait de la citation vient de l'équipe publique de
+ * la DDE (donnée réelle), sinon un cadre « Portrait à fournir » le remplace. Hors aperçu, rien
+ * n'est inventé.
  */
 import type { PeiEditorialStat } from '~/utils/pei-presentation'
 import type { PaginatedResponse } from '~/types/api'
 import type { PartnerPublicRaw } from '~/composables/usePublicPartnersApi'
-import { fillEmptyPartnerFamilies, peiHomePreview, pickPreviewCoverIds } from '@bank/mock-data/pei-home-preview'
+import { fillEmptyPartnerFamilies, peiHomePreview, pickPreviewPhotos, usedPhotos } from '@bank/mock-data/pei-home-preview'
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -16,13 +23,12 @@ const localePath = useLocalePath()
 const { public: { siteUrl } } = useRuntimeConfig()
 
 const { loadContent, getRawContent } = useEditorialContent('entrepreneurship')
-const { getMediaUrl } = useMediaApi()
-const { getServiceLink } = usePublicOrganizationApi()
+const { getMediaUrl, getImageVariantUrl } = useMediaApi()
+const { getServiceLink, getServiceById } = usePublicOrganizationApi()
 const { listPrograms, listPartners } = usePublicEntrepreneurshipApi()
 const { getAllPublishedNews, listPublishedNews } = usePublicNewsApi()
-const { listPublishedEvents } = usePublicEventsApi()
 const apiBase = useApiBase()
-// Mode aperçu (`?apercu=1` uniquement) : données d'exemple pour la validation visuelle
+// Mode aperçu (actif par défaut pendant la validation, `?apercu=0` = état réel) : exemples
 const { preview, previewPath } = usePeiPreview()
 const { buildPeiOrganization, buildWebPage, buildBreadcrumbList } = usePeiJsonLd()
 
@@ -42,19 +48,30 @@ const keyServiceId = computed(() => {
 const { breadcrumb, dde, ddeId, ready: breadcrumbReady } = usePeiBreadcrumb(null, keyServiceId)
 
 // Sources indépendantes : une erreur masque la section concernée (FR-023)
-const [{ data: programsData }, { data: partnersData }, { data: newsData }, { data: previewData }] = await Promise.all([
+const [
+  { data: programsData },
+  { data: partnersData },
+  { data: newsData },
+  { data: ddeData },
+  { data: previewData },
+  { image: previewImage, ids: previewIds },
+] = await Promise.all([
   useAsyncData('pei-home-programs', () => listPrograms().catch(() => [])),
   useAsyncData('pei-home-partners', () => listPartners().catch(() => [])),
   useAsyncData('pei-home-news', async () => {
     await breadcrumbReady
     return ddeId.value ? getAllPublishedNews({ service_id: ddeId.value, limit: 3 }).catch(() => []) : []
   }),
+  // Fiche publique de la DDE : son équipe fournit le vrai portrait de l'auteur de la citation
+  useAsyncData('pei-home-dde', async () => {
+    await breadcrumbReady
+    return ddeId.value ? getServiceById(ddeId.value).catch(() => null) : null
+  }),
   // Aperçu : contenus publics réels servant d'exemples (rien n'est chargé hors aperçu)
   useAsyncData('pei-home-preview', async () => {
     if (!preview.value) return null
-    const [latestNews, events, catalog] = await Promise.all([
-      listPublishedNews({ limit: peiHomePreview.newsFetchLimit }).then(r => r.items).catch(() => []),
-      listPublishedEvents({ limit: peiHomePreview.eventsFetchLimit }).then(r => r.items).catch(() => []),
+    const [latestNews, catalog] = await Promise.all([
+      listPublishedNews({ limit: peiHomePreview.newsFallbackCount }).then(r => r.items).catch(() => []),
       // Lecture directe de l'API publique des partenaires (sans l'enrichissement pays de
       // `usePublicPartnersApi`, dont l'appel relatif échoue au rendu serveur)
       $fetch<PaginatedResponse<PartnerPublicRaw>>(`${apiBase}/api/public/partners`, { query: { limit: '500' } })
@@ -62,8 +79,7 @@ const [{ data: programsData }, { data: partnersData }, { data: newsData }, { dat
         .catch(() => []),
     ])
     return {
-      coverIds: pickPreviewCoverIds([...latestNews, ...events]),
-      news: latestNews.slice(0, peiHomePreview.newsFallbackCount),
+      news: latestNews,
       partners: catalog.map(p => ({
         id: p.id,
         name: p.name,
@@ -76,12 +92,13 @@ const [{ data: programsData }, { data: partnersData }, { data: newsData }, { dat
       })),
     }
   }, { watch: [preview] }),
+  // Réserve d'images d'exemple partagée du mini-site (vide hors aperçu)
+  usePeiPreviewImages(),
   breadcrumbReady,
 ])
 
 /** Données d'exemple actives (null hors aperçu) : elles ne remplissent que ce qui est vide. */
 const sample = computed(() => (preview.value ? previewData.value : null))
-const sampleImages = computed(() => (sample.value?.coverIds ?? []).map(id => getMediaUrl(id, 'medium')).filter((url): url is string => !!url))
 
 const programs = computed(() => [...(programsData.value ?? [])].sort((a, b) => a.display_order - b.display_order))
 const partners = computed(() => {
@@ -105,12 +122,30 @@ const realSlides = computed(() =>
     .map(n => getMediaUrl(text(`hero.slide${n}.image`) || null, 'medium'))
     .filter((url): url is string => !!url),
 )
-/** Aperçu : diapositives manquantes complétées par des couvertures d'actualités (jusqu'à 3). */
-const slides = computed(() => {
-  if (!sample.value || realSlides.value.length >= peiHomePreview.heroImageCount) return realSlides.value
-  const extra = sampleImages.value.filter(url => !realSlides.value.includes(url))
-  return [...realSlides.value, ...extra].slice(0, peiHomePreview.heroImageCount)
+const realImpactImage = computed(() => getMediaUrl(text('impact.image') || null, 'medium'))
+
+// ---------------------------------------------------------------------------
+// Aperçu : une photo d'exemple distincte par emplacement vide de la maquette
+// (jamais une couverture déjà visible dans les actualités de la page)
+// ---------------------------------------------------------------------------
+const previewPhotos = computed(() => {
+  if (!preview.value) return null
+  const used = usedPhotos([
+    ...realSlides.value,
+    realImpactImage.value,
+    ...news.value.map(item => getMediaUrl(item.cover_image_external_id ?? null, 'medium')),
+  ])
+  const poolSize = previewIds.value.length
+  const { hero, impact } = peiHomePreview.slots
+  return {
+    hero: pickPreviewPhotos(hero.slice(realSlides.value.length), previewImage, used, poolSize),
+    impact: realImpactImage.value ? null : pickPreviewPhotos(impact, previewImage, used, poolSize)[0] ?? null,
+  }
 })
+
+/** Diapositives : images éditoriales ; en aperçu, complétées jusqu'à une par mot du slogan (3). */
+const slides = computed(() =>
+  [...realSlides.value, ...(previewPhotos.value?.hero ?? [])].slice(0, Math.max(realSlides.value.length, peiHomePreview.heroImageCount)))
 const heroTitle = computed(() => text('hero.title') || t('pei.seo.homeTitle'))
 /** « INNOVER. AGIR. TRANSFORMER. » → trois mots (un par diapositive). */
 const sloganWords = computed(() =>
@@ -168,14 +203,28 @@ const XL_COLUMNS = ['', 'xl:grid-cols-1', 'xl:grid-cols-2', 'xl:grid-cols-3', 'x
 const journeyColumns = computed(() => XL_COLUMNS[Math.min(programs.value.length, 6)] ?? 'xl:grid-cols-5')
 
 // Citation et impact (trois chiffres d'impact facultatifs au-dessus du texte)
-const quoteImage = computed(() => getMediaUrl(text('quote.image') || null, 'low'))
-/** Aperçu : photo d'impact absente → couverture suivante (distincte du hero si possible). */
-const impactImage = computed(() => {
-  const real = getMediaUrl(text('impact.image') || null, 'medium')
-  if (real || !sample.value) return real
-  const unused = sampleImages.value.filter(url => !slides.value.includes(url))
-  return unused[0] ?? sampleImages.value.at(-1) ?? null
+/** Nom normalisé en mots (sans accents ni casse) : « Gaël Gbonsou » → gael, gbonsou. */
+const nameTokens = (value: string): string[] =>
+  value.normalize('NFD').replace(/[\u0300-\u036F]/g, '').toLowerCase().split(/[^a-z0-9]+/).filter(token => token.length >= 2)
+
+/**
+ * Vrai portrait de l'auteur de la citation : membre de l'équipe publique de la DDE dont le nom
+ * contient tous les mots de `quote.author` (jamais la photo d'une autre personne).
+ */
+const authorTeamPhoto = computed(() => {
+  const tokens = nameTokens(text('quote.author'))
+  if (!tokens.length) return null
+  const member = (ddeData.value?.team ?? []).find((m) => {
+    if (!m.user?.photo_url) return false
+    const own = new Set(nameTokens(`${m.user.first_name} ${m.user.last_name}`))
+    return tokens.every(token => own.has(token))
+  })
+  return member?.user?.photo_url ? getImageVariantUrl(member.user.photo_url, 'medium') : null
 })
+/** Portrait : image éditoriale, sinon photo de l'auteur dans l'équipe de la DDE. */
+const quoteImage = computed(() => getMediaUrl(text('quote.image') || null, 'low') || authorTeamPhoto.value)
+/** Photo d'impact : image éditoriale ; en aperçu, photo d'exemple. */
+const impactImage = computed(() => realImpactImage.value || previewPhotos.value?.impact || null)
 const impactStats = computed(() => editorialStats('impact.stats', 3))
 
 // Partenaires : description éditoriale de chaque famille (accueil et page « Nos partenaires »)
@@ -211,27 +260,7 @@ useHead(() => ({
 
 <template>
   <div>
-    <!-- Bandeau du mode aperçu (`?apercu=1`), fixé sous l'en-tête du site -->
-    <div
-      v-if="preview"
-      role="note"
-      class="fixed inset-x-0 top-20 z-40 flex h-11 items-center border-b border-amber-300 bg-amber-100 text-amber-950 shadow-sm dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100"
-    >
-      <div class="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
-        <font-awesome-icon icon="fa-solid fa-eye" class="h-4 w-4 shrink-0" aria-hidden="true" />
-        <p class="line-clamp-2 min-w-0 flex-1 text-xs leading-tight sm:text-[13px]">
-          <strong class="font-extrabold">{{ t('pei.home.preview.label') }}</strong>
-          — {{ t('pei.home.preview.message') }}
-        </p>
-        <a
-          :href="localePath('/entrepreneuriat')"
-          class="inline-flex min-h-[36px] min-w-[36px] shrink-0 items-center justify-center rounded-md px-2 text-xs font-bold hover:bg-amber-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-900 dark:hover:bg-amber-900 dark:focus-visible:outline-amber-100 sm:text-[13px]"
-        >
-          <font-awesome-icon icon="fa-solid fa-xmark" class="h-4 w-4 sm:hidden" aria-hidden="true" />
-          <span class="sr-only underline underline-offset-2 sm:not-sr-only">{{ t('pei.home.preview.exit') }}</span>
-        </a>
-      </div>
-    </div>
+    <EntrepreneurshipPreviewBanner />
 
     <EntrepreneurshipHomeHero
       :title="heroTitle"
@@ -378,6 +407,7 @@ useHead(() => ({
       :author="text('quote.author')"
       :role="text('quote.role')"
       :author-image="quoteImage"
+      :portrait-placeholder="preview ? t('pei.home.preview.portraitPending') : null"
       :impact-title="t('pei.home.impactBadge')"
       :impact-text="text('impact.text')"
       :impact-stats="impactStats"

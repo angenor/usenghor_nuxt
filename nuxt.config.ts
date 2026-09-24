@@ -3,6 +3,9 @@ import { fileURLToPath } from 'node:url'
 // https://nuxt.com/docs/api/configuration/nuxt-config
 const siteUrl = process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
+// Mini-site PEI (/entrepreneuriat), dans les trois langues
+const PEI_NOINDEX_PATHS = ['', '/en', '/ar'].flatMap(prefix => [`${prefix}/entrepreneuriat`, `${prefix}/entrepreneuriat/**`])
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
@@ -67,9 +70,14 @@ export default defineNuxtConfig({
   ],
   sitemap: {
     sources: ['/api/__sitemap__/urls'],
-    exclude: ['/admin/**', '/levees-de-fonds/**'],
+    // Mini-site PEI hors index tant que son contenu est un aperçu (à retirer à l'ouverture)
+    exclude: ['/admin/**', '/levees-de-fonds/**', ...PEI_NOINDEX_PATHS],
     autoI18n: true
   },
+  // Mini-site PEI : noindex en en-tête (robots.txt ne doit pas le bloquer, sinon le noindex n'est pas lu)
+  routeRules: Object.fromEntries(
+    PEI_NOINDEX_PATHS.map(path => [path, { headers: { 'X-Robots-Tag': 'noindex, nofollow' } }])
+  ),
   css: [
     '~/assets/css/main.css',
     '~/assets/css/timeline.css',

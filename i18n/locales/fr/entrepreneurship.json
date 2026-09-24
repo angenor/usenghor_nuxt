@@ -47,7 +47,8 @@
       "preview": {
         "label": "Aperçu",
         "message": "certains contenus sont des exemples en attente de validation",
-        "exit": "Quitter l'aperçu"
+        "exit": "Quitter l'aperçu",
+        "portraitPending": "Portrait à fournir"
       }
     },
     "activities": {
@@ -76,6 +77,9 @@
         "ecosystem": "L'animation de l'écosystème"
       },
       "keyPoints": "À retenir",
+      "keyPointsLabel": {
+        "status": "Le statut ouvre droit à"
+      },
       "statusLink": "Tout savoir sur le statut",
       "support": {
         "eyebrow": "L'accompagnement opérationnel",
@@ -84,7 +88,7 @@
         "to": "Start-up financée",
         "phaseLabel": "Phase {n} · {phase}"
       },
-      "ecosystemEyebrow": "Rencontres et événements",
+      "ecosystemEyebrow": "L'animation de l'écosystème",
       "agenda": {
         "title": "Prochains rendez-vous",
         "all": "Tout l'agenda"
@@ -103,7 +107,7 @@
       "tabsLabel": "Type de portraits",
       "tabs": {
         "fse": "Lauréats FSE",
-        "see": "Étudiants entrepreneurs"
+        "see": "Étudiants-entrepreneurs"
       },
       "featured": "Portrait mis en avant",
       "cohortYear": "Promotion {year}",
@@ -118,6 +122,34 @@
       "empty": {
         "title": "Aucun portrait publié pour le moment",
         "description": "Les portraits de cette catégorie seront publiés prochainement."
+      },
+      "statsLabel": "Les alumni en chiffres",
+      "sample": "Exemple",
+      "mentorButton": "Devenir mentor",
+      "timeline": {
+        "label": "Promotions du Fonds de Soutien à l’Entrepreneuriat",
+        "title": "Une promotion, une même ambition. | {count} promotions, une même ambition.",
+        "numbers": {
+          "two": "Deux",
+          "three": "Trois",
+          "four": "Quatre",
+          "five": "Cinq",
+          "six": "Six"
+        }
+      },
+      "spotlight": {
+        "badge": "Lauréat {cohort} · À la une"
+      },
+      "cohort": {
+        "focus": "Focus :",
+        "profile": "Profil type :",
+        "assessment": "Bilan :",
+        "emptyTitle": "Portraits à venir",
+        "emptyDescription": "Les portraits de cette promotion seront publiés prochainement."
+      },
+      "see": {
+        "title": "Étudier et entreprendre, en même temps.",
+        "statusLink": "Le statut étudiant-entrepreneur"
       }
     },
     "partners": {

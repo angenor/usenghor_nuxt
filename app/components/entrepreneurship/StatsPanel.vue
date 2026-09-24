@@ -1,7 +1,8 @@
 <script setup lang="ts">
 /**
- * Chiffres clés du pôle : panneau 2 × 2 (accueil, par défaut) ou bandeau pleine largeur
- * à trois colonnes séparées (`variant="band"`, page « Nos alumni »).
+ * Chiffres clés du pôle : panneau 2 × 2 (accueil, par défaut), bandeau pleine largeur
+ * à trois colonnes séparées (`variant="band"`) ou cartes teintées bleu nuit / bleu très clair /
+ * rose (`variant="cards"`, page « Nos alumni » : une valeur textuelle s'affiche en plus petit).
  */
 interface Stat {
   value: string
@@ -11,7 +12,7 @@ interface Stat {
 const props = withDefaults(defineProps<{
   title?: string
   stats: Stat[]
-  variant?: 'panel' | 'band'
+  variant?: 'panel' | 'band' | 'cards'
 }>(), {
   title: undefined,
   variant: 'panel',
@@ -58,11 +59,61 @@ onMounted(() => {
 })
 
 onUnmounted(() => observer?.disconnect())
+
+/** Teintes des cartes (`variant="cards"`), en boucle : bleu nuit, bleu très clair, rose. */
+const CARD_TONES = [
+  {
+    card: 'bg-brand-blue-900 dark:bg-brand-blue-950 dark:ring-1 dark:ring-inset dark:ring-white/10',
+    value: 'text-white',
+    label: 'text-brand-blue-200',
+  },
+  {
+    card: 'bg-[#f5f7ff] dark:bg-gray-800',
+    value: 'text-brand-blue-900 dark:text-white',
+    label: 'text-gray-600 dark:text-gray-300',
+  },
+  {
+    card: 'bg-[#fff1f1] dark:bg-brand-red-950/40 dark:ring-1 dark:ring-inset dark:ring-brand-red-900/50',
+    value: 'text-brand-red-800 dark:text-brand-red-300',
+    label: 'text-gray-600 dark:text-gray-300',
+  },
+] as const
+
+const cardTone = (index: number) => CARD_TONES[index % CARD_TONES.length]!
 </script>
 
 <template>
+  <div v-if="variant === 'cards'" ref="panelRef">
+    <p v-if="title" class="sr-only">
+      {{ title }}
+    </p>
+    <dl class="grid gap-4 sm:gap-6 md:grid-cols-3">
+      <div
+        v-for="(stat, index) in stats"
+        :key="index"
+        class="flex min-w-0 flex-col-reverse justify-end gap-2 rounded-3xl p-7 sm:p-8"
+        :class="cardTone(index).card"
+      >
+        <dt class="text-base leading-relaxed break-words" :class="cardTone(index).label">
+          {{ stat.label }}
+        </dt>
+        <dd
+          class="font-black break-words"
+          :class="[
+            cardTone(index).value,
+            isPeiFigureStat(stat.value)
+              ? 'text-6xl lg:text-7xl leading-none tracking-[-0.04em] tabular-nums'
+              : 'text-3xl lg:text-[2.5rem] leading-[1.1] tracking-[-0.03em]',
+          ]"
+        >
+          <!-- « 5 000 € » : isolé en LTR, sinon inversé en arabe (« € 000 5 ») -->
+          <bdi :dir="isPeiFigureStat(stat.value) ? 'ltr' : 'auto'">{{ displayValue(index) }}</bdi>
+        </dd>
+      </div>
+    </dl>
+  </div>
   <div
-    v-if="variant === 'band'"
+    v-else-if="variant === 'band'"
     ref="panelRef"
     class="w-full bg-gradient-to-r from-brand-blue-900 via-brand-blue-800 to-brand-blue-900 py-12 sm:py-16"
   >

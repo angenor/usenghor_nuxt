@@ -148,10 +148,12 @@ export default defineSitemapEventHandler(async () => {
   try {
     // Services et pôles actifs (avec ou sans secteur), adresse dérivée du nom ;
     // _i18nTransform : variantes /en et /ar générées par autoI18n
-    const services = await $fetch<Array<{ name: string }>>(`${backendUrl}/api/public/services`)
+    const services = await $fetch<Array<{ name: string, landing_path?: string | null }>>(`${backendUrl}/api/public/services`)
     const slugs = new Set<string>()
 
     for (const service of services) {
+      // Pôle PEI hors plan du site tant que le mini-site n'est pas ouvert (cf. PEI_PUBLICLY_LISTED dans usePeiPreview.ts)
+      if (service.landing_path && /^\/entrepreneuriat(?:[/?#]|$)/.test(service.landing_path)) continue
       const slug = service.name ? slugifyServiceName(service.name) : ''
       if (slug && !slugs.has(slug)) {
         slugs.add(slug)

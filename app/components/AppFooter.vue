@@ -274,7 +274,7 @@ onMounted(() => {
                   {{ t('footer.university.governance') }}
                 </NuxtLink>
               </li>
-              <li>
+              <li v-if="!isUnlistedPeiPath('/entrepreneuriat')">
                 <NuxtLink :to="localePath('/entrepreneuriat')" class="text-gray-400 hover:text-brand-blue-400 transition-colors duration-300">
                   {{ t('footer.university.entrepreneurship') }}
                 </NuxtLink>

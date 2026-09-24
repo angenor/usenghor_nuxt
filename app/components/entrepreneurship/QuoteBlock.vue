@@ -6,7 +6,9 @@
  * Sans portrait, la carte nom / fonction passe sous la citation ; sans photo d'impact,
  * le texte occupe toute la largeur. Avec au moins un chiffre d'impact, les chiffres s'affichent
  * en grand (bleu nuit / bleu / rouge foncé) et le texte devient un paragraphe courant.
- * Aucun emplacement vide n'est affiché.
+ * Aucun emplacement vide n'est affiché, sauf `portraitPlaceholder` (additif, mode aperçu) :
+ * sans portrait, un cadre stylé (initiales de l'auteur + ce libellé, ex. « Portrait à fournir »)
+ * garde l'emplacement de la maquette — jamais la photo d'une autre personne.
  */
 import type { PeiEditorialStat } from '~/utils/pei-presentation'
 
@@ -20,11 +22,24 @@ const props = defineProps<{
   /** Chiffres d'impact (additif) : absents ou vides → rendu inchangé. */
   impactStats?: PeiEditorialStat[]
   impactImage?: string | null
+  /** Aperçu : libellé du cadre affiché à la place d'un portrait absent (sinon rien). */
+  portraitPlaceholder?: string | null
 }>()
 
 const portraitFailed = ref(false)
 const impactFailed = ref(false)
 const portrait = computed(() => (!portraitFailed.value && props.authorImage) || null)
+/** Cadre « portrait à fournir » : aperçu seulement, quand aucun portrait n'est affichable. */
+const placeholder = computed(() => (!portrait.value && props.portraitPlaceholder?.trim()) || null)
+/** Emplacement du portrait occupé (photo ou cadre d'aperçu). */
+const portraitSlot = computed(() => !!portrait.value || !!placeholder.value)
+/** « Gaël Gbonsou » → « GG » (cadre d'aperçu). */
+const initials = computed(() => (props.author ?? '')
+  .split(/\s+/)
+  .filter(Boolean)
+  .map(word => word.charAt(0).toLocaleUpperCase())
+  .slice(0, 3)
+  .join(''))
 const impactPhoto = computed(() => (!impactFailed.value && props.impactImage) || null)
 
 /** Le texte d'impact peut être du HTML (éditeur riche) ou du texte brut. */
@@ -47,7 +62,7 @@ const FIGURE_COLUMNS: Record<number, string> = { 1: '', 2: 'sm:grid-cols-2', 3: 
     <div class="mx-auto flex max-w-7xl flex-col gap-16 px-4 sm:px-6 lg:gap-20 lg:px-8">
       <figure
         class="m-0 grid items-center gap-10 lg:gap-20"
-        :class="portrait ? 'lg:grid-cols-[minmax(0,460px)_minmax(0,1fr)]' : ''"
+        :class="portraitSlot ? 'lg:grid-cols-[minmax(0,460px)_minmax(0,1fr)]' : ''"
       >
         <!-- Portrait (la carte nom / fonction est superposée via la grille) -->
         <div
@@ -63,8 +78,24 @@ const FIGURE_COLUMNS: Record<number, string> = { 1: '', 2: 'sm:grid-cols-2', 3: 
             @error="portraitFailed = true"
           >
         </div>
+        <!-- Aperçu : cadre du portrait à fournir (initiales, jamais un autre visage) -->
+        <div
+          v-else-if="placeholder"
+          class="col-start-1 row-start-1 h-[420px] pb-12 sm:h-[540px]"
+        >
+          <div class="relative flex h-full w-full flex-col items-center justify-center gap-5 overflow-hidden rounded-[28px] bg-[#e8ebf3] bg-[repeating-linear-gradient(135deg,rgba(14,24,64,.06)_0_10px,transparent_10px_20px)] text-brand-blue-900 dark:bg-brand-blue-900 dark:bg-[repeating-linear-gradient(135deg,rgba(255,255,255,.05)_0_10px,transparent_10px_20px)] dark:text-white">
+            <span
+              class="flex h-36 w-36 items-center justify-center rounded-full bg-white text-5xl font-black tracking-[-0.03em] shadow-sm dark:bg-brand-blue-800 sm:h-44 sm:w-44 sm:text-6xl"
+              aria-hidden="true"
+            >{{ initials }}</span>
+            <span class="inline-flex items-center gap-2 rounded-full bg-white/80 px-3.5 py-1.5 text-[13px] font-semibold text-gray-700 dark:bg-white/10 dark:text-brand-blue-100">
+              <font-awesome-icon icon="fa-solid fa-camera" class="h-3.5 w-3.5" aria-hidden="true" />
+              {{ placeholder }}
+            </span>
+          </div>
+        </div>
 
-        <div class="flex min-w-0 flex-col gap-2" :class="portrait ? 'row-start-2 lg:col-start-2 lg:row-start-1' : 'max-w-5xl'">
+        <div class="flex min-w-0 flex-col gap-2" :class="portraitSlot ? 'row-start-2 lg:col-start-2 lg:row-start-1' : 'max-w-5xl'">
           <span
             class="block h-16 select-none font-black leading-[.6] text-brand-red-300 text-[140px] sm:h-24 sm:text-[200px] rtl:-scale-x-100"
             aria-hidden="true"
@@ -77,7 +108,7 @@ const FIGURE_COLUMNS: Record<number, string> = { 1: '', 2: 'sm:grid-cols-2', 3: 
         <figcaption
           v-if="author"
           class="flex flex-col gap-1 rounded-[18px] bg-brand-blue-900 px-6 py-5 text-white shadow-[0_20px_40px_rgba(14,24,64,.25)] dark:bg-brand-blue-800"
-          :class="portrait ? 'z-10 col-start-1 row-start-1 mx-6 self-end sm:mx-8' : 'justify-self-start'"
+          :class="portraitSlot ? 'z-10 col-start-1 row-start-1 mx-6 self-end sm:mx-8' : 'justify-self-start'"
         >
           <span class="text-lg font-extrabold">{{ author }}</span>
           <span v-if="role" class="text-sm text-brand-blue-200">{{ role }}</span>

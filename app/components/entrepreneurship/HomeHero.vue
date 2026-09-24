@@ -3,6 +3,10 @@
  * Hero plein écran de l'accueil du pôle PEI : slider photo sous un voile bleu nuit,
  * slogan géant empilé dont un mot est « allumé » à la fois (INNOVER → AGIR → TRANSFORMER, en boucle).
  *
+ * - Voile en dégradé concentré derrière le texte (à gauche — à droite en arabe — et en bas) :
+ *   la photo reste nettement visible du côté opposé ; fondu enchaîné au changement de mot et
+ *   léger zoom lent (Ken Burns) sur l'image active, sans mouvement si `prefers-reduced-motion`.
+ *
  * - Dès 2 mots, l'accent passe d'un mot au suivant, quel que soit le nombre d'images.
  *   Images : autant d'images que de mots → l'image n suit le mot n ; au moins 2 images
  *   en nombre différent → elles avancent au même rythme (modulo) ; 0 ou 1 image → image fixe.
@@ -105,6 +109,8 @@ const pageHidden = ref(false)
 const liveMessage = ref('')
 
 const autoplay = computed(() => mounted.value && hasSteps.value && !reducedMotion.value)
+/** Zoom lent de l'image active : après hydratation (le zoom part de l'échelle 1), jamais en mouvement réduit. */
+const kenBurns = computed(() => mounted.value && !reducedMotion.value)
 const paused = computed(() => hovered.value || focused.value || pageHidden.value)
 
 /** Image affichée : appariée au mot, sinon rotation au rythme des étapes, sinon fixe. */
@@ -196,23 +202,32 @@ function actionClass(action: HeroAction): string {
     @focusin="focused = true"
     @focusout="onFocusOut"
   >
-    <!-- Images -->
-    <div class="absolute inset-0 -z-10">
+    <!-- Images (fondu enchaîné calé sur le changement de mot + zoom lent de l'image active) -->
+    <div class="absolute inset-0 -z-10 overflow-hidden">
       <img
         v-for="(src, index) in slides"
         :key="src"
         :src="src"
         :alt="imageAlt(index)"
         :aria-hidden="index === activeImage ? undefined : 'true'"
-        class="absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out motion-reduce:transition-none"
-        :class="index === activeImage ? 'opacity-100' : 'opacity-0'"
+        class="pei-hero-image absolute inset-0 h-full w-full object-cover"
+        :class="[
+          index === activeImage ? 'opacity-100' : 'opacity-0',
+          kenBurns && index === activeImage ? 'scale-[1.08]' : 'scale-100',
+        ]"
         :fetchpriority="index === 0 ? 'high' : 'auto'"
         :loading="index === 0 ? 'eager' : 'lazy'"
         decoding="async"
         @error="onImageError(src)"
       >
-      <div class="absolute inset-0 bg-brand-blue-900/75" aria-hidden="true" />
-      <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-brand-blue-900/80 to-transparent" aria-hidden="true" />
+      <!--
+        Voile (`.pei-hero-veil`) : uniforme en mobile (le texte occupe toute la largeur) ; en grand
+        écran, dégradé concentré derrière le slogan (côté de début de ligne), photo nettement
+        visible de l'autre côté. Opacités mesurées sur les photos les plus claires de la réserve.
+      -->
+      <div class="pei-hero-veil absolute inset-0" aria-hidden="true" />
+      <div class="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-brand-blue-900/[.92] via-brand-blue-900/40 to-transparent" aria-hidden="true" />
+      <div class="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-brand-blue-900/70 to-transparent" aria-hidden="true" />
     </div>
 
     <div class="mx-auto flex w-full max-w-7xl flex-grow flex-col px-4 pb-10 pt-28 sm:px-6 lg:px-8 lg:pb-14 lg:pt-32">
@@ -329,6 +344,36 @@ function actionClass(action: HeroAction): string {
 </template>
 
 <style scoped>
+/*
+ * Voile bleu nuit (brand-blue-900) : contraste mesuré sur les photos claires de la réserve —
+ * texte courant et mot allumé ≥ 4.5:1, mots atténués (texte géant) ≥ 3:1.
+ */
+.pei-hero-veil {
+  background: rgb(14 24 64 / 0.86);
+}
+
+@media (min-width: 1024px) {
+  .pei-hero-veil {
+    background: linear-gradient(to right, rgb(14 24 64 / 0.94) 0%, rgb(14 24 64 / 0.9) 50%, rgb(14 24 64 / 0.85) 72%, rgb(14 24 64 / 0.3) 100%);
+  }
+
+  [dir='rtl'] .pei-hero-veil {
+    background: linear-gradient(to left, rgb(14 24 64 / 0.94) 0%, rgb(14 24 64 / 0.9) 50%, rgb(14 24 64 / 0.85) 72%, rgb(14 24 64 / 0.3) 100%);
+  }
+}
+
+/* Fondu enchaîné (1,2 s) et zoom lent : l'image quittée revient doucement à l'échelle 1 */
+.pei-hero-image {
+  transition: opacity 1.2s ease-in-out, transform 9s linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pei-hero-image {
+    transition: none;
+    transform: none;
+  }
+}
+
 .pei-progress {
   width: 0;
   animation-name: pei-progress;

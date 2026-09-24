@@ -47,7 +47,8 @@
       "preview": {
         "label": "Preview",
         "message": "some content is sample material awaiting approval",
-        "exit": "Exit preview"
+        "exit": "Exit preview",
+        "portraitPending": "Portrait to be provided"
       }
     },
     "activities": {
@@ -76,6 +77,9 @@
         "ecosystem": "Ecosystem animation"
       },
       "keyPoints": "Key points",
+      "keyPointsLabel": {
+        "status": "The status gives access to"
+      },
       "statusLink": "All about the status",
       "support": {
         "eyebrow": "Hands-on support",
@@ -84,7 +88,7 @@
         "to": "Funded start-up",
         "phaseLabel": "Phase {n} · {phase}"
       },
-      "ecosystemEyebrow": "Meetups and events",
+      "ecosystemEyebrow": "Ecosystem animation",
       "agenda": {
         "title": "Upcoming events",
         "all": "Full calendar"
@@ -118,6 +122,34 @@
       "empty": {
         "title": "No portraits published yet",
         "description": "Portraits in this category will be published soon."
+      },
+      "statsLabel": "Alumni in figures",
+      "sample": "Example",
+      "mentorButton": "Become a mentor",
+      "timeline": {
+        "label": "Classes of the Entrepreneurship Support Fund",
+        "title": "One class, one ambition. | {count} classes, one shared ambition.",
+        "numbers": {
+          "two": "Two",
+          "three": "Three",
+          "four": "Four",
+          "five": "Five",
+          "six": "Six"
+        }
+      },
+      "spotlight": {
+        "badge": "{cohort} laureate · Featured"
+      },
+      "cohort": {
+        "focus": "Focus:",
+        "profile": "Typical profile:",
+        "assessment": "Outcome:",
+        "emptyTitle": "Portraits coming soon",
+        "emptyDescription": "Portraits of this class will be published soon."
+      },
+      "see": {
+        "title": "Studying and starting a business, at the same time.",
+        "statusLink": "The student-entrepreneur status"
       }
     },
     "partners": {

@@ -253,6 +253,8 @@ function updatePrimaryNavItems() {
       return {
         ...item,
         children: editorialChildren
+          // Mini-site PEI non encore ouvert : entrée masquée (usePeiPreview)
+          .filter(child => !isUnlistedPeiPath(child.route))
           .sort((a, b) => a.sort_order - b.sort_order)
           .map(child => ({
             key: child.id,
@@ -294,6 +296,8 @@ function updateSecondaryNavItems() {
       return {
         ...section,
         children: editorialChildren
+          // Mini-site PEI non encore ouvert : entrée masquée (usePeiPreview)
+          .filter(child => !isUnlistedPeiPath(child.route))
           .sort((a, b) => a.sort_order - b.sort_order)
           .map(child => ({
             key: child.id,
