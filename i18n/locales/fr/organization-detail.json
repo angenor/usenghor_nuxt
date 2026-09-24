@@ -21,6 +21,7 @@
       "projects": "Projets",
       "news": "Actualités",
       "formations": "Formations",
+      "calls": "Appels",
       "media": "Médiathèque"
     },
     "presentation": {
@@ -89,6 +90,19 @@
       "credits": "Crédits",
       "viewDetails": "Voir le programme",
       "empty": "Aucune formation associée pour le moment."
+    },
+    "calls": {
+      "title": "Appels",
+      "subtitle": "Appels à candidatures de {name}",
+      "open": "En cours et à venir",
+      "closed": "Appels clos",
+      "status": {
+        "ongoing": "En cours",
+        "upcoming": "À venir",
+        "closed": "Clos"
+      },
+      "deadline": "Date limite : {date}",
+      "viewDetails": "Voir l'appel"
     },
     "media": {
       "title": "Médiathèque",

@@ -130,7 +130,7 @@ const callUrl = computed(() => {
   if (isApiCall.value) {
     const apiCall = props.call as ApplicationCallPublic
     // Link to detail page or external URL
-    return apiCall.external_form_url || localePath(`/candidatures/${apiCall.slug}`)
+    return apiCall.external_form_url || localePath(`/actualites/appels/${apiCall.slug}`)
   }
   return (props.call as CampusCall).url
 })

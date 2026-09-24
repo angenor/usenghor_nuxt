@@ -66,6 +66,7 @@ export function usePublicCallsApi() {
     call_type?: CallType | 'all'
     call_status?: CallStatus | 'all'
     program_id?: string
+    service_id?: string
   } = {}): Promise<PaginatedResponse<ApplicationCallPublic>> {
     return publicFetch<PaginatedResponse<ApplicationCallPublic>>('/api/public/application-calls', {
       query: {
@@ -75,6 +76,7 @@ export function usePublicCallsApi() {
         call_type: params.call_type !== 'all' ? params.call_type : undefined,
         call_status: params.call_status !== 'all' ? params.call_status : undefined,
         program_id: params.program_id || undefined,
+        service_id: params.service_id || undefined,
       },
     })
   }

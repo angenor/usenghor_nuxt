@@ -70,6 +70,33 @@ export interface ProgramRef {
   type: string
 }
 
+export interface ServiceOptionGroup {
+  id: string
+  name: string
+  services: ServiceRef[]
+}
+
+/**
+ * Regroupe les services par secteur pour un <select> à <optgroup>
+ * (secteurs et services triés par nom, services sans secteur en dernier).
+ */
+export function groupServicesBySector(services: ServiceRef[], sectors: SectorRef[]): ServiceOptionGroup[] {
+  const sectorNames = new Map(sectors.map(s => [s.id, s.name]))
+  const groups = new Map<string, ServiceOptionGroup>()
+  for (const service of services) {
+    const id = service.sector_id && sectorNames.has(service.sector_id) ? service.sector_id : 'none'
+    if (!groups.has(id)) {
+      groups.set(id, { id, name: sectorNames.get(id) ?? 'Sans secteur', services: [] })
+    }
+    groups.get(id)!.services.push(service)
+  }
+  for (const group of groups.values()) {
+    group.services.sort((a, b) => a.name.localeCompare(b.name, 'fr'))
+  }
+  return [...groups.values()].sort((a, b) =>
+    a.id === 'none' ? 1 : b.id === 'none' ? -1 : a.name.localeCompare(b.name, 'fr'))
+}
+
 // ============================================================================
 // Composable
 // ============================================================================

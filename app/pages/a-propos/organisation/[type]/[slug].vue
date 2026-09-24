@@ -10,6 +10,7 @@ import type {
 import type { NewsDisplay } from '~/types/news'
 import type { AlbumWithMedia } from '~/types/api/media'
 import type { ProgramPublic } from '~/composables/usePublicProgramsApi'
+import type { ApplicationCallPublic } from '~/types/api'
 
 const route = useRoute()
 const { t, locale } = useI18n()
@@ -26,6 +27,7 @@ const { listPublishedNews, formatNewsDate } = usePublicNewsApi()
 const { getMediaUrl, getImageVariantUrl } = useMediaApi()
 const { getAlbumById: getPublicAlbumById } = usePublicAlbumsApi()
 const { listProgramsByService, publicProgramTypeLabels, publicProgramTypeColors, formatDuration, programTypeToUrlSlug } = usePublicProgramsApi()
+const { listCalls } = usePublicCallsApi()
 
 // Scroll detection for sticky title — observe un marqueur placé dans le hero
 const heroTitleRef = ref<HTMLElement | null>(null)
@@ -66,6 +68,7 @@ const service = ref<ServicePublicWithDetails | null>(null)
 const relatedNews = ref<NewsDisplay[]>([])
 const serviceAlbums = ref<AlbumWithMedia[]>([])
 const servicePrograms = ref<ProgramPublic[]>([])
+const serviceCalls = ref<ApplicationCallPublic[]>([])
 
 // Fetch entity data
 const fetchEntity = async () => {
@@ -148,6 +151,23 @@ const fetchServicePrograms = async () => {
   }
 }
 
+// Fetch service calls (appels rattachés au service, publiés)
+const fetchServiceCalls = async () => {
+  if (entityType !== 'service' || !service.value) {
+    serviceCalls.value = []
+    return
+  }
+
+  try {
+    const response = await listCalls({ service_id: service.value.id, limit: 100 })
+    serviceCalls.value = response.items
+  }
+  catch (err) {
+    console.error('Error fetching service calls:', err)
+    serviceCalls.value = []
+  }
+}
+
 // Fetch on mount
 onMounted(async () => {
   await fetchEntity()
@@ -155,6 +175,7 @@ onMounted(async () => {
     fetchRelatedNews(),
     fetchServiceAlbums(),
     fetchServicePrograms(),
+    fetchServiceCalls(),
   ])
 })
 
@@ -186,11 +207,12 @@ if (entityData.value) {
     service.value = entityData.value.data as ServicePublicWithDetails
   }
   loading.value = false
-  // Charger les actualités, l'album et les formations associés (côté client)
+  // Charger les actualités, l'album, les formations et les appels associés (côté client)
   if (import.meta.client) {
     fetchRelatedNews()
     fetchServiceAlbums()
     fetchServicePrograms()
+    fetchServiceCalls()
   }
 }
 
@@ -263,6 +285,18 @@ const team = computed<ServiceTeamMemberPublic[]>(() => {
 const serviceParent = computed(() => (entityType === 'service' ? service.value?.parent ?? null : null))
 const serviceLandingPath = computed(() => (entityType === 'service' ? service.value?.landing_path ?? null : null))
 const servicePoles = computed(() => (entityType === 'service' ? service.value?.children ?? [] : []))
+
+// Appels du service : en cours / à venir (ordre du backend), puis clos du plus récent au plus ancien
+const openServiceCalls = computed(() => serviceCalls.value.filter(call => call.status !== 'closed'))
+const closedServiceCalls = computed(() => serviceCalls.value
+  .filter(call => call.status === 'closed')
+  .sort((a, b) => (b.deadline ?? '').localeCompare(a.deadline ?? '')))
+
+const callStatusClasses: Record<string, string> = {
+  ongoing: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  upcoming: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  closed: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+}
 
 // Services (only for sectors)
 const sectorServices = computed(() => {
@@ -341,7 +375,7 @@ const tabs = computed(() => {
       { key: 'news', icon: 'fa-solid fa-newspaper' },
     ]
   }
-  // Services: présentation + full tabs + formations conditionnelles + actualités + médiathèque
+  // Services: présentation + full tabs + formations et appels conditionnels + actualités + médiathèque
   const serviceTabs = [
     { key: 'presentation', icon: 'fa-solid fa-info-circle' },
     { key: 'missions', icon: 'fa-solid fa-bullseye' },
@@ -351,6 +385,9 @@ const tabs = computed(() => {
   ]
   if (servicePrograms.value.length > 0) {
     serviceTabs.push({ key: 'formations', icon: 'fa-solid fa-graduation-cap' })
+  }
+  if (serviceCalls.value.length > 0) {
+    serviceTabs.push({ key: 'calls', icon: 'fa-solid fa-bullhorn' })
   }
   serviceTabs.push(
     { key: 'news', icon: 'fa-solid fa-newspaper' },
@@ -1003,6 +1040,91 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                 {{ t('organizationDetail.formations.empty') }}
               </p>
             </div>
+
+            <!-- Next Tab Button -->
+            <div v-if="nextTab" class="mt-12 flex justify-end">
+              <button
+                type="button"
+                class="group inline-flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                :class="`${colorClasses.bgLight} ${colorClasses.text}`"
+                @click="goToNextTab"
+              >
+                <span>{{ t(`organizationDetail.tabs.${nextTab.key}`) }}</span>
+                <font-awesome-icon :icon="nextTab.icon" class="w-5 h-5 transition-transform group-hover:translate-x-1" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Calls Tab (for services only, when calls are linked) -->
+          <div v-if="activeTab === 'calls' && entityType === 'service'" class="animate__animated animate__fadeIn">
+            <div class="mb-8">
+              <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                {{ t('organizationDetail.calls.title') }}
+              </h2>
+              <p class="text-gray-600 dark:text-gray-400">
+                {{ t('organizationDetail.calls.subtitle', { name: entityName }) }}
+              </p>
+            </div>
+
+            <template
+              v-for="group in [
+                { key: 'open', calls: openServiceCalls },
+                { key: 'closed', calls: closedServiceCalls },
+              ]"
+              :key="group.key"
+            >
+              <section v-if="group.calls.length > 0" class="mb-10 last:mb-0">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  {{ t(`organizationDetail.calls.${group.key}`) }}
+                </h3>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <NuxtLink
+                    v-for="call in group.calls"
+                    :key="call.id"
+                    :to="localePath(`/actualites/appels/${call.slug}`)"
+                    class="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                  >
+                    <!-- Cover image -->
+                    <div class="relative h-40 overflow-hidden">
+                      <img
+                        v-if="call.cover_image_external_id"
+                        :src="getMediaUrl(call.cover_image_external_id, 'medium') ?? undefined"
+                        :alt="localized(call, 'title')"
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                      />
+                      <div v-else class="w-full h-full flex items-center justify-center bg-brand-blue-500">
+                        <font-awesome-icon icon="fa-solid fa-bullhorn" class="w-12 h-12 text-white/80" />
+                      </div>
+                      <!-- Status badge -->
+                      <div class="absolute top-4 end-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold" :class="callStatusClasses[call.status]">
+                          {{ t(`organizationDetail.calls.status.${call.status}`) }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-6">
+                      <h4 class="font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
+                        {{ localized(call, 'title') }}
+                      </h4>
+
+                      <p v-if="call.deadline" class="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mb-3">
+                        <font-awesome-icon icon="fa-solid fa-clock" class="w-3 h-3" />
+                        {{ t('organizationDetail.calls.deadline', { date: formatGmtDateTime(call.deadline, locale) }) }}
+                      </p>
+
+                      <!-- CTA -->
+                      <span class="flex items-center gap-2 text-sm font-medium group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors" :class="colorClasses.text">
+                        <span>{{ t('organizationDetail.calls.viewDetails') }}</span>
+                        <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3 transition-transform group-hover:translate-x-1 rtl:-scale-x-100" />
+                      </span>
+                    </div>
+                  </NuxtLink>
+                </div>
+              </section>
+            </template>
 
             <!-- Next Tab Button -->
             <div v-if="nextTab" class="mt-12 flex justify-end">

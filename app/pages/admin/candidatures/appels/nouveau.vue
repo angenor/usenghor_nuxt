@@ -21,6 +21,7 @@ const { listCampuses } = useCampusApi()
 const { listPrograms, programTypeLabels } = useProgramsApi()
 const { listProjects } = useProjectsApi()
 const { getCountriesForSelect } = useCountriesApi()
+const { getServices, getSectors, services: allServices, sectors: allSectors } = useReferenceData()
 
 // Charger les campus pour le sélecteur
 interface CampusOption {
@@ -58,6 +59,10 @@ interface CountryOption {
 }
 const countryOptions = ref<CountryOption[]>([])
 const loadingCountries = ref(false)
+
+// Services (onglet « Appels » de la fiche service), groupés par secteur
+const loadingServices = ref(false)
+const serviceOptionGroups = computed(() => groupServicesBySector(allServices.value, allSectors.value))
 
 onMounted(async () => {
   // Charger les campus
@@ -106,6 +111,12 @@ onMounted(async () => {
     loadingProjects.value = false
   }
 
+  // Charger les services et leurs secteurs
+  loadingServices.value = true
+  Promise.all([getServices(), getSectors()]).finally(() => {
+    loadingServices.value = false
+  })
+
   // Charger les pays
   loadingCountries.value = true
   try {
@@ -140,6 +151,7 @@ const form = ref({
   campus_external_id: '' as string,
   program_external_id: '' as string,
   project_external_id: '' as string,
+  service_external_id: '' as string,
   country_external_id: '' as string,
   location_address: '',
   opening_date: '',
@@ -398,6 +410,7 @@ const saveForm = async () => {
       campus_external_id: form.value.campus_external_id || null,
       program_external_id: form.value.program_external_id || null,
       project_external_id: form.value.project_external_id || null,
+      service_external_id: form.value.service_external_id || null,
       country_external_id: form.value.country_external_id || null,
       location_address: form.value.location_address || null,
       cover_image_external_id: form.value.cover_image_external_id,
@@ -704,6 +717,25 @@ const tabs = [
               </option>
             </select>
             <p class="mt-1 text-xs text-gray-500">Associer cet appel à un projet existant</p>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Service associé
+            </label>
+            <select
+              v-model="form.service_external_id"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              :disabled="loadingServices"
+            >
+              <option value="">Aucun service lié</option>
+              <optgroup v-for="group in serviceOptionGroups" :key="group.id" :label="group.name">
+                <option v-for="service in group.services" :key="service.id" :value="service.id">
+                  {{ service.name }}
+                </option>
+              </optgroup>
+            </select>
+            <p class="mt-1 text-xs text-gray-500">L'appel apparaîtra dans l'onglet « Appels » de la fiche publique du service</p>
           </div>
 
           <div>

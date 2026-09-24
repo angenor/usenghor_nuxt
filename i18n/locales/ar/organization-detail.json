@@ -21,6 +21,7 @@
       "projects": "المشاريع",
       "news": "الأخبار",
       "formations": "البرامج التكوينية",
+      "calls": "دعوات للترشح",
       "media": "الوسائط"
     },
     "presentation": {
@@ -89,6 +90,19 @@
       "credits": "الاعتمادات",
       "viewDetails": "عرض البرنامج",
       "empty": "لا توجد برامج تكوينية مرتبطة حالياً."
+    },
+    "calls": {
+      "title": "دعوات للترشح",
+      "subtitle": "دعوات الترشح الخاصة بـ {name}",
+      "open": "جارية وقادمة",
+      "closed": "دعوات مغلقة",
+      "status": {
+        "ongoing": "جارٍ",
+        "upcoming": "قادم",
+        "closed": "مغلق"
+      },
+      "deadline": "الموعد النهائي: {date}",
+      "viewDetails": "عرض الدعوة"
     },
     "media": {
       "title": "الوسائط",

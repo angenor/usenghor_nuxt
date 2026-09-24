@@ -148,6 +148,7 @@ export interface ApplicationCallRead extends CallI18nFields {
   cover_image_external_id: string | null
   program_external_id: string | null
   project_external_id: string | null
+  service_external_id?: string | null
   campus_external_id: string | null
   country_external_id: string | null
   created_by_external_id: string | null
@@ -189,6 +190,7 @@ export interface ApplicationCallPublic extends CallI18nFields {
   cover_image_external_id: string | null
   program_external_id: string | null
   project_external_id: string | null
+  service_external_id?: string | null
   campus_external_id: string | null
   country_external_id: string | null
   location_address: string | null
@@ -225,6 +227,7 @@ export interface ApplicationCallCreatePayload extends CallI18nFields {
   cover_image_external_id?: string | null
   program_external_id?: string | null
   project_external_id?: string | null
+  service_external_id?: string | null
   campus_external_id?: string | null
   country_external_id?: string | null
   location_address?: string | null
@@ -251,6 +254,7 @@ export interface ApplicationCallUpdatePayload extends CallI18nFields {
   cover_image_external_id?: string | null
   program_external_id?: string | null
   project_external_id?: string | null
+  service_external_id?: string | null
   campus_external_id?: string | null
   country_external_id?: string | null
   location_address?: string | null

@@ -27,6 +27,7 @@ const { listCampuses } = useCampusApi()
 const { listPrograms, programTypeLabels } = useProgramsApi()
 const { listProjects } = useProjectsApi()
 const { getCountriesForSelect } = useCountriesApi()
+const { getServices, getSectors, services: allServices, sectors: allSectors } = useReferenceData()
 
 const {
   uploadMediaVariants,
@@ -69,6 +70,15 @@ interface CountryOption {
 }
 const countryOptions = ref<CountryOption[]>([])
 const loadingCountries = ref(false)
+
+// Services (onglet « Appels » de la fiche service), groupés par secteur
+const loadingServices = ref(false)
+const serviceOptionGroups = computed(() => groupServicesBySector(allServices.value, allSectors.value))
+// Service rattaché absent de la liste (service désactivé) : on le garde sélectionnable
+const linkedServiceMissing = computed(() =>
+  !loadingServices.value
+  && !!form.value.service_external_id
+  && !allServices.value.some(s => s.id === form.value.service_external_id))
 
 async function loadCampuses() {
   loadingCampuses.value = true
@@ -116,6 +126,15 @@ async function loadProjects() {
     console.error('Erreur lors du chargement des projets')
   } finally {
     loadingProjects.value = false
+  }
+}
+
+async function loadServices() {
+  loadingServices.value = true
+  try {
+    await Promise.all([getServices(), getSectors()])
+  } finally {
+    loadingServices.value = false
   }
 }
 
@@ -187,6 +206,7 @@ const form = ref({
   campus_external_id: '' as string,
   program_external_id: '' as string,
   project_external_id: '' as string,
+  service_external_id: '' as string,
   country_external_id: '' as string,
   location_address: '',
   opening_date: '',
@@ -266,6 +286,7 @@ async function fetchCall() {
       campus_external_id: call.campus_external_id || '',
       program_external_id: call.program_external_id || '',
       project_external_id: call.project_external_id || '',
+      service_external_id: call.service_external_id || '',
       country_external_id: call.country_external_id || '',
       location_address: call.location_address || '',
       opening_date: call.opening_date?.split('T')[0] || '',
@@ -338,6 +359,7 @@ onMounted(() => {
   loadCampuses()
   loadPrograms()
   loadProjects()
+  loadServices()
   loadCountries()
 })
 
@@ -603,6 +625,7 @@ const saveForm = async () => {
       campus_external_id: form.value.campus_external_id || null,
       program_external_id: form.value.program_external_id || null,
       project_external_id: form.value.project_external_id || null,
+      service_external_id: form.value.service_external_id || null,
       country_external_id: form.value.country_external_id || null,
       location_address: form.value.location_address || null,
       cover_image_external_id: form.value.cover_image_external_id,
@@ -893,6 +916,28 @@ const tabs = [
               </option>
             </select>
             <p class="mt-1 text-xs text-gray-500">Associer cet appel à un projet existant</p>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Service associé
+            </label>
+            <select
+              v-model="form.service_external_id"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              :disabled="loadingServices"
+            >
+              <option value="">Aucun service lié</option>
+              <option v-if="linkedServiceMissing" :value="form.service_external_id">
+                Service désactivé ou introuvable
+              </option>
+              <optgroup v-for="group in serviceOptionGroups" :key="group.id" :label="group.name">
+                <option v-for="service in group.services" :key="service.id" :value="service.id">
+                  {{ service.name }}
+                </option>
+              </optgroup>
+            </select>
+            <p class="mt-1 text-xs text-gray-500">L'appel apparaîtra dans l'onglet « Appels » de la fiche publique du service</p>
           </div>
 
           <div>

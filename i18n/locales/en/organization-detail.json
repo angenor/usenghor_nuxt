@@ -21,6 +21,7 @@
       "projects": "Projects",
       "news": "News",
       "formations": "Programs",
+      "calls": "Calls",
       "media": "Media"
     },
     "presentation": {
@@ -89,6 +90,19 @@
       "credits": "Credits",
       "viewDetails": "View program",
       "empty": "No associated programs at the moment."
+    },
+    "calls": {
+      "title": "Calls",
+      "subtitle": "Calls for applications from {name}",
+      "open": "Open and upcoming",
+      "closed": "Closed calls",
+      "status": {
+        "ongoing": "Open",
+        "upcoming": "Upcoming",
+        "closed": "Closed"
+      },
+      "deadline": "Deadline: {date}",
+      "viewDetails": "View call"
     },
     "media": {
       "title": "Media",
