@@ -43,6 +43,11 @@
         "slides": "شرائح الشعار",
         "showSlide": "عرض الشريحة {n} من {total}: {label}",
         "slideAnnounce": "الشريحة {n} من {total}: {label}"
+      },
+      "preview": {
+        "label": "معاينة",
+        "message": "بعض المحتويات أمثلة في انتظار المصادقة",
+        "exit": "الخروج من المعاينة"
       }
     },
     "activities": {

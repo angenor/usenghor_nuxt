@@ -14,6 +14,7 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const localePath = useLocalePath()
+const { previewPath } = usePeiPreview()
 const { localized } = useLocalizedField()
 
 const NuxtLink = resolveComponent('NuxtLink')
@@ -31,7 +32,7 @@ const toneStyle = computed(() => peiStepStyle(peiStepTone(props.program.phase)))
 <template>
   <component
     :is="to ? NuxtLink : 'div'"
-    :to="to ? localePath(to) : undefined"
+    :to="to ? previewPath(localePath(to)) : undefined"
     :style="toneStyle"
     class="flex h-full flex-col gap-3.5 rounded-[20px] bg-white px-6 py-7 text-brand-blue-900 shadow-sm dark:bg-gray-800 dark:text-white"
     :class="to ? 'transition-shadow duration-300 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue-500' : ''"

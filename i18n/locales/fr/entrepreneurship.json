@@ -43,6 +43,11 @@
         "slides": "Diapositives du slogan",
         "showSlide": "Afficher la diapositive {n} sur {total} : {label}",
         "slideAnnounce": "Diapositive {n} sur {total} : {label}"
+      },
+      "preview": {
+        "label": "Aperçu",
+        "message": "certains contenus sont des exemples en attente de validation",
+        "exit": "Quitter l'aperçu"
       }
     },
     "activities": {

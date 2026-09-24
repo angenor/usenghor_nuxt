@@ -3,9 +3,15 @@
  * Sous-navigation collante du mini-site « Entreprendre à Senghor ».
  * Calquée sur SectionAboutTabsNav (research R2) ; réutilisée par toutes les rubriques du pôle.
  */
+const props = defineProps<{
+  /** Bandeau d'aperçu fixe affiché au-dessus (accueil en `?apercu=1`) : la barre collante se place dessous. */
+  belowPreviewBanner?: boolean
+}>()
+
 const { t } = useI18n()
 const localePath = useLocalePath()
 const route = useRoute()
+const { previewPath } = usePeiPreview()
 
 const tabs = computed(() => [
   { key: 'presentation', to: '/entrepreneuriat', icon: 'fa-solid fa-circle-info', exact: true },
@@ -29,7 +35,7 @@ const ctaActive = computed(() => isActive(ctaPath))
 </script>
 
 <template>
-  <div class="sticky top-20 z-40">
+  <div class="sticky z-40" :class="props.belowPreviewBanner ? 'top-[124px]' : 'top-20'">
     <nav
       :aria-label="t('pei.nav.label')"
       class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm"
@@ -39,7 +45,7 @@ const ctaActive = computed(() => isActive(ctaPath))
           <NuxtLink
             v-for="tab in tabs"
             :key="tab.key"
-            :to="localePath(tab.to)"
+            :to="previewPath(localePath(tab.to))"
             :aria-current="isActive(tab.to, tab.exact) ? 'page' : undefined"
             :class="[
               'group flex shrink-0 items-center gap-2 px-3 sm:px-4 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-all duration-200',
@@ -59,7 +65,7 @@ const ctaActive = computed(() => isActive(ctaPath))
           </NuxtLink>
 
           <NuxtLink
-            :to="localePath(ctaPath)"
+            :to="previewPath(localePath(ctaPath))"
             :aria-current="ctaActive ? 'page' : undefined"
             :class="[
               'ms-auto shrink-0 inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-brand-red-500 hover:bg-brand-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors duration-200',

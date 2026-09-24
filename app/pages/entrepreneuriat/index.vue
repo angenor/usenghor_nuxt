@@ -6,6 +6,9 @@
  * actualité à la une, partenaires par famille, bandeau final).
  */
 import type { PeiEditorialStat } from '~/utils/pei-presentation'
+import type { PaginatedResponse } from '~/types/api'
+import type { PartnerPublicRaw } from '~/composables/usePublicPartnersApi'
+import { fillEmptyPartnerFamilies, peiHomePreview, pickPreviewCoverIds } from '@bank/mock-data/pei-home-preview'
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -16,7 +19,11 @@ const { loadContent, getRawContent } = useEditorialContent('entrepreneurship')
 const { getMediaUrl } = useMediaApi()
 const { getServiceLink } = usePublicOrganizationApi()
 const { listPrograms, listPartners } = usePublicEntrepreneurshipApi()
-const { getAllPublishedNews } = usePublicNewsApi()
+const { getAllPublishedNews, listPublishedNews } = usePublicNewsApi()
+const { listPublishedEvents } = usePublicEventsApi()
+const apiBase = useApiBase()
+// Mode aperçu (`?apercu=1` uniquement) : données d'exemple pour la validation visuelle
+const { preview, previewPath } = usePeiPreview()
 const { buildPeiOrganization, buildWebPage, buildBreadcrumbList } = usePeiJsonLd()
 
 // Contenu éditorial d'abord (identifiant du service DDE)
@@ -35,19 +42,56 @@ const keyServiceId = computed(() => {
 const { breadcrumb, dde, ddeId, ready: breadcrumbReady } = usePeiBreadcrumb(null, keyServiceId)
 
 // Sources indépendantes : une erreur masque la section concernée (FR-023)
-const [{ data: programsData }, { data: partnersData }, { data: newsData }] = await Promise.all([
+const [{ data: programsData }, { data: partnersData }, { data: newsData }, { data: previewData }] = await Promise.all([
   useAsyncData('pei-home-programs', () => listPrograms().catch(() => [])),
   useAsyncData('pei-home-partners', () => listPartners().catch(() => [])),
   useAsyncData('pei-home-news', async () => {
     await breadcrumbReady
     return ddeId.value ? getAllPublishedNews({ service_id: ddeId.value, limit: 3 }).catch(() => []) : []
   }),
+  // Aperçu : contenus publics réels servant d'exemples (rien n'est chargé hors aperçu)
+  useAsyncData('pei-home-preview', async () => {
+    if (!preview.value) return null
+    const [latestNews, events, catalog] = await Promise.all([
+      listPublishedNews({ limit: peiHomePreview.newsFetchLimit }).then(r => r.items).catch(() => []),
+      listPublishedEvents({ limit: peiHomePreview.eventsFetchLimit }).then(r => r.items).catch(() => []),
+      // Lecture directe de l'API publique des partenaires (sans l'enrichissement pays de
+      // `usePublicPartnersApi`, dont l'appel relatif échoue au rendu serveur)
+      $fetch<PaginatedResponse<PartnerPublicRaw>>(`${apiBase}/api/public/partners`, { query: { limit: '500' } })
+        .then(r => r.items)
+        .catch(() => []),
+    ])
+    return {
+      coverIds: pickPreviewCoverIds([...latestNews, ...events]),
+      news: latestNews.slice(0, peiHomePreview.newsFallbackCount),
+      partners: catalog.map(p => ({
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        description_en: p.description_en,
+        description_ar: p.description_ar,
+        website: p.website,
+        logo_url: getMediaUrl(p.logo_external_id, 'low'),
+        type: p.type,
+      })),
+    }
+  }, { watch: [preview] }),
   breadcrumbReady,
 ])
 
+/** Données d'exemple actives (null hors aperçu) : elles ne remplissent que ce qui est vide. */
+const sample = computed(() => (preview.value ? previewData.value : null))
+const sampleImages = computed(() => (sample.value?.coverIds ?? []).map(id => getMediaUrl(id, 'medium')).filter((url): url is string => !!url))
+
 const programs = computed(() => [...(programsData.value ?? [])].sort((a, b) => a.display_order - b.display_order))
-const partners = computed(() => partnersData.value ?? [])
-const news = computed(() => (newsData.value ?? []).slice(0, 3))
+const partners = computed(() => {
+  const real = partnersData.value ?? []
+  return sample.value ? fillEmptyPartnerFamilies(real, sample.value.partners) : real
+})
+const news = computed(() => {
+  const real = (newsData.value ?? []).slice(0, 3)
+  return real.length || !sample.value ? real : sample.value.news
+})
 const partnersVisible = computed(() => partners.value.some(f => f.partners.length > 0))
 
 /** Lien « Historique, vision et missions du pôle » : fiche (ou page dédiée) du service DDE. */
@@ -56,11 +100,17 @@ const ddeLink = computed(() => (dde.value ? getServiceLink(dde.value) : null))
 // ---------------------------------------------------------------------------
 // Hero
 // ---------------------------------------------------------------------------
-const slides = computed(() =>
+const realSlides = computed(() =>
   [1, 2, 3]
     .map(n => getMediaUrl(text(`hero.slide${n}.image`) || null, 'medium'))
     .filter((url): url is string => !!url),
 )
+/** Aperçu : diapositives manquantes complétées par des couvertures d'actualités (jusqu'à 3). */
+const slides = computed(() => {
+  if (!sample.value || realSlides.value.length >= peiHomePreview.heroImageCount) return realSlides.value
+  const extra = sampleImages.value.filter(url => !realSlides.value.includes(url))
+  return [...realSlides.value, ...extra].slice(0, peiHomePreview.heroImageCount)
+})
 const heroTitle = computed(() => text('hero.title') || t('pei.seo.homeTitle'))
 /** « INNOVER. AGIR. TRANSFORMER. » → trois mots (un par diapositive). */
 const sloganWords = computed(() =>
@@ -119,7 +169,13 @@ const journeyColumns = computed(() => XL_COLUMNS[Math.min(programs.value.length,
 
 // Citation et impact (trois chiffres d'impact facultatifs au-dessus du texte)
 const quoteImage = computed(() => getMediaUrl(text('quote.image') || null, 'low'))
-const impactImage = computed(() => getMediaUrl(text('impact.image') || null, 'medium'))
+/** Aperçu : photo d'impact absente → couverture suivante (distincte du hero si possible). */
+const impactImage = computed(() => {
+  const real = getMediaUrl(text('impact.image') || null, 'medium')
+  if (real || !sample.value) return real
+  const unused = sampleImages.value.filter(url => !slides.value.includes(url))
+  return unused[0] ?? sampleImages.value.at(-1) ?? null
+})
 const impactStats = computed(() => editorialStats('impact.stats', 3))
 
 // Partenaires : description éditoriale de chaque famille (accueil et page « Nos partenaires »)
@@ -133,6 +189,7 @@ const seoTitle = computed(() => text('hero.title') || t('pei.seo.homeTitle'))
 const seoDescription = computed(() => text('hero.subtitle') || t('pei.seo.homeDescription'))
 
 useSeoMeta({
+  robots: () => (preview.value ? 'noindex, nofollow' : undefined),
   title: () => seoTitle.value,
   description: () => seoDescription.value,
   ogTitle: () => seoTitle.value,
@@ -154,6 +211,28 @@ useHead(() => ({
 
 <template>
   <div>
+    <!-- Bandeau du mode aperçu (`?apercu=1`), fixé sous l'en-tête du site -->
+    <div
+      v-if="preview"
+      role="note"
+      class="fixed inset-x-0 top-20 z-40 flex h-11 items-center border-b border-amber-300 bg-amber-100 text-amber-950 shadow-sm dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100"
+    >
+      <div class="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
+        <font-awesome-icon icon="fa-solid fa-eye" class="h-4 w-4 shrink-0" aria-hidden="true" />
+        <p class="line-clamp-2 min-w-0 flex-1 text-xs leading-tight sm:text-[13px]">
+          <strong class="font-extrabold">{{ t('pei.home.preview.label') }}</strong>
+          — {{ t('pei.home.preview.message') }}
+        </p>
+        <a
+          :href="localePath('/entrepreneuriat')"
+          class="inline-flex min-h-[36px] min-w-[36px] shrink-0 items-center justify-center rounded-md px-2 text-xs font-bold hover:bg-amber-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-900 dark:hover:bg-amber-900 dark:focus-visible:outline-amber-100 sm:text-[13px]"
+        >
+          <font-awesome-icon icon="fa-solid fa-xmark" class="h-4 w-4 sm:hidden" aria-hidden="true" />
+          <span class="sr-only underline underline-offset-2 sm:not-sr-only">{{ t('pei.home.preview.exit') }}</span>
+        </a>
+      </div>
+    </div>
+
     <EntrepreneurshipHomeHero
       :title="heroTitle"
       :words="sloganWords"
@@ -163,13 +242,14 @@ useHead(() => ({
       :actions="heroActions"
     />
 
-    <EntrepreneurshipSubNav />
+    <EntrepreneurshipSubNav :below-preview-banner="preview" />
 
     <!-- Manifeste -->
     <section
       v-if="text('presentation.title') || text('presentation.content')"
       id="presentation"
-      class="scroll-mt-40 bg-white py-20 dark:bg-gray-900 lg:pb-[104px] lg:pt-[120px]"
+      :class="preview ? 'scroll-mt-[200px]' : 'scroll-mt-40'"
+      class="bg-white py-20 dark:bg-gray-900 lg:pb-[104px] lg:pt-[120px]"
     >
       <div class="mx-auto flex max-w-7xl flex-col gap-10 px-4 sm:px-6 lg:gap-14 lg:px-8">
         <p v-if="text('presentation.badge')" class="text-[13px] font-bold uppercase tracking-[0.12em] text-brand-red-700 dark:text-brand-red-300">
@@ -190,7 +270,7 @@ useHead(() => ({
           />
           <NuxtLink
             v-if="ddeLink && text('presentation.link')"
-            :to="localePath(ddeLink)"
+            :to="previewPath(localePath(ddeLink))"
             class="mt-4 inline-flex min-h-[44px] break-inside-avoid items-center gap-2.5 text-base font-bold text-brand-blue-700 hover:underline dark:text-brand-blue-300"
           >
             {{ text('presentation.link') }}
@@ -236,7 +316,8 @@ useHead(() => ({
     <section
       v-if="programs.length"
       id="parcours"
-      class="scroll-mt-40 bg-[#faf8f4] py-20 dark:bg-gray-950 lg:py-28"
+      :class="preview ? 'scroll-mt-[200px]' : 'scroll-mt-40'"
+      class="bg-[#faf8f4] py-20 dark:bg-gray-950 lg:py-28"
     >
       <div class="mx-auto flex max-w-7xl flex-col gap-10 px-4 sm:px-6 lg:gap-12 lg:px-8">
         <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
@@ -253,7 +334,7 @@ useHead(() => ({
           </div>
           <NuxtLink
             v-if="text('activities.link')"
-            :to="localePath('/entrepreneuriat/activites')"
+            :to="previewPath(localePath('/entrepreneuriat/activites'))"
             class="inline-flex min-h-[52px] shrink-0 items-center gap-2.5 self-start rounded-xl bg-brand-blue-900 px-6 text-[15px] font-bold text-white transition-colors hover:bg-brand-blue-800 dark:bg-white dark:text-brand-blue-900 dark:hover:bg-brand-blue-100 lg:self-auto"
           >
             {{ text('activities.link') }}
@@ -316,7 +397,7 @@ useHead(() => ({
             </h2>
           </div>
           <NuxtLink
-            :to="localePath('/entrepreneuriat/actualites')"
+            :to="previewPath(localePath('/entrepreneuriat/actualites'))"
             class="inline-flex min-h-[44px] items-center gap-2 text-[15px] font-bold text-brand-blue-500 hover:text-brand-blue-700 dark:text-brand-blue-300 dark:hover:text-brand-blue-200"
           >
             {{ t('pei.home.allNews') }}
@@ -357,7 +438,7 @@ useHead(() => ({
             </h2>
           </div>
           <NuxtLink
-            :to="localePath('/entrepreneuriat/partenaires')"
+            :to="previewPath(localePath('/entrepreneuriat/partenaires'))"
             class="inline-flex min-h-[44px] items-center gap-2 text-[15px] font-bold text-brand-blue-500 hover:text-brand-blue-700 dark:text-brand-blue-300 dark:hover:text-brand-blue-200"
           >
             {{ t('pei.home.allPartners') }}
@@ -380,7 +461,7 @@ useHead(() => ({
           </p>
           <div class="flex flex-wrap gap-3">
             <NuxtLink
-              :to="localePath('/entrepreneuriat/statut-etudiant-entrepreneur')"
+              :to="previewPath(localePath('/entrepreneuriat/statut-etudiant-entrepreneur'))"
               class="inline-flex min-h-[56px] items-center gap-2 rounded-xl bg-white px-6 font-extrabold text-brand-red-800 transition-colors hover:bg-brand-red-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               {{ text('cta.button') }}

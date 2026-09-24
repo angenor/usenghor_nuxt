@@ -43,6 +43,11 @@
         "slides": "Slogan slides",
         "showSlide": "Show slide {n} of {total}: {label}",
         "slideAnnounce": "Slide {n} of {total}: {label}"
+      },
+      "preview": {
+        "label": "Preview",
+        "message": "some content is sample material awaiting approval",
+        "exit": "Exit preview"
       }
     },
     "activities": {

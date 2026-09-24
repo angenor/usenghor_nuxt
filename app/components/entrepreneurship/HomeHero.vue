@@ -1,13 +1,17 @@
 <script setup lang="ts">
 /**
  * Hero plein écran de l'accueil du pôle PEI : slider photo sous un voile bleu nuit,
- * slogan géant empilé dont la diapositive active « allume » le mot correspondant.
+ * slogan géant empilé dont un mot est « allumé » à la fois (INNOVER → AGIR → TRANSFORMER, en boucle).
  *
- * - Un mot par image : le mot n allumé pendant la diapositive n. Si le nombre de mots
- *   diffère du nombre d'images (ou si une seule image), tous les mots restent allumés.
+ * - Dès 2 mots, l'accent passe d'un mot au suivant, quel que soit le nombre d'images.
+ *   Images : autant d'images que de mots → l'image n suit le mot n ; au moins 2 images
+ *   en nombre différent → elles avancent au même rythme (modulo) ; 0 ou 1 image → image fixe.
+ *   Sans slogan exploitable (moins de 2 mots) mais avec 2 images ou plus : slider d'images seul.
  * - Défilement automatique (barre de progression CSS) en pause au survol, au focus
- *   et onglet masqué ; désactivé avec `prefers-reduced-motion`.
- * - Commandes : un bouton par diapositive (numéro + mot), annonce polie au changement manuel.
+ *   et onglet masqué.
+ * - `prefers-reduced-motion` : aucune avance automatique et tous les mots allumés
+ *   (le slogan reste lisible d'un coup d'œil) ; un clic sur une commande allume le mot choisi.
+ * - Commandes : un bouton par étape (numéro + mot), annonce polie au changement manuel.
  */
 interface BreadcrumbItem {
   label: string
@@ -43,20 +47,25 @@ const props = withDefaults(defineProps<{
 
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
+const { previewPath } = usePeiPreview()
 const { $lenis } = useNuxtApp()
 
 // ---------------------------------------------------------------------------
-// Diapositives
+// Diapositives et étapes
 // ---------------------------------------------------------------------------
 const failed = ref<string[]>([])
 const slides = computed(() => {
-  const list = props.images.filter(src => !!src && !failed.value.includes(src))
+  const list = [...new Set(props.images.filter(src => !!src && !failed.value.includes(src)))]
   return list.length ? list : [props.fallbackImage]
 })
-const total = computed(() => slides.value.length)
-const hasSlider = computed(() => total.value >= 2)
-/** Mots et diapositives appariés (sinon : tous les mots allumés). */
-const linked = computed(() => hasSlider.value && props.words.length === total.value)
+const slideCount = computed(() => slides.value.length)
+/** Slogan animé : au moins deux mots, indépendamment des images. */
+const wordMode = computed(() => props.words.length >= 2)
+/** Nombre d'étapes du défilement : un par mot, sinon un par image (slider seul), sinon aucune. */
+const total = computed(() => (wordMode.value ? props.words.length : slideCount.value >= 2 ? slideCount.value : 0))
+const hasSteps = computed(() => total.value >= 2)
+/** Mots et images appariés un à un (l'image n suit le mot n). */
+const linked = computed(() => wordMode.value && slideCount.value === props.words.length)
 
 function onImageError(src: string) {
   if (src !== props.fallbackImage && !failed.value.includes(src)) failed.value.push(src)
@@ -70,12 +79,12 @@ function wordLabel(word: string): string {
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
-function slideLabel(index: number): string {
-  return linked.value ? wordLabel(props.words[index] ?? '') : ''
+function stepLabel(index: number): string {
+  return wordMode.value ? wordLabel(props.words[index] ?? '') : ''
 }
 
 function imageAlt(index: number): string {
-  const label = slideLabel(index)
+  const label = linked.value ? stepLabel(index) : ''
   return label ? `${props.title} — ${label}` : props.title
 }
 
@@ -84,21 +93,35 @@ function imageAlt(index: number): string {
 // ---------------------------------------------------------------------------
 const SLIDE_DURATION = 6000
 const active = ref(0)
+/** Compteur de changements : fait avancer les images au même rythme que les mots (modulo). */
+const tick = ref(0)
 const mounted = ref(false)
 const reducedMotion = ref(false)
+/** Une commande a été actionnée (mouvement réduit : un seul mot allumé ensuite). */
+const touched = ref(false)
 const hovered = ref(false)
 const focused = ref(false)
 const pageHidden = ref(false)
 const liveMessage = ref('')
 
-const autoplay = computed(() => mounted.value && hasSlider.value && !reducedMotion.value)
+const autoplay = computed(() => mounted.value && hasSteps.value && !reducedMotion.value)
 const paused = computed(() => hovered.value || focused.value || pageHidden.value)
+
+/** Image affichée : appariée au mot, sinon rotation au rythme des étapes, sinon fixe. */
+const activeImage = computed(() => {
+  if (slideCount.value < 2) return 0
+  if (linked.value || !wordMode.value) return active.value % slideCount.value
+  return tick.value % slideCount.value
+})
 
 function goTo(index: number, manual = false) {
   if (!total.value) return
-  active.value = (index + total.value) % total.value
+  const next = (index + total.value) % total.value
+  if (next !== active.value) tick.value++
+  active.value = next
   if (manual) {
-    const label = slideLabel(active.value)
+    touched.value = true
+    const label = stepLabel(active.value)
     liveMessage.value = label
       ? t('pei.home.hero.slideAnnounce', { n: active.value + 1, total: total.value, label })
       : t('hero.slider.current', { n: active.value + 1, total: total.value })
@@ -109,8 +132,24 @@ function onProgressEnd(index: number) {
   if (index === active.value) goTo(active.value + 1)
 }
 
+/** Mouvement réduit sans choix manuel : tous les mots allumés (aussi en CSS, avant hydratation). */
+const allLit = computed(() => !wordMode.value || (reducedMotion.value && !touched.value))
+
 function isLit(index: number): boolean {
-  return !linked.value || index === active.value
+  return allLit.value || index === active.value
+}
+
+/** Commande courante (aucune tant que tout le slogan est allumé en mouvement réduit). */
+function isCurrentStep(index: number): boolean {
+  return index === active.value && !(wordMode.value && allLit.value)
+}
+
+function wordClass(index: number): string {
+  const last = index === props.words.length - 1
+  if (isLit(index)) return last ? 'text-brand-red-300' : 'text-white'
+  // Mot atténué ; `prefers-reduced-motion` le rallume tant qu'aucune commande n'a été actionnée
+  if (touched.value) return 'text-[#7584c2]'
+  return last ? 'text-[#7584c2] motion-reduce:text-brand-red-300' : 'text-[#7584c2] motion-reduce:text-white'
 }
 
 function onFocusOut(event: FocusEvent) {
@@ -164,9 +203,9 @@ function actionClass(action: HeroAction): string {
         :key="src"
         :src="src"
         :alt="imageAlt(index)"
-        :aria-hidden="index === active ? undefined : 'true'"
+        :aria-hidden="index === activeImage ? undefined : 'true'"
         class="absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out motion-reduce:transition-none"
-        :class="index === active ? 'opacity-100' : 'opacity-0'"
+        :class="index === activeImage ? 'opacity-100' : 'opacity-0'"
         :fetchpriority="index === 0 ? 'high' : 'auto'"
         :loading="index === 0 ? 'eager' : 'lazy'"
         decoding="async"
@@ -207,9 +246,7 @@ function actionClass(action: HeroAction): string {
               v-for="(word, index) in words"
               :key="index"
               class="break-words transition-colors duration-500 motion-reduce:transition-none"
-              :class="isLit(index)
-                ? (index === words.length - 1 ? 'text-brand-red-300' : 'text-white')
-                : 'text-[#7584c2]'"
+              :class="wordClass(index)"
             ><bdi>{{ word }}</bdi></span>
           </template>
           <span v-else class="normal-case tracking-tight text-[clamp(2.5rem,7vw,5.5rem)]">{{ title }}</span>
@@ -236,7 +273,7 @@ function actionClass(action: HeroAction): string {
               </a>
               <NuxtLink
                 v-else
-                :to="localePath(action.to)"
+                :to="previewPath(localePath(action.to))"
                 class="inline-flex min-h-[52px] items-center gap-2 rounded-xl px-6 font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 :class="actionClass(action)"
               >
@@ -248,37 +285,37 @@ function actionClass(action: HeroAction): string {
         </div>
 
         <div
-          v-if="hasSlider"
+          v-if="hasSteps"
           class="flex w-full gap-4 lg:w-auto"
           role="group"
-          :aria-label="linked ? t('pei.home.hero.slides') : t('hero.slider.slides')"
+          :aria-label="wordMode ? t('pei.home.hero.slides') : t('hero.slider.slides')"
         >
           <button
-            v-for="(src, index) in slides"
-            :key="src"
+            v-for="index in total"
+            :key="index"
             type="button"
             class="flex min-h-[44px] min-w-0 flex-1 flex-col gap-2.5 text-start focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white lg:w-[150px] lg:flex-none"
-            :aria-current="index === active ? 'true' : undefined"
-            :aria-label="linked
-              ? t('pei.home.hero.showSlide', { n: index + 1, total, label: slideLabel(index) })
-              : t('hero.slider.slide', { n: index + 1, total })"
-            @click="goTo(index, true)"
+            :aria-current="isCurrentStep(index - 1) ? 'true' : undefined"
+            :aria-label="wordMode
+              ? t('pei.home.hero.showSlide', { n: index, total, label: stepLabel(index - 1) })
+              : t('hero.slider.slide', { n: index, total })"
+            @click="goTo(index - 1, true)"
           >
             <span class="relative block h-1 w-full overflow-hidden rounded-full bg-white/30" aria-hidden="true">
               <span
-                v-if="index === active"
+                v-if="isCurrentStep(index - 1)"
                 class="absolute inset-y-0 start-0 rounded-full bg-white"
                 :class="autoplay ? 'pei-progress' : 'w-full'"
                 :style="autoplay ? { animationDuration: `${SLIDE_DURATION}ms`, animationPlayState: paused ? 'paused' : 'running' } : undefined"
-                @animationend="onProgressEnd(index)"
+                @animationend="onProgressEnd(index - 1)"
               />
             </span>
             <span
               class="truncate text-[13px] font-bold"
-              :class="index === active ? 'text-white' : 'text-brand-blue-200'"
+              :class="isCurrentStep(index - 1) ? 'text-white' : 'text-brand-blue-200'"
               aria-hidden="true"
             >
-              {{ pad(index + 1) }}<template v-if="slideLabel(index)"> · {{ slideLabel(index) }}</template>
+              {{ pad(index) }}<template v-if="stepLabel(index - 1)"> · {{ stepLabel(index - 1) }}</template>
             </span>
           </button>
         </div>
