@@ -13,7 +13,8 @@
     },
     "breadcrumb": {
       "dde": "DDE",
-      "pole": "Pôle Entrepreneuriat et Innovation"
+      "pole": "Pôle Entrepreneuriat et Innovation",
+      "label": "Fil d'Ariane"
     },
     "phases": {
       "awareness": "Sensibilisation",
@@ -35,13 +36,58 @@
       "allPartners": "Tous les partenaires du pôle",
       "partnersBadge": "Nos partenaires",
       "newsBadge": "Actualités",
-      "discoverActivities": "Découvrir le parcours"
+      "discoverActivities": "Découvrir le parcours",
+      "impactBadge": "Un impact déjà tangible",
+      "hero": {
+        "breadcrumbLabel": "Fil d'Ariane",
+        "slides": "Diapositives du slogan",
+        "showSlide": "Afficher la diapositive {n} sur {total} : {label}",
+        "slideAnnounce": "Diapositive {n} sur {total} : {label}"
+      }
     },
     "activities": {
       "anchorsLabel": "Aller à une phase",
       "upcomingEvents": "Prochains événements",
       "online": "En ligne",
-      "eventLink": "Voir l'événement"
+      "eventLink": "Voir l'événement",
+      "discoverJourney": "Découvrir le parcours",
+      "ring": {
+        "label": "Les étapes du parcours",
+        "captionTop": "étape pour | étapes pour",
+        "captionBottom": "entreprendre",
+        "step": "Étape {n} : {title}"
+      },
+      "figuresLabel": "Le parcours en chiffres",
+      "journey": {
+        "title": "Tout commence par l'envie d'oser.",
+        "intro": "{n} dispositif accompagne les porteurs de projet, de l'éveil de l'esprit d'entreprendre jusqu'au financement des premières opérations. | {n} dispositifs s'enchaînent, de l'éveil de l'esprit d'entreprendre jusqu'au financement des premières opérations."
+      },
+      "phaseEyebrow": {
+        "awareness": "L'éveil et la sensibilisation",
+        "status": "Le cadre de réussite",
+        "pre_incubation": "La pré-incubation",
+        "incubation": "L'incubation",
+        "funding": "Le financement",
+        "ecosystem": "L'animation de l'écosystème"
+      },
+      "keyPoints": "À retenir",
+      "statusLink": "Tout savoir sur le statut",
+      "support": {
+        "eyebrow": "L'accompagnement opérationnel",
+        "title": "De l'idée à l'accélération, en {n} phase. | De l'idée à l'accélération, en {n} phases.",
+        "from": "Idée",
+        "to": "Start-up financée",
+        "phaseLabel": "Phase {n} · {phase}"
+      },
+      "ecosystemEyebrow": "Rencontres et événements",
+      "agenda": {
+        "title": "Prochains rendez-vous",
+        "all": "Tout l'agenda"
+      },
+      "empty": {
+        "title": "Aucune activité publiée pour le moment",
+        "description": "Les dispositifs du parcours seront présentés ici prochainement."
+      }
     },
     "common": {
       "viewMore": "Voir plus",

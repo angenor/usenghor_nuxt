@@ -40,17 +40,30 @@ export interface PeiPageContext {
 export function usePeiBreadcrumb(
   current: MaybeRefOrGetter<string | null>,
   ddeServiceId: MaybeRefOrGetter<string | null>,
-): { breadcrumb: ComputedRef<PeiBreadcrumbItem[]>, ready: Promise<unknown> } {
+): {
+  breadcrumb: ComputedRef<PeiBreadcrumbItem[]>
+  dde: ComputedRef<ServicePublic | null>
+  /** Identifiant du service DDE à utiliser pour les contenus (actualités, événements, albums) : DDE résolue, sinon clé éditoriale. */
+  ddeId: ComputedRef<string | null>
+  ready: Promise<unknown>
+} {
   const { t } = useI18n()
   const { listServices, getServiceUrl } = usePublicOrganizationApi()
 
   const servicesAsync = useAsyncData('pei-org-services', () => listServices().catch(() => [] as ServicePublic[]))
 
-  const breadcrumb = computed<PeiBreadcrumbItem[]>(() => {
+  /** Service DDE résolu (parent du pôle, sinon clé éditoriale), exposé aussi pour les liens de page. */
+  const dde = computed<ServicePublic | null>(() => {
     const services = servicesAsync.data.value ?? []
     const pole = services.find(s => s.landing_path === '/entrepreneuriat')
-    const dde = (pole?.parent_id && services.find(s => s.id === pole.parent_id))
+    return (pole?.parent_id && services.find(s => s.id === pole.parent_id))
       || services.find(s => s.id === toValue(ddeServiceId))
+      || null
+  })
+
+  const ddeId = computed<string | null>(() => dde.value?.id ?? toValue(ddeServiceId) ?? null)
+
+  const breadcrumb = computed<PeiBreadcrumbItem[]>(() => {
     const currentLabel = toValue(current)
 
     const items: PeiBreadcrumbItem[] = [
@@ -58,13 +71,13 @@ export function usePeiBreadcrumb(
       { label: t('nav.about'), to: '/a-propos' },
       { label: t('about.tabs.organization'), to: '/a-propos/organisation' },
     ]
-    if (dde) items.push({ label: dde.sigle || t('pei.breadcrumb.dde'), to: getServiceUrl(dde) })
+    if (dde.value) items.push({ label: dde.value.sigle || t('pei.breadcrumb.dde'), to: getServiceUrl(dde.value) })
     items.push({ label: t('pei.breadcrumb.pole'), to: currentLabel ? '/entrepreneuriat' : undefined })
     if (currentLabel) items.push({ label: currentLabel })
     return items
   })
 
-  return { breadcrumb, ready: servicesAsync }
+  return { breadcrumb, dde, ddeId, ready: servicesAsync }
 }
 
 export function usePeiPage(options: PeiPageOptions): Promise<PeiPageContext> {
@@ -79,18 +92,22 @@ export function usePeiPage(options: PeiPageOptions): Promise<PeiPageContext> {
   const { buildPeiOrganization, buildWebPage, buildBreadcrumbList } = usePeiJsonLd()
 
   // Aucun `await` avant la fin des appels de composables (contexte Nuxt perdu hors <script setup>) :
-  // les deux lectures sont enregistrées tout de suite, le service DDE attend l'éditorial.
+  // les lectures sont enregistrées tout de suite, le service DDE attend l'éditorial et la liste des services.
   const editorial = useAsyncData('editorial-entrepreneurship', () => loadContent().then(() => true))
 
   const text = (key: string): string => getRawContent(`entrepreneurship.${key}`)?.trim() || ''
 
-  const ddeServiceId = computed(() => {
+  /** Clé éditoriale `entrepreneurship.dde_service_id` (repli quand le pôle n'a pas de service parent). */
+  const keyServiceId = computed(() => {
     const id = text('dde_service_id')
     return isUuid(id) ? id : null
   })
 
+  // Fil d'Ariane partagé et DDE unique du mini-site : parent du pôle `/entrepreneuriat`, sinon la clé
+  const { breadcrumb, ddeId: ddeServiceId, ready: breadcrumbReady } = usePeiBreadcrumb(() => t(`pei.nav.${navKey}`), keyServiceId)
+
   const ddeAsync = useAsyncData(`pei-${heroPrefix}-dde`, async () => {
-    await editorial
+    await Promise.all([editorial, breadcrumbReady])
     return ddeServiceId.value ? getServiceById(ddeServiceId.value).catch(() => null) : null
   })
   const ddeService = ddeAsync.data
@@ -103,8 +120,6 @@ export function usePeiPage(options: PeiPageOptions): Promise<PeiPageContext> {
     subtitle: text(`${heroPrefix}.hero.subtitle`) || undefined,
     images: heroImage.value ? [heroImage.value] : [],
   }))
-
-  const { breadcrumb, ready: breadcrumbReady } = usePeiBreadcrumb(() => t(`pei.nav.${navKey}`), ddeServiceId)
 
   function applySeo(seoOptions: { type?: 'WebPage' | 'CollectionPage' } = {}) {
     const localeMap: Record<string, string> = { fr: 'fr_FR', en: 'en_US', ar: 'ar_SA' }

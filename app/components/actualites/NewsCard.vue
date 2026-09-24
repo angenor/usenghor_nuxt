@@ -2,6 +2,8 @@
 /**
  * Carte d'actualité partagée (grille « Dernières actualités » de /actualites,
  * accueil du pôle PEI). Markup extrait à l'identique de pages/actualites/index.vue.
+ * Variantes additives de l'accueil du pôle : `featured` (actualité à la une, grande image)
+ * et `compact` (vignette + date + titre) ; sans image, la zone image est masquée.
  */
 import type { NewsDisplay } from '~/types/news'
 
@@ -9,11 +11,13 @@ interface Props {
   item: NewsDisplay
   showAssociations?: boolean
   imageVariant?: 'low' | 'medium'
+  variant?: 'grid' | 'featured' | 'compact'
 }
 
 const props = withDefaults(defineProps<Props>(), {
   showAssociations: true,
   imageVariant: 'low',
+  variant: 'grid',
 })
 
 const { locale } = useI18n()
@@ -47,6 +51,51 @@ const hasAssociations = computed(() =>
 
 <template>
   <NuxtLink
+    v-if="variant === 'featured'"
+    :to="localePath(`/actualites/${item.slug}`)"
+    class="group flex h-full flex-col overflow-hidden rounded-3xl bg-white text-brand-blue-900 shadow-sm transition-shadow hover:shadow-lg dark:bg-gray-800 dark:text-white"
+  >
+    <div v-if="coverImageUrl" class="h-60 overflow-hidden sm:h-80 lg:h-[360px]">
+      <img
+        :src="coverImageUrl"
+        :alt="title"
+        class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        loading="lazy"
+      >
+    </div>
+    <div class="flex flex-col gap-3 p-6 sm:p-8">
+      <span v-if="formattedDate" class="text-[13px] font-bold text-brand-blue-500 dark:text-brand-blue-300">{{ formattedDate }}</span>
+      <h3 class="text-2xl font-extrabold leading-tight tracking-[-0.02em] transition-colors group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-300 sm:text-[30px]">
+        {{ title }}
+      </h3>
+      <p v-if="excerpt" class="line-clamp-3 text-base leading-relaxed text-gray-600 dark:text-gray-300">
+        {{ excerpt }}
+      </p>
+    </div>
+  </NuxtLink>
+  <NuxtLink
+    v-else-if="variant === 'compact'"
+    :to="localePath(`/actualites/${item.slug}`)"
+    class="group grid h-full overflow-hidden rounded-[20px] bg-white text-brand-blue-900 shadow-sm transition-shadow hover:shadow-lg dark:bg-gray-800 dark:text-white"
+    :class="coverImageUrl ? 'grid-cols-[112px_minmax(0,1fr)] sm:grid-cols-[180px_minmax(0,1fr)]' : 'grid-cols-1'"
+  >
+    <div v-if="coverImageUrl" class="relative min-h-[120px] overflow-hidden">
+      <img
+        :src="coverImageUrl"
+        :alt="title"
+        class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        loading="lazy"
+      >
+    </div>
+    <div class="flex flex-col justify-center gap-2.5 p-5 sm:p-6">
+      <span v-if="formattedDate" class="text-[13px] font-bold text-brand-blue-500 dark:text-brand-blue-300">{{ formattedDate }}</span>
+      <h3 class="line-clamp-3 text-lg font-extrabold leading-snug transition-colors group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-300 sm:text-xl">
+        {{ title }}
+      </h3>
+    </div>
+  </NuxtLink>
+  <NuxtLink
+    v-else
     :to="localePath(`/actualites/${item.slug}`)"
     class="group block"
   >

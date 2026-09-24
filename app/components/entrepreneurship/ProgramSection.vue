@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** Bloc d'une phase du parcours sur « Nos activités » (version longue des dispositifs). */
+/** Bloc d'une phase du parcours (version longue des dispositifs) ; teintes fixées par la phase (`peiStepTone`). */
 import type { PeiProgramPhase, PeiProgramPublic } from '~/types/api/entrepreneurship'
 
 const props = withDefaults(defineProps<{
@@ -16,7 +16,7 @@ const { t } = useI18n()
 const { localized } = useLocalizedField()
 const { getImageVariantUrl } = useMediaApi()
 
-const headColors = computed(() => peiColorClasses(props.programs[0]?.color))
+const TONE_TEXT = 'text-[color:var(--pei-ink)] dark:text-[color:var(--pei-fill)]'
 
 function programTitle(program: PeiProgramPublic): string {
   return localized(program, 'title')
@@ -32,11 +32,12 @@ function coverUrl(program: PeiProgramPublic): string | null {
     :id="standalone ? PEI_PHASE_ANCHORS[phase] : undefined"
     :aria-labelledby="standalone ? `${PEI_PHASE_ANCHORS[phase]}-title` : undefined"
     :class="standalone ? 'scroll-mt-40 py-16 border-t border-gray-200 dark:border-gray-700 first:border-t-0' : ''"
+    :style="peiStepStyle(peiStepTone(phase))"
   >
     <div v-if="standalone" class="flex items-center gap-4 mb-10">
       <span
         class="w-12 h-12 shrink-0 rounded-xl flex items-center justify-center text-lg font-bold"
-        :class="[headColors.numBg, headColors.numText]"
+        :class="['bg-[color:var(--pei-soft)] dark:bg-[color:var(--pei-soft-dark)]', TONE_TEXT]"
       >
         {{ index }}
       </span>
@@ -49,6 +50,7 @@ function coverUrl(program: PeiProgramPublic): string | null {
       v-for="program in programs"
       :key="program.id"
       class="grid gap-8 lg:grid-cols-12 items-start mb-12 last:mb-0"
+      :style="peiStepStyle(peiStepTone(program.phase))"
     >
       <div v-if="coverUrl(program)" class="lg:col-span-5">
         <img
@@ -59,7 +61,7 @@ function coverUrl(program: PeiProgramPublic): string | null {
         >
       </div>
       <div class="min-w-0" :class="coverUrl(program) ? 'lg:col-span-7' : 'lg:col-span-12'">
-        <p class="text-xs font-semibold uppercase tracking-wider" :class="peiColorClasses(program.color).label">
+        <p class="text-xs font-semibold uppercase tracking-wider" :class="TONE_TEXT">
           {{ t(`pei.phases.${program.phase}`) }}
           <template v-if="program.sigle"> · {{ program.sigle }}</template>
         </p>
@@ -69,7 +71,7 @@ function coverUrl(program: PeiProgramPublic): string | null {
         <p v-if="localized(program, 'tagline')" class="mt-3 text-lg text-gray-600 dark:text-gray-300">
           {{ localized(program, 'tagline') }}
         </p>
-        <p v-if="localized(program, 'highlight')" class="mt-3 font-semibold" :class="peiColorClasses(program.color).label">
+        <p v-if="localized(program, 'highlight')" class="mt-3 font-semibold" :class="TONE_TEXT">
           {{ localized(program, 'highlight') }}
         </p>
         <RichTextRenderer

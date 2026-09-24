@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PeiProgramAdmin, PeiProgramCreatePayload } from '~/types/api/entrepreneurship'
-import { colorOptions, programPhaseLabels } from '~/composables/useEntrepreneurshipApi'
+import { programPhaseColorLabels, programPhaseLabels } from '~/composables/useEntrepreneurshipApi'
 
 definePageMeta({
   layout: 'admin',
@@ -32,7 +32,8 @@ const isDeleting = ref(false)
 const canEdit = computed(() => hasPermission('entrepreneurship.edit'))
 const canDelete = computed(() => hasPermission('entrepreneurship.delete'))
 
-const colorOption = computed(() => colorOptions.find(option => option.value === program.value?.color))
+/** Teinte publique du dispositif : fixée par sa phase. */
+const phaseTone = computed(() => (program.value ? peiStepTone(program.value.phase) : null))
 
 let successTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -229,8 +230,8 @@ async function executeDelete() {
           <div class="mb-4 flex flex-wrap items-center gap-3">
             <span
               class="inline-block h-4 w-4 rounded-full"
-              :class="colorOption?.swatchClass ?? 'bg-gray-400'"
-              :title="colorOption?.label"
+              :style="phaseTone ? { backgroundColor: phaseTone.fill } : undefined"
+              :title="`Couleur de la phase : ${programPhaseColorLabels[program.phase] ?? program.phase}`"
             />
             <span class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
               {{ programPhaseLabels[program.phase] ?? program.phase }}
@@ -238,7 +239,7 @@ async function executeDelete() {
             <span
               v-if="program.highlight"
               class="inline-flex rounded-full px-3 py-1 text-sm font-semibold"
-              :class="colorOption?.badgeClass ?? 'bg-gray-100 text-gray-700'"
+              :style="phaseTone ? { backgroundColor: phaseTone.soft, color: phaseTone.ink } : undefined"
             >
               {{ program.highlight }}
             </span>

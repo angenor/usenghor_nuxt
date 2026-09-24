@@ -13,7 +13,8 @@
     },
     "breadcrumb": {
       "dde": "DDE",
-      "pole": "Entrepreneurship and Innovation Hub"
+      "pole": "Entrepreneurship and Innovation Hub",
+      "label": "Breadcrumb"
     },
     "phases": {
       "awareness": "Awareness",
@@ -35,13 +36,58 @@
       "allPartners": "All the hub's partners",
       "partnersBadge": "Our partners",
       "newsBadge": "News",
-      "discoverActivities": "Discover the pathway"
+      "discoverActivities": "Discover the pathway",
+      "impactBadge": "An impact already tangible",
+      "hero": {
+        "breadcrumbLabel": "Breadcrumb",
+        "slides": "Slogan slides",
+        "showSlide": "Show slide {n} of {total}: {label}",
+        "slideAnnounce": "Slide {n} of {total}: {label}"
+      }
     },
     "activities": {
       "anchorsLabel": "Go to a phase",
       "upcomingEvents": "Upcoming events",
       "online": "Online",
-      "eventLink": "View the event"
+      "eventLink": "View the event",
+      "discoverJourney": "Explore the pathway",
+      "ring": {
+        "label": "The steps of the pathway",
+        "captionTop": "step to | steps to",
+        "captionBottom": "start a business",
+        "step": "Step {n}: {title}"
+      },
+      "figuresLabel": "The pathway in figures",
+      "journey": {
+        "title": "It all starts with the courage to dare.",
+        "intro": "{n} programme supports project leaders, from awakening the entrepreneurial spirit to funding the first operations. | {n} programmes follow one another, from awakening the entrepreneurial spirit to funding the first operations."
+      },
+      "phaseEyebrow": {
+        "awareness": "Awakening and awareness",
+        "status": "A framework for success",
+        "pre_incubation": "Pre-incubation",
+        "incubation": "Incubation",
+        "funding": "Funding",
+        "ecosystem": "Ecosystem animation"
+      },
+      "keyPoints": "Key points",
+      "statusLink": "All about the status",
+      "support": {
+        "eyebrow": "Hands-on support",
+        "title": "From idea to acceleration, in {n} phase. | From idea to acceleration, in {n} phases.",
+        "from": "Idea",
+        "to": "Funded start-up",
+        "phaseLabel": "Phase {n} · {phase}"
+      },
+      "ecosystemEyebrow": "Meetups and events",
+      "agenda": {
+        "title": "Upcoming events",
+        "all": "Full calendar"
+      },
+      "empty": {
+        "title": "No activities published yet",
+        "description": "The pathway's programmes will be presented here soon."
+      }
     },
     "common": {
       "viewMore": "See more",

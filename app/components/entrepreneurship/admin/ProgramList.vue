@@ -3,8 +3,8 @@
  * Liste admin des dispositifs du parcours PEI (tableau réordonnable par glisser-déposer).
  */
 import { VueDraggable } from 'vue-draggable-plus'
-import type { PeiColor, PeiProgramAdmin } from '~/types/api/entrepreneurship'
-import { colorOptions, programPhaseLabels } from '~/composables/useEntrepreneurshipApi'
+import type { PeiProgramAdmin } from '~/types/api/entrepreneurship'
+import { programPhaseColorLabels, programPhaseLabels } from '~/composables/useEntrepreneurshipApi'
 
 const props = withDefaults(defineProps<{
   items: PeiProgramAdmin[]
@@ -37,12 +37,9 @@ watch(
 
 const isDragDisabled = computed(() => props.dragDisabled || !props.canEdit)
 
-function swatchClass(color: PeiColor): string {
-  return colorOptions.find(option => option.value === color)?.swatchClass ?? 'bg-gray-400'
-}
-
-function colorLabel(color: PeiColor): string {
-  return colorOptions.find(option => option.value === color)?.label ?? color
+/** Pastille : couleur publique du dispositif, fixée par sa phase. */
+function phaseColorLabel(item: PeiProgramAdmin): string {
+  return `Couleur de la phase : ${programPhaseColorLabels[item.phase] ?? item.phase}`
 }
 
 function onDragEnd() {
@@ -141,9 +138,10 @@ function onDragEnd() {
                 <div class="flex items-center gap-3">
                   <span
                     class="inline-block h-4 w-4 flex-shrink-0 rounded-full ring-2 ring-white dark:ring-gray-800"
-                    :class="swatchClass(item.color)"
-                    :title="colorLabel(item.color)"
-                    :aria-label="`Couleur : ${colorLabel(item.color)}`"
+                    :style="{ backgroundColor: peiStepTone(item.phase).fill }"
+                    :title="phaseColorLabel(item)"
+                    role="img"
+                    :aria-label="phaseColorLabel(item)"
                   />
                   <div class="min-w-0">
                     <button

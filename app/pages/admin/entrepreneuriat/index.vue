@@ -137,7 +137,7 @@ const shortcuts = computed<Shortcut[]>(() => [
     label: 'FAQ',
     icon: 'fa-solid fa-circle-question',
     to: '/admin/faq',
-    convention: 'Catégorie « see » pour les questions du statut',
+    convention: 'Catégories dont le code commence par « see- » : leurs questions publiées s\'affichent sur la page du statut étudiant-entrepreneur',
   },
   {
     id: 'calls',
@@ -151,7 +151,7 @@ const shortcuts = computed<Shortcut[]>(() => [
     label: 'Page éditoriale « Entrepreneuriat »',
     icon: 'fa-solid fa-pen-to-square',
     to: '/admin/editorial/valeurs',
-    convention: 'Textes, chiffres clés, images du slider, e-mail de contact, service DDE',
+    convention: 'Textes, chiffres clés et d\'impact, images du slider, descriptions des familles de partenaires, e-mail de contact, service DDE de repli',
   },
 ])
 </script>
@@ -192,7 +192,9 @@ const shortcuts = computed<Shortcut[]>(() => [
       >
         <font-awesome-icon icon="fa-solid fa-triangle-exclamation" class="mt-0.5 h-5 w-5 text-amber-600 dark:text-amber-400" />
         <p class="text-sm text-amber-800 dark:text-amber-300">
-          Le service DDE n'est pas identifié : renseignez la clé « Service DDE » dans la page Entrepreneuriat
+          Le service DDE n'est pas identifié : rattachez le service du pôle (page dédiée « /entrepreneuriat ») à son service parent dans
+          <NuxtLink to="/admin/organisation/services" class="font-medium underline hover:no-underline">Organisation → Services</NuxtLink>,
+          ou renseignez la clé « Service DDE » de la page Entrepreneuriat
           (<NuxtLink to="/admin/editorial/valeurs" class="font-medium underline hover:no-underline">Valeurs</NuxtLink>).
         </p>
       </div>

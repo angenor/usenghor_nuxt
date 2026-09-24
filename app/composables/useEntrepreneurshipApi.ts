@@ -57,6 +57,19 @@ export const programPhaseLabels: Record<PeiProgramPhase, string> = {
   ecosystem: 'Écosystème',
 }
 
+/**
+ * Nom de la couleur d'une phase (backoffice) : sur le site public, la couleur d'un dispositif
+ * est fixée par sa phase (`PEI_PHASE_TONES`, utils/pei-presentation.ts) ; la colonne `color` reste en base.
+ */
+export const programPhaseColorLabels: Record<PeiProgramPhase, string> = {
+  awareness: 'Orange',
+  status: 'Violet',
+  pre_incubation: 'Rouge',
+  incubation: 'Vert',
+  funding: 'Turquoise',
+  ecosystem: 'Bleu',
+}
+
 export const programPhaseOptions: { value: PeiProgramPhase, label: string }[] = (
   Object.keys(programPhaseLabels) as PeiProgramPhase[]
 ).map(value => ({ value, label: programPhaseLabels[value] }))
@@ -76,6 +89,7 @@ export const resourceTypeOptions: { value: PeiResourceType, label: string }[] = 
   Object.keys(resourceTypeLabels) as PeiResourceType[]
 ).map(value => ({ value, label: resourceTypeLabels[value] }))
 
+/** Couleurs nommées de la colonne `color` (n'est plus choisie dans le backoffice ni lue par le site public). */
 export interface PeiColorOption {
   value: PeiColor
   label: string

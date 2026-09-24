@@ -8,7 +8,6 @@
 import type { ApplicationCallPublicWithDetails, CallScheduleRead } from '~/types/api'
 
 import type {
-  PeiColor,
   PeiLaureatePublic,
   PeiLaureateType,
   PeiPartnerFamily,
@@ -39,50 +38,75 @@ export const PEI_PHASE_ANCHORS: Record<PeiProgramPhase, string> = {
 /** Ordre fixe des familles de partenaires du pôle. */
 export const PEI_FAMILY_ORDER: PeiPartnerFamily[] = ['academic', 'support', 'international']
 
-export interface PeiColorClasses {
-  border: string
-  numBg: string
-  numText: string
+/**
+ * Teintes d'une étape du parcours, **fixées par la phase** (le champ `color` du dispositif
+ * reste en base mais n'est plus lu par le site public) — palette proche de l'infographie
+ * du cahier des charges :
+ * - `fill` (claire) : segments de l'anneau et de la barre, texte sur fond bleu nuit et en mode sombre
+ *   (≥ 4.5:1 sur brand-blue-800/900 et gray-800/900, et sous le texte bleu nuit des segments) ;
+ * - `ink` (foncée) : texte sur fond blanc ou `soft`, fond de l'encart « À retenir » sous texte blanc (≥ 4.5:1) ;
+ * - `soft` / `softDark` : fonds teintés en mode clair / sombre.
+ */
+export interface PeiStepTone {
+  fill: string
+  ink: string
+  soft: string
+  softDark: string
+}
+
+export const PEI_PHASE_TONES: Record<PeiProgramPhase, PeiStepTone> = {
+  // Orange
+  awareness: { fill: '#f7a64a', ink: '#b45309', soft: '#fff4e6', softDark: 'rgba(247,166,74,.14)' },
+  // Violet
+  status: { fill: '#b69cf7', ink: '#6d28d9', soft: '#f3eeff', softDark: 'rgba(182,156,247,.14)' },
+  // Rouge
+  pre_incubation: { fill: '#ff8a8a', ink: '#b91c1c', soft: '#ffecec', softDark: 'rgba(255,138,138,.14)' },
+  // Vert
+  incubation: { fill: '#a9cf5b', ink: '#467310', soft: '#eef7dc', softDark: 'rgba(169,207,91,.14)' },
+  // Turquoise
+  funding: { fill: '#62c6e0', ink: '#0e7490', soft: '#e0f5fa', softDark: 'rgba(98,198,224,.14)' },
+  // Bleu de la marque (brand-blue-300 / brand-blue-500)
+  ecosystem: { fill: '#8aabff', ink: '#2b4bbf', soft: '#eef2ff', softDark: 'rgba(138,171,255,.16)' },
+}
+
+/** Teinte d'une étape : celle de sa phase (phase inconnue → bleu de la marque). */
+export function peiStepTone(phase: PeiProgramPhase | null | undefined): PeiStepTone {
+  return PEI_PHASE_TONES[phase as PeiProgramPhase] ?? PEI_PHASE_TONES.ecosystem
+}
+
+/** Variables CSS d'une teinte, consommées par les classes `[color:var(--pei-…)]`. */
+export function peiStepStyle(tone: PeiStepTone): Record<string, string> {
+  return {
+    '--pei-fill': tone.fill,
+    '--pei-ink': tone.ink,
+    '--pei-soft': tone.soft,
+    '--pei-soft-dark': tone.softDark,
+  }
+}
+
+/** Chiffre éditorial découpé pour l'affichage : « 500+ » → nombre « 500 » + signe « + » en plus petit. */
+export interface PeiEditorialStat {
+  value: string
   label: string
+  prefix: string
+  number: string
+  suffix: string
+  /** Faux si la valeur ne contient pas de nombre (affichée telle quelle). */
+  numeric: boolean
 }
 
-/** Classes Tailwind (clair / sombre) par couleur nommée d'un dispositif. */
-export const PEI_COLOR_CLASSES: Record<PeiColor, PeiColorClasses> = {
-  blue: {
-    border: 'border-t-brand-blue-500',
-    numBg: 'bg-brand-blue-100 dark:bg-brand-blue-900/40',
-    numText: 'text-brand-blue-700 dark:text-brand-blue-300',
-    label: 'text-brand-blue-700 dark:text-brand-blue-300',
-  },
-  blue_dark: {
-    border: 'border-t-brand-blue-700',
-    numBg: 'bg-brand-blue-100 dark:bg-brand-blue-950/50',
-    numText: 'text-brand-blue-800 dark:text-brand-blue-200',
-    label: 'text-brand-blue-800 dark:text-brand-blue-200',
-  },
-  red: {
-    border: 'border-t-brand-red-500',
-    numBg: 'bg-brand-red-100 dark:bg-brand-red-900/40',
-    numText: 'text-brand-red-700 dark:text-brand-red-300',
-    label: 'text-brand-red-700 dark:text-brand-red-300',
-  },
-  amber: {
-    border: 'border-t-amber-500',
-    numBg: 'bg-amber-100 dark:bg-amber-900/40',
-    numText: 'text-amber-800 dark:text-amber-300',
-    label: 'text-amber-800 dark:text-amber-300',
-  },
-  teal: {
-    border: 'border-t-teal-600',
-    numBg: 'bg-teal-100 dark:bg-teal-900/40',
-    numText: 'text-teal-800 dark:text-teal-300',
-    label: 'text-teal-800 dark:text-teal-300',
-  },
+/** Descriptions éditoriales des familles de partenaires (`entrepreneurship.partners.family.<famille>.description`). */
+export function peiFamilyDescriptions(text: (key: string) => string): Partial<Record<PeiPartnerFamily, string>> {
+  return Object.fromEntries(
+    PEI_FAMILY_ORDER
+      .map(family => [family, text(`partners.family.${family}.description`)] as const)
+      .filter(([, description]) => !!description),
+  )
 }
 
-/** Classes d'une couleur ; valeur inconnue → bleu. */
-export function peiColorClasses(color: string | null | undefined): PeiColorClasses {
-  return PEI_COLOR_CLASSES[color as PeiColor] ?? PEI_COLOR_CLASSES.blue
+/** Parties d'un chiffre mis en avant (« 4 crédits · 10 h libérées » → deux points). */
+export function splitHighlight(value: string | null | undefined): string[] {
+  return (value ?? '').split(/\s+[·•|]\s+/).map(s => s.trim()).filter(Boolean)
 }
 
 /** Vrai si la valeur est animable en compteur (« 12 », « 500+ »). */

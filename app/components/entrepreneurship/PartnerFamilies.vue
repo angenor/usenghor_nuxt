@@ -1,15 +1,21 @@
 <script setup lang="ts">
 /**
  * Partenaires du pôle en grille unique logo + nom (style de /a-propos/partenaires), dans l'ordre des familles.
- * Variante `logos` (accueil, par défaut) : grille seule ; `detailed` (page « Nos partenaires ») : filtres par famille.
+ * Variante `logos` (par défaut) : grille seule ; `detailed` (page « Nos partenaires ») : filtres par famille ;
+ * `columns` (accueil du pôle) : une colonne par famille (titre + tuiles de logos), familles vides masquées.
+ * `descriptions` (additif, variantes `columns` et `detailed`) : phrase éditoriale sous le titre de chaque famille ;
+ * absente ou vide → rendu inchangé.
  */
 import type { PeiPartnerFamily, PeiPartnerFamilyPublic } from '~/types/api/entrepreneurship'
 
 const props = withDefaults(defineProps<{
   families: PeiPartnerFamilyPublic[]
-  variant?: 'logos' | 'detailed'
+  variant?: 'logos' | 'detailed' | 'columns'
+  /** Description de chaque famille (clés `entrepreneurship.partners.family.<famille>.description`). */
+  descriptions?: Partial<Record<PeiPartnerFamily, string>>
 }>(), {
   variant: 'logos',
+  descriptions: () => ({}),
 })
 
 const { t } = useI18n()
@@ -35,6 +41,26 @@ const filterOptions = computed(() => [
   ...visible.value.map(f => ({ value: f.family as FamilyFilter, label: t(`pei.families.${f.family}`), icon: FAMILY_ICONS[f.family], count: f.partners.length })),
 ])
 
+/** Colonnes de la variante `columns` selon le nombre de familles visibles. */
+const COLUMN_CLASSES: Record<number, string> = {
+  1: 'max-w-xl',
+  2: 'md:grid-cols-2',
+  3: 'md:grid-cols-2 lg:grid-cols-3',
+}
+
+/** Description non vide d'une famille, sinon chaîne vide. */
+function familyDescription(family: PeiPartnerFamily): string {
+  return props.descriptions?.[family]?.trim() ?? ''
+}
+
+/** Variante détaillée : familles décrites sous les filtres (toutes, ou celle filtrée). */
+const describedFamilies = computed(() =>
+  visible.value
+    .filter(f => (selectedFamily.value === 'all' || f.family === selectedFamily.value) && familyDescription(f.family))
+    .map(f => ({ family: f.family, title: t(`pei.families.${f.family}`), description: familyDescription(f.family) })),
+)
+const DESCRIBED_COLUMNS: Record<number, string> = { 1: 'max-w-2xl mx-auto text-center', 2: 'md:grid-cols-2', 3: 'md:grid-cols-3' }
+
 const filteredPartners = computed(() =>
   visible.value
     .filter(f => selectedFamily.value === 'all' || f.family === selectedFamily.value)
@@ -43,7 +69,51 @@ const filteredPartners = computed(() =>
 </script>
 
 <template>
-  <div v-if="visible.length">
+  <div
+    v-if="visible.length && variant === 'columns'"
+    class="grid gap-7"
+    :class="COLUMN_CLASSES[visible.length] ?? COLUMN_CLASSES[3]"
+  >
+    <div
+      v-for="family in visible"
+      :key="family.family"
+      class="flex flex-col gap-5 rounded-3xl bg-[#f5f7ff] p-6 dark:bg-gray-800 sm:p-8"
+    >
+      <div class="flex flex-col gap-3">
+        <h3 class="text-[22px] font-extrabold text-brand-blue-900 dark:text-white">
+          {{ t(`pei.families.${family.family}`) }}
+        </h3>
+        <p v-if="familyDescription(family.family)" class="text-[15px] leading-relaxed text-gray-600 dark:text-gray-300">
+          {{ familyDescription(family.family) }}
+        </p>
+      </div>
+      <ul class="grid gap-3" :class="family.partners.length >= 3 ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2'">
+        <li v-for="partner in family.partners" :key="partner.id" class="flex">
+          <component
+            :is="partner.website ? 'a' : 'div'"
+            :href="partner.website || undefined"
+            :target="partner.website ? '_blank' : undefined"
+            :rel="partner.website ? 'noopener noreferrer' : undefined"
+            :title="partner.name"
+            class="flex h-[72px] w-full items-center justify-center rounded-xl border border-gray-200 bg-white px-3 py-2 text-center text-[15px] font-extrabold text-gray-700 transition-shadow dark:border-gray-600 dark:bg-white"
+            :class="partner.website ? 'hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue-500' : ''"
+          >
+            <span v-if="partner.logo_url" class="flex h-12 w-full items-center justify-center">
+              <img
+                :src="partner.logo_url"
+                :alt="partner.name"
+                class="max-h-full max-w-full object-contain"
+                loading="lazy"
+              >
+            </span>
+            <span v-else class="line-clamp-2">{{ partner.name }}</span>
+            <span v-if="partner.website" class="sr-only">{{ t('pei.common.openInNewTab') }}</span>
+          </component>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div v-else-if="visible.length">
     <!-- Filtres par famille (page « Nos partenaires » uniquement) -->
     <div v-if="variant === 'detailed'" class="mb-10 flex flex-wrap justify-center gap-3" role="group" :aria-label="t('pei.partners.filterLabel')">
       <button
@@ -67,6 +137,24 @@ const filteredPartners = computed(() =>
         </span>
       </button>
     </div>
+
+    <!-- Descriptions des familles (toutes, ou la famille filtrée) -->
+    <dl
+      v-if="variant === 'detailed' && describedFamilies.length"
+      class="mb-10 grid gap-6"
+      :class="DESCRIBED_COLUMNS[Math.min(describedFamilies.length, 3)]"
+      aria-live="polite"
+    >
+      <div v-for="item in describedFamilies" :key="item.family" class="flex flex-col gap-1.5">
+        <dt class="flex items-center gap-2 font-bold text-brand-blue-900 dark:text-white" :class="{ 'justify-center': describedFamilies.length === 1 }">
+          <font-awesome-icon :icon="FAMILY_ICONS[item.family]" class="h-4 w-4 text-brand-blue-500 dark:text-brand-blue-300" aria-hidden="true" />
+          {{ item.title }}
+        </dt>
+        <dd class="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+          {{ item.description }}
+        </dd>
+      </div>
+    </dl>
 
     <ul class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
       <li v-for="partner in filteredPartners" :key="partner.id" class="flex">

@@ -9,7 +9,7 @@ import type {
   PeiProgramCreatePayload,
   PeiProgramPhase,
 } from '~/types/api/entrepreneurship'
-import { colorOptions, programPhaseOptions } from '~/composables/useEntrepreneurshipApi'
+import { programPhaseColorLabels, programPhaseOptions } from '~/composables/useEntrepreneurshipApi'
 
 type Lang = 'fr' | 'en' | 'ar'
 
@@ -39,6 +39,7 @@ function buildForm(program: PeiProgramAdmin | null) {
     code: program?.code ?? '',
     sigle: program?.sigle ?? '',
     phase: (program?.phase ?? '') as PeiProgramPhase | '',
+    // Non modifiable ici (la couleur publique dépend de la phase) : valeur existante renvoyée telle quelle
     color: (program?.color ?? 'blue') as PeiColor,
     active: program?.active ?? true,
     title: program?.title ?? '',
@@ -109,6 +110,12 @@ function regenerateCode() {
 const codeChanged = computed(
   () => isEditMode.value && form.code !== (props.program?.code ?? ''),
 )
+
+// ── Couleur (fixée par la phase) ───────────────────────────────────
+const phaseTone = computed(() => (form.phase ? peiStepTone(form.phase) : null))
+
+/** Aide commune des champs « Chiffre mis en avant ». */
+const HIGHLIGHT_HELP = 'Alimente le bandeau de chiffres de la page « Nos activités », l\'encart « À retenir » (ou le pied de carte) de l\'étape et la pastille de la carte sur l\'accueil du pôle. Séparez plusieurs chiffres par « · » (ex. 4 crédits · 10 h libérées).'
 
 // ── Visuel ─────────────────────────────────────────────────────────
 const coverUrl = computed(() => getMediaUrl(form.cover_image_external_id, 'medium'))
@@ -316,44 +323,34 @@ const cardClass = 'rounded-xl border border-gray-200 bg-white p-6 dark:border-gr
           </select>
         </div>
 
-        <fieldset>
-          <legend class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <div>
+          <p class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
             Couleur
-          </legend>
-          <div class="flex flex-wrap items-center gap-3">
-            <label
-              v-for="option in colorOptions"
-              :key="option.value"
-              class="relative cursor-pointer"
-              :title="option.label"
-            >
-              <input
-                v-model="form.color"
-                type="radio"
-                name="program-color"
-                :value="option.value"
-                class="peer sr-only"
-                :aria-label="option.label"
-              >
-              <span
-                class="block h-8 w-8 rounded-full ring-2 ring-offset-2 transition peer-focus-visible:ring-brand-blue-400 dark:ring-offset-gray-800"
-                :class="[
-                  option.swatchClass,
-                  form.color === option.value ? 'ring-gray-900 dark:ring-white' : 'ring-transparent',
-                ]"
-              />
-              <span
-                v-if="form.color === option.value"
-                class="pointer-events-none absolute inset-0 flex items-center justify-center text-xs text-white"
-              >
-                <font-awesome-icon icon="fa-solid fa-check" />
-              </span>
-            </label>
-            <span class="text-xs text-gray-500 dark:text-gray-400">
-              {{ colorOptions.find(option => option.value === form.color)?.label }}
-            </span>
+          </p>
+          <div class="flex items-center gap-3" role="status">
+            <span
+              class="inline-block h-8 w-8 flex-shrink-0 rounded-full ring-1 ring-black/10 dark:ring-white/20"
+              :class="phaseTone ? '' : 'bg-gray-200 dark:bg-gray-600'"
+              :style="phaseTone ? { backgroundColor: phaseTone.fill } : undefined"
+              aria-hidden="true"
+            />
+            <div class="min-w-0 text-xs">
+              <p class="font-medium text-gray-700 dark:text-gray-300">
+                Couleur déterminée par la phase
+                <span
+                  v-if="phaseTone && form.phase"
+                  class="ml-1 inline-flex rounded-full px-2 py-0.5 font-semibold"
+                  :style="{ backgroundColor: phaseTone.soft, color: phaseTone.ink }"
+                >{{ programPhaseColorLabels[form.phase] }}</span>
+              </p>
+              <p class="mt-0.5 text-gray-500 dark:text-gray-400">
+                {{ form.phase
+                  ? 'Même teinte partout sur le site public : anneau et barre du parcours, cartes, numéros et encart « À retenir ».'
+                  : 'Choisissez une phase pour voir la teinte utilisée sur le site public.' }}
+              </p>
+            </div>
           </div>
-        </fieldset>
+        </div>
 
         <div class="flex items-end">
           <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
@@ -423,8 +420,12 @@ const cardClass = 'rounded-xl border border-gray-200 bg-white p-6 dark:border-gr
               type="text"
               maxlength="120"
               :class="inputClass"
-              placeholder="ex. 4 crédits, 5 000 €"
+              placeholder="ex. 4 crédits · 10 h libérées"
+              aria-describedby="program-highlight-help"
             >
+            <p id="program-highlight-help" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {{ HIGHLIGHT_HELP }}
+            </p>
           </div>
         </div>
 
@@ -445,7 +446,10 @@ const cardClass = 'rounded-xl border border-gray-200 bg-white p-6 dark:border-gr
             <label for="program-highlight-en" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Chiffre mis en avant (EN)
             </label>
-            <input id="program-highlight-en" v-model="form.highlight_en" type="text" maxlength="120" :class="inputClass">
+            <input id="program-highlight-en" v-model="form.highlight_en" type="text" maxlength="120" :class="inputClass" aria-describedby="program-highlight-en-help">
+            <p id="program-highlight-en-help" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {{ HIGHLIGHT_HELP }}
+            </p>
           </div>
         </div>
 
@@ -466,7 +470,10 @@ const cardClass = 'rounded-xl border border-gray-200 bg-white p-6 dark:border-gr
             <label for="program-highlight-ar" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Chiffre mis en avant (AR)
             </label>
-            <input id="program-highlight-ar" v-model="form.highlight_ar" type="text" dir="rtl" maxlength="120" :class="inputClass">
+            <input id="program-highlight-ar" v-model="form.highlight_ar" type="text" dir="rtl" maxlength="120" :class="inputClass" aria-describedby="program-highlight-ar-help">
+            <p id="program-highlight-ar-help" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {{ HIGHLIGHT_HELP }}
+            </p>
           </div>
         </div>
       </EntrepreneurshipAdminLangTabs>

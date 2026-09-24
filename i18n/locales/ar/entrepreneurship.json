@@ -13,7 +13,8 @@
     },
     "breadcrumb": {
       "dde": "إدارة التنمية وريادة الأعمال",
-      "pole": "قطب ريادة الأعمال والابتكار"
+      "pole": "قطب ريادة الأعمال والابتكار",
+      "label": "مسار التنقل"
     },
     "phases": {
       "awareness": "التوعية",
@@ -35,13 +36,58 @@
       "allPartners": "جميع شركاء القطب",
       "partnersBadge": "شركاؤنا",
       "newsBadge": "الأخبار",
-      "discoverActivities": "اكتشف المسار"
+      "discoverActivities": "اكتشف المسار",
+      "impactBadge": "أثر ملموس بالفعل",
+      "hero": {
+        "breadcrumbLabel": "مسار التنقل",
+        "slides": "شرائح الشعار",
+        "showSlide": "عرض الشريحة {n} من {total}: {label}",
+        "slideAnnounce": "الشريحة {n} من {total}: {label}"
+      }
     },
     "activities": {
       "anchorsLabel": "الانتقال إلى مرحلة",
       "upcomingEvents": "الفعاليات القادمة",
       "online": "عبر الإنترنت",
-      "eventLink": "عرض الفعالية"
+      "eventLink": "عرض الفعالية",
+      "discoverJourney": "اكتشف المسار",
+      "ring": {
+        "label": "مراحل المسار",
+        "captionTop": "مرحلة | مراحل",
+        "captionBottom": "لريادة الأعمال",
+        "step": "المرحلة {n}: {title}"
+      },
+      "figuresLabel": "المسار بالأرقام",
+      "journey": {
+        "title": "كل شيء يبدأ بالرغبة في الإقدام.",
+        "intro": "يرافق {n} برنامج حاملي المشاريع، من إيقاظ روح المبادرة إلى تمويل العمليات الأولى. | تتتابع {n} برامج، من إيقاظ روح المبادرة إلى تمويل العمليات الأولى."
+      },
+      "phaseEyebrow": {
+        "awareness": "الإيقاظ والتوعية",
+        "status": "إطار للنجاح",
+        "pre_incubation": "ما قبل الاحتضان",
+        "incubation": "الاحتضان",
+        "funding": "التمويل",
+        "ecosystem": "تنشيط المنظومة"
+      },
+      "keyPoints": "أبرز النقاط",
+      "statusLink": "كل ما يخص الصفة",
+      "support": {
+        "eyebrow": "المرافقة العملية",
+        "title": "من الفكرة إلى التسريع، في {n} مرحلة. | من الفكرة إلى التسريع، في {n} مراحل.",
+        "from": "الفكرة",
+        "to": "شركة ناشئة ممولة",
+        "phaseLabel": "المرحلة {n} · {phase}"
+      },
+      "ecosystemEyebrow": "لقاءات وفعاليات",
+      "agenda": {
+        "title": "المواعيد القادمة",
+        "all": "الأجندة كاملة"
+      },
+      "empty": {
+        "title": "لا توجد أنشطة منشورة حاليًا",
+        "description": "ستُعرض برامج المسار هنا قريبًا."
+      }
     },
     "common": {
       "viewMore": "عرض المزيد",
