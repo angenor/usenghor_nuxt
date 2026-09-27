@@ -89,7 +89,7 @@ function stepLabel(index: number): string {
 
 function imageAlt(index: number): string {
   const label = linked.value ? stepLabel(index) : ''
-  return label ? `${props.title} — ${label}` : props.title
+  return label ? `${props.title} (${label})` : props.title
 }
 
 // ---------------------------------------------------------------------------

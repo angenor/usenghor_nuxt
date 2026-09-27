@@ -354,7 +354,7 @@ onUnmounted(() => {
           <NuxtLink :to="localePath('/')" class="flex items-center group" :aria-label="t('nav.home')">
             <NuxtImg
               src="/images/logos/logo-web-noir-petit.png"
-              alt="Université Senghor — Retour à l'accueil"
+              alt="Université Senghor, retour à l'accueil"
               width="150"
               height="48"
               format="webp"

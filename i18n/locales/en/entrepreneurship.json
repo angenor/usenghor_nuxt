@@ -47,7 +47,7 @@
         "resume": "Resume the slideshow"
       },
       "preview": {
-        "label": "Preview",
+        "label": "Preview:",
         "message": "some content is sample material awaiting approval",
         "exit": "Exit preview",
         "portraitPending": "Portrait to be provided"

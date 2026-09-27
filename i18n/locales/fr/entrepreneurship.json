@@ -47,7 +47,7 @@
         "resume": "Reprendre le défilement"
       },
       "preview": {
-        "label": "Aperçu",
+        "label": "Aperçu :",
         "message": "certains contenus sont des exemples en attente de validation",
         "exit": "Quitter l'aperçu",
         "portraitPending": "Portrait à fournir"

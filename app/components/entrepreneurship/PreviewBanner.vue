@@ -22,7 +22,7 @@ const exitHref = computed(() => `${route.path}?${PEI_PREVIEW_QUERY}=0`)
       <font-awesome-icon icon="fa-solid fa-eye" class="h-4 w-4 shrink-0" aria-hidden="true" />
       <p class="line-clamp-2 min-w-0 flex-1 text-xs leading-tight sm:text-[13px]">
         <strong class="font-extrabold">{{ t('pei.home.preview.label') }}</strong>
-        — {{ t('pei.home.preview.message') }}
+        {{ t('pei.home.preview.message') }}
       </p>
       <a
         :href="exitHref"

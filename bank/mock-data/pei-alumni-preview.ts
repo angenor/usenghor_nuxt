@@ -223,7 +223,7 @@ function sampleLaureate(cohort: PeiCohortPublic, index: number, options: SampleO
     id: `${PEI_ALUMNI_PREVIEW_ID_PREFIX}portrait-${options.type}-${index}`,
     type: options.type,
     full_name: SAMPLE_NAME,
-    project_name: `Projet d’exemple — ${theme.project}`,
+    project_name: `Projet d’exemple (${theme.project})`,
     department_label: department.fr,
     department_label_en: department.en,
     department_label_ar: department.ar,
