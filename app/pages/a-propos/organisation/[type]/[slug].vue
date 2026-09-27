@@ -363,37 +363,40 @@ const breadcrumb = computed(() => [
   { label: entityName.value },
 ])
 
-// Active tab
-const activeTab = ref('presentation')
+// Onglets : seuls ceux qui ont du contenu sont affichés
 const tabs = computed(() => {
-  if (entityType === 'secteur') {
-    // Secteurs: présentation + missions + services list + actualités
-    return [
-      { key: 'presentation', icon: 'fa-solid fa-info-circle' },
-      { key: 'missions', icon: 'fa-solid fa-bullseye' },
-      { key: 'services', icon: 'fa-solid fa-building' },
-      { key: 'news', icon: 'fa-solid fa-newspaper' },
-    ]
-  }
-  // Services: présentation + full tabs + formations et appels conditionnels + actualités + médiathèque
-  const serviceTabs = [
-    { key: 'presentation', icon: 'fa-solid fa-info-circle' },
-    { key: 'missions', icon: 'fa-solid fa-bullseye' },
-    { key: 'team', icon: 'fa-solid fa-users' },
-    { key: 'achievements', icon: 'fa-solid fa-trophy' },
-    { key: 'projects', icon: 'fa-solid fa-diagram-project' },
-  ]
-  if (servicePrograms.value.length > 0) {
-    serviceTabs.push({ key: 'formations', icon: 'fa-solid fa-graduation-cap' })
-  }
-  if (serviceCalls.value.length > 0) {
-    serviceTabs.push({ key: 'calls', icon: 'fa-solid fa-bullhorn' })
-  }
-  serviceTabs.push(
-    { key: 'news', icon: 'fa-solid fa-newspaper' },
-    { key: 'media', icon: 'fa-solid fa-images' },
-  )
-  return serviceTabs
+  const candidates = entityType === 'secteur'
+    ? [
+        { key: 'presentation', icon: 'fa-solid fa-info-circle', visible: !!localized(entity.value, 'description_html') },
+        { key: 'missions', icon: 'fa-solid fa-bullseye', visible: !!localized(entity.value, 'mission_html') },
+        { key: 'services', icon: 'fa-solid fa-building', visible: sectorServices.value.length > 0 },
+        { key: 'news', icon: 'fa-solid fa-newspaper', visible: relatedNews.value.length > 0 },
+      ]
+    : [
+        {
+          key: 'presentation',
+          icon: 'fa-solid fa-info-circle',
+          visible: !!localized(entity.value, 'description_html') || !!serviceParent.value || !!serviceLandingPath.value || servicePoles.value.length > 0,
+        },
+        { key: 'missions', icon: 'fa-solid fa-bullseye', visible: !!localized(entity.value, 'mission_html') || objectives.value.length > 0 },
+        { key: 'team', icon: 'fa-solid fa-users', visible: team.value.length > 0 },
+        { key: 'achievements', icon: 'fa-solid fa-trophy', visible: achievements.value.length > 0 },
+        { key: 'projects', icon: 'fa-solid fa-diagram-project', visible: projects.value.length > 0 },
+        { key: 'formations', icon: 'fa-solid fa-graduation-cap', visible: servicePrograms.value.length > 0 },
+        { key: 'calls', icon: 'fa-solid fa-bullhorn', visible: serviceCalls.value.length > 0 },
+        { key: 'news', icon: 'fa-solid fa-newspaper', visible: relatedNews.value.length > 0 },
+        { key: 'media', icon: 'fa-solid fa-images', visible: serviceAlbums.value.length > 0 },
+      ]
+  const visibleTabs = candidates.filter(tab => tab.visible).map(({ key, icon }) => ({ key, icon }))
+  // Fiche entièrement vide : on garde « Présentation » et son état vide
+  return visibleTabs.length > 0 ? visibleTabs : [{ key: 'presentation', icon: 'fa-solid fa-info-circle' }]
+})
+
+// Active tab : repli sur le premier onglet visible si l'onglet choisi n'existe pas (ou plus)
+const selectedTab = ref('presentation')
+const activeTab = computed({
+  get: () => (tabs.value.some(tab => tab.key === selectedTab.value) ? selectedTab.value : tabs.value[0]?.key ?? 'presentation'),
+  set: (key: string) => { selectedTab.value = key },
 })
 
 // Navigate to next tab
@@ -688,12 +691,6 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
               </div>
             </div>
 
-            <!-- Empty state for objectives -->
-            <div v-else-if="entityType === 'service'" class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">
-              <font-awesome-icon icon="fa-solid fa-bullseye" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
-              <p class="text-gray-500 dark:text-gray-400 text-lg">{{ t('organizationDetail.missions.noObjectives') || 'Aucun objectif défini' }}</p>
-            </div>
-
             <!-- Next Tab Button -->
             <div v-if="nextTab" class="mt-12 flex justify-end">
               <button
@@ -768,11 +765,6 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
               </NuxtLink>
             </div>
 
-            <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">
-              <font-awesome-icon icon="fa-solid fa-users" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
-              <p class="text-gray-500 dark:text-gray-400 text-lg">{{ t('organizationDetail.team.empty') }}</p>
-            </div>
-
             <!-- Next Tab Button -->
             <div v-if="nextTab" class="mt-12 flex justify-end">
               <button
@@ -827,11 +819,6 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                 </div>
               </NuxtLink>
             </div>
-
-            <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">
-              <font-awesome-icon icon="fa-solid fa-building" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
-              <p class="text-gray-500 dark:text-gray-400 text-lg">{{ t('organizationDetail.services.empty') || 'Aucun service dans ce secteur' }}</p>
-            </div>
           </div>
 
           <!-- Achievements Tab (for services only) -->
@@ -870,11 +857,6 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                   <p v-if="achievement.description" class="text-sm text-gray-600 dark:text-gray-400">{{ achievement.description }}</p>
                 </div>
               </div>
-            </div>
-
-            <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">
-              <font-awesome-icon icon="fa-solid fa-trophy" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
-              <p class="text-gray-500 dark:text-gray-400 text-lg">{{ t('organizationDetail.achievements.empty') || 'Aucune réalisation enregistrée' }}</p>
             </div>
 
             <!-- Next Tab Button -->
@@ -947,11 +929,6 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                   </div>
                 </div>
               </div>
-            </div>
-
-            <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">
-              <font-awesome-icon icon="fa-solid fa-diagram-project" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
-              <p class="text-gray-500 dark:text-gray-400 text-lg">{{ t('organizationDetail.projects.empty') || 'Aucun projet en cours' }}</p>
             </div>
           </div>
 
@@ -1032,13 +1009,6 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                   </span>
                 </div>
               </NuxtLink>
-            </div>
-
-            <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">
-              <font-awesome-icon icon="fa-solid fa-graduation-cap" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
-              <p class="text-gray-500 dark:text-gray-400 text-lg">
-                {{ t('organizationDetail.formations.empty') }}
-              </p>
             </div>
 
             <!-- Next Tab Button -->
@@ -1213,14 +1183,6 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
               </NuxtLink>
             </div>
 
-            <!-- Empty state -->
-            <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">
-              <font-awesome-icon icon="fa-solid fa-newspaper" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
-              <p class="text-gray-500 dark:text-gray-400 text-lg">
-                {{ t('organizationDetail.news.empty') || 'Aucune actualité pour le moment' }}
-              </p>
-            </div>
-
             <!-- View all news link -->
             <div v-if="relatedNews.length > 0" class="mt-8 text-center">
               <NuxtLink
@@ -1319,14 +1281,6 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                   {{ album.media_items.length }} {{ album.media_items.length > 1 ? 'médias' : 'média' }}
                 </p>
               </div>
-            </div>
-
-            <!-- Empty state -->
-            <div v-else class="bg-white dark:bg-gray-900 rounded-2xl p-12 shadow-sm text-center">
-              <font-awesome-icon icon="fa-solid fa-images" class="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" />
-              <p class="text-gray-500 dark:text-gray-400 text-lg">
-                {{ t('organizationDetail.media.empty') }}
-              </p>
             </div>
           </div>
         </div>
