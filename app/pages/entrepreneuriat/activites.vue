@@ -284,7 +284,9 @@ useHead(() => ({
     <EntrepreneurshipPreviewBanner />
 
     <!-- ===================== HERO ===================== -->
-    <section class="relative overflow-hidden bg-brand-blue-900 dark:bg-brand-blue-950 text-white" aria-labelledby="pei-activities-title">
+    <section class="relative overflow-hidden text-white" aria-labelledby="pei-activities-title">
+      <!-- Fond et motif des autres rubriques (PageHero sans image) -->
+      <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
       <img
         v-if="heroImage && !heroImageFailed"
         :src="heroImage"
@@ -294,6 +296,7 @@ useHead(() => ({
         decoding="async"
         @error="heroImageFailed = true"
       >
+      <div class="absolute inset-0 opacity-10 heropattern-topography-brand-blue-500" />
       <!-- Aperçu : marge haute augmentée de la hauteur du bandeau fixe (44 px) -->
       <div
         class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 lg:pb-24 grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)] xl:grid-cols-[minmax(0,1fr)_minmax(0,36rem)] items-center"

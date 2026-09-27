@@ -40,7 +40,10 @@ const OFFSETS = ['mt-12 lg:mt-24', '', 'mt-6 lg:mt-12']
 </script>
 
 <template>
-  <section class="relative overflow-hidden bg-brand-blue-900 text-white dark:bg-brand-blue-950" aria-labelledby="pei-alumni-title">
+  <section class="relative overflow-hidden text-white" aria-labelledby="pei-alumni-title">
+    <!-- Fond et motif des autres rubriques (PageHero sans image) -->
+    <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
+    <div class="absolute inset-0 opacity-10 heropattern-topography-brand-blue-500" />
     <div
       class="relative mx-auto grid max-w-7xl items-end gap-10 px-4 sm:px-6 lg:gap-16 lg:px-8"
       :class="[
@@ -89,7 +92,7 @@ const OFFSETS = ['mt-12 lg:mt-24', '', 'mt-6 lg:mt-12']
         <div
           v-for="(tile, position) in tiles"
           :key="`${tile.index}-${tile.src}`"
-          class="overflow-hidden rounded-t-[1.125rem] bg-brand-blue-800"
+          class="overflow-hidden rounded-t-[1.125rem] bg-gray-800"
           :class="OFFSETS[position]"
         >
           <img
