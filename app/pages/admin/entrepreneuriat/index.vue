@@ -121,9 +121,9 @@ const shortcuts = computed<Shortcut[]>(() => [
     label: 'Albums de la DDE',
     icon: 'fa-solid fa-images',
     to: ddeServiceId.value
-      ? `/admin/organisation/services?service_id=${ddeServiceId.value}`
-      : '/admin/organisation/services',
-    convention: 'Lier les albums depuis la fenêtre de modification du service DDE',
+      ? `/admin/organisation/services/${ddeServiceId.value}?onglet=medias`
+      : '/admin/organisation',
+    convention: 'Lier les albums depuis l\'onglet « Médias » de la page du service DDE (Organisation)',
   },
   {
     id: 'partners',
@@ -193,14 +193,21 @@ const shortcuts = computed<Shortcut[]>(() => [
         <font-awesome-icon icon="fa-solid fa-triangle-exclamation" class="mt-0.5 h-5 w-5 text-amber-600 dark:text-amber-400" />
         <p class="text-sm text-amber-800 dark:text-amber-300">
           Le service DDE n'est pas identifié : rattachez le service du pôle (page dédiée « /entrepreneuriat ») à son service parent dans
-          <NuxtLink to="/admin/organisation/services" class="font-medium underline hover:no-underline">Organisation → Services</NuxtLink>,
+          <NuxtLink to="/admin/organisation" class="font-medium underline hover:no-underline">Organisation</NuxtLink> (champ « Service parent » de la page du pôle),
           ou renseignez la clé « Service DDE » de la page Entrepreneuriat
           (<NuxtLink to="/admin/editorial/valeurs" class="font-medium underline hover:no-underline">Valeurs</NuxtLink>).
         </p>
       </div>
       <p v-else class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
         <font-awesome-icon icon="fa-solid fa-building" class="h-4 w-4 text-gray-400" />
-        Service DDE : <span class="font-medium text-gray-900 dark:text-white">{{ stats.dde_service.name }}</span>
+        Service DDE :
+        <NuxtLink
+          :to="`/admin/organisation/services/${stats.dde_service.id}`"
+          class="font-medium text-gray-900 underline decoration-gray-300 underline-offset-2 hover:decoration-current dark:text-white dark:decoration-gray-600"
+          title="Ouvrir la page du service (Organisation)"
+        >
+          {{ stats.dde_service.name }}
+        </NuxtLink>
       </p>
     </template>
 

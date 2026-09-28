@@ -8,14 +8,15 @@ interface SubtableI18nFields {
   title_en?: string | null
   title_ar?: string | null
   description_en_html?: string | null
+  description_en_md?: string | null
   description_ar_html?: string | null
+  description_ar_md?: string | null
 }
 
 export interface ServiceObjectivePublic extends SubtableI18nFields {
   id: string
   service_id: string
   title: string
-  description: string | null
   description_html: string | null
   description_md: string | null
   display_order: number
@@ -25,7 +26,6 @@ export interface ServiceAchievementPublic extends SubtableI18nFields {
   id: string
   service_id: string
   title: string
-  description: string | null
   description_html: string | null
   description_md: string | null
   type: string | null
@@ -38,7 +38,6 @@ export interface ServiceProjectPublic extends SubtableI18nFields {
   id: string
   service_id: string
   title: string
-  description: string | null
   description_html: string | null
   description_md: string | null
   cover_image_external_id: string | null

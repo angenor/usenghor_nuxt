@@ -16,11 +16,14 @@ const breadcrumbs = computed(() => {
   let currentPath = '/admin'
   paths.forEach(segment => {
     currentPath += `/${segment}`
-    // Formater le label (kebab-case vers Title Case)
-    const label = segment
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ')
+    // Formater le label (kebab-case vers Title Case) ; un identifiant UUID
+    // n'apporte rien à l'utilisateur : libellé générique.
+    const label = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment)
+      ? 'Détail'
+      : segment
+          .split('-')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ')
     items.push({ label, path: currentPath })
   })
 

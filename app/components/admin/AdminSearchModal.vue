@@ -22,6 +22,7 @@ interface SearchableItem {
   route: string
   icon: string
   parent?: string
+  keywords?: string[]
 }
 
 const searchableItems = computed<SearchableItem[]>(() => {
@@ -34,7 +35,8 @@ const searchableItems = computed<SearchableItem[]>(() => {
         label: section.label,
         description: section.description,
         route: section.route,
-        icon: section.icon
+        icon: section.icon,
+        keywords: section.keywords
       })
     }
 
@@ -47,7 +49,8 @@ const searchableItems = computed<SearchableItem[]>(() => {
             description: child.description,
             route: child.route,
             icon: child.icon,
-            parent: section.label
+            parent: section.label,
+            keywords: child.keywords
           })
         }
       })
@@ -63,12 +66,15 @@ const filteredItems = computed(() => {
     return searchableItems.value
   }
 
-  const query = searchQuery.value.toLowerCase()
+  // Comparaison insensible à la casse et aux accents (« equipe » trouve « équipe »)
+  const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036F]/g, '').toLowerCase()
+  const query = normalize(searchQuery.value.trim())
   return searchableItems.value.filter(item => {
-    const labelMatch = item.label.toLowerCase().includes(query)
-    const descMatch = item.description?.toLowerCase().includes(query)
-    const parentMatch = item.parent?.toLowerCase().includes(query)
-    return labelMatch || descMatch || parentMatch
+    const labelMatch = normalize(item.label).includes(query)
+    const descMatch = item.description ? normalize(item.description).includes(query) : false
+    const parentMatch = item.parent ? normalize(item.parent).includes(query) : false
+    const keywordMatch = item.keywords?.some(k => normalize(k).includes(query)) ?? false
+    return labelMatch || descMatch || parentMatch || keywordMatch
   })
 })
 

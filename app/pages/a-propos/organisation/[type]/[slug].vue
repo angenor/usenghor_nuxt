@@ -685,7 +685,11 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                   </div>
                   <div class="flex-1 min-w-0 pt-1">
                     <h4 class="font-semibold text-gray-900 dark:text-white mb-1">{{ localized(objective, 'title') }}</h4>
-                    <p v-if="objective.description" class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{{ objective.description }}</p>
+                    <RichTextRenderer
+                      v-if="localized(objective, 'description_html')"
+                      :html="localized(objective, 'description_html')"
+                      class="prose-sm text-sm text-gray-600 dark:text-gray-400 leading-relaxed"
+                    />
                   </div>
                 </div>
               </div>
@@ -805,8 +809,8 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                     <h4 class="font-semibold text-gray-900 dark:text-white mb-1 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                       {{ localized(svc, 'name') }}
                     </h4>
-                    <p v-if="svc.description" class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                      {{ svc.description }}
+                    <p v-if="localized(svc, 'description_html')" class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                      {{ extractPlainText(localized(svc, 'description_html')) }}
                     </p>
                     <span class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-2 group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors">
                       <font-awesome-icon icon="fa-solid fa-arrow-right" class="w-3 h-3" />
@@ -839,7 +843,7 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                 <div v-if="achievement.cover_image_external_id" class="relative h-40 overflow-hidden">
                   <img
                     :src="getMediaUrl(achievement.cover_image_external_id, 'medium') ?? undefined"
-                    :alt="achievement.title"
+                    :alt="localized(achievement, 'title')"
                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div v-if="achievement.type" class="absolute top-4 right-4">
@@ -854,7 +858,11 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                     {{ formatDate(achievement.achievement_date) }}
                   </p>
                   <h3 class="font-bold text-gray-900 dark:text-white mb-2">{{ localized(achievement, 'title') }}</h3>
-                  <p v-if="achievement.description" class="text-sm text-gray-600 dark:text-gray-400">{{ achievement.description }}</p>
+                  <RichTextRenderer
+                    v-if="localized(achievement, 'description_html')"
+                    :html="localized(achievement, 'description_html')"
+                    class="prose-sm text-sm text-gray-600 dark:text-gray-400"
+                  />
                 </div>
               </div>
             </div>
@@ -891,7 +899,7 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                 <div v-if="project.cover_image_external_id" class="relative h-40 overflow-hidden">
                   <img
                     :src="getMediaUrl(project.cover_image_external_id, 'medium') ?? undefined"
-                    :alt="project.title"
+                    :alt="localized(project, 'title')"
                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div class="absolute top-4 right-4">
@@ -905,7 +913,11 @@ const getNewsCoverImageUrl = (news: NewsDisplay, variant: 'low' | 'medium' | 'or
                 </div>
                 <div class="p-6">
                   <h3 class="font-bold text-gray-900 dark:text-white mb-2">{{ localized(project, 'title') }}</h3>
-                  <p v-if="project.description" class="text-sm text-gray-600 dark:text-gray-400 mb-4">{{ project.description }}</p>
+                  <RichTextRenderer
+                    v-if="localized(project, 'description_html')"
+                    :html="localized(project, 'description_html')"
+                    class="prose-sm text-sm text-gray-600 dark:text-gray-400 mb-4"
+                  />
 
                   <!-- Dates -->
                   <div v-if="project.start_date || project.expected_end_date" class="text-xs text-gray-500 dark:text-gray-400 mb-4">

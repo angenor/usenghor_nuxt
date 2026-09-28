@@ -33,11 +33,9 @@ const ROUTE_PERMISSIONS: Record<string, string[]> = {
   '/admin/projets/liste': ['project.view'],
   '/admin/projets/categories': ['project.view'],
   '/admin/projets/appels': ['project.view'],
-  // Organisation
+  // Organisation (préfixe : couvre aussi /admin/organisation/services/* et
+  // les anciennes adresses secteurs / services / objectifs, redirigées)
   '/admin/organisation': ['organization.view'],
-  '/admin/organisation/secteurs': ['organization.view'],
-  '/admin/organisation/services': ['organization.view'],
-  '/admin/organisation/objectifs': ['organization.view'],
   // Campus
   '/admin/campus': ['campuses.view'],
   '/admin/campus/liste': ['campuses.view'],
@@ -93,7 +91,7 @@ export function getRequiredPermissions(path: string): string[] {
     }
   }
 
-  return bestMatch ? ROUTE_PERMISSIONS[bestMatch] : []
+  return bestMatch ? (ROUTE_PERMISSIONS[bestMatch] ?? []) : []
 }
 
 export function usePermissions() {

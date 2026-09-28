@@ -38,30 +38,53 @@ import {
 
 export type ProjectStatus = 'planned' | 'ongoing' | 'completed' | 'suspended'
 
-export interface ServiceObjectiveRead {
+// Champs de traduction auto FR → EN/AR des sous-entités d'un service
+// (objectifs, réalisations, projets) : titre + description riche.
+export interface ServiceSubItemI18nFields {
+  title_en?: string | null
+  title_ar?: string | null
+  description_en_html?: string | null
+  description_en_md?: string | null
+  description_ar_html?: string | null
+  description_ar_md?: string | null
+}
+
+/** Champs source FR d'un objectif / réalisation / projet à traduire (sans persistance). */
+export interface ServiceSubItemTranslateRequest {
+  title?: string | null
+  description_html?: string | null
+  description_md?: string | null
+}
+
+export type ServiceSubItemTranslateResponse = ServiceSubItemI18nFields
+
+export interface ServiceObjectiveRead extends ServiceSubItemI18nFields {
   id: string
   service_id: string
   title: string
-  description: string | null
+  description_html: string | null
+  description_md: string | null
   display_order: number
 }
 
-export interface ServiceAchievementRead {
+export interface ServiceAchievementRead extends ServiceSubItemI18nFields {
   id: string
   service_id: string
   title: string
-  description: string | null
+  description_html: string | null
+  description_md: string | null
   type: string | null
   cover_image_external_id: string | null
   achievement_date: string | null
   created_at: string
 }
 
-export interface ServiceProjectRead {
+export interface ServiceProjectRead extends ServiceSubItemI18nFields {
   id: string
   service_id: string
   title: string
-  description: string | null
+  description_html: string | null
+  description_md: string | null
   cover_image_external_id: string | null
   progress: number
   status: ProjectStatus
@@ -69,6 +92,15 @@ export interface ServiceProjectRead {
   expected_end_date: string | null
   created_at: string
   updated_at: string
+}
+
+/** Élément de `GET /api/admin/services` : service + compteurs calculés côté serveur. */
+export interface ServiceListItem extends ServiceRead {
+  objectives_count?: number
+  achievements_count?: number
+  projects_count?: number
+  team_count?: number
+  albums_count?: number
 }
 
 export interface ServiceWithDetails extends ServiceRead {
@@ -116,37 +148,42 @@ export interface ServiceUpdate extends SectorServiceI18nFields {
   active?: boolean
 }
 
-export interface ServiceObjectiveCreate {
+export interface ServiceObjectiveCreate extends ServiceSubItemI18nFields {
   title: string
-  description?: string | null
+  description_html?: string | null
+  description_md?: string | null
   display_order?: number
 }
 
-export interface ServiceObjectiveUpdate {
+export interface ServiceObjectiveUpdate extends ServiceSubItemI18nFields {
   title?: string
-  description?: string | null
+  description_html?: string | null
+  description_md?: string | null
   display_order?: number
 }
 
-export interface ServiceAchievementCreate {
+export interface ServiceAchievementCreate extends ServiceSubItemI18nFields {
   title: string
-  description?: string | null
+  description_html?: string | null
+  description_md?: string | null
   type?: string | null
   cover_image_external_id?: string | null
   achievement_date?: string | null
 }
 
-export interface ServiceAchievementUpdate {
+export interface ServiceAchievementUpdate extends ServiceSubItemI18nFields {
   title?: string
-  description?: string | null
+  description_html?: string | null
+  description_md?: string | null
   type?: string | null
   cover_image_external_id?: string | null
   achievement_date?: string | null
 }
 
-export interface ServiceProjectCreate {
+export interface ServiceProjectCreate extends ServiceSubItemI18nFields {
   title: string
-  description?: string | null
+  description_html?: string | null
+  description_md?: string | null
   cover_image_external_id?: string | null
   progress?: number
   status?: ProjectStatus
@@ -154,9 +191,10 @@ export interface ServiceProjectCreate {
   expected_end_date?: string | null
 }
 
-export interface ServiceProjectUpdate {
+export interface ServiceProjectUpdate extends ServiceSubItemI18nFields {
   title?: string
-  description?: string | null
+  description_html?: string | null
+  description_md?: string | null
   cover_image_external_id?: string | null
   progress?: number
   status?: ProjectStatus
@@ -227,6 +265,7 @@ export interface ServiceDisplay extends ServiceRead {
   achievements_count: number
   projects_count: number
   team_count: number
+  albums_count: number
 }
 
 export interface ServiceStats {
@@ -293,7 +332,13 @@ export const projectStatusColors: Record<ProjectStatus, string> = {
 // Composable
 // ============================================================================
 
-export function useServicesApi() {
+/**
+ * @param options.fallbackToMock Repli sur les données fictives si l'API échoue
+ *   (défaut `true`, historique). Les pages Organisation passent `false` : un
+ *   arbre fictif (IDs non UUID) masquerait l'erreur et casserait les écritures.
+ */
+export function useServicesApi(options: { fallbackToMock?: boolean } = {}) {
+  const fallbackToMock = options.fallbackToMock ?? true
   const { apiFetch } = useApi()
 
   // Cache pour les secteurs (éviter les appels multiples)
@@ -321,7 +366,8 @@ export function useServicesApi() {
         }
       }
     }
-    catch {
+    catch (error) {
+      if (!fallbackToMock) throw error
       // Fallback sur mock data
       console.warn('[useServicesApi] API unavailable, loading sectors from mock data')
       const mockSectors = getMockSectorsForSelect()
@@ -350,8 +396,7 @@ export function useServicesApi() {
    * Transforme ServiceRead (backend) vers ServiceDisplay (frontend).
    */
   function transformToDisplay(
-    service: ServiceRead,
-    details?: { objectives: number; achievements: number; projects: number },
+    service: ServiceListItem,
     sectors?: Map<string, SectorRead>,
   ): ServiceDisplay {
     const dept = service.sector_id && sectors?.get(service.sector_id)
@@ -366,10 +411,11 @@ export function useServicesApi() {
           }
         : null,
       head: null, // Sera enrichi si besoin via un autre appel
-      objectives_count: details?.objectives ?? 0,
-      achievements_count: details?.achievements ?? 0,
-      projects_count: details?.projects ?? 0,
-      team_count: details?.team ?? 0,
+      objectives_count: service.objectives_count ?? 0,
+      achievements_count: service.achievements_count ?? 0,
+      projects_count: service.projects_count ?? 0,
+      team_count: service.team_count ?? 0,
+      albums_count: service.albums_count ?? 0,
     }
   }
 
@@ -396,6 +442,7 @@ export function useServicesApi() {
       achievements_count: service.achievements?.length ?? 0,
       projects_count: service.projects?.length ?? 0,
       team_count: service.team?.length ?? 0,
+      albums_count: 0,
     }
   }
 
@@ -437,6 +484,7 @@ export function useServicesApi() {
       achievements_count: service.achievements_count,
       projects_count: service.projects_count,
       team_count: 0,
+      albums_count: 0,
       created_at: service.created_at,
       updated_at: service.updated_at,
     }
@@ -456,35 +504,25 @@ export function useServicesApi() {
     try {
       const sectors = await loadSectors()
 
-      const response = await apiFetch<PaginatedResponse<ServiceRead>>('/api/admin/services', {
+      const response = await apiFetch<PaginatedResponse<ServiceListItem>>('/api/admin/services', {
         query: {
           page: params.page || 1,
-          limit: params.limit || 100,
+          limit: params.limit || 500,
           search: params.search,
           sector_id: params.sector_id,
           active: params.active,
         },
       })
 
-      // Pour chaque service, récupérer les compteurs
-      const servicesWithDetails = await Promise.all(
-        response.items.map(async (service) => {
-          try {
-            const details = await getServiceById(service.id)
-            return transformWithDetailsToDisplay(details, sectors)
-          }
-          catch {
-            return transformToDisplay(service, undefined, sectors)
-          }
-        }),
-      )
-
+      // Les compteurs (objectifs, réalisations, projets, équipe, albums) sont
+      // calculés par le serveur : une seule requête, plus d'appel par service.
       return {
         ...response,
-        items: servicesWithDetails,
+        items: response.items.map(service => transformToDisplay(service, sectors)),
       }
     }
-    catch {
+    catch (error) {
+      if (!fallbackToMock) throw error
       // Fallback sur mock data
       console.warn('[useServicesApi] API unavailable, using mock data')
       const mockServices = getMockAllServices()
@@ -521,10 +559,11 @@ export function useServicesApi() {
    */
   async function getAllServices(): Promise<ServiceDisplay[]> {
     try {
-      const response = await listServices({ limit: 100 })
+      const response = await listServices({ limit: 500 })
       return response.items
     }
-    catch {
+    catch (error) {
+      if (!fallbackToMock) throw error
       // Fallback sur mock data
       console.warn('[useServicesApi] API unavailable, using mock data')
       return getMockAllServices().map(transformMockToDisplay)
@@ -665,6 +704,31 @@ export function useServicesApi() {
     )
   }
 
+  /**
+   * Réordonne les objectifs d'un service (liste complète des IDs, dans l'ordre).
+   */
+  async function reorderServiceObjectives(
+    serviceId: string,
+    objectiveIds: string[],
+  ): Promise<ServiceObjectiveRead[]> {
+    return apiFetch<ServiceObjectiveRead[]>(`/api/admin/services/${serviceId}/objectives/reorder`, {
+      method: 'PUT',
+      body: { objective_ids: objectiveIds },
+    })
+  }
+
+  /**
+   * Traduit titre + description FR d'un objectif → EN/AR (sans persistance).
+   */
+  async function translateServiceObjective(
+    payload: ServiceSubItemTranslateRequest,
+  ): Promise<ServiceSubItemTranslateResponse> {
+    return apiFetch<ServiceSubItemTranslateResponse>('/api/admin/services/objectives/translate', {
+      method: 'POST',
+      body: payload,
+    })
+  }
+
   // =========================================================================
   // Achievements
   // =========================================================================
@@ -719,6 +783,18 @@ export function useServicesApi() {
         method: 'DELETE',
       },
     )
+  }
+
+  /**
+   * Traduit titre + description FR d'une réalisation → EN/AR (sans persistance).
+   */
+  async function translateServiceAchievement(
+    payload: ServiceSubItemTranslateRequest,
+  ): Promise<ServiceSubItemTranslateResponse> {
+    return apiFetch<ServiceSubItemTranslateResponse>('/api/admin/services/achievements/translate', {
+      method: 'POST',
+      body: payload,
+    })
   }
 
   // =========================================================================
@@ -777,6 +853,18 @@ export function useServicesApi() {
     )
   }
 
+  /**
+   * Traduit titre + description FR d'un projet de service → EN/AR (sans persistance).
+   */
+  async function translateServiceProject(
+    payload: ServiceSubItemTranslateRequest,
+  ): Promise<ServiceSubItemTranslateResponse> {
+    return apiFetch<ServiceSubItemTranslateResponse>('/api/admin/services/projects/translate', {
+      method: 'POST',
+      body: payload,
+    })
+  }
+
   // =========================================================================
   // Albums
   // =========================================================================
@@ -820,14 +908,8 @@ export function useServicesApi() {
    * Récupère les membres de l'équipe d'un service.
    */
   async function getServiceTeamMembers(serviceId: string): Promise<ServiceTeamMemberRead[]> {
-    try {
-      return await apiFetch<ServiceTeamMemberRead[]>(`/api/admin/services/${serviceId}/team`)
-    }
-    catch {
-      // Fallback : retourner un tableau vide
-      console.warn('[useServicesApi] API unavailable for team members')
-      return []
-    }
+    // Pas de repli silencieux : l'onglet Équipe doit pouvoir afficher l'erreur.
+    return apiFetch<ServiceTeamMemberRead[]>(`/api/admin/services/${serviceId}/team`)
   }
 
   /**
@@ -870,6 +952,19 @@ export function useServicesApi() {
   }
 
   /**
+   * Réordonne les membres de l'équipe d'un service (liste complète des IDs).
+   */
+  async function reorderServiceTeamMembers(
+    serviceId: string,
+    memberIds: string[],
+  ): Promise<ServiceTeamMemberRead[]> {
+    return apiFetch<ServiceTeamMemberRead[]>(`/api/admin/services/${serviceId}/team/reorder`, {
+      method: 'PUT',
+      body: { member_ids: memberIds },
+    })
+  }
+
+  /**
    * Récupère l'affectation service d'un utilisateur.
    */
   async function getUserServiceAffectation(userId: string): Promise<ServiceTeamMemberRead | null> {
@@ -891,7 +986,7 @@ export function useServicesApi() {
    */
   async function getServicesStats(): Promise<ServiceStats> {
     const services = await getAllServices()
-    const sectors =await loadSectors()
+    const sectors = await loadSectors()
 
     // Compter par secteur
     const byDeptMap = new Map<string, number>()
@@ -935,7 +1030,7 @@ export function useServicesApi() {
    */
   async function getServicesGroupedBySector(): Promise<ServicesBySector[]> {
     const services = await getAllServices()
-    const sectors =await loadSectors()
+    const sectors = await loadSectors()
     const grouped = new Map<string, ServiceDisplay[]>()
 
     for (const service of services) {
@@ -994,14 +1089,9 @@ export function useServicesApi() {
         items_sample: itemsSample.slice(0, 5),
       }
     }
-    catch {
-      return {
-        objectives_count: 0,
-        achievements_count: 0,
-        projects_count: 0,
-        can_delete: true,
-        items_sample: [],
-      }
+    catch (error) {
+      // Jamais « supprimable » par défaut : la suppression part en cascade.
+      throw error
     }
   }
 
@@ -1032,13 +1122,14 @@ export function useServicesApi() {
             .sort((a, b) => a.name.localeCompare(b.name))
         }
       }
-      catch {
+      catch (error) {
+        if (!fallbackToMock) throw error
         // Fallback sur mock data
         console.warn('[useServicesApi] API unavailable, using mock data for sectors')
         return getMockSectorsForSelect()
       }
       // Fallback sur mock data si pas de résultats
-      return getMockSectorsForSelect()
+      return fallbackToMock ? getMockSectorsForSelect() : []
     }
 
     return Array.from(sectors.values())
@@ -1094,18 +1185,22 @@ export function useServicesApi() {
     createServiceObjective,
     updateServiceObjective,
     deleteServiceObjective,
+    reorderServiceObjectives,
+    translateServiceObjective,
 
     // Achievements
     getServiceAchievements,
     createServiceAchievement,
     updateServiceAchievement,
     deleteServiceAchievement,
+    translateServiceAchievement,
 
     // Projects
     getServiceProjects,
     createServiceProject,
     updateServiceProject,
     deleteServiceProject,
+    translateServiceProject,
 
     // Albums
     getServiceAlbums,
@@ -1117,6 +1212,7 @@ export function useServicesApi() {
     addServiceTeamMember,
     updateServiceTeamMember,
     deleteServiceTeamMember,
+    reorderServiceTeamMembers,
     getUserServiceAffectation,
 
     // Statistics & Utilities

@@ -10,6 +10,8 @@ export interface SidebarItem {
   route?: string
   permissions: string[]
   description?: string
+  // Termes supplémentaires pour la recherche rapide (AdminSearchModal)
+  keywords?: string[]
   children?: SidebarItem[]
 }
 
@@ -20,6 +22,8 @@ export interface SidebarSection {
   route?: string
   permissions: string[]
   description?: string
+  // Termes supplémentaires pour la recherche rapide (AdminSearchModal)
+  keywords?: string[]
   children?: SidebarItem[]
 }
 
@@ -240,33 +244,10 @@ export function useAdminSidebar() {
       id: 'organization',
       label: 'Organisation',
       icon: 'fa-solid fa-building',
+      route: '/admin/organisation',
       permissions: ['organization.view'],
-      children: [
-        {
-          id: 'sectors',
-          label: 'Secteurs',
-          icon: 'fa-solid fa-sitemap',
-          route: '/admin/organisation/secteurs',
-          permissions: ['organization.view'],
-          description: 'Secteurs'
-        },
-        {
-          id: 'services',
-          label: 'Services',
-          icon: 'fa-solid fa-cogs',
-          route: '/admin/organisation/services',
-          permissions: ['organization.view'],
-          description: 'Services administratifs et techniques'
-        },
-        {
-          id: 'service-objectives',
-          label: 'Objectifs & Réalisations',
-          icon: 'fa-solid fa-bullseye',
-          route: '/admin/organisation/objectifs',
-          permissions: ['organization.view'],
-          description: 'Suivi des objectifs par service'
-        }
-      ]
+      description: 'Secteurs, services et pôles',
+      keywords: ['secteurs', 'services', 'pôles', 'équipe', 'objectifs', 'réalisations', 'projets', 'organigramme', 'responsables']
     },
 
     // ========================================================================

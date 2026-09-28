@@ -22,7 +22,6 @@ import type {
 
 // Import mock data pour fallback en développement
 import {
-  mockSectorsAdmin,
   getAllSectorsAdmin as getMockAllSectors,
   getSectorByIdAdmin as getMockSectorById,
   getSectorStats as getMockSectorStats,
@@ -133,8 +132,10 @@ export function useSectorsApi() {
       id: sector.id,
       code: sector.code,
       name: sector.name,
-      description: sector.description || null,
-      mission: sector.mission || null,
+      description_html: sector.description || null,
+      description_md: sector.description || null,
+      mission_html: sector.mission || null,
+      mission_md: sector.mission || null,
       icon_external_id: null,
       cover_image_external_id: null,
       head_external_id: sector.head_id || null,
@@ -194,32 +195,45 @@ export function useSectorsApi() {
   }
 
   /**
-   * Récupère tous les secteurs avec leur nombre de services.
+   * Récupère tous les secteurs (ordre d'affichage du serveur).
+   *
+   * - `withServicesCount` (défaut `true`) : renseigne `services_count` avec
+   *   UNE requête supplémentaire sur la liste des services (plus d'appel
+   *   `/sectors/{id}/services` par secteur). Passer `false` quand l'appelant
+   *   dispose déjà des services (il calcule lui-même les compteurs).
+   * - `fallbackToMock` (défaut `true`) : repli sur les données fictives si
+   *   l'API est indisponible. Passer `false` pour recevoir l'erreur (écrans
+   *   d'administration où des secteurs fictifs seraient trompeurs).
    */
-  async function getAllSectors(): Promise<SectorDisplay[]> {
+  async function getAllSectors(options: {
+    withServicesCount?: boolean
+    fallbackToMock?: boolean
+  } = {}): Promise<SectorDisplay[]> {
+    const { withServicesCount = true, fallbackToMock = true } = options
     try {
-      const response = await listSectors({ limit: 100 })
+      const response = await apiFetch<PaginatedResponse<SectorRead>>('/api/admin/sectors', {
+        query: { page: 1, limit: 100 },
+      })
+      const sectors = response.items.map(s => transformToDisplay(s, 0))
+      if (!withServicesCount || sectors.length === 0) return sectors
 
-      // Pour chaque secteur, récupérer le nombre de services
-      const sectorsWithServices = await Promise.all(
-        response.items.map(async (sector) => {
-          try {
-            const services = await getSectorServices(sector.id)
-            return {
-              ...sector,
-              services_count: services.length,
-            }
-          }
-          catch {
-            return sector
-          }
-        }),
-      )
-
-      return sectorsWithServices
+      try {
+        const services = await apiFetch<PaginatedResponse<ServiceRead>>('/api/admin/services', {
+          query: { page: 1, limit: 500 },
+        })
+        const counts = new Map<string, number>()
+        for (const service of services.items) {
+          if (service.sector_id) counts.set(service.sector_id, (counts.get(service.sector_id) || 0) + 1)
+        }
+        return sectors.map(s => ({ ...s, services_count: counts.get(s.id) || 0 }))
+      }
+      catch {
+        // Compteurs indisponibles : les secteurs restent exploitables
+        return sectors
+      }
     }
-    catch {
-      // Fallback sur mock data
+    catch (err) {
+      if (!fallbackToMock) throw err
       console.warn('[useSectorsApi] API unavailable, using mock data')
       return getMockAllSectors().map(transformMockToDisplay)
     }
@@ -331,15 +345,16 @@ export function useSectorsApi() {
 
   /**
    * Calcule les statistiques des secteurs.
+   * Passer la liste déjà chargée évite de tout recharger.
    */
-  async function getSectorsStats(): Promise<SectorStats> {
+  async function getSectorsStats(sectors?: SectorDisplay[]): Promise<SectorStats> {
     try {
-      const sectors = await getAllSectors()
+      const list = sectors ?? await getAllSectors()
       return {
-        total: sectors.length,
-        active: sectors.filter(s => s.active).length,
-        totalServices: sectors.reduce((sum, s) => sum + s.services_count, 0),
-        withHead: sectors.filter(s => s.head_external_id).length,
+        total: list.length,
+        active: list.filter(s => s.active).length,
+        totalServices: list.reduce((sum, s) => sum + s.services_count, 0),
+        withHead: list.filter(s => s.head_external_id).length,
       }
     }
     catch {
@@ -359,8 +374,9 @@ export function useSectorsApi() {
    */
   async function getSectorUsage(id: string): Promise<SectorUsage> {
     try {
-      const sector = await getSectorById(id)
-      const servicesCount = sector.services_count
+      // Une seule requête : la liste des services du secteur
+      const services = await getSectorServices(id)
+      const servicesCount = services.length
 
       return {
         services_count: servicesCount,
@@ -369,8 +385,11 @@ export function useSectorsApi() {
         can_delete: servicesCount === 0,
       }
     }
-    catch {
-      // Fallback sur mock data
+    catch (err) {
+      // Repli sur les données fictives uniquement pour un secteur fictif : pour
+      // un vrai secteur, un « supprimable » inventé serait dangereux (la
+      // suppression d'un secteur supprime ses services en cascade).
+      if (!getMockSectorById(id)) throw err
       const mockUsage = getMockSectorUsage(id)
       return {
         services_count: mockUsage.services_count,
@@ -424,7 +443,8 @@ export function useSectorsApi() {
    */
   async function getSectorsForSelect(): Promise<Array<{ id: string, name: string, code: string }>> {
     try {
-      const sectors = await getAllSectors()
+      // Pas besoin des compteurs de services : une seule requête
+      const sectors = await getAllSectors({ withServicesCount: false, fallbackToMock: false })
       return sectors
         .filter(s => s.active)
         .map(s => ({
